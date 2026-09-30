@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F1 Drive</title>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --panel: #14171c;
+    --panel-2: #1b1f26;
+    --line: #2a303a;
+    --text: #eef1f5;
+    --muted: #8b95a3;
+    --accent: #e10600;
+    --accent-2: #ff4b3a;
+    --good: #35d07f;
+    --ui-font: "Segoe UI", "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+    --num-font: "Bahnschrift", "DIN Alternate", "Segoe UI", "Microsoft JhengHei", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: var(--bg); color: var(--text);
+    font-family: var(--ui-font);
+    -webkit-user-select: none; user-select: none;
+  }
+  #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; background: #87b8e8; }
+  .hidden { display: none !important; }
+
+  /* ---------- Menu ---------- */
+  #menu {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    background: linear-gradient(180deg, rgba(11,13,16,.96), rgba(11,13,16,.90));
+  }
+  .menu-head {
+    flex: none;
+    padding: 22px 32px 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 28px;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; margin-right: auto; }
+  .brand-mark { width: 8px; height: 44px; background: var(--accent); transform: skewX(-14deg); }
+  .brand h1 {
+    margin: 0; font-family: var(--num-font); font-size: 34px; line-height: 1;
+    font-weight: 700; letter-spacing: .04em; font-style: italic;
+  }
+  .brand h1 span { color: var(--accent-2); }
+  .brand p { margin: 6px 0 0; font-size: 13px; color: var(--muted); letter-spacing: .08em; }
+  .keys { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); }
+  .keys span { white-space: nowrap; }
+  kbd {
+    display: inline-block; min-width: 22px; padding: 1px 6px; margin-right: 3px;
+    font: 600 12px/18px var(--num-font); text-align: center; color: var(--text);
+    background: var(--panel-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px;
+  }
+  .menu-tools {
+    flex: none; display: flex; align-items: center; gap: 14px;
+    padding: 14px 32px;
+  }
+  #track-search {
+    flex: 1 1 auto; max-width: 420px; height: 38px; padding: 0 14px;
+    font: 15px var(--ui-font); color: var(--text);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 6px; outline: none;
+    -webkit-user-select: text; user-select: text;
+  }
+  #track-search:focus { border-color: var(--accent-2); }
+  #track-search::placeholder { color: #626c7a; }
+  #track-count { font-size: 13px; color: var(--muted); }
+  #menu-resume {
+    margin-left: auto; height: 38px; padding: 0 18px; cursor: pointer;
+    font: 600 14px var(--ui-font); color: #fff;
+    background: var(--accent); border: 0; border-radius: 6px;
+  }
+  #menu-resume:hover { background: var(--accent-2); }
+  .menu-main { flex: 1 1 auto; min-height: 0; display: flex; }
+  .menu-body { flex: 1 1 auto; min-width: 0; overflow-y: auto; padding: 4px 32px 32px; }
+  .menu-body::-webkit-scrollbar, #mp-panel::-webkit-scrollbar { width: 10px; }
+  .menu-body::-webkit-scrollbar-thumb, #mp-panel::-webkit-scrollbar-thumb { background: #2f3641; border-radius: 5px; }
+  #track-lock {
+    margin: 0 0 14px; padding: 12px 16px; font-size: 14px; color: var(--text);
+    background: var(--panel-2); border: 1px solid var(--line); border-left: 3px solid var(--accent-2); border-radius: 6px;
+  }
+  #track-grid.locked { pointer-events: none; opacity: .38; filter: grayscale(.6); }
+
+  /* ---------- Multiplayer panel ---------- */
+  #mp-panel {
+    flex: none; width: 340px; overflow-y: auto; padding: 4px 24px 28px 22px;
+    border-left: 1px solid var(--line); font-size: 13.5px; line-height: 1.55;
+  }
+  #mp-panel h2 { margin: 0 0 12px; font-size: 17px; font-weight: 600; letter-spacing: .04em; }
+  #mp-panel h3 { margin: 16px 0 6px; font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .1em; }
+  .mp-field { display: flex; gap: 8px; align-items: center; }
+  .mp-field + .mp-field { margin-top: 8px; }
+  #mp-panel input[type=text], #mp-panel input[type=number] {
+    flex: 1 1 auto; min-width: 0; height: 34px; padding: 0 10px;
+    font: 14px var(--ui-font); color: var(--text);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 6px; outline: none;
+    -webkit-user-select: text; user-select: text;
+  }
+  #mp-panel input:focus { border-color: var(--accent-2); }
+  #mp-panel input::placeholder { color: #626c7a; }
+  #mp-panel input:disabled { opacity: .5; }
+  #mp-panel #mp-port { flex: 0 0 96px; font-variant-numeric: tabular-nums; }
+  .mp-btn {
+    flex: none; height: 34px; padding: 0 14px; cursor: pointer; white-space: nowrap;
+    font: 600 13.5px var(--ui-font); color: #fff;
+    background: var(--panel-2); border: 1px solid #3a4250; border-radius: 6px;
+  }
+  .mp-btn:hover { border-color: #5b6575; background: #232832; }
+  .mp-btn.primary { background: var(--accent); border-color: var(--accent); }
+  .mp-btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  .mp-btn:disabled { opacity: .45; cursor: default; pointer-events: none; }
+  #mp-colours { display: flex; flex-wrap: wrap; gap: 8px; }
+  .mp-swatch {
+    width: 28px; height: 28px; padding: 0; cursor: pointer; border-radius: 50%;
+    border: 2px solid rgba(0,0,0,.5); outline: 2px solid transparent; outline-offset: 1px;
+  }
+  .mp-swatch:hover { outline-color: #5b6575; }
+  .mp-swatch.on { outline-color: #fff; }
+  .mp-note { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+  #mp-status { margin: 14px 0 0; padding: 8px 12px; border-radius: 6px; background: var(--panel); border: 1px solid var(--line); }
+  #mp-status.err { color: #ffb4ae; border-color: #6b2a26; }
+  #mp-status.ok { color: #9fe8c0; border-color: #245c40; }
+  #mp-players { margin: 0; padding: 0; list-style: none; }
+  #mp-players li { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  .mp-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(0,0,0,.6); }
+  .mp-pname { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mp-tag { flex: none; font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+  .mp-addr {
+    display: block; margin: 4px 0; padding: 5px 10px; border-radius: 5px; background: var(--panel); border: 1px solid var(--line);
+    font: 600 14px var(--num-font); letter-spacing: .02em; -webkit-user-select: text; user-select: text; word-break: break-all;
+  }
+  #mp-host ol { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 12.5px; }
+  #mp-host ol b { color: var(--text); font-weight: 600; }
+  #mp-leave { margin-top: 16px; width: 100%; }
+  #track-grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  }
+  .card {
+    position: relative; display: flex; flex-direction: column; text-align: left;
+    padding: 0; cursor: pointer; color: inherit; font: inherit;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+    transition: border-color .12s, transform .12s, background .12s;
+    contain: content;
+  }
+  .card::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--accent); opacity: 0; transition: opacity .12s;
+  }
+  .card:hover, .card:focus-visible {
+    border-color: #4a5361; background: var(--panel-2); transform: translateY(-2px); outline: none;
+  }
+  .card:hover::before, .card:focus-visible::before { opacity: 1; }
+  .card svg { display: block; width: 100%; height: 130px; padding: 14px; }
+  .card svg path { fill: none; stroke: #dfe5ec; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  .card:hover svg path { stroke: #fff; }
+  .card svg circle { fill: var(--accent-2); }
+  .card-info { padding: 10px 14px 12px; border-top: 1px solid var(--line); }
+  .card-name { font-size: 15px; font-weight: 600; line-height: 1.3; }
+  .card-meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; font-size: 12.5px; color: var(--muted); }
+  .card-meta b { font: 600 12.5px var(--num-font); color: #c9d1db; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  #track-empty { padding: 60px 0; text-align: center; color: var(--muted); }
+
+  /* ---------- HUD ---------- */
+  #hud { position: fixed; inset: 0; z-index: 5; pointer-events: none; font-variant-numeric: tabular-nums; }
+  .hud-box {
+    position: absolute; background: rgba(10,12,15,.62); border: 1px solid rgba(255,255,255,.10);
+    border-radius: 8px; backdrop-filter: blur(3px);
+  }
+  #hud-timing { top: 18px; left: 18px; padding: 12px 16px 12px 18px; min-width: 210px; border-left: 3px solid var(--accent); }
+  #hud-track { font-size: 13px; font-weight: 600; letter-spacing: .03em; margin-bottom: 8px; max-width: 260px; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; line-height: 1.55; }
+  .row .k { font-size: 12px; color: #aab3bf; letter-spacing: .08em; }
+  .row .v { font: 600 17px var(--num-font); }
+  #hud-cur { font-size: 22px; }
+  #hud-best { color: var(--good); }
+  #hud-players { top: 196px; left: 18px; padding: 8px 14px 9px 12px; min-width: 210px; max-width: 280px; font-size: 13px; }
+  #hud-players .prow { display: flex; align-items: center; gap: 8px; line-height: 1.6; }
+  #hud-players .pt { flex: none; font: 600 13px var(--num-font); color: #c9d1db; }
+  #hud-toast {
+    position: absolute; top: 18px; left: 50%; transform: translateX(-50%); max-width: 60vw;
+    padding: 8px 18px; font-size: 14px; text-align: center; border-left: 3px solid var(--accent-2);
+  }
+  #hud-map { top: 18px; right: 18px; padding: 8px; }
+  #minimap { display: block; width: 190px; height: 190px; }
+  #hud-speedo {
+    right: 22px; bottom: 22px; padding: 10px 18px 12px; display: flex; align-items: flex-end; gap: 16px;
+  }
+  .gear-wrap { text-align: center; padding-right: 16px; border-right: 1px solid rgba(255,255,255,.14); }
+  .gear-wrap .k, .speed-wrap .k { font-size: 11px; color: #aab3bf; letter-spacing: .12em; }
+  #hud-gear { font: 700 44px/1 var(--num-font); color: var(--accent-2); min-width: 34px; }
+  .speed-wrap { text-align: right; }
+  #hud-speed { font: 700 64px/0.95 var(--num-font); font-style: italic; min-width: 128px; }
+  #hud-hint {
+    position: absolute; left: 18px; bottom: 16px; font-size: 12px; color: rgba(255,255,255,.72);
+    text-shadow: 0 1px 2px rgba(0,0,0,.8);
+  }
+  #hud-hint kbd { background: rgba(10,12,15,.6); border-color: rgba(255,255,255,.2); }
+  #hud-menu-btn {
+    pointer-events: auto; cursor: pointer; margin-left: 8px; padding: 2px 10px;
+    font: 12px var(--ui-font); color: #fff; background: rgba(10,12,15,.6);
+    border: 1px solid rgba(255,255,255,.25); border-radius: 4px;
+  }
+  #hud-menu-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* ---------- Error ---------- */
+  #error {
+    position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+    background: rgba(11,13,16,.96); padding: 32px;
+  }
+  #error .inner { max-width: 640px; border-left: 3px solid var(--accent); padding: 6px 0 6px 20px; }
+  #error h2 { margin: 0 0 10px; font-size: 20px; }
+  #error pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: 13px/1.6 Consolas, monospace; color: #ffb4ae; -webkit-user-select: text; user-select: text; }
+
+  @media (max-width: 720px) {
+    .menu-head, .menu-tools { padding-left: 16px; padding-right: 16px; }
+    .menu-body { padding: 4px 16px 24px; }
+    .menu-main { flex-direction: column; overflow-y: auto; }
+    .menu-main .menu-body { overflow: visible; flex: none; }
+    #mp-panel { width: auto; border-left: 0; border-bottom: 1px solid var(--line); padding: 16px; overflow: visible; order: -1; }
+    #hud-players { display: none; }
+    #minimap { width: 130px; height: 130px; }
+    #hud-speed { font-size: 46px; min-width: 96px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="hud-timing" class="hud-box">
+    <div id="hud-track"></div>
+    <div class="row"><span class="k">圈數</span><span class="v" id="hud-lap">--</span></div>
+    <div class="row"><span class="k">本圈</span><span class="v" id="hud-cur">--</span></div>
+    <div class="row"><span class="k">上一圈</span><span class="v" id="hud-last">--</span></div>
+    <div class="row"><span class="k">最快圈</span><span class="v" id="hud-best">--</span></div>
+  </div>
+  <div id="hud-players" class="hud-box hidden"></div>
+  <div id="hud-toast" class="hud-box hidden"></div>
+  <div id="hud-map" class="hud-box"><canvas id="minimap"></canvas></div>
+  <div id="hud-speedo" class="hud-box">
+    <div class="gear-wrap"><div id="hud-gear">N</div><div class="k">檔位</div></div>
+    <div class="speed-wrap"><div id="hud-speed">0</div><div class="k">KM/H</div></div>
+  </div>
+  <div id="hud-hint">
+    <kbd>W</kbd>油門 <kbd>S</kbd>煞車‧倒車 <kbd>A</kbd><kbd>D</kbd>轉向 <kbd>R</kbd>重置 <kbd>L</kbd>行車線 <kbd>Esc</kbd>選單 <kbd>F11</kbd>全螢幕
+    <button id="hud-menu-btn" type="button" tabindex="-1">選單</button>
+  </div>
+</div>
+
+<div id="menu" class="hidden">
+  <div class="menu-head">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <h1>F1 <span>DRIVE</span></h1>
+        <p>第一人稱賽道駕駛 ‧ 選擇賽道開始 ‧ 地圖資料 © OpenStreetMap contributors</p>
+      </div>
+    </div>
+    <div class="keys">
+      <span><kbd>W</kbd>油門</span>
+      <span><kbd>S</kbd>煞車‧倒車</span>
+      <span><kbd>A</kbd><kbd>D</kbd>轉向</span>
+      <span><kbd>R</kbd>重置</span>
+      <span><kbd>L</kbd>行車線</span>
+      <span><kbd>Esc</kbd>選單</span>
+      <span><kbd>F11</kbd>全螢幕</span>
+    </div>
+  </div>
+  <div class="menu-tools">
+    <input id="track-search" type="search" placeholder="搜尋賽道或地點…" autocomplete="off" spellcheck="false">
+    <span id="track-count"></span>
+    <button id="menu-resume" type="button" class="hidden">繼續駕駛</button>
+  </div>
+  <div class="menu-main">
+    <div class="menu-body">
+      <div id="track-lock" class="hidden"></div>
+      <div id="track-grid"></div>
+      <div id="track-empty" class="hidden">找不到符合的賽道</div>
+    </div>
+    <aside id="mp-panel">
+      <h2>多人連線</h2>
+      <div class="mp-field">
+        <input id="mp-name" type="text" maxlength="16" placeholder="你的名稱" autocomplete="off" spellcheck="false" aria-label="玩家名稱">
+      </div>
+      <h3>車色</h3>
+      <div id="mp-colours"></div>
+
+      <div id="mp-offline">
+        <h3>建立房間（你當房主）</h3>
+        <div class="mp-field">
+          <input id="mp-port" type="number" min="1024" max="65535" step="1" value="24500" aria-label="連接埠">
+          <button id="mp-create" type="button" class="mp-btn primary">建立房間</button>
+        </div>
+        <p id="mp-create-note" class="mp-note hidden"></p>
+        <h3>加入房間</h3>
+        <div class="mp-field">
+          <input id="mp-addr" type="text" maxlength="255" placeholder="房主 IP，例：203.0.113.5:24500" autocomplete="off" spellcheck="false" aria-label="房主位址">
+          <button id="mp-join" type="button" class="mp-btn primary">加入房間</button>
+        </div>
+      </div>
+
+      <div id="mp-status" class="hidden"></div>
+
+      <div id="mp-online" class="hidden">
+        <div id="mp-host" class="hidden">
+          <h3>把位址給朋友</h3>
+          <div>同一個區域網路（同一台路由器／Wi-Fi）：</div>
+          <div id="mp-lan"></div>
+          <div style="margin-top:8px">不同網路的朋友要用你的<b>公網 IP</b>：</div>
+          <div class="mp-field" style="margin-top:4px">
+            <button id="mp-pubip" type="button" class="mp-btn">顯示我的公網 IP</button>
+          </div>
+          <div id="mp-pubip-out"></div>
+          <ol>
+            <li>在路由器設定<b>連接埠轉發</b>：TCP <b id="mp-port-note">24500</b> → 這台電腦的區域網路 IP。</li>
+            <li>Windows 防火牆第一次會跳出詢問，請按<b>允許存取</b>。</li>
+            <li>你關閉遊戲或離開房間，房間就會結束。</li>
+          </ol>
+        </div>
+        <h3 id="mp-players-title">玩家</h3>
+        <ul id="mp-players"></ul>
+        <button id="mp-leave" type="button" class="mp-btn">離開房間</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div id="error" class="hidden">
+  <div class="inner">
+    <h2>遊戲無法啟動</h2>
+    <pre id="error-text"></pre>
+  </div>
+</div>
+
+<script>
+  // Readable on-screen error instead of a blank page (also used by main.js).
+  window.F1 = window.F1 || {};
+  window.F1.showError = function (msg) {
+    var box = document.getElementById('error'), pre = document.getElementById('error-text');
+    if (!box || !pre) return;
+    pre.textContent = (pre.textContent ? pre.textContent + '\n' : '') + msg;
+    box.classList.remove('hidden');
+  };
+  window.addEventListener('error', function (e) {
+    if (e && e.target && e.target.tagName === 'SCRIPT') {
+      window.F1.showError('無法載入程式檔：' + (e.target.getAttribute('src') || '?'));
+    }
+  }, true);
+</script>
+<script src="lib/three.min.js"></script>
+<script src="tracks-data.js"></script>
+<script src="js/track.js"></script>
+<script src="js/car.js"></script>
+<script src="js/cockpit.js"></script>
+<script src="js/raceline.js"></script>
+<script src="scenery-data.js"></script>
+<script src="js/scenery.js"></script>
+<script src="js/collide.js"></script>
+<script src="js/carmodel.js"></script>
+<script src="js/net.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

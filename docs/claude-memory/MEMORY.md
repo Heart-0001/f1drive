@@ -1,0 +1,2 @@
+- [F1Drive resume state](f1drive-resume-state.md) — paused 2026-09-30; pushed to GitHub Heart-0001/f1drive, full handoff in repo CLAUDE.md
+- [F1Drive workflow preferences](f1drive-workflow-preferences.md) — many Opus subagents, then a Fable agent review at the end

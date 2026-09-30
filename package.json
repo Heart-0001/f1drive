@@ -1,0 +1,40 @@
+{
+  "name": "f1drive",
+  "version": "1.0.0",
+  "description": "First-person F1 driving game on real circuit layouts",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "build-tracks": "node tools/build-tracks.mjs",
+    "server": "node net/server.js",
+    "dist": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "local.f1drive",
+    "productName": "F1Drive",
+    "files": [
+      "electron-main.js",
+      "preload.js",
+      "net/*.js",
+      "index.html",
+      "tracks-data.js",
+      "scenery-data.js",
+      "js/*.js",
+      "lib/*.js"
+    ],
+    "win": {
+      "target": "portable",
+      "signAndEditExecutable": false
+    },
+    "portable": {
+      "artifactName": "F1Drive.exe"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "ws": "^8.22.0"
+  }
+}
