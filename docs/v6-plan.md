@@ -168,6 +168,10 @@ Then: v6.2 integration (steering law, banking / slope presentation, Monaco tunne
 visibility, verified track-data corrections, recalibration ~22 min), full re-run, npm run dist, exe smoke, docs,
 local commit (no push).
 
+## RESUMED 2026-10-01 (after the usage reset)
+
+- The user said "continue" (usage reset). Relaunched from the repo copies: wf-v61-resume.js (Glue + Critic on the WIP tree; run wf_a659accd-b86), f1drive-v62-prep-resume.js (tunnel + handling; wf_4f87d153-d3d), f1drive-track-audit-resume.js (wf_4089d207-948). Watchdog cron re-created. .claude/scheduled_tasks.lock untracked + ignored.
+
 ## Watchdog (asked for by the user)
 
 - `node tools/watchdog.mjs` — exit 0 moving, 2 an agent has been silent for more than 25 min, 3 nothing is running.

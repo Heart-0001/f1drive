@@ -1,0 +1,102 @@
+
+################ gamepad ABXY
+
+== summary
+I remapped the controller in js/gamepad.js to the v6.1 layout, and it is verified both in the unit suite and in the real game. Only button indices changed: state.boost, state.pressed.{reset,line,menu,recentre,limiter,compound}, mergeInput, rumble, onChange, active and the 500 ms edge resync work exactly as before (a diff of the code against the old copy shows only the mapping lines changed). The header comment now has the full table.
+
+New standard mapping: A[0] or RB[5] held = battery; B[1] or LB[4] = limiter (edge); X[2] = next compound (edge); Y[3] = reset (edge); View/Back[8] = racing line (edge); Menu/Start[9] = menu; RS click[11] = recentre. When two buttons share a function they are OR-ed, so pressing the second while the first is held is not a new press. Triggers, sticks and D-pad are unchanged. The raw (non-standard) layout is mapped the same way by name: A0 / RB5 battery, B1 / LB4 limiter, X2 compound, Y3 reset, Back6 line, Start7 menu, RS10 recentre.
+
+devtests/gamepad-test/gamepad.test.js is updated and now passes 25/25 (exit 0). It includes a new table test that presses every standard button (0-16) alone and every raw button (0-10) alone and checks what each one does. To check the tests catch mistakes, I ran them against the old gamepad.js and against two broken copies (Back mapped wrongly on the raw layout, B not combined with LB); all three fail.
+
+I also added devtests/gamepad-test/game-map.js. It drives the real index.html + main.js in one offscreen window that is muted through devtests/electron-userdata.js (SOUND was never set), using a fake controller. Result: ALL PASS 11/11 on Monza with the 2025 standard car. It confirms A and RB deploy the battery, B does not, B and LB toggle the limiter, X cycles the compound (M -> H -> S) and View does not, View toggles the racing line and X does not, Y resets the car and A does not, Menu opens and resumes, RS click recentres, and there are no console errors.
+
+Several existing harnesses press the old indices and now fail (exact lines are under openIssues). I checked that the fixes work by running edited copies in my scratchpad; no project file outside my folders was changed:
+- gp-smoke pad part: unchanged 22/25 (exit 1) -> edited copy 25/25.
+- v6-smoke pad part: unchanged 3/6 (exit 1) -> edited copy 6/6.
+- gp-e2e solo: unchanged 587/588 (exit 1) -> edited copy 588/588.
+- gp-e2e solo-v6: edited copy 295/295.
+
+== apiNotes
+ - API unchanged; only the button indices moved. state.boost (hold), state.pressed.{reset,line,menu,recentre,limiter,compound} (one-frame edges), mergeInput(keys,out) (boost merged, limiter passed through from keys), rumble, onChange, active and the 500 ms edge resync all behave as before. main.js needs no code change: it only reads state.pressed.* and boost.
+ - FINAL TABLE for the hints (standard mapping; index, function, keyboard equivalent): A [0] hold = battery 電池 (E); RB [5] hold = battery 電池 (E); B [1] edge = pit limiter toggle 限速器 (Q); LB [4] edge = pit limiter 限速器 (Q); X [2] edge = next tyre compound 換胎配方 (T); Y [3] edge = reset 重置 (R); View/Back [8] edge = racing line 行車線 (L); Menu/Start [9] = menu 選單 (Esc); RS click [11] = recentre view 視角回正; RT [7] = throttle 油門; LT [6] = brake 煞車; left stick = steer 轉向; right stick = look 視角; D-pad [12-15] = digital steer / throttle / brake. LS click [10] and Home [16] are unused.
+ - Raw layout (unmapped pads with 6+ axes, i.e. the Linux xpad order A0 B1 X2 Y3 LB4 RB5 Back6 Start7 Guide8 LS9 RS10): A0 / RB5 = battery, B1 / LB4 = limiter, X2 = compound, Y3 = reset, Back6 = line, Start7 = menu, RS10 = recentre. Guide8 and LS9 are unused.
+ - DECISION (recorded in the gamepad.js header): raw-layout recentre stays on button 10, not 9 as the task text said ('LS8 RS9'). This branch only runs for pads with 6 or more axes (LX LY LT RX RY RT hatX hatY), which is the Linux xpad layout, and that layout has Guide at 8, LS at 9 and RS at 10. Mapping recentre to 9 would put it on the left-stick click.
+ - DECISION: when two buttons share a function (A / RB, B / LB) they are OR-ed. Pressing the second while the first is held is not a new limiter press; boost stays on while either one is held.
+ - Behaviour kept from before: the battery is a hold, not an edge, so A (like RB before) held through a menu or suspended polling deploys on the first poll. Held B / LB / X / Y / View are swallowed by the 500 ms resync as before.
+ - Suggested index.html line 652 #hud-hint-pad: <span class="hk"><kbd>RT</kbd>油門</span> <span class="hk"><kbd>LT</kbd>煞車</span> <span class="hk"><kbd>左搖桿</kbd>轉向</span> <span class="hk"><kbd>右搖桿</kbd>視角</span> <span class="hk"><kbd>A</kbd>/<kbd>RB</kbd>電池</span> <span class="hk"><kbd>B</kbd>/<kbd>LB</kbd>限速器</span> <span class="hk"><kbd>X</kbd>配方</span> <span class="hk"><kbd>Y</kbd>重置</span> <span class="hk"><kbd>Back</kbd>行車線</span> <span class="hk"><kbd>Start</kbd>選單</span>. It keeps the tokens LB, RB, Back and RT, so the existing hint checks (v6-smoke line 738, ui-v6 line 354, gp-smoke line 482, ui-gp line 296) keep passing. It is one <kbd> longer than now, so re-run ui-v6 and ui-gp for clipping.
+ - Suggested index.html line 674 #keys-pad row, in the header column order 油門|煞車‧倒車|轉向|重置|行車線|限速器|電池|換胎配方|靜音|選單|視角|全螢幕: RT | LT | 左搖桿 | Y | Back | B/LB | A/RB | X | — | Start | 右搖桿 | —
+ - Suggested js/README-interfaces.md lines 372-374 (controls line): 'W S A D or arrows / RT LT left stick; R / Y reset; L / Back (View) racing line; Esc / Start (Menu) menu; Q / B or LB pit limiter (toggle); E / A or RB battery (hold); T / X next tyre compound; M mute; right stick look, RS click recentre.'
+ - main.js comments that describe the old map: line 47 'T / Back', line 949 'T / Back', line 1029 '(E / RB / B)', line 1066 'Start = Esc, A / Y = R, X = L, LB = Q, Back = T'. The text strings in main.js line 901 (toast '按 LB 關閉限速器') and ui.js line 1029 ('請開啟限速器（LB）') are still correct because LB is still the limiter, but they could say B now.
+ - New harness: npx electron devtests/gamepad-test/game-map.js (env TRACK, default monza). It runs muted through electron-userdata.js, uses no network port, takes about 15 s, and exits 1 on a failed check or 2 on its 120 s watchdog. devtests/README.md (not mine) should list it and change the gamepad.test.js count to 25.
+
+== openIssues
+ - GLUE: devtests/gp-smoke/smoke.js. Change press(0) to press(3) at lines 531, 552 and 560 (Y = reset), and press(2) to press(8) at lines 535-536 (View = racing line). Rename the checks at line 533 ('A resets' -> 'Y resets'), line 537 ('X toggles' -> 'View toggles') and line 564 ('RT + stick + A' -> '+ Y'). Verified on a copy: pad part 25/25.
+ - GLUE: devtests/v6-smoke/smoke.js. Change __btn(1, …) to __btn(0, …) at lines 715 and 718 (A held = battery), and press(8) to press(2) at lines 732 and 734 (X = compound). Rename line 722 'B held' -> 'A held' and line 736 'Back picks' -> 'X picks'. The line 738 hint regex (/LB/ /RB/ /Back/) still passes with the suggested hint text. Verified on a copy: pad part 6/6. Optionally add a 'B toggles the limiter' check.
+ - GLUE: devtests/gp-e2e/solo-page.js lines 233, 251, 261, 316 and 318, and devtests/gp-e2e/page.js lines 65 and 78: change btn(0, …) to btn(3, …) (the autopilot's reset button is now Y). page.js is used by online.js, start-clock.js and bench.js. Verified on a copy: solo 588/588 and solo-v6 295/295. online, online-v6, start-clock and bench were not run (8-13 min each, network ports).
+ - GLUE: devtests/gp-e2e/online-v6-page.js line 59: change tap(8, 'compound') to tap(2, 'compound') (X). The LB limiter taps (lines 71, 73) and RB boost (lines 72, 80) are unchanged. Not run.
+ - GLUE: devtests/v6-critic/critic.js lines 175-176 press __e.pad.buttons[0] to show that 'the pad's A' (the reset) is ignored during a box service. A is now the battery, so the check passes without testing anything; change it to buttons[3] (Y). Line 479 __d.btn(4) (LB) and the line 538 mash list need no change. Not run.
+ - GLUE (not in the listed green suites): devtests/car-v6/game-check.js lines 121-123: __btn(1) 'B held is a boost' -> __btn(0) (A). Line 127: __btn(8) -> __btn(2) (X = compound). Update the check name at line 129. devtests/review-final/game/run.js line 390 presses A only to wake the pad (now a brief boost); it is a NOTE-only probe and is harmless.
+ - INTEGRATOR: change index.html line 652 (#hud-hint-pad) and line 674 (#keys-pad row) as suggested in apiNotes, then re-run ui-v6 and ui-gp for clipping.
+ - INTEGRATOR: also update js/README-interfaces.md lines 372-374 and these devtests/README.md rows: gamepad-test (25 tests, new game-map.js row), v6-smoke pad '(RB / B …, LB, Back)', gp-e2e online-v6 '(LB limiter, Back compound)', the gp-e2e shared-files paragraph 'online-v6-page.js (ERS on RB, the pit stop through LB / Back …)', and v6-critic pit 'R / pad A'.
+ - Side effect: the run of the unchanged gp-e2e/solo.js rewrote its own git-ignored screenshots in devtests/gp-e2e/out-solo/, as every run does. The edited scratchpad copies wrote their output only under the session scratchpad (gps/, v6s/, gpe/).
+
+################ seasons ERS data
+
+== summary
+Every car 2011..2026 now has its own battery from tools/ers-data.json, and each car's lap-time target still holds when it is driven with the battery deployed.
+
+What the data now says:
+- **Batteries:** deploy, harvest and store from tools/ers-data.json replace perf.ersPower, perf.ersHarvest and a new perf.ersStore. They are not multiplied on top of the js/cars-data.js values.
+- **Cars without KERS:** five cars have hasErs false, so their CarSpec has ers: null: 2011-lotus-racing, 2011-hrt, 2011-virgin, 2012-hrt and 2012-marussia. All of 2010 has no battery either. Every 2013 car has KERS.
+- **Lap times unchanged:** every season's standard car and era physics are byte-identical to before, so calibrate.mjs was not re-run. The only exception is a display value: the 2010 standard car's battery bar went from 50 to 0, on purpose (that season has no battery). Of the 168 cars in 2011..2026, 111 changed their multipliers: the 100 cars of 2011..2025 whose battery differs from the standard one, plus all 11 cars of 2026. The other 57, and all of 2010, have exactly the same multipliers as before.
+
+How the lap time is kept on target: the per-car level solve uses the racing-line speed model, which has no battery. So a new script, devtests/seasons-calib/ers-effect.mjs, measures each battery's effect by driving. It fits each season's standard car with each distinct battery of that season (49 in total), drives all 40 circuits with E held, and writes devtests/seasons-calib/ers-effect.json. tools/build-cars.mjs then solves the chassis level so that speed-model delta + battery effect = target. A strong battery therefore gets a weaker chassis and a car without KERS a stronger one, with the same lap time and a different character.
+
+Measured battery effects (mean over the 40 circuits, against the season's standard car; positive = slower):
+- **No KERS:** +0.555 % in 2011, +0.538 % in 2012.
+- **2011 Red Bull** (deploy 0.92, harvest 0.92): +0.05 %.
+- **Mercedes 2014–16** (1.08 / 1.12): −0.17 to −0.19 %.
+- **Renault 2014–15** (0.88 / 0.92): +0.25 to +0.26 %.
+- **Honda 2015** (0.84 / 0.76): +0.39 %.
+- **Honda 2021** (1.12 / 1.12): −0.19 %.
+- **2026:** Aston Martin (0.88 / 0.88) +0.16 %; Mercedes (1.04 / 1.0502) −0.05 %; the other 2026 cars −0.03 to +0.04 %.
+
+Examples of the chassis level change (%):
+- **2011:** Team Lotus −0.72 → +0.22; HRT −1.52 → −0.61.
+- **2014:** Mercedes +0.67 → +0.40; Red Bull +0.50 → +0.88.
+- **2015:** McLaren −0.21 → +0.37.
+- **2021:** Red Bull +0.76 → +0.44.
+- **2026** (had no level before): Aston Martin +0.27; Mercedes −0.08.
+
+No multiplier reaches a range edge: chassis and engine multipliers stay within 0.955..1.030.
+
+2026 keeps the js/cars-data.js power, drag and chassis multipliers plus one common level L. Its target is the speed-model delta those multipliers already gave (the cars-data pace was derived without the battery). The 2026 order is unchanged and now matches the data target exactly in the driven check (rank correlation 1.000, was 0.991).
+
+Battery bar: gain lowered from 13 to 3.5, and 0 for any car without a battery. Examples: Honda 2015 6, Aston Martin 2026 16, Renault 2014 20, Ferrari 2014 50, Mercedes 2014–16 80, Honda 2021 84.
+
+js/cars.js now allows ers null per car (never for the standard car), clamps the battery multipliers to 0.75..1.15 (store 0.9..1.1) with every other range unchanged, adds F1.cars.ersNote(id) (a Map lookup), and still uses Map-only lookups.
+
+docs/seasons-data.md has a new battery section with the effect table and level changes, an updated drive-check table, decisions and limits.
+
+Defaults I chose, all recorded in docs/seasons-data.md:
+- **2026 Mercedes harvest cut to 1.0502 (data says 1.08).** The 2026 era harvest (2190 W/kg) already sits at js/car.js's ceiling / 1.05; 1.08 would push it over the ceiling and car.js would silently drop it to the reference's 230 W/kg. Widening this would mean changing the 2026 standard car and re-running the 22-minute calibration. It is still the highest harvest of 2026, and the build prints a NOTE about it.
+- **js/cars.js clamps an out-of-range battery value to the edge** instead of falling back to the reference value, so a 2026 car can never lose 90 % of its harvest.
+- **The 2010 standard car's battery bar is now 0** (it was 50), consistent with every other car without a battery.
+
+Known side effect: when E is not pressed, the battery differences disappear but the chassis differences remain. So within a season, cars without KERS or with a weak battery become relatively faster: check-drive.js --teams (which never presses E) shows 2011 Team Lotus 0.12 % ahead of the standard car. This is the intended character change, since targets are defined with E.
+
+== apiNotes
+ - UI: show the battery note. Each car row in js/seasons-data.js has ersNote, a one-line Traditional Chinese string ('' when there is none; 128 of 168 cars have one, at most 43 characters). The CarSpec does NOT carry it, so in the car card the UI should call F1.cars.ersNote(spec.id), which returns '' for unknown or hostile ids. Example: 2015-mclaren -> 'MGU-H 回收不足：跑到半圈電能就用光'.
+ - UI: no-battery cars. CarSpec.ers === null now also for 2011-lotus-racing, 2011-hrt, 2011-virgin, 2012-hrt and 2012-marussia (as for all of 2010), and their ratings.ers is 0. ui.js hasErs() already hides the battery bar for ers === null; the telemetry should hide the battery as it already does for 2010 (v6-smoke checks this for 2010).
+ - Data shape added in js/seasons-data.js car rows: perf.ersStore (multiplier), hasErs (boolean), ersNote (string), est.ersPct (the battery's share of est.lapPct). est.lapPct now means the lap with the battery deployed, against the standard car also deploying.
+ - Multiplier ranges: ersPower and ersHarvest 0.75..1.15, ersStore 0.9..1.1; all other multipliers still 0.95..1.05. The contract text in js/README-interfaces.md (perf comment '0.95..1.05', the F1.cars API list) is not mine to edit. It should add: the battery ranges, ersStore, hasErs / ersNote in the data, F1.cars.ersNote(id) -> string, 'ratings.ers 0 when ers is null', and per-car ers null for 2011-2012.
+ - js/cars.js: hasErs false gives ers null except for the '<year>-standard' car, which always gets the era's battery. Only the value false removes a battery. A battery value (era x multiplier) outside js/car.js's 1/10..10 x reference window is now clamped to the edge, not replaced by the reference value; physics values still fall back to the reference as before.
+ - Workflow: if tools/ers-data.json changes, re-run `node devtests/seasons-calib/ers-effect.mjs` (about 3.5 min with the default 4 child processes) and then `node tools/build-cars.mjs`. The generator refuses a missing or stale ers-effect.json, or one lacking a battery some car uses. ers-effect.json is fingerprinted against calibration.json, so it must also be re-run after any calibrate.mjs run. calibrate.mjs is unchanged; its harvest ceiling still uses CFG.MAX = 1.05.
+
+== openIssues
+ - devtests/v6-smoke/smoke.js part 'pad' fails 3 checks because of the parallel gamepad remap (needs the new A / B / X mapping). Not my file.
+ - devtests/README.md (not my file) needs a row for `node devtests/seasons-calib/ers-effect.mjs [--check] [--jobs N] [years] [--probe year key tracks]`: about 3.5 min with 4 jobs, exit code with --check, writes ers-effect.json. calibrate.mjs's comment on H_CAP ('a team multiplier up to CFG.MAX') is slightly outdated now that battery multipliers go to 1.15; left untouched because changing H_CAP would change the 2026 standard car.
+ - js/README-interfaces.md contract text (not my file): add ersStore, hasErs, ersNote, F1.cars.ersNote(id), the battery multiplier ranges, ratings.ers = 0 without a battery, and per-car ers null.
+ - The UI (ui.js, not my file) does not show ersNote yet; it should use F1.cars.ersNote(c.id) in the car card.
+ - Pre-existing, unchanged: in test/cars.test.js the 4-circuit era-index check shows 2026 at +0.56 % against its 0.6 % limit (the standard cars are byte-identical, so this is not caused by this task). Little margin if js/car.js changes again.
+ - Without E the per-car order within a season shifts (no-KERS and weak-battery cars get relatively faster). This is inherent to calibrating with the battery deployed, and is documented in docs/seasons-data.md.

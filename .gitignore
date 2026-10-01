@@ -18,3 +18,4 @@ devtests/review-final/seasons/seasons-repro/
 # large intermediate dumps / API caches of in-progress analyses (kept locally)
 devtests/handling-test/ref/
 devtests/track-audit/cache/
+.claude/scheduled_tasks.lock
