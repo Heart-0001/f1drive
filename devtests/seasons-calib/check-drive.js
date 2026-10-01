@@ -10,6 +10,10 @@
 // Default: every season's standard car on 4 circuits (Sepang, COTA, Jeddah, Zandvoort: chosen on 2026-10-01 because
 // none was among the builder's then 12 calibration circuits; the calibration now uses all 40); ratio = flying lap / the
 // 2025 standard car's (= F1.REF_SPEC) on the same circuit, compared with the era pace index of tools/seasons-raw.json.
+// When the calibration matched the index with the battery deployed (calibration.json `deploy`), this autopilot, which
+// follows the racing line's speed profile (a profile without the battery) and so cannot use E, is compared instead
+// with the calibration's median for both cars without the battery (`noDeployMedian`); test/cars.test.js drives the
+// index itself with E.
 // --tracks a,b,c other circuits (tracks-data.js ids); --teams also drives every team car of the chosen years;
 // --years 2014,2026 only these seasons; --json file writes the results. About 3 s (4 circuits), 30 s (all 40).
 // Result on 2026-10-01 after the fix: every season within 0.48 % on the 4 circuits, within 0.16 % over all 40.
@@ -27,6 +31,7 @@ require(path.join(ROOT, 'js', 'car.js'));
 require(path.join(ROOT, 'js', 'raceline.js'));
 const F1 = global.F1;
 const RAW = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools', 'seasons-raw.json'), 'utf8'));
+const CAL = JSON.parse(fs.readFileSync(path.join(__dirname, 'calibration.json'), 'utf8'));
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const TRACKS = arg('--tracks', 'my-1999,us-2012,sa-2021,nl-1948').split(',');
@@ -108,9 +113,10 @@ console.log('2025 standard (F1.REF_SPEC): ' + tracks.map((t, i) => t.id + ' ' + 
   (refRuns[i].grass || refRuns[i].hits ? ' OFF' : '')).join('  '));
 const years = YEARS.length ? YEARS : F1.cars.seasons.map(s => s.year);
 const result = { tracks: TRACKS, ref: refRuns.map(r => ({ flying: r.flying, pred: r.pred })), seasons: [] };
-console.log('\nyear  index   driven(median)  err      line(median)  err     per track driven ratio                     top km/h  off');
+if (CAL.deploy) console.log('\ntarget: the calibration\'s no-battery median (calibration.json noDeployMedian; the index is matched deploying the battery)');
+console.log('\nyear  target  driven(median)  err      line(median)  err     per track driven ratio                     top km/h  off');
 for (const y of years) {
-  const idx = RAW.seasons.find(s => s.year === y).eraIndex;
+  const idx = CAL.deploy ? CAL.seasons[y].noDeployMedian : RAW.seasons.find(s => s.year === y).eraIndex;
   const specs = TEAMS ? F1.cars.list(y) : [F1.cars.get(y + '-standard')];
   const rows = [];
   for (const spec of specs) {

@@ -49,6 +49,14 @@ test('17 seasons 2010..2026, ascending, with label, engine and an era of finite 
   });
 });
 
+test('season labels describe their own year: no change of a later year is announced (2017 "...; 2018 起有 Halo")', () => {
+  for (const s of SEASONS) {
+    const text = s.label.slice(String(s.year).length);
+    for (const m of text.match(/(19|20)\d\d/g) || []) assert(+m <= s.year, s.year + ' label names ' + m + ': ' + s.label);
+  }
+  assert.strictEqual(F1.cars.seasons.find(s => s.year === 2017).label, '2017 · 寬車寬胎高下壓力');
+});
+
 test('cars: standard first with every multiplier 1, ids unique and valid, colours, multipliers, ratings, texts', () => {
   const all = new Set();
   for (const s of SEASONS) {
@@ -74,6 +82,22 @@ test('cars: standard first with every multiplier 1, ids unique and valid, colour
     });
   }
   assert.strictEqual(all.size, 17 + 180);
+});
+
+// the menu bars: 50 + 50 tanh(gain x / 50) (tools/build-cars.mjs ratingOf) never pins a car at 0 / 100, and keeps the
+// order of the measured differences (devtests/seasons-calib/entries.json ratingX) inside every season
+test('menu ratings are never pinned at 0 / 100 and follow the order of the measured differences', () => {
+  const LOG = JSON.parse(fs.readFileSync(path.join(ROOT, 'devtests', 'seasons-calib', 'entries.json'), 'utf8'));
+  for (const s of SEASONS) {
+    const ls = LOG.seasons.find(q => q.year === s.year);
+    for (const c of s.cars) for (const k of RATINGS) assert(c.ratings[k] > 0 && c.ratings[k] < 100, c.id + ' rating ' + k + ' = ' + c.ratings[k]);
+    for (const k of RATINGS) {
+      const rows = ls.cars.map(c => ({ id: c.id, x: c.ratingX[k], r: s.cars.find(q => q.id === c.id).ratings[k] })).sort((a, b) => a.x - b.x);
+      for (let i = 1; i < rows.length; i++) assert(rows[i].r >= rows[i - 1].r, s.year + ' ' + k + ': ' + rows[i - 1].id + ' ' + rows[i - 1].r + ' > ' + rows[i].id + ' ' + rows[i].r);
+    }
+  }
+  // the 2010 back markers no longer share a 0 (their measured standing starts differ: HRT -7.1 %, Virgin -5.8 %)
+  assert(F1.cars.get('2010-hrt').ratings.accel < F1.cars.get('2010-virgin').ratings.accel);
 });
 
 test('F1.cars.seasons / DEFAULT_YEAR / list', () => {
@@ -147,7 +171,11 @@ test('era physics by the regulations: engines, gears, ERS, cockpit', () => {
       assert(e.ers.power < F1.REF_SPEC.ers.power * 0.7 && e.ers.store < F1.REF_SPEC.ers.store * 0.2, y + ' KERS 60 kW / 400 kJ');
       assert(Math.abs(e.ers.store / e.ers.power - 6.67) < 0.5, y + ' KERS lasts about 6.7 s: ' + e.ers.store / e.ers.power);
     } else if (y <= 2025) assert.deepStrictEqual(e.ers, F1.REF_SPEC.ers, y + ' ERS = the reference');
-    else assert(e.ers.power > 2.9 * F1.REF_SPEC.ers.power && e.ers.harvest > 5 * F1.REF_SPEC.ers.harvest, '2026 350 kW');
+    else {
+      assert(e.ers.power > 2.9 * F1.REF_SPEC.ers.power && e.ers.harvest > 5 * F1.REF_SPEC.ers.harvest, '2026 350 kW');
+      assert.deepStrictEqual(e.ers.taperKmh, [290, 345], '2026: the deploy power fades out between 290 and 345 km/h (FIA C5.2.8)');
+    }
+    if (y < 2026 && e.ers) assert(!('taperKmh' in e.ers), y + ': no taper before 2026');
   }
   const top = y => F1.carPerf(F1.cars.get(y + '-standard')).topSpeed * 3.6;
   assert(top(2014) > top(2013) + 10, '2014 low drag: faster on the straights than the V8 + KERS cars');
@@ -156,6 +184,15 @@ test('era physics by the regulations: engines, gears, ERS, cockpit', () => {
   for (const y of [2017, 2018, 2019, 2020, 2021]) assert(e(y).downforce > e(2025).downforce, y + ' high downforce');
   assert(e(2021).downforce < e(2020).downforce, '2021 floor cut');
   assert(e(2026).downforce < e(2025).downforce * 0.85 && e(2026).traction > e(2025).traction, '2026 less downforce, more electric power out of corners');
+});
+
+// review finding S1: with E held the 2026 car reached 377 km/h (boost top 381) against a real 338 km/h Monza trap and
+// 345 km/h for 2025; the FIA's power-vs-speed rule gives it no electric power from 345 km/h
+test('2026 battery: deploying all the way, every 2026 car tops out at 345 km/h at most and the standard car below 2025', () => {
+  const top = spec => F1.carPerf(spec).topSpeedBoost * 3.6;
+  for (const spec of F1.cars.list(2026)) assert(top(spec) <= 345, spec.id + ' boost top ' + top(spec).toFixed(1) + ' km/h');
+  assert(top(F1.cars.get('2026-standard')) < top(F1.cars.get('2025-standard')), '2026 slower than 2025 at the end of a long straight');
+  assert(top(F1.cars.get('2026-standard')) > F1.carPerf(F1.cars.get('2026-standard')).topSpeed * 3.6 + 3, 'the battery still adds speed below 345 km/h');
 });
 
 const LIVERIES = Object.assign({}, ...['2010-2017.json', '2018-2026.json'].map(f =>
@@ -351,6 +388,7 @@ test('corrupted data (fuzzed): every CarSpec is exactly what js/car.js drives (F
     }
     if (rnd() < 0.3) e.gearKmh = pick([[5, 50], [60, 700], [100, 50], [], [60], [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22], 'x']);
     if (rnd() < 0.3) e.ers = pick([null, false, {}, { store: 1e12, power: 1, harvest: 1e-9 }, { store: R.ers.store * 10, power: R.ers.power * 10, harvest: R.ers.harvest * 10 }]);
+    if (rnd() < 0.3 && e.ers && typeof e.ers === 'object') e.ers.taperKmh = pick([[290, 345], [345, 290], [49, 100], [50, 51], [599, 600], [598, 600.5], [290, 290.5], [10, 20], 'x', [NaN, 1], [290], [290, 345, 400], null, {}]);
     // era values at the edge of the range, times the largest multiplier
     if (rnd() < 0.2) { e.power = R.power * 4; e.traction = R.traction / 4; }
     s.cars.forEach(c => {
@@ -376,18 +414,64 @@ test('corrupted data (fuzzed): every CarSpec is exactly what js/car.js drives (F
   assert.strictEqual(cars.list(2014)[0].power, R.power * 4, 'the standard car keeps the edge value');
 });
 
+test('ers.taperKmh: a valid era taper reaches every car of the season (frozen), a broken one none, and car.js keeps it', () => {
+  const base = JSON.parse(JSON.stringify(SEASONS.find(q => q.year === 2014)));
+  const with_ = t => { const s = JSON.parse(JSON.stringify(base)); s.era.ers.taperKmh = t; return sandbox([s], null).list(2014); };
+  for (const spec of with_([300, 340])) {
+    assert.deepStrictEqual(plain(spec.ers.taperKmh), [300, 340], spec.id);
+    assert(Object.isFrozen(spec.ers.taperKmh), spec.id + ' frozen');
+    assert.deepStrictEqual(F1.sanitizeSpec(plain(spec)), plain(spec), spec.id + ': js/car.js keeps the taper');
+  }
+  for (const bad of [[340, 300], [40, 100], [300, 300.5], [300, 601], [300], 'x', null, { 0: 300, 1: 340 }]) {
+    for (const spec of with_(bad)) assert(!('taperKmh' in spec.ers), JSON.stringify(bad) + ' ' + spec.id);
+  }
+  for (const spec of F1.cars.list(2014)) assert(!('taperKmh' in spec.ers), spec.id + ': no taper before 2026');
+});
+
 // The era pace index, checked independently of the builder's calibration code: every season's standard car on the
 // racing line built for it (js/raceline.js's speed profile = what the autopilot of devtests/seasons-calib/check-drive.js
 // drives within ~0.02 %), on four circuits, against the 2025 standard car. The builder solves the index as the median
 // over all 40 circuits; any four must stay within 0.6 % (single circuits scatter by 1..2 % in the low-downforce years).
-test('era pace index on 4 check circuits (Sepang, COTA, Jeddah, Zandvoort): median within 0.6 % every season', () => {
+// When devtests/seasons-calib/calibration.json says `deploy` (the index matched with the battery in use, as on a real
+// pole lap: review finding S1) the racing line's profile, which has no battery, cannot show it: both cars are then
+// DRIVEN deploying (a keyboard racing-line autopilot holding E on full throttle above 100 km/h, flying lap = the
+// better of laps 2 and 3, the battery refilled only by harvesting).
+const CALIB = JSON.parse(fs.readFileSync(path.join(ROOT, 'devtests', 'seasons-calib', 'calibration.json'), 'utf8'));
+function deployLap(track, spec) {
+  const car = F1.createCar(spec, { tyres: false }), line = F1.buildRaceLine(track, car.perf);
+  const S = track.samples, N = S.length, ds = track.length / N, P = line.points, st = car.state, dt = 1 / 120;
+  const input = { up: false, down: false, left: false, right: false, boost: false }, laps = [];
+  let time = 0, lapStart = 0, prev = 0;
+  car.reset(track, 0);
+  while (laps.length < 3 && time < 900) {
+    line.update(st);
+    const v = Math.max(0, st.speed), lv = line.levels[2];
+    input.up = lv < 0.45 || v < 5; input.down = lv >= 0.6 && v >= 5;
+    input.boost = input.up && !input.down && v > 100 / 3.6;
+    const tp = P[(st.sampleIndex + Math.round(Math.min(35, Math.max(7, 5 + 0.3 * v)) / ds)) % N];
+    const dx = tp.x - st.x, dz = tp.z - st.z;
+    const kap = 2 * (dx * Math.cos(st.heading) - dz * Math.sin(st.heading)) / (dx * dx + dz * dz);
+    const want = Math.max(-1, Math.min(1, Math.atan(kap * 3.6) * (1 + (v / 22) * (v / 22)) / 0.35));
+    input.left = want > st.steer + 0.03; input.right = want < st.steer - 0.03;
+    car.update(dt, input, track);
+    time += dt;
+    if (prev > N * 0.75 && st.sampleIndex < N * 0.25) {
+      const s0 = S[0], tc = time - Math.max(0, Math.min((st.x - s0.x) * s0.tx + (st.z - s0.z) * s0.tz, 3)) / Math.max(st.speed, 1);
+      laps.push(tc - lapStart); lapStart = tc;
+    }
+    prev = st.sampleIndex;
+  }
+  line.dispose();
+  return Math.min(laps[1], laps[2]);
+}
+test('era pace index on 4 check circuits (Sepang, COTA, Jeddah, Zandvoort): median within 0.6 % every season' + (CALIB.deploy ? ' (driven, deploying)' : ''), () => {
   global.THREE = require(path.join(ROOT, 'lib', 'three.min.js'));
   require(path.join(ROOT, 'tracks-data.js'));
   require(path.join(ROOT, 'js', 'track.js'));
   require(path.join(ROOT, 'js', 'raceline.js'));
   const ids = ['my-1999', 'us-2012', 'sa-2021', 'nl-1948'];
   const tracks = ids.map(i => F1.buildTrack(global.F1_TRACKS.find(t => t.id === i)));
-  const lap = (t, spec) => { const l = F1.buildRaceLine(t, F1.carPerf(spec)); const x = l.lapTime; l.dispose(); return x; };
+  const lap = CALIB.deploy ? deployLap : (t, spec) => { const l = F1.buildRaceLine(t, F1.carPerf(spec)); const x = l.lapTime; l.dispose(); return x; };
   const ref = tracks.map(t => lap(t, F1.REF_SPEC));
   const med = a => { const s = a.slice().sort((x, y) => x - y); return 0.5 * (s[1] + s[2]); };
   const errs = [];
@@ -422,9 +506,19 @@ test('js/seasons-data.js loads as a plain script, as a node module and in a work
   assert.strictEqual(JSON.stringify(require(path.join(ROOT, 'js', 'seasons-data.js'))), JSON.stringify(SEASONS));
 });
 
-test('tools/build-cars.mjs --check: js/seasons-data.js is up to date with its inputs', () => {
+// review finding S4: calibrate.mjs only printed a warning when it missed the index, and the doc's table was hand-copied
+test('the calibration hit every era index within the task\'s 0.3 % (build-cars refuses one that does not)', () => {
+  for (const s of SEASONS) {
+    const c = CALIB.seasons[s.year];
+    assert.strictEqual(c.index, s.paceIndex, s.year);
+    assert(Math.abs(c.drivenMedian - c.index) <= 0.003, s.year + ': driven ' + c.drivenMedian + ' vs index ' + c.index);
+  }
+});
+
+test('tools/build-cars.mjs --check: js/seasons-data.js and the calibration table of docs/seasons-data.md are up to date', () => {
   const r = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'build-cars.mjs'), '--check', '--quiet'], { cwd: ROOT, encoding: 'utf8', timeout: 300000 });
   assert.strictEqual(r.status, 0, (r.stdout || '') + (r.stderr || ''));
+  assert(/up to date\s+docs\/seasons-data\.md/.test(r.stdout), r.stdout);
   assert(/up to date\s+js\/seasons-data\.js/.test(r.stdout), r.stdout);
 });
 

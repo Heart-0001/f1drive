@@ -1,0 +1,87 @@
+[
+ {
+  "label": "fresh-userdata",
+  "pid": 1848,
+  "cdpUpMs": 4472,
+  "pageListedMs": 4472,
+  "cdpAttempts": 1,
+  "bootMs": 5106,
+  "state": {
+   "overlay": "",
+   "cards": 40,
+   "host": true,
+   "gl": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "audio": "none/running",
+   "dpr": 1.5,
+   "size": [
+    2560,
+    1370
+   ],
+   "store": []
+  },
+  "firstTrackMs": 845,
+  "drive": {
+   "n": 1251,
+   "mean": 0.9939248593305227,
+   "p50": 1,
+   "p95": 1.5,
+   "max": 3.5999999940395355,
+   "speed": 49.20345462473633,
+   "heapMB": 73.05145263671875,
+   "fps": 156
+  },
+  "muted": {
+   "backend": "worklet",
+   "state": "running",
+   "frames": 1254
+  },
+  "exitMs": 0,
+  "tempLeft": [
+   "016ea930-ced5-40b8-8668-65f17a50823b.tmp",
+   "1502a766-33ae-426e-af05-c9b6a338b5d6.tmp",
+   "3a199529-e061-41e7-803c-8738e2ff6dd3.tmp",
+   "bedd6f23-4b0b-4176-b064-11d35bd89039.tmp"
+  ]
+ },
+ {
+  "label": "warm-userdata",
+  "pid": 34952,
+  "cdpUpMs": 4274,
+  "pageListedMs": 4274,
+  "cdpAttempts": 1,
+  "bootMs": 4869,
+  "state": {
+   "overlay": "",
+   "cards": 40,
+   "host": true,
+   "gl": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "audio": "none/running",
+   "dpr": 1.5,
+   "size": [
+    2560,
+    1370
+   ],
+   "store": []
+  },
+  "firstTrackMs": 497,
+  "drive": {
+   "n": 1269,
+   "mean": 1.0925137895923416,
+   "p50": 1,
+   "p95": 1.7000000178813934,
+   "max": 3.4000000059604645,
+   "speed": 49.264338420612354,
+   "heapMB": 68.85528564453125,
+   "fps": 158.4
+  },
+  "muted": {
+   "backend": "worklet",
+   "state": "running",
+   "frames": 1272
+  },
+  "exitMs": 0,
+  "tempLeft": [
+   "f1drive-ud-review-final-game-ihwyRg"
+  ]
+ }
+]

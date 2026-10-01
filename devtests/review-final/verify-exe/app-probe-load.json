@@ -1,0 +1,46 @@
+{
+ "mode": "load",
+ "root": "C:\\Users\\Heart\\Desktop\\f1Drive",
+ "boot": {
+  "overlay": "",
+  "showError": "function",
+  "host": true,
+  "audio": "worklet/suspended"
+ },
+ "loads": [
+  {
+   "id": "it-1922",
+   "clickMs": 0,
+   "maxGapMs": 509,
+   "running": true
+  },
+  {
+   "id": "be-1925",
+   "clickMs": 0,
+   "maxGapMs": 307,
+   "running": true
+  },
+  {
+   "id": "mc-1929",
+   "clickMs": 0,
+   "maxGapMs": 229,
+   "running": true
+  },
+  {
+   "id": "jp-1962",
+   "clickMs": 0,
+   "maxGapMs": 244,
+   "running": true
+  },
+  {
+   "id": "it-1922",
+   "clickMs": 0,
+   "maxGapMs": 245,
+   "running": true
+  }
+ ],
+ "consoleErrors": [],
+ "securityWarnings": [
+  "%cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Co"
+ ]
+}

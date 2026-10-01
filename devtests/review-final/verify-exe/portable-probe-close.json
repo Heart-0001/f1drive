@@ -1,0 +1,22 @@
+{
+ "exe": "C:\\Users\\Heart\\Desktop\\f1Drive\\dist\\F1Drive-v6-preview.exe",
+ "mode": "close",
+ "stubPid": 29784,
+ "unpackDir": "3K4Lj2NoKbUMbuJaZcP5IxEZGh3",
+ "unpackSeenMs": 3180,
+ "cdpUpMs": 3904,
+ "bootMs": 4488,
+ "audioMuted": "none/running",
+ "unpackSizeMB": 272.1,
+ "stubAliveWhileAppRuns": true,
+ "appPidsUnderUnpack": [
+  18964,
+  19700,
+  34696,
+  50156,
+  50280
+ ],
+ "allGoneAfterCloseMs": 463,
+ "unpackDirExistsAfterExit": false,
+ "unpackSizeAfterExitMB": 0
+}

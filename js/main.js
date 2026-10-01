@@ -26,6 +26,7 @@
   // until the player picks one.
   var START_YEAR = 2025;
   var PIT_REACH = 40;                        // m around the pit complex in which a remote car is checked for the pit lane
+  var LOAD_WAIT_MS = 100;                    // a track is built after the next frame, or after this if no frame comes
 
   var THREE, ui, tracks, net = null;
   var gp = null;                             // F1.gp, the Grand Prix session (set at boot)
@@ -38,6 +39,7 @@
   var raceLine = null, lineOn = true;
   var scenery = null, sky = null;
   var running = false, rafId = 0, lastT = 0, acc = 0;
+  var loadNext = null, loadRaf = 0, loadTimer = 0;   // the track waiting to be built (loadTrack)
   var goFrame = false;                       // the Grand Prix lights went out in the frame being simulated
   var input = { up: false, down: false, left: false, right: false };   // keyboard (the arrows / WASD)
   var boostKey = false;                      // E held: deploy the battery
@@ -51,7 +53,7 @@
     rpm: 0, rpmIdle: 4000, rpmShift: 11800, rpmMax: 12500, throttle: 0, brake: 0, battery: null, deploy: 0, harvest: 0,
     limiter: false, inPit: false, limitKmh: 80, tyres: null, nextCompound: 'M', team: '', car: '', colour: '#888888', colour2: '#888888'
   };
-  var pitView = { inLane: false, limiter: false, speeding: false, service: null, limitKmh: 80, boxAhead: null, slot: -1, pending: 0 };
+  var pitView = { inLane: false, limiter: false, speeding: false, service: null, limitKmh: 80, boxAhead: null, slot: -1, pending: 0, served: false };
   var pitOpt = { slot: 0, limiter: false };
   var pitBox = null;                         // bounding box of the pit complex of this track (+ PIT_REACH), or null
   var listener = { x: 0, y: 0, z: 0, heading: 0 };   // where the driver's ears are, for F1.audio
@@ -287,9 +289,10 @@
     return net && net.connected ? placeOnGrid(net.slot || 0) : placeAtStart();
   }
 
-  // The tyre wear multiplier: the Grand Prix option during a session, normal in free practice.
+  // The tyre wear multiplier: the Grand Prix option from the grid on (the race), normal in qualifying and free
+  // practice. (At x5 a set would puncture within a 3-lap qualifying run.)
   function wearRate() {
-    var s = gp && gp.phase !== 'free' ? gp.snapshot : null;
+    var p = gp ? gp.phase : 'free', s = p === 'grid' || p === 'race' || p === 'results' ? gp.snapshot : null;
     return s && typeof s.wear === 'number' && s.wear >= 1 ? s.wear : 1;
   }
 
@@ -377,6 +380,33 @@
     } catch (err) {
       fail('載入賽道失敗：' + (data && data.name ? data.name : '') + '\n' + (err && err.stack ? err.stack : err));
     }
+  }
+
+  // Building a track holds the page for 0.2..0.6 s: a note goes up first and the build runs once it has been painted
+  // (after the next frame; a window that paints nothing, e.g. hidden, builds after LOAD_WAIT_MS anyway). A pick made
+  // while one waits replaces it.
+  function loadTrack(data) {
+    var waiting = !!loadNext;
+    loadNext = data;
+    if (ui.setLoading) ui.setLoading(data.name || data.id || '');
+    if (waiting) return;
+    loadRaf = requestAnimationFrame(function () {
+      loadRaf = 0;
+      clearTimeout(loadTimer);
+      loadTimer = setTimeout(loadNow, 0);
+    });
+    loadTimer = setTimeout(loadNow, LOAD_WAIT_MS);
+  }
+
+  function loadNow() {
+    if (loadRaf) { cancelAnimationFrame(loadRaf); loadRaf = 0; }
+    clearTimeout(loadTimer); loadTimer = 0;
+    var data = loadNext;
+    loadNext = null;
+    if (!data) return;
+    selectTrack(data);
+    if (ui.setLoading) ui.setLoading(null);
+    if (net && net.connected) refreshNetUi();
   }
 
   // In a room we only drive on the room's track (the one everybody else has loaded).
@@ -652,7 +682,7 @@
       netUi.lockText = '';
       if (netUi.status === HOST_PICK + passwordNote()) setStatus('房間已建立，你是房主。' + passwordNote(), 'ok');   // the room has its track now
       clearRemoteModels();
-      selectTrack(data);                      // spawns on our grid slot and starts driving
+      loadTrack(data);                        // spawns on our grid slot and starts driving
       refreshNetUi();
     });
     net.on('hit', onRemoteHit);
@@ -711,7 +741,7 @@
       if (net.isHost) net.selectTrack(data.id);
       return;
     }
-    selectTrack(data);
+    loadTrack(data);
   }
 
   /* ---------- Grand Prix ---------- */
@@ -773,8 +803,15 @@
     if (car && car.tyres) car.tyres.setWearRate(wearRate());
     if (phase === 'free') {
       if (track && car && lap) resetLap(car.state.sampleIndex);
+      // held in the box for a service: the tyre change is finished at once (pit.reset() alone would drop it and
+      // release the car on the set it came in on, a puncture included). (work 0: a penalty hold, no tyres)
+      var svc = pit ? pit.state.service : null, fitted = !!(svc && !(svc.work <= 0) && car && car.tyres);
+      if (fitted) {
+        car.tyres.fit(nextCompound);
+        if (audio) { audio.play('pitgun'); audio.play('jack', 0.6); }
+      }
       if (pit) pit.reset();
-      toast('大獎賽已結束，回到自由練習');
+      toast('大獎賽已結束，回到自由練習' + (fitted ? '（已換上新胎：' + (COMPOUND_NAME[nextCompound] || nextCompound) + '）' : ''));
       return;
     }
     if (!gp.taking) {
@@ -844,12 +881,21 @@
     if (ev === 'serviceStart') {
       car.state.speed = 0;                    // held in the box from here on (frame())
       if (audio) { audio.play('jack'); audio.play('pitgun'); }
+    } else if (ev === 'penaltyStart') {
+      // a speeding hold the visit's stop did not serve: held at the exit line (a stop-go, no tyres), like a service
+      car.state.speed = 0;
+      var hold = pit.state.service ? pit.state.service.total : 0;
+      toast('維修區超速罰停：在出口線停 ' + (Math.round(hold * 10) / 10) + ' 秒', 4000);
+    } else if (ev === 'penaltyDone') {
+      toast('罰停結束，出發！', 2500);
     } else if (ev === 'serviceDone') {
       if (car.tyres) car.tyres.fit(nextCompound);
       if (audio) { audio.play('pitgun'); audio.play('jack', 0.6); }
       toast('換上新胎：' + (COMPOUND_NAME[nextCompound] || nextCompound) + '，出發！', 2500);
     } else if (ev === 'speeding') {
-      toast('維修區超速（限速 ' + Math.round(pit.state.limitKmh) + ' km/h）：停站時罰停 5 秒', 5000);
+      // served at this visit's stop when the stop is still to come, else (sped after it, or no stop) at the exit line
+      toast('維修區超速（限速 ' + Math.round(pit.state.limitKmh) + ' km/h）：' +
+        (pit.state.served ? '在出口線罰停 5 秒' : '停站時罰停 5 秒（不停站就在出口線）'), 5000);
     } else if (ev === 'exit' && limiterOn) {
       // (the limiter does not switch itself off: a car still held at the lane speed on the track looks broken)
       toast('已離開維修區：按 ' + (pad && pad.state.connected ? 'LB' : 'Q') + ' 關閉限速器', 4000);
@@ -882,6 +928,7 @@
     pitView.boxAhead = st ? st.boxAhead : null;
     pitView.slot = st ? st.slot : -1;
     pitView.pending = st ? st.pending : 0;
+    pitView.served = !!(st && st.served);       // the visit has had its stop: a pending hold waits for the exit line
     ui.setPit(pitView);
   }
 
@@ -912,13 +959,33 @@
     toast(m ? '已靜音（M）' : '聲音已開啟（M）', 1500);
   }
 
-  // R / controller A: back onto the centreline at the car's current progress; timing keeps running.
+  // R / controller A: back onto the centreline at the car's current progress; timing keeps running. In the pit lane
+  // (its asphalt, tapers and boxes included) onto the lane's centre instead: R must not skip the rest of the lane and
+  // its speed limit. The limiter and the pit visit stay as they are.
   function resetCar() {
     if (gp.inputLocked) return;               // frozen on the grid
     if (pit && pit.state.service) return;     // held in the pit box
     // while the lap counter waits out an index jump (Suzuka's crossover) it knows better where the car is
-    car.reset(track, lap.jumping ? lap.prevIdx : car.state.sampleIndex);
+    var idx = lap.jumping ? lap.prevIdx : car.state.sampleIndex;
+    if (ownInPit() || (pit && pit.state.inLane)) placeInLane(idx);
+    else car.reset(track, idx);
     lap.sync(car.state.sampleIndex);
+  }
+
+  // On the pit lane's centre at sample idx, facing along the lane, stopped (as placeOnGrid). -> sample index
+  function placeInLane(idx) {
+    var P = track.pit, S = track.samples, n = S.length, i = ((Math.round(idx) % n) + n) % n;
+    var a = (i + n - 1) % n, b = (i + 1) % n, d = P.laneD(i), da = P.laneD(a), db = P.laneD(b);
+    car.reset(track, i);
+    if (!(d === d)) return car.state.sampleIndex;   // (outside the pit's stretch: the centreline)
+    if (!(da === da)) { a = i; da = d; }
+    if (!(db === db)) { b = i; db = d; }
+    car.state.x = S[i].x + S[i].nx * d;
+    car.state.z = S[i].z + S[i].nz * d;
+    car.state.heading = Math.atan2(S[b].x + S[b].nx * db - S[a].x - S[a].nx * da, S[b].z + S[b].nz * db - S[a].z - S[a].nz * da);
+    car.update(1e-4, null, track);            // no input, standing still: just re-locates (sample, d, height)
+    car.state.speed = 0;
+    return car.state.sampleIndex;
   }
 
   // A field that takes the keys (text, numbers, the year select). A focused slider / switch of the 設定 tab is not
@@ -1187,9 +1254,9 @@
     cars = F1.cars && typeof F1.cars.resolve === 'function' ? F1.cars : null;
     if (cars) for (var i = 0; i < cars.seasons.length; i++) seasonYears[cars.seasons[i].year] = true;
     car = F1.createCar(cars ? cars.resolve(ui.getCar ? ui.getCar() : null, ownYear()) : undefined);
-    // the credits line: F1DB's full attribution on hover
+    // the credits line: F1DB's full attribution on hover (a click opens 設定, where every source is listed)
     var cr = document.querySelector('.brand .credits'), at = cars && cars.attribution;
-    if (cr && at && at.f1db) cr.title = at.f1db + (at.sources2026 ? '\n' + at.sources2026 : '');
+    if (cr && at && at.f1db) cr.title = at.f1db + (at.sources2026 ? '\n' + at.sources2026 : '') + '\n按一下：所有資料來源與授權（設定）';
   }
 
   function initAudio() {

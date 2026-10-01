@@ -1,0 +1,82 @@
+[
+ {
+  "label": "fresh-userdata",
+  "pid": 16676,
+  "cdpUpMs": 344,
+  "pageListedMs": 344,
+  "cdpAttempts": 1,
+  "bootMs": 825,
+  "state": {
+   "overlay": "",
+   "cards": 40,
+   "host": true,
+   "gl": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "audio": "none/running",
+   "dpr": 1.5,
+   "size": [
+    2560,
+    1370
+   ],
+   "store": []
+  },
+  "firstTrackMs": 860,
+  "drive": {
+   "n": 1244,
+   "mean": 1.0166398716365792,
+   "p50": 1,
+   "p95": 1.5999999940395355,
+   "max": 3,
+   "speed": 49.08225345354771,
+   "heapMB": 73.05145263671875,
+   "fps": 155.4
+  },
+  "muted": {
+   "backend": "worklet",
+   "state": "running",
+   "frames": 1248
+  },
+  "exitMs": 0,
+  "tempLeft": [
+   "fd025202-aa78-46e6-a543-2b88c715a87b.tmp"
+  ]
+ },
+ {
+  "label": "warm-userdata",
+  "pid": 32908,
+  "cdpUpMs": 267,
+  "pageListedMs": 268,
+  "cdpAttempts": 1,
+  "bootMs": 681,
+  "state": {
+   "overlay": "",
+   "cards": 40,
+   "host": true,
+   "gl": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "audio": "none/running",
+   "dpr": 1.5,
+   "size": [
+    2560,
+    1370
+   ],
+   "store": []
+  },
+  "firstTrackMs": 509,
+  "drive": {
+   "n": 1246,
+   "mean": 1.0676565013861772,
+   "p50": 1,
+   "p95": 1.7000000178813934,
+   "max": 3.199999988079071,
+   "speed": 49.162387958069665,
+   "heapMB": 77.62908935546875,
+   "fps": 155.5
+  },
+  "muted": {
+   "backend": "worklet",
+   "state": "running",
+   "frames": 1249
+  },
+  "exitMs": 0,
+  "tempLeft": []
+ }
+]

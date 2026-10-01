@@ -11,7 +11,8 @@
   "mass": "minimum weight = car with driver, dry tyres, no fuel (regulation). qualifyingMass = minimum + 5 kg fuel (assumption); raceMidMass = minimum + half the race fuel",
   "power": "powerPeak = best-supported estimate of the peak total output (combustion + electric) of the front-running power unit in qualifying trim; powerRaceTrim = estimated power available through most of the full-throttle part of a lap (combustion plus the electric power that the energy rules let the car sustain there: KERS 2011-2013 only 6.7 s a lap, ERS-K 120 kW almost the whole full-throttle time 2014-2025, 2026 capped by the 8.5 MJ/lap recharge limit); powerCombustionRaceTrim = the combustion share of it; powerReported = figures quoted by Wikipedia for single power units, most of them tagged \"unreliable source\" there and 10-15 % above the official FIA / Formula 1 / Mercedes statements, kept for reference only; hp = kW / 0.7457",
   "lapTimeAnchors": "v / ms = final lap of the fastest classified qualifier (F1DB); best / bestMs = fastest lap of the whole qualifying session; cond / bestCond = dry | mixed | wet; anchorMs = the lap to calibrate against (best dry lap on the comparable layout) or null",
-  "cockpit": "gameStyle follows js/README-interfaces.md: modern (2010-2017, no halo), halo (2018-2021), halo18 (2022 on)"
+  "cockpit": "gameStyle follows js/README-interfaces.md: modern (2010-2017, no halo), halo (2018-2021), halo18 (2022 on)",
+  "label": "seasons[year].label = the game's display text for that one year, used instead of the period's label where the period label names a change of a later year (the year selector shows \"<year> · <label>\"); a plain string like cockpit"
  },
  "periods": [
   {
@@ -2878,6 +2879,15 @@
      ],
      "note": "C5.2.8 i-iii"
     },
+    "taperKmh": {
+     "v": [
+      290,
+      345
+     ],
+     "unit": "km/h",
+     "derived": true,
+     "from": "powerVsSpeed (C5.2.8 i, normal profile): 350 kW up to 290 km/h, zero from 345 km/h. CarSpec ers.taperKmh: js/car.js fades the deploy power linearly between the two speeds, leaving out the rule's knee at 340 km/h (100 kW). Deploying all the way, the 2026 standard car then tops out at about 337 km/h, against 338.1 km/h at the real 2026 Monza qualifying speed trap (topSpeed.monzaQualifying)"
+    },
     "deployPerLap": {
      "v": 8.5,
      "unit": "MJ",
@@ -3830,6 +3840,7 @@
   },
   "2017": {
    "period": "2017-2018",
+   "label": "寬車寬胎高下壓力",
    "minMass": {
     "v": 728,
     "unit": "kg",
@@ -3949,6 +3960,7 @@
   },
   "2018": {
    "period": "2017-2018",
+   "label": "寬車寬胎高下壓力、加裝 Halo",
    "minMass": {
     "v": 733,
     "unit": "kg",
@@ -4068,6 +4080,7 @@
   },
   "2019": {
    "period": "2019-2021",
+   "label": "簡化前翼、史上最快的車",
    "minMass": {
     "v": 743,
     "unit": "kg",
@@ -4188,6 +4201,7 @@
   },
   "2020": {
    "period": "2019-2021",
+   "label": "簡化前翼、史上最快的車",
    "minMass": {
     "v": 746,
     "unit": "kg",
@@ -4306,6 +4320,7 @@
   },
   "2021": {
    "period": "2019-2021",
+   "label": "削地板減下壓力、最後一年 13 吋輪圈",
    "minMass": {
     "v": 752,
     "unit": "kg",

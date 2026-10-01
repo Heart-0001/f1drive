@@ -27,7 +27,7 @@ function check(name, ok, detail) {
   console.log((ok ? 'PASS ' : 'FAIL ') + name + (detail !== undefined ? '  ' + (typeof detail === 'string' ? detail : J(detail)) : ''));
 }
 
-const CONTRACT_ORDER = ['lib/three.min.js', 'tracks-data.js', 'js/seasons-data.js', 'js/cars.js', 'js/track.js', 'js/tyres.js', 'js/car.js',
+const CONTRACT_ORDER = ['js/boot.js', 'lib/three.min.js', 'tracks-data.js', 'js/seasons-data.js', 'js/cars.js', 'js/track.js', 'js/tyres.js', 'js/car.js',
   'js/cockpit.js', 'js/gamepad.js', 'js/audio.js', 'js/raceline.js', 'scenery-data.js', 'js/scenery.js', 'js/collide.js',
   'js/carmodel.js', 'js/laps.js', 'js/pit.js', 'net/session.js', 'js/net.js', 'js/gp.js', 'js/telemetry.js', 'js/ui.js', 'js/main.js'];
 // every id the v6 UI adds (reported to the integrator / end-to-end tests)
@@ -333,7 +333,18 @@ app.whenReady().then(async () => {
         await shot('hud-' + tag + '-results16');
         s = await layout();
         const res = await js(`({ res: __rect('gp-results'), body: __rect('gp-results-body'), sub: __text('gp-results-sub'), teams: document.querySelectorAll('#gp-results .gp-team').length, chips: document.querySelectorAll('#gp-results .gp-chip').length })`);
-        check(tag + ': results overlay clear of the telemetry graphic and inside the window', !s.over['gp-results'] && res.res.y >= 0 && res.res.b <= H && res.res.x >= 0 && res.res.r <= W, { res: res.res, tel: s.tel });
+        const inWin = res.res.y >= 0 && res.res.b <= H && res.res.x >= 0 && res.res.r <= W;
+        if (W >= 1260) check(tag + ': results overlay clear of the telemetry graphic and inside the window', !s.over['gp-results'] && inWin, { res: res.res, tel: s.tel });
+        else {
+          // narrower than 1260 px (index.html): the overlay goes below the top row of boxes (timing box, minimap; under
+          // 1000 px also the 選單 button), the session box makes way for it; it stays above the telemetry graphic when at
+          // least 250 px are left there, else it is 250 px tall and covers the graphic's top
+          const top = await js(`({ timing: __rect('hud-timing'), map: __rect('hud-map'), btn: __rect('hud-menu-btn'), gp: __rect('hud-gp'), open: document.getElementById('hud').classList.contains('res-open') })`);
+          const room = s.tel.y - res.res.y - 8, below = res.res.y >= top.timing.b && res.res.y >= top.map.b && (W >= 1000 || !top.btn.shown || res.res.y >= top.btn.b);
+          check(tag + ': results overlay inside the window, below the timing box / minimap' + (W < 1000 ? ' / 選單 button' : '') + ', the session box hidden; ' +
+            (room >= 250 ? 'clear of the telemetry graphic (' + Math.round(room) + ' px left above it)' : 'over the graphic\'s top at 250 px tall (only ' + Math.round(room) + ' px above it)'),
+            inWin && below && top.open && !top.gp.shown && (room >= 250 ? !s.over['gp-results'] : res.res.h <= 251), { res: res.res, tel: s.tel, top });
+        }
         if (tag === '1280' || tag === '1920') check(tag + ': results 16 rows need no scrolling', res.body.sh <= res.body.ch + 1, res.body);
         if (tag === '1280') check('results subtitle: year and wear; team chips and names in the rows', /2026 賽季/.test(res.sub) && /輪胎損耗 ×2/.test(res.sub) && res.teams === 16 && res.chips === 16, res);
         await js(`F1.ui.setPad(true, 'Pad')`);

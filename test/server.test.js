@@ -16,7 +16,7 @@ const nodeNet = require('net');
 const http = require('http');
 const crypto = require('crypto');
 const WebSocket = require('ws');
-const { createServer } = require('../net/server.js');
+const { createServer, IDLE_MS } = require('../net/server.js');
 const { minLapTime, RACE_TIMEOUT_MS } = require('../net/session.js');
 const netClient = require('../js/net.js');
 
@@ -92,6 +92,15 @@ function client(port, hello) {
   });
 }
 const state = (x, v) => ({ t: 's', k: 0, c: Date.now(), s: [x, 0, 0, 0, 0, 0, v || 0, 0] });
+// The car really drives from x0 to x1 along x in n steps of 50 ms (n + 1 states; the speed field tells the truth).
+// Its POSITIONS, timed by their arrival, are all the server believes of its motion when it judges an impact report.
+async function driveTo(c, x0, x1, z, n) {
+  const v = Math.abs(x1 - x0) / (n * 0.05), h = x1 >= x0 ? Math.PI / 2 : -Math.PI / 2;
+  for (let k = 0; k <= n; k++) {
+    c.drive(x0 + (x1 - x0) * k / n, z, undefined, v, h);
+    if (k < n) await sleep(50);
+  }
+}
 
 // A WebSocket client on a bare TCP socket that never answers a close frame (or a ping): what a hostile
 // peer does to keep its connection. Frames are sent masked with key 0.
@@ -402,8 +411,8 @@ function freshNet() {
     a.send({ t: 'hit', k: 0, to: b.id, i: [3, -4] });                  // nobody has reported a position yet
     await sleep(80);
     assert.strictEqual(b.last('hit'), null, 'a car that is not on the track cannot hit');
-    // a drives at 90 m/s along +x into b (parked 4 m ahead); c is parked half a kilometre away
-    const near = async () => { b.drive(14, 10); c.drive(500, 10); a.drive(10, 10, undefined, 90, Math.PI / 2); await sleep(60); };
+    // a drives at 90 m/s along +x up to b (parked 4 m ahead); c is parked half a kilometre away
+    const near = async () => { b.drive(14, 10); c.drive(500, 10); await driveTo(a, -3.5, 10, 10, 3); };
     await near();
     a.send({ t: 'hit', k: 0, to: b.id, i: [3, -4] });
     await b.wait(() => b.last('hit'));
@@ -411,7 +420,7 @@ function freshNet() {
     await near();
     a.send({ t: 'hit', k: 0, to: b.id, i: [3000, 0] });
     await b.wait(() => b.all('hit').length === 2);
-    assert.deepStrictEqual(b.last('hit').i, [80, 0]);
+    assert.deepStrictEqual(b.last('hit').i, [50, 0], 'HIT_MAX');
     await near();
     for (let i = 0; i < 20; i++) a.send({ t: 'hit', k: 0, to: b.id, i: [1, 1] });      // burst: only one passes
     for (const bad of [{ to: a.id, i: [1, 1] }, { to: 999, i: [1, 1] }, { to: b.id, i: [1] }, { to: b.id, i: ['x', 1] },
@@ -1225,9 +1234,10 @@ function freshNet() {
     let sent = 0;
     const hit = async (from, to, expected, label) => {
       const n = to.all('hit').length;
-      // fresh positions: from drives at 20 m/s along +x into to, parked 6 m ahead (from does not jump)
-      to.drive(from.px + 6, from.pz); from.drive(from.px, from.pz, undefined, 20, Math.PI / 2);
-      await sleep(50);                                           // the 40 ms throttle
+      // fresh positions: to stays parked; from drives the last 3 m at 20 m/s along +x up to 6 m behind it (from does
+      // not jump; to does not move, or it would drive away from the impact as far as the server can tell)
+      to.drive(to.px, to.pz);
+      await driveTo(from, to.px - 9, to.px - 6, to.pz, 3);         // (150 ms: also the 40 ms throttle)
       from.send({ t: 'hit', k: from.seq(), to: to.id, i: [++sent, 0] });
       if (expected) { await to.wait(() => to.all('hit').length === n + 1, 1000, label); assert.strictEqual(to.last('hit').i[0], sent, label); }
       else { await sleep(100); assert.strictEqual(to.all('hit').length, n, label); }
@@ -1546,7 +1556,7 @@ function freshNet() {
       for (const h of [{ from: 8, i: [1e150, 0] }, { from: 8, i: [0, -300] }, { from: 8, i: [3, 4] }, { from: 8, i: ['x', 1] }, { from: 8, i: [1] },
         { from: 8, i: 'xx' }, { from: 99, i: [1, 1] }, { from: '8', i: [1, 1] }, { from: 8 }]) await raw(Object.assign({ t: 'hit' }, h));
       await raw('{"t":"hit","from":8,"i":[1e999,0]}'); await raw('{"t":"hit","from":8,"i":[1e300,1e300]}');
-      assert.deepStrictEqual(ev.filter(e => e[0] === 'hit').map(e => [e[1], e[2]]), [[8, [80, 0]], [8, [0, -80]], [8, [3, 4]]]);
+      assert.deepStrictEqual(ev.filter(e => e[0] === 'hit').map(e => [e[1], e[2]]), [[8, [50, 0]], [8, [0, -50]], [8, [3, 4]]]);
 
       // --- snap ---
       await raw({ t: 'snap', p: [[8, 1000, 1e300, 0, 0, 0, 0, 0, 0, 0], [8, 1001, 0, 0, 0, 0, 0, 0, 1e9, 0], [8, 'x', 0, 0, 0, 0, 0, 0, 0, 0], [8], 5, null, 'x'] });
@@ -1801,31 +1811,36 @@ function freshNet() {
       }
       return list;
     };
-    // one address (127.0.0.2 is not "this machine" for the server: only 127.0.0.1 is exempt) holds at most 16
+    // one address (127.0.0.2 is not "this machine" for the server: only 127.0.0.1 is exempt) holds at most 28
     const one = tcp(40, '127.0.0.2');
     await sleep(400);
-    assert.strictEqual(open(one), 16, 'silent TCP connections kept per address');
-    // ...and at most 8 of them can be WebSockets; the rest are told "busy"
+    assert.strictEqual(open(one), 28, 'silent TCP connections kept per address');
+    // ...and at most 20 of them can be WebSockets: a whole room behind one address (a LAN party / school / office
+    // joining over the internet, MP-3) gets in, plus a few still connecting; the rest are told "busy"
     const wsFrom3 = [];
-    for (let i = 0; i < 11; i++) {
-      wsFrom3.push(await new Promise(resolve => {
-        const ws = new WebSocket('ws://127.0.0.1:' + srv.port, { localAddress: '127.0.0.3' });
-        const c = { ws, msgs: [], closed: null };
-        ws.on('message', d => c.msgs.push(JSON.parse(d.toString())));
-        ws.on('open', () => { ws.send(JSON.stringify({ t: 'hello', v: 1, name: 'n' + i })); setTimeout(() => resolve(c), 60); });
-        ws.on('close', code => { c.closed = code; });
-        ws.on('error', () => resolve(c));
-      }));
-    }
+    const ws3 = hello => new Promise(resolve => {
+      const ws = new WebSocket('ws://127.0.0.1:' + srv.port, { localAddress: '127.0.0.3' });
+      const c = { ws, msgs: [], closed: null };
+      ws.on('message', d => { c.msgs.push(JSON.parse(d.toString())); resolve(c); });
+      ws.on('open', () => { if (hello) ws.send(JSON.stringify({ t: 'hello', v: 1, name: hello })); else setTimeout(() => resolve(c), 30); });
+      ws.on('close', code => { c.closed = code; resolve(c); });
+      ws.on('error', () => resolve(c));
+    });
+    for (let i = 0; i < 15; i++) wsFrom3.push(await ws3('n' + i));          // 15 players + a = a full room
+    for (let i = 0; i < 7; i++) wsFrom3.push(await ws3(i < 5 ? null : 'late')); // 5 still connecting, then 2 more
     await sleep(150);
-    assert.deepStrictEqual([wsFrom3.filter(c => c.msgs.some(m => m.t === 'welcome')).length, wsFrom3.filter(c => c.msgs.some(m => m.t === 'error' && m.code === 'busy')).length], [8, 3]);
-    assert.strictEqual(srv.info().players.length, 9);
+    const said = (c, t, code) => c.msgs.some(m => m.t === t && (!code || m.code === code));
+    assert.deepStrictEqual([wsFrom3.filter(c => said(c, 'welcome')).length, wsFrom3.slice(15, 20).filter(c => c.msgs.length === 0 && !c.closed).length,
+      wsFrom3.filter(c => said(c, 'error', 'busy')).length], [15, 5, 2], 'players / sockets still connecting / busy from one address');
+    assert.strictEqual(srv.info().players.length, 16);
     wsFrom3.forEach(c => c.ws.terminate());
+    await until(() => srv.info().players.length === 1, 2000, 'the address\'s players gone');
+    await sleep(100);
     // the whole server keeps at most 96 connections, whoever they come from
     const t0 = Date.now();
     const many = tcp(150);
     await sleep(500);
-    assert(open(many) <= 96 - 16 - 1 && open(many) >= 60, 'silent TCP connections kept in all: ' + open(many));
+    assert(open(many) <= 96 - 28 - 1 && open(many) >= 60, 'silent TCP connections kept in all: ' + open(many));
     // a slow-loris dribbling its request is cut off like the silent ones
     const loris = many.find(s => !s._gone), req = 'GET / HTTP/1.1\r\nHost: x\r\nX-Pad: ' + 'x'.repeat(200);
     let sent = 0;
@@ -2043,40 +2058,50 @@ function freshNet() {
 
   lane = lanes.review2;                        // real time
 
-  T('impact reports: none after a teleport; no bigger than the two cars\' motion allows, within a budget per pair; none on stale positions (hit-spam)', async t => {
+  T('impact reports: as hard as the cars\' POSITIONS were closing, never the speed a client claims; none after a teleport; a budget per pair; none on stale positions (hit-spam, MP-1)', async t => {
     const srv = await t.start();
     const v = await client(srv.port, { name: 'victim' }), e = await client(srv.port, { name: 'evil' }), o = await client(srv.port, { name: 'other' });
-    // the victim drives along +z at 60 m/s and reports 20 times a second, as the game does
-    let vz = 1000;
-    const vt = setInterval(() => { vz += 3; v.drive(1000, vz, undefined, 60, 0); }, 50);
-    e.drive(-1000, -1000);
-    await sleep(120);
-    // one state 10 m beside him from 2.8 km away is a reset, not driving: nothing it reports is relayed
-    e.drive(1010, vz);
-    for (let i = 0; i < 5; i++) { e.send({ t: 'hit', k: 0, to: v.id, i: [0, -80] }); await sleep(45); }
-    await sleep(100);
-    assert.strictEqual(v.all('hit').length, 0, 'nothing after a teleport');
-    // then it keeps pace beside him ("parked", it says) and fires 80 m/s reports both ways, 22 a second
-    const et = setInterval(() => e.drive(1010, vz), 50);
-    await sleep(120);
+    // the victim is parked at the origin and reports 20 times a second, as the game does
+    const vt = setInterval(() => v.drive(0, 0), 50);
+    const W = -Math.PI / 2;                                      // heading -x: straight at the victim from +x
+    // the attacker's fake car at (x, 0), "doing 130 m/s at the victim", one state every 50 ms for ms
+    const park = async (x, ms) => { for (let s = 0; s < ms; s += 50) { e.drive(x, 0, undefined, 130, W); await sleep(50); } };
+    // n reports of `i`, 45 ms apart -> the velocity changes that reached the victim meanwhile
+    const fire = async (n, i) => {
+      const n0 = v.all('hit').length;
+      for (let k = 0; k < n; k++) { e.send({ t: 'hit', k: 0, to: v.id, i }); await sleep(45); }
+      await sleep(100);
+      return v.all('hit').slice(n0).map(m => m.i);
+    };
+    e.drive(-2000, 0);
+    await sleep(160);
+    // a reset: one state 2.5 m from him, from 2 km away, is not driving: nothing it reports is relayed
+    e.drive(2.5, 0, undefined, 130, W);
+    assert.deepStrictEqual(await fire(5, [-80, 0]), [], 'nothing after a teleport');
+    // the verifier's attack: it stands still there but its speed field says 130 m/s at him. Its positions do not
+    // close on him at all: the slack is all that gets through (it was the whole 80 m/s)
+    await park(2.5, 300);
+    let got = await fire(1, [-80, 0]);
+    assert(got.length === 1 && Math.hypot(got[0][0], got[0][1]) <= 3.01, 'a parked car claiming 130 m/s: only the slack: ' + JSON.stringify(got));
+    // ...and its claimed speed does not stretch the 'near' check either (it did, to 12 + 0.2 x 130 = 38 m)
+    await park(30, 650);
+    assert.deepStrictEqual(await fire(3, [-80, 0]), [], '30 m away, parked');
+    // a real ram: its positions close on him at 60 m/s (and everybody sees its car do it): HIT_MAX goes through,
+    // and the pair's budget caps the series that follows (a report every 45 ms for a second)
+    await driveTo(e, 30, 3, 0, 9);
     const t0 = Date.now();
-    let k = 0;
-    while (Date.now() - t0 < 1000) { e.send({ t: 'hit', k: 0, to: v.id, i: [0, k++ % 2 ? 80 : -80] }); await sleep(45); }
-    await sleep(150);
-    const got = v.all('hit').map(m => m.i);
+    got = await fire(22, [-80, 0]);
     const total = got.reduce((s, i) => s + Math.hypot(i[0], i[1]), 0);
-    assert(got.length >= 2, 'a car that runs into a parked one at 60 m/s is pushed back: ' + got.length);
-    assert(got.every(i => i[0] === 0 && i[1] < 0), 'only against his motion (a parked car cannot push him on): ' + JSON.stringify(got));
-    assert(got.every(i => -i[1] <= 63.01), 'no more than the closing speed (60 m/s) + 3: ' + JSON.stringify(got));
-    assert(total <= 160 + 40 * 1.4, 'the budget of the pair: ' + total.toFixed(1) + ' m/s in about a second (was 22 x 80)');
-    assert.strictEqual(o.all('hit').length, 0);
+    assert.deepStrictEqual(got[0], [-50, 0], 'the first one: HIT_MAX');
+    assert(got.every(i => i[1] === 0 && i[0] < 0 && i[0] >= -50), 'along the impulse, no more than HIT_MAX: ' + JSON.stringify(got));
+    assert(total <= 100 + 25 * (Date.now() - t0) / 1000 + 0.1, 'the budget of the pair: ' + total.toFixed(1) + ' m/s in ' + (Date.now() - t0) + ' ms');
+    assert(total >= 100, 'the budget is there to be used: ' + total.toFixed(1));
+    assert.strictEqual(o.all('hit').length, 0, 'nobody else gets any of it');
     // stale: the victim stops reporting; half a second later nothing is relayed
     clearInterval(vt);
+    const et = setInterval(() => e.drive(3, 0), 50);
     await sleep(600);
-    const n = v.all('hit').length;
-    for (let i = 0; i < 3; i++) { e.send({ t: 'hit', k: 0, to: v.id, i: [0, -5] }); await sleep(50); }
-    await sleep(100);
-    assert.strictEqual(v.all('hit').length, n, 'the target\'s position is stale');
+    assert.deepStrictEqual(await fire(3, [-5, 0]), [], 'the target\'s position is stale');
     clearInterval(et);
     [v, e, o].forEach(c => c.ws.close());
   });
@@ -2150,6 +2175,9 @@ function freshNet() {
     await until(() => ev.length, 4000, 'net.js dropped');
     assert.deepStrictEqual(ev, ['連線中斷：太久沒有動作，已被移出房間']);
     h.ws.close(); busy.ws.close();
+    // the default: a guest in a browser tab hidden for 5 min has its timers (pings, the parked pose) run once a
+    // minute by Chrome; three of those wake-ups must fit (MP-6)
+    assert(IDLE_MS >= 3 * 60000, 'IDLE_MS ' + IDLE_MS);
   });
 
   const tcp = runLane(lanes.tcp);                               // mostly waiting: fine next to anything

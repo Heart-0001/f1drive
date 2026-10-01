@@ -14,10 +14,11 @@
 // Runs (each in its own window, a fresh profile):
 //   monza      2012, the Red Bull RB8      Q 1 / R 6, tyre wear x5; the KERS A/B on the start straight first
 //   suzuka     2012, the McLaren MP4-27    the same Grand Prix
-//   zandvoort  2012, the Ferrari F2012     the same; Zandvoort's banked corners (19 deg) and its 60 km/h pit lane whose
+//   zandvoort  2012, the Ferrari F2012     the same; Zandvoort's banked corners (19 deg) and its 80 km/h pit lane whose
 //              box 1 lies just BEFORE the line (the stop and the crossing are in the same lap)
 //   monza26    2026, the Mercedes W17      the ERS A/B on the start straight (compared with the 2012 KERS), the same
-//              Grand Prix, but the pit stop is driven at the limit + 25 km/h WITHOUT the limiter: speeding, +5 s
+//              Grand Prix, but the pit stop is driven at the limit + 25 km/h WITHOUT the limiter into the box (at the limit
+//              after it): speeding, +5 s at that stop
 // Each run: 年份 picked with real keys on the select of the 車輛 tab (the label clicked to focus it, the year typed:
 // type-ahead), the car card clicked; year / car in the menu, the 大獎賽 tab, the HUD session box, the telemetry graphic and
 // the results; T (real key) in free practice picks hards for the Grand Prix (strategy: at x5 a medium set lasts only
@@ -273,12 +274,17 @@ async function abTest(w, cfg, rep, trackIdx) {
   check('A/B: both runs on the road over the whole distance (no grass, no wall), the same distance (' + len + ' m)', res.a.grass === 0 && res.a.hits === 0 && res.b.grass === 0 && res.b.hits === 0 && a.dist >= len && res.b.dist >= len && Math.abs(a.dist - res.b.dist) < 4,
     { a: res.a, b: res.b });
   check('A/B: W only: no deploy, the battery stays full', a.deployFrames === 0 && a.battery === 1, res.a);
+  // (since 2026-10-01 deploying multiplies the engine's drive, traction cap included, by 1 + ers.power / power, up to the
+  // tyres: while the traction cap holds the drive - for the 2012 cars nearly up to their top speed - the battery deploys
+  // only part of its power, state.deploy = traction x v / power: 0.83 at 275 km/h)
   check('A/B: E held: the battery deploys (state.deploy up to ' + res.b.maxDeploy.toFixed(2) + ') and drains (' + (1 - b.battery).toFixed(3) + ' of the store used); the telemetry graphic got it half way (deploy ' + (shotTel && shotTel.deploy.toFixed(2)) + ', battery ' + (shotTel && shotTel.battery.toFixed(3)) + ')',
-    dep > 30 && res.b.maxDeploy > 0.9 && b.battery < 1 && shotTel && shotTel.deploy > 0 && shotTel.battery < 1 && shotTel.battery === b1.battery, { shotTel, b: res.b });
+    dep > 30 && res.b.maxDeploy > 0.6 && b.battery < 1 && shotTel && shotTel.deploy > 0 && shotTel.battery < 1 && shotTel.battery === b1.battery, { shotTel, b: res.b });
   check('A/B: the deploy power is the car\'s (' + res.powerWkg.toFixed(1) + ' W/kg on average over the frames deploying; at most the spec\'s ' + spec.power.toFixed(1) + ' W/kg: near the start the tyres limit it)', res.powerWkg <= spec.power * 1.001 && res.powerWkg > spec.power * 0.25, res);
   if (cfg.year <= 2013) {
-    check('KERS (' + cfg.year + '): a SMALL store: ' + spec.store.toFixed(0) + ' J/kg = ' + res.fullS.toFixed(1) + ' s at full deploy (the 2025 reference car: ' + (4656.67 / 145.52).toFixed(0) + ' s); E held all the way: empty after ' + res.deployS.toFixed(2) + ' s of deploying (' + (res.b.emptyAt === null ? '-' : res.b.emptyAt.toFixed(2)) + ' s after the start), then nothing more',
-      spec.store < 1000 && res.fullS < 8 && res.b.emptyAt !== null && res.deployS >= res.fullS * 0.98 && res.deployS <= res.fullS * 2 && b.battery === 0 && b.deploy === 0, res);
+    // (the traction-capped deploy above: from a standing start the 2012 store lasts longer than store / power; on Monza's
+    // 422 m it is then not quite empty at the end. If it does run out, nothing more is deployed.)
+    check('KERS (' + cfg.year + '): a SMALL store: ' + spec.store.toFixed(0) + ' J/kg = ' + res.fullS.toFixed(1) + ' s at full deploy (the 2025 reference car: ' + (4656.67 / 145.52).toFixed(0) + ' s); E held all the way: ' + ((1 - b.battery) * 100).toFixed(0) + ' % of it used in ' + res.deployS.toFixed(2) + ' s of deploying' + (res.b.emptyAt === null ? '' : ', empty ' + res.b.emptyAt.toFixed(2) + ' s after the start, then nothing more'),
+      spec.store < 1000 && res.fullS < 8 && 1 - b.battery > 0.5 && res.deployS <= res.fullS * 2 && (res.b.emptyAt === null ? b.battery > 0 : b.battery === 0 && b.deploy === 0 && res.deployS >= res.fullS * 0.98), res);
     check('KERS: faster with E (+' + gain.toFixed(1) + ' km/h after ' + len + ' m)', gain > 1, { gain });
   } else {
     check('ERS (' + cfg.year + '): much more power: +' + gain.toFixed(1) + ' km/h after ' + len + ' m with E (spec ' + spec.power.toFixed(0) + ' W/kg, the 2025 reference car 146 W/kg' +
@@ -298,7 +304,7 @@ async function pitStop(w, ctx, o) {
   await w.js(`__e.ap.on = true; if (__e.ap.mode !== 'line') __e.ap.mode = 'line'; true`);
   if (!await w.pump(nearPit(PIT_BEFORE), ctx.pred * 2 + 120, o.what + ': ' + PIT_BEFORE + ' m before the pit lane')) return null;
   const stopsBefore = await w.js(`F1.game.pit.state.stops`), c0 = w.evs('cross').length, from = w.log.length, held0 = await w.js(`__e.truth.held`);
-  const plan = await w.js(`__e.pitPlan(${J({ cruise: !!o.limiter, vLane: o.vLane || 0 })})`);
+  const plan = await w.js(`__e.pitPlan(${J({ cruise: !!o.limiter, vLane: o.vLane || 0, vLaneOut: o.vLaneOut || 0 })})`);
   if (!plan || !plan.ok) { console.log('pitPlan: ' + J(plan)); return null; }
   // Q 15 m before the entry line (the curtain), a screenshot just before it
   if (o.limiter) {
@@ -465,8 +471,8 @@ async function scenario(w, cfg, rep) {
   s = await w.snap();
   const hudYear = () => w.js(`({ year: document.getElementById('hud-gp-year').textContent, shown: __e.shown('hud-gp-year') })`);
   let hy = await hudYear();
-  check('qualifying: the session is ' + year + ', tyre wear x' + WEAR + ' (snapshot), the car ' + cfg.car + ' (parc fermé), a new set of the compound picked with T (' + NEXT + ') wearing at rate ' + WEAR + ', battery full',
-    s.snapshot.year === year && s.snapshot.wear === WEAR && s.snapshot.q === Q && s.snapshot.r === R && s.spec.id === cfg.car && s.tyres.rate === WEAR && s.tyres.compound === NEXT && maxOf(s.tyres.wear) === 0 && s.battery === 1,
+  check('qualifying: the session is ' + year + ', tyre wear x' + WEAR + ' (snapshot), the car ' + cfg.car + ' (parc fermé), a new set of the compound picked with T (' + NEXT + ') wearing at rate 1 (the wear option is for the race only), battery full',
+    s.snapshot.year === year && s.snapshot.wear === WEAR && s.snapshot.q === Q && s.snapshot.r === R && s.spec.id === cfg.car && s.tyres.rate === 1 && s.tyres.compound === NEXT && maxOf(s.tyres.wear) === 0 && s.battery === 1,
     { snap: { year: s.snapshot.year, wear: s.snapshot.wear }, spec: s.spec.id, tyres: s.tyres, battery: s.battery });
   check('HUD session box: 排位賽 with the season ' + hy.year + '; toast 大獎賽開始', s.hud.gpTitle === '排位賽' && hy.year === String(year) && hy.shown && w.toastsSince(from).some(t => t.indexOf('大獎賽開始：排位 1 圈，正賽 6 圈') === 0), { hy, toasts: w.toastsSince(from) });
   // parc fermé: the 車輛 tab is locked while the session is on
@@ -537,7 +543,9 @@ async function scenario(w, cfg, rep) {
   let k = await w.js(`F1.game.gp.lap`), planned = 0, pv = null;
   while (k < R) {
     if (planned && !pv) {
-      pv = await pitStop(w, ctx, { limiter: !cfg.speeding, vLane: cfg.speeding ? (meta.pit.limit + 25) / 3.6 : 0, escInService: !!cfg.escInService, what: 'race pit stop' });
+      // (speeding: over the limit into the box, then at the limit to the exit line: speeding after the stop would be a second
+      // offence, held at the exit line, which v6-smoke's pit part covers)
+      pv = await pitStop(w, ctx, { limiter: !cfg.speeding, vLane: cfg.speeding ? (meta.pit.limit + 25) / 3.6 : 0, vLaneOut: cfg.speeding ? (meta.pit.limit - 2) / 3.6 : 0, escInService: !!cfg.escInService, what: 'race pit stop' });
       if (!pv) { check('race: the pit stop was driven', false); break; }
       k = await w.js(`F1.game.gp.lap`);
       continue;
@@ -590,7 +598,7 @@ async function scenario(w, cfg, rep) {
     } else {
       const spToasts = w.toastsSince(pv.from).filter(t => /維修區超速/.test(t));
       check('pit, speeding on purpose: no limiter, the lane at up to ' + P.maxLaneKmh.toFixed(1) + ' km/h (limit ' + meta.pit.limit + '): speeding (' + P.speedingFrames + ' frames), the toast once (' + (spToasts[0] || '-') + ')',
-        P.limiterAtEntry === false && P.maxLaneKmh > meta.pit.limit + 15 && P.speedingFrames > 0 && spToasts.length === 1 && spToasts[0] === '維修區超速（限速 ' + meta.pit.limit + ' km/h）：停站時罰停 5 秒', { rec: P, toasts: spToasts });
+        P.limiterAtEntry === false && P.maxLaneKmh > meta.pit.limit + 15 && P.speedingFrames > 0 && spToasts.length === 1 && spToasts[0] === '維修區超速（限速 ' + meta.pit.limit + ' km/h）：停站時罰停 5 秒（不停站就在出口線）' && P.holdStartClock === null, { rec: P, toasts: spToasts });
       check('pit: the penalty +5 s is applied AT THAT STOP: service = ' + (P.svcWork || 0).toFixed(3) + ' s tyre change (random, 2.0..4.5) + 5 s = ' + (P.svcTotal || 0).toFixed(3) + ' s; the HUD shows 罰停中 first (' + pv.dom.svc1.label + ' ' + pv.dom.svc1.time + ', ' + pv.dom.svc1.pen + '), then 換胎中 (' + (pv.dom.svc2 ? pv.dom.svc2.label + ' ' + pv.dom.svc2.time : '?') + ')',
         P.svcPenalty === 5 && P.svcWork >= 2 && P.svcWork <= 4.5 && near(P.svcTotal, P.svcWork + 5, 1e-9) && P.penNowFrames > 0 && pv.dom.svc1.label === '罰停中' && pv.dom.svc1.pen === '罰停 +5 s' && pv.dom.svc2 && pv.dom.svc2.label === '換胎中' &&
         (await w.js(`F1.game.pit.state.pending`)) === 0, { work: P.svcWork, total: P.svcTotal, penalty: P.svcPenalty, svc1: pv.dom.svc1, svc2: pv.dom.svc2 });
@@ -657,7 +665,9 @@ async function scenario(w, cfg, rep) {
   const bigDrain = kb.drains.length ? maxOf(kb.drains.map(d => d[0] - d[1])) : 0;
   if (kers) check('KERS in the race: the small store (' + ci.ers.store.toFixed(0) + ' J/kg) drains on the straights (' + kb.drains.length + ' deployments, the biggest ' + (bigDrain * 100).toFixed(0) + ' % of it; lowest ' + (kb.minBattery * 100).toFixed(1) + ' %, ' + kb.cycles + 'x down to 5 %) and recharges under braking between them (' +
     rechN + 'x by 8 % or more, up to +' + (rech.length ? (maxOf(rech) * 100).toFixed(0) : '-') + ' %): ' + kb.deployE.toFixed(0) + ' J/kg deployed = ' + (kb.deployE / ci.ers.store).toFixed(1) + ' stores, ' + kb.harvestE.toFixed(0) + ' J/kg harvested',
-    kb.drains.length >= R && bigDrain >= 0.25 && rechN >= R && kb.deployE > ci.ers.store * 2 && kb.harvestE > ci.ers.store * 2, { kb, rech });
+    // (harvest: what the straights took, given back under braking; with the traction-capped deploy a straight takes less of
+    // the store, which stays fuller, so the race harvests about 1.9 stores here: more than 1.5 is asked)
+    kb.drains.length >= R && bigDrain >= 0.25 && rechN >= R && kb.deployE > ci.ers.store * 2 && kb.harvestE > ci.ers.store * 1.5, { kb, rech });
   else check('ERS in the race: deployed (' + kb.deployE.toFixed(0) + ' J/kg) and harvested (' + kb.harvestE.toFixed(0) + ' J/kg) every lap, the battery going down and up', kb.deployE > 4849 && kb.harvestE > 4849 && kb.minBattery < 0.8, kb);
   check('race: the manager deploys on the straights only (the brake never applied while deploying)', series.every(x => !(x[5] > 0 && x[9] > 0)), series.filter(x => x[5] > 0 && x[9] > 0).slice(0, 5));
 

@@ -52,6 +52,30 @@ const DTM_GAUSS_SIGMA = 20;    // m
 // clockwise), so the order is reversed while keeping points[0] (start/finish) in place.
 const REVERSED_IN_DATASET = new Set(['sg-2008', 'fr-1969']);
 
+// The dataset's first vertex is taken as the start / finish line. Where it is not, [lat, lon] of the real line: the
+// closed loop is turned to start there (the point's foot on the centreline becomes points[0], a vertex is inserted
+// there unless one is within START_SNAP m; order and racing direction kept). Done after the height profile is built,
+// so the elevation samples (and their cache keys) do not move; bankOverrides fractions are taken on the turned loop.
+// The other 39 circuits were checked: their first vertex is beside the pit buildings / on the real pit straight.
+const START_AT = {
+  // Monaco: the dataset starts at Casino Square (the top of the lap). The line is on Boulevard Albert 1er:
+  // OpenStreetMap node 4937755860 "Monaco Grand Prix Start/Finish Line" (raceway=start-finish), ODbL.
+  'mc-1929': [43.7350269, 7.4212652],
+};
+const START_SNAP = 1;          // m
+
+// Pit lane facts js/track.js cannot take from the geometry, emitted as pitSide / pitLimitKmh:
+//   side      -1 = the driver's right at the line, +1 = the left. Given only where scenery-data.js has no pit buildings
+//             to take the side from (js/track.js prefers it to them; with neither it tries the inside of the lap first).
+//   limitKmh  the pit lane speed limit where it is lower than the usual 80 (js/track.js never reports more).
+const PIT_FACTS = {
+  // Monaco: the pit lane (OpenStreetMap way 850261588 "Voie des stands", pit exit way 1388331347 "Sortie des stands")
+  // runs on the harbour side of Boulevard Albert 1er, i.e. on the right going north to Sainte Devote. 60 km/h.
+  'mc-1929': { side: -1, limitKmh: 60 },
+  // Marina Bay: 60 km/h (with Monaco the two tight street circuits that keep the old 60 limit).
+  'sg-2008': { limitKmh: 60 },
+};
+
 // ---------------------------------------------------------------- elevation sources
 // Where a better (bare-earth) model with an open API covers a circuit. Why each one (checked 2026-10, see also
 // PUBLISHED below and devtests/track-fix/): GLO-90 flattened COTA (20.6 m vs 41 m published; the 300 m climb to Turn 1
@@ -505,6 +529,34 @@ function buildElevation(track, sampling, raw, src) {
     range: Math.max(...elev), maxGrad, scale, lengthCheck: total } };
 }
 
+// ---------------------------------------------------------------- start / finish line (see START_AT)
+// Turns track.points ([x, z, lon, lat]) and elev so that the loop starts at the foot of [lat, lon] on the centreline.
+function startAt(track, elev, ll, warn) {
+  const g = track.geo, P = track.points, n = P.length, x = (ll[1] - g.lon0) * g.kx, z = (ll[0] - g.lat0) * g.kz;
+  let best = Infinity, bi = 0, bt = 0, s = 0, bs = 0;
+  for (let i = 0; i < n; i++) {
+    const a = P[i], b = P[(i + 1) % n], ex = b[0] - a[0], ez = b[1] - a[1], l2 = ex * ex + ez * ez;
+    const t = l2 > 0 ? Math.max(0, Math.min(1, ((x - a[0]) * ex + (z - a[1]) * ez) / l2)) : 0;
+    const d = Math.hypot(a[0] + ex * t - x, a[1] + ez * t - z);
+    if (d < best) { best = d; bi = i; bt = t; bs = s + t * Math.sqrt(l2); }
+    s += Math.sqrt(l2);
+  }
+  if (best > 30) warn(`${track.id}: START_AT ${best.toFixed(0)} m off the centreline`);
+  const a = P[bi], b = P[(bi + 1) % n], seg = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  let k;
+  if (bt * seg <= START_SNAP) k = bi;
+  else if ((1 - bt) * seg <= START_SNAP) k = (bi + 1) % n;
+  else {
+    const q = [r1(a[0] + (b[0] - a[0]) * bt), r1(a[1] + (b[1] - a[1]) * bt), a[2] + (b[2] - a[2]) * bt, a[3] + (b[3] - a[3]) * bt];
+    P.splice(bi + 1, 0, q);
+    elev = elev.slice();
+    elev.splice(bi + 1, 0, r1(elev[bi] + (elev[(bi + 1) % n] - elev[bi]) * bt));
+    k = bi + 1;
+  }
+  track.points = P.slice(k).concat(P.slice(0, k));
+  return { elev: elev.slice(k).concat(elev.slice(0, k)), s: bs, dist: best };
+}
+
 // ---------------------------------------------------------------- banking (see BANKED)
 function bankOverrides(track, warn) {
   const list = BANKED[track.id];
@@ -544,6 +596,7 @@ async function main() {
   const ids = new Set();
   for (const t of tracks) { if (ids.has(t.id)) warn(`duplicate id ${t.id}`); ids.add(t.id); }
   for (const id of Object.keys(ELEV_SOURCE)) if (!ids.has(id) || !SOURCES[ELEV_SOURCE[id]]) warn(`ELEV_SOURCE ${id}: unknown track or source`);
+  for (const id of [...Object.keys(START_AT), ...Object.keys(PIT_FACTS)]) if (!ids.has(id)) warn(`START_AT / PIT_FACTS ${id}: unknown track`);
 
   // elevation: every source's samples fetched (cached), then each track built from its own source
   const srcOf = (t) => SOURCES[ELEV_SOURCE[t.id] || 'glo90'];
@@ -559,13 +612,20 @@ async function main() {
   const dump = {};
   tracks.forEach((t, i) => {
     const sname = ELEV_SOURCE[t.id] || 'glo90', src = SOURCES[sname];
-    const { elev, profile, stats } = buildElevation(t, samplings[i], keysPer[i].map((k) => caches[sname][k]), src);
+    let { elev, profile, stats } = buildElevation(t, samplings[i], keysPer[i].map((k) => caches[sname][k]), src);
+    if (START_AT[t.id]) {          // before bankOverrides: their fractions are of the turned loop
+      const st = startAt(t, elev, START_AT[t.id], warn);
+      elev = st.elev;
+      t._start = st;
+    }
     t.bankOverrides = bankOverrides(t, warn);
     t.points = t.points.map(([x, z]) => [x, z]);
     t.elev = elev;
     t.elevSource = sname;
+    t.pit = PIT_FACTS[t.id] || null;
     Object.assign(t._stats, stats);
-    dump[t.id] = Object.assign({ source: sname }, profile, { elev, bankOverrides: t.bankOverrides });
+    // (profile = the uniform samples from the dataset's first vertex; elev starts at startS metres into that loop)
+    dump[t.id] = Object.assign({ source: sname }, profile, { elev, startS: t._start ? t._start.s : 0, bankOverrides: t.bankOverrides });
     if (elev.length !== t.points.length || elev.some((v) => !Number.isFinite(v))) warn(`${t.name}: bad elevation data`);
   });
   if (dumpFile) writeFileSync(dumpFile, JSON.stringify(dump), 'utf8');
@@ -588,7 +648,8 @@ async function main() {
 //   https://github.com/bacinger/f1-circuits   (file: f1-circuits.geojson)
 // Licence of the source data: MIT License, Copyright (c) Tomislav Bacinger.
 // Converted to local metres (x = east, z = -north), centred on each circuit,
-// scaled to the official lap length. points[0] = start/finish, racing direction.
+// scaled to the official lap length. points[0] = start/finish, racing direction (Monaco's loop turned to start at
+// the real line on Boulevard Albert 1er, OpenStreetMap node 4937755860, ODbL).
 // Segments longer than ${MAX_POINT_SPACING} m carry extra collinear vertices.
 // geo = projection used: x = (lon - geo.lon0) * geo.kx, z = (lat - geo.lat0) * geo.kz.
 // elev[i] = height in metres of points[i] above the lowest point of the circuit, smoothed, from:
@@ -597,11 +658,14 @@ ${Object.entries(bySource).map(([s, l]) => `//   ${SOURCES[s].label}:\n//     ${
 //   terrain models see the ground above / below the road.
 // bankOverrides (optional) = real banked corners [{name, from, to, deg}]: full bank angle deg (inside of the corner
 // lower) from fraction \`from\` to fraction \`to\` of the lap (arc length of points); sources in tools/build-tracks.mjs.
+// pitSide (optional) = side of the real pit lane where the scenery data has no pit buildings: -1 the driver's right at
+// the line, +1 the left. pitLimitKmh (optional) = the real pit lane speed limit where it is below 80.
 `;
   const body = tracks.map((t) =>
     `{id:${JSON.stringify(t.id)},name:${JSON.stringify(t.name)},location:${JSON.stringify(t.location)},` +
     `lengthKm:${t.lengthKm},geo:${JSON.stringify(t.geo)},points:${JSON.stringify(t.points)},elev:${JSON.stringify(t.elev)}` +
     (t.bankOverrides ? `,bankOverrides:${JSON.stringify(t.bankOverrides.map(({ name, from, to, deg }) => ({ name, from, to, deg })))}` : '') +
+    (t.pit && t.pit.side ? `,pitSide:${t.pit.side}` : '') + (t.pit && t.pit.limitKmh ? `,pitLimitKmh:${t.pit.limitKmh}` : '') +
     '}').join(',\n');
   if (!dry) writeFileSync(OUT, `${header}window.F1_TRACKS = [\n${body}\n];\n`, 'utf8');
 
@@ -627,6 +691,11 @@ ${Object.entries(bySource).map(([s, l]) => `//   ${SOURCES[s].label}:\n//     ${
       console.log(`${t.id.padEnd(8)} ${b.name.padEnd(26)} ${String(b.deg).padStart(5)} deg  from ${b.from.toFixed(5)} (${b._m[0].toFixed(0)} m) ` +
         `to ${b.to.toFixed(5)} (${b._m[1].toFixed(0)} m), ${b._m[2].toFixed(0)} m at full angle`);
     }
+  }
+  console.log('\nStart / finish line moved (START_AT) and pit lane facts (PIT_FACTS):');
+  for (const t of tracks) {
+    if (t._start) console.log(`${t.id.padEnd(8)} points[0] = ${t._start.s.toFixed(0)} m into the dataset's lap, ${t._start.dist.toFixed(1)} m from the given line`);
+    if (t.pit) console.log(`${t.id.padEnd(8)} pit ${JSON.stringify(t.pit)}`);
   }
   console.log('\nSources of the published figures:');
   for (const [id, p] of Object.entries(PUBLISHED)) console.log(`  ${id}: ${p[1]}`);

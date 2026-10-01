@@ -265,7 +265,10 @@ test('REF_SPEC: the v5 physics constants, 8 gears, the contract\'s drivetrain, 6
   assert.strictEqual(R.latBase, P5.latBase); assert.strictEqual(R.latMax, P5.latMax); assert.strictEqual(R.brakeBase, P5.brakeBase);
   assert.strictEqual(R.traction, P5.traction);
   assert.deepStrictEqual(R.gearKmh, [60, 100, 140, 180, 220, 260, 300]); assert.strictEqual(R.topKmh, 345);
-  assert.deepStrictEqual([R.rpmIdle, R.rpmShift, R.rpmMax, R.shiftTime, R.cylinders, R.aspiration, R.cockpit], [4000, 11800, 12500, 0.05, 6, 'hybrid', 'halo18']);
+  // rpmMax 15 000: the V6 regulation limit, as every other V6 season (review S6). It only caps rpmFor, which the reference
+  // car reaches at 439 km/h in 8th (deploying it tops out at 346): physics and sound at the shift point are unchanged.
+  assert.deepStrictEqual([R.rpmIdle, R.rpmShift, R.rpmMax, R.shiftTime, R.cylinders, R.aspiration, R.cockpit], [4000, 11800, 15000, 0.05, 6, 'hybrid', 'halo18']);
+  assert(F1.carPerf(R).topSpeedBoost * KMH * R.rpmShift / R.topKmh < 12500, 'rpm never reaches the old 12 500 ceiling either');
   assert(/^[a-z0-9-]{1,40}$/.test(R.id), R.id);
   assert(R.ers && R.ers.store > 0 && R.ers.power > 0 && R.ers.harvest > 0);
   near(R.ers.store / R.ers.power, 32, 1e-9, 'a full store deploys for 32 s');
@@ -323,7 +326,8 @@ test('drivetrain formula: gearFor (hysteresis 8 km/h), rpmFor (rpmShift * v / to
   assert.strictEqual(P.gearFor(250 / KMH, 2), 6, 'several gears at once upwards'); assert.strictEqual(P.gearFor(50 / KMH, 7), 1, 'and downwards');
   near(P.rpmFor(100 / KMH, 3), 11800 * 100 / 140, 1e-9); near(P.rpmFor(330 / KMH, 8), 11800 * 330 / 345, 1e-9);
   assert.strictEqual(P.rpmFor(0.1, 0), 4000); assert.strictEqual(P.rpmFor(10 / KMH, 1), 4000, 'idle floor');
-  assert.strictEqual(P.rpmFor(400 / KMH, 8), 12500, 'ceiling'); near(P.rpmFor(-40 / KMH, -1), 11800 * 40 / 60, 1e-9, 'reverse on gear 1');
+  near(P.rpmFor(400 / KMH, 8), 11800 * 400 / 345, 1e-9, 'under the ceiling at 400 km/h');
+  assert.strictEqual(P.rpmFor(500 / KMH, 8), 15000, 'ceiling'); near(P.rpmFor(-40 / KMH, -1), 11800 * 40 / 60, 1e-9, 'reverse on gear 1');
   near(P.rpmFor(150 / KMH), 11800 * 150 / 180, 1e-9, 'gear from the speed when not given');
   const v8 = F1.carPerf(Object.assign({}, F1.REF_SPEC, { gearKmh: [90, 130, 170, 210, 250, 290], topKmh: 320, rpmIdle: 5000, rpmShift: 18000, rpmMax: 18000, cylinders: 8, aspiration: 'na' }));
   assert.strictEqual(v8.gears, 7); assert.strictEqual(v8.gearFor(300 / KMH), 7); near(v8.rpmFor(300 / KMH, 7), 18000 * 300 / 320, 1e-9);
@@ -453,10 +457,11 @@ test('gears down with 8 km/h of hysteresis under braking, reverse gear, neutral 
 // 4. battery (ERS)
 // ==================================================================================================================
 const E = F1.REF_SPEC.ers;
-test('deploy: only with boost + throttle + no brake + charge; adds ers.power / v at speed; a full store lasts 32 s', () => {
+test('deploy: only with boost + throttle + no brake + charge; adds ers.power / v where power-limited; a full store lasts 32 s', () => {
   const tr = strip(40000);
   const run = (inp, v0, bat) => { const c = F1.createCar(null, { tyres: false }); c.reset(tr, 0); c.state.speed = v0; if (bat !== undefined) c.setBattery(bat); c.update(STEP, inp, tr); return c.state; };
-  const v = 250 / KMH, base = run({ up: true }, v), boost = run({ up: true, boost: true }, v);
+  // 330 km/h: above the traction cap's speed (power / traction = 318 km/h) the engine is power-limited
+  const v = 330 / KMH, base = run({ up: true }, v), boost = run({ up: true, boost: true }, v);
   assert.strictEqual(base.deploy, 0); near(boost.deploy, 1, 1e-9, 'deploy share');
   near((boost.speed - base.speed) / STEP, E.power / v, 1e-6, 'extra acceleration = ers.power / v');
   near(1 - boost.battery, E.power * STEP / E.store, 1e-12, 'drain = ers.power per second');
@@ -465,27 +470,84 @@ test('deploy: only with boost + throttle + no brake + charge; adds ers.power / v
     assert.strictEqual(s.deploy, 0, what); assert.strictEqual(s.speed, s0.speed, what + ': no extra drive');
   }
   near(run({ throttle: 0.5, boost: true }, v).deploy, 0.5, 1e-9, 'proportional to the throttle');
-  // 32 s at full power (full throttle + boost from 300 km/h)
-  const c = F1.createCar(null, { tyres: false }); c.reset(tr, 0); c.state.speed = 300 / KMH;
+  // 250 km/h, traction-capped: 0.15 x the capped drive, so the battery deploys (and drains) less than ers.power
+  const v2 = 250 / KMH, b2 = run({ up: true, boost: true }, v2);
+  near((b2.speed - run({ up: true }, v2).speed) / STEP, 0.15 * F1.CAR_PERF.traction, 1e-6, '0.15 x the traction cap');
+  near(b2.deploy, 0.15 * F1.CAR_PERF.traction * v2 / E.power, 1e-9, 'deploy share below 1');
+  // 32 s at full power (full throttle + boost from 330 km/h: power-limited all the way)
+  const c = F1.createCar(null, { tyres: false }); c.reset(tr, 0); c.state.speed = 330 / KMH;
   let t = 0; while (c.state.battery > 0 && t < 60) { c.update(STEP, { up: true, boost: true }, tr); t += STEP; }
   near(t, 32, 0.02, 'store lasts'); assert(c.state.battery === 0);
   c.update(STEP, { up: true, boost: true }, tr); assert.strictEqual(c.state.deploy, 0, 'nothing left');
 });
 
-test('deploy is traction-limited (the tyres\' friction): little at a standing start, +15..20 km/h at the end of a 900 m straight from 150 km/h', () => {
+// Review D3: the deploy used to add ers.power / v on top of the drivetrain's traction cap (up to the tyres' friction):
+// +32 % acceleration at 150 km/h, 0-200 km/h 6.09 -> 5.04 s, +36 km/h after 8 s. Now it multiplies the engine's drive
+// (traction cap included) by 1 + ers.power / power = 1.15 at every speed, still limited by the tyres.
+test('deploy = 1.15 x the engine\'s drive at every speed (traction cap included), up to the tyres; +15..20 km/h at the end of a 900 m straight', () => {
   const tr = strip(40000), P = F1.CAR_PERF;
-  // at 20 m/s ers.power / v would be 7 m/s^2 more, but the tyres can only take muTraction * a_n in all
   const extra = v => { const run = boost => { const c = F1.createCar(null, { tyres: false }); c.reset(tr, 0); c.state.speed = v; c.update(1e-3, { up: true, boost }, tr); return c.state.speed; };
     return (run(true) - run(false)) / 1e-3; };
+  // at 20 m/s 0.15 x the drive would be 1.65 m/s^2 more, but the tyres can only take muTraction * a_n in all
   near(extra(20), P.muTraction * (9.81 + P.downforce * 400) - P.traction, 1e-6, 'capped by the tyres at 20 m/s');
-  near(extra(80), E.power / 80, 1e-6, 'the full ers.power at 80 m/s');
-  const t100 = boost => { const c = F1.createCar(null, { tyres: false }); c.reset(tr, 0); let n = 0; while (c.state.speed * KMH < 100) { c.update(STEP, { up: true, boost }, tr); n++; } return n * STEP; };
-  const a = t100(false), b = t100(true);
+  for (const kmh of [100, 150, 200, 250, 300, 330, 345]) {
+    const v = kmh / KMH, drive = Math.min(P.traction, P.power / v), x = extra(v), tyres = P.muTraction * (9.81 + P.downforce * v * v) - drive;
+    near(x, Math.min(tyres, drive * E.power / P.power), 1e-6, kmh + ' km/h');
+    assert(x <= 0.15 * drive + 1e-6, kmh + ' km/h: never more than 0.15 x the drive: ' + x);
+  }
+  near(extra(90), E.power / 90, 1e-6, 'the full ers.power at 90 m/s (power-limited)');
+  const tTo = (kmh, boost) => { const c = F1.createCar(null, { tyres: false }); c.reset(tr, 0); let n = 0; while (c.state.speed * KMH < kmh) { c.update(STEP, { up: true, boost }, tr); n++; } return n * STEP; };
+  const a = tTo(100, false), b = tTo(100, true), a2 = tTo(200, false), b2 = tTo(200, true);
   assert(a - b < 0.25 && a - b >= 0, '0-100 km/h ' + a.toFixed(3) + ' s, with boost ' + b.toFixed(3) + ' s');
+  assert(a2 - b2 > 0.4 && a2 - b2 < 0.8, '0-200 km/h ' + a2.toFixed(3) + ' s, with boost ' + b2.toFixed(3) + ' s (was 6.09 -> 5.04)');
+  const at8 = boost => { const c = F1.createCar(null, { tyres: false }); c.reset(tr, 0); for (let i = 0; i < 8 * 120; i++) c.update(STEP, { up: true, boost }, tr); return c.state.speed * KMH; };
+  const g8 = at8(true) - at8(false);
+  assert(g8 > 15 && g8 < 30, 'after 8 s from a standing start: +' + g8.toFixed(1) + ' km/h (was +36)');
   const end = boost => { const c = F1.createCar(null, { tyres: false }); c.reset(tr, 0); c.state.speed = 150 / KMH; while (c.state.z < 900) c.update(STEP, { up: true, boost }, tr); return c.state.speed * KMH; };
   const gain = end(true) - end(false);
   assert(gain >= 15 && gain <= 20, 'gain ' + gain);
-  info('0-100 km/h ' + a.toFixed(2) + ' s / boost ' + b.toFixed(2) + ' s; 900 m from 150 km/h: ' + end(false).toFixed(1) + ' -> ' + end(true).toFixed(1) + ' km/h');
+  info('0-100 km/h ' + a.toFixed(2) + ' s / boost ' + b.toFixed(2) + ' s; 0-200 ' + a2.toFixed(2) + ' / ' + b2.toFixed(2) + ' s; +' + g8.toFixed(1) +
+    ' km/h after 8 s; 900 m from 150 km/h: ' + end(false).toFixed(1) + ' -> ' + end(true).toFixed(1) + ' km/h');
+});
+
+// Review D2: the 2026 MGU-K fades out with speed (rule C5.2.8: P = 1800 - 5v kW, 350 kW up to 290 km/h). A spec gives it
+// as ers.taperKmh [from, to]: the deploy power falls linearly from ers.power at `from` to 0 at `to`.
+test('ers.taperKmh: sanitised, the deploy power fades out between its speeds, topSpeedBoost follows; none for the reference', () => {
+  const R = F1.REF_SPEC, S = ers => F1.sanitizeSpec(Object.assign({}, R, { ers }));
+  assert.deepStrictEqual(Object.keys(R.ers), ['store', 'power', 'harvest'], 'the reference has no taper');
+  const e26 = { store: 4849, power: 442, harvest: 2190 };
+  const ok = S(Object.assign({ taperKmh: [290, 360] }, e26));
+  assert.deepStrictEqual(ok.ers, Object.assign({}, e26, { taperKmh: [290, 360] }));
+  const src = [290, 345], cp = S(Object.assign({ taperKmh: src }, e26)); src[0] = 1;
+  assert.deepStrictEqual(cp.ers.taperKmh, [290, 345], 'a copy');
+  assert.deepStrictEqual(F1.sanitizeSpec(ok), ok, 'idempotent');
+  for (const bad of [null, 0, 'x', [], [290], [290, 360, 400], [360, 290], [290, 290], [290, 290.5], ['290', 360], [NaN, 360], [290, Infinity], [10, 360], [290, 700], { 0: 290, 1: 360, length: 2 }]) {
+    assert.deepStrictEqual(S(Object.assign({ taperKmh: bad }, e26)).ers, e26, 'taperKmh ' + JSON.stringify(bad) + ': dropped');
+  }
+  assert.strictEqual(S({ taperKmh: [290, 360] }).ers, null, 'a taper alone is no battery');
+  // the deploy power by speed
+  const spec = Object.assign({}, R, { ers: Object.assign({ taperKmh: [290, 360] }, e26) }), P = F1.carPerf(spec), flat = F1.carPerf(Object.assign({}, R, { ers: e26 }));
+  for (const [kmh, want] of [[0, 442], [200, 442], [290, 442], [300, 442 * 60 / 70], [325, 442 / 2], [340, 442 * 20 / 70], [360, 0], [400, 0], [-300, 442 * 60 / 70]]) {
+    near(P.ersDeploy(kmh / KMH), want, 1e-9, kmh + ' km/h');
+    assert.strictEqual(flat.ersDeploy(kmh / KMH), 442, 'no taper: ' + kmh);
+  }
+  assert.strictEqual(F1.CAR_PERF.ersDeploy(400 / KMH), E.power, 'the reference: ers.power at any speed');
+  assert.strictEqual(F1.carPerf(Object.assign({}, R, { ers: null })).ersDeploy(50), 0, 'no battery: 0');
+  // in the car: below the taper the same as without it, above `to` nothing, in between the faded power
+  const tr = strip(40000);
+  const extra = (sp, kmh) => { const run = boost => { const c = F1.createCar(sp, { tyres: false }); c.reset(tr, 0); c.state.speed = kmh / KMH; c.setBattery(1); c.update(1e-3, { up: true, boost }, tr); return c.state; };
+    const b = run(true); return { a: (b.speed - run(false).speed) / 1e-3, deploy: b.deploy }; };
+  near(extra(spec, 250).a, extra(Object.assign({}, R, { ers: e26 }), 250).a, 1e-9, 'below the taper: unchanged');
+  near(extra(spec, 325).a, P.power / (325 / KMH) * (442 / 2) / P.power, 1e-6, '325 km/h: half the power');
+  const top = extra(spec, 365);
+  assert.deepStrictEqual([top.a, top.deploy], [0, 0], 'above 360 km/h: nothing');
+  // the deploying top speed stays inside the taper: the boost can no longer carry the car 50 km/h past its top speed
+  const vb = P.topSpeedBoost * KMH, vf = flat.topSpeedBoost * KMH;
+  assert(vb > P.topSpeed * KMH + 5 && vb < 360 && vf > vb + 20, 'top ' + (P.topSpeed * KMH).toFixed(1) + ', deploying ' + vb.toFixed(1) + ' (no taper ' + vf.toFixed(1) + ')');
+  const c = F1.createCar(spec, { tyres: false }); c.reset(tr, 0); c.state.speed = 200 / KMH; c.setBattery(1);
+  let vmax = 0; for (let i = 0; i < 120 * 60; i++) { c.update(STEP, { up: true, boost: true }, tr); vmax = Math.max(vmax, c.state.speed * KMH); }
+  assert(vmax <= vb + 0.05, 'driven: ' + vmax.toFixed(2) + ' vs ' + vb.toFixed(2));
+  info('taper [290, 360] on 442 W/kg: top ' + (P.topSpeed * KMH).toFixed(1) + ' km/h, deploying ' + vb.toFixed(1) + ' (without the taper ' + vf.toFixed(1) + ')');
 });
 
 test('harvest: under braking (share of the braking power, up to ers.harvest), a little on lift-off above 20 m/s; braking unchanged; clamps', () => {

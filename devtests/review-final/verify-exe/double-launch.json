@@ -1,0 +1,52 @@
+{
+ "exe": "C:\\Users\\Heart\\Desktop\\f1Drive\\dist\\F1Drive-v6-preview.exe",
+ "gapMs": 1500,
+ "unpackExistedBefore": false,
+ "timeline": [
+  {
+   "t": 2031,
+   "stubA": true,
+   "stubB": true,
+   "cdpA": null,
+   "cdpB": null,
+   "stubBWindow": ""
+  },
+  {
+   "t": 4319,
+   "stubA": true,
+   "stubB": true,
+   "cdpA": [
+    "index.html"
+   ],
+   "cdpB": null,
+   "stubBWindow": ""
+  },
+  {
+   "t": 17528,
+   "stubA": true,
+   "stubB": true,
+   "cdpA": [
+    "index.html"
+   ],
+   "cdpB": [
+    "index.html"
+   ],
+   "stubBWindow": ""
+  }
+ ],
+ "appProcs": [
+  9980,
+  11664,
+  13896,
+  26912,
+  35020,
+  36040,
+  44872,
+  48236,
+  49036,
+  50616
+ ],
+ "stubBExitCode": null,
+ "leftProcs": [],
+ "unpackLeft": false
+}

@@ -23,15 +23,24 @@
 // back in.
 //
 // Speeding: in the lane at more than LIMIT_TOL km/h over track.pit.limitKmh (80 if the pit has none), by the
-// magnitude of the speed, reversing included. state.speeding is that, live. The first time in a visit: 'speeding',
-// and PENALTY_S seconds of hold are added to state.pending. Each speeding visit adds its own 5 s.
+// magnitude of the speed, reversing included. state.speeding is that, live. The first time in a visit, and again the
+// first time after the visit's stop began: 'speeding', and PENALTY_S seconds of hold are added to state.pending.
+//
+// The hold is served at the visit's stop (below) when it comes after the offence; otherwise at the exit line: a car
+// of a visit that crosses the exit line forwards with state.pending > 0 (sped after its stop, or did not stop) is
+// held there at once, a stop-go without tyres: 'penaltyStart', state.service = {total, left, penalty, work: 0} with
+// total = penalty = left = everything in state.pending (pending goes to 0), counted down as a service (main.js
+// freezes the car for any state.service); at left = 0: 'penaltyDone', state.service = null (no tyres, stops
+// unchanged). Moved more than ABORT_MOVE: 'serviceAbort', the part not served goes back to state.pending. So an
+// offence always costs its time in the visit it was committed in (speeding after the stop gains up to ~7 s at Monza:
+// unserved, it was free time), and pending only outlives a visit that ends back over the entry line or by reset().
 //
 // Service: the car is in its own box (boxes[slot]: within BOX_ALONG m along the box, BOX_ACROSS m across,
 // heading within BOX_HEADING) = state.inBox; at rest there (|speed| < REST_SPEED) during a visit that has not had
 // its service yet, and driven there (the car has been moving at some point of the visit: a car PUT at rest in its
 // box does not get one), the service starts: 'serviceStart', state.service = {total, left, penalty, work}: `work` the
-// tyre change (serviceTime below), `penalty` = everything in state.pending (served now: pending goes to 0),
-// total = work + penalty, left counts down from total (the penalty hold comes first: left > work means the car
+// tyre change (serviceTime below, 2.0 .. 4.5 s), `penalty` = everything in state.pending (served now: pending goes
+// to 0), total = work + penalty, left counts down from total (the penalty hold comes first: left > work means the car
 // is still serving it). One service per visit. At left = 0: 'serviceDone', state.service = null, stops + 1;
 // main.js then fits the new tyres and releases the car. A car that moves more than ABORT_MOVE m from where its
 // service started (it was not held, or was put elsewhere) goes without: 'serviceAbort' (not in the contract;
@@ -53,7 +62,7 @@
 
   var LIMIT_DEFAULT = 80;          // km/h when track.pit has no usable limitKmh
   var LIMIT_TOL = 3;               // km/h over the limit before it counts
-  var PENALTY_S = 5;               // hold added to a stop for every visit with speeding
+  var PENALTY_S = 5;               // hold for every speeding offence: at the visit's stop, else at the exit line
   var REST_SPEED = 0.5;            // m/s: at rest, the service may start
   var BOX_ALONG = 2.5;             // m: the car's origin within this of the box point along the box ...
   var BOX_ACROSS = 1.2;            // ... and within this across it ...
@@ -100,13 +109,13 @@
       inLane: false,       // in the pit lane: between the entry and exit lines, beyond the pit wall (or in the own box)
       speeding: false,     // in the lane and over the limit + 3 km/h right now
       inBox: false,        // in the own box (position + heading), moving or not
-      service: null,       // null | {total, left, penalty, work} (s)
+      service: null,       // null | {total, left, penalty, work} (s); work 0: a penalty hold at the exit line
       stops: 0,            // services completed since reset()
-      pending: 0,          // s of speeding hold waiting for the next stop
+      pending: 0,          // s of speeding hold waiting for the visit's stop or its exit line
       boxAhead: null,      // m to the own box along the lane: + ahead, - passed; null off the pit's stretch
       boxPassed: false,    // more than BOX_ALONG past the own box
       visit: false,        // a pit visit is open (in the lane, or just out of it: see the header)
-      flagged: false,      // this visit has had its speeding penalty
+      flagged: false,      // this visit has had its speeding penalty (since its stop began)
       served: false,       // this visit has had (or is having) its service
       slot: -1,            // the box used: boxes[slot]; -1 = none (no pit / no boxes)
       limitKmh: LIMIT_DEFAULT
@@ -120,6 +129,8 @@
     var moved = false;                         // the car has been moving in this visit (a car PUT at rest in its box
                                                //   has not stopped there: no service until it drives in)
     var svcX = 0, svcZ = 0;                    // where the running service started
+    var svcHold = false;                       // the running service is a penalty hold at the exit line (no tyres)
+    var lastPos = NaN;                         // lane position at the last readable update (exit line crossing)
     var queue = new Array(QUEUE), qHead = 0, qLen = 0;
 
     function push(ev) { if (qLen < QUEUE) { queue[(qHead + qLen) % QUEUE] = ev; qLen++; } }
@@ -138,7 +149,7 @@
       state.visit = state.flagged = state.served = false;
       state.service = null; state.stops = 0; state.pending = 0; state.boxAhead = null;
       state.slot = -1; state.limitKmh = LIMIT_DEFAULT;
-      moved = false; gone = 0;
+      moved = false; gone = 0; svcHold = false; lastPos = NaN;
       qHead = qLen = 0;
       for (var q = 0; q < QUEUE; q++) queue[q] = null;
     }
@@ -192,20 +203,33 @@
       return (pb >= pc ? sum : -sum) + fb - fa;
     }
 
+    // (a new offence after the stop is penalised again: flagged is cleared)
     function startService(car) {
       var work = serviceTime(random), pen = state.pending, total = work + pen;
-      state.pending = 0;
+      state.pending = 0; state.flagged = false;
       state.service = { total: total, left: total, penalty: pen, work: work };
-      state.served = true;
+      state.served = true; svcHold = false;
       svcX = car.x; svcZ = car.z;
       push('serviceStart');
     }
 
-    // the car went without its service: the part of the penalty hold not yet served waits for the next stop
+    // the exit line with a hold the visit's stop did not serve: held here for all of it (a stop-go, no tyres)
+    function startHold(car) {
+      var pen = state.pending;
+      state.pending = 0;
+      state.service = { total: pen, left: pen, penalty: pen, work: 0 };
+      svcHold = true;
+      svcX = car.x; svcZ = car.z;
+      push('penaltyStart');
+    }
+
+    // the car went without its service / hold: the part of the penalty hold not yet served waits for the next stop or
+    // forward exit-line crossing (an aborted hold's line is already crossed: in practice the next visit's)
     function abortService() {
       var sv = state.service, held = sv.total - sv.left;
       if (held < sv.penalty) state.pending += sv.penalty - held;
-      state.service = null; state.served = false; moved = false;
+      if (!svcHold) { state.served = false; moved = false; }
+      state.service = null; svcHold = false;
       push('serviceAbort');
     }
 
@@ -220,8 +244,9 @@
       sv.left -= dt;
       if (sv.left <= 1e-9) {
         sv.left = 0;
-        state.service = null; state.stops++;
-        push('serviceDone');
+        state.service = null;
+        if (svcHold) { svcHold = false; push('penaltyDone'); }
+        else { state.stops++; push('serviceDone'); }
       }
       return true;
     }
@@ -233,7 +258,7 @@
      * One step. car = car.state ({x, z, heading, speed, sampleIndex, d}); track = F1.buildTrack(...) (uses
      * track.pit, track.samples, track.length); o = {slot, limiter} (slot: the room slot, boxes[slot]; missing -> 0;
      * limiter is accepted and not used). -> 'enter' | 'exit' | 'speeding' | 'serviceStart' | 'serviceDone' |
-     * 'serviceAbort' | null
+     * 'penaltyStart' | 'penaltyDone' | 'serviceAbort' | null
      */
     pit.update = function (dt, car, track, o) {
       var pitObj = track && typeof track === 'object' ? track.pit : null;
@@ -300,6 +325,12 @@
       if (!state.service && !aborted && inBox && state.visit && moved && !state.served && speed < REST_SPEED) {
         startService(car);
       }
+      // the exit line crossed forwards with a hold still to serve: held right there
+      if (!state.service && !aborted && hasXZ && state.visit && state.pending > 0 && lastPos < L && pos >= L &&
+          pos <= L + H) {
+        startHold(car);
+      }
+      lastPos = pos;
 
       // where the own box is
       var ahead = b && hasXZ && pos >= lo && pos <= hi ? rowDistance(i, pos, car, b) : NaN;

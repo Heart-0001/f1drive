@@ -1,0 +1,1612 @@
+{
+ "2010": [
+  [
+   "2010-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "2.4 L V8",
+   ""
+  ],
+  [
+   "2010-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB6",
+   "Renault RS27-2010",
+   "車隊首座車隊冠軍、Vettel 首座車手冠軍；19 站拿下 15 次桿位。"
+  ],
+  [
+   "2010-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MP4-25",
+   "Mercedes FO 108X",
+   "首創 F-duct：車手用左腿蓋住座艙內的小孔，讓尾翼在直線上失速以降低阻力。"
+  ],
+  [
+   "2010-ferrari",
+   "法拉利",
+   "Ferrari",
+   "F10",
+   "Ferrari 056",
+   "Alonso 加盟首戰巴林站即奪冠，全年 5 勝。"
+  ],
+  [
+   "2010-mercedes",
+   "賓士",
+   "Mercedes",
+   "MGP W01",
+   "Mercedes FO 108X",
+   "賓士 1955 年後首度以廠隊回歸（前身為 Brawn），Schumacher 復出；Rosberg 3 度登台。"
+  ],
+  [
+   "2010-renault",
+   "雷諾",
+   "Renault",
+   "R30",
+   "Renault RS27-2010",
+   "重回 Renault 早年的經典黃黑配色；Kubica 3 度登上頒獎台。"
+  ],
+  [
+   "2010-williams",
+   "威廉斯",
+   "Williams",
+   "FW32",
+   "Cosworth CA2010",
+   "Hülkenberg 在巴西站以 1.049 秒的差距拿下生涯首個桿位。"
+  ],
+  [
+   "2010-force-india",
+   "印度力量",
+   "Force India",
+   "VJM03",
+   "Mercedes FO 108X",
+   ""
+  ],
+  [
+   "2010-sauber",
+   "索伯",
+   "BMW Sauber",
+   "C29",
+   "Ferrari 056",
+   "BMW 退出後仍以「BMW Sauber」名義參賽，開季車身幾乎沒有贊助商。"
+  ],
+  [
+   "2010-toro-rosso",
+   "紅牛二隊",
+   "Toro Rosso",
+   "STR5",
+   "Ferrari 056",
+   "車隊第一輛在 Faenza 自行設計製造的底盤（先前與紅牛共用設計）。"
+  ],
+  [
+   "2010-lotus-racing",
+   "蓮花",
+   "Lotus Racing",
+   "T127",
+   "Cosworth CA2010",
+   "採用 Lotus 傳統的綠金配色；三支新車隊中排名最高（第 10）。"
+  ],
+  [
+   "2010-hrt",
+   "HRT",
+   "HRT",
+   "F110",
+   "Cosworth CA2010",
+   "Dallara 設計製造，整季從未升級；最佳成績第 14 名。"
+  ],
+  [
+   "2010-virgin",
+   "維珍",
+   "Virgin",
+   "VR-01",
+   "Cosworth CA2010",
+   "F1 首輛完全以 CFD 模擬設計、不用風洞的賽車；油箱容量不足，後來被迫重新設計。"
+  ]
+ ],
+ "2011": [
+  [
+   "2011-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "2.4 L V8 + KERS",
+   ""
+  ],
+  [
+   "2011-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB7",
+   "Renault RS27-2011",
+   "排氣吹拂擴散器稱霸，19 站 12 勝、18 次桿位，Vettel 衛冕。"
+  ],
+  [
+   "2011-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MP4-26",
+   "Mercedes FO 108Y",
+   "獨特的 L 形側箱設計；全年 6 勝。"
+  ],
+  [
+   "2011-ferrari",
+   "法拉利",
+   "Ferrari",
+   "150° Italia",
+   "Ferrari 056",
+   "以義大利統一 150 週年命名（原名 F150，因 Ford 商標抗議而改名）；全年僅 1 勝。"
+  ],
+  [
+   "2011-mercedes",
+   "賓士",
+   "Mercedes",
+   "MGP W02",
+   "Mercedes FO 108Y",
+   "整季未登頒獎台，最佳成績是 Schumacher 加拿大站第四。"
+  ],
+  [
+   "2011-renault",
+   "雷諾",
+   "Renault",
+   "R31",
+   "Renault RS27-2011",
+   "以 Lotus Renault GP 名義參賽，黑金塗裝致敬 JPS Lotus；前置排氣被設計者自承是「失敗的實驗」。"
+  ],
+  [
+   "2011-force-india",
+   "印度力量",
+   "Force India",
+   "VJM04",
+   "Mercedes FO 108Y",
+   "以 69 分排名年度第六。"
+  ],
+  [
+   "2011-sauber",
+   "索伯",
+   "Sauber",
+   "C30",
+   "Ferrari 056",
+   "澳洲開幕戰兩車因尾翼不合規定被取消成績。"
+  ],
+  [
+   "2011-toro-rosso",
+   "紅牛二隊",
+   "Toro Rosso",
+   "STR6",
+   "Ferrari 056",
+   ""
+  ],
+  [
+   "2011-williams",
+   "威廉斯",
+   "Williams",
+   "FW33",
+   "Cosworth CA2011K",
+   "全季僅 5 分、年度第九，是車隊 1978 年首季以來最差名次。"
+  ],
+  [
+   "2011-lotus-racing",
+   "蓮花",
+   "Lotus",
+   "T128",
+   "Renault RS27-2011",
+   "改用 Renault 引擎與 Red Bull Technology 變速箱；英國站起加上 Caterham 標誌。"
+  ],
+  [
+   "2011-hrt",
+   "HRT",
+   "HRT",
+   "F111",
+   "Cosworth CA2011",
+   "塗裝由 Daniel Simon 設計；澳洲開幕戰未達 107% 門檻，無法起跑。"
+  ],
+  [
+   "2011-virgin",
+   "維珍",
+   "Virgin",
+   "MVR-02",
+   "Cosworth CA2011",
+   "延續純 CFD 設計、不裝 KERS；季中與設計公司 Wirth Research 分手。"
+  ]
+ ],
+ "2012": [
+  [
+   "2012-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "2.4 L V8 + KERS",
+   ""
+  ],
+  [
+   "2012-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB8",
+   "Renault RS27-2012",
+   "Vettel 與車隊三連霸，全年 7 勝。"
+  ],
+  [
+   "2012-ferrari",
+   "法拉利",
+   "Ferrari",
+   "F2012",
+   "Ferrari 056",
+   "Alonso 全年 3 勝，最後僅以 3 分之差輸掉車手冠軍。"
+  ],
+  [
+   "2012-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MP4-27",
+   "Mercedes FO 108Z",
+   "全年 7 勝、8 次桿位；Hamilton 效力麥拉倫的最後一年。"
+  ],
+  [
+   "2012-lotus-f1",
+   "蓮花",
+   "Lotus",
+   "E20",
+   "Renault RS27-2012",
+   "Räikkönen 復出首年在阿布達比站奪冠；原本設計的反應式車身高度系統季前遭禁。"
+  ],
+  [
+   "2012-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W03",
+   "Mercedes FO 108Z",
+   "Rosberg 中國站拿下賓士車隊 1955 年以來首個桿位與分站冠軍；Schumacher 最後一季。"
+  ],
+  [
+   "2012-sauber",
+   "索伯",
+   "Sauber",
+   "C31",
+   "Ferrari 056",
+   "全年 4 度登上頒獎台（馬來西亞、加拿大、義大利、日本）。"
+  ],
+  [
+   "2012-force-india",
+   "印度力量",
+   "Force India",
+   "VJM05",
+   "Mercedes FO 108Z",
+   "Hülkenberg 比利時站、di Resta 新加坡站都拿下第四。"
+  ],
+  [
+   "2012-williams",
+   "威廉斯",
+   "Williams",
+   "FW34",
+   "Renault RS27-2012",
+   "Maldonado 西班牙站桿位起跑奪冠，是威廉斯 2004 年以來首勝。"
+  ],
+  [
+   "2012-toro-rosso",
+   "紅牛二隊",
+   "Toro Rosso",
+   "STR7",
+   "Ferrari 056",
+   ""
+  ],
+  [
+   "2012-caterham",
+   "卡特漢",
+   "Caterham",
+   "CT01",
+   "Renault RS27-2012",
+   "由 Team Lotus 更名後的第一輛車，也是車隊首輛配備 KERS 的賽車。"
+  ],
+  [
+   "2012-marussia",
+   "瑪魯西亞",
+   "Marussia",
+   "MR01",
+   "Cosworth CA2012",
+   "季前未通過撞擊測試，錯過最後一次季前測試。"
+  ],
+  [
+   "2012-hrt",
+   "HRT",
+   "HRT",
+   "F112",
+   "Cosworth CA2012",
+   "HRT 最後一輛 F1 賽車；澳洲開幕戰再度未達 107% 門檻，無法起跑。"
+  ]
+ ],
+ "2013": [
+  [
+   "2013-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "2.4 L V8 + KERS",
+   ""
+  ],
+  [
+   "2013-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB9",
+   "Renault RS27-2013",
+   "Vettel 四連霸並在下半季創下 9 連勝；V8 自然進氣時代最後一輛冠軍車。"
+  ],
+  [
+   "2013-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W04",
+   "Mercedes FO 108F",
+   "8 次桿位、3 勝，但輪胎磨耗嚴重；Rosberg 摩納哥站奪冠。"
+  ],
+  [
+   "2013-ferrari",
+   "法拉利",
+   "Ferrari",
+   "F138",
+   "Ferrari 056",
+   "名稱代表 2013 年與 V8 引擎的最後一季；全年 2 勝。"
+  ],
+  [
+   "2013-lotus-f1",
+   "蓮花",
+   "Lotus",
+   "E21",
+   "Renault RS27-2013",
+   "Räikkönen 澳洲開幕戰奪冠，全年 14 次登上頒獎台。"
+  ],
+  [
+   "2013-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MP4-28",
+   "Mercedes FO 108F",
+   "麥拉倫 1980 年以來首度整季無人登上頒獎台。"
+  ],
+  [
+   "2013-force-india",
+   "印度力量",
+   "Force India",
+   "VJM06",
+   "Mercedes FO 108F",
+   "Sutil 在澳洲開幕戰一度領跑；全年 77 分、年度第六。"
+  ],
+  [
+   "2013-sauber",
+   "索伯",
+   "Sauber",
+   "C32",
+   "Ferrari 056",
+   "改用灰色塗裝；窄側箱的靈感來自 Pérez 2011 年摩納哥的撞車。"
+  ],
+  [
+   "2013-toro-rosso",
+   "紅牛二隊",
+   "Toro Rosso",
+   "STR8",
+   "Ferrari 056",
+   "Toro Rosso 最後一輛使用法拉利 V8 引擎的賽車。"
+  ],
+  [
+   "2013-williams",
+   "威廉斯",
+   "Williams",
+   "FW35",
+   "Renault RS27-2013",
+   "Bottas 出道年；全季僅 5 分，追平車隊最差紀錄。"
+  ],
+  [
+   "2013-marussia",
+   "瑪魯西亞",
+   "Marussia",
+   "MR02",
+   "Cosworth CA2013",
+   "至 2026 年為止，F1 最後一輛搭載 Cosworth 引擎的賽車。"
+  ],
+  [
+   "2013-caterham",
+   "卡特漢",
+   "Caterham",
+   "CT03",
+   "Renault RS27-2013",
+   "改用較亮的綠色；全季未得分，排名第 11。"
+  ]
+ ],
+ "2014": [
+  [
+   "2014-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2014-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W05 Hybrid",
+   "Mercedes PU106A Hybrid",
+   "渦輪混合動力首年，19 站 16 勝、18 次桿位；渦輪與壓縮機分置引擎兩端。"
+  ],
+  [
+   "2014-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB10",
+   "Renault Energy F1 2014",
+   "Ricciardo 在加拿大站拿下生涯首勝，全年 3 勝是賓士以外僅有的勝場。"
+  ],
+  [
+   "2014-williams",
+   "威廉斯",
+   "Williams",
+   "FW36",
+   "Mercedes PU106A Hybrid",
+   "首年換上 Martini Racing 塗裝；Massa 奧地利站桿位，全年 9 度登台、年度第三。"
+  ],
+  [
+   "2014-ferrari",
+   "法拉利",
+   "Ferrari",
+   "F14 T",
+   "Ferrari 059/3",
+   "名稱由車迷投票選出；1993 年以來第一輛整季沒贏下任何一站的法拉利。"
+  ],
+  [
+   "2014-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MP4-29",
+   "Mercedes PU106A Hybrid",
+   "澳洲開幕戰雙車登台（新人 Magnussen 第二），也是麥拉倫到 2019 年前最後一次登台。"
+  ],
+  [
+   "2014-force-india",
+   "印度力量",
+   "Force India",
+   "VJM07",
+   "Mercedes PU106A Hybrid",
+   "Pérez 巴林站季軍，是車隊四年多來首座頒獎台。"
+  ],
+  [
+   "2014-toro-rosso",
+   "紅牛二隊",
+   "Toro Rosso",
+   "STR9",
+   "Renault Energy F1 2014",
+   "Toro Rosso 第一輛搭載 Renault 引擎的賽車。"
+  ],
+  [
+   "2014-lotus-f1",
+   "蓮花",
+   "Lotus",
+   "E22",
+   "Renault Energy F1 2014",
+   "左短右長的不對稱雙叉「象牙」鼻錐；全年只拿 10 分。"
+  ],
+  [
+   "2014-marussia",
+   "瑪魯西亞",
+   "Marussia",
+   "MR03",
+   "Ferrari 059/3",
+   "Bianchi 在摩納哥站拿下第九，為車隊首度得分。"
+  ],
+  [
+   "2014-sauber",
+   "索伯",
+   "Sauber",
+   "C33",
+   "Ferrari 059/3",
+   "開季車身嚴重過重；Sauber 史上首次整季零分。"
+  ],
+  [
+   "2014-caterham",
+   "卡特漢",
+   "Caterham",
+   "CT05",
+   "Renault Energy F1 2014",
+   "車隊最後一輛車；財務困難缺席兩站，最終站靠募資回到賽場。"
+  ]
+ ],
+ "2015": [
+  [
+   "2015-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2015-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W06 Hybrid",
+   "Mercedes PU106B Hybrid",
+   "全年 16 勝、18 次桿位，12 次包辦冠亞軍。"
+  ],
+  [
+   "2015-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF15-T",
+   "Ferrari 060",
+   "Vettel 加盟首年 3 勝，第二站馬來西亞就拿下首勝。"
+  ],
+  [
+   "2015-williams",
+   "威廉斯",
+   "Williams",
+   "FW37",
+   "Mercedes PU106B Hybrid",
+   "4 度登上頒獎台，連續第二年拿下年度第三。"
+  ],
+  [
+   "2015-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB11",
+   "Renault Energy F1 2015",
+   "2008 年以來首度整季無勝；季前以黑白迷彩塗裝測試。"
+  ],
+  [
+   "2015-force-india",
+   "印度力量",
+   "Force India",
+   "VJM08",
+   "Mercedes PU106B Hybrid",
+   "英國站起換上短鼻 B 規格；Pérez 俄羅斯站季軍，年度第五創當時隊史最佳。"
+  ],
+  [
+   "2015-lotus-f1",
+   "蓮花",
+   "Lotus",
+   "E23 Hybrid",
+   "Mercedes PU106B Hybrid",
+   "Enstone 車隊首度改用賓士動力，隔年即換回 Renault；Grosjean 比利時站季軍是 Lotus 之名最後一次登上頒獎台。"
+  ],
+  [
+   "2015-toro-rosso",
+   "紅牛二隊",
+   "Toro Rosso",
+   "STR10",
+   "Renault Energy F1 2015",
+   "Verstappen 出道年，匈牙利站與美國站兩度拿下第四。"
+  ],
+  [
+   "2015-sauber",
+   "索伯",
+   "Sauber",
+   "C34",
+   "Ferrari 060",
+   "隨 Nasr 帶來 Banco do Brasil 贊助換上藍色新塗裝；Nasr 出道戰澳洲站就拿下第五。"
+  ],
+  [
+   "2015-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MP4-30",
+   "Honda RA615H",
+   "Honda 回歸；追求「零尺寸」的緊湊車尾，全季僅 27 分、排名第九。"
+  ],
+  [
+   "2015-marussia",
+   "瑪魯西亞",
+   "Marussia",
+   "MR03B",
+   "Ferrari 059/3",
+   "車隊破產重組後，以 2014 年的 MR03 改裝參賽，全季零分。"
+  ]
+ ],
+ "2016": [
+  [
+   "2016-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2016-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W07 Hybrid",
+   "Mercedes PU106C Hybrid",
+   "21 站 19 勝、20 次桿位；Rosberg 奪冠後隨即退休。"
+  ],
+  [
+   "2016-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB12",
+   "TAG Heuer F1-2016 (Renault)",
+   "Verstappen 升上紅牛首戰西班牙站即奪冠，成為 F1 史上最年輕的分站冠軍。"
+  ],
+  [
+   "2016-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF16-H",
+   "Ferrari 061",
+   "整季沒有任何分站冠軍，也沒拿到桿位。"
+  ],
+  [
+   "2016-force-india",
+   "印度力量",
+   "Force India",
+   "VJM09",
+   "Mercedes PU106C Hybrid",
+   "Pérez 摩納哥站季軍；年度第四是隊史最佳。"
+  ],
+  [
+   "2016-williams",
+   "威廉斯",
+   "Williams",
+   "FW38",
+   "Mercedes PU106C Hybrid",
+   "據 Williams 車隊數據，Bottas 在歐洲站（巴庫）排位賽跑出 378 km/h，是 F1 非官方的最高速紀錄。"
+  ],
+  [
+   "2016-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MP4-31",
+   "Honda RA616H",
+   "最後一輛以「MP4」命名的麥拉倫；年度第六。"
+  ],
+  [
+   "2016-toro-rosso",
+   "紅牛二隊",
+   "Toro Rosso",
+   "STR11",
+   "Ferrari 060",
+   "改用法拉利 2015 年規格的 060 動力單元；Verstappen 開季在此跑了 4 站才升上紅牛。"
+  ],
+  [
+   "2016-haas",
+   "哈斯",
+   "Haas",
+   "VF-16",
+   "Ferrari 061",
+   "美國哈斯車隊首輛賽車（Dallara 製造）；Grosjean 首戰澳洲站就拿下第六。"
+  ],
+  [
+   "2016-renault",
+   "雷諾",
+   "Renault",
+   "R.S.16",
+   "Renault R.E.16",
+   "Renault 買回 Lotus 車隊後以廠隊身分回歸；全年只拿 8 分。"
+  ],
+  [
+   "2016-sauber",
+   "索伯",
+   "Sauber",
+   "C35",
+   "Ferrari 061",
+   "全季唯一積分來自雨戰巴西站，靠這 2 分超越 Manor。"
+  ],
+  [
+   "2016-manor",
+   "Manor",
+   "Manor",
+   "MRT05",
+   "Mercedes PU106C Hybrid",
+   "Wehrlein 奧地利站第十，拿下車隊唯一 1 分；車隊在隔年初倒閉。"
+  ]
+ ],
+ "2017": [
+  [
+   "2017-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2017-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W08 EQ Power+",
+   "Mercedes M08 EQ Power+",
+   "12 勝、15 次桿位，賓士車隊四連霸。"
+  ],
+  [
+   "2017-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF70H",
+   "Ferrari 062",
+   "以法拉利 70 週年命名；Vettel 澳洲開幕戰奪冠，全年 5 勝。"
+  ],
+  [
+   "2017-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB13",
+   "TAG Heuer F1-2017 (Renault)",
+   "全年 3 勝；Ricciardo 在亞塞拜然站一度掉到第 17，最後仍逆轉奪冠。"
+  ],
+  [
+   "2017-force-india",
+   "印度力量",
+   "Force India",
+   "VJM10",
+   "Mercedes M08 EQ Power+",
+   "BWT 贊助讓車身從季前測試的銀灰色改成全粉紅塗裝；連續兩年年度第四。"
+  ],
+  [
+   "2017-williams",
+   "威廉斯",
+   "Williams",
+   "FW40",
+   "Mercedes M08 EQ Power+",
+   "車名紀念車隊 40 週年；Stroll 亞塞拜然站季軍，成為當時史上第二年輕的登台車手。"
+  ],
+  [
+   "2017-renault",
+   "雷諾",
+   "Renault",
+   "R.S.17",
+   "Renault R.E.17",
+   "全年 57 分、年度第六，比前一年的 8 分大幅進步。"
+  ],
+  [
+   "2017-toro-rosso",
+   "紅牛二隊",
+   "Toro Rosso",
+   "STR12",
+   "Toro Rosso (Renault)",
+   "改穿皇家藍新塗裝；搭載以 Toro Rosso 為名的 Renault 引擎。"
+  ],
+  [
+   "2017-haas",
+   "哈斯",
+   "Haas",
+   "VF-17",
+   "Ferrari 062",
+   "摩納哥站起把紅色區塊改成淺灰，同站拿下隊史首次雙車得分。"
+  ],
+  [
+   "2017-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MCL32",
+   "Honda RA617H",
+   "橘色塗裝回歸；最後一輛搭載 Honda 引擎的麥拉倫，可靠度問題不斷。"
+  ],
+  [
+   "2017-sauber",
+   "索伯",
+   "Sauber",
+   "C36",
+   "Ferrari 061",
+   "藍白金 25 週年塗裝；使用前一年規格的法拉利動力單元。"
+  ]
+ ],
+ "2018": [
+  [
+   "2018-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2018-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W09 EQ Power+",
+   "Mercedes M09 EQ Power+",
+   "車隊冠軍五連霸，Hamilton 奪第五座車手冠軍"
+  ],
+  [
+   "2018-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF71H",
+   "Ferrari 062 EVO",
+   "6 勝、車隊第 2；日本站起車身加上 Mission Winnow 標誌"
+  ],
+  [
+   "2018-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB14",
+   "TAG Heuer F1-2018 (Renault)",
+   "4 勝；最後一輛使用雷諾（TAG Heuer 冠名）動力的紅牛"
+  ],
+  [
+   "2018-renault",
+   "雷諾",
+   "Renault",
+   "R.S.18",
+   "Renault R.E.18",
+   "車隊第 4，2016 年重返 F1 後最佳"
+  ],
+  [
+   "2018-haas",
+   "哈斯",
+   "Haas",
+   "VF-18",
+   "Ferrari 062 EVO",
+   "93 分、車隊第 5，至今仍是哈斯最成功的賽車"
+  ],
+  [
+   "2018-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MCL33",
+   "Renault R.E.18",
+   "與本田分手後改用雷諾客戶動力，重拾木瓜橘塗裝"
+  ],
+  [
+   "2018-force-india",
+   "印度力量",
+   "Force India",
+   "VJM11",
+   "Mercedes M09 EQ Power+",
+   "季中進入破產管理，比利時站起改由新車隊 Racing Point Force India 參賽，前 12 站的車隊積分作廢"
+  ],
+  [
+   "2018-sauber",
+   "索伯",
+   "Sauber",
+   "C37",
+   "Ferrari 062 EVO",
+   "Alfa Romeo 冠名，Leclerc 的新秀年"
+  ],
+  [
+   "2018-toro-rosso",
+   "紅牛二隊",
+   "Toro Rosso",
+   "STR13",
+   "Honda RA618H",
+   "與本田合作的第一年；Gasly 巴林站第 4 為全季最佳"
+  ],
+  [
+   "2018-williams",
+   "威廉斯",
+   "Williams",
+   "FW41",
+   "Mercedes M09 EQ Power+",
+   "車隊第 10、只拿 7 分，是當時車隊史上最低名次；Martini 贊助的最後一年"
+  ]
+ ],
+ "2019": [
+  [
+   "2019-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2019-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W10 EQ Power+",
+   "Mercedes M10 EQ Power+",
+   "15 勝，追平紀錄的車隊冠軍六連霸；Hamilton 第六座車手冠軍"
+  ],
+  [
+   "2019-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF90",
+   "Ferrari 064",
+   "改用霧面漆減重；Leclerc 比利時站奪生涯首勝、蒙札再勝"
+  ],
+  [
+   "2019-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB15",
+   "Honda RA619H",
+   "改用本田動力；Verstappen 奧地利站奪勝，是本田 2006 年以來首勝"
+  ],
+  [
+   "2019-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MCL34",
+   "Renault E-Tech 19",
+   "Sainz 巴西站季軍，車隊 2014 年以來首座頒獎台"
+  ],
+  [
+   "2019-renault",
+   "雷諾",
+   "Renault",
+   "R.S.19",
+   "Renault E-Tech 19",
+   "日本站因自動調整煞車比例的裝置違規，兩車成績取消"
+  ],
+  [
+   "2019-toro-rosso",
+   "紅牛二隊",
+   "Toro Rosso",
+   "STR14",
+   "Honda RA619H",
+   "Kvyat 德國站季軍、Gasly 巴西站亞軍；最後一年以 Toro Rosso 為名"
+  ],
+  [
+   "2019-racing-point",
+   "Racing Point",
+   "Racing Point",
+   "RP19",
+   "BWT Mercedes M10 EQ Power+",
+   "Racing Point 接手 Force India 資產後打造的第一輛賽車"
+  ],
+  [
+   "2019-alfa-romeo",
+   "愛快羅密歐",
+   "Alfa Romeo",
+   "C38",
+   "Ferrari 064",
+   "Sauber 以 Alfa Romeo Racing 名義參賽的第一年"
+  ],
+  [
+   "2019-haas",
+   "哈斯",
+   "Haas",
+   "VF-19",
+   "Ferrari 064",
+   "Rich Energy 黑金塗裝；冠名合約在義大利站終止，新加坡站起撤下標誌"
+  ],
+  [
+   "2019-williams",
+   "威廉斯",
+   "Williams",
+   "FW42",
+   "Mercedes M10 EQ Power+",
+   "趕不及季前測試（缺席兩天半），全季只有 Kubica 德國站拿 1 分"
+  ]
+ ],
+ "2020": [
+  [
+   "2020-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2020-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W11 EQ Performance",
+   "Mercedes-AMG F1 M11",
+   "改漆黑色支持反種族歧視；搭載 DAS 雙軸轉向，車隊冠軍七連霸"
+  ],
+  [
+   "2020-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB16",
+   "Honda RA620H",
+   "2 勝（70 週年大獎賽、阿布達比）"
+  ],
+  [
+   "2020-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MCL35",
+   "Renault E-Tech 20",
+   "車隊第 3，2012 年以來最佳；雷諾動力的最後一年"
+  ],
+  [
+   "2020-racing-point",
+   "Racing Point",
+   "Racing Point",
+   "RP20",
+   "BWT Mercedes M11 EQ Performance",
+   "外號「粉紅賓士」；煞車導流罩被判抄襲 W10、扣 15 分，Pérez 薩基爾站奪勝"
+  ],
+  [
+   "2020-renault",
+   "雷諾",
+   "Renault",
+   "R.S.20",
+   "Renault E-Tech 20",
+   "Ricciardo 艾菲爾站季軍，是重返 F1 後首座頒獎台；以雷諾之名的最後一年"
+  ],
+  [
+   "2020-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF1000",
+   "Ferrari 065",
+   "托斯卡尼站迎來車隊第 1000 場大獎賽；車隊第 6，1980 年以來最差"
+  ],
+  [
+   "2020-alphatauri",
+   "紅牛二隊",
+   "AlphaTauri",
+   "AT01",
+   "Honda RA620H",
+   "Gasly 蒙札站奪勝，AlphaTauri 名下唯一一場勝利"
+  ],
+  [
+   "2020-alfa-romeo",
+   "愛快羅密歐",
+   "Alfa Romeo",
+   "C39",
+   "Ferrari 065",
+   ""
+  ],
+  [
+   "2020-haas",
+   "哈斯",
+   "Haas",
+   "VF-20",
+   "Ferrari 065",
+   "Grosjean 巴林站嚴重事故，最後兩站由 Fittipaldi 代打"
+  ],
+  [
+   "2020-williams",
+   "威廉斯",
+   "Williams",
+   "FW43",
+   "Mercedes-AMG F1 M11",
+   "全季零分；創辦人 Frank Williams 在義大利站後離開車隊"
+  ]
+ ],
+ "2021": [
+  [
+   "2021-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2021-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W12 E Performance",
+   "Mercedes-AMG F1 M12",
+   "車隊冠軍八連霸，但 Hamilton 以 8 分之差輸掉車手冠軍"
+  ],
+  [
+   "2021-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB16B",
+   "Honda RA621H",
+   "Verstappen 奪生涯首座車手冠軍；本田正式退出 F1 前的最後一季"
+  ],
+  [
+   "2021-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF21",
+   "Ferrari 065/6",
+   "Leclerc 在摩納哥、亞塞拜然兩度奪桿，全季未勝"
+  ],
+  [
+   "2021-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MCL35M",
+   "Mercedes-AMG F1 M12",
+   "Ricciardo 領軍蒙札一二名，車隊 2012 年以來首勝"
+  ],
+  [
+   "2021-alpine",
+   "Alpine",
+   "Alpine",
+   "A521",
+   "Renault E-Tech 20B",
+   "以 Alpine 之名的第一年；Ocon 匈牙利站奪勝"
+  ],
+  [
+   "2021-alphatauri",
+   "紅牛二隊",
+   "AlphaTauri",
+   "AT02",
+   "Honda RA621H",
+   "Gasly 亞塞拜然站季軍；142 分為這支車隊單季最高分"
+  ],
+  [
+   "2021-aston-martin",
+   "奧斯頓馬丁",
+   "Aston Martin",
+   "AMR21",
+   "Mercedes-AMG F1 M12",
+   "Aston Martin 重返 F1 的第一輛車；Vettel 亞塞拜然站亞軍"
+  ],
+  [
+   "2021-williams",
+   "威廉斯",
+   "Williams",
+   "FW43B",
+   "Mercedes-AMG F1 M12",
+   "Russell 比利時站拿下亞軍"
+  ],
+  [
+   "2021-alfa-romeo",
+   "愛快羅密歐",
+   "Alfa Romeo",
+   "C41",
+   "Ferrari 065/6",
+   "Räikkönen 的 F1 生涯最後一季"
+  ],
+  [
+   "2021-haas",
+   "哈斯",
+   "Haas",
+   "VF-21",
+   "Ferrari 065/6",
+   "全季零分，是唯一沒有大改前一年賽車的車隊"
+  ]
+ ],
+ "2022": [
+  [
+   "2022-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2022-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB18",
+   "Red Bull RBPTH001 (Honda)",
+   "地面效應新規首年，17 勝奪下車手、車隊雙冠"
+  ],
+  [
+   "2022-ferrari",
+   "法拉利",
+   "Ferrari",
+   "F1-75",
+   "Ferrari 066/7",
+   "12 次桿位只換到 4 勝；Sainz 英國站奪生涯首勝"
+  ],
+  [
+   "2022-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W13 E Performance",
+   "Mercedes-AMG F1 M13",
+   "近乎無側箱的設計，飽受海豚跳之苦；Russell 巴西站奪生涯首勝"
+  ],
+  [
+   "2022-alpine",
+   "Alpine",
+   "Alpine",
+   "A522",
+   "Renault E-Tech RE22",
+   "車隊第 4，2018 年以來最佳"
+  ],
+  [
+   "2022-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MCL36",
+   "Mercedes-AMG F1 M13",
+   "Norris 伊莫拉站季軍，全隊唯一頒獎台"
+  ],
+  [
+   "2022-alfa-romeo",
+   "愛快羅密歐",
+   "Alfa Romeo",
+   "C42",
+   "Ferrari 066/7",
+   "周冠宇的新秀年，他是首位中國籍 F1 正式車手"
+  ],
+  [
+   "2022-aston-martin",
+   "奧斯頓馬丁",
+   "Aston Martin",
+   "AMR22",
+   "Mercedes-AMG F1 M13",
+   "Vettel 的 F1 生涯最後一季"
+  ],
+  [
+   "2022-haas",
+   "哈斯",
+   "Haas",
+   "VF-22",
+   "Ferrari 066/7",
+   "Magnussen 巴西站奪下哈斯史上第一個桿位"
+  ],
+  [
+   "2022-alphatauri",
+   "紅牛二隊",
+   "AlphaTauri",
+   "AT03",
+   "Red Bull RBPTH001 (Honda)",
+   "車隊第 9；Gasly 季後轉投 Alpine"
+  ],
+  [
+   "2022-williams",
+   "威廉斯",
+   "Williams",
+   "FW44",
+   "Mercedes-AMG F1 M13",
+   "de Vries 在蒙札替補 Albon，首戰拿到第 9"
+  ]
+ ],
+ "2023": [
+  [
+   "2023-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2023-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB19",
+   "Honda RBPTH001",
+   "22 站贏 21 站，勝率創 F1 紀錄"
+  ],
+  [
+   "2023-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W14 E Performance",
+   "Mercedes-AMG F1 M14",
+   "開季沿用無側箱設計，摩納哥站起改回傳統側箱"
+  ],
+  [
+   "2023-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF-23",
+   "Ferrari 066/10",
+   "Sainz 新加坡站奪勝，是全季唯一不是紅牛贏的正賽"
+  ],
+  [
+   "2023-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MCL60",
+   "Mercedes-AMG F1 M14",
+   "開季落後，奧地利站大升級後躍居前段，全季 9 次頒獎台"
+  ],
+  [
+   "2023-aston-martin",
+   "奧斯頓馬丁",
+   "Aston Martin",
+   "AMR23",
+   "Mercedes-AMG F1 M14",
+   "Alonso 開季 8 站 6 上頒獎台，全季 8 座"
+  ],
+  [
+   "2023-alpine",
+   "Alpine",
+   "Alpine",
+   "A523",
+   "Renault E-Tech RE23",
+   "Ocon 摩納哥站、Gasly 荷蘭站各拿一座季軍"
+  ],
+  [
+   "2023-williams",
+   "威廉斯",
+   "Williams",
+   "FW45",
+   "Mercedes-AMG F1 M14",
+   "車隊第 7，2017 年以來最佳"
+  ],
+  [
+   "2023-alphatauri",
+   "紅牛二隊",
+   "AlphaTauri",
+   "AT04",
+   "Honda RBPTH001",
+   "以 AlphaTauri 之名的最後一年，全季先後 4 位車手上陣"
+  ],
+  [
+   "2023-alfa-romeo",
+   "愛快羅密歐",
+   "Alfa Romeo",
+   "C43",
+   "Ferrari 066/10",
+   "以 Alfa Romeo 冠名的最後一年"
+  ],
+  [
+   "2023-haas",
+   "哈斯",
+   "Haas",
+   "VF-23",
+   "Ferrari 066/10",
+   "MoneyGram 冠名首年，VF-19 之後首度以深色為主；車隊墊底"
+  ]
+ ],
+ "2024": [
+  [
+   "2024-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2024-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MCL38",
+   "Mercedes-AMG F1 M15",
+   "奪下 1998 年以來首座車隊冠軍；Norris、Piastri 都拿下生涯首勝"
+  ],
+  [
+   "2024-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF-24",
+   "Ferrari 066/12",
+   "Leclerc 摩納哥主場奪勝；車隊以 14 分之差屈居第 2"
+  ],
+  [
+   "2024-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB20",
+   "Honda RBPTH002",
+   "Verstappen 奪第四座車手冠軍，車隊卻只拿第 3"
+  ],
+  [
+   "2024-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W15 E Performance",
+   "Mercedes-AMG F1 M15",
+   "Hamilton 在賓士的最後一季，英國、比利時兩勝"
+  ],
+  [
+   "2024-aston-martin",
+   "奧斯頓馬丁",
+   "Aston Martin",
+   "AMR24",
+   "Mercedes-AMG F1 M15",
+   "全季沒有頒獎台，仍保住車隊第 5"
+  ],
+  [
+   "2024-alpine",
+   "Alpine",
+   "Alpine",
+   "A524",
+   "Renault E-Tech RE24",
+   "巴西站雨戰 Ocon 亞軍、Gasly 季軍"
+  ],
+  [
+   "2024-haas",
+   "哈斯",
+   "Haas",
+   "VF-24",
+   "Ferrari 066/10",
+   "小松禮雄接任領隊的第一年，車隊第 7"
+  ],
+  [
+   "2024-rb",
+   "紅牛二隊",
+   "RB",
+   "VCARB 01",
+   "Honda RBPTH002",
+   "以 Visa Cash App RB 之名的第一年；藍色塗裝被車迷比作 Toro Rosso"
+  ],
+  [
+   "2024-williams",
+   "威廉斯",
+   "Williams",
+   "FW46",
+   "Mercedes-AMG F1 M15",
+   "季中由 Colapinto 接替 Sargeant 跑最後 9 站"
+  ],
+  [
+   "2024-kick-sauber",
+   "索伯",
+   "Kick Sauber",
+   "C44",
+   "Ferrari 066/12",
+   "開季新款輕量輪圈螺帽會和氣動扳手卡牙，進站一度慢到 30 秒以上；全季只拿 4 分墊底"
+  ]
+ ],
+ "2025": [
+  [
+   "2025-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力",
+   ""
+  ],
+  [
+   "2025-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MCL39",
+   "Mercedes-AMG F1 M16",
+   "連兩年車隊冠軍，Norris 以 2 分之差奪生涯首座車手冠軍"
+  ],
+  [
+   "2025-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W16 E Performance",
+   "Mercedes-AMG F1 M16",
+   "Russell 加拿大、新加坡兩勝；Antonelli 的新秀年"
+  ],
+  [
+   "2025-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB21",
+   "Honda RBPTH003",
+   "Verstappen 8 勝，最終以 2 分之差錯失車手冠軍"
+  ],
+  [
+   "2025-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF-25",
+   "Ferrari 066/15",
+   "Hamilton 加盟首年；全季未贏正賽，只拿下中國站衝刺賽"
+  ],
+  [
+   "2025-williams",
+   "威廉斯",
+   "Williams",
+   "FW47",
+   "Mercedes-AMG F1 M16",
+   "Sainz 在亞塞拜然、卡達兩度拿下正賽季軍，車隊第 5 為 2017 年以來最佳"
+  ],
+  [
+   "2025-racing-bulls",
+   "紅牛二隊",
+   "Racing Bulls",
+   "VCARB 02",
+   "Honda RBPTH003",
+   "改用全白塗裝；Hadjar 荷蘭站季軍，生涯首座頒獎台"
+  ],
+  [
+   "2025-aston-martin",
+   "奧斯頓馬丁",
+   "Aston Martin",
+   "AMR25",
+   "Mercedes-AMG F1 M16",
+   ""
+  ],
+  [
+   "2025-haas",
+   "哈斯",
+   "Haas",
+   "VF-25",
+   "Ferrari 066/15",
+   ""
+  ],
+  [
+   "2025-kick-sauber",
+   "索伯",
+   "Kick Sauber",
+   "C45",
+   "Ferrari 066/15",
+   "Hülkenberg 英國站季軍，出賽 239 場後首登頒獎台"
+  ],
+  [
+   "2025-alpine",
+   "Alpine",
+   "Alpine",
+   "A525",
+   "Renault E-Tech RE25",
+   "車隊墊底；雷諾動力單元的最後一年"
+  ]
+ ],
+ "2026": [
+  [
+   "2026-standard",
+   "F1Drive",
+   "F1Drive",
+   "標準賽車",
+   "1.6 L V6 渦輪混合動力（電力約五成）",
+   ""
+  ],
+  [
+   "2026-mercedes",
+   "賓士",
+   "Mercedes",
+   "F1 W17 E Performance",
+   "Mercedes-AMG F1 M17 E Performance",
+   "全能標竿：加速、煞車與電能管理都是全場最佳，彎道也是頂尖；真實弱點是起跑與可靠度。"
+  ],
+  [
+   "2026-ferrari",
+   "法拉利",
+   "Ferrari",
+   "SF-26",
+   "Ferrari 067/6",
+   "彎道頂尖、出彎俐落，但動力單元偏弱，長直線尾段會掉速。"
+  ],
+  [
+   "2026-mclaren",
+   "麥拉倫",
+   "McLaren",
+   "MCL40",
+   "Mercedes-AMG F1 M17 E Performance",
+   "彎道強，季中升級後拿下分站冠軍；但在同一具 Mercedes 動力中直線最慢，極速是前段班最低。"
+  ],
+  [
+   "2026-red-bull",
+   "紅牛",
+   "Red Bull",
+   "RB22",
+   "Red Bull Ford DM01",
+   "內燃機是 FIA 評定的基準（最強），但全季極速只在中位數；底盤難調，高速彎是前四強中最弱。"
+  ],
+  [
+   "2026-racing-bulls",
+   "紅牛二隊",
+   "Racing Bulls",
+   "VCARB 03",
+   "Red Bull Ford DM01",
+   "中段班最快：直線速度名列前茅（測速點全季平均僅次於 Alpine），彎道中規中矩、調校窗口窄。"
+  ],
+  [
+   "2026-alpine",
+   "Alpine",
+   "Alpine",
+   "A526",
+   "Mercedes-AMG F1 M17 E Performance",
+   "全場極速最高（Monza 桿位），但高速彎推頭、下壓力不足。"
+  ],
+  [
+   "2026-haas",
+   "哈斯",
+   "Haas",
+   "VF-26",
+   "Ferrari 067/6",
+   "開季正賽表現亮眼，但全季進步幅度最小、單圈速度偏弱，慢彎入彎是弱點。"
+  ],
+  [
+   "2026-audi",
+   "奧迪",
+   "Audi",
+   "R26",
+   "Audi AFR 26 Hybrid",
+   "底盤不錯，中高速彎是中段班最好的之一；自製動力單元能量管理較差、起跑吃虧。"
+  ],
+  [
+   "2026-williams",
+   "威廉斯",
+   "Williams",
+   "FW48",
+   "Mercedes-AMG F1 M17 E Performance",
+   "開季超重又缺下壓力，彎道與煞車吃虧；靠 Mercedes 動力，直線速度仍在中位數以上。"
+  ],
+  [
+   "2026-aston-martin",
+   "奧斯頓馬丁",
+   "Aston Martin",
+   "AMR26",
+   "Honda RA626H",
+   "被 Honda 動力單元拖累：極速、加速、電能都是全場最弱，慢彎相對沒那麼差。"
+  ],
+  [
+   "2026-cadillac",
+   "凱迪拉克",
+   "Cadillac",
+   "MAC-26",
+   "Ferrari 067/6",
+   "新車隊首作：平衡尚可但嚴重缺下壓力，三種彎都是全場最慢，極速略低於中位數。"
+  ]
+ ]
+}

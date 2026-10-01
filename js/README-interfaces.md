@@ -19,6 +19,8 @@ window.F1_TRACKS = [{ id, name, location, lengthKm, points: [[x, z], ...] }, ...
 ```
 `points`: closed centreline in metres, centred near the origin, first point NOT repeated at the end,
 ordered in the racing direction, points[0] = start/finish line. Sorted by name.
+Optional: `pitSide` (-1 = driver's right at the line, +1 = left: the real pit lane side where scenery-data.js has no pit
+buildings; Monaco) and `pitLimitKmh` (the real pit lane speed limit where below 80: Monaco, Singapore = 60).
 
 ## js/track.js
 
@@ -357,10 +359,11 @@ What the user asked for (translated, in the order it was asked):
    everybody can see. Keyboard: Q = pit limiter, E = battery; controller mapping is ours to choose.
 
 Final script order in `index.html`:
-`lib/three.min.js`, `tracks-data.js`, `js/seasons-data.js`, `js/cars.js`, `js/track.js`, `js/tyres.js`, `js/car.js`,
+`js/boot.js`, `lib/three.min.js`, `tracks-data.js`, `js/seasons-data.js`, `js/cars.js`, `js/track.js`, `js/tyres.js`, `js/car.js`,
 `js/cockpit.js`, `js/gamepad.js`, `js/audio.js`, `js/raceline.js`, `scenery-data.js`, `js/scenery.js`, `js/collide.js`,
 `js/carmodel.js`, `js/laps.js`, `js/pit.js`, `net/session.js`, `js/net.js`, `js/gp.js`, `js/telemetry.js`, `js/ui.js`,
-`js/main.js`.
+`js/main.js`. `index.html` has a Content-Security-Policy (no inline script, no inline handlers, no remote scripts):
+`js/boot.js` holds what used to be the inline error / missing-script overlay.
 
 Golden rule for every module below: **the reference car on fresh medium tyres, with no boost, no limiter and no pit
 stop, drives exactly as the v5 car did** (same accelerations, grip, braking, top speed). All existing tests, racing-line
@@ -378,6 +381,7 @@ CarSpec = {
   year, team, teamZh, car, engine,     // display: 'Ferrari', '法拉利', 'F2004', 'Ferrari 3.0 V10'
   colour, colour2,                      // livery '#rrggbb'
   ratings: { topSpeed, accel, cornering, braking, ers },   // 0..100 inside its season, 50 = that season's standard car
+                                        //   (50 + 50 * tanh(gain * x / 50): never pinned at 0 or 100)
   note,                                 // one line, Traditional Chinese, or ''
   // physics — ABSOLUTE values in js/car.js units (everything is per kg):
   power,              // W/kg
@@ -392,12 +396,14 @@ CarSpec = {
   rpmIdle, rpmShift, rpmMax,
   shiftTime,          // s: how long a gear change SOUNDS (ignition cut), 0.03..0.08; the drive is not interrupted
   cylinders, aspiration,   // 8 (2.4 l V8, 2010-2013) or 6 (1.6 l V6 turbo-hybrid, 2014 on); 'na' | 'hybrid'
-  ers,                // null (no battery) | { store (J/kg), power (W/kg), harvest (W/kg) }
+  ers,                // null (no battery) | { store (J/kg), power (W/kg), harvest (W/kg), taperKmh? }
+                      //   taperKmh: optional [from, to] km/h, the deploy power fades linearly to 0 between them
+                      //   (2026 only: [290, 345], from FIA C5.2.8)
   cockpit             // style id: 'modern' (2010-2017, no halo) | 'halo' (2018-2021) | 'halo18' (2022 on: 18-inch wheels, wheel covers)
 }
 ```
 `F1.REF_SPEC` (defined by js/car.js) is the v5 car: its physics numbers are today's constants, 8 gears
-(`gearKmh [60, 100, 140, 180, 220, 260, 300]`, `topKmh 345`), `rpmIdle 4000, rpmShift 11800, rpmMax 12500`,
+(`gearKmh [60, 100, 140, 180, 220, 260, 300]`, `topKmh 345`), `rpmIdle 4000, rpmShift 11800, rpmMax 15000` (the V6 regulation limit),
 `shiftTime 0.05`, 6 cylinders, `'hybrid'`, `ers {store 4656.67, power 145.52, harvest 230}` (per kg), cockpit `'halo18'`, id `'2025-standard'`.
 
 Drivetrain formula (shared by car.js for the own car and by audio.js for remote cars): gear by speed against `gearKmh`
@@ -432,7 +438,8 @@ F1.cars = {
 ### js/car.js additions
 
 - `F1.REF_SPEC`; `F1.carPerf(spec) -> perf` (same fields and functions as `F1.CAR_PERF`, which stays the reference
-  car's, plus `gearFor(v)`, `rpmFor(v, gear?)`, `topSpeed`); `F1.createCar(spec?)`, `car.setSpec(spec)`, `car.spec`,
+  car's, plus `gearFor(v)`, `rpmFor(v, gear?)`, `topSpeed`, `topSpeedBoost`, `ersDeploy(v)` = the W/kg the battery deploys at
+  speed v, 0 without one); `F1.createCar(spec?)`, `car.setSpec(spec)`, `car.spec`,
   `car.perf`, `car.tyres` (the `F1.createTyres()` instance), `car.setBattery(v)`.
 - `input` gains `boost` (bool, hold: deploy the battery) and `limiter` (bool: pit limiter engaged).
 - `car.state` gains, refreshed every `update`: `throttle`, `brake` (0..1 pedals actually applied), `gear` (-1 reverse,
@@ -441,8 +448,10 @@ F1.cars = {
   the pit lane between the entry and exit lines), `vib` (0..1 vibration from flat spots / punctures).
 - Gear changes do not interrupt the drive (seamless-shift gearboxes throughout 2010..2026); `spec.shiftTime` only
   shapes the sound. `state.shiftT` restarts at 0 on every gear change, `state.shiftDir` is +1 (up) or -1 (down).
-- ERS: only with `spec.ers`. Deploy while `input.boost`, throttle applied, battery > 0 and not braking: `ers.power` is
-  added to the engine power (still traction-limited). Harvest under braking (proportional to pedal and speed, up to
+- ERS: only with `spec.ers`. Deploy while `input.boost`, throttle applied, battery > 0 and not braking: the engine's
+  drive (traction cap included) is multiplied by `1 + ers.power / power`, up to what the tyres transmit (so below the
+  traction cap's speed the battery deploys only part of its power: `state.deploy` < 1); `ers.taperKmh` fades the deploy
+  power out linearly. Harvest under braking (proportional to pedal and speed, up to
   `ers.harvest`) and a little on lift-off above 20 m/s; bookkeeping only, braking distances do not change. Reference
   car: a full store lasts ~32 s, a racing lap without deploying recovers 50..70 % of it, +15..20 km/h at the end of a
   long straight. `car.reset()` leaves the battery alone; main.js calls `car.setBattery(1)`.
@@ -480,12 +489,13 @@ set lasts roughly 15 hard laps of an average track.
 
 ### js/track.js additions — pit lane
 
-Every track gets a pit lane next to the start / finish straight, on the side of the real pit buildings where the
-scenery data has them (else the side with room). `track.pit` is `null` only if a track really has no room.
+Every track gets a pit lane next to the start / finish straight, on the side given by `trackData.pitSide`, else of the
+real pit buildings where the scenery data has them (else the side with room). `track.pit` is `null` only if a track
+really has no room.
 ```js
 track.pit = {
   side,               // +1 on the +n side (driver's left), -1 on the other
-  limitKmh,           // 80 (60 on the tight street circuits)
+  limitKmh,           // 80; trackData.pitLimitKmh where lower (60 at Monaco and Singapore)
   from, to,           // sample indices: first / last sample of the lane incl. its tapers (cyclic, `from` before the line)
   entry, exit,        // sample indices of the entry line and exit line (the light curtains, speed limit between them)
   laneD(index),       // signed lateral offset of the lane's centre at that sample, NaN outside from..to
@@ -512,15 +522,20 @@ track.pit = {
 pit = F1.createPit({ random })
 pit.reset()
 pit.update(dt, carState, track, { slot, limiter }) -> event | null
-    // 'enter' (crossed the entry line into the lane), 'exit', 'speeding' (first time over the limit in this visit),
-    // 'serviceStart', 'serviceDone'
-pit.state = { inLane, speeding, inBox, service /* null | {total, left, penalty} */, stops }
+    // 'enter' (crossed the entry line into the lane), 'exit', 'speeding' (first time over the limit in this visit, and
+    // again the first time after its stop began), 'serviceStart', 'serviceDone', 'penaltyStart', 'penaltyDone' (a hold
+    // at the exit line), 'serviceAbort' (the car left its box / hold before the end: main.js may ignore it)
+pit.state = { inLane, speeding, inBox, service /* null | {total, left, penalty, work} (work 0: a hold at the exit line) */,
+              stops, pending /* s of hold still to serve */, boxAhead, boxPassed, visit, flagged, served, slot, limitKmh }
 ```
 - Stop in YOUR box (`track.pit.boxes[slot]`: within about 2.5 m along, 1.2 m across, roughly aligned, speed below
   0.5 m/s): the service starts and takes a random 2.0..4.5 s (the occasional slow stop). During the service the car is
   held (main.js freezes it as on the grid). At 'serviceDone' main.js fits the chosen compound and releases the car.
-- Speeding in the lane (more than 3 km/h over `limitKmh` between the lines) adds a 5 s hold to that visit's stop; in the
-  next stop if the driver did not stop this time.
+- Speeding in the lane (more than 3 km/h over `limitKmh` between the lines) adds a 5 s hold. It is served at that
+  visit's stop when the stop comes after it, else (sped after the stop, or no stop) as a stop-go at the exit line:
+  'penaltyStart', `state.service = {total, left, penalty, work: 0}` (main.js freezes the car as for a service, no tyres),
+  'penaltyDone'. Speeding after the stop is a new offence. A pending hold only outlives a visit that reverses out over
+  the entry line.
 - Cars in the pit lane are ghosts to each other and to cars on the track (no collisions in the lane).
 
 ### js/audio.js — `F1.audio` (Web Audio, fully synthesised: the project ships no sound files)
@@ -584,9 +599,14 @@ PIT LIMITER state, the team colour and car name. One canvas, no DOM work per fra
   `init({..., onYear(year), onCar(id), onAudio({volume, muted})})`, `setCars({year, cars, selected, canPickYear,
   canPickCar, seasons})`, `getCar()`, `getAudio()`; the choice and the audio settings persist in localStorage.
 - Grand Prix panel: shows the year, and a 輪胎損耗 (wear x1..x5) control next to Q / R; `onGpStart({q, r, wear})`.
-- HUD: pit overlay text (`setPit({inLane, limiter, speeding, service: {left, total, penalty} | null, limitKmh})`:
-  維修區限速 80、超速、換胎中 2.3 s ...), next-compound indicator through the telemetry graphic; hints updated for
-  Q / E / T / M and the controller mapping; volume slider + mute in the menu; F1DB attribution next to OpenStreetMap.
+- HUD: pit overlay text (`setPit({inLane, limiter, speeding, service: {left, total, penalty} | null, limitKmh, boxAhead,
+  slot, pending, served})`: 維修區限速 80、超速、換胎中 2.3 s、罰停中 ...; `pending` = s of hold still to serve, `served` =
+  the visit has had its stop, so that hold waits for the exit line), next-compound indicator through the telemetry
+  graphic; hints updated for Q / E / T / M and the controller mapping; volume slider + mute in the menu; F1DB attribution
+  next to OpenStreetMap (the credits line opens 設定 → 資料來源與授權: every data source with its licence and address).
+- `ui.setLoading(name | null)`: the 載入賽道中… note while a track is built (main.js builds it after the next frame).
+- `#hud.res-open` while the results overlay is open: in windows under 1260 px the overlay sits below the top row of boxes
+  and the session box makes way for it.
 
 ### js/main.js + electron-main.js (v6 glue)
 
@@ -596,8 +616,14 @@ PIT LIMITER state, the team colour and car name. One canvas, no DOM work per fra
 - Audio: `init()` on the first key / click, `setActive(running)`, `update` every frame, beeps with the start lights,
   pit sounds.
 - Battery full and a fresh set of tyres (medium by default, the chosen compound otherwise) on track load, at the start of
-  qualifying and on the grid; `tyres.setWearRate(view.wear)` during a session, 1 otherwise.
-- Pit: `pit.update` every step; the car is frozen during a service; 'serviceDone' -> `car.tyres.fit(next)`; remote and
-  own cars in the lane are ghosts; toasts / `ui.setPit`.
+  qualifying and on the grid; `tyres.setWearRate(view.wear)` from the grid on (grid / race / results); 1 in qualifying
+  and free practice (the 輪胎損耗 option is for the race only).
+- Pit: `pit.update` every step; the car is frozen during a service and during a hold at the exit line (any
+  `pit.state.service`); 'serviceDone' -> `car.tyres.fit(next)`; 'penaltyStart' / 'penaltyDone' -> toasts; remote and
+  own cars in the lane are ghosts; toasts / `ui.setPit`. A Grand Prix that ends while the car is held in its box
+  finishes the tyre change on the spot (a hold at the exit line is just dropped).
+- R inside the pit lane (asphalt, tapers or a box) puts the car on the lane centre at the same place, stopped, facing
+  along the lane; the limiter and the pit visit are kept (the lane and its speed limit still have to be driven). R is
+  ignored while the car is held for a service or a hold.
 - `F1.buildRaceLine(track, perf?)` (js/raceline.js) takes the car's perf (default `F1.CAR_PERF`).
 - `electron-main.js`: autoplay policy `no-user-gesture-required`.

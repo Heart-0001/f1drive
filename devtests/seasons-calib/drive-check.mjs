@@ -10,13 +10,15 @@
 // Hungaroring?) and off-track runs. Writes devtests/seasons-calib/drive-check.json (only when every season was run).
 // Exit code 1 when a car leaves the road on a flying lap or a correlation with the real order is below 0.8.
 // About 3 min.
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import * as B from '../../tools/build-cars.mjs';
 import { driveLap, buildTracks } from './driver.mjs';
 
 const require = createRequire(import.meta.url);
+// the battery as the calibration used it (calibration.json `deploy`: E held on full throttle above 100 km/h)
+const DEPLOY = JSON.parse(readFileSync(B.CALIB_FILE, 'utf8')).deploy === true ? { deploy: true } : undefined;
 const only = process.argv.slice(2).filter(a => /^\d{4}$/.test(a)).map(Number);
 const G = B.loadGame();
 require(join(B.ROOT, 'js', 'seasons-data.js'));
@@ -51,7 +53,7 @@ for (const s of CARS.seasons) {
   if (only.length && !only.includes(s.year)) continue;
   const list = CARS.list(s.year), rs = raw.seasons.find(q => q.year === s.year);
   const data = global.F1_SEASONS.find(q => q.year === s.year);
-  const runs = list.map(spec => tracks.map(t => driveLap(t, spec)));
+  const runs = list.map(spec => tracks.map(t => driveLap(t, spec, DEPLOY)));
   const std = runs[0];
   const rows = list.slice(1).map((spec, k) => {
     const r = runs[k + 1], e = rs.entries.find(q => q.id === spec.id), d = data.cars.find(q => q.id === spec.id);

@@ -109,6 +109,8 @@
   }
 
   // o = { slot (box, default 0), vLane: m/s cap between the entry and exit lines (default: 2 km/h under the limit),
+  //       vLaneOut: m/s cap from the box to the exit line (default vLane: a car speeding all the way also speeds after
+  //       its stop, a new offence held at the exit line by js/pit.js),
   //       cruise: true = the limiter holds the speed (throttle wide open in the lane), out: m to drive on after pit.to }
   // The path starts where the car is now: its own offset blended to the lane over the stretch up to pit.from.
   V.pitPlan = function (o) {
@@ -142,7 +144,8 @@
       vmax[u] = Math.min(vmax[u], Math.sqrt(A_LAT / Math.max(kap, 1e-6)));
     }
     var uEn = run + kEn, uEx = run + kEx, vLane = o.vLane > 0 ? o.vLane : vLim - 2 / 3.6;
-    for (u = uEn - Math.round(40 / ds); u <= uEx; u++) vmax[u] = Math.min(vmax[u], vLane);
+    var vOut = o.vLaneOut > 0 ? o.vLaneOut : vLane;
+    for (u = uEn - Math.round(40 / ds); u <= uEx; u++) vmax[u] = Math.min(vmax[u], u > ub ? vOut : vLane);
     vmax[ub] = Math.min(vmax[ub], 2);
     for (u = L - 1; u >= 0; u--) {
       var acc = u < ub && ub - u < 40 / ds ? A_STOP : A_BRAKE;
@@ -152,16 +155,49 @@
       active: true, phase: 'approach', U: 0, sounds0: V.sounds.length, idx: start, start: start, L: L, run: run, ub: ub, uEn: uEn, uEx: uEx, slot: slot, box: b,
       cruise: !!o.cruise, vLane: vLane, tgt: tgt, vmax: vmax, integ: 0, stopped: null, served: false, stops0: g.pit.state.stops,
       rec: { maxLaneKmh: 0, cruiseKmh: 0, hits: 0, grass: 0, maxServiceMove: 0, serviceFrames: 0, frozenBad: 0, svcStartClock: null, svcDoneClock: null,
-        svcTotal: null, svcPenalty: null, svcWork: null, lapNs: [], lapChanges: [], enterClock: null, exitClock: null }
+        svcTotal: null, svcPenalty: null, svcWork: null, lapNs: [], lapChanges: [], enterClock: null, exitClock: null,
+        holdStartClock: null, holdDoneClock: null, holdTotal: null, holdFrames: 0, maxHoldMove: 0, holdFrozenBad: 0, holdLap0: null, holdLap1: null }
     };
     if (!V.lineStep) {
       V.lineStep = E.ap.step;
-      E.ap.step = function () { if (V.plan && V.plan.active) planStep(); else if (V.following) followStep(); else V.lineStep(); };
+      E.ap.step = dispatch;
     }
     V.following = false;
     E.ap.on = true;
     return { ok: true, run: run, L: L, uEn: uEn, uEx: uEx, ub: ub, K: K };
   };
+
+  function dispatch() { if (V.plan && V.plan.active) planStep(); else if (V.lane && V.lane.active) laneStep(); else if (V.following) followStep(); else V.lineStep(); }
+
+  // From INSIDE the pit lane (e.g. after R there: js/main.js puts the car on the lane centre): follow the lane centre
+  // (track.pit.laneD) at o.v m/s (default 2 km/h under the limit; the limiter, if on, holds it anyway) to pit.to, back to
+  // the centreline over 100 m, then hand over to the line autopilot. (The line autopilot itself would steer into the pit
+  // wall from in there.)
+  V.laneOut = function (o) {
+    o = o || {};
+    var E = window.__e;
+    if (!V.lineStep) { V.lineStep = E.ap.step; E.ap.step = dispatch; }
+    if (V.plan) V.plan.active = false;
+    V.following = false;
+    V.lane = { active: true, v: o.v || 0, integ: 0 };
+    E.ap.on = true;
+    return true;
+  };
+  function laneStep() {
+    var E = window.__e, g = F1.game, track = g.track, pit = track.pit, st = g.car.state, S = track.samples, N = S.length, ds = track.length / N, L = V.lane;
+    var wq = function (q) { return ((q % N) + N) % N; }, K = wq(pit.to - pit.from), k = wq(st.sampleIndex - pit.from), back = Math.round(100 / ds);
+    if (k > K + back + 10 && k < K + back + 400) { L.active = false; setPad(0, 0, 0); return; }
+    var v = Math.max(0, st.speed), la = clamp(4 + 0.35 * v, 5, 20), kj = k + Math.round(la / ds), j = wq(pit.from + kj), dT;
+    if (kj <= K) dT = pit.laneD(j);
+    else { var f = clamp((kj - K) / back, 0, 1); dT = pit.laneD(pit.to) * (1 - f * f * (3 - 2 * f)); }
+    var s = S[j], gx = s.x + s.nx * dT - st.x, gz = s.z + s.nz * dT - st.z, sh = Math.sin(st.heading), ch = Math.cos(st.heading);
+    var xf = gx * sh + gz * ch, yl = gx * ch - gz * sh, kap = 2 * yl / (xf * xf + yl * yl), PERF = g.car.perf || F1.CAR_PERF;
+    var lock = PERF.steerLock / (1 + (v / PERF.steerSpeedRef) * (v / PERF.steerSpeedRef));
+    var steer = clamp(Math.atan(kap * PERF.wheelbase) / lock, -1, 1), vt = L.v > 0 ? L.v : pit.limitKmh / 3.6 - 2 / 3.6, err = vt - v, thr = 0, brk = 0;
+    L.integ = clamp(L.integ + err * E.dt * 0.6, 0, 1);
+    if (err > -0.4) thr = clamp(0.35 * err + L.integ + 0.15, 0, 1); else { brk = clamp(-0.3 * err, 0, 1); L.integ *= 0.9; }
+    setPad(thr, brk, steer);
+  }
 
   function planStep() {
     var E = window.__e, pl = V.plan, g = F1.game, track = g.track, car = g.car, st = car.state, S = track.samples, N = S.length, ds = track.length / N;
@@ -181,11 +217,20 @@
       if (rec.lapNs.length) rec.lapChanges.push({ n: g.lap.n, inLane: P.inLane, carInPit: st.inPit, d: st.d, last: g.lap.last, U: pl.U, clock: E.clock });
       rec.lapNs.push(g.lap.n);
     }
-    if (P.service && !pl.stopped) {
+    // the box service (work > 0) and a penalty hold at the exit line (work 0: js/pit.js 'penaltyStart') apart
+    var svcBox = !!(P.service && P.service.work > 0), hold = !!(P.service && !(P.service.work > 0));
+    if (svcBox && !pl.stopped) {
       var lx0 = Math.cos(b.heading), lz0 = -Math.sin(b.heading), dd = (b.x - st.x) * Math.sin(b.heading) + (b.z - st.z) * Math.cos(b.heading);
       pl.stopped = { along: -dd, across: (st.x - b.x) * lx0 + (st.z - b.z) * lz0, hd: Math.atan2(Math.sin(st.heading - b.heading), Math.cos(st.heading - b.heading)), inPit: st.inPit, clock: E.clock };
     }
-    if (P.service) {
+    if (hold) {
+      if (rec.holdStartClock === null) { rec.holdStartClock = E.clock; rec.holdTotal = P.service.total; rec.holdX = st.x; rec.holdZ = st.z; rec.holdLap0 = g.lap.time; }
+      rec.holdFrames++;
+      var hm = Math.hypot(st.x - rec.holdX, st.z - rec.holdZ);
+      if (hm > rec.maxHoldMove) rec.maxHoldMove = hm;
+      if (st.speed !== 0) rec.holdFrozenBad++;
+    } else if (rec.holdStartClock !== null && rec.holdDoneClock === null) { rec.holdDoneClock = E.clock; rec.holdLap1 = g.lap.time; }
+    if (svcBox) {
       if (rec.svcStartClock === null) { rec.svcStartClock = E.clock; rec.svcTotal = P.service.total; rec.svcPenalty = P.service.penalty; rec.svcWork = P.service.work; rec.svcX = st.x; rec.svcZ = st.z;
         rec.svcLap0 = g.lap.time; rec.svcSounds0 = V.sounds.length; }
       rec.serviceFrames++;
@@ -236,7 +281,7 @@
     var E = window.__e;
     if (!V.lineStep) {
       V.lineStep = E.ap.step;
-      E.ap.step = function () { if (V.plan && V.plan.active) planStep(); else if (V.following) followStep(); else V.lineStep(); };
+      E.ap.step = dispatch;
     }
     V.following = !!on;
     E.ap.on = true;

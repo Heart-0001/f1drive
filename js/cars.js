@@ -15,9 +15,10 @@
 //   }
 // CarSpec = era value x the car's multiplier (clamped to 0.95..1.05) for power, dragK (drag), downforce, latBase and
 // latMax (grip), brakeBase (brake), traction, ers.power (ersPower), ers.harvest (ersHarvest); everything else is the
-// era's. The 2025 standard car is F1.REF_SPEC, number for number. Every number is checked with the ranges of js/car.js's
-// F1.sanitizeSpec (physics 1/4..4 x the reference, ERS 1/10..10 x, gears 10..500 km/h, rpm, shift time, cylinders),
-// the era value and again each era x multiplier product: a broken data file falls back to the v5 reference car's
+// era's (ers.store, the 2026 ers.taperKmh, drivetrain, cockpit). The 2025 standard car is F1.REF_SPEC, number for
+// number. Every number is checked with the ranges of js/car.js's F1.sanitizeSpec (physics 1/4..4 x the reference,
+// ERS 1/10..10 x, gears 10..500 km/h, rpm, shift time, cylinders, the taper's speeds), the era value and again each
+// era x multiplier product: a broken data file falls back to the v5 reference car's
 // values, never to NaN, and every CarSpec is exactly what js/car.js drives (F1.sanitizeSpec(spec) deep-equals spec), so
 // the HUD, the sound and the physics never disagree.
 // The CarSpecs are built once and FROZEN (shared by every caller): copy before changing one.
@@ -38,7 +39,7 @@
   var REF = {
     power: POWER, dragK: DRAG_K, downforce: 0.0045 / (20.0 / 9.81), latBase: 20.0, latMax: 44.0, brakeBase: 12.0,
     traction: 11.0, gearKmh: [60, 100, 140, 180, 220, 260, 300], topKmh: 345, rpmIdle: 4000, rpmShift: 11800,
-    rpmMax: 12500, shiftTime: 0.05, cylinders: 6, aspiration: 'hybrid',
+    rpmMax: 15000, shiftTime: 0.05, cylinders: 6, aspiration: 'hybrid',
     ers: { store: 32 * ERS_POWER, power: ERS_POWER, harvest: 230 }, cockpit: 'halo18'
   };
   var STD = { team: 'F1Drive', teamZh: 'F1Drive', car: '標準賽車', engine: '1.6 L V6 渦輪混合動力', colour: '#9AA0A6', colour2: '#2B2F36' };
@@ -75,13 +76,16 @@
     o.ers = ers === null || ers === false ? null : {
       store: ersVal(own(ers, 'store'), 'store'), power: ersVal(own(ers, 'power'), 'power'), harvest: ersVal(own(ers, 'harvest'), 'harvest')
     };
+    // 2026: the deploy power fades out between [from, to] km/h (js/car.js's range); kept only when valid
+    var tk = own(ers, 'taperKmh');
+    if (o.ers && Array.isArray(tk) && tk.length === 2 && inRange(tk[0], 50, 599) && inRange(tk[1], tk[0] + 1, 600)) o.ers.taperKmh = [tk[0], tk[1]];
     o.cockpit = COCKPITS.indexOf(own(e, 'cockpit')) >= 0 ? e.cockpit : REF.cockpit;
     return o;
   }
 
   function freeze(s) {
     Object.freeze(s.ratings); Object.freeze(s.gearKmh);
-    if (s.ers) Object.freeze(s.ers);
+    if (s.ers) { if (s.ers.taperKmh) Object.freeze(s.ers.taperKmh); Object.freeze(s.ers); }
     return Object.freeze(s);
   }
 
@@ -120,6 +124,7 @@
     s.aspiration = asp === 'na' || asp === 'hybrid' ? asp : era.aspiration;
     s.ers = era.ers ? { store: era.ers.store, power: ersVal(era.ers.power * mult(m, 'ersPower'), 'power'),
       harvest: ersVal(era.ers.harvest * mult(m, 'ersHarvest'), 'harvest') } : null;
+    if (s.ers && era.ers.taperKmh) s.ers.taperKmh = era.ers.taperKmh.slice();
     s.cockpit = era.cockpit;
     return freeze(s);
   }

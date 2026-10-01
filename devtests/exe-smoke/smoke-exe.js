@@ -31,7 +31,8 @@ function getJson(url) {
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   if (!fs.existsSync(EXE)) { console.log('FAIL exe not found: ' + EXE); process.exit(1); }
   const userData = fs.mkdtempSync(path.join(require('os').tmpdir(), 'f1drive-exe-smoke-'));
-  const app = spawn(EXE, ['--remote-debugging-port=' + PORT, '--user-data-dir=' + userData], { stdio: 'ignore', detached: false });
+  // --mute-audio: the packaged game plays its engine sound with no gesture; nobody at the PC should hear the smoke test
+  const app = spawn(EXE, ['--remote-debugging-port=' + PORT, '--user-data-dir=' + userData, '--mute-audio'], { stdio: 'ignore', detached: false });
   let ws, id = 0;
   const pending = new Map();
   const send = (method, params) => new Promise((res, rej) => {
@@ -106,7 +107,8 @@ function getJson(url) {
   } finally {
     try { if (ws) await send('Browser.close').catch(() => {}); } catch (e) { /* closing */ }
     await sleep(1500);
-    try { process.kill(app.pid); } catch (e) { /* already gone */ }
+    // the portable exe is a stub that unpacks and starts the real app as a child: /T ends the whole tree
+    try { require('child_process').execFileSync('taskkill', ['/T', '/F', '/PID', String(app.pid)], { stdio: 'ignore' }); } catch (e) { /* already gone */ }
     try { fs.rmSync(userData, { recursive: true, force: true }); } catch (e) { /* locked */ }
   }
   const failed = results.filter(r => !r).length;

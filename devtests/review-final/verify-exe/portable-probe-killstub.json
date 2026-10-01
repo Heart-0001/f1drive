@@ -1,0 +1,33 @@
+{
+ "exe": "C:\\Users\\Heart\\Desktop\\f1Drive\\dist\\F1Drive-v6-preview.exe",
+ "mode": "killstub",
+ "stubPid": 30192,
+ "unpackDir": "3K4Lj2NoKbUMbuJaZcP5IxEZGh3",
+ "unpackSeenMs": 3074,
+ "cdpUpMs": 3765,
+ "bootMs": 4319,
+ "audioMuted": "none/running",
+ "unpackSizeMB": 272.1,
+ "stubAliveWhileAppRuns": true,
+ "appPidsUnderUnpack": [
+  9728,
+  12124,
+  36152,
+  42020,
+  51168
+ ],
+ "afterStubKill": {
+  "stubAlive": false,
+  "appPidsStillRunning": [
+   9728,
+   12124,
+   36152,
+   42020,
+   51168
+  ],
+  "cdpStillAnswers": true
+ },
+ "allGoneAfterCloseMs": 342,
+ "unpackDirExistsAfterExit": true,
+ "unpackSizeAfterExitMB": 272.1
+}

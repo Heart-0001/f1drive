@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>idle probe</title></head>
+<body>
+<script src="../../../js/net.js"></script>
+<script>
+  // A browser-mode guest (no preload) that joined and then sits in the menu: only js/net.js's own timers
+  // (keepalive every 100 ms -> a parked state every 200 ms, ping every 10 s) talk to the server.
+  window.probe = { log: [] };
+  F1.net.on('disconnected', function (reason) { window.probe.log.push('disconnected: ' + reason); console.warn('DISCONNECTED ' + reason); });
+  F1.net.join('127.0.0.1:' + location.hash.slice(1)).then(function (res) {
+    console.warn('JOIN ' + JSON.stringify(res));
+    F1.net.sendState({ x: 50, y: 0, z: 50, heading: 0, pitch: 0, roll: 0, speed: 0, steer: 0 }, true);
+  });
+  document.addEventListener('visibilitychange', function () { console.warn('VIS ' + document.visibilityState); });
+</script>
+</body></html>

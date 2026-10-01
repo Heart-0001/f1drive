@@ -17,7 +17,7 @@
   var BUF_MAX = 24;
   var CONNECT_TIMEOUT = 8000;
   var NAME_MAX = 16;
-  var HIT_MAX = 80;             // m/s, the largest velocity change the server relays in one impact report
+  var HIT_MAX = 50;             // m/s, the largest velocity change the server relays in one impact report
   var CLOCK_MAX = 1e14;         // ms: no server clock is beyond this (keeps a hostile value out of the arithmetic)
   var PING_KEEP = 8;            // pings that may be waiting for their pong
   var GP_PHASES = { free: 1, quali: 1, grid: 1, race: 1, results: 1 };

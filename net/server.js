@@ -27,29 +27,39 @@ const RATE_BURST = 120;
 const RATE_KICK = 600;             // messages dropped by the limiter before the connection is closed
 const KICK_GRACE_MS = 1000;        // a kicked / rejected socket gets this long to close politely, then it is destroyed
 const MAX_SOCKETS = 48;            // connected sockets incl. ones that have not said hello yet
-const MAX_PER_IP = 8;
+const MAX_PER_IP = MAX_PLAYERS + 4;   // a whole room can come from one address (a LAN party / school / office behind
+                                      //   one public IPv4, CGNAT), plus a few that are still connecting
 const MAX_TCP = 96;                // TCP connections incl. ones that have not (or never will) become WebSockets
-const MAX_TCP_PER_IP = 16;
+const MAX_TCP_PER_IP = MAX_PER_IP + 8;
 const HTTP_TIMEOUT_MS = 4000;      // a TCP connection has this long to finish its WebSocket handshake
 const NAME_MAX = 16;
 const HIT_MIN_MS = 40;             // a player may report at most one impact per 40 ms
-const HIT_MAX = 80;                // m/s, largest velocity change one impact report may ask for
+const HIT_MAX = 50;                // m/s, largest velocity change one impact report may ask for (js/collide.js hands
+                                   //   each car 0.6 x the closing speed: a car at 300 km/h into a parked one)
 // An impact report ("my car hit yours") comes from the OTHER player's game, so it is relayed only as far as it
-// fits what both cars last reported of themselves (see case 'hit'). The server does not know the track, so it
-// cannot see the pit lane: the lane's ghost rule is the receiving game's.
-const HIT_FRESH_MS = 500;          // both cars' positions must be this recent
+// fits how both cars really moved (see case 'hit'). Their motion is taken from the POSITIONS they reported, timed
+// by when those arrived here: the speed, heading and clock in a car state are the client's word and only draw his
+// car. A client that forges a whole consistent path can still ram (visibly: everybody sees his car do it); that is
+// inherent without physics on the server. The server does not know the track, so it cannot see the pit lane: the
+// lane's ghost rule is the receiving game's.
+const HIT_FRESH_MS = 500;          // both cars' positions must be this recent; motion is measured over this long
 const HIT_NEAR = 12;               // m between the two positions at most, plus HIT_LAG_S of each car's speed
 const HIT_LAG_S = 0.2;             //   (the two positions were not taken at the same moment)
 const HIT_SLACK = 3;               // m/s over the speed at which the reporter's car was closing along the impulse
-const HIT_BUDGET = 160;            // m/s one player can hand one other player in a row (two full impacts) ...
-const HIT_REFILL = 40;             // ... refilled at this many m/s per second
-const HIT_KEEP = 8;                // velocities remembered per player (~0.4 s): the closing speed before the contact
+const HIT_BUDGET = 100;            // m/s one player can hand one other player in a row (two full impacts) ...
+const HIT_REFILL = 25;             // ... refilled at this many m/s per second
+const HIT_KEEP = 16;               // positions remembered per player (~0.8 s at 20 Hz): his motion before the contact
+const VEL_MIN_MS = 100;            // a velocity is measured over at least this long (arrival jitter stays a small part)
 const HIT_MIN_DV = 0.2;            // m/s: smaller ones are not worth relaying (the games ignore them)
 // Driving as the server can see it without knowing the track: the path a player's reported positions cover.
 const DRIVE_VMAX = 130;            // m/s: no car goes faster (cleanState clamps the speed to this)
 const DRIVE_CARRY_MS = 5000;       // a gap in a player's states credits at most this long (lag: late states in a burst)
 const TELEPORT = 30;               // m: a step this much longer than the time since the previous one allows is a reset
-const IDLE_MS = 60000;             // a player who sends nothing at all for this long is dropped (the game pings every 10 s)
+// A player who sends nothing at all for this long is dropped. The game pings every 10 s and repeats its pose
+// every 200 ms, but Chrome runs the timers of a tab hidden for 5 min once a minute (the browser build joining a
+// room; the desktop app is not throttled): three such wake-ups of margin. Protocol pongs do not count: the
+// network stack answers them even for a frozen page.
+const IDLE_MS = 180000;
 const PW_MAX = 64;                 // characters of a room password
 const PW_TRIES = 5;                // wrong passwords one address may try ...
 const PW_WINDOW_MS = 60000;        // ... in this long; then it is refused ('wait') until that is over
@@ -126,7 +136,7 @@ function cleanState(a) {
 /**
  * createServer(opts) -> Promise<{ port, close(): Promise, info(): {...} }>
  * opts: { port = 24500, host = '0.0.0.0', hostToken = null, password = '', maxPlayers = 16, log = fn|null, now = fn,
- *         random = fn, idleMs = 60000 }
+ *         random = fn, idleMs = 180000 }
  *   hostToken: when set, only a client presenting it in `hello` is the host (the in-game "Create" flow)
  *              and the host never migrates. When null (dedicated server) the first player is the host
  *              and the role passes to the longest-connected player when the host leaves. Either way the
@@ -259,7 +269,7 @@ function createServer(opts) {
     function setTrack(id) {
       trackAt = mono(); trackNext = null;
       trackId = id; trackSeq++;
-      players.forEach(function (q) { q.state = null; q.fresh = false; q.last = null; q.best = null; q.vel.length = 0; });
+      players.forEach(function (q) { q.state = null; q.fresh = false; q.last = null; q.best = null; q.trail.length = 0; });
       // a new track ends a Grand Prix in progress; everybody hears that before they load the track
       if (session.phase !== 'free') {
         while (session.phase !== 'free') session.end();
@@ -365,13 +375,37 @@ function createServer(opts) {
       const c = Math.min(d, p.budget);
       p.dist += c; p.budget -= c;
     }
-    // m/s at which a's car was closing on b's along (ux, uz), from their velocities of the last HIT_FRESH_MS
-    // (the fastest approach: the reporter's own game may already have slowed his car down)
+    // How player p really moved in the last HIT_FRESH_MS (mono() t): from the positions he reported since his last
+    // reset (p.trail), timed by their arrival here, never by the speed / heading / clock he claims. Each state is
+    // paired with the latest one at least VEL_MIN_MS before it; f(vx, vz) gets each such velocity (m/s, XZ).
+    // -> how many there were (0: his positions show no motion to measure)
+    function motion(p, t, f) {
+      const tr = p.trail;
+      let n = 0;
+      for (let i = tr.length - 1; i > 0 && t - tr[i][2] <= HIT_FRESH_MS; i--) {
+        for (let j = i - 1; j >= 0 && t - tr[j][2] <= HIT_FRESH_MS; j--) {
+          const dt = tr[i][2] - tr[j][2];
+          if (dt < VEL_MIN_MS) continue;
+          f((tr[i][0] - tr[j][0]) * 1000 / dt, (tr[i][1] - tr[j][1]) * 1000 / dt);
+          n++;
+          break;
+        }
+      }
+      return n;
+    }
+    // the fastest p moved (m/s), at most DRIVE_VMAX; null when nothing can be measured
+    function topSpeed(p, t) {
+      let s = 0;
+      const n = motion(p, t, function (vx, vz) { s = Math.max(s, Math.sqrt(vx * vx + vz * vz)); });
+      return n ? Math.min(s, DRIVE_VMAX) : null;
+    }
+    // m/s at which a's car was closing on b's along (ux, uz): a's fastest approach (his own game may already have
+    // slowed his car down) against b's slowest; b counts as standing still when his motion cannot be measured
     function closing(a, b, ux, uz, t) {
       let va = -Infinity, vb = Infinity;
-      a.vel.forEach(function (v) { if (t - v[2] <= HIT_FRESH_MS) va = Math.max(va, v[0] * ux + v[1] * uz); });
-      b.vel.forEach(function (v) { if (t - v[2] <= HIT_FRESH_MS) vb = Math.min(vb, v[0] * ux + v[1] * uz); });
-      return va - vb;
+      motion(a, t, function (vx, vz) { va = Math.max(va, vx * ux + vz * uz); });
+      motion(b, t, function (vx, vz) { vb = Math.min(vb, vx * ux + vz * uz); });
+      return va - (vb === Infinity ? 0 : vb);
     }
     // what player p may still hand player id (m/s), refilled since the last time
     function hitBudget(p, id, t) {
@@ -416,7 +450,7 @@ function createServer(opts) {
         // driving (see driven()): session-clock time of the last state, path credit, path / time since the last
         // lap, which phase they belong to, whether the last state was a reset
         sAt: now, budget: 0, dist: 0, live: 0, dKey: '', jump: false,
-        sT: -1e9, vel: [], hitB: new Map()         // impacts: mono() of the last state, [vx, vz, mono] recent, budgets
+        sT: -1e9, trail: [], hitB: new Map()       // impacts: mono() of the last state, [x, z, mono] recent, budgets
       };
       players.set(id, p);
       ws._player = p;
@@ -464,8 +498,10 @@ function createServer(opts) {
           gpSync(now);                             // (driving after lights out is the race's, tick or no tick yet)
           driven(p, st, now);
           p.state = st; p.ct = Math.round(clamp(m.c, 0, 1e13)); p.fresh = true; p.sT = t;
-          p.vel.push([Math.sin(st[3]) * st[6], Math.cos(st[3]) * st[6], t]);   // heading 0 = +z (js/collide.js)
-          if (p.vel.length > HIT_KEEP) p.vel.shift();
+          // where he is and when that arrived, for his motion (see motion()); a reset starts it again
+          if (p.jump) p.trail.length = 0;
+          p.trail.push([st[0], st[2], t]);
+          if (p.trail.length > HIT_KEEP) p.trail.shift();
           // race progress rides along; no further ahead of the laps counted than the path driven allows
           if (isNum(m.g)) session.progress(p.id, m.g, p.dist);
           break;
@@ -511,11 +547,14 @@ function createServer(opts) {
           if (!isNum(m.i[0]) || !isNum(m.i[1])) return;
           const target = players.get(m.to);
           if (!target || target === p || t - p.hitT < HIT_MIN_MS) return;
-          // both cars on this track with a recent position (the reporter's one he drove to, not a reset), near
-          // each other, and solid for each other (in a Grand Prix qualifying cars and spectators are ghosts)
+          // both cars on this track with a recent position, the reporter's one he drove to (not a reset) after
+          // positions that show his motion, near each other, and solid for each other (in a Grand Prix qualifying
+          // cars and spectators are ghosts)
           const a = p.state, b = target.state;
           if (!a || !b || p.jump || t - p.sT > HIT_FRESH_MS || t - target.sT > HIT_FRESH_MS) return;
-          const dx = a[0] - b[0], dz = a[2] - b[2], near = HIT_NEAR + (Math.abs(a[6]) + Math.abs(b[6])) * HIT_LAG_S;
+          const sa = topSpeed(p, t), sb = topSpeed(target, t) || 0;
+          if (sa === null) return;
+          const dx = a[0] - b[0], dz = a[2] - b[2], near = HIT_NEAR + (sa + sb) * HIT_LAG_S;
           if (dx * dx + dz * dz > near * near || !session.solid(p.id, target.id, now)) return;
           p.hitT = t;
           const mag = Math.sqrt(m.i[0] * m.i[0] + m.i[1] * m.i[1]);
@@ -686,7 +725,7 @@ function lanAddresses() {
 
 module.exports = {
   createServer: createServer, lanAddresses: lanAddresses,
-  DEFAULT_PORT: DEFAULT_PORT, MAX_PLAYERS: MAX_PLAYERS, PROTOCOL: PROTOCOL
+  DEFAULT_PORT: DEFAULT_PORT, MAX_PLAYERS: MAX_PLAYERS, PROTOCOL: PROTOCOL, IDLE_MS: IDLE_MS
 };
 
 if (require.main === module) {

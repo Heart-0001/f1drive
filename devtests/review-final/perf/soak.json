@@ -1,0 +1,8666 @@
+{
+ "t0": 1790823644253,
+ "samples": [
+  {
+   "n": 653,
+   "mean": 2.5001531395758825,
+   "p50": 1.5999999940395355,
+   "p95": 2.199999988079071,
+   "max": 568.9000000059605,
+   "maxGap": 16.80000000000109,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 1,
+    "createOscillator": 0,
+    "createBufferSource": 1,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 654,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 37.92533672127424,
+   "running": true,
+   "track": "it-1922",
+   "at": 13,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 0
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 712,
+     "cpu": 0
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 221,
+     "priv": 140,
+     "cpu": 0
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2345,
+    "LayoutCount": 492,
+    "RecalcStyleCount": 493,
+    "JSHeapUsedSize": 48252624
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.5285950408986777,
+   "p50": 1.5,
+   "p95": 2,
+   "max": 2.7000000178813934,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 6,
+    "createOscillator": 0,
+    "createBufferSource": 6,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 1259,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 12.167463623589283,
+   "running": true,
+   "track": "it-1922",
+   "at": 23,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 272,
+     "priv": 695,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 226,
+     "priv": 145,
+     "cpu": 1.5
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 57,
+    "Nodes": 2951,
+    "LayoutCount": 1097,
+    "RecalcStyleCount": 1098,
+    "JSHeapUsedSize": 46653592
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.5120860933270674,
+   "p50": 1.5,
+   "p95": 2,
+   "max": 3,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 11,
+    "createOscillator": 0,
+    "createBufferSource": 11,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 1863,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 10.110459581071872,
+   "running": true,
+   "track": "it-1922",
+   "at": 33,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 213,
+     "priv": 158,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 284,
+     "priv": 701,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 229,
+     "priv": 148,
+     "cpu": 1.5
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 53,
+    "Nodes": 2231,
+    "LayoutCount": 1701,
+    "RecalcStyleCount": 1702,
+    "JSHeapUsedSize": 44026964
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.4552066119741802,
+   "p50": 1.4000000059604645,
+   "p95": 1.9000000059604645,
+   "max": 3.7000000178813934,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 12,
+    "createOscillator": 0,
+    "createBufferSource": 12,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 2468,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 14.356152018490194,
+   "running": true,
+   "track": "it-1922",
+   "at": 43,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 188,
+     "priv": 134,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 284,
+     "priv": 719,
+     "cpu": 2.8
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 230,
+     "priv": 149,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 54,
+    "Nodes": 2835,
+    "LayoutCount": 2305,
+    "RecalcStyleCount": 2306,
+    "JSHeapUsedSize": 49017520
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.449503310912887,
+   "p50": 1.4000000059604645,
+   "p95": 1.9000000059604645,
+   "max": 3.0999999940395355,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 13,
+    "createOscillator": 0,
+    "createBufferSource": 13,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 3072,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 15.808523435634912,
+   "running": true,
+   "track": "it-1922",
+   "at": 53,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 109,
+     "cpu": 3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 272,
+     "priv": 712,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 230,
+     "priv": 149,
+     "cpu": 1.5
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2328,
+    "LayoutCount": 2910,
+    "RecalcStyleCount": 2911,
+    "JSHeapUsedSize": 49535072
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.5247933885775322,
+   "p50": 1.5,
+   "p95": 2.2000000178813934,
+   "max": 3.300000011920929,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 14,
+    "createOscillator": 0,
+    "createBufferSource": 14,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 3677,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 13.310715833312031,
+   "running": true,
+   "track": "it-1922",
+   "at": 63,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 150,
+     "priv": 96,
+     "cpu": 3.2
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 285,
+     "priv": 750,
+     "cpu": 3.3
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 224,
+     "priv": 143,
+     "cpu": 1.5
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 53,
+    "Nodes": 2933,
+    "LayoutCount": 3514,
+    "RecalcStyleCount": 3515,
+    "JSHeapUsedSize": 44496012
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.4808264460445435,
+   "p50": 1.4000000059604645,
+   "p95": 2.0999999940395355,
+   "max": 3.0999999940395355,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 15,
+    "createOscillator": 0,
+    "createBufferSource": 15,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 4282,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 13.654318518346837,
+   "running": true,
+   "track": "it-1922",
+   "at": 73,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 3.1
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 297,
+     "priv": 761,
+     "cpu": 3.2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 223,
+     "priv": 142,
+     "cpu": 1.5
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2462,
+    "LayoutCount": 4119,
+    "RecalcStyleCount": 4120,
+    "JSHeapUsedSize": 37557184
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.4993377483345025,
+   "p50": 1.4000000059604645,
+   "p95": 2.0999999940395355,
+   "max": 3,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 15,
+    "createOscillator": 0,
+    "createBufferSource": 15,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 4886,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 40.224564487777066,
+   "running": true,
+   "track": "it-1922",
+   "at": 83,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 187,
+     "priv": 133,
+     "cpu": 3.2
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 297,
+     "priv": 767,
+     "cpu": 3.3
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 224,
+     "priv": 143,
+     "cpu": 1.5
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 1973,
+    "LayoutCount": 4723,
+    "RecalcStyleCount": 4724,
+    "JSHeapUsedSize": 39735244
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.4519867542267635,
+   "p50": 1.4000000059604645,
+   "p95": 1.9000000059604645,
+   "max": 2.5,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 18,
+    "createOscillator": 0,
+    "createBufferSource": 18,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 5490,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 13.606268110900654,
+   "running": true,
+   "track": "it-1922",
+   "at": 93,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 297,
+     "priv": 778,
+     "cpu": 3
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 223,
+     "priv": 142,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 54,
+    "Nodes": 2577,
+    "LayoutCount": 5327,
+    "RecalcStyleCount": 5328,
+    "JSHeapUsedSize": 39809112
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.379966887959976,
+   "p50": 1.399999976158142,
+   "p95": 1.7999999821186066,
+   "max": 2.800000011920929,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 18,
+    "createOscillator": 0,
+    "createBufferSource": 18,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 6094,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 13.765422272920327,
+   "running": true,
+   "track": "it-1922",
+   "at": 103,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 212,
+     "priv": 158,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 297,
+     "priv": 789,
+     "cpu": 2.8
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 222,
+     "priv": 140,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 2098,
+    "LayoutCount": 5931,
+    "RecalcStyleCount": 5932,
+    "JSHeapUsedSize": 42195384
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.3524834441132103,
+   "p50": 1.300000011920929,
+   "p95": 1.7000000178813934,
+   "max": 2.0999999940395355,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 19,
+    "createOscillator": 0,
+    "createBufferSource": 19,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 6698,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 12.986350809579895,
+   "running": true,
+   "track": "it-1922",
+   "at": 113,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 187,
+     "priv": 133,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 297,
+     "priv": 795,
+     "cpu": 2.8
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 222,
+     "priv": 140,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2702,
+    "LayoutCount": 6535,
+    "RecalcStyleCount": 6536,
+    "JSHeapUsedSize": 40216816
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.3715231795579392,
+   "p50": 1.399999976158142,
+   "p95": 1.7000000178813934,
+   "max": 2.4000000059604645,
+   "maxGap": 16.80000000000291,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 20,
+    "createOscillator": 0,
+    "createBufferSource": 20,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 7302,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 12.459327618084915,
+   "running": true,
+   "track": "it-1922",
+   "at": 123,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 297,
+     "priv": 801,
+     "cpu": 2.8
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 222,
+     "priv": 140,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 2215,
+    "LayoutCount": 7140,
+    "RecalcStyleCount": 7141,
+    "JSHeapUsedSize": 38490580
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.3900826454162598,
+   "p50": 1.4000000059604645,
+   "p95": 1.800000011920929,
+   "max": 2.300000011920929,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 23,
+    "createOscillator": 0,
+    "createBufferSource": 23,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 7907,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 11.709430768016597,
+   "running": true,
+   "track": "it-1922",
+   "at": 134,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 150,
+     "priv": 96,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 297,
+     "priv": 806,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 221,
+     "priv": 140,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 54,
+    "Nodes": 2819,
+    "LayoutCount": 7744,
+    "RecalcStyleCount": 7745,
+    "JSHeapUsedSize": 39719572
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.3814569539976436,
+   "p50": 1.300000011920929,
+   "p95": 1.800000011920929,
+   "max": 2.300000011920929,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 23,
+    "createOscillator": 0,
+    "createBufferSource": 23,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 8511,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 24.096328607602914,
+   "running": true,
+   "track": "it-1922",
+   "at": 144,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 297,
+     "priv": 810,
+     "cpu": 2.8
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 222,
+     "priv": 140,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 2336,
+    "LayoutCount": 8348,
+    "RecalcStyleCount": 8349,
+    "JSHeapUsedSize": 41712984
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.4039735092923342,
+   "p50": 1.4000000059604645,
+   "p95": 1.800000011920929,
+   "max": 2.199999988079071,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 24,
+    "createOscillator": 0,
+    "createBufferSource": 24,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 9115,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 18.49044101957302,
+   "running": true,
+   "track": "it-1922",
+   "at": 154,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 188,
+     "priv": 133,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 297,
+     "priv": 815,
+     "cpu": 2.8
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 221,
+     "priv": 140,
+     "cpu": 1.3
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2941,
+    "LayoutCount": 8953,
+    "RecalcStyleCount": 8954,
+    "JSHeapUsedSize": 43282028
+   }
+  },
+  {
+   "n": 694,
+   "mean": 1.4671469746903658,
+   "p50": 1.399999976158142,
+   "p95": 1.800000011920929,
+   "max": 59.900000005960464,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 29,
+    "createOscillator": 0,
+    "createBufferSource": 29,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 9809,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 5.166309271801936,
+   "running": true,
+   "track": "be-1925",
+   "at": 166,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.8
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 321,
+     "priv": 883,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 305,
+     "priv": 219,
+     "cpu": 1.6
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 57,
+    "Nodes": 2440,
+    "LayoutCount": 9443,
+    "RecalcStyleCount": 9444,
+    "JSHeapUsedSize": 90951996
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.3433057854983432,
+   "p50": 1.300000011920929,
+   "p95": 1.7000000178813934,
+   "max": 2.4000000059604645,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 30,
+    "createOscillator": 0,
+    "createBufferSource": 30,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 10414,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 4.3956320040122,
+   "running": true,
+   "track": "be-1925",
+   "at": 176,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 138,
+     "priv": 83,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 283,
+     "priv": 628,
+     "cpu": 3
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 304,
+     "priv": 220,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 58,
+    "Nodes": 3045,
+    "LayoutCount": 10048,
+    "RecalcStyleCount": 10049,
+    "JSHeapUsedSize": 92771696
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.3291390731634682,
+   "p50": 1.300000011920929,
+   "p95": 1.7000000178813934,
+   "max": 2.800000011920929,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 30,
+    "createOscillator": 0,
+    "createBufferSource": 30,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 11018,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 24.91715207341354,
+   "running": true,
+   "track": "be-1925",
+   "at": 186,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 175,
+     "priv": 120,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 659,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 307,
+     "priv": 223,
+     "cpu": 1.3
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 58,
+    "Nodes": 3649,
+    "LayoutCount": 10652,
+    "RecalcStyleCount": 10653,
+    "JSHeapUsedSize": 95090660
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.352561982998178,
+   "p50": 1.300000011920929,
+   "p95": 1.7000000178813934,
+   "max": 2.5999999940395355,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 31,
+    "createOscillator": 0,
+    "createBufferSource": 31,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 11623,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 12.958166129535574,
+   "running": true,
+   "track": "be-1925",
+   "at": 196,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 664,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 312,
+     "priv": 228,
+     "cpu": 1.3
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 59,
+    "Nodes": 4253,
+    "LayoutCount": 11256,
+    "RecalcStyleCount": 11257,
+    "JSHeapUsedSize": 92864228
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.3617549663940012,
+   "p50": 1.300000011920929,
+   "p95": 1.7000000178813934,
+   "max": 2.5,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 31,
+    "createOscillator": 0,
+    "createBufferSource": 31,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 12227,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 22.71920243318302,
+   "running": true,
+   "track": "be-1925",
+   "at": 206,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 150,
+     "priv": 96,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 675,
+     "cpu": 3
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 317,
+     "priv": 233,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 59,
+    "Nodes": 4858,
+    "LayoutCount": 11861,
+    "RecalcStyleCount": 11862,
+    "JSHeapUsedSize": 95137896
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.333388429683102,
+   "p50": 1.300000011920929,
+   "p95": 1.699999988079071,
+   "max": 2.199999988079071,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 31,
+    "createOscillator": 0,
+    "createBufferSource": 31,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 12832,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 25.4623256522698,
+   "running": true,
+   "track": "be-1925",
+   "at": 216,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 138,
+     "priv": 83,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 308,
+     "priv": 702,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 322,
+     "priv": 238,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 59,
+    "Nodes": 5462,
+    "LayoutCount": 12465,
+    "RecalcStyleCount": 12466,
+    "JSHeapUsedSize": 90182412
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.3438741722150354,
+   "p50": 1.300000011920929,
+   "p95": 1.7000000178813934,
+   "max": 2.5999999940395355,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 32,
+    "createOscillator": 0,
+    "createBufferSource": 32,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 13436,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 6.081869509709756,
+   "running": true,
+   "track": "be-1925",
+   "at": 226,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 175,
+     "priv": 120,
+     "cpu": 3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 715,
+     "cpu": 3
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 326,
+     "priv": 243,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 60,
+    "Nodes": 6067,
+    "LayoutCount": 13070,
+    "RecalcStyleCount": 13071,
+    "JSHeapUsedSize": 92036940
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.3314049583821257,
+   "p50": 1.300000011920929,
+   "p95": 1.7999999821186066,
+   "max": 3.9000000059604645,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 33,
+    "createOscillator": 0,
+    "createBufferSource": 33,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 14041,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 3.315657901693811,
+   "running": true,
+   "track": "be-1925",
+   "at": 236,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 729,
+     "cpu": 3
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 331,
+     "priv": 247,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 61,
+    "Nodes": 6672,
+    "LayoutCount": 13675,
+    "RecalcStyleCount": 13676,
+    "JSHeapUsedSize": 93068600
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.3241322310010264,
+   "p50": 1.300000011920929,
+   "p95": 1.699999988079071,
+   "max": 2.199999988079071,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 34,
+    "createOscillator": 0,
+    "createBufferSource": 34,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 14646,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 2.079437744152847,
+   "running": true,
+   "track": "be-1925",
+   "at": 246,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 150,
+     "priv": 96,
+     "cpu": 3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 303,
+     "priv": 741,
+     "cpu": 3
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 336,
+     "priv": 252,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 62,
+    "Nodes": 7277,
+    "LayoutCount": 14279,
+    "RecalcStyleCount": 14280,
+    "JSHeapUsedSize": 93613268
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.3372516554613776,
+   "p50": 1.300000011920929,
+   "p95": 1.800000011920929,
+   "max": 2.5999999940395355,
+   "maxGap": 16.800000000017462,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 34,
+    "createOscillator": 0,
+    "createBufferSource": 34,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 15250,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 19.327849444876637,
+   "running": true,
+   "track": "be-1925",
+   "at": 256,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 308,
+     "priv": 758,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 341,
+     "priv": 257,
+     "cpu": 1.3
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 62,
+    "Nodes": 7880,
+    "LayoutCount": 14883,
+    "RecalcStyleCount": 14884,
+    "JSHeapUsedSize": 94552016
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.324462809592239,
+   "p50": 1.300000011920929,
+   "p95": 1.7000000178813934,
+   "max": 2.4000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 34,
+    "createOscillator": 0,
+    "createBufferSource": 34,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 15855,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 21.903340277338142,
+   "running": true,
+   "track": "be-1925",
+   "at": 266,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 188,
+     "priv": 133,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 308,
+     "priv": 774,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 209,
+     "priv": 166,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 2466,
+    "LayoutCount": 15488,
+    "RecalcStyleCount": 15489,
+    "JSHeapUsedSize": 40802852
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.3142384104677383,
+   "p50": 1.2999999821186066,
+   "p95": 1.699999988079071,
+   "max": 2.4000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 35,
+    "createOscillator": 0,
+    "createBufferSource": 35,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 16459,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 6.633911172706348,
+   "running": true,
+   "track": "be-1925",
+   "at": 276,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 297,
+     "priv": 786,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 212,
+     "priv": 166,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2113,
+    "LayoutCount": 16092,
+    "RecalcStyleCount": 16093,
+    "JSHeapUsedSize": 41259392
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.282947020370834,
+   "p50": 1.2999999821186066,
+   "p95": 1.699999988079071,
+   "max": 2.199999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 35,
+    "createOscillator": 0,
+    "createBufferSource": 35,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 17063,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 24.04906567886155,
+   "running": true,
+   "track": "be-1925",
+   "at": 286,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 138,
+     "priv": 83,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 307,
+     "priv": 801,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 212,
+     "priv": 165,
+     "cpu": 1.3
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2717,
+    "LayoutCount": 16697,
+    "RecalcStyleCount": 16698,
+    "JSHeapUsedSize": 40597608
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.3124172187206762,
+   "p50": 1.2999999821186066,
+   "p95": 1.7000000178813934,
+   "max": 2.600000023841858,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 35,
+    "createOscillator": 0,
+    "createBufferSource": 35,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 17667,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 24.52054498378114,
+   "running": true,
+   "track": "be-1925",
+   "at": 297,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 308,
+     "priv": 812,
+     "cpu": 3
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 87,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 213,
+     "priv": 165,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 2210,
+    "LayoutCount": 17301,
+    "RecalcStyleCount": 17302,
+    "JSHeapUsedSize": 40166784
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.2659504127896521,
+   "p50": 1.2000000178813934,
+   "p95": 1.600000023841858,
+   "max": 2,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 35,
+    "createOscillator": 0,
+    "createBufferSource": 35,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 18272,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 20.753569548232406,
+   "running": true,
+   "track": "be-1925",
+   "at": 307,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 121,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 308,
+     "priv": 824,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 213,
+     "priv": 165,
+     "cpu": 1.3
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 2814,
+    "LayoutCount": 17905,
+    "RecalcStyleCount": 17906,
+    "JSHeapUsedSize": 40941368
+   }
+  },
+  {
+   "n": 693,
+   "mean": 1.4187590188278265,
+   "p50": 1.300000011920929,
+   "p95": 1.7000000178813934,
+   "max": 49.80000001192093,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 42,
+    "createOscillator": 0,
+    "createBufferSource": 42,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 18965,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 31.151632275133963,
+   "running": true,
+   "track": "mc-1929",
+   "at": 318,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 138,
+     "priv": 83,
+     "cpu": 2.9
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 284,
+     "priv": 629,
+     "cpu": 2.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 268,
+     "priv": 223,
+     "cpu": 1.5
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 59,
+    "Nodes": 2429,
+    "LayoutCount": 18391,
+    "RecalcStyleCount": 18392,
+    "JSHeapUsedSize": 69739848
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.354304635712248,
+   "p50": 1.300000011920929,
+   "p95": 1.7999999821186066,
+   "max": 2.399999976158142,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 60,
+    "createOscillator": 0,
+    "createBufferSource": 60,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 19569,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 13.810438816745517,
+   "running": true,
+   "track": "mc-1929",
+   "at": 328,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 120,
+     "cpu": 3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 284,
+     "priv": 634,
+     "cpu": 3
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 269,
+     "priv": 224,
+     "cpu": 1.4
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 77,
+    "Nodes": 3034,
+    "LayoutCount": 18995,
+    "RecalcStyleCount": 18996,
+    "JSHeapUsedSize": 69417496
+   }
+  },
+  {
+   "n": 604,
+   "mean": 1.130298013274638,
+   "p50": 1.0999999940395355,
+   "p95": 1.5999999940395355,
+   "max": 2,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 67,
+    "createOscillator": 0,
+    "createBufferSource": 67,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 20173,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 7.999071609837662,
+   "running": true,
+   "track": "mc-1929",
+   "at": 339,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.7
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 288,
+     "priv": 637,
+     "cpu": 2.6
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 273,
+     "priv": 223,
+     "cpu": 1.2
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 84,
+    "Nodes": 3638,
+    "LayoutCount": 19599,
+    "RecalcStyleCount": 19600,
+    "JSHeapUsedSize": 68264112
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.8752066126539687,
+   "p50": 0.9000000059604645,
+   "p95": 1.199999988079071,
+   "max": 1.5999999940395355,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 73,
+    "createOscillator": 0,
+    "createBufferSource": 73,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 20778,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 7.265729737717145,
+   "running": true,
+   "track": "mc-1929",
+   "at": 349,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 138,
+     "priv": 83,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 284,
+     "priv": 646,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 278,
+     "priv": 224,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 90,
+    "Nodes": 4242,
+    "LayoutCount": 20203,
+    "RecalcStyleCount": 20204,
+    "JSHeapUsedSize": 73928924
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8927152317683429,
+   "p50": 0.9000000059604645,
+   "p95": 1.199999988079071,
+   "max": 1.699999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 80,
+    "createOscillator": 0,
+    "createBufferSource": 80,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 21382,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 8.831235324429356,
+   "running": true,
+   "track": "mc-1929",
+   "at": 359,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 188,
+     "priv": 133,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 660,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 282,
+     "priv": 224,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 97,
+    "Nodes": 4846,
+    "LayoutCount": 20807,
+    "RecalcStyleCount": 20808,
+    "JSHeapUsedSize": 72268100
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8690397347144733,
+   "p50": 0.8999999761581421,
+   "p95": 1.100000023841858,
+   "max": 1.399999976158142,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 82,
+    "createOscillator": 0,
+    "createBufferSource": 82,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 21986,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 11.022864808251844,
+   "running": true,
+   "track": "mc-1929",
+   "at": 369,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 121,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 668,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 287,
+     "priv": 224,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 99,
+    "Nodes": 5451,
+    "LayoutCount": 21412,
+    "RecalcStyleCount": 21413,
+    "JSHeapUsedSize": 69942024
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.8879338851644973,
+   "p50": 0.8999999761581421,
+   "p95": 1.199999988079071,
+   "max": 2,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 83,
+    "createOscillator": 0,
+    "createBufferSource": 83,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 22591,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 14.56524297167366,
+   "running": true,
+   "track": "mc-1929",
+   "at": 379,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 681,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 292,
+     "priv": 224,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 100,
+    "Nodes": 6055,
+    "LayoutCount": 22016,
+    "RecalcStyleCount": 22017,
+    "JSHeapUsedSize": 73913484
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8956953648798514,
+   "p50": 0.8999999761581421,
+   "p95": 1.2000000178813934,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 84,
+    "createOscillator": 0,
+    "createBufferSource": 84,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 23195,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 13.42837139685966,
+   "running": true,
+   "track": "mc-1929",
+   "at": 389,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 139,
+     "priv": 83,
+     "cpu": 2.4
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 692,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 297,
+     "priv": 225,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 101,
+    "Nodes": 6659,
+    "LayoutCount": 22620,
+    "RecalcStyleCount": 22621,
+    "JSHeapUsedSize": 71140628
+   }
+  },
+  {
+   "n": 603,
+   "mean": 0.8781094527857418,
+   "p50": 0.8999999761581421,
+   "p95": 1.199999988079071,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 85,
+    "createOscillator": 0,
+    "createBufferSource": 85,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 23798,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 18.06530299313877,
+   "running": true,
+   "track": "mc-1929",
+   "at": 399,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 121,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 284,
+     "priv": 685,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 301,
+     "priv": 225,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 102,
+    "Nodes": 7263,
+    "LayoutCount": 23224,
+    "RecalcStyleCount": 23225,
+    "JSHeapUsedSize": 75125108
+   }
+  },
+  {
+   "n": 605,
+   "mean": 1.0319008261211648,
+   "p50": 1,
+   "p95": 1.4000000059604645,
+   "max": 2.7999999821186066,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 91,
+    "createOscillator": 0,
+    "createBufferSource": 91,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 24403,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 19.328654022397366,
+   "running": true,
+   "track": "mc-1929",
+   "at": 409,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.5
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 718,
+     "cpu": 2.2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 306,
+     "priv": 225,
+     "cpu": 1.1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 108,
+    "Nodes": 7868,
+    "LayoutCount": 23829,
+    "RecalcStyleCount": 23830,
+    "JSHeapUsedSize": 72949212
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8968543045666834,
+   "p50": 0.9000000059604645,
+   "p95": 1.199999988079071,
+   "max": 1.699999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 92,
+    "createOscillator": 0,
+    "createBufferSource": 92,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 25007,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 11.626437367415992,
+   "running": true,
+   "track": "mc-1929",
+   "at": 419,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 138,
+     "priv": 83,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 724,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 195,
+     "priv": 152,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2346,
+    "LayoutCount": 24432,
+    "RecalcStyleCount": 24433,
+    "JSHeapUsedSize": 35184508
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8966887408731788,
+   "p50": 0.9000000059604645,
+   "p95": 1.199999988079071,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 101,
+    "createOscillator": 0,
+    "createBufferSource": 101,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 25611,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 9.994771736945694,
+   "running": true,
+   "track": "mc-1929",
+   "at": 429,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 120,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 726,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 198,
+     "priv": 152,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 54,
+    "Nodes": 1980,
+    "LayoutCount": 25036,
+    "RecalcStyleCount": 25037,
+    "JSHeapUsedSize": 33697716
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8695364240680309,
+   "p50": 0.8999999761581421,
+   "p95": 1.100000023841858,
+   "max": 1.4000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 102,
+    "createOscillator": 0,
+    "createBufferSource": 102,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 26215,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 11.728310696609164,
+   "running": true,
+   "track": "mc-1929",
+   "at": 439,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 737,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 197,
+     "priv": 151,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 55,
+    "Nodes": 2584,
+    "LayoutCount": 25640,
+    "RecalcStyleCount": 25641,
+    "JSHeapUsedSize": 34351552
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.9438741716821462,
+   "p50": 0.9000000059604645,
+   "p95": 1.2000000178813934,
+   "max": 1.699999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 104,
+    "createOscillator": 0,
+    "createBufferSource": 104,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 26819,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 6.200827033426533,
+   "running": true,
+   "track": "mc-1929",
+   "at": 449,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 138,
+     "priv": 83,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 284,
+     "priv": 734,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 199,
+     "priv": 152,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2068,
+    "LayoutCount": 26244,
+    "RecalcStyleCount": 26245,
+    "JSHeapUsedSize": 35160948
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.858278145409183,
+   "p50": 0.800000011920929,
+   "p95": 1.100000023841858,
+   "max": 1.5999999940395355,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 152,
+    "Texture": 16,
+    "Program": 18,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 105,
+    "createOscillator": 0,
+    "createBufferSource": 105,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 27423,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 12.377367373973097,
+   "running": true,
+   "track": "mc-1929",
+   "at": 459,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 121,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 296,
+     "priv": 763,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 198,
+     "priv": 151,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 53,
+    "Nodes": 2672,
+    "LayoutCount": 26848,
+    "RecalcStyleCount": 26849,
+    "JSHeapUsedSize": 34036932
+   }
+  },
+  {
+   "n": 694,
+   "mean": 0.9587896254547048,
+   "p50": 0.9000000059604645,
+   "p95": 1.2000000178813934,
+   "max": 41.19999998807907,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 105,
+    "createOscillator": 0,
+    "createBufferSource": 105,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 28117,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 77.10211148818505,
+   "running": true,
+   "track": "jp-1962",
+   "at": 471,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 310,
+     "priv": 854,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 239,
+     "priv": 192,
+     "cpu": 1.1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2437,
+    "LayoutCount": 27342,
+    "RecalcStyleCount": 27343,
+    "JSHeapUsedSize": 53477404
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.9623140492222526,
+   "p50": 0.9000000059604645,
+   "p95": 1.300000011920929,
+   "max": 2,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 107,
+    "createOscillator": 0,
+    "createBufferSource": 107,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 28722,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 14.897343628756472,
+   "running": true,
+   "track": "jp-1962",
+   "at": 481,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 2.4
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 310,
+     "priv": 855,
+     "cpu": 2.1
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 240,
+     "priv": 192,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 54,
+    "Nodes": 3041,
+    "LayoutCount": 27946,
+    "RecalcStyleCount": 27947,
+    "JSHeapUsedSize": 53356940
+   }
+  },
+  {
+   "n": 603,
+   "mean": 0.8815920391980293,
+   "p50": 0.8999999761581421,
+   "p95": 1.199999988079071,
+   "max": 1.5999999940395355,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 108,
+    "createOscillator": 0,
+    "createBufferSource": 108,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 29325,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 15.12130001317065,
+   "running": true,
+   "track": "jp-1962",
+   "at": 491,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 310,
+     "priv": 873,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 244,
+     "priv": 192,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 55,
+    "Nodes": 3645,
+    "LayoutCount": 28550,
+    "RecalcStyleCount": 28551,
+    "JSHeapUsedSize": 54192968
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.9390728461327932,
+   "p50": 0.9000000059604645,
+   "p95": 1.2999999821186066,
+   "max": 1.600000023841858,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 109,
+    "createOscillator": 0,
+    "createBufferSource": 109,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 29929,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 9.877527049741017,
+   "running": true,
+   "track": "jp-1962",
+   "at": 501,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 310,
+     "priv": 875,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 250,
+     "priv": 193,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 56,
+    "Nodes": 4250,
+    "LayoutCount": 29154,
+    "RecalcStyleCount": 29155,
+    "JSHeapUsedSize": 49308136
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.9467768600656966,
+   "p50": 0.9000000059604645,
+   "p95": 1.2000000178813934,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 110,
+    "createOscillator": 0,
+    "createBufferSource": 110,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 30534,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 2.4935556095969007,
+   "running": true,
+   "track": "jp-1962",
+   "at": 511,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 310,
+     "priv": 887,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 254,
+     "priv": 193,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 57,
+    "Nodes": 4854,
+    "LayoutCount": 29758,
+    "RecalcStyleCount": 29759,
+    "JSHeapUsedSize": 49954940
+   }
+  },
+  {
+   "n": 603,
+   "mean": 1.081592039336415,
+   "p50": 1.0999999940395355,
+   "p95": 1.4000000059604645,
+   "max": 1.699999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 111,
+    "createOscillator": 0,
+    "createBufferSource": 111,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 31137,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 2.56209332727619,
+   "running": true,
+   "track": "jp-1962",
+   "at": 521,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 120,
+     "cpu": 2.4
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 293,
+     "priv": 630,
+     "cpu": 2.2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 259,
+     "priv": 193,
+     "cpu": 1.1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 58,
+    "Nodes": 5458,
+    "LayoutCount": 30362,
+    "RecalcStyleCount": 30363,
+    "JSHeapUsedSize": 51368968
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.8733884292693177,
+   "p50": 0.8999999761581421,
+   "p95": 1.199999988079071,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 112,
+    "createOscillator": 0,
+    "createBufferSource": 112,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 31742,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 6.601121521010674,
+   "running": true,
+   "track": "jp-1962",
+   "at": 532,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 281,
+     "priv": 647,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 264,
+     "priv": 194,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 59,
+    "Nodes": 6063,
+    "LayoutCount": 30967,
+    "RecalcStyleCount": 30968,
+    "JSHeapUsedSize": 54032988
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8857615895026567,
+   "p50": 0.9000000059604645,
+   "p95": 1.199999988079071,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 113,
+    "createOscillator": 0,
+    "createBufferSource": 113,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 32346,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 3.128499226468759,
+   "running": true,
+   "track": "jp-1962",
+   "at": 542,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 138,
+     "priv": 83,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 293,
+     "priv": 660,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 269,
+     "priv": 194,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 60,
+    "Nodes": 6667,
+    "LayoutCount": 31571,
+    "RecalcStyleCount": 31572,
+    "JSHeapUsedSize": 49681188
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8948675501622901,
+   "p50": 0.9000000059604645,
+   "p95": 1.2000000178813934,
+   "max": 1.5999999940395355,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 114,
+    "createOscillator": 0,
+    "createBufferSource": 114,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 32950,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 6.5057464316961,
+   "running": true,
+   "track": "jp-1962",
+   "at": 552,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 188,
+     "priv": 133,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 686,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 274,
+     "priv": 195,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 61,
+    "Nodes": 7271,
+    "LayoutCount": 32175,
+    "RecalcStyleCount": 32176,
+    "JSHeapUsedSize": 50935948
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.9461157023414107,
+   "p50": 0.9000000059604645,
+   "p95": 1.300000011920929,
+   "max": 1.699999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 115,
+    "createOscillator": 0,
+    "createBufferSource": 115,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 33555,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 3.9535056877007966,
+   "running": true,
+   "track": "jp-1962",
+   "at": 562,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 695,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 279,
+     "priv": 195,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 62,
+    "Nodes": 7875,
+    "LayoutCount": 32779,
+    "RecalcStyleCount": 32780,
+    "JSHeapUsedSize": 51155168
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.9327814567661443,
+   "p50": 0.9000000059604645,
+   "p95": 1.300000011920929,
+   "max": 1.699999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 116,
+    "createOscillator": 0,
+    "createBufferSource": 116,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 34159,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 4.090815550669275,
+   "running": true,
+   "track": "jp-1962",
+   "at": 572,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 138,
+     "priv": 83,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 706,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 203,
+     "priv": 159,
+     "cpu": 1.1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2357,
+    "LayoutCount": 33383,
+    "RecalcStyleCount": 33384,
+    "JSHeapUsedSize": 38044736
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8567880802596641,
+   "p50": 0.800000011920929,
+   "p95": 1.199999988079071,
+   "max": 1.600000023841858,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 117,
+    "createOscillator": 0,
+    "createBufferSource": 117,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 34763,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 3.8869515333890514,
+   "running": true,
+   "track": "jp-1962",
+   "at": 582,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 722,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 207,
+     "priv": 160,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 1983,
+    "LayoutCount": 33988,
+    "RecalcStyleCount": 33989,
+    "JSHeapUsedSize": 37644464
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8544701986162868,
+   "p50": 0.800000011920929,
+   "p95": 1.0999999940395355,
+   "max": 1.699999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 118,
+    "createOscillator": 0,
+    "createBufferSource": 118,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 35367,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 1.7930598152019912,
+   "running": true,
+   "track": "jp-1962",
+   "at": 592,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 120,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 734,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 206,
+     "priv": 159,
+     "cpu": 0.9
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2587,
+    "LayoutCount": 34592,
+    "RecalcStyleCount": 34593,
+    "JSHeapUsedSize": 37579132
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.8803305795370054,
+   "p50": 0.9000000059604645,
+   "p95": 1.199999988079071,
+   "max": 1.699999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 119,
+    "createOscillator": 0,
+    "createBufferSource": 119,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 35972,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 8.661329440974699,
+   "running": true,
+   "track": "jp-1962",
+   "at": 602,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 748,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 207,
+     "priv": 160,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2078,
+    "LayoutCount": 35196,
+    "RecalcStyleCount": 35197,
+    "JSHeapUsedSize": 38619956
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8822847689125711,
+   "p50": 0.9000000059604645,
+   "p95": 1.100000023841858,
+   "max": 1.4000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 120,
+    "createOscillator": 0,
+    "createBufferSource": 120,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 36576,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 6.78666283036259,
+   "running": true,
+   "track": "jp-1962",
+   "at": 612,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 756,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 207,
+     "priv": 159,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 53,
+    "Nodes": 2682,
+    "LayoutCount": 35800,
+    "RecalcStyleCount": 35801,
+    "JSHeapUsedSize": 38232600
+   }
+  },
+  {
+   "n": 693,
+   "mean": 0.9092352091405986,
+   "p50": 0.800000011920929,
+   "p95": 1.0999999940395355,
+   "max": 42.80000001192093,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 127,
+    "createOscillator": 0,
+    "createBufferSource": 127,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 37269,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 11.214915757669958,
+   "running": true,
+   "track": "us-2023",
+   "at": 624,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 121,
+     "cpu": 2.2
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 326,
+     "priv": 827,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 309,
+     "priv": 265,
+     "cpu": 1.2
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 59,
+    "Nodes": 2437,
+    "LayoutCount": 36292,
+    "RecalcStyleCount": 36293,
+    "JSHeapUsedSize": 98399892
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.8406611578523621,
+   "p50": 0.800000011920929,
+   "p95": 1.0999999940395355,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 128,
+    "createOscillator": 0,
+    "createBufferSource": 128,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 37874,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 10.763039188463555,
+   "running": true,
+   "track": "us-2023",
+   "at": 634,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 318,
+     "priv": 833,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 309,
+     "priv": 265,
+     "cpu": 0.9
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 60,
+    "Nodes": 3042,
+    "LayoutCount": 36897,
+    "RecalcStyleCount": 36898,
+    "JSHeapUsedSize": 100164816
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.9067880791050709,
+   "p50": 0.9000000059604645,
+   "p95": 1.2000000178813934,
+   "max": 1.7999999821186066,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 129,
+    "createOscillator": 0,
+    "createBufferSource": 129,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 38478,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 11.177704912969919,
+   "running": true,
+   "track": "us-2023",
+   "at": 644,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 139,
+     "priv": 83,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 326,
+     "priv": 849,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 314,
+     "priv": 265,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 61,
+    "Nodes": 3645,
+    "LayoutCount": 37500,
+    "RecalcStyleCount": 37501,
+    "JSHeapUsedSize": 102950244
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.86407284714923,
+   "p50": 0.8999999761581421,
+   "p95": 1.0999999940395355,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 130,
+    "createOscillator": 0,
+    "createBufferSource": 130,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 39082,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 10.871953558273301,
+   "running": true,
+   "track": "us-2023",
+   "at": 654,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 188,
+     "priv": 133,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 326,
+     "priv": 853,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 319,
+     "priv": 265,
+     "cpu": 0.9
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 62,
+    "Nodes": 4250,
+    "LayoutCount": 38105,
+    "RecalcStyleCount": 38106,
+    "JSHeapUsedSize": 97884828
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8895695363448946,
+   "p50": 0.9000000059604645,
+   "p95": 1.199999988079071,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 131,
+    "createOscillator": 0,
+    "createBufferSource": 131,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 39686,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 16.086053030358077,
+   "running": true,
+   "track": "us-2023",
+   "at": 664,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 326,
+     "priv": 865,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 323,
+     "priv": 266,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 63,
+    "Nodes": 4854,
+    "LayoutCount": 38709,
+    "RecalcStyleCount": 38710,
+    "JSHeapUsedSize": 98714132
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8784768227611156,
+   "p50": 0.8999999761581421,
+   "p95": 1.199999988079071,
+   "max": 1.5999999940395355,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 131,
+    "createOscillator": 0,
+    "createBufferSource": 131,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 40290,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 40.469849152764596,
+   "running": true,
+   "track": "us-2023",
+   "at": 674,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 138,
+     "priv": 83,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 326,
+     "priv": 875,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 329,
+     "priv": 266,
+     "cpu": 0.9
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 63,
+    "Nodes": 5457,
+    "LayoutCount": 39312,
+    "RecalcStyleCount": 39313,
+    "JSHeapUsedSize": 100110888
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.932781457407585,
+   "p50": 0.9000000059604645,
+   "p95": 1.300000011920929,
+   "max": 1.699999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 131,
+    "createOscillator": 0,
+    "createBufferSource": 131,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 40894,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 40.71572812697549,
+   "running": true,
+   "track": "us-2023",
+   "at": 684,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 2.4
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 326,
+     "priv": 882,
+     "cpu": 2.1
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 334,
+     "priv": 266,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 63,
+    "Nodes": 6062,
+    "LayoutCount": 39917,
+    "RecalcStyleCount": 39918,
+    "JSHeapUsedSize": 99877160
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8890728484715847,
+   "p50": 0.8999999761581421,
+   "p95": 1.2000000178813934,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 137,
+    "createOscillator": 0,
+    "createBufferSource": 137,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 41498,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 11.07558516900569,
+   "running": true,
+   "track": "us-2023",
+   "at": 694,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 326,
+     "priv": 885,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 339,
+     "priv": 267,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 69,
+    "Nodes": 6666,
+    "LayoutCount": 40521,
+    "RecalcStyleCount": 40522,
+    "JSHeapUsedSize": 98505740
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.868377483394367,
+   "p50": 0.8999999761581421,
+   "p95": 1.100000023841858,
+   "max": 1.4000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 139,
+    "createOscillator": 0,
+    "createBufferSource": 139,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 42102,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 15.281726174776002,
+   "running": true,
+   "track": "us-2023",
+   "at": 705,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 326,
+     "priv": 897,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 343,
+     "priv": 267,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 71,
+    "Nodes": 7270,
+    "LayoutCount": 41125,
+    "RecalcStyleCount": 41126,
+    "JSHeapUsedSize": 103674792
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8605960266578276,
+   "p50": 0.800000011920929,
+   "p95": 1.100000023841858,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 140,
+    "createOscillator": 0,
+    "createBufferSource": 140,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 42706,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 12.724207721572325,
+   "running": true,
+   "track": "us-2023",
+   "at": 715,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 120,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 326,
+     "priv": 907,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 349,
+     "priv": 268,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 72,
+    "Nodes": 7874,
+    "LayoutCount": 41729,
+    "RecalcStyleCount": 41730,
+    "JSHeapUsedSize": 101321172
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.8452892565037593,
+   "p50": 0.800000011920929,
+   "p95": 1.100000023841858,
+   "max": 1.300000011920929,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 143,
+    "createOscillator": 0,
+    "createBufferSource": 143,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 43311,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 15.266980001233367,
+   "running": true,
+   "track": "us-2023",
+   "at": 725,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 301,
+     "priv": 642,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 220,
+     "priv": 180,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2252,
+    "LayoutCount": 42333,
+    "RecalcStyleCount": 42334,
+    "JSHeapUsedSize": 49191984
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8649006620641576,
+   "p50": 0.8999999761581421,
+   "p95": 1.100000023841858,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 145,
+    "createOscillator": 0,
+    "createBufferSource": 145,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 43915,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 11.26451440590667,
+   "running": true,
+   "track": "us-2023",
+   "at": 735,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 301,
+     "priv": 644,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 223,
+     "priv": 179,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 54,
+    "Nodes": 2856,
+    "LayoutCount": 42937,
+    "RecalcStyleCount": 42938,
+    "JSHeapUsedSize": 49924072
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8427152329722777,
+   "p50": 0.800000011920929,
+   "p95": 1.0999999940395355,
+   "max": 1.4000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 149,
+    "createOscillator": 0,
+    "createBufferSource": 149,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 44519,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 9.5714497979086,
+   "running": true,
+   "track": "us-2023",
+   "at": 745,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 120,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 301,
+     "priv": 652,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 223,
+     "priv": 179,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 55,
+    "Nodes": 2497,
+    "LayoutCount": 43541,
+    "RecalcStyleCount": 43542,
+    "JSHeapUsedSize": 49030736
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8480132454081087,
+   "p50": 0.800000011920929,
+   "p95": 1.0999999940395355,
+   "max": 1.4000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 150,
+    "createOscillator": 0,
+    "createBufferSource": 150,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 45123,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 16.39766969254968,
+   "running": true,
+   "track": "us-2023",
+   "at": 755,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 301,
+     "priv": 663,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 224,
+     "priv": 179,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 2005,
+    "LayoutCount": 44145,
+    "RecalcStyleCount": 44146,
+    "JSHeapUsedSize": 48177936
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8705298015416063,
+   "p50": 0.8999999761581421,
+   "p95": 1.199999988079071,
+   "max": 1.5,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 146,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 44,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 151,
+    "createOscillator": 0,
+    "createBufferSource": 151,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 45727,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 15.861875350500412,
+   "running": true,
+   "track": "us-2023",
+   "at": 765,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 139,
+     "priv": 83,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 301,
+     "priv": 674,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 224,
+     "priv": 179,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2609,
+    "LayoutCount": 44749,
+    "RecalcStyleCount": 44750,
+    "JSHeapUsedSize": 48838004
+   }
+  },
+  {
+   "n": 693,
+   "mean": 0.9327561340978824,
+   "p50": 0.800000011920929,
+   "p95": 1.199999988079071,
+   "max": 45.29999998211861,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 152,
+    "createOscillator": 0,
+    "createBufferSource": 152,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 46420,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 13.026727581799943,
+   "running": true,
+   "track": "az-2016",
+   "at": 777,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 120,
+     "cpu": 2.2
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 319,
+     "priv": 746,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 1.1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2426,
+    "LayoutCount": 45240,
+    "RecalcStyleCount": 45241,
+    "JSHeapUsedSize": 46501252
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.8494214878594579,
+   "p50": 0.800000011920929,
+   "p95": 1.100000023841858,
+   "max": 1.4000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 153,
+    "createOscillator": 0,
+    "createBufferSource": 153,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 47025,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 18.051683838211513,
+   "running": true,
+   "track": "az-2016",
+   "at": 787,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 319,
+     "priv": 750,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 0.9
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 53,
+    "Nodes": 3031,
+    "LayoutCount": 45845,
+    "RecalcStyleCount": 45846,
+    "JSHeapUsedSize": 46148620
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8521523179103997,
+   "p50": 0.800000011920929,
+   "p95": 1.199999988079071,
+   "max": 1.7000000178813934,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 158,
+    "createOscillator": 0,
+    "createBufferSource": 158,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 47629,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 10.11959998831267,
+   "running": true,
+   "track": "az-2016",
+   "at": 797,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 139,
+     "priv": 83,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 319,
+     "priv": 756,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 56,
+    "Nodes": 2518,
+    "LayoutCount": 46449,
+    "RecalcStyleCount": 46450,
+    "JSHeapUsedSize": 50311972
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.865289256099827,
+   "p50": 0.8999999761581421,
+   "p95": 1.199999988079071,
+   "max": 1.4000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 159,
+    "createOscillator": 0,
+    "createBufferSource": 159,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 48234,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 20.71446665988714,
+   "running": true,
+   "track": "az-2016",
+   "at": 807,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 188,
+     "priv": 133,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 769,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 1996,
+    "LayoutCount": 47053,
+    "RecalcStyleCount": 47054,
+    "JSHeapUsedSize": 49613332
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8673841057727668,
+   "p50": 0.800000011920929,
+   "p95": 1.199999988079071,
+   "max": 1.699999988079071,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 159,
+    "createOscillator": 0,
+    "createBufferSource": 159,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 48838,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 25.333390436857005,
+   "running": true,
+   "track": "az-2016",
+   "at": 817,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 774,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2600,
+    "LayoutCount": 47658,
+    "RecalcStyleCount": 47659,
+    "JSHeapUsedSize": 49523548
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.9018211919839019,
+   "p50": 0.9000000059604645,
+   "p95": 1.2000000178813934,
+   "max": 1.9000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 159,
+    "createOscillator": 0,
+    "createBufferSource": 159,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 49442,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 40.656834872967096,
+   "running": true,
+   "track": "az-2016",
+   "at": 827,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 319,
+     "priv": 780,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 2119,
+    "LayoutCount": 48262,
+    "RecalcStyleCount": 48263,
+    "JSHeapUsedSize": 45763152
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8649006625082319,
+   "p50": 0.800000011920929,
+   "p95": 1.100000023841858,
+   "max": 1.4000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 165,
+    "createOscillator": 0,
+    "createBufferSource": 165,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 50046,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 10.996137428692046,
+   "running": true,
+   "track": "az-2016",
+   "at": 837,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 200,
+     "priv": 145,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 319,
+     "priv": 782,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 0.9
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 57,
+    "Nodes": 2723,
+    "LayoutCount": 48866,
+    "RecalcStyleCount": 48867,
+    "JSHeapUsedSize": 45282564
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8875827824339172,
+   "p50": 0.9000000059604645,
+   "p95": 1.199999988079071,
+   "max": 1.7000000178813934,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 172,
+    "createOscillator": 0,
+    "createBufferSource": 172,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 50650,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 11.100375367709153,
+   "running": true,
+   "track": "az-2016",
+   "at": 847,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 120,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 319,
+     "priv": 794,
+     "cpu": 2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 58,
+    "Nodes": 2239,
+    "LayoutCount": 49470,
+    "RecalcStyleCount": 49471,
+    "JSHeapUsedSize": 48617396
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.8740495865010033,
+   "p50": 0.8999999761581421,
+   "p95": 1.199999988079071,
+   "max": 1.300000011920929,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 172,
+    "createOscillator": 0,
+    "createBufferSource": 172,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 51255,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 16.019168218494766,
+   "running": true,
+   "track": "az-2016",
+   "at": 857,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 151,
+     "priv": 96,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 786,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 0.9
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 58,
+    "Nodes": 2843,
+    "LayoutCount": 50074,
+    "RecalcStyleCount": 50075,
+    "JSHeapUsedSize": 47356972
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8551324500844179,
+   "p50": 0.800000011920929,
+   "p95": 1.100000023841858,
+   "max": 1.5999999940395355,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 176,
+    "createOscillator": 0,
+    "createBufferSource": 176,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 51859,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 10.72550608886164,
+   "running": true,
+   "track": "az-2016",
+   "at": 867,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 139,
+     "priv": 83,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 319,
+     "priv": 811,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 55,
+    "Nodes": 2358,
+    "LayoutCount": 50678,
+    "RecalcStyleCount": 50679,
+    "JSHeapUsedSize": 48934872
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8594370870203372,
+   "p50": 0.800000011920929,
+   "p95": 1.199999988079071,
+   "max": 1.5999999940395355,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 178,
+    "createOscillator": 0,
+    "createBufferSource": 178,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 52463,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 9.660960358609048,
+   "running": true,
+   "track": "az-2016",
+   "at": 877,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 176,
+     "priv": 120,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 306,
+     "priv": 823,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 0.9
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 57,
+    "Nodes": 2963,
+    "LayoutCount": 51283,
+    "RecalcStyleCount": 51284,
+    "JSHeapUsedSize": 46733324
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.8701986753881372,
+   "p50": 0.800000011920929,
+   "p95": 1.100000023841858,
+   "max": 1.5999999940395355,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 179,
+    "createOscillator": 0,
+    "createBufferSource": 179,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 53067,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 24.40274902572683,
+   "running": true,
+   "track": "az-2016",
+   "at": 888,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 163,
+     "priv": 108,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 319,
+     "priv": 835,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2478,
+    "LayoutCount": 51887,
+    "RecalcStyleCount": 51888,
+    "JSHeapUsedSize": 51243496
+   }
+  },
+  {
+   "n": 605,
+   "mean": 0.9985123961425024,
+   "p50": 1,
+   "p95": 1.4000000059604645,
+   "max": 1.5999999940395355,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 187,
+    "createOscillator": 0,
+    "createBufferSource": 187,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 53672,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 8.99292291215916,
+   "running": true,
+   "track": "az-2016",
+   "at": 898,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 139,
+     "priv": 83,
+     "cpu": 2.4
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 319,
+     "priv": 841,
+     "cpu": 2.2
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 233,
+     "priv": 186,
+     "cpu": 1.1
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 51,
+    "Nodes": 2014,
+    "LayoutCount": 52491,
+    "RecalcStyleCount": 52492,
+    "JSHeapUsedSize": 50657572
+   }
+  },
+  {
+   "n": 604,
+   "mean": 0.871192053059079,
+   "p50": 0.8999999761581421,
+   "p95": 1.199999988079071,
+   "max": 1.9000000059604645,
+   "maxGap": 16.800000000046566,
+   "heap": 76600000,
+   "heapTotal": 91700000,
+   "gl": {
+    "Buffer": 151,
+    "Texture": 17,
+    "Program": 19,
+    "Shader": 0,
+    "Framebuffer": 3,
+    "Renderbuffer": 1,
+    "VertexArray": 45,
+    "Query": 0,
+    "Sampler": 0
+   },
+   "au": {
+    "createGain": 188,
+    "createOscillator": 0,
+    "createBufferSource": 188,
+    "createBiquadFilter": 0,
+    "createBuffer": 0,
+    "createPanner": 0,
+    "createStereoPanner": 0,
+    "createDelay": 0,
+    "createWaveShaper": 0,
+    "createDynamicsCompressor": 0,
+    "createAnalyser": 0,
+    "createConstantSource": 0,
+    "worklet": 1
+   },
+   "audio": {
+    "backend": "worklet",
+    "voices": 0,
+    "state": "running",
+    "errors": 0
+   },
+   "mirrors": {
+    "live": true,
+    "passes": 54276,
+    "size": [
+     512,
+     96
+    ],
+    "hfov": 40
+   },
+   "speed": 8.572628505451304,
+   "running": true,
+   "track": "az-2016",
+   "at": 908,
+   "proc": {
+    "Browser": {
+     "pid": 3900,
+     "ws": 188,
+     "priv": 133,
+     "cpu": 2.3
+    },
+    "GPU:GPU": {
+     "pid": 31120,
+     "ws": 319,
+     "priv": 853,
+     "cpu": 1.9
+    },
+    "Utility:Network Service:network.mojom.NetworkService": {
+     "pid": 51144,
+     "ws": 88,
+     "priv": 14,
+     "cpu": 0
+    },
+    "Tab": {
+     "pid": 5020,
+     "ws": 232,
+     "priv": 186,
+     "cpu": 0.9
+    },
+    "Utility:Audio Service:audio.mojom.AudioService": {
+     "pid": 16688,
+     "ws": 85,
+     "priv": 12,
+     "cpu": 0
+    }
+   },
+   "cdp": {
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 52,
+    "Nodes": 2618,
+    "LayoutCount": 53095,
+    "RecalcStyleCount": 53096,
+    "JSHeapUsedSize": 47926176
+   }
+  }
+ ],
+ "loads": [
+  {
+   "id": "it-1922",
+   "clickMs": 351,
+   "maxGapMs": 583,
+   "at": 3
+  },
+  {
+   "id": "be-1925",
+   "clickMs": 290,
+   "maxGapMs": 333,
+   "at": 156
+  },
+  {
+   "id": "mc-1929",
+   "clickMs": 209,
+   "maxGapMs": 250,
+   "at": 308
+  },
+  {
+   "id": "jp-1962",
+   "clickMs": 178,
+   "maxGapMs": 200,
+   "at": 461
+  },
+  {
+   "id": "us-2023",
+   "clickMs": 307,
+   "maxGapMs": 333,
+   "at": 614
+  },
+  {
+   "id": "az-2016",
+   "clickMs": 254,
+   "maxGapMs": 283,
+   "at": 767
+  }
+ ],
+ "variants": [
+  {
+   "name": "baseline",
+   "mean": 0.83,
+   "p50": 0.8,
+   "p95": 1.1,
+   "max": 1.4,
+   "n": 1200,
+   "cpu": {
+    "Browser": 2.3,
+    "GPU:GPU": 1.9,
+    "Utility:Network Service:network.mojom.NetworkService": 0,
+    "Tab": 0.9,
+    "Utility:Audio Service:audio.mojom.AudioService": 0
+   }
+  },
+  {
+   "name": "mirrors-off",
+   "mean": 0.77,
+   "p50": 0.7,
+   "p95": 0.9,
+   "max": 53.7,
+   "n": 1199,
+   "cpu": {
+    "Browser": 2.3,
+    "GPU:GPU": 1.9,
+    "Utility:Network Service:network.mojom.NetworkService": 0,
+    "Tab": 0.9,
+    "Utility:Audio Service:audio.mojom.AudioService": 0
+   }
+  },
+  {
+   "name": "audio-off",
+   "mean": 0.82,
+   "p50": 0.8,
+   "p95": 1.1,
+   "max": 1.4,
+   "n": 1200,
+   "cpu": {
+    "Browser": 2.3,
+    "GPU:GPU": 1.9,
+    "Utility:Network Service:network.mojom.NetworkService": 0,
+    "Tab": 0.8,
+    "Utility:Audio Service:audio.mojom.AudioService": 0
+   }
+  },
+  {
+   "name": "telemetry-off",
+   "mean": 0.79,
+   "p50": 0.8,
+   "p95": 1.1,
+   "max": 1.5,
+   "n": 1200,
+   "cpu": {
+    "Browser": 2.3,
+    "GPU:GPU": 1.7,
+    "Utility:Network Service:network.mojom.NetworkService": 0,
+    "Tab": 0.9,
+    "Utility:Audio Service:audio.mojom.AudioService": 0
+   }
+  },
+  {
+   "name": "all-off",
+   "mean": 0.67,
+   "p50": 0.6,
+   "p95": 0.9,
+   "max": 1.6,
+   "n": 1201,
+   "cpu": {
+    "Browser": 2.3,
+    "GPU:GPU": 1.7,
+    "Utility:Network Service:network.mojom.NetworkService": 0,
+    "Tab": 0.7,
+    "Utility:Audio Service:audio.mojom.AudioService": 0
+   }
+  }
+ ],
+ "errors": [],
+ "bootMs": 775
+}

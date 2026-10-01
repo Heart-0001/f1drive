@@ -8,7 +8,8 @@
 //   F1.REF_SPEC                       the reference CarSpec (the v5 car: its physics numbers are the constants below)
 //   F1.sanitizeSpec(spec) -> spec     a clean copy with exactly the contract's fields, the reference's where missing / absurd
 //   F1.carPerf(spec) -> perf          F1.CAR_PERF's fields and functions for that spec, plus gearFor(v, gear?),
-//                                     rpmFor(v, gear?), gears, topSpeedBoost, ers, spec. F1.CAR_PERF = the reference's.
+//                                     rpmFor(v, gear?), gears, topSpeedBoost, ersDeploy(v), ers, spec. F1.CAR_PERF =
+//                                     the reference's.
 //   F1.createCar(spec?, opts?) -> car opts: {tyres: instance | false, random} (default F1.createTyres({random}) when
 //                                     js/tyres.js is loaded, else null: grip 1)
 //   car = { state, reset(track, i), update(dt, input, track), setSpec(spec), setBattery(v), bump(strength), spec, perf,
@@ -95,11 +96,13 @@
   var AN_MIN = 2.0;                 // floor for a_n (car "light" over a sharp crest), m/s^2
 
   // ---- CarSpec (README-interfaces.md, v6) -------------------------------------
-  // The reference car = the v5 car: its physics numbers are the constants above. ERS (per kg of car): ers.power is
-  // added to the engine at full throttle (still traction-limited: the tyres' friction), a full store deploys it for
-  // 32 s; harvest: ERS_ETA of the braking power up to ers.harvest. Measured with the real car on the real tracks
-  // (devtests/car-v6/ers.js): +16..20 km/h at the end of every straight of 900 m or more, a racing lap without
-  // deploying recovers 55..65 % of the store (analog pedals; the keyboard test driver 48..80 %).
+  // The reference car = the v5 car: its physics numbers are the constants above. ERS (per kg of car): deploying
+  // multiplies the engine's drive by 1 + ers.power / power at every speed (the drivetrain's traction cap included,
+  // still limited by the tyres' friction), a full store deploys ers.power for 32 s; ers.taperKmh (optional, 2026:
+  // the MGU-K rule) fades the deploy power out linearly between its two speeds. Harvest: ERS_ETA of the braking power
+  // up to ers.harvest. Measured with the real car on the real tracks (devtests/car-v6/ers.js): +16..19 km/h at the end
+  // of every straight of 900 m or more, 0-200 km/h 6.09 -> 5.38 s, a racing lap without deploying recovers 55..65 % of
+  // the store (analog pedals; the keyboard test driver 48..80 %).
   var ERS_POWER = 0.15 * POWER;                    // 145.5 W/kg: 0.15 x the engine (1.15 x in all deploying)
   var REF = {
     id: '2025-standard', year: 2025,
@@ -110,7 +113,8 @@
     power: POWER, dragK: DRAG_K, downforce: DOWNFORCE, latBase: LAT_BASE, latMax: LAT_MAX,
     brakeBase: BRAKE_BASE, traction: TRACTION,
     gearKmh: [60, 100, 140, 180, 220, 260, 300], topKmh: 345,
-    rpmIdle: 4000, rpmShift: 11800, rpmMax: 12500, shiftTime: 0.05,
+    rpmIdle: 4000, rpmShift: 11800, rpmMax: 15000, shiftTime: 0.05,   // rpmMax: the V6 regulation limit (as every
+                                                                        //   other V6 season); rpm reaches it at 439 km/h
     cylinders: 6, aspiration: 'hybrid',
     ers: { store: 32 * ERS_POWER, power: ERS_POWER, harvest: 230 },
     cockpit: 'halo18'
@@ -142,6 +146,7 @@
   // So a bad data file can never produce NaN physics. ers missing (undefined) = the reference's battery; a battery only
   // from an object giving at least one of store / power / harvest as a number, with neither store nor power 0 (its absurd
   // fields are then the reference's); anything else (null, false, 0, '', {}, {store: 0, ...}) = no battery (null).
+  // ers.taperKmh [from, to] (km/h, 50 <= from, from + 1 <= to <= 600) is kept only when valid (the reference has none).
   function sanitizeSpec(spec) {
     var s = spec && typeof spec === 'object' ? spec : {}, R = REF, o = {}, i, k;
     o.id = typeof s.id === 'string' && /^[a-z0-9-]{1,40}$/.test(s.id) ? s.id : R.id;
@@ -174,6 +179,8 @@
       e = e && typeof e === 'object' ? e : {};
       o.ers = {};
       for (i = 0; i < ERS_KEYS.length; i++) { k = ERS_KEYS[i]; o.ers[k] = inRange(e[k], R.ers[k] / 10, R.ers[k] * 10) ? e[k] : R.ers[k]; }
+      x = e.taperKmh;
+      if (Array.isArray(x) && x.length === 2 && inRange(x[0], 50, 599) && inRange(x[1], x[0] + 1, 600)) o.ers.taperKmh = [x[0], x[1]];
     }
     o.cockpit = s.cockpit === 'modern' || s.cockpit === 'halo' || s.cockpit === 'halo18' ? s.cockpit : R.cockpit;
     return o;
@@ -189,7 +196,8 @@
     var latAero = LAT_AERO + (muLat * downforce - MU_LAT * DOWNFORCE);
     var brakeAero = BRAKE_AERO + (brakeDrag - BRAKE_DRAG) + (muBrake * downforce - MU_BRAKE * DOWNFORCE);
     var gk = s.gearKmh, nGears = gk.length + 1, rpmIdle = s.rpmIdle, rpmShift = s.rpmShift, rpmMax = s.rpmMax;
-    var ersPower = s.ers ? s.ers.power : 0;
+    var ersPower = s.ers ? s.ers.power : 0, taper = s.ers && s.ers.taperKmh ? s.ers.taperKmh : null;
+    var tv0 = taper ? taper[0] * KMH : 0, tv1 = taper ? taper[1] * KMH : 0;
 
     // bank / pitch in radians (bank > 0: driver's left higher; pitch > 0: nose up), kappaV in 1/m.
     function baseLoad(v, bank, pitch, kappaV) {
@@ -265,13 +273,19 @@
       var vt = Math.sqrt((traction - ROLL) / dragK);
       return v < vt ? v : vt;
     }
-    // ... and deploying the battery (the ERS force ersPower / v on top of the engine, up to the tyres' traction)
+    // The battery's deploy power at speed v (W/kg): ers.power, faded out linearly from taperKmh[0] to 0 at taperKmh[1].
+    function ersDeploy(v) {
+      var av = v < 0 ? -v : v;
+      if (!taper || !(av > tv0)) return ersPower;
+      return av < tv1 ? ersPower * (tv1 - av) / (tv1 - tv0) : 0;
+    }
+    // ... and deploying the battery (the engine's drive x (1 + deploy power / power), up to the tyres' traction)
     function topBoost() {
       if (!ersPower) return topFor(power);
       var lo = 1, hi = 250;
       for (var it = 0; it < 80; it++) {
         var v = 0.5 * (lo + hi), ice = Math.min(traction, power / v);
-        var a = Math.min(muTraction * (GRAVITY + downforce * v * v), ice + ersPower / v) - ROLL - dragK * v * v;
+        var a = Math.min(muTraction * (GRAVITY + downforce * v * v), ice * (1 + ersDeploy(v) / power)) - ROLL - dragK * v * v;
         if (a > 0) lo = v; else hi = v;
       }
       return lo;
@@ -294,7 +308,8 @@
       rpmFor: rpmFor,                  // (v, gear?) -> rpm
       gears: nGears,
       topSpeedBoost: topBoost(),       // m/s, deploying the battery all the way
-      ers: s.ers,                      // null | {store J/kg, power W/kg, harvest W/kg}
+      ersDeploy: ersDeploy,            // (v m/s) -> W/kg the battery deploys at that speed (0 without one)
+      ers: s.ers,                      // null | {store J/kg, power W/kg, harvest W/kg, taperKmh?: [from, to] km/h}
       spec: s                          // the sanitised spec these numbers come from
     };
   }
@@ -491,10 +506,11 @@
         if (ers) {
           var bat = state.battery, e;
           if (boost && thr > 0 && brk === 0 && bat > 0 && lf === 1) {        // (not while the limiter cuts)
-            // deploy: ers.power / v on top of the engine at full throttle, up to what the tyres can transmit
+            // deploy: the engine's drive (traction cap included) x (1 + deploy power / engine power), up to what the
+            // tyres can transmit: below the traction cap's speed the battery deploys less than its power
             var full = Math.min(traction, K.power / Math.max(av, 1));
             var cap = (grass ? Math.min(TRACTION_GRASS, MU_TRACTION_GRASS * an) : K.muTraction * an) * gTrac;
-            var add = (Math.min(cap, full + ers.power / Math.max(av, 1)) - full) * thr * lf;
+            var add = Math.min(cap - full, full * K.ersDeploy(av) / K.power) * thr * lf;
             if (add > 0) {
               e = add * av * h;
               if (e > bat * ers.store) { e = bat * ers.store; add = e / (av * h); }

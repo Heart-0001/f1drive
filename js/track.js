@@ -55,7 +55,7 @@
   var PIT_SOFT = 1.5;        // the outer wall eases off / back onto the track's own wall over +-this (m)
   var PIT_ROOM_MARGIN = 1.5; // the whole complex stays this far inside the medial axis (other roads, bends)
   var PIT_LAT_MAX = 8;       // m/s^2 on the lane centre at 80 km/h ...
-  var PIT_LAT_MAX_60 = 12;   // ... and at 60 (tight street circuits; the car has ~21 on asphalt there)
+  var PIT_LAT_MAX_60 = 12;   // ... and at 60 (a lane that has to follow a bend; the car has ~21 on asphalt there)
   var PIT_GARAGE_H = 6, PIT_DOOR_H = 4.2;   // garage face (the start gantry passes over at 6.5 m)
   var PIT_CURTAIN_H = 7.5;   // light curtains at the entry / exit line
   var PIT_LINE_W = 0.2;
@@ -593,9 +593,11 @@
       if (span < 8) return;
       function wq(q) { return ((q % N) + N) % N; }
 
-      // side of the real pit buildings next to the line, weighted by footprint area
+      // side of the real pit lane: trackData.pitSide where the track data gives it (tracks without pit buildings in the
+      // scenery data), else the side of the real pit buildings next to the line, weighted by footprint area
       var pref = 0, sc = global.F1_SCENERY, data = sc && trackData && trackData.id ? sc[trackData.id] : null;
-      if (data && Array.isArray(data.buildings)) {
+      if (trackData && (trackData.pitSide === 1 || trackData.pitSide === -1)) pref = trackData.pitSide;
+      else if (data && Array.isArray(data.buildings)) {
         var acc = 0;
         for (var b = 0; b < data.buildings.length; b++) {
           var bl = data.buildings[b], p = bl && bl.p;
@@ -617,10 +619,12 @@
       var area = 0;
       for (var u = 0; u < N; u++) { var w = (u + 1) % N; area += px[u] * pz[w] - px[w] * pz[u]; }
       // What is tried, in this order: [cross-section, limit, late]. A full lane at 80 km/h, then less runoff in front of
-      // the pit wall, then 60 km/h (a lane that has to follow more of a bend), then the narrow lane (always 60). The
+      // the pit wall, then the narrow lane, then the same at 60 km/h (a lane that has to follow more of a bend). The
       // side of the pit buildings first, all of it; without data both sides for each option, the inside of the lap
       // first. Last resort ('late'): the lane still starts before the line, but its entry line may come after it.
-      var opts = [[0, 80], [1, 80], [0, 60], [1, 60], [2, 60]], tries = [], t, v;
+      // The limit reported (and painted) is the lower of the layout's and trackData.pitLimitKmh (the real limit where
+      // it is below 80: Monaco, Singapore).
+      var opts = [[0, 80], [1, 80], [2, 80], [0, 60], [1, 60], [2, 60]], tries = [], t, v;
       var inside = area > 0 ? -1 : 1, first = pref || inside, dbg = Array.isArray(F1.PIT_DEBUG) ? F1.PIT_DEBUG : null;
       for (v = 0; v < opts.length; v++) {
         tries.push([first, opts[v][0], opts[v][1], false]);
@@ -629,6 +633,8 @@
       if (pref) for (v = 0; v < opts.length; v++) tries.push([-first, opts[v][0], opts[v][1], false]);
       tries.push([first, 2, 60, true], [-first, 2, 60, true]);
       for (t = 0; t < tries.length && !pitL; t++) pitL = layout(tries[t][0], tries[t][1], tries[t][2], tries[t][3]);
+      var realLim = trackData ? +trackData.pitLimitKmh : NaN;
+      if (pitL && realLim > 0 && realLim < pitL.limit) pitL.limit = realLim;
 
       function why(side, vi, limit, msg) {       // F1.PIT_DEBUG = [] collects why a layout was not taken
         if (dbg) dbg.push((trackData && trackData.id) + ' side ' + side + ' variant ' + vi + ' ' + limit + ': ' + msg);
@@ -1121,22 +1127,31 @@
     }
     var tgx = axis(tx0, nIx), tgz = axis(tz0, nIz);
     var tH = new Float64Array(TW * TH).fill(Infinity), tFix = new Float64Array(TW * TH);
-    function stamp(x, z, h) {
+    // The cell the point (x, z) of sample i's cross-section (lateral dLo..dHi) falls in: its vertices are kept
+    // TERRAIN_EPS below that cross-section, each at its own lateral offset, the cross-section held level beyond its
+    // ends. Rising outwards (the high side of a banked corner) that shape is concave, so the cell's triangles stay
+    // under it and the ground beyond the outer wall stays at the top of the banking (the lowest point of the
+    // cross-section in the cell, taken before, left a 3-5 m drop behind the walls of the real bankings). Where the
+    // cell reaches past the end that falls away (the low side) all four vertices take that end's height, as before.
+    function stamp(i, x, z, dLo, dHi) {
       var ix = Math.floor((x - tx0) / cellT), iz = Math.floor((z - tz0) / cellT);
       if (ix < 0) ix = 0; else if (ix > nIx - 2) ix = nIx - 2;
       if (iz < 0) iz = 0; else if (iz > nIz - 2) iz = nIz - 2;
-      var c = (iz + TERRAIN_RINGS) * TW + ix + TERRAIN_RINGS;
-      if (h < tH[c]) tH[c] = h;
-      if (h < tH[c + 1]) tH[c + 1] = h;
-      if (h < tH[c + TW]) tH[c + TW] = h;
-      if (h < tH[c + TW + 1]) tH[c + TW + 1] = h;
+      var c = (iz + TERRAIN_RINGS) * TW + ix + TERRAIN_RINGS, v, dv, low = tanB[i] > 0 ? dLo : dHi, past = false;
+      function lat(v) { return (tx0 + (ix + (v & 1)) * cellT - px[i]) * nx[i] + (tz0 + (iz + (v >> 1)) * cellT - pz[i]) * nz[i]; }
+      for (v = 0; v < 4; v++) { dv = lat(v); if (low < 0 ? dv < dLo : dv > dHi) past = true; }
+      for (v = 0; v < 4; v++) {
+        dv = past ? low : lat(v);
+        var h = py[i] + (dv < dLo ? dLo : (dv > dHi ? dHi : dv)) * tanB[i] - TERRAIN_EPS, cv = c + (v & 1) + (v >> 1) * TW;
+        if (h < tH[cv]) tH[cv] = h;
+      }
     }
     for (i = 0; i < N; i++) {
       var dLo = -(wallOuter[0][i] + 0.3), dHi = wallOuter[1][i] + 0.3;
       var nSt = Math.ceil((dHi - dLo) / 2);
       for (k = 0; k <= nSt; k++) {
         var dd = dLo + (dHi - dLo) * k / nSt;
-        stamp(px[i] + nx[i] * dd, pz[i] + nz[i] * dd, py[i] + dd * tanB[i] - TERRAIN_EPS);
+        stamp(i, px[i] + nx[i] * dd, pz[i] + nz[i] * dd, dLo, dHi);
       }
     }
     for (i = 0; i < TW * TH; i++) { if (tH[i] < Infinity) tFix[i] = 1; else tH[i] = 0; }

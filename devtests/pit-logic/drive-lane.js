@@ -62,6 +62,12 @@
       var log = [], r = { log: log, inLaneBad: 0, trackBad: 0, service: null, speedingSeen: false };
       var box = P.boxes[slot], bu = box.index;
       function step(u, d, v, h, where) {
+        while (pit.state.service) {               // held as main.js holds the car for any state.service (exit-line hold)
+          car.speed = 0;
+          var hv = pit.update(STEP, car, track, { slot: slot, limiter: true });
+          if (hv) log.push(hv);
+          r.heldExit = (r.heldExit || 0) + STEP;
+        }
         put(car, u, d, h, v);
         var ev = pit.update(STEP, car, track, { slot: slot, limiter: true });
         if (ev) log.push(ev);
@@ -131,9 +137,10 @@
         (r.headingOff || 0).toFixed(1) + ' deg off the box heading (lane direction vs box heading)');
       check(r.stops === 1 && r.pending === 0 && !r.visit && !r.speedingSeen, 'slot ' + slot + ': end state');
     });
-    // 2. through at the limit + 20 km/h: speeding once, 5 s pending
+    // 2. through at the limit + 20 km/h: speeding once, held 5 s at the exit line (no stop to serve it), nothing pending
     var sp = drive(4, lim + 20, false);
-    check(sp.log.join() === 'enter,speeding,exit' && sp.pending === 5, 'speeding run: ' + sp.log.join(' ') + ' pending ' + sp.pending);
+    check(sp.log.join() === 'enter,speeding,penaltyStart,penaltyDone,exit' && sp.pending === 0 && sp.stops === 0 &&
+      Math.abs(sp.heldExit - 5) < 2 * STEP, 'speeding run: ' + sp.log.join(' ') + ' pending ' + sp.pending + ' held ' + sp.heldExit);
     // 3. flat out on the track beside the lane: nothing
     var pit3 = F1.createPit(), car3 = { x: 0, z: 0, heading: 0, speed: 80, sampleIndex: cyc(Fr - 60), d: 0 }, ev3 = [];
     for (var u3 = Fr - 60, e3 = Fr + cyc(T - Fr) + 60; u3 < e3; u3 += 80 * STEP / (track.length / N)) {

@@ -470,7 +470,16 @@ async function pitScenario(trackId, tag, second) {
       check(tag + ': 120 km/h in the lane without the limiter: speeding toast', r2.maxLaneKmh > P.limit + 20 && toastSpeed.length >= 1, { max: r2.maxLaneKmh, toasts: toastSpeed });
       check(tag + ': the stop is 5 s longer (penalty 5 s served first)', r2.svcPenalty === 5 && Math.abs(r2.svcTotal - r2.svcWork - 5) < 1e-9 && Math.abs((r2.svcDoneClock - r2.svcStartClock) / 1000 - r2.svcTotal) < 0.05,
         { total: r2.svcTotal, work: r2.svcWork, penalty: r2.svcPenalty });
-      check(tag + ': second stop: 2 stops, frozen, no contact', v2.after.stops === 2 && r2.maxServiceMove === 0 && r2.hits === 0, { stops: v2.after.stops, hits: r2.hits });
+      check(tag + ': second stop: 2 stops, frozen, no contact', v2.after.stops === 2 && r2.maxServiceMove === 0 && r2.frozenBad === 0 && r2.hits === 0, { stops: v2.after.stops, hits: r2.hits, moved: r2.maxServiceMove, bad: r2.frozenBad });
+      // over the limit again after the stop (the driver keeps 120 km/h to the exit line): a new offence, held 5 s AT THE
+      // EXIT LINE (a stop-go: js/pit.js 'penaltyStart' / 'penaltyDone', no tyres), the car frozen, the lap clock running
+      const tAll = await w.js(`__v.toasts.map(function (t) { return t.text; })`);
+      const heldS = (r2.holdDoneClock - r2.holdStartClock) / 1000;
+      check(tag + ': speeding after the stop: a second toast (在出口線罰停 5 秒), held ' + (heldS === heldS ? heldS.toFixed(2) : '?') + ' s at the exit line, frozen, the lap clock ran on, then 罰停結束; no new tyres (still 2 stops)',
+        tAll.filter(t => /維修區超速（限速/.test(t)).length === 2 && /在出口線罰停 5 秒/.test(tAll.filter(t => /維修區超速（限速/.test(t))[1]) && tAll.some(t => /出口線停 5 秒/.test(t)) && tAll.some(t => /罰停結束/.test(t)) &&
+        r2.holdTotal === 5 && Math.abs(heldS - 5) < 0.05 && Math.abs((r2.holdLap1 - r2.holdLap0) - heldS) < 0.05 && r2.maxHoldMove === 0 && r2.holdFrozenBad === 0 &&
+        (await w.js(`F1.game.pit.state.stops`)) === 2 && (await w.js(`F1.game.pit.state.pending`)) === 0,
+        { toasts: tAll.slice(-6), hold: { total: r2.holdTotal, held: heldS, lap: r2.holdLap1 - r2.holdLap0, moved: r2.maxHoldMove, bad: r2.holdFrozenBad } });
     }
   }
   await w.noErrors();
@@ -488,15 +497,21 @@ async function partTyres() {
   await w.js(`__v.hookRenderer() && __e.hookCar()`);
   await w.tap('Escape');
   await w.click('#tab-gp');
-  await w.field('gp-q', '5'); await w.field('gp-r', '1');
+  // (the wear option is for the race only: qualifying runs at x1, so the laps are driven in the race)
+  await w.field('gp-q', '1'); await w.field('gp-r', '3');
   await w.click('#gp-wear button[data-w="5"]');
   check('Grand Prix with 輪胎損耗 ×5 started from the menu', await w.click('gp-start') && await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000));
+  const tq = await w.js(`__v.tyres()`);
+  check('qualifying: wear rate 1 (the x5 is for the race only)', tq.rate === 1, tq);
+  await w.js(`F1.game.gp.action('skip'); true`);
+  check('qualifying skipped: on the grid', await w.pump(`g.gp.phase === 'grid'`, 5, 'grid'));
   const t0 = await w.js(`__v.tyres()`);
-  check('qualifying: a new medium set, wear rate 5', t0.rate === 5 && t0.compound === 'M' && Math.max.apply(null, t0.wear) === 0, t0);
+  check('grid: a new medium set, wear rate 5 from here on', t0.rate === 5 && t0.compound === 'M' && Math.max.apply(null, t0.wear) === 0, t0);
   await w.js(`__e.ap.on = true; __e.ap.mode = 'line'; true`);
+  check('lights out: the race', await w.pump(`g.gp.phase === 'race' && !g.gp.inputLocked`, 30, 'race'));
   const laps = [];
   for (let k = 1; k <= 2; k++) {
-    const ok = await w.pump(`g.gp.lap >= ${k}`, 200, 'quali lap ' + k);
+    const ok = await w.pump(`g.gp.lap >= ${k}`, 200, 'race lap ' + k);
     const s = await w.js(`({ lap: F1.game.lap.last, tyres: __v.tyres(), hud: __v.hud.tyres })`);
     laps.push({ ok, lap: s.lap, wear: s.tyres.wear.map(x => +x.toFixed(3)), grip: s.tyres.grip, hudWear: s.hud.wear });
     if (k === 2) await w.shot('tyres-1-worn-telemetry', true);
@@ -511,7 +526,7 @@ async function partTyres() {
     v.after.tyres.grip.lat === 1 && v.after.tyres.grip.brake === 1 && v.after.tyres.grip.traction === 1, v && v.after.tyres);
   await w.frames(10);
   await w.shot('tyres-2-after-stop', true);
-  check('the lap with the stop counted for the session (quali lap 3 recorded, slower than the flying lap)', await w.pump(`g.gp.lap >= 3`, 200, 'lap 3') && (await w.js(`F1.game.lap.last`)) > laps[1].lap, await w.js(`F1.game.lap.last`));
+  check('the lap with the stop counted for the session (race lap 3 recorded, slower than the flying lap)', await w.pump(`g.gp.lap >= 3`, 200, 'lap 3') && (await w.js(`F1.game.lap.last`)) > laps[1].lap, await w.js(`F1.game.lap.last`));
   await w.noErrors();
   w.destroy();
 }
@@ -642,7 +657,7 @@ async function partRoom() {
     teams: [].map.call(document.querySelectorAll('#gp-standings .gp-row'), function (r) { var t = r.querySelector('.gp-team'); return [r.querySelector('.mp-pname').textContent, t ? t.textContent : null]; }) })`);
   const ga = await gv(A), gb = await gv(B);
   console.log('grand prix views: ' + J({ ga, gb }));
-  check('the session shows its year (2014) in the HUD box; wear x3 applied to both cars\' tyres', ga.year === '2014' && gb.year === '2014' && ga.vYear === 2014 && ga.wear === 3 && gb.wear === 3 && ga.rate === 3 && gb.rate === 3, { ga, gb });
+  check('the session shows its year (2014) in the HUD box; wear x3 in the session, qualifying tyres at x1 (the option is for the race only)', ga.year === '2014' && gb.year === '2014' && ga.vYear === 2014 && ga.wear === 3 && gb.wear === 3 && ga.rate === 1 && gb.rate === 1, { ga, gb });
   check('standings: every row has the livery chip of its car (HUD box) and the team name (menu panel)', ga.chips.length === 2 && ga.chips.every(r => !!r[1]) && gb.teams.length === 2 &&
     gb.teams.some(r => r[0] === 'Alice' && r[1] === '賓士') && gb.teams.some(r => r[0] === 'Bob' && r[1] === '紅牛'), { chips: ga.chips, teams: gb.teams });
   await A.shot('room-3-host-quali-2014');
@@ -701,7 +716,9 @@ async function partPad() {
   await sleep(800);
   const bb = await w.js(`({ dep: window.__dep, boost: F1.gamepad.state.boost })`);
   await w.js(`__btn(1, 0); __btn(7, 0); __btn(6, 1); clearInterval(window.__di); true`);
-  check('RB held: the battery deploys (state.deploy > 0, battery drains); released: no deploy', rb.dep > 0.5 && rb.battery < 1 && rb.boost && off.dep === 0 && !off.boost, { rb, off });
+  // (state.deploy = the share of the battery's power used: since 2026-10-01 the deploy adds to the engine's drive only up to
+  // what the tyres transmit, so in these 3.5 s from a standstill it peaks near 0.43, full only above the traction cap's speed)
+  check('RB held: the battery deploys (state.deploy > 0, battery drains); released: no deploy', rb.dep > 0.25 && rb.battery < 1 && rb.boost && off.dep === 0 && !off.boost, { rb, off });
   check('B held: deploys too', bb.dep > 0.5 && bb.boost, bb);
   await w.until(`Math.abs(F1.game.car.state.speed) < 1`, 6000); await w.js(`__btn(6, 0)`);
   const l0 = await w.js(`F1.game.limiter`);

@@ -1,0 +1,23 @@
+reference (2025 standard = F1.REF_SPEC) flying laps: au-1953 90.433, pt-1972 74.367, it-1953 82.483, mx-1962 82.308, pt-2008 84.283, br-1977 82.450, it-1914 84.033, br-1940 74.158, it-1922 85.925, ar-1952 81.217, bh-2002 101.000, az-2016 101.192, es-1991 79.350, mc-1929 86.733, fr-1960 84.250, be-1925 110.967, ca-1978 75.750, us-2012 110.667, fr-1969 99.717, nl-1948 76.100, es-2026 106.158, de-1932 81.142, hu-1986 82.242, us-1909 66.850, tr-2005 91.517, sa-2021 95.975, za-1961 79.125, us-2023 96.875, qa-2004 88.417, sg-2008 103.483, us-2022 95.000, de-1927 95.575, at-1969 73.675, my-1999 99.425, cn-2004 100.050, gb-1948 94.158, ru-2014 103.967, jp-1962 97.483, us-1956 80.633, ae-2009 95.142
+reference ERS: a flying lap could recover 69.3 % of the store (median; 69 59 65 71 71 63 64 60 50 73 83 80 65 82 68 73 61 96 79 64 93 66 80 49 72 67 66 65 67 98 69 83 55 83 82 66 91 75 49 78)
+WARNING 2010: driven median 1.04014 misses the index 1.0405 by more than 0.0003
+2010  index 1.0405  driven 1.0401 (mean 1.0396, 12 drives of 40)  grip scale x0.9789 (profile start 0.980)  top 329 km/h
+2011  index 1.0356  driven 1.0356 (mean 1.0356, 3 drives of 40)  grip scale x1.0066 (profile start 1.009)  top 318.4 km/h  ERS harvest 35.4098 W/kg: lap 1 stores (target 1)
+2012  index 1.0504  driven 1.0506 (mean 1.0497, 3 drives of 40)  grip scale x0.9741 (profile start 0.976)  top 318.4 km/h  ERS harvest 33.5087 W/kg: lap 1 stores (target 1)
+2013  index 1.0472  driven 1.0472 (mean 1.0467, 3 drives of 40)  grip scale x0.9818 (profile start 0.984)  top 318.4 km/h  ERS harvest 33.8656 W/kg: lap 1 stores (target 1)
+2014  index 1.0612  driven 1.0611 (mean 1.0619, 3 drives of 40)  grip scale x0.9287 (profile start 0.932)  top 335.8 km/h
+2015  index 1.0543  driven 1.0541 (mean 1.0547, 3 drives of 40)  grip scale x0.9419 (profile start 0.945)  top 335.8 km/h
+2016  index 1.0336  driven 1.0336 (mean 1.0332, 3 drives of 40)  grip scale x0.9786 (profile start 0.980)  top 335.8 km/h
+2017  index 1.0059  driven 1.0058 (mean 1.0059, 1 drives of 40)  grip scale x0.9828 (profile start 0.983)  top 323.2 km/h
+2018  index 0.9933  driven 0.9934 (mean 0.9933, 5 drives of 40)  grip scale x1.0139 (profile start 1.011)  top 323.2 km/h
+2019  index 0.9918  driven 0.9917 (mean 0.9915, 5 drives of 40)  grip scale x1.0088 (profile start 1.006)  top 328.1 km/h
+2020  index 0.9865  driven 0.9864 (mean 0.9865, 5 drives of 40)  grip scale x1.0358 (profile start 1.030)  top 328.1 km/h
+2021  index 1.0059  driven 1.0059 (mean 1.0064, 3 drives of 40)  grip scale x0.9571 (profile start 0.958)  top 328.1 km/h
+2022  index 1.0236  driven 1.0236 (mean 1.0246, 3 drives of 40)  grip scale x0.9370 (profile start 0.939)  top 330 km/h
+2023  index 1.0156  driven 1.0155 (mean 1.0163, 3 drives of 40)  grip scale x0.9556 (profile start 0.956)  top 330 km/h
+2024  index 1.0047  driven 1.0047 (mean 1.0049, 1 drives of 40)  grip scale x0.9842 (profile start 0.984)  top 330 km/h
+2025  index 1.0000  driven 1.0000 (mean 1.0000, 0 drives of 40)  grip scale x1.0000 (profile start 1.000)  top 330 km/h
+2026  index 1.0322  driven 1.0322 (mean 1.0319, 3 drives of 40)  grip scale x0.9267 (profile start 0.925)  top 329 km/h  ERS harvest 2190 W/kg (CAP): lap 1.9051 stores (target 2.125)
+calibration.json up to date
+(992.7 s)
+EXIT 0

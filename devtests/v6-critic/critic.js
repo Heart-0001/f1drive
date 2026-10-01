@@ -131,7 +131,7 @@ async function pitVisit(w, name, o) {
   await w.js(`__e.ap.on = true; __e.ap.mode = 'line'; true`);
   if (!await w.pump(nearPit(PIT_BEFORE), 260, name + ': ' + PIT_BEFORE + ' m before the pit lane')) return null;
   if (o.limiter) { await w.tap('Q'); if (!await w.until(`F1.game.limiter === true`, 2000, 'Q')) return null; }
-  const plan = await w.js(`__v.pitPlan(${J({ cruise: !!o.limiter, vLane: o.vLane || 0 })})`);
+  const plan = await w.js(`__v.pitPlan(${J({ cruise: !!o.limiter, vLane: o.vLane || 0, vLaneOut: o.vLaneOut || 0 })})`);
   if (!plan || !plan.ok) { note('pitPlan ' + J(plan)); return null; }
   const out = { plan };
   await w.pump(`__v.plan.U >= __v.plan.uEn - 25`, 60, 'before the entry line');
@@ -216,15 +216,18 @@ async function pitMonaco() {
   check(tag + ': track loads', await w.pickTrackWarp('mc-1929'));
   await w.js(`__e.ap.on = true; __e.ap.mode = 'line'; true`);
   await w.pump(`g.lap.started`, 60, 'timing');
-  // 1. through the lane at ~95 km/h without the limiter: speeding, the stop costs 5 s more
-  const v = await pitVisit(w, tag + '-fast', { limiter: false, vLane: 95 / 3.6 });
+  // 1. into the box at ~95 km/h without the limiter: speeding, the stop costs 5 s more (then at the limit to the exit:
+  //    speeding after the stop would be a second offence, held at the exit line; v6-smoke's pit part covers that)
+  const v = await pitVisit(w, tag + '-fast', { limiter: false, vLane: 95 / 3.6, vLaneOut: 58 / 3.6 });
   if (!v || !v.svcStarted) { check(tag + ': speeding visit with a stop', false, v); }
   else {
     note(tag + ' speeding: ' + J({ strip: v.strip, during: v.during, strip2: v.strip2, after: v.after, toasts: v.toasts }));
     const sp = await w.js(`__v.toasts.map(function (t) { return t.text; }).filter(function (t) { return /超速/.test(t); })`);
     check(tag + ': speeding in the 60 km/h lane: toast, the strip tells of the pending 5 s, served in the stop', sp.length === 1 && (/超速/.test(v.strip.warn) || v.strip.pending.indexOf('下次停站罰停 +5 s') >= 0) && v.during.svc.penalty === 5 && /罰停/.test(v.strip2), { sp, strip: v.strip, during: v.during, strip2: v.strip2 });
   }
-  // 2. R in the pit lane: back on the track, nothing stuck
+  // 2. R in the pit lane: the car is put on the lane centre at the same place (js/main.js: not out of the lane, which would
+  //    skip it), stopped, the visit and the limiter kept; driven on along the lane (__v.laneOut: the line autopilot would
+  //    steer into the pit wall from in there), the next lap counts, the visit ends
   const v2 = await pitVisit(w, tag + '-reset', {
     limiter: true,
     onLane: async w => {
@@ -232,16 +235,18 @@ async function pitMonaco() {
       const before = await w.js(`__v.car()`);
       await w.js(`__v.plan.active = false; __e.ap.on = false; __e.pad.buttons[7].value = 0; __e.pad.buttons[7].pressed = false; __e.pad.axes[0] = 0; true`);
       await w.tap('R'); await w.frames(5);
-      const after = await w.js(`({ car: __v.car(), pit: __v.pitState(), lap: { n: F1.game.lap.n, time: F1.game.lap.time, jumping: F1.game.lap.jumping } })`);
+      const after = await w.js(`({ car: __v.car(), laneD: F1.game.track.pit.laneD(F1.game.car.state.sampleIndex), pit: __v.pitState(), limiter: F1.game.limiter, lap: { n: F1.game.lap.n, time: F1.game.lap.time, jumping: F1.game.lap.jumping } })`);
       await w.shot(tag + '-4-after-R-in-lane', true);
-      // drive on (the line autopilot), one more lap: the lap counts, the pit visit ended cleanly
-      await w.js(`__e.ap.on = true; __e.ap.mode = 'line'; true`);
+      // drive on along the lane and out: the lap counts, the pit visit ends cleanly
+      await w.js(`__e.ap.on = true; __e.ap.mode = 'line'; __v.laneOut()`);
       const lapN = after.lap.n;
-      const lapped = await w.pump(`g.lap.n > ${lapN}`, 200, 'the next lap');
-      const end = await w.js(`({ pit: __v.pitState(), lap: F1.game.lap.last })`);
+      const lapped = await w.pump(`g.lap.n > ${lapN} && !F1.game.pit.state.visit && !__v.lane.active`, 200, 'the next lap, out of the lane');
+      const end = await w.js(`({ pit: __v.pitState(), lap: F1.game.lap.last, car: __v.car() })`);
+      await w.tap('Q');
       note(tag + ' R in the lane: ' + J({ before, after, lapped, end }));
-      check(tag + ': R in the pit lane puts the car on the track centreline, the next lap counts, the visit ends (no service, no penalty)', Math.abs(after.car.d) < 0.5 && lapped && !end.pit.visit && end.pit.pending === 0 && end.pit.stops === 1,
-        { after: after.car, pit: end.pit });
+      check(tag + ': R in the pit lane puts the car on the lane centre (d ' + after.car.d.toFixed(2) + ' vs ' + (after.laneD === after.laneD ? after.laneD.toFixed(2) : after.laneD) + '), stopped, still in the lane with its visit and the limiter; driven on, the next lap counts, the visit ends (no service, no penalty)',
+        Math.abs(after.car.d - after.laneD) < 0.5 && after.car.v === 0 && after.pit.inLane && after.pit.visit && after.limiter && lapped && !end.pit.visit && end.pit.pending === 0 && end.pit.stops === 1 && end.car.hit === 0,
+        { after, pit: end.pit });
       return 'stop';
     }
   });
@@ -256,8 +261,9 @@ async function pitZandvoort() {
   await w.js(`__e.ap.on = true; __e.ap.mode = 'line'; true`);
   await w.pump(`g.lap.started`, 60, 'timing');
   const v0 = await pitVisit(w, tag + '-full', { limiter: true });
-  check(tag + ': a full stop in box 1 of the 60 km/h lane (limiter, service, out again)', v0 && v0.svcStarted && v0.after && !v0.after.svc && v0.after.stops === 1 && v0.info && v0.info.rec.hits === 0 &&
-    v0.info.rec.maxLaneKmh < 61, v0 && { after: v0.after, rec: v0.info && v0.info.rec });
+  const zLim = await w.js(`F1.game.track.pit.limitKmh`);
+  check(tag + ': a full stop in box 1 of the ' + zLim + ' km/h lane (limiter, service, out again)', v0 && v0.svcStarted && v0.after && !v0.after.svc && v0.after.stops === 1 && v0.info && v0.info.rec.hits === 0 &&
+    v0.info.rec.maxLaneKmh < zLim + 1, v0 && { after: v0.after, rec: v0.info && v0.info.rec });
   const v = await pitVisit(w, tag, {
     limiter: true,
     onService: async w => {
@@ -303,14 +309,16 @@ async function tyresPuncture() {
   await w.pickTrackWarp('it-1922');
   await w.tap('Escape');
   await w.click('#tab-gp');
-  await w.field('gp-q', '8'); await w.field('gp-r', '1');
+  await w.field('gp-q', '1'); await w.field('gp-r', '8');
   await w.click('#gp-wear button[data-w="5"]');
   check(tag + ': a Grand Prix with wear x5 starts', await w.click('gp-start') && await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000));
-  await w.js(`__e.ap.on = true; __e.ap.mode = 'line'; window.__lapLog = []; true`);
+  // the wear option is for the race only (qualifying wears at x1): straight to the race
+  await w.js(`F1.game.gp.action('skip'); __e.ap.on = true; __e.ap.mode = 'line'; window.__lapLog = []; true`);
+  check(tag + ': qualifying skipped: the race, wear x5 from the grid on', await w.pump(`g.gp.phase === 'race' && !g.gp.inputLocked`, 30, 'race') && (await w.js(`F1.game.tyres.wearRate`)) === 5);
   const laps = [];
   let punct = false;
   for (let k = 1; k <= 7 && !punct; k++) {
-    const ok = await w.pump(`g.gp.lap >= ${k} || g.tyres.state.puncture >= 0`, 220, 'quali lap ' + k);
+    const ok = await w.pump(`g.gp.lap >= ${k} || g.tyres.state.puncture >= 0`, 220, 'race lap ' + k);
     const s = await w.js(`({ lapN: F1.game.gp.lap, last: F1.game.lap.last, tyres: __v.tyres(), hudPunct: __v.hud.tyres && __v.hud.tyres.puncture })`);
     laps.push({ lapN: s.lapN, last: s.last, wear: s.tyres.wear.map(x => +x.toFixed(2)), grip: s.tyres.grip, punct: s.tyres.puncture });
     if (s.tyres.puncture >= 0) punct = true;
@@ -360,10 +368,12 @@ async function tyresFlatDirt() {
   const g1 = await w.js(`({ tyres: __v.tyres(), grass: F1.game.car.state.onGrass })`);
   await w.tap('R'); await w.frames(5);
   await w.js(`__v.follow(true); true`);
-  const g2 = await w.js(`(function () { var n = 0, maxDirt = 0; while (n < 300) { n += __e.run(1, '', 2000).n; } return { tyres: __v.tyres() }; })()`);
+  // the dirt wears off with the distance driven on asphalt (about 150 m): drive 300 m (the excursion may also have hit
+  // the wall hard enough for a puncture, and a car on a punctured rear tyre covers far less ground in a fixed time)
+  const g2 = await w.js(`(function () { var s = F1.game.car.state, n = 0, dist = 0; while (n < 1800 && dist < 300) { n += __e.run(1, '', 2000).n; if (!s.onGrass) dist += Math.abs(s.speed) * __e.dt; } return { tyres: __v.tyres(), dist: dist, frames: n }; })()`);
   w.key('W', false);
-  note(tag + ' dirt: ' + J({ g1: g1.tyres.dirt, grip1: g1.tyres.grip, g2: g2.tyres.dirt }));
-  check(tag + ': grass dirties the tyres (grip down), they clean up on the asphalt', g1.tyres.dirt > 0.2 && g1.tyres.grip.lat < 1 && g2.tyres.dirt < g1.tyres.dirt * 0.3, { g1: g1.tyres, g2: g2.tyres });
+  note(tag + ' dirt: ' + J({ g1: g1.tyres.dirt, grip1: g1.tyres.grip, puncture: g1.tyres.puncture, g2: g2.tyres.dirt, asphalt: Math.round(g2.dist) + ' m in ' + g2.frames + ' frames' }));
+  check(tag + ': grass dirties the tyres (grip down), they clean up on the asphalt (' + Math.round(g2.dist) + ' m)', g1.tyres.dirt > 0.2 && g1.tyres.grip.lat < 1 && g2.dist >= 300 && g2.tyres.dirt < g1.tyres.dirt * 0.3, { g1: g1.tyres, g2: g2.tyres, dist: g2.dist });
   await w.noErrors();
   w.destroy();
 }
@@ -453,10 +463,12 @@ async function partRoom() {
     after.aSpec === '2016-mercedes' && after.bSpec === '2016-red-bull', { ya, yb, direct, after });
   await B.shot('room-02-guest-parc-ferme');
   await A.tap('Escape'); await B.tap('Escape');
-  const wear = { a: await A.js(`F1.game.tyres.wearRate`), b: await B.js(`F1.game.tyres.wearRate`), c: await C.js(`F1.game.tyres.wearRate`) };
-  check('tyre wear x2 on every car', wear.a === 2 && wear.b === 2 && wear.c === 2, wear);
+  const wearQ = { a: await A.js(`F1.game.tyres.wearRate`), b: await B.js(`F1.game.tyres.wearRate`), c: await C.js(`F1.game.tyres.wearRate`) };
+  check('qualifying: tyre wear x1 on every car (the x2 is for the race only)', wearQ.a === 1 && wearQ.b === 1 && wearQ.c === 1, wearQ);
   await A.js(`F1.game.gp.action('skip'); true`);
   check('grid, then the race', await A.until(`F1.game.gp.phase === 'grid'`, 5000) && await A.until(`F1.game.gp.phase === 'race'`, 20000) && await B.until(`F1.game.gp.phase === 'race' && !F1.game.gp.inputLocked`, 5000));
+  const wear = { a: await A.js(`F1.game.tyres.wearRate`), b: await B.js(`F1.game.tyres.wearRate`), c: await C.js(`F1.game.tyres.wearRate`) };
+  check('the race: tyre wear x2 on every car', wear.a === 2 && wear.b === 2 && wear.c === 2, wear);
   // B drives a lap into its box (the limiter on LB near the lane), A and C stay on the grid
   await B.js(DRIVER);
   const bSlot = await B.js(`F1.net.slot`);

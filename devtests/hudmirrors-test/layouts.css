@@ -1,0 +1,62 @@
+/* HUD rear-view mirror frames: preview CSS injected by devtests/hudmirrors-test/run.js (insertCSS) into the REAL game.
+   Nothing here is in index.html; the integrator copies the chosen block (layout A) into index.html's <style>.
+   The frames are two empty divs inside #hud (so they hide with the HUD while the menu is open):
+     <div id="hud-mirror-l" class="hud-mirror"></div><div id="hud-mirror-r" class="hud-mirror"></div>
+   placed right after <div id="hud" ...> (first children: every HUD box is painted over them where they would meet).
+   The glass is the frame's padding box; js/hudmirrors.js measures it (opts.elements) and draws the rear view there. */
+
+:root {
+  /* (on :root, not #hud: #hud-toast is outside #hud) glass 18.75 %of the window width (240 x 80 at 1280, 360 x 120 at 1920), 3 : 1, 224..400 px wide */
+  --mir-gw: clamp(224px, 18.75vw, 400px);
+  --mir-gh: calc(var(--mir-gw) / 3);
+  --mir-b: 4px;                                         /* housing (border) thickness */
+  --mir-top: 12px;
+  --mir-side: 18px;
+  --mir-oh: calc(var(--mir-gh) + 2 * var(--mir-b));     /* outer height of a frame */
+  --mir-ow: calc(var(--mir-gw) + 2 * var(--mir-b));     /* outer width */
+}
+.hud-mirror {
+  position: absolute; z-index: 0; box-sizing: content-box; padding: 0;
+  width: var(--mir-gw); height: var(--mir-gh);
+  border: var(--mir-b) solid #15181d; border-color: #20242b #15181d #0d0f12;   /* moulded housing, lit from above */
+  border-radius: 11px;                                   /* glass corners: 11 - 4 = 7 px (= RADIUS in hudmirrors.js) */
+  background: transparent;
+  box-shadow: 0 3px 12px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.07);
+  pointer-events: none;
+}
+
+/* ---------------- A: mirrors in the top corners, the corner columns moved down under them ---------------- */
+body.mir-a .hud-mirror { top: var(--mir-top); }
+body.mir-a #hud-mirror-l { left: var(--mir-side); }
+body.mir-a #hud-mirror-r { right: var(--mir-side); }
+body.mir-a #hud-timing { top: calc(var(--mir-top) + var(--mir-oh) + 10px); }
+body.mir-a #hud-map { top: calc(var(--mir-top) + var(--mir-oh) + 10px); }
+body.mir-a #hud-players, body.mir-a #hud-gp { top: calc(200px + var(--mir-oh)); }
+body.mir-a #hud-gp { max-height: calc(100vh - 248px - var(--mir-oh)); }
+@media (max-width: 1119px) {
+  body.mir-a #hud-gp, body.mir-a #hud-players { max-height: calc(100vh - 208px - var(--mir-oh) - var(--tel-top)); }
+}
+@media (max-width: 999px) {
+  body.mir-a #hud-hint { top: calc(238px + var(--mir-oh)); }
+}
+@media (max-width: 720px) {
+  body.mir-a #hud-lights { top: calc(180px + var(--mir-oh)); }
+  body.mir-a #hud-gp { top: calc(288px + var(--mir-oh)); }
+  body.mir-a #hud-hint { top: calc(178px + var(--mir-oh)); }
+}
+
+/* ---------------- B: mirrors in the top corners, the corner boxes moved inwards beside them ---------------- */
+body.mir-b .hud-mirror { top: var(--mir-top); }
+body.mir-b #hud-mirror-l { left: var(--mir-side); }
+body.mir-b #hud-mirror-r { right: var(--mir-side); }
+body.mir-b #hud-timing { left: calc(var(--mir-side) + var(--mir-ow) + 10px); }
+body.mir-b #hud-map { right: calc(var(--mir-side) + var(--mir-ow) + 10px); }
+body.mir-b #hud-players, body.mir-b #hud-gp { top: calc(var(--mir-top) + var(--mir-oh) + 10px); }
+body.mir-b #hud-gp { max-height: calc(100vh - 58px - var(--mir-oh) - var(--tel-top)); }
+
+/* ---------------- C: corner boxes stay; mirrors at the very top, inboard of them; lights / toast below ---------------- */
+body.mir-c .hud-mirror { top: 8px; }
+body.mir-c #hud-mirror-l { left: 336px; }                                   /* right of the widest timing box (~300 px) */
+body.mir-c #hud-mirror-r { right: 244px; }                                  /* left of the minimap (208 px + 18 + gap) */
+body.mir-c #hud-lights { top: calc(8px + var(--mir-oh) + 12px); }
+body.mir-c #hud-toast { top: calc(8px + var(--mir-oh) + 12px); }

@@ -1,0 +1,2390 @@
+{
+ "source": "F1Drive per-car energy-recovery (KERS / ERS) multipliers 2011-2026, researched 2026-10-01 from public sources (Wikipedia car / power-unit / race articles and the motorsport press, every URL per entry). Each number is an ESTIMATE for a game: a documented, ERS-specific statement turned into a score, not a measurement. 2026 = the hand-researched js/cars-data.js values. Summary in Traditional Chinese: docs/ers-data.md.",
+ "rules": "deploy, harvest, store multiply the ers.power, ers.harvest and ers.store of that season's STANDARD car (1 = standard). They replace the perf.ersPower / perf.ersHarvest multipliers of js/seasons-data.js / js/cars-data.js, they do not stack on them; hasErs false means ers: null for that car. Scale: multiplier = 1 + 0.04 x score. Score 0 = no ERS-specific data (or a neutral documented characteristic); +/-1 a documented edge / small shortfall or a supplier characteristic carried from adjacent seasons (low confidence); +/-2 a clear documented advantage / shortfall; +/-3 a dominant advantage or a serious shortfall (ERS disabled or failing all season); -4..-6 only for the extreme documented harvest deficit (Honda 2015: losing up to 120 kW halfway through a lap). Range enforced: deploy and harvest 0.75..1.15, store 0.9..1.1. deploy: the rules cap the electric power for everybody (KERS 60 kW, MGU-K 120 kW, 2026 350 kW), so deploy stands for how much of that power a car really got on a straight over a season (de-rated or disabled ERS, clipping, failures), not a different hardware rating. harvest: recovery rate (MGU-K under braking; MGU-H 2014-2025). store: 1 everywhere - the usable window is regulated (KERS 400 kJ a lap, 4 MJ 2014-2026) and no exception is documented. hasErs false = the car raced the whole season without KERS (2011: Team Lotus, Virgin, HRT; 2012: HRT, Marussia); its deploy / harvest / store are 1 and ignored. 2010 (out of scope here) is no-KERS for everybody by team agreement. 2013: every car had KERS (Marussia's first, designed by Williams; Caterham with the Red Bull Technologies system). Customers get their supplier's figures (power-unit suppliers must supply an identical specification) unless a team-specific fact is documented: year-old engines (Marussia 2015 with the 2014 Ferrari 059/3, Toro Rosso 2016 with the 2015 060, Sauber 2017 with the 2016 061), Ferrari's 2021 hybrid upgrade documented only for Ferrari's own cars, 2026 works-vs-customer hybrid usage (Mercedes). A single race failure does not change a season figure. 2026: the js/cars-data.js scores (ersHarvest = 1 + 0.01 x report score, ersPower from straight-end telemetry) with their deviation from 1 multiplied by 4, i.e. the same 4 % step as the rest of this file; the Monza 2026 energy-deployment analysis (The Race, 2026-09-05) agrees with the order. note: one line of Traditional Chinese for the car menu, the same for every car of a supplier-season; empty where nothing ERS-specific is sourced. reason: English, the evidence and the score. group: the supplier-season key used to assign the numbers. confidence: high = several consistent ERS-specific sources; medium = one clear ERS-specific source or a well-documented supplier characteristic; low = no ERS-specific data (1.0) or a characteristic carried over / inferred.",
+ "entries": {
+  "2011-red-bull": {
+   "hasErs": true,
+   "deploy": 0.92,
+   "harvest": 0.92,
+   "store": 1,
+   "note": "KERS 開季首站沒裝、第二站才上陣又出故障，電池加成較弱",
+   "confidence": "medium",
+   "reason": "Red Bull never fitted KERS at round 1 (Australia) and raced the previously unraced unit from Malaysia, where Vettel had KERS problems for the second half of the race -> -2 / -2 (season average, estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/2011_Australian_Grand_Prix",
+    "https://en.wikipedia.org/wiki/2011_Malaysian_Grand_Prix"
+   ],
+   "group": "rbKers2011"
+  },
+  "2011-mclaren": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2011-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2011-mercedes": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2011-renault": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2011-force-india": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2011-sauber": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2011-toro-rosso": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2011-williams": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2011-lotus-racing": {
+   "hasErs": false,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "沒有裝 KERS：沒有電池加速",
+   "confidence": "high",
+   "reason": "raced without KERS in 2011 (three teams opted out: Team Lotus, Virgin, HRT)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/Lotus_T128_(Formula_One_car)"
+   ],
+   "group": "noKers2011"
+  },
+  "2011-hrt": {
+   "hasErs": false,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "沒有裝 KERS：沒有電池加速",
+   "confidence": "high",
+   "reason": "raced without KERS in 2011 (three teams opted out: Team Lotus, Virgin, HRT)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system"
+   ],
+   "group": "noKers2011"
+  },
+  "2011-virgin": {
+   "hasErs": false,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "沒有裝 KERS：沒有電池加速",
+   "confidence": "high",
+   "reason": "raced without KERS in 2011 (three teams opted out: Team Lotus, Virgin, HRT)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/Virgin_MVR-02"
+   ],
+   "group": "noKers2011"
+  },
+  "2012-red-bull": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2012-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2012-mclaren": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2012-lotus-f1": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2012-mercedes": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2012-sauber": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2012-force-india": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2012-williams": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2012-toro-rosso": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2012-caterham": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "首度裝 KERS（Red Bull Technologies 系統），效率沒有公開資料",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship",
+    "https://en.wikipedia.org/wiki/Caterham_CT01"
+   ],
+   "group": "kers"
+  },
+  "2012-marussia": {
+   "hasErs": false,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "沒有裝 KERS：沒有電池加速",
+   "confidence": "high",
+   "reason": "one of the only two cars of 2012 without KERS (HRT F112, Marussia MR01)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/HRT_F112",
+    "https://en.wikipedia.org/wiki/Marussia_MR01"
+   ],
+   "group": "noKers2012"
+  },
+  "2012-hrt": {
+   "hasErs": false,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "沒有裝 KERS：沒有電池加速",
+   "confidence": "high",
+   "reason": "one of the only two cars of 2012 without KERS (HRT F112, Marussia MR01)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/HRT_F112",
+    "https://en.wikipedia.org/wiki/Marussia_MR01"
+   ],
+   "group": "noKers2012"
+  },
+  "2013-red-bull": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "one documented KERS problem (Webber, start of the Australian GP) - a single race failure does not change the season figure -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_RB9"
+   ],
+   "group": "kersRb2013"
+  },
+  "2013-mercedes": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2013-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2013-lotus-f1": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2013-mclaren": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2013-force-india": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2013-sauber": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2013-toro-rosso": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2013-williams": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship"
+   ],
+   "group": "kers"
+  },
+  "2013-marussia": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "首度裝 KERS（Williams 設計），效率沒有公開資料",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship",
+    "https://en.wikipedia.org/wiki/Marussia_MR02"
+   ],
+   "group": "kers"
+  },
+  "2013-caterham": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "KERS 60 kW / 400 kJ a lap for everybody; no public data on efficiency differences between KERS suppliers -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kinetic_energy_recovery_system",
+    "https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship",
+    "https://en.wikipedia.org/wiki/Caterham_CT03"
+   ],
+   "group": "kers"
+  },
+  "2014-mercedes": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "分離式渦輪：電能回收與運用全場最佳",
+   "confidence": "high",
+   "reason": "PU106A split turbo gave Mercedes \"the edge in packaging, aerodynamic efficiency, and battery usage\"; Horner: with a Mercedes engine the overtake button makes the car go faster -> harvest +3, deploy +2",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing"
+   ],
+   "group": "merc2014"
+  },
+  "2014-red-bull": {
+   "hasErs": true,
+   "deploy": 0.88,
+   "harvest": 0.92,
+   "store": 1,
+   "note": "ERS 軟體與可靠度問題：按加速鈕常常沒反應",
+   "confidence": "medium",
+   "reason": "Renault Energy F1-2014: turbo / ERS software problems, ran with ERS disabled on Renault's advice in testing (up to 150 hp); Horner: \"push the button, the car stops\"; very unreliable and down on power -> deploy -3, harvest -2",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_RB10",
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing"
+   ],
+   "group": "ren2014"
+  },
+  "2014-williams": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "分離式渦輪：電能回收與運用全場最佳",
+   "confidence": "high",
+   "reason": "PU106A split turbo gave Mercedes \"the edge in packaging, aerodynamic efficiency, and battery usage\"; Horner: with a Mercedes engine the overtake button makes the car go faster -> harvest +3, deploy +2",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing"
+   ],
+   "group": "merc2014"
+  },
+  "2014-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 059/3: no ERS-specific public data found; overall power between Mercedes and Renault -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing",
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2014"
+  },
+  "2014-mclaren": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "分離式渦輪：電能回收與運用全場最佳",
+   "confidence": "high",
+   "reason": "PU106A split turbo gave Mercedes \"the edge in packaging, aerodynamic efficiency, and battery usage\"; Horner: with a Mercedes engine the overtake button makes the car go faster -> harvest +3, deploy +2",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing"
+   ],
+   "group": "merc2014"
+  },
+  "2014-force-india": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "分離式渦輪：電能回收與運用全場最佳",
+   "confidence": "high",
+   "reason": "PU106A split turbo gave Mercedes \"the edge in packaging, aerodynamic efficiency, and battery usage\"; Horner: with a Mercedes engine the overtake button makes the car go faster -> harvest +3, deploy +2",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing"
+   ],
+   "group": "merc2014"
+  },
+  "2014-toro-rosso": {
+   "hasErs": true,
+   "deploy": 0.88,
+   "harvest": 0.92,
+   "store": 1,
+   "note": "ERS 軟體與可靠度問題：按加速鈕常常沒反應",
+   "confidence": "medium",
+   "reason": "Renault Energy F1-2014: turbo / ERS software problems, ran with ERS disabled on Renault's advice in testing (up to 150 hp); Horner: \"push the button, the car stops\"; very unreliable and down on power -> deploy -3, harvest -2",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_RB10",
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing"
+   ],
+   "group": "ren2014"
+  },
+  "2014-lotus-f1": {
+   "hasErs": true,
+   "deploy": 0.88,
+   "harvest": 0.92,
+   "store": 1,
+   "note": "ERS 軟體與可靠度問題：按加速鈕常常沒反應",
+   "confidence": "medium",
+   "reason": "Renault Energy F1-2014: turbo / ERS software problems, ran with ERS disabled on Renault's advice in testing (up to 150 hp); Horner: \"push the button, the car stops\"; very unreliable and down on power -> deploy -3, harvest -2",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_RB10",
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing"
+   ],
+   "group": "ren2014"
+  },
+  "2014-marussia": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 059/3: no ERS-specific public data found; overall power between Mercedes and Renault -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing",
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2014"
+  },
+  "2014-sauber": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 059/3: no ERS-specific public data found; overall power between Mercedes and Renault -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing",
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2014"
+  },
+  "2014-caterham": {
+   "hasErs": true,
+   "deploy": 0.88,
+   "harvest": 0.92,
+   "store": 1,
+   "note": "ERS 軟體與可靠度問題：按加速鈕常常沒反應",
+   "confidence": "medium",
+   "reason": "Renault Energy F1-2014: turbo / ERS software problems, ran with ERS disabled on Renault's advice in testing (up to 150 hp); Horner: \"push the button, the car stops\"; very unreliable and down on power -> deploy -3, harvest -2",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_RB10",
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing"
+   ],
+   "group": "ren2014"
+  },
+  "2015-mercedes": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "仍是最強的混合動力：電能回收與運用最佳",
+   "confidence": "medium",
+   "reason": "PU106B: evolution of the split-turbo PU106A; the most powerful unit of 2015 -> supplier characteristic kept (+2 / +3)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Formula_One_engines",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2015"
+  },
+  "2015-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 060: no ERS-specific public data found -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2015"
+  },
+  "2015-williams": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "仍是最強的混合動力：電能回收與運用最佳",
+   "confidence": "medium",
+   "reason": "PU106B: evolution of the split-turbo PU106A; the most powerful unit of 2015 -> supplier characteristic kept (+2 / +3)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Formula_One_engines",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2015"
+  },
+  "2015-red-bull": {
+   "hasErs": true,
+   "deploy": 0.88,
+   "harvest": 0.92,
+   "store": 1,
+   "note": "動力、可靠度、驅動性都出問題，電能部署偏弱",
+   "confidence": "medium",
+   "reason": "Renault Energy F1-2015 \"moved backwards\"; reliability, power and drivability all major issues; lacking performance vs Mercedes and Ferrari -> deploy -3, harvest -2 (as 2014)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_RB11",
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2015"
+  },
+  "2015-force-india": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "仍是最強的混合動力：電能回收與運用最佳",
+   "confidence": "medium",
+   "reason": "PU106B: evolution of the split-turbo PU106A; the most powerful unit of 2015 -> supplier characteristic kept (+2 / +3)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Formula_One_engines",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2015"
+  },
+  "2015-lotus-f1": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "仍是最強的混合動力：電能回收與運用最佳",
+   "confidence": "medium",
+   "reason": "PU106B: evolution of the split-turbo PU106A; the most powerful unit of 2015 -> supplier characteristic kept (+2 / +3)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Formula_One_engines",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2015"
+  },
+  "2015-toro-rosso": {
+   "hasErs": true,
+   "deploy": 0.88,
+   "harvest": 0.92,
+   "store": 1,
+   "note": "動力、可靠度、驅動性都出問題，電能部署偏弱",
+   "confidence": "medium",
+   "reason": "Renault Energy F1-2015 \"moved backwards\"; reliability, power and drivability all major issues; lacking performance vs Mercedes and Ferrari -> deploy -3, harvest -2 (as 2014)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_RB11",
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2015"
+  },
+  "2015-sauber": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 060: no ERS-specific public data found -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2015"
+  },
+  "2015-mclaren": {
+   "hasErs": true,
+   "deploy": 0.84,
+   "harvest": 0.76,
+   "store": 1,
+   "note": "MGU-H 回收不足：跑到半圈電能就用光",
+   "confidence": "high",
+   "reason": "RA615H: undersized turbo, \"poor regeneration capabilities\"; inefficient MGU-H used energy faster than it could be harvested, losing up to 120 kW halfway through a lap; harvesting at the top of the Kemmel straight while others deployed -> harvest -6, deploy -4",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MP4-30",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "honda2015"
+  },
+  "2015-marussia": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "使用 2014 年規格的法拉利動力（舊款）",
+   "confidence": "low",
+   "reason": "Marussia raced the year-old 059/3 (F1DB designation) instead of the 2015 Ferrari 060 -> -1 / -1 (estimate: no ERS-specific data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ferOld2015"
+  },
+  "2016-mercedes": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "混合動力仍領先：電能回收最佳",
+   "confidence": "medium",
+   "reason": "PU106C: third evolution of the split-turbo design; rivals still \"need to gain much more to catch Mercedes and Ferrari\" -> supplier characteristic kept (+2 / +3)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://www.autosport.com/f1/news/127796/honda-made-great-progress-in-2016--renault"
+   ],
+   "group": "merc2016"
+  },
+  "2016-red-bull": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力仍落後賓士與法拉利，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault R.E.16 (TAG Heuer for Red Bull): supplier with a documented deficit to Mercedes and Ferrari, gains in 2016; no ERS-specific data -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Renault_R.S.19"
+   ],
+   "group": "ren2016"
+  },
+  "2016-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 061: no ERS-specific public data found -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2016"
+  },
+  "2016-force-india": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "混合動力仍領先：電能回收最佳",
+   "confidence": "medium",
+   "reason": "PU106C: third evolution of the split-turbo design; rivals still \"need to gain much more to catch Mercedes and Ferrari\" -> supplier characteristic kept (+2 / +3)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://www.autosport.com/f1/news/127796/honda-made-great-progress-in-2016--renault"
+   ],
+   "group": "merc2016"
+  },
+  "2016-williams": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "混合動力仍領先：電能回收最佳",
+   "confidence": "medium",
+   "reason": "PU106C: third evolution of the split-turbo design; rivals still \"need to gain much more to catch Mercedes and Ferrari\" -> supplier characteristic kept (+2 / +3)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://www.autosport.com/f1/news/127796/honda-made-great-progress-in-2016--renault"
+   ],
+   "group": "merc2016"
+  },
+  "2016-mclaren": {
+   "hasErs": true,
+   "deploy": 0.92,
+   "harvest": 0.88,
+   "store": 1,
+   "note": "MGU-K 換新磁鐵提升回充，但仍明顯落後",
+   "confidence": "medium",
+   "reason": "RA616H: \"newer, more efficient magnet assembly which improved battery regeneration\", revised MGU-H magnets; Honda \"needs to gain much more\" -> harvest -3, deploy -2",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://www.autosport.com/f1/news/127796/honda-made-great-progress-in-2016--renault"
+   ],
+   "group": "honda2016"
+  },
+  "2016-toro-rosso": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "使用 2015 年規格法拉利動力，沒有原廠支援",
+   "confidence": "low",
+   "reason": "Toro Rosso: 2015-specification Ferrari 060 without direct factory support (works / Haas / Sauber had the 061) -> -1 / -1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Toro_Rosso_STR11"
+   ],
+   "group": "ferOld2016"
+  },
+  "2016-haas": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 061: no ERS-specific public data found -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2016"
+  },
+  "2016-renault": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力仍落後賓士與法拉利，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault R.E.16 (TAG Heuer for Red Bull): supplier with a documented deficit to Mercedes and Ferrari, gains in 2016; no ERS-specific data -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Renault_R.S.19"
+   ],
+   "group": "ren2016"
+  },
+  "2016-sauber": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 061: no ERS-specific public data found -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2016"
+  },
+  "2016-manor": {
+   "hasErs": true,
+   "deploy": 1.08,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "混合動力仍領先：電能回收最佳",
+   "confidence": "medium",
+   "reason": "PU106C: third evolution of the split-turbo design; rivals still \"need to gain much more to catch Mercedes and Ferrari\" -> supplier characteristic kept (+2 / +3)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://www.autosport.com/f1/news/127796/honda-made-great-progress-in-2016--renault"
+   ],
+   "group": "merc2016"
+  },
+  "2017-mercedes": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2017"
+  },
+  "2017-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 062: no ERS-specific public data found -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2017"
+  },
+  "2017-red-bull": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力仍落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault R.E.17: supplier deficit carried (battery failure Verstappen, Canada); no ERS-specific season data -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_RB13",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2017"
+  },
+  "2017-force-india": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2017"
+  },
+  "2017-williams": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2017"
+  },
+  "2017-renault": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力仍落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault R.E.17: supplier deficit carried (battery failure Verstappen, Canada); no ERS-specific season data -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_RB13",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2017"
+  },
+  "2017-toro-rosso": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力仍落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault R.E.17: supplier deficit carried (battery failure Verstappen, Canada); no ERS-specific season data -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_RB13",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2017"
+  },
+  "2017-haas": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 062: no ERS-specific public data found -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2017"
+  },
+  "2017-mclaren": {
+   "hasErs": true,
+   "deploy": 0.88,
+   "harvest": 0.84,
+   "store": 1,
+   "note": "MGU-H 一再故障、降低出力保可靠度，電能偏弱",
+   "confidence": "medium",
+   "reason": "RA617H: persistent turbo / MGU-H shaft failures, engine detuned for reliability, \"no power, no reliability\" -> harvest -4, deploy -3",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MCL32",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "honda2017"
+  },
+  "2017-sauber": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "使用 2016 年規格法拉利動力（舊款）",
+   "confidence": "low",
+   "reason": "Sauber recycled the 2016 Ferrari 061 instead of the redesigned 062 -> -1 / -1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Sauber_C36"
+   ],
+   "group": "ferOld2017"
+  },
+  "2018-mercedes": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2018"
+  },
+  "2018-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 062 EVO: no ERS-specific public data found -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2018"
+  },
+  "2018-red-bull": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力年底被 Honda 超越，電能略弱",
+   "confidence": "low",
+   "reason": "Renault R.E.18: \"continued deficits against other power units\" (2018-2025), Honda ahead by the end of 2018; Monaco MGU-K failure (25 % less power) is a single event -> -1 / -1",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/2018_Monaco_Grand_Prix"
+   ],
+   "group": "ren2018"
+  },
+  "2018-renault": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力年底被 Honda 超越，電能略弱",
+   "confidence": "low",
+   "reason": "Renault R.E.18: \"continued deficits against other power units\" (2018-2025), Honda ahead by the end of 2018; Monaco MGU-K failure (25 % less power) is a single event -> -1 / -1",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/2018_Monaco_Grand_Prix"
+   ],
+   "group": "ren2018"
+  },
+  "2018-haas": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 062 EVO: no ERS-specific public data found -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2018"
+  },
+  "2018-mclaren": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力年底被 Honda 超越，電能略弱",
+   "confidence": "low",
+   "reason": "Renault R.E.18: \"continued deficits against other power units\" (2018-2025), Honda ahead by the end of 2018; Monaco MGU-K failure (25 % less power) is a single event -> -1 / -1",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/2018_Monaco_Grand_Prix"
+   ],
+   "group": "ren2018"
+  },
+  "2018-force-india": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2018"
+  },
+  "2018-sauber": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "",
+   "confidence": "low",
+   "reason": "Ferrari 062 EVO: no ERS-specific public data found -> 1.0 (no data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "fer2018"
+  },
+  "2018-toro-rosso": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "MGU-H 重新設計，第三版換新 MGU-K 與電池，年底超越雷諾",
+   "confidence": "medium",
+   "reason": "RA618H: MGU-H redesigned (but the flawed 2017 MGU-H at the first round), Spec 3 with a redesigned MGU-K and battery from Russia, pushed Honda ahead of Renault -> -1 / -1",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Toro_Rosso_STR13",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "honda2018"
+  },
+  "2018-williams": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2018"
+  },
+  "2019-mercedes": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2019"
+  },
+  "2019-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "直線很強，但公開資料指向內燃機（燃油流量），電能取標準值",
+   "confidence": "low",
+   "reason": "Ferrari 064: strong straight-line speed tied to the fuel-flow controversy (combustion side), not to the ERS -> 1.0 (no ERS data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF90"
+   ],
+   "group": "fer2019"
+  },
+  "2019-red-bull": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "與賓士動力接近，緊湊渦輪在高海拔特別強",
+   "confidence": "medium",
+   "reason": "RA619H: output \"closely matched to the rival Mercedes engine\", new MGU-H stator, compact turbo strong at altitude, fewest failures -> +1 / +1",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_in_Formula_One"
+   ],
+   "group": "honda2019"
+  },
+  "2019-mclaren": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力持續落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault E-Tech: biggest gains since 2016 in 2019 but \"continued deficits against other power units\" through 2025 -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_R.S.19",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2019"
+  },
+  "2019-renault": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力持續落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault E-Tech: biggest gains since 2016 in 2019 but \"continued deficits against other power units\" through 2025 -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_R.S.19",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2019"
+  },
+  "2019-toro-rosso": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "與賓士動力接近，緊湊渦輪在高海拔特別強",
+   "confidence": "medium",
+   "reason": "RA619H: output \"closely matched to the rival Mercedes engine\", new MGU-H stator, compact turbo strong at altitude, fewest failures -> +1 / +1",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_in_Formula_One"
+   ],
+   "group": "honda2019"
+  },
+  "2019-racing-point": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2019"
+  },
+  "2019-alfa-romeo": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "直線很強，但公開資料指向內燃機（燃油流量），電能取標準值",
+   "confidence": "low",
+   "reason": "Ferrari 064: strong straight-line speed tied to the fuel-flow controversy (combustion side), not to the ERS -> 1.0 (no ERS data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF90"
+   ],
+   "group": "fer2019"
+  },
+  "2019-haas": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "直線很強，但公開資料指向內燃機（燃油流量），電能取標準值",
+   "confidence": "low",
+   "reason": "Ferrari 064: strong straight-line speed tied to the fuel-flow controversy (combustion side), not to the ERS -> 1.0 (no ERS data)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF90"
+   ],
+   "group": "fer2019"
+  },
+  "2019-williams": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2019"
+  },
+  "2020-mercedes": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2020"
+  },
+  "2020-red-bull": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "「Extra Harvest」模式：短時間大量回充",
+   "confidence": "medium",
+   "reason": "RA620H: MGU-K run harder, new \"Extra Harvest\" mode for large energy regeneration in a short period -> harvest +2, deploy +1",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "honda2020"
+  },
+  "2020-mclaren": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力持續落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault E-Tech: biggest gains since 2016 in 2019 but \"continued deficits against other power units\" through 2025 -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_R.S.19",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2019"
+  },
+  "2020-racing-point": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2020"
+  },
+  "2020-renault": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力持續落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault E-Tech: biggest gains since 2016 in 2019 but \"continued deficits against other power units\" through 2025 -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_R.S.19",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2019"
+  },
+  "2020-ferrari": {
+   "hasErs": true,
+   "deploy": 0.92,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "400 V 電池：直線尾段電能不足",
+   "confidence": "medium",
+   "reason": "Ferrari 065: 400 V energy store (rivals 800 V) until late 2021 - after the switch \"the power is always available through the straight line ... compared with last year a big step forward\" -> deploy -2, harvest -1",
+   "sources": [
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://en.wikipedia.org/wiki/Ferrari_SF1000"
+   ],
+   "group": "fer2020"
+  },
+  "2020-alphatauri": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "「Extra Harvest」模式：短時間大量回充",
+   "confidence": "medium",
+   "reason": "RA620H: MGU-K run harder, new \"Extra Harvest\" mode for large energy regeneration in a short period -> harvest +2, deploy +1",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "honda2020"
+  },
+  "2020-alfa-romeo": {
+   "hasErs": true,
+   "deploy": 0.92,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "400 V 電池：直線尾段電能不足",
+   "confidence": "medium",
+   "reason": "Ferrari 065: 400 V energy store (rivals 800 V) until late 2021 - after the switch \"the power is always available through the straight line ... compared with last year a big step forward\" -> deploy -2, harvest -1",
+   "sources": [
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://en.wikipedia.org/wiki/Ferrari_SF1000"
+   ],
+   "group": "fer2020"
+  },
+  "2020-haas": {
+   "hasErs": true,
+   "deploy": 0.92,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "400 V 電池：直線尾段電能不足",
+   "confidence": "medium",
+   "reason": "Ferrari 065: 400 V energy store (rivals 800 V) until late 2021 - after the switch \"the power is always available through the straight line ... compared with last year a big step forward\" -> deploy -2, harvest -1",
+   "sources": [
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://en.wikipedia.org/wiki/Ferrari_SF1000"
+   ],
+   "group": "fer2020"
+  },
+  "2020-williams": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2020"
+  },
+  "2021-mercedes": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2021"
+  },
+  "2021-red-bull": {
+   "hasErs": true,
+   "deploy": 1.12,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "電能回收與部署常優於賓士，第 12 站起換新電池",
+   "confidence": "medium",
+   "reason": "RA621H: \"often having superior energy recovery and deployment\" vs Mercedes; CNT energy store from round 12 (1.3x output density, deployable energy available much more of the time) -> +3 / +3",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_in_Formula_One",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Red_Bull_RB16B"
+   ],
+   "group": "honda2021"
+  },
+  "2021-ferrari": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 1,
+   "store": 1,
+   "note": "俄羅斯站起換 800 V 電池，直線尾段不再斷電",
+   "confidence": "medium",
+   "reason": "Ferrari works: 400 V store until Russia (round 15, Sainz from Turkey), then 800 V \"in line with its rivals\" -> season average deploy -1, harvest 0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2021"
+  },
+  "2021-mclaren": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2021"
+  },
+  "2021-alpine": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力持續落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault E-Tech: biggest gains since 2016 in 2019 but \"continued deficits against other power units\" through 2025 -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_R.S.19",
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2019"
+  },
+  "2021-alphatauri": {
+   "hasErs": true,
+   "deploy": 1.12,
+   "harvest": 1.12,
+   "store": 1,
+   "note": "電能回收與部署常優於賓士，第 12 站起換新電池",
+   "confidence": "medium",
+   "reason": "RA621H: \"often having superior energy recovery and deployment\" vs Mercedes; CNT energy store from round 12 (1.3x output density, deployable energy available much more of the time) -> +3 / +3",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_in_Formula_One",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Red_Bull_RB16B"
+   ],
+   "group": "honda2021"
+  },
+  "2021-aston-martin": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2021"
+  },
+  "2021-williams": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "賓士混合動力的回收優勢延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes: split-turbo hybrid characteristic carried from 2014-2016, smaller because rivals are documented as closing in (Honda \"closely matched\" 2019, Honda superior recovery 2021) -> harvest +2, deploy +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "merc2021"
+  },
+  "2021-alfa-romeo": {
+   "hasErs": true,
+   "deploy": 0.92,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "法拉利新電池只見於廠隊，客戶車維持 400 V（推估）",
+   "confidence": "low",
+   "reason": "Ferrari customers: the hybrid upgrade is documented only for the Ferrari drivers (Leclerc Russia, Sainz Turkey) -> kept at the 2020 level (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "ferCust2021"
+  },
+  "2021-haas": {
+   "hasErs": true,
+   "deploy": 0.92,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "法拉利新電池只見於廠隊，客戶車維持 400 V（推估）",
+   "confidence": "low",
+   "reason": "Ferrari customers: the hybrid upgrade is documented only for the Ferrari drivers (Leclerc Russia, Sainz Turkey) -> kept at the 2020 level (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "ferCust2021"
+  },
+  "2022-red-bull": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "Honda 碳奈米管電池延續到凍結期（推估）",
+   "confidence": "low",
+   "reason": "Honda RBPTH001-003: the 2021 CNT energy store carried into the frozen units (development limited to reliability); rivals moved to 800 V -> +1 / +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21"
+   ],
+   "group": "rbpt2022"
+  },
+  "2022-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2022-mercedes": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2022-alpine": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力持續落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault E-Tech RE22-RE25: \"continued deficits against other power units\", Alpine's poor performance and reliability led to the end of the programme -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2022"
+  },
+  "2022-mclaren": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2022-alfa-romeo": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2022-aston-martin": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2022-haas": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2022-alphatauri": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "Honda 碳奈米管電池延續到凍結期（推估）",
+   "confidence": "low",
+   "reason": "Honda RBPTH001-003: the 2021 CNT energy store carried into the frozen units (development limited to reliability); rivals moved to 800 V -> +1 / +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21"
+   ],
+   "group": "rbpt2022"
+  },
+  "2022-williams": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2023-red-bull": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "Honda 碳奈米管電池延續到凍結期（推估）",
+   "confidence": "low",
+   "reason": "Honda RBPTH001-003: the 2021 CNT energy store carried into the frozen units (development limited to reliability); rivals moved to 800 V -> +1 / +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21"
+   ],
+   "group": "rbpt2022"
+  },
+  "2023-mercedes": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2023-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2023-mclaren": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2023-aston-martin": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2023-alpine": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力持續落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault E-Tech RE22-RE25: \"continued deficits against other power units\", Alpine's poor performance and reliability led to the end of the programme -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2022"
+  },
+  "2023-williams": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2023-alphatauri": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "Honda 碳奈米管電池延續到凍結期（推估）",
+   "confidence": "low",
+   "reason": "Honda RBPTH001-003: the 2021 CNT energy store carried into the frozen units (development limited to reliability); rivals moved to 800 V -> +1 / +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21"
+   ],
+   "group": "rbpt2022"
+  },
+  "2023-alfa-romeo": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2023-haas": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2024-mclaren": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2024-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2024-red-bull": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "Honda 碳奈米管電池延續到凍結期（推估）",
+   "confidence": "low",
+   "reason": "Honda RBPTH001-003: the 2021 CNT energy store carried into the frozen units (development limited to reliability); rivals moved to 800 V -> +1 / +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21"
+   ],
+   "group": "rbpt2022"
+  },
+  "2024-mercedes": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2024-aston-martin": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2024-alpine": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力持續落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault E-Tech RE22-RE25: \"continued deficits against other power units\", Alpine's poor performance and reliability led to the end of the programme -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2022"
+  },
+  "2024-haas": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2024-rb": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "Honda 碳奈米管電池延續到凍結期（推估）",
+   "confidence": "low",
+   "reason": "Honda RBPTH001-003: the 2021 CNT energy store carried into the frozen units (development limited to reliability); rivals moved to 800 V -> +1 / +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21"
+   ],
+   "group": "rbpt2022"
+  },
+  "2024-williams": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2024-kick-sauber": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2025-mclaren": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2025-mercedes": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2025-red-bull": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "Honda 碳奈米管電池延續到凍結期（推估）",
+   "confidence": "low",
+   "reason": "Honda RBPTH001-003: the 2021 CNT energy store carried into the frozen units (development limited to reliability); rivals moved to 800 V -> +1 / +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21"
+   ],
+   "group": "rbpt2022"
+  },
+  "2025-ferrari": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2025-williams": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2025-racing-bulls": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "Honda 碳奈米管電池延續到凍結期（推估）",
+   "confidence": "low",
+   "reason": "Honda RBPTH001-003: the 2021 CNT energy store carried into the frozen units (development limited to reliability); rivals moved to 800 V -> +1 / +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Ferrari_SF21"
+   ],
+   "group": "rbpt2022"
+  },
+  "2025-aston-martin": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "賓士混合動力回收效率延續（推估）",
+   "confidence": "low",
+   "reason": "Mercedes M13-M16: supplier hybrid characteristic carried, smaller under the freeze -> harvest +1 (estimate)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_V6_hybrid_Formula_One_power_unit",
+    "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid"
+   ],
+   "group": "merc2022"
+  },
+  "2025-haas": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2025-kick-sauber": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 1,
+   "store": 1,
+   "note": "2021 年底起改 800 V，與對手看齊",
+   "confidence": "low",
+   "reason": "Ferrari 066: 800 V energy store \"in line with its rivals\" since late 2021; no other ERS data -> 1.0",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://the-race.com/formula-1/how-ferrari-hybrid-upgrade-helped-edge-battle-with-mclaren/"
+   ],
+   "group": "fer2022"
+  },
+  "2025-alpine": {
+   "hasErs": true,
+   "deploy": 0.96,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "雷諾動力持續落後，電能略弱（推估）",
+   "confidence": "low",
+   "reason": "Renault E-Tech RE22-RE25: \"continued deficits against other power units\", Alpine's poor performance and reliability led to the end of the programme -> -1 / -1 (supplier characteristic)",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_V6_hybrid_Formula_One_power_unit"
+   ],
+   "group": "ren2022"
+  },
+  "2026-mercedes": {
+   "hasErs": true,
+   "deploy": 1.04,
+   "harvest": 1.08,
+   "store": 1,
+   "note": "電能回收與部署全場最佳",
+   "confidence": "medium",
+   "reason": "Mercedes works: ERS integration / harvesting \"outstanding\", super clipping, fastest straight ends; Monza: ahead on the three straights -> js/cars-data.js ersPower 1.009 / ersHarvest 1.02, deviation x4",
+   "sources": [
+    "https://www.the-race.com/formula-1/every-2026-f1-team-big-weakness/",
+    "https://www.autosport.com/f1/news/how-mercedes-advantage-in-f1-2026-goes-beyond-the-engine/10803973/",
+    "https://www.the-race.com/formula-1/f1-teams-monza-italian-gp-early-energy-depoyment-patterns/",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  },
+  "2026-ferrari": {
+   "hasErs": true,
+   "deploy": 0.98,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "峰值馬力較低，電池耗得快、回充靠收油滑行",
+   "confidence": "medium",
+   "reason": "Ferrari 067: lower peak power so the battery is drained faster, recharge relies more on lift-and-coast; Monza: loses on the straights, claws back out of Ascari -> js/cars-data.js ersPower 0.9957 / ersHarvest 0.99, deviation x4",
+   "sources": [
+    "https://www.the-race.com/formula-1/every-2026-f1-team-big-weakness/",
+    "https://www.autosport.com/f1/news/how-mercedes-advantage-in-f1-2026-goes-beyond-the-engine/10803973/",
+    "https://www.the-race.com/formula-1/f1-teams-monza-italian-gp-early-energy-depoyment-patterns/",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  },
+  "2026-mclaren": {
+   "hasErs": true,
+   "deploy": 0.98,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "同一具賓士動力，但電能運用不如廠隊",
+   "confidence": "medium",
+   "reason": "McLaren: Stella admits a \"gap in hybrid usage\" to the works team; Monza: \"from an energy perspective, we've still got a bit of work to do\" -> js/cars-data.js ersPower 0.9957 / ersHarvest 1.01, deviation x4",
+   "sources": [
+    "https://www.autosport.com/f1/news/how-mercedes-advantage-in-f1-2026-goes-beyond-the-engine/10803973/",
+    "https://www.the-race.com/formula-1/f1-teams-monza-italian-gp-early-energy-depoyment-patterns/",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  },
+  "2026-red-bull": {
+   "hasErs": true,
+   "deploy": 1.02,
+   "harvest": 1,
+   "store": 1,
+   "note": "內燃機最強，電能部署報導不一，取中性",
+   "confidence": "low",
+   "reason": "Red Bull Ford: ICE rated the benchmark, but \"energy deployment and lack of driveability\" criticised and less efficient harvesting in fast corners -> neutral harvest -> js/cars-data.js ersPower 1.0047 / ersHarvest 1, deviation x4",
+   "sources": [
+    "https://www.motorsport.com/f1/news/f1-2026-mid-season-grades-red-bull-stumbles-but-summer-rally-shows-glimmer-of-progress/10845430/",
+    "https://www.planetf1.com/chinese-grand-prix/why-red-bull-are-slow-2026-max-verstappen-rb22-problems",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  },
+  "2026-racing-bulls": {
+   "hasErs": true,
+   "deploy": 1.02,
+   "harvest": 1,
+   "store": 1,
+   "note": "內燃機最強，電能部署報導不一，取中性",
+   "confidence": "low",
+   "reason": "Racing Bulls (Red Bull Ford): supplier characteristic -> js/cars-data.js ersPower 1.0052 / ersHarvest 1, deviation x4",
+   "sources": [
+    "https://www.motorsport.com/f1/news/f1-2026-mid-season-grades-red-bull-stumbles-but-summer-rally-shows-glimmer-of-progress/10845430/",
+    "https://www.planetf1.com/chinese-grand-prix/why-red-bull-are-slow-2026-max-verstappen-rb22-problems",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  },
+  "2026-alpine": {
+   "hasErs": true,
+   "deploy": 1.01,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "同一具賓士動力，電能運用比照客戶隊",
+   "confidence": "low",
+   "reason": "Alpine (Mercedes customer): customer-team gap inferred from McLaren's statement -> js/cars-data.js ersPower 1.0028 / ersHarvest 1.01, deviation x4",
+   "sources": [
+    "https://www.autosport.com/f1/news/how-mercedes-advantage-in-f1-2026-goes-beyond-the-engine/10803973/",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  },
+  "2026-haas": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "法拉利動力：電池耗得快",
+   "confidence": "medium",
+   "reason": "Haas (Ferrari customer): supplier characteristic -> js/cars-data.js ersPower 0.9994 / ersHarvest 0.99, deviation x4",
+   "sources": [
+    "https://www.the-race.com/formula-1/every-2026-f1-team-big-weakness/",
+    "https://www.autosport.com/f1/news/how-mercedes-advantage-in-f1-2026-goes-beyond-the-engine/10803973/",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  },
+  "2026-audi": {
+   "hasErs": true,
+   "deploy": 1,
+   "harvest": 0.92,
+   "store": 1,
+   "note": "能量管理效率較差",
+   "confidence": "medium",
+   "reason": "Audi AFR 26: \"less efficient energy management\"; lack of power \"snowballs into higher battery deployment\" -> js/cars-data.js ersPower 0.9995 / ersHarvest 0.98, deviation x4",
+   "sources": [
+    "https://www.autosport.com/f1/news/how-every-f1-2026-teams-performed-so-far-team-by-team/10812457/",
+    "https://www.motorsport.com/f1/news/f1-2026-mid-season-grades-audi-gets-off-to-solid-start-on-works-debut/10845164/",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  },
+  "2026-williams": {
+   "hasErs": true,
+   "deploy": 1.02,
+   "harvest": 1.04,
+   "store": 1,
+   "note": "同一具賓士動力，電能運用比照客戶隊",
+   "confidence": "low",
+   "reason": "Williams (Mercedes customer): customer-team gap inferred from McLaren's statement -> js/cars-data.js ersPower 1.0055 / ersHarvest 1.01, deviation x4",
+   "sources": [
+    "https://www.autosport.com/f1/news/how-mercedes-advantage-in-f1-2026-goes-beyond-the-engine/10803973/",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  },
+  "2026-aston-martin": {
+   "hasErs": true,
+   "deploy": 0.88,
+   "harvest": 0.88,
+   "store": 1,
+   "note": "電能回收效率差、電池曾因震動受損",
+   "confidence": "high",
+   "reason": "Honda RA626H: energy recovery efficiency problems, vibrations damaged the battery; Monza: straight-line speed \"isn't enough\" -> js/cars-data.js ersPower 0.9708 / ersHarvest 0.97, deviation x4",
+   "sources": [
+    "https://www.the-race.com/formula-1/every-2026-f1-team-big-weakness/",
+    "https://www.motorsport.com/f1/news/f1-2026-mid-season-grades-aston-martin-seeks-redemption-after-shocking-start/10844630/",
+    "https://en.wikipedia.org/wiki/Honda_V6_hybrid_Formula_One_power_unit",
+    "https://www.the-race.com/formula-1/f1-teams-monza-italian-gp-early-energy-depoyment-patterns/",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  },
+  "2026-cadillac": {
+   "hasErs": true,
+   "deploy": 0.98,
+   "harvest": 0.96,
+   "store": 1,
+   "note": "法拉利動力：電池耗得快",
+   "confidence": "medium",
+   "reason": "Cadillac (Ferrari customer): supplier characteristic -> js/cars-data.js ersPower 0.9939 / ersHarvest 0.99, deviation x4",
+   "sources": [
+    "https://www.the-race.com/formula-1/every-2026-f1-team-big-weakness/",
+    "https://www.autosport.com/f1/news/how-mercedes-advantage-in-f1-2026-goes-beyond-the-engine/10803973/",
+    "https://api.openf1.org/v1/car_data?session_key=11357&driver_number=63"
+   ],
+   "group": "2026"
+  }
+ }
+}

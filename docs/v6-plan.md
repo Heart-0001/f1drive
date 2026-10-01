@@ -109,6 +109,18 @@ Never run two agents that own the same file at the same time; heavy Electron har
 - 08:10 the user heard engines from the speakers: the offscreen harness windows played sound. Stage H stopped, Electron killed, devtests/electron-userdata.js now mutes every harness (SOUND=1 to hear one), ui-gp/shots.js muted too; stage H resumed (testers restarted). Every prompt now says: all Electron windows muted.
 - 08:20 keep-awake restarted for 16 h (pid in tools/watchdog-out/keepawake.pid).
 - ~10:40 stage H DONE; ~10:45 final Fable review (stage J) launched.
+- ~12:10 stage J: 34 confirmed findings (R in the pit lane skips the lane, pit speeding unpunished without a stop, ERS bypasses the traction cap / no 2026 taper, seasons uncalibrated with the battery, Monaco start at Casino Square, Electron 33 EOL, no CSP, renderer crash handling, portable exe self-extract, ...). Fixers done except data; the net fixer moved package.json to Electron ^44.5.1 (+ icon, electronLanguages zh-TW / en-US, js/cars-data.js no longer packaged) and I ran npm install at ~12:40 (installed 44.5.1). The re-run stage verifies everything on 44.
+
+## User answers, 10-01 ~11:30 (v6.1)
+
+1. Default year -> 2026 (START_YEAR in main.js; harnesses that rely on the 2025 reference car must select it explicitly).
+2. Battery: every car should have its own data -> per-car ERS (deploy / harvest / store multipliers 0.75..1.15, and NO battery for the 2011-2013 cars that raced without KERS) from tools/ers-data.json (research running), applied by tools/build-cars.mjs + js/cars.js (allow per-car ers null, wider ERS range).
+3. Gamepad: put the functions on A B X Y. Chosen: A = battery (hold), B = pit limiter (toggle), X = next compound, Y = reset; View / Back = racing line; Menu / Start = menu; RB = battery too, LB = limiter too; RS click = recentre.
+4. 紅牛二隊: OK.
+5. Commit only, no push (the user wants to change more) — committed locally as bb5591c at ~11:30 (review-final scratch excluded).
+6. NEW: two small HUD rear-view mirrors at the top-left and top-right of the screen (js/hudmirrors.js, prep running), with a setting / key to hide them.
+
+Prep DONE ~12:00: tools/ers-data.json + docs/ers-data.md (168 cars; 5 no-KERS cars 2011-2012; Mercedes 2014-16 strongest, Honda 2015 weakest; deploy/harvest REPLACE perf.ersPower/ersHarvest; widen sanitising to 0.75..1.15; lower the ratings.ers gain to ~3-4) and js/hudmirrors.js + devtests/hudmirrors-test (33/33; layout A: mirrors in the top corners, timing box / minimap / session box moved down under them; +0.45..0.6 ms; exact main.js / index.html edits in scratchpad mirrors-report.txt). Plan: after the final review finishes -> v6.1 integration workflow (script ready: scratchpad wf-v61.js; launch when the final review incl. its fixes + re-run has finished) (build-cars + cars.js ERS, gamepad remap, START_YEAR 2026, HUD mirrors in main / ui / index, harness updates for the default year and the pad map) -> full re-run -> npm run dist -> exe smoke -> docs -> local commit.
 
 ## Watchdog (asked for by the user)
 

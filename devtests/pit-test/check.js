@@ -12,7 +12,8 @@
 //              stopped in a box (anywhere js/pit.js serves it: its origin within BOX_ALONG of the box point; nose 2.8 m,
 //              tail 2.7 m) within CAR_CLEAR m, measured along the lane: a curtain that close fills the driver's view
 //              (it was 5 m in front of box 1 at Monaco and Las Vegas)
-//   order      entry < line < exit in lap order (Monaco: see the report; the 'late' layout puts the entry after the line)
+//   order      entry < line < exit in lap order (a 'late' layout, entry after the line, is a warning; no track has one since
+//              Monaco's line moved to Boulevard Albert 1er on 2026-10-01)
 //   path       the lane centre can be driven at the limit (lateral acceleration, clearance to both walls, on asphalt)
 //   api        laneD / wallD / inLane / paved / contains agree with each other on a dense grid of points
 //   same       samples: every field of the git HEAD js/track.js is identical except the pit side's wall distance / flag
@@ -26,6 +27,8 @@
 //                2. no kerbs on the pit lane's asphalt: the v5 paint mesh must still be a prefix of the new one once the
 //                   v5 kerb triangles on the pit side of from..to (the kerb strip, halfW .. halfW + 1.3 m, where the
 //                   lane's asphalt now is) are taken out, and every triangle taken out must be such a kerb triangle.
+//              And where HEAD's own lane is elsewhere (tracks-data.js pitSide: Monaco's lane on the harbour side), HEAD's
+//              widening of its pit side's wall inside its lane is allowed for too.
 //   time       build time (median of 3) against HEAD
 // Exit code 1 when a check fails. Warnings are printed and counted but do not fail.
 'use strict';
@@ -315,13 +318,19 @@ for (const td of TRACKS) {
   const head = buildHead(tdN), HS = head.samples;
   check(HS.length === N && head.length === tr.length, id, 'sample count / length changed');
   let fieldDiff = 0, fieldEx = '', wallMoved = 0, keysDiff = 0;
+  // HEAD's own pit lane, where it differs (tracks-data.js pitSide, 2026-10-01: Monaco's lane moved to the harbour side):
+  // HEAD's widening of ITS pit side's wall in ITS lane is not "something else changed"
+  const hp = head.pit, hK = hp ? wq(hp.to - hp.from) : -1;
+  const headMoved = hp && (hp.side !== sg || hp.from !== pit.from || hp.to !== pit.to);
   for (let i = 0; i < Math.min(N, HS.length); i++) {
-    const a = HS[i], b = SN[i], lane = inLaneIdx(i);
+    const a = HS[i], b = SN[i], lane = inLaneIdx(i), inH = headMoved && wq(i - hp.from) <= hK;
     if (Object.keys(a).join() !== Object.keys(b).join()) keysDiff++;
     for (const key of Object.keys(a)) {
       if (a[key] === b[key]) continue;
       const pitSide = (sg > 0 && (key === 'wallPosDist' || key === 'wallPos')) || (sg < 0 && (key === 'wallNegDist' || key === 'wallNeg'));
       if (lane && pitSide && (typeof a[key] === 'boolean' ? b[key] === true : b[key] >= a[key])) { if (typeof a[key] === 'number') wallMoved++; continue; }
+      const headSide = inH && ((hp.side > 0 && (key === 'wallPosDist' || key === 'wallPos')) || (hp.side < 0 && (key === 'wallNegDist' || key === 'wallNeg')));
+      if (headSide && (typeof a[key] === 'boolean' ? a[key] === true : a[key] >= b[key])) continue;
       fieldDiff++; if (!fieldEx) fieldEx = 'sample ' + i + ' ' + key + ' ' + a[key] + ' -> ' + b[key];
     }
   }

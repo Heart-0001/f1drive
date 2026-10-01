@@ -1,0 +1,37 @@
+{
+ "mode": "crash",
+ "root": "C:\\Users\\Heart\\Desktop\\f1Drive",
+ "boot": {
+  "overlay": "",
+  "showError": "function",
+  "host": true,
+  "audio": "worklet/suspended"
+ },
+ "room": {
+  "connected": true,
+  "isHost": true
+ },
+ "portOpenBefore": true,
+ "runningBefore": true,
+ "listeners": {
+  "renderProcessGone": 4,
+  "unresponsive": 2
+ },
+ "after5s": {
+  "gone": {
+   "reason": "crashed",
+   "exitCode": 2
+  },
+  "isCrashed": false,
+  "reloadsStarted": 1,
+  "windowAlive": true,
+  "url": "index.html"
+ },
+ "portOpenAfter": false,
+ "dialogsShown": "none hooked (electron-main.js has no dialog import)",
+ "consoleErrors": [],
+ "securityWarnings": [
+  "%cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Co",
+  "%cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Co"
+ ]
+}

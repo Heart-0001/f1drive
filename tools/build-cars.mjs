@@ -1,7 +1,8 @@
 // Builds js/seasons-data.js (window.F1_SEASONS): the seasons 2010..2026 of the Grand Prix year selector, each with its
 // STANDARD car (the era physics, every multiplier 1) and every real team's car of that year (multipliers on the era).
 //
-//   node tools/build-cars.mjs            write js/seasons-data.js (and devtests/seasons-calib/entries.json, the solve log)
+//   node tools/build-cars.mjs            write js/seasons-data.js (and devtests/seasons-calib/entries.json, the solve log,
+//                                        and the calibration table of docs/seasons-data.md, between its markers)
 //   node tools/build-cars.mjs --check    compute and compare with the files on disk; exit code 1 when they differ
 //   node tools/build-cars.mjs --dry      compute and print, write nothing
 //   node tools/build-cars.mjs --quiet    no per-season tables
@@ -36,12 +37,17 @@
 //                     circuits (every circuit of the game) in (median) era index x the 2025 standard car's time. Aero and grip are the one free
 //                     number: where the index and the eras.json figures disagree they move, not the power. (Downforce
 //                     alone would have to swing from x0.49 (2026) to x1.27 (2020): lap times are not very sensitive to it.)
-//       drivetrain <- gears (7 to 2013, 8 from 2014), rpm (eras.json; V6 max 15 000 except the anchor 2025, which
-//                     keeps F1.REF_SPEC's 12 500), shift sound time, cylinders / aspiration, cockpit style
+//                     Real pole laps used the battery, so both cars should be driven deploying it (calibration.json
+//                     `deploy`): without it, pressing E adds 0.4..0.7 s a lap with KERS, 2..3.5 s with the ERS and
+//                     3.6..4.7 s in 2026 on top of the index and the season order inverts (final review, 2026-10-01).
+//                     The driven median must be within CFG.INDEX_TOL of the index (else refused).
+//       drivetrain <- gears (7 to 2013, 8 from 2014), rpm (eras.json; V6 max 15 000; the anchor 2025 keeps
+//                     F1.REF_SPEC's), shift sound time, cylinders / aspiration, cockpit style
 //       ers        <- null 2010; KERS 2011-2013 (60 kW, a 400 kJ store); F1.REF_SPEC.ers 2014-2025; 2026 350 kW with
 //                     a 4 MJ store; power and store scaled per kg against the reference (120 kW, 4 MJ, 805 kg), the
 //                     harvest of KERS / 2026 CALIBRATED so that a lap recovers the rules' budget (KERS: 400 kJ = one
-//                     store per lap; 2026: 8.5 MJ = 2.1 stores per lap through the 4 MJ window).
+//                     store per lap; 2026: 8.5 MJ = 2.1 stores per lap through the 4 MJ window). 2026 also fades the
+//                     deploy power out between 290 and 345 km/h (FIA C5.2.8; ers.taperKmh, eras.json).
 //  B. Cars of a season (not 2026): lap-time target = K x (qualifying gap - median gap), K = SPREAD / (max - min gap)
 //     (the real order and proportions, compressed to SPREAD % between the fastest and the slowest car; the standard
 //     car sits where the median team is). Engine: the teams of one engine maker (F1DB engineBuiltBy: TAG Heuer and
@@ -51,7 +57,8 @@
 //     grip, brake, traction and downforce + L (as js/cars-data.js's method), solved (profile model = js/raceline.js's
 //     speed profile on the calibration circuits, mean lap delta) so that the lap-time target is hit. ERS multipliers 1
 //     (no documented source). 2026: js/cars-data.js as it is.
-//  C. Ratings 0..100 (50 = the season's standard car), the formula of js/cars-data.js (devtests/cars-data/derive.js).
+//  C. Ratings 0..100 (50 = the season's standard car): the measures and gains of js/cars-data.js
+//     (devtests/cars-data/derive.js), 50 + gain x near 50, compressed with a tanh towards the ends (RATING, ratingOf).
 'use strict';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -86,9 +93,14 @@ export const CFG = {
   ENGINE_SINGLE: 0.5,           // an engine used by one team only: this share of its lean is the engine's
   TRIM_GAIN: 5,                 // drag and downforce % per % of the team's own lean beyond its engine group's
   MIN: 0.95, MAX: 1.05, DECIMALS: 4,
+  INDEX_TOL: 0.003,             // |driven median - era index| the task allows (0.3 %); a calibration beyond it is refused
+                                // (beyond calibration.json's own, tighter tolerance it is reported as a warning)
   SIG: 6                        // significant digits of the era physics (the 2025 anchor is written unrounded)
 };
-// rating = 50 + gain * x, rounded, 0..100; x = 0 for the season's standard car (js/cars-data.js's formula)
+// rating = 50 + 50 tanh(gain * x / 50), rounded; x = 0 for the season's standard car. Near 50 it is js/cars-data.js's
+// 50 + gain * x (the same slope); the tanh compresses the ends instead of clamping them at 0 / 100, where 17 cars of
+// 2010-2026 piled up (2010 HRT and Virgin both accel 0, 2016 Manor and 2020 Renault topSpeed 100; final review).
+export const ratingOf = gx => clamp(Math.round(50 + 50 * Math.tanh(gx / 50)), 0, 100);
 export const RATING = {
   topSpeed: { gain: 11, x: '極速（不含電池）與標準車的差，km/h' },
   accel: { gain: 12, x: '0–300 km/h（乘以該年標準車極速 / 330 km/h）所需時間比標準車少的百分比' },
@@ -172,7 +184,8 @@ export function eraInputs(eras, year) {
   const pwRace = V(s.powerToWeight.qualifyingRaceTrim), pwPeak = V(s.powerToWeight.qualifyingPeak);
   const drs = V(p.topSpeed.drs) === true;
   const inp = {
-    year, period: p.id, label: p.label, engineDisplay: p.engineDisplay,
+    // the season's own display label where the period's would announce a later year's change (2017: '...; 2018 起有 Halo')
+    year, period: p.id, label: typeof s.label === 'string' && s.label ? s.label : p.label, engineDisplay: p.engineDisplay,
     ersType, pwRace, pwPeak,
     pwAccel: ersType === 'ERS' || ersType === 'ERS-2026' ? pwPeak : pwRace,
     topNoDrs: V(p.topSpeed.typicalTopKmh) - (drs ? V(p.topSpeed.drsGain) : 0),
@@ -181,12 +194,16 @@ export function eraInputs(eras, year) {
     mass: V(s.qualifyingMass),
     ersKw: ersType === 'none' ? 0 : V(p.ers.power), ersStoreMJ: ersType === 'none' ? 0 : V(p.ers.storeWindow),
     ersHarvestMJ: ersType === 'none' ? 0 : V(p.ers.harvestPerLap),
+    // 2026: the ERS-K power fades with speed (C5.2.8): [full power up to, zero from] km/h; null = no taper
+    ersTaperKmh: p.ers.taperKmh ? V(p.ers.taperKmh) : null,
     gears: V(p.gearbox.forwardGears), shiftTime: V(p.gearbox.gameShiftTime),
     cylinders: V(p.engine.cylinders), aspiration: V(p.engine.aspiration) === 'na' ? 'na' : 'hybrid',
     rpmIdle: V(p.engine.rpmIdle), rpmShift: V(p.engine.rpmShiftRaceTrim), rpmLimit: V(p.engine.revLimitRegulation),
     cockpit: s.cockpit
   };
   for (const k of Object.keys(inp)) if (inp[k] === undefined || (typeof inp[k] === 'number' && !isFinite(inp[k]))) throw new Error('tools/eras.json ' + year + ': ' + k + ' missing');
+  const tk = inp.ersTaperKmh;               // (js/car.js's range: 50 <= from, from + 1 <= to <= 600)
+  if (tk !== null && !(Array.isArray(tk) && tk.length === 2 && tk[0] >= 50 && tk[1] >= tk[0] + 1 && tk[1] <= 600)) throw new Error('tools/eras.json ' + year + ': ers.taperKmh must be [full power up to, zero from] km/h');
   return inp;
 }
 
@@ -232,9 +249,11 @@ export function eraSpec(eras, year, gripScale, ersHarvest) {
   };
   const ers = inp.ersType === 'none' ? null : (inp.ersType === 'ERS' ? { store: R.ers.store, power: R.ers.power, harvest: R.ers.harvest } :
     { store: sig(R.ers.store * f.ersStore), power: sig(R.ers.power * f.ersPower), harvest: sig(ersHarvest) });
+  // 2026: the deploy power fades out between taperKmh[0] and [1] (js/car.js: the deploy step and topSpeedBoost)
+  if (ers && inp.ersTaperKmh) ers.taperKmh = inp.ersTaperKmh.slice();
   // drivetrain: top gear reaches rpmShift at the top speed deploying the battery, at most the reference's ratio of
   // 345 / 330 km/h above the top speed without it (the reference: 345 km/h, its boost top speed is 346), in 5 km/h
-  // steps: the V8 of 2010 revs to its limit at top speed, the 2026 car (boost top 381 km/h) keeps 345
+  // steps: the V8 of 2010 revs to its limit at top speed
   const perf = G.carPerf(Object.assign({}, R, e, { ers }));
   const top = perf.topSpeed / KMH, ratio = R.topKmh / (G.CAR_PERF.topSpeed / KMH);
   const topKmh = anchor ? R.topKmh : 5 * Math.round(Math.max(top, Math.min(perf.topSpeedBoost / KMH, top * ratio)) / 5);
@@ -405,6 +424,7 @@ export function applyMult(era, m) {
     ers: era.ers ? { store: era.ers.store, power: era.ers.power * m.ersPower, harvest: era.ers.harvest * m.ersHarvest } : null,
     cockpit: era.cockpit
   };
+  if (era.ers && era.ers.taperKmh) s.ers.taperKmh = era.ers.taperKmh.slice();
   return s;
 }
 
@@ -432,7 +452,7 @@ export function ratingsFor(met, stdMet, m) {
     ers: 0.5 * ((m.ersPower - 1) + (m.ersHarvest - 1)) * 100
   };
   const r = {};
-  for (const k of Object.keys(RATING)) r[k] = clamp(Math.round(50 + RATING[k].gain * x[k]), 0, 100);
+  for (const k of Object.keys(RATING)) r[k] = ratingOf(RATING[k].gain * x[k]);
   return { ratings: r, x };
 }
 
@@ -451,7 +471,7 @@ export function build(opts) {
   opts = opts || {};
   const G = loadGame(), R = G.REF_SPEC;
   const { raw, eras, liveries, cars2026 } = loadInputs();
-  const problems = [];
+  const problems = [], warnings = [];
   if (!existsSync(CALIB_FILE)) throw new Error('missing ' + relative(ROOT, CALIB_FILE) + ': run node devtests/seasons-calib/calibrate.mjs');
   const calib = readJson(CALIB_FILE);
   const fp = priorsFingerprint(eras, raw);
@@ -465,6 +485,10 @@ export function build(opts) {
     if (!rs) { problems.push('no raw season ' + year); continue; }
     const cal = calib.seasons && calib.seasons[year];
     if (!cal) { problems.push('no calibration for ' + year); continue; }
+    // the driven calibration must have hit the era index (calibrate.mjs only prints a warning when it misses)
+    const miss = Math.abs(cal.drivenMedian - rs.eraIndex);
+    if (!(miss <= CFG.INDEX_TOL)) problems.push(year + ': calibrated driven median ' + cal.drivenMedian + ' misses the era index ' + rs.eraIndex + ' by more than ' + CFG.INDEX_TOL);
+    else if (miss > calib.tolerance) warnings.push(year + ': calibrated driven median ' + cal.drivenMedian + ' misses the era index ' + rs.eraIndex + ' by ' + (miss * 100).toFixed(3) + ' % (calibration tolerance ' + (calib.tolerance * 100).toFixed(2) + ' %)');
     const inp = eraInputs(eras, year);
     const era = eraSpec(eras, year, cal.gripScale, cal.ersHarvest);
     const std = Object.assign({}, R, era);
@@ -480,7 +504,7 @@ export function build(opts) {
     };
     if (year === CFG.ANCHOR && stdCar.engine !== stdEngine) problems.push('the anchor standard engine "' + R.engine + '" differs from eras.json "' + stdEngine + '"');
     const cars = [stdCar];
-    const slog = { year, index: rs.eraIndex, era, stdTopKmh: stdMet.topKmh, accelKmh, cars: [] };
+    const slog = { year, index: rs.eraIndex, era, stdTopKmh: stdMet.topKmh, stdTopBoostKmh: stdMet.topBoostKmh, accelKmh, cars: [] };
 
     // ---- entries
     const E = rs.entries.map(e => ({ src: e, id: e.id }));
@@ -604,7 +628,7 @@ export function build(opts) {
     }
     if (JSON.stringify(e.gearKmh) !== JSON.stringify(R.gearKmh) || JSON.stringify(e.ers) !== JSON.stringify(R.ers)) problems.push('anchor gears / ers differ from F1.REF_SPEC');
   }
-  return { seasons, log, problems, calib, raw, fingerprint: fp };
+  return { seasons, log, problems, warnings, calib, raw, fingerprint: fp };
 }
 const applyWith = (std, m) => Object.assign({}, std, applyMult(std, m));
 
@@ -629,7 +653,7 @@ export function seasonsJs(b) {
   L.push('//');
   L.push('// window.F1_SEASONS = [{ year, label, engine, paceIndex (real pole-time index, 2025 = 1),');
   L.push('//   era: { power, dragK, downforce, latBase, latMax, brakeBase, traction, gearKmh, topKmh, rpmIdle, rpmShift, rpmMax,');
-  L.push('//          shiftTime, cylinders, aspiration, ers: null | { store, power, harvest }, cockpit }   (absolute CarSpec values)');
+  L.push('//          shiftTime, cylinders, aspiration, ers: null | { store, power, harvest, taperKmh? }, cockpit }   (absolute CarSpec values)');
   L.push('//   cars: [{ id, lineage, team, teamZh, car, engine, cylinders, aspiration, colour, colour2,');
   L.push('//            ratings: { topSpeed, accel, cornering, braking, ers },   0..100, 50 = the season\'s standard car');
   L.push('//            perf: { power, drag, downforce, grip, brake, traction, ersPower, ersHarvest },   multipliers on the era');
@@ -656,6 +680,46 @@ export function seasonsJs(b) {
   return L.join('\n') + '\n';
 }
 
+// docs/seasons-data.md: the calibration table is generated (copied by hand it went stale), between these markers
+export const DOC_FILE = P('docs', 'seasons-data.md');
+const DOC_BEGIN = '<!-- BEGIN calibration table: generated by node tools/build-cars.mjs from devtests/seasons-calib/calibration.json, do not edit -->';
+const DOC_END = '<!-- END calibration table -->';
+function calibrationTable(b) {
+  const R = loadGame().REF_SPEC, c = b.calib, f = (v, d) => v.toFixed(d), pct = v => f(v * 100, 2) + ' %';
+  // calibrate.mjs (deploying) also drives the solved car without the battery: what a lap without E costs
+  const nd = Object.values(c.seasons).some(s => typeof s.noDeployMedian === 'number');
+  const L = [DOC_BEGIN, '',
+    '| 年 | 目標指數 | 實跑（中位數） | 平均 | ' + (nd ? '不放電（中位數） | ' : '') + '各賽道標準差 | 各賽道最大偏差 | 極速 km/h | 放電極速 | 功率 W/kg（×2025） | 牽引 | 風阻 | 下壓力 | 機械抓地 | 側向上限 | 抓地倍率 |',
+    '|' + ' --- |'.repeat(nd ? 16 : 15)];
+  const off = [];
+  for (const s of b.log.seasons) {
+    const cal = c.seasons[s.year], e = s.era;
+    const dev = Object.values(cal.ratios).map(r => r / cal.index - 1), m = mean(dev);
+    const sd = Math.sqrt(mean(dev.map(d => (d - m) * (d - m)))), mx = Math.max(...dev.map(Math.abs));
+    const miss = Math.abs(cal.drivenMedian - cal.index);
+    if (miss > c.tolerance) off.push(s.year + ' 差 ' + f(miss * 100, 3) + ' %');
+    L.push('| ' + [s.year, f(cal.index, 4), f(cal.drivenMedian, 4) + (miss > c.tolerance ? '*' : ''), f(cal.drivenMean, 4)].concat(nd ? [f(cal.noDeployMedian, 4)] : []).concat([pct(sd), pct(mx),
+      f(s.stdTopKmh, 1), f(s.stdTopBoostKmh, 1), f(e.power, 0) + '（' + f(e.power / R.power, 3) + '）', f(e.traction / R.traction, 3),
+      f(e.dragK / R.dragK, 3), f(e.downforce / R.downforce, 3), f(e.latBase / R.latBase, 3), f(e.latMax / R.latMax, 3), f(cal.gripScale, 4)]).join(' | ') + ' |');
+  }
+  const y26 = b.seasons.find(s => s.year === CFG.CURRENT), taper = y26 && y26.era.ers && y26.era.ers.taperKmh;
+  L.push('',
+    '牽引到側向上限各欄是對 2025 的倍數；極速不含電池，放電極速是一直放電的極限。' +
+      (nd ? '「不放電」是本年與 2025 標準車都不按 E 時的中位數圈速比（沒人按 E 時的年代順序）。' : '') + '校正誤差要求 ' + f(c.tolerance * 100, 2) + ' %（任務要求 ' +
+      f(CFG.INDEX_TOL * 100, 1) + ' %）' + (off.length ? '；* 超出 ' + f(c.tolerance * 100, 2) + ' %：' + off.join('、') + '（仍在 ' + f(CFG.INDEX_TOL * 100, 1) + ' % 以內）。' : '，每一年都達到。'),
+    '這份校正' + (c.deploy ? '是**放電**跑的（全油門且 100 km/h 以上按住 E，電池只靠回收補充；2025 標準車也一樣）。' :
+      '是**不放電**跑的（舊方法：按 E 之後各年代多出的電力不同，年代順序會亂，見〈ERS〉一節）。') +
+      (taper ? '2026 的放電功率 ' + taper[0] + ' km/h 起遞減，' + taper[1] + ' km/h 為零。' : '2026 的放電功率不隨速度遞減。') +
+      'calibration.json 指紋 `' + c.fingerprint + '`。',
+    '', DOC_END);
+  return L.join('\n');
+}
+function docText(b) {
+  const old = readFileSync(DOC_FILE, 'utf8'), i = old.indexOf(DOC_BEGIN), j = old.indexOf(DOC_END);
+  if (i < 0 || j < i) throw new Error(relative(ROOT, DOC_FILE) + ' has no calibration table markers');
+  return old.slice(0, i) + calibrationTable(b) + old.slice(j + DOC_END.length);
+}
+
 function entriesJson(b) {
   return JSON.stringify({ generatedBy: 'tools/build-cars.mjs', fingerprint: b.fingerprint, seasons: b.log.seasons.map(s => ({
     year: s.year, index: s.index, K: s.K === undefined ? null : round(s.K, 5), gapMedianPct: s.gapMedian === undefined ? null : s.gapMedian,
@@ -679,7 +743,8 @@ async function main() {
       }
     }
   }
-  const outputs = [[OUT_JS, seasonsJs(b)], [ENTRIES_FILE, entriesJson(b)]];
+  for (const w of b.warnings) console.log('WARNING ' + w);
+  const outputs = b.problems.length ? [] : [[OUT_JS, seasonsJs(b)], [ENTRIES_FILE, entriesJson(b)], [DOC_FILE, docText(b)]];
   if (b.problems.length) { console.log('PROBLEMS (nothing written):\n  ' + b.problems.join('\n  ')); process.exitCode = 1; }
   else if (CHECK) {
     for (const [file, text] of outputs) {

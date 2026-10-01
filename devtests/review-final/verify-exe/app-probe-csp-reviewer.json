@@ -1,0 +1,27 @@
+{
+ "mode": "csp",
+ "root": "C:\\Users\\Heart\\Desktop\\f1Drive\\devtests\\review-final\\verify-exe\\csp-reviewer",
+ "boot": {
+  "overlay": "",
+  "showError": "undefined",
+  "host": true,
+  "audio": "worklet/suspended"
+ },
+ "cspMeta": "default-src 'self'; script-src 'self' blob: data:; worker-src 'self' blob: data:; connect-src 'self' ws: wss: https://api.ipify.org; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'",
+ "drive": {
+  "running": true,
+  "v": 25.64049559005979,
+  "audio": "worklet/running",
+  "frames": 214,
+  "overlay": ""
+ },
+ "ws": "error event (allowed by CSP, port closed)",
+ "fetchIpify": "http 200",
+ "evalBlocked": "eval blocked: EvalError",
+ "inlineHandler": "inline handler blocked",
+ "consoleErrors": [
+  "Refused to execute inline script because it violates the following Content Security Policy directive: \"script-src 'self' blob: data:\". Either the 'unsafe-inline' keyword, a hash ('sha256-R9h3PXdFiCah7uED70jP9pYbr+is3fBPMynJr+Wpe8M='), or a nonce ('nonce-...') is required to enable inline execution.\n",
+  "Refused to execute inline event handler because it violates the following Content Security Policy directive: \"script-src 'self' blob: data:\". Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to e"
+ ],
+ "securityWarnings": []
+}

@@ -13,3 +13,5 @@ devtests/*/out/
 # reviewers' scratch: packaged app copies and data caches
 devtests/*/package/
 **/seasons-cache/
+devtests/review-final/verify-exe/*/
+devtests/review-final/seasons/seasons-repro/

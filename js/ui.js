@@ -40,7 +40,7 @@
 
   // pit strip: the last input, in the units shown (setPit is called every frame)
   var pitC = { shown: false, inLane: false, limiter: false, speeding: false, limit: 0, slot: -1, box: 0,
-    tenths: -1, frac: -1, pen: -1, penNow: false, pending: -1, pad: false };
+    tenths: -1, frac: -1, pen: -1, penNow: false, pending: -1, served: false, pad: false };
   var PIT_NONE = {};
   var PIT_BOX_HIDDEN = -99999;
 
@@ -602,7 +602,7 @@
 
     var key = phase + '|' + (v.sid == null ? '' : v.sid) + '|' + (online ? 1 : 0);
     if (key !== gpKey) { gpKey = key; gpClosed = false; }
-    setShown('gpres', el.gpRes, phase === 'results' && !gpClosed);
+    showResults(phase === 'results' && !gpClosed);
 
     gpEndsAt = phase === 'race' && typeof v.endsInMs === 'number' && isFinite(v.endsInMs)
       ? performance.now() + Math.max(0, v.endsInMs) : 0;
@@ -661,6 +661,13 @@
     setText('gpresnote', el.gpResNote, ctl ? '' : '等待房主開始下一場或結束大獎賽');
     setShown('gpresagain', el.gpResAgain, ctl);
     setShown('gpresend', el.gpResEnd, ctl);
+  }
+
+  // The results overlay. #hud.res-open: in a narrow window the overlay takes the session box's place (index.html).
+  function showResults(on) {
+    on = !!on;
+    setShown('gpres', el.gpRes, on);
+    if (cache.resopen !== on) { cache.resopen = on; el.hud.classList.toggle('res-open', on); }
   }
 
   function renderPad() {
@@ -740,7 +747,7 @@
     el.gpClose.addEventListener('click', function () {
       el.gpClose.blur();
       gpClosed = true;
-      setShown('gpres', el.gpRes, false);
+      showResults(false);
     });
 
     renderGp();
@@ -1030,7 +1037,7 @@
     }
     setHtml('pitbox', el.pitBox, box);
     setShown('pitboxon', el.pitBox, box);
-    var pend = c.pending > 0 && !c.speeding && c.tenths < 0 ? '下次停站罰停 +' + fmtSec(c.pending / 10) + ' s' : '';
+    var pend = c.pending > 0 && !c.speeding && c.tenths < 0 ? (c.served ? '出口線罰停 +' : '下次停站罰停 +') + fmtSec(c.pending / 10) + ' s' : '';
     setText('pitpend', el.pitPending, pend);
     setShown('pitpendon', el.pitPending, pend);
     var svc = c.tenths >= 0;
@@ -1128,6 +1135,7 @@
     el.telemetry = $('hud-telemetry');
     el.menuBtn = $('hud-menu-btn');
     el.toast = $('hud-toast');               // (not inside #hud: shown over the menu too)
+    el.loading = $('loading'); el.loadingName = $('loading-name');   // (likewise)
     // side panel tabs
     el.mpPanel = $('mp-panel'); el.tabs = $('menu-tabs');
     el.tabBtn = { car: $('tab-car'), gp: $('tab-gp'), mp: $('tab-mp'), set: $('tab-set') };
@@ -1139,6 +1147,7 @@
     // 設定
     el.setVolume = $('set-volume'); el.setVolumeVal = $('set-volume-val');
     el.setMute = $('set-mute'); el.setMuteText = $('set-mute-text');
+    el.credits = $('credits'); el.setCredits = $('set-credits');   // credits line -> 資料來源與授權
     // HUD pit strip
     el.pit = $('hud-pit'); el.pitLimit = $('hud-pit-limit'); el.pitLim = $('hud-pit-lim'); el.pitWarn = $('hud-pit-warn');
     el.pitBox = $('hud-pit-box'); el.pitPending = $('hud-pit-pending'); el.pitSvc = $('hud-pit-svc');
@@ -1203,6 +1212,11 @@
       if (el.menuBtn) el.menuBtn.addEventListener('click', function () {
         el.menuBtn.blur();
         if (callbacks.onExitToMenu) callbacks.onExitToMenu();
+      });
+      // the credits line under the title: every source and licence, with its address, is in 設定
+      if (el.credits && el.setCredits) el.credits.addEventListener('click', function () {
+        setTab('set', true);
+        if (el.setCredits.scrollIntoView) el.setCredits.scrollIntoView({ block: 'nearest' });
       });
       initTabs();
       initCarPanel();
@@ -1310,7 +1324,8 @@
      * Pit lane strip above the telemetry graphic, called every frame. p = { inLane, limiter, speeding,
      * service: null | {left, total, penalty} (s; the penalty part is served first), limitKmh, boxAhead (m to our
      * box along the lane, + ahead / - passed, null: unknown), slot (our box index, -1: none; shown as slot + 1),
-     * pending (optional: s of hold waiting for the next stop) }. Shown while in the lane, while the limiter is on
+     * pending (optional: s of hold waiting for the next stop), served (optional: true = this visit has had its stop, so
+     * the pending hold is served at the exit line) }. Shown while in the lane, while the limiter is on
      * and during a service; hidden otherwise (setPit(null) hides it). Only touches the DOM when what it shows changes.
      */
     setPit: function (p) {
@@ -1327,7 +1342,7 @@
       if (inLane && !s && slot >= 0 && typeof ahead === 'number' && isFinite(ahead)) {
         box = ahead > 2.5 ? Math.min(99999, Math.round(ahead)) : ahead < -2.5 ? -1 : 0;
       }
-      var tenths = -1, frac = -1, pen = -1, penNow = false, pending = -1;
+      var tenths = -1, frac = -1, pen = -1, penNow = false, pending = -1, served = p.served === true;
       if (s) {
         var total = Math.max(0, pitNum(s.total, 0)), left = Math.min(Math.max(0, pitNum(s.left, 0)), 999);
         var penalty = Math.max(0, pitNum(s.penalty, 0));
@@ -1340,9 +1355,9 @@
       var c = pitC;
       if (c.shown === shown && c.inLane === inLane && c.limiter === limiter && c.speeding === speeding && c.limit === limit &&
           c.slot === slot && c.box === box && c.tenths === tenths && c.frac === frac && c.pen === pen && c.penNow === penNow &&
-          c.pending === pending && c.pad === padOn) return;
+          c.pending === pending && c.served === served && c.pad === padOn) return;
       c.shown = shown; c.inLane = inLane; c.limiter = limiter; c.speeding = speeding; c.limit = limit; c.slot = slot;
-      c.box = box; c.tenths = tenths; c.frac = frac; c.pen = pen; c.penNow = penNow; c.pending = pending; c.pad = padOn;
+      c.box = box; c.tenths = tenths; c.frac = frac; c.pen = pen; c.penNow = penNow; c.pending = pending; c.served = served; c.pad = padOn;
       renderPit();
     },
 
@@ -1353,6 +1368,17 @@
       el.toast.textContent = text || '';
       el.toast.classList.toggle('hidden', !text);
       if (text) toastTimer = setTimeout(function () { el.toast.classList.add('hidden'); }, ms || 4000);
+    },
+
+    /**
+     * A track is being built (the page stops for a moment): name = its name, shown in a note in the middle of the
+     * screen, over the menu and the HUD; null hides the note.
+     */
+    setLoading: function (name) {
+      if (!inited || !el.loading) return;
+      var on = typeof name === 'string';
+      setText('loadname', el.loadingName, on ? name : '');
+      setShown('loading', el.loading, on);
     },
 
     /** Optional (not in the interface doc): main.js may register a "resume" handler to show a 繼續駕駛 button. */

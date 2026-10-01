@@ -12,7 +12,7 @@ function test(name, fn) {
 
 const DT = 1 / 128;                     // s per update(): exact in binary, so the service clock has no rounding
 const KMH = 1 / 3.6;
-const EVENTS = ['enter', 'exit', 'speeding', 'serviceStart', 'serviceDone', 'serviceAbort'];
+const EVENTS = ['enter', 'exit', 'speeding', 'serviceStart', 'serviceDone', 'penaltyStart', 'penaltyDone', 'serviceAbort'];
 const STATE_KEYS = ['inLane', 'speeding', 'inBox', 'service', 'stops', 'pending', 'boxAhead', 'boxPassed', 'visit',
   'flagged', 'served', 'slot', 'limitKmh'];
 const near = (a, b, eps) => Math.abs(a - b) <= (eps || 1e-9);
@@ -113,13 +113,15 @@ const CURVED = makeTrack({ shape: 'circle', side: 1, sEntry: 150, sExit: 450 });
 
 // A car driven over a stub track: `s` metres along the lap, `lat` metres to the left of the centreline. Every
 // step() feeds the pit exactly as main.js does (one update per physics step) and checks what must always hold.
+// o.main (or r.main = true): go() holds the car as main.js does while pit.state.service is set (a service, or a
+// penalty hold at the exit line): the clock runs, the car stays where it is, then the drive goes on.
 function rig(track, o) {
   o = o || {};
   const pit = createPit({ random: o.random || mulberry32(7), boxBack: o.boxBack });
   const car = { x: 0, y: 0, z: 0, heading: 0, speed: 0, sampleIndex: 0, d: 0, steer: 0 };
   const st = pit.state;
   const r = {
-    pit, car, track, st, slot: o.slot === undefined ? 0 : o.slot, log: [], steps: 0, s: 0, lat: 0,
+    pit, car, track, st, slot: o.slot === undefined ? 0 : o.slot, log: [], steps: 0, s: 0, lat: 0, main: !!o.main, held: 0,
     open: false, svc: false, visitSpeeding: 0, visitStarts: 0,
     // puts the car there (an R reset when it jumps), heading `off` radians left of the road direction
     put(s, lat, speed, off) {
@@ -143,10 +145,13 @@ function rig(track, o) {
         // ends (done / abort) before the next one starts, at most one service started per visit unless aborted
         if (ev === 'enter') { assert(!r.open, 'enter twice'); r.open = true; r.visitSpeeding = 0; r.visitStarts = 0; }
         if (ev === 'exit') { assert(r.open, 'exit without enter'); r.open = false; }
+        // one speeding per visit, and one more after its stop began
         if (ev === 'speeding') { assert(r.open, 'speeding outside a visit'); assert(++r.visitSpeeding === 1, 'speeding twice'); }
-        if (ev === 'serviceStart') { assert(!r.svc && r.open); r.svc = true; assert(++r.visitStarts === 1, 'two services in a visit'); }
-        if (ev === 'serviceDone') { assert(r.svc); r.svc = false; }
-        if (ev === 'serviceAbort') { assert(r.svc); r.svc = false; r.visitStarts--; }
+        if (ev === 'serviceStart') { assert(!r.svc && r.open); r.svc = 'service'; r.visitSpeeding = 0; assert(++r.visitStarts === 1, 'two services in a visit'); }
+        if (ev === 'penaltyStart') { assert(!r.svc && r.open); r.svc = 'hold'; }
+        if (ev === 'serviceDone') { assert.strictEqual(r.svc, 'service'); r.svc = false; }
+        if (ev === 'penaltyDone') { assert.strictEqual(r.svc, 'hold'); r.svc = false; }
+        if (ev === 'serviceAbort') { assert(r.svc); if (r.svc === 'service') r.visitStarts--; r.svc = false; }
       }
       assert(!st.inLane || st.visit, 'in the lane = in a visit');
       assert(!st.speeding || st.inLane, 'speeding only in the lane');
@@ -158,8 +163,8 @@ function rig(track, o) {
       if (st.service) {
         const v = st.service;
         assert(near(v.total, v.work + v.penalty) && v.left >= 0 && v.left <= v.total, JSON.stringify(v));
-        assert(v.work >= 2 && v.work <= 4.5 && v.penalty >= 0);
-        assert(st.served && st.visit);
+        if (v.work === 0) assert(v.penalty > 0 && st.visit, 'a penalty hold: ' + JSON.stringify(v));
+        else { assert(v.work >= 2 && v.work <= 4.5 && v.penalty >= 0); assert(st.served && st.visit); }
       }
       return ev;
     },
@@ -168,7 +173,11 @@ function rig(track, o) {
       const s0 = r.s, l0 = r.lat, dS = s1 - s0, dL = lat1 - l0;
       const n = Math.max(1, Math.ceil(Math.hypot(dS, dL) / (v * DT)));
       const off = dS === 0 ? 0 : Math.atan(dL / dS);
-      for (let k = 1; k <= n; k++) { r.put(s0 + dS * k / n, l0 + dL * k / n, dS < 0 ? -v : v, off); r.step(); }
+      for (let k = 1; k <= n; k++) {
+        while (r.main && st.service) { car.speed = 0; r.step(); r.held++; }      // main.js: held, the clock runs
+        r.put(s0 + dS * k / n, l0 + dL * k / n, dS < 0 ? -v : v, off); r.step();
+      }
+      while (r.main && st.service) { car.speed = 0; r.step(); r.held++; }
       return r;
     },
     hold(n) { car.speed = 0; for (let k = 0; k < n; k++) r.step(); return r; },
@@ -275,7 +284,7 @@ test('the service time is the injected random draw; dt that is not a positive nu
 });
 
 test('speed limit: over by more than 3 km/h, once per visit, from the entry line to the exit line', () => {
-  const r = rig(SHIFTED);
+  const r = rig(SHIFTED, { main: true });
   r.approach(90).go(SHIFTED.o.sEntry - 1, 12 * r.side(), 300 * KMH);     // flat out up to the line: allowed
   assert.deepStrictEqual([r.take(), r.st.speeding, r.st.pending], [[], false, 0]);
   r.go(SHIFTED.o.sEntry + 20, 12 * r.side(), 82.99 * KMH);
@@ -288,11 +297,11 @@ test('speed limit: over by more than 3 km/h, once per visit, from the entry line
   assert.deepStrictEqual([r.take(), r.st.speeding, r.st.pending], [[], true, 5], 'flagged once per visit');
   r.go(r.s - 10, r.lat, 90 * KMH);
   assert.deepStrictEqual([r.take(), r.st.pending], [[], 5], 'reversing counts by the magnitude, still once');
-  r.out(200 * KMH);
-  assert.deepStrictEqual([r.take(), r.st.pending, r.st.flagged], [['exit'], 5, false]);
+  r.out(200 * KMH);                                         // no stop: the 5 s are served at the exit line
+  assert.deepStrictEqual([r.take(), r.st.pending, r.st.flagged, r.st.stops], [['penaltyStart', 'penaltyDone', 'exit'], 0, false, 0]);
   // flat out on the track beside the lane: nothing
   r.put(SHIFTED.o.sEntry - 100, 0, 80).go(SHIFTED.o.sExit + 100, 0, 80);
-  assert.deepStrictEqual([r.take(), r.st.pending, r.st.visit], [[], 5, false]);
+  assert.deepStrictEqual([r.take(), r.st.pending, r.st.visit], [[], 0, false]);
   // a lane with its own limit
   const t60 = makeTrack({ sEntry: 100, sExit: 400, limitKmh: 60 }), k = rig(t60);
   k.enter(62 * KMH);
@@ -332,27 +341,70 @@ test('speeding and stopping in the same visit: the 5 s hold is added to that sto
   assert.strictEqual(r.st.service.penalty, 0);
 });
 
-test('speeding without stopping: the hold waits for the next stop; every speeding visit adds its own 5 s', () => {
+// Review D4: the hold used to wait for a NEXT stop, so speeding with no stop to come (after the last stop, a no-stop
+// race, qualifying) was free: flat out from box 16 to the exit gained up to 7.6 s at Monza. Now it is served at the exit
+// line of the same visit: a stop-go without tyres.
+test('speeding the visit\'s stop does not serve (no stop, or after it): held at the exit line, a stop-go without tyres', () => {
+  const t = STRAIGHT.o, sd = -1;
+  // (a) driven through at 90 km/h: held for 5 s the moment it crosses the exit line, then on its way
   const r = rig(STRAIGHT, { slot: 3 });
-  r.enter(90 * KMH).out(90 * KMH);
-  assert.deepStrictEqual([r.take(), r.st.pending, r.st.stops], [['enter', 'speeding', 'exit'], 5, 0]);
-  r.lap().enter().out();
-  assert.deepStrictEqual([r.take(), r.st.pending], [['enter', 'exit'], 5], 'a clean visit without a stop keeps it');
-  r.lap().enter(100 * KMH).out(100 * KMH);
-  assert.deepStrictEqual([r.take(), r.st.pending], [['enter', 'speeding', 'exit'], 10]);
-  r.lap().enter().toBox(3).hold(1);
+  r.enter(90 * KMH).go(t.sExit - 3, 12 * sd, 90 * KMH);
+  assert.deepStrictEqual([r.take(), r.st.pending, r.st.service], [['enter', 'speeding'], 5, null], 'nothing before the exit line');
+  let ev = null;
+  while (!ev) { r.put(r.s + 90 * KMH * DT, 12 * sd, 90 * KMH); ev = r.step(); }
+  assert.strictEqual(ev, 'penaltyStart');
+  assert.strictEqual(STRAIGHT.lp(r.car.sampleIndex), STRAIGHT.L, 'on the exit line');
   const sv = r.st.service;
-  assert.deepStrictEqual([sv.penalty, r.st.pending], [10, 0], 'both holds at the next stop');
-  r.until('serviceDone');
-  r.leaveBox().out().lap().enter().toBox(3).hold(1);
-  assert.deepStrictEqual([r.st.service.penalty, r.st.stops], [0, 1]);
-  // speeding in the visit AFTER the stop: waits for the stop after that
-  r.until('serviceDone');
-  r.go(r.s + 16, 12 * r.side(), 30);
-  assert.deepStrictEqual([r.st.pending, r.st.speeding], [5, true]);
+  assert.deepStrictEqual([sv.total, sv.left, sv.penalty, sv.work, r.st.pending, r.st.stops, r.st.served, r.st.visit, r.st.flagged],
+    [5, 5, 5, 0, 0, 0, false, true, true]);
+  const n = r.until('penaltyDone');                         // held (main.js freezes the car for any state.service)
+  assert.strictEqual(n, Math.ceil((5 - 1e-9) / DT), 'held 5 s');
+  assert.deepStrictEqual([r.st.service, r.st.stops, r.st.pending, r.take()], [null, 0, 0, ['penaltyStart', 'penaltyDone']], 'no serviceDone: no tyres');
+  r.main = true;
   r.out();
+  assert.deepStrictEqual([r.take(), r.st.pending, r.st.stops], [['exit'], 0, 0]);
+  // (b) a clean stop, then flat out from the box: speeding again (the stop began a new count), held at the exit
   r.lap().enter().toBox(3).hold(1);
-  assert.strictEqual(r.st.service.penalty, 5);
+  r.until('serviceDone');
+  assert.deepStrictEqual([r.take(), r.st.service, r.st.stops], [['enter', 'serviceStart', 'serviceDone'], null, 1]);
+  r.go(r.s + 16, 12 * sd, 30);
+  assert.deepStrictEqual([r.take(), r.st.pending, r.st.speeding], [['speeding'], 5, true]);
+  r.held = 0;
+  r.out(30);
+  assert.deepStrictEqual([r.take(), r.st.pending, r.st.stops, r.held], [['penaltyStart', 'penaltyDone', 'exit'], 0, 1, Math.ceil((5 - 1e-9) / DT)]);
+  // (c) speeding before AND after the stop: 5 s at the stop, 5 s more at the exit line
+  r.lap().enter(100 * KMH).toBox(3).hold(1);
+  assert.deepStrictEqual([r.take(), r.st.service.penalty, r.st.pending], [['enter', 'speeding', 'serviceStart'], 5, 0]);
+  r.until('serviceDone');
+  r.leaveBox().go(r.s + 30, 12 * sd, 30).out(30);
+  assert.deepStrictEqual([r.take(), r.st.pending, r.st.stops], [['serviceDone', 'speeding', 'penaltyStart', 'penaltyDone', 'exit'], 0, 2]);
+  // (d) a clean visit after it: no hold anywhere
+  r.lap().enter().out();
+  assert.deepStrictEqual([r.take(), r.st.pending], [['enter', 'exit'], 0]);
+  // (e) a hold the car is not held for (moved more than 1 m): aborted, the rest waits; no new hold on the same crossing;
+  //     the next visit's stop serves it
+  const k = rig(SHIFTED, { slot: 2 });
+  k.enter(100 * KMH).go(SHIFTED.o.sExit + 4, 12 * sd, 100 * KMH);
+  assert.deepStrictEqual(k.take(), ['enter', 'speeding', 'penaltyStart', 'serviceAbort'], 'and no second speeding: one offence');
+  assert(k.st.pending > 4.9 && k.st.pending < 5 && k.st.service === null, 'pending ' + k.st.pending);
+  k.out();
+  const left = k.st.pending;
+  k.lap().enter().toBox(2).hold(1);
+  assert.deepStrictEqual([k.take(), k.st.service.penalty, k.st.pending], [['exit', 'enter', 'serviceStart'], left, 0]);
+  // (f) reversed out over the entry line after speeding: the visit ends with the hold pending; the next visit's exit
+  //     line serves it
+  const q = rig(SHIFTED, { main: true });
+  q.enter(100 * KMH).go(SHIFTED.o.sEntry - 12, 12 * sd, 5);
+  assert.deepStrictEqual([q.take(), q.st.pending, q.st.visit], [['enter', 'speeding', 'exit'], 5, false]);
+  q.enter().out();
+  assert.deepStrictEqual([q.take(), q.st.pending], [['enter', 'penaltyStart', 'penaltyDone', 'exit'], 0]);
+  // (g) into the lane BACKWARDS over the exit line with a hold pending: no hold until it crosses the line forwards
+  const g = rig(SHIFTED, { main: true });
+  g.enter(100 * KMH).go(SHIFTED.o.sEntry - 12, 12 * sd, 5);
+  g.put(SHIFTED.o.sExit + 12, 12 * sd, -3).go(SHIFTED.o.sExit - 20, 12 * sd, 3);
+  assert.deepStrictEqual([g.take(), g.st.pending, g.st.visit], [['enter', 'speeding', 'exit', 'enter'], 5, true]);
+  g.out();
+  assert.deepStrictEqual([g.take(), g.st.pending], [['penaltyStart', 'penaltyDone', 'exit'], 0]);
 });
 
 test('wrong box, crooked, astride, outside a box, still rolling: no service; where the own box is', () => {
@@ -417,17 +469,26 @@ test('R reset inside the lane: back on the track, the visit ends past the exit; 
   assert.deepStrictEqual([r.take(), r.st.visit], [[], true], 'not yet: 6 m past the exit line');
   r.go(STRAIGHT.o.sExit + 8, 0, 80);
   assert.deepStrictEqual([r.take(), r.st.visit], [['exit'], false]);
-  // R in the lane put back IN the lane (a main.js that resets to the lane centre): the visit simply goes on
+  // R in the lane put back IN the lane (a main.js that resets to the lane centre): the visit simply goes on, the
+  // speeding hold is served at the exit line
+  r.main = true;
   r.lap().enter(100 * KMH);
   r.put(r.s - 1, 12 * r.side(), 0).step();
   r.go(r.s + 30, r.lat, 70 * KMH).out();
-  assert.deepStrictEqual([r.take(), r.st.pending], [['enter', 'speeding', 'exit'], 5]);
+  assert.deepStrictEqual([r.take(), r.st.pending], [['enter', 'speeding', 'penaltyStart', 'penaltyDone', 'exit'], 0]);
+  // R onto the track after speeding: the visit goes on (beside the lane), its exit line still holds the car
+  r.lap().enter(100 * KMH).go(r.s + 20, r.lat, 70 * KMH);
+  r.put(r.s, 0, 0).step();
+  r.held = 0;
+  r.go(STRAIGHT.o.sExit + 150, 0, 60);
+  assert.deepStrictEqual([r.take(), r.st.pending, r.held], [['enter', 'speeding', 'penaltyStart', 'penaltyDone', 'exit'], 0, Math.ceil((5 - 1e-9) / DT)]);
   // R reset outside: on the track next to the lane, far away, on the grass across from it
+  r.main = false;
   r.put(0, 3, 50).step(); r.put(0, 0, 0).step();
   r.put(900, 5, 50).step(); r.put(900, 0, 0).step();
   r.put(STRAIGHT.o.sEntry + 50, 25 * r.side(), 0).step(); r.put(STRAIGHT.o.sEntry + 50, 0, 0).step();
   r.put(STRAIGHT.o.sEntry + 50, -25 * r.side(), 0).step();
-  assert.deepStrictEqual([r.take(), r.st.visit, r.st.pending], [[], false, 5]);
+  assert.deepStrictEqual([r.take(), r.st.visit, r.st.pending], [[], false, 0]);
 });
 
 test('R reset (or any move) during a service: aborted, no tyres, the unserved part of the hold waits', () => {
@@ -440,7 +501,9 @@ test('R reset (or any move) during a service: aborted, no tyres, the unserved pa
   assert.strictEqual(r.step(), 'serviceAbort');
   assert.deepStrictEqual([r.st.service, r.st.stops, r.st.served, r.st.inLane, r.st.visit], [null, 0, false, false, true]);
   assert(near(r.st.pending, 4, 1e-9), 'the 4 s not served yet: ' + r.st.pending);
-  r.out().lap().enter().toBox(1).hold(1);
+  // back into the box in the same visit: that stop serves them
+  r.go(r.s, 18 * r.side(), 2).hold(1);
+  assert.deepStrictEqual(r.take(), ['serviceAbort', 'serviceStart']);
   assert(near(r.st.service.penalty, 4, 1e-9));
   // held past the penalty (work started): nothing goes back; drove off without being held
   r.hold(4 * 128 + 10);
@@ -459,7 +522,7 @@ test('R reset (or any move) during a service: aborted, no tyres, the unserved pa
 });
 
 test('reversing over the entry line (and dithering on the exit line): no repeated events', () => {
-  const r = rig(STRAIGHT);
+  const r = rig(STRAIGHT, { main: true });
   const t = STRAIGHT.o, sd = r.side();
   r.enter(90 * KMH);
   assert.deepStrictEqual(r.take(), ['enter', 'speeding']);
@@ -472,10 +535,10 @@ test('reversing over the entry line (and dithering on the exit line): no repeate
   assert.deepStrictEqual([r.take(), r.st.visit, r.st.flagged], [['exit'], false, false]);
   r.go(t.sEntry + 20, 12 * sd, 95 * KMH);
   assert.deepStrictEqual([r.take(), r.st.pending], [['enter', 'speeding'], 10], 'a new visit');
-  // the exit line: over it, back, over, back ... one exit
+  // the exit line: over it, back, over, back ... one exit; the 10 s pending are held at the first crossing, once
   r.go(t.sExit - 2, 12 * sd, 20);
   for (let k = 0; k < 30; k++) r.go(t.sExit + 5, 12 * sd, 2).go(t.sExit - 3, 12 * sd, 2);
-  assert.deepStrictEqual([r.take(), r.st.inLane, r.st.visit], [[], true, true], 'up to 5 m over it and back: still the visit');
+  assert.deepStrictEqual([r.take(), r.st.inLane, r.st.visit, r.st.pending], [['penaltyStart', 'penaltyDone'], true, true, 0], 'up to 5 m over it and back: still the visit');
   r.go(t.sExit + 50, 12 * sd, 20);
   assert.deepStrictEqual([r.take(), r.st.visit], [['exit'], false]);
   // backwards into the lane over the exit line after the visit ended: a visit of its own
@@ -536,9 +599,9 @@ test('track.pit === null (or unusable): everything inert, nothing throws', () =>
   assert.deepStrictEqual([r.log, r.st.inLane, r.st.slot], [[], false, -1]);
   // a pit without boxes: the lane and its limit work, no stop is possible
   const noBoxes = Object.assign({}, STRAIGHT, { pit: Object.assign({}, STRAIGHT.pit, { boxes: null }) });
-  const k = rig(noBoxes);
+  const k = rig(noBoxes, { main: true });
   k.enter(100 * KMH).toBox(0).hold(500).leaveBox().out();
-  assert.deepStrictEqual([k.log, k.st.pending, k.st.stops, k.st.boxAhead, k.st.slot], [['enter', 'speeding', 'exit'], 5, 0, null, -1]);
+  assert.deepStrictEqual([k.log, k.st.pending, k.st.stops, k.st.boxAhead, k.st.slot], [['enter', 'speeding', 'penaltyStart', 'penaltyDone', 'exit'], 0, 0, null, -1]);
 });
 
 test('garbage car state: never throws, never NaN; an unreadable state changes nothing, a service keeps counting', () => {
@@ -683,7 +746,7 @@ test('curved lane: box heading follows the curve, boxAhead is measured along the
 
 test('determinism: the same seed and drive give the same events, services and states', () => {
   const drive = seed => {
-    const r = rig(STRAIGHT, { slot: 3, random: mulberry32(seed) });
+    const r = rig(STRAIGHT, { slot: 3, random: mulberry32(seed), main: true });
     const out = [];
     for (let v = 0; v < 6; v++) {
       r.enter(v % 2 ? 95 * KMH : 20);
@@ -697,11 +760,12 @@ test('determinism: the same seed and drive give the same events, services and st
   assert.notDeepStrictEqual(a.out, c.out);
   // every stop consumes exactly two draws, nothing else touches the generator
   const g = mulberry32(1234), want = a.out.map((t, k) => createPit.serviceTime(g));
-  // visits 0..5: stops in 0, 1, 3, 4; speeding in 1, 3, 5 -> holds 0, 5, 5, 0 and 5 s left over from visit 5
+  // visits 0..5: stops in 0, 1, 3, 4; speeding in 1, 3, 5 -> holds 0, 5, 5, 0 at the stops, visit 5's at its exit line
   const pen = [0, 5, 5, 0];
   assert.strictEqual(pen.length, a.out.length);
   a.out.forEach((t, k) => assert(near(t, want[k] + pen[k], 1e-12), 'stop ' + k + ': ' + t + ' vs ' + want[k]));
-  assert.deepStrictEqual([a.stops, a.pending], [4, 5], 'visit 5 sped without stopping');
+  assert.deepStrictEqual([a.stops, a.pending], [4, 0], 'visit 5 sped without stopping: held at the exit');
+  assert.deepStrictEqual(a.log.filter(e => e.startsWith('penalty')), ['penaltyStart', 'penaltyDone']);
 });
 
 test('service times: 10 000 draws — always 2.0..4.5 s, mostly 2.2..3.2, the occasional slow stop', () => {
@@ -736,7 +800,7 @@ test('service times: 10 000 draws — always 2.0..4.5 s, mostly 2.2..3.2, the oc
 test('random driving: events stay paired and ordered, the state stays consistent', () => {
   let seed = 2024;
   const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
-  let services = 0, visits = 0;
+  let services = 0, visits = 0, holds = 0;
   for (const track of [STRAIGHT, SHIFTED, CURVED]) {
     for (let run = 0; run < 8; run++) {
       const r = rig(track, { slot: Math.floor(rnd() * 16), random: mulberry32(run) });
@@ -751,14 +815,15 @@ test('random driving: events stay paired and ordered, the state stays consistent
         else if (x < 0.5) r.go(r.s - rnd() * 15, r.lat, 1 + rnd() * 4);                  // reverse
         else if (x < 0.55) { r.pit.reset(); r.open = false; r.svc = false; }
         else r.go(r.s + rnd() * 30, rnd() < 0.5 ? 12 * sd : (rnd() < 0.5 ? 0 : 18 * sd), 1 + rnd() * 35);
-        if (r.st.service && rnd() < 0.5) r.until('serviceDone');
+        if (r.st.service && rnd() < 0.5) r.until(r.st.service.work ? 'serviceDone' : 'penaltyDone');
       }
       services += r.log.filter(e => e === 'serviceDone').length;
       visits += r.log.filter(e => e === 'enter').length;
+      holds += r.log.filter(e => e === 'penaltyStart').length;
     }
   }
-  assert(services > 20 && visits > 50, 'the fuzz really exercises it: ' + services + ' services, ' + visits + ' visits');
-  return '(' + visits + ' visits, ' + services + ' services)';
+  assert(services > 20 && visits > 50 && holds > 3, 'the fuzz really exercises it: ' + services + ' services, ' + visits + ' visits, ' + holds + ' holds');
+  return '(' + visits + ' visits, ' + services + ' services, ' + holds + ' exit-line holds)';
 });
 
 console.log(failed ? '\n' + failed + ' test(s) FAILED' : '\nall pit tests passed');

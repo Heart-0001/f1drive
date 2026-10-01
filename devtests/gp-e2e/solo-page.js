@@ -349,7 +349,8 @@
   }
 
   /* ---------- pit-lane driver (v6) ---------- */
-  // E.pitPlan({ slot (box, default 0), vLane: m/s between the lines (default 2 km/h under the limit), cruise: the pit
+  // E.pitPlan({ slot (box, default 0), vLane: m/s between the lines (default 2 km/h under the limit), vLaneOut: m/s from
+  // the box to the exit line (default vLane; over the limit after the stop is a new offence, held at the exit line), cruise: the pit
   // limiter holds the speed (throttle open in the lane while F1.game.limiter), out: m to drive on after pit.to (150),
   // then: the ap.mode afterwards ('line') }) -> { ok, run, L, uEn, uEx, ub } or { error }. From where the car is (it must
   // be 40..N/2 samples before pit.from): a target path from its own offset to the lane, into the box, stop, wait for the
@@ -390,7 +391,8 @@
       vmax[u] = Math.min(vmax[u], Math.sqrt(PIT_A_LAT / Math.max(kap, 1e-6)));
     }
     var uEn = run + kEn, uEx = run + kEx, vLane = o.vLane > 0 ? o.vLane : vLim - 2 / 3.6;
-    for (u = uEn - Math.round(40 / ds); u <= uEx; u++) vmax[u] = Math.min(vmax[u], vLane);
+    var vOut = o.vLaneOut > 0 ? o.vLaneOut : vLane;           // from the box to the exit line (default vLane)
+    for (u = uEn - Math.round(40 / ds); u <= uEx; u++) vmax[u] = Math.min(vmax[u], u > ub ? vOut : vLane);
     vmax[ub] = Math.min(vmax[ub], 2);
     for (u = L - 1; u >= 0; u--) {
       var acc = u < ub && ub - u < 40 / ds ? PIT_A_STOP : PIT_A_BRAKE;
@@ -401,7 +403,8 @@
       cruise: !!o.cruise, vLane: vLane, tgt: tgt, vmax: vmax, integ: 0, stopped: null, served: false, stops0: g.pit.state.stops, then: o.then || 'line',
       rec: { maxLaneKmh: 0, cruiseKmh: 0, minLaneKmh: 1e9, hits: 0, grass: 0, maxServiceMove: 0, serviceFrames: 0, frozenBad: 0, svcStartClock: null, svcDoneClock: null,
         svcTotal: null, svcPenalty: null, svcWork: null, svcHeld0: null, svcHeld1: null, svcLap0: null, svcLap1: null, enterClock: null, exitClock: null,
-        limiterAtEntry: null, limiterAtExit: null, speedingFrames: 0, penNowFrames: 0, lapNs: [], lapChanges: [] }
+        limiterAtEntry: null, limiterAtExit: null, speedingFrames: 0, penNowFrames: 0, lapNs: [], lapChanges: [],
+        holdStartClock: null, holdDoneClock: null, holdTotal: null, holdFrames: 0, holdHeld0: null, holdHeld1: null }
     };
     ap.mode = 'pit';
     ap.on = true;
@@ -436,11 +439,17 @@
       if (rec.lapNs.length) rec.lapChanges.push({ n: g.lap.n, inLane: P.inLane, carInPit: st.inPit, d: st.d, last: g.lap.last, U: pl.U, clock: E.clock });
       rec.lapNs.push(g.lap.n);
     }
-    if (P.service && !pl.stopped) {
+    // the box service (work > 0) and a penalty hold at the exit line (work 0: js/pit.js 'penaltyStart') apart
+    var svcBox = !!(P.service && P.service.work > 0), hold = !!(P.service && !(P.service.work > 0));
+    if (hold) {
+      if (rec.holdStartClock === null) { rec.holdStartClock = E.clock; rec.holdTotal = P.service.total; rec.holdHeld0 = T.held; }
+      rec.holdFrames++;
+    } else if (rec.holdStartClock !== null && rec.holdDoneClock === null) { rec.holdDoneClock = E.clock; rec.holdHeld1 = T.held; }
+    if (svcBox && !pl.stopped) {
       var lx0 = Math.cos(b.heading), lz0 = -Math.sin(b.heading), dd = (b.x - st.x) * Math.sin(b.heading) + (b.z - st.z) * Math.cos(b.heading);
       pl.stopped = { along: -dd, across: (st.x - b.x) * lx0 + (st.z - b.z) * lz0, hd: Math.atan2(Math.sin(st.heading - b.heading), Math.cos(st.heading - b.heading)), inPit: st.inPit, clock: E.clock };
     }
-    if (P.service) {
+    if (svcBox) {
       if (rec.svcStartClock === null) {
         rec.svcStartClock = E.clock; rec.svcTotal = P.service.total; rec.svcPenalty = P.service.penalty; rec.svcWork = P.service.work;
         rec.svcX = st.x; rec.svcZ = st.z; rec.svcLap0 = g.lap.time; rec.svcHeld0 = T.held;

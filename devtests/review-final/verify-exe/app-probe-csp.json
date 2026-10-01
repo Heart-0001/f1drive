@@ -1,0 +1,28 @@
+{
+ "mode": "csp",
+ "root": "C:\\Users\\Heart\\Desktop\\f1Drive",
+ "boot": {
+  "overlay": "",
+  "showError": "function",
+  "host": true,
+  "audio": "worklet/suspended"
+ },
+ "cspMeta": "default-src 'self'; script-src 'self' blob: 'unsafe-eval'; connect-src 'self' ws: wss: https://api.ipify.org; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'none'",
+ "drive": {
+  "running": true,
+  "v": 25.53833261383979,
+  "audio": "worklet/running",
+  "frames": 184,
+  "overlay": ""
+ },
+ "ws": "error event (allowed by CSP, port closed)",
+ "fetchIpify": "http 200",
+ "evalBlocked": "eval ran: 2",
+ "inlineHandler": "inline handler blocked",
+ "consoleErrors": [
+  "Refused to execute inline event handler because it violates the following Content Security Policy directive: \"script-src 'self' blob: 'unsafe-eval'\". Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not ap"
+ ],
+ "securityWarnings": [
+  "%cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Co"
+ ]
+}

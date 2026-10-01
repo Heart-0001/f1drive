@@ -227,8 +227,8 @@ async function scenario() {
   const qv = await all(ABC, w => w.js(`({ v: F1.gp.view(), rate: F1.game.tyres.wearRate, comp: F1.game.tyres.state.compound, wear: F1.game.tyres.state.wear.slice(), year: __e2e.text('hud-gp-year'), toast: __e2e.hud().toast,
     chips: [].map.call(document.querySelectorAll('#hud-gp-rows .gp-row'), function (r) { var c = r.querySelector('.gp-chip'); return [r.querySelector('.mp-pname').textContent, c ? c.style.background : null]; }),
     teams: [].map.call(document.querySelectorAll('#gp-standings .gp-row'), function (r) { var t = r.querySelector('.gp-team'); return [r.querySelector('.mp-pname').textContent, t ? t.textContent : null]; }) })`));
-  check('quali on every window: the session\'s year 2014 (HUD box) and wear x3; every car on fresh mediums wearing x3; toast with the format',
-    qv.every(x => x.v.year === YEAR && x.v.wear === 3 && x.year === String(YEAR) && x.rate === 3 && x.comp === 'M' && x.wear.every(v => v === 0) && /^大獎賽開始：排位 1 圈，正賽 3 圈/.test(x.toast) && x.v.q === 1 && x.v.r === 3),
+  check('quali on every window: the session\'s year 2014 (HUD box) and wear x3; every car on fresh mediums wearing x1 (the wear option is for the race only); toast with the format',
+    qv.every(x => x.v.year === YEAR && x.v.wear === 3 && x.year === String(YEAR) && x.rate === 1 && x.comp === 'M' && x.wear.every(v => v === 0) && /^大獎賽開始：排位 1 圈，正賽 3 圈/.test(x.toast) && x.v.q === 1 && x.v.r === 3),
     qv.map(x => ({ year: x.v.year, wear: x.v.wear, hud: x.year, rate: x.rate, comp: x.comp, toast: x.toast })));
   check('standings: every row has the livery chip of its car (HUD box) and its team in the menu panel (賓士 / 紅牛 / 威廉斯)', qv.every(x => x.chips.length === 3 && x.chips.every(c => !!c[1])) &&
     J(qv[1].teams) === J([['Alice', '賓士'], ['Bob', '紅牛'], ['Carol', '威廉斯']]), { chips: qv[0].chips, teams: qv[1].teams });
@@ -278,9 +278,9 @@ async function scenario() {
   setPart('grid');
   const tGrid = Date.now();
   await sleep(400);
-  const gs = await all(ABC, w => w.js(`({ gp: __e2e.gp(), box: __e2e.box(F1.gp.gridSlot), comp: F1.game.tyres.state.compound, wear: F1.game.tyres.state.wear.slice(), bat: F1.game.car.state.battery })`));
-  check('grid A, B, C (qualifying order) in boxes 1..3, locked; fresh mediums and a full battery on every car', gs.every((g, i) => g.gp.gridSlot === i && g.gp.locked && Math.abs(g.box.nose - 0.25) < 0.02 && Math.abs(g.box.off) < 0.02) &&
-    gs.every(g => g.comp === 'M' && g.wear.every(v => v === 0) && g.bat === 1), gs);
+  const gs = await all(ABC, w => w.js(`({ gp: __e2e.gp(), box: __e2e.box(F1.gp.gridSlot), comp: F1.game.tyres.state.compound, wear: F1.game.tyres.state.wear.slice(), rate: F1.game.tyres.wearRate, bat: F1.game.car.state.battery })`));
+  check('grid A, B, C (qualifying order) in boxes 1..3, locked; fresh mediums wearing x3 from here on and a full battery on every car', gs.every((g, i) => g.gp.gridSlot === i && g.gp.locked && Math.abs(g.box.nose - 0.25) < 0.02 && Math.abs(g.box.off) < 0.02) &&
+    gs.every(g => g.comp === 'M' && g.wear.every(v => v === 0) && g.rate === 3 && g.bat === 1), gs);
   for (const w of ABC) await w.js(`__v6.ers.minBattery = 1; __v6.ers.boostFrames = 0; __v6.ers.deployFrames = 0; __v6.ers.frames = 0; __e2e.stats(true); true`);
   const goOk = await waitAll(ABC, `F1.gp.phase === 'race' && !F1.gp.inputLocked`, 20000, 'lights out');
   const go = await all(ABC, w => w.e('go'));

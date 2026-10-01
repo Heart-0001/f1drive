@@ -6,15 +6,22 @@
 // on top of the eras.json priors: tools/build-cars.mjs METHOD A) is solved so that the MEDIAN over the circuits of
 //     flying lap of the season's standard car / flying lap of the 2025 standard car (= F1.REF_SPEC)
 // equals the season's era pace index (tools/seasons-raw.json; within +-0.03 %, the task allows +-0.3 %).
-// For the KERS (2011-2013) and 2026 seasons the ERS harvest is then solved so that the energy a flying lap could
-// recover (battery kept empty: never full, no deploy) is the rules' per-lap budget in stores: KERS 0.4 MJ / 0.4 MJ = 1,
-// 2026 8.5 MJ / 4 MJ = 2.125 (median over the circuits).
+// Both cars DEPLOY the battery (driver.mjs opts.deploy: E held on full throttle above 100 km/h, the battery refilled
+// only by harvesting), because the real pole laps of the index used it: calibrated without it, pressing E added
+// 0.4..0.7 s a lap with KERS, 2..3.5 s with the ERS and 3.6..4.7 s in 2026 on top of the index and inverted the
+// season order (2026 faster than 2025, 2014 faster than 2013: the final review of 2026-10-01).
+// For the KERS (2011-2013) and 2026 seasons the ERS harvest is solved first (it sets what a lap can deploy), so that
+// the energy a flying lap could recover (battery kept empty: never full, no deploy) is the rules' per-lap budget in
+// stores: KERS 0.4 MJ / 0.4 MJ = 1, 2026 8.5 MJ / 4 MJ = 2.125 (median over the circuits); then the grip scale with
+// that harvest, then the harvest again at the solved grip (repeated while it moves by more than 0.5 %).
+// The grip scale: secant on log(grip scale) inside a bracket, bisection when the secant leaves it (the driven median
+// is not smooth in the grip: 2010 used to run out of iterations 0.036 % off).
 // Writes devtests/seasons-calib/calibration.json (read by tools/build-cars.mjs, which refuses a stale one).
 //   --profile   only the profile-model solve (no driving): quick look at the numbers, writes nothing
 //   --check     re-run and compare with calibration.json (exit code 1 when a number differs)
 //   years       only these seasons (writes nothing)
-// Deterministic: fixed 1/120 s step, no randomness, tyres off (grip 1 = a new medium set), no boost, no limiter.
-// About 8..12 min (40 circuits).
+// Deterministic: fixed 1/120 s step, no randomness, tyres off (grip 1 = a new medium set), no limiter.
+// About 10 min on an idle PC (40 circuits; about 55 min measured while other harnesses ran).
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { relative } from 'node:path';
 import * as B from '../../tools/build-cars.mjs';
@@ -63,15 +70,41 @@ if (PROFILE) {
 
 // ---- driving ------------------------------------------------------------------------------------------------------------
 const tracks = buildTracks(B.trackIds());
+const DEPLOY = { deploy: true };         // the laps the index is matched with: the battery deployed (driver.mjs)
 function driveAll(spec, opts) { return tracks.map(t => driveLap(t, spec, opts)); }
-const refRuns = driveAll(R);
+const refRuns = driveAll(R, DEPLOY);
 const refLaps = refRuns.map(r => r.flying);
 refRuns.forEach((r, i) => { if (r.grass || r.hits || !(r.flying > 0)) console.log('WARNING reference car off the road on ' + tracks[i].id); });
-function drivenRatio(year, df, harvest) {
+const refLapsNoDeploy = driveAll(R).map(r => r.flying);          // (documentation: the same laps without the battery)
+function drivenRatio(year, df, harvest, opts) {
   const spec = Object.assign({}, R, B.eraSpec(eras, year, df, harvest));
-  const runs = driveAll(spec);
-  const ratios = runs.map((r, i) => r.flying / refLaps[i]);
+  const runs = driveAll(spec, opts || DEPLOY);
+  const ratios = runs.map((r, i) => r.flying / (opts ? refLapsNoDeploy : refLaps)[i]);
   return { spec, runs, ratios, median: B.median(ratios), off: runs.filter(r => r.grass || r.hits || !(r.flying > 0)).length };
+}
+// the grip scale for a given ERS harvest: secant on log(grip scale) from x0, kept inside the bracket of grip scales
+// known to be too slow / too fast (bisection when the secant step leaves it), at most MAX_IT drives of every circuit
+const MAX_IT = 16;
+function solveGrip(year, harvest, x0) {
+  const idx = indexOf(year);
+  let lo = Math.log(0.2), hi = Math.log(4), loSet = false, hiSet = false;   // too little grip (slow) .. too much (fast)
+  const note = (x, d) => { if (d.median > idx) { lo = Math.max(lo, x); loSet = true; } else { hi = Math.min(hi, x); hiSet = true; } };
+  let d0 = drivenRatio(year, B.sig(Math.exp(x0)), harvest), it = 1, best = { x: x0, d: d0 };
+  note(x0, d0);
+  let x1 = x0 + 0.05 * (d0.median > idx ? 1 : -1);
+  while (Math.abs(best.d.median - idx) > TOL && it < MAX_IT) {
+    const d1 = drivenRatio(year, B.sig(Math.exp(x1)), harvest); it++;
+    note(x1, d1);
+    if (Math.abs(d1.median - idx) < Math.abs(best.d.median - idx)) best = { x: x1, d: d1 };
+    if (Math.abs(d1.median - idx) <= TOL) break;
+    const slope = (d1.median - d0.median) / (x1 - x0);
+    let xn = Math.abs(slope) > 1e-9 ? x1 - (d1.median - idx) / slope : NaN;
+    const both = loSet && hiSet;
+    // outside the bracket (or slow to converge, 8 drives): bisect it; no bracket yet: a step towards the index
+    if (!(xn > lo && xn < hi) || (it > 8 && both)) xn = both ? 0.5 * (lo + hi) : x1 + (d1.median > idx ? 0.1 : -0.1);
+    x0 = x1; d0 = d1; x1 = Math.max(Math.log(0.2), Math.min(Math.log(4), xn));
+  }
+  return { x: best.x, d: best.d, iterations: it };
 }
 
 // ERS: potential harvest of a flying lap as a function of the harvest cap H (W/kg), from one probe drive per track
@@ -110,9 +143,10 @@ const refProbe = driveAll(R, { harvestProbe: true }).map(v => v.probe.energy / R
 
 const out = {
   generatedBy: 'devtests/seasons-calib/calibrate.mjs', fingerprint: B.priorsFingerprint(eras, raw),
-  method: 'standard car driven by the keyboard racing-line autopilot (devtests/seasons-calib/driver.mjs, 120 Hz, flying lap = best of laps 2..3), era grip scale solved so that the median over the circuits of the lap ratio to the 2025 standard car (F1.REF_SPEC) equals the era pace index; ERS harvest of KERS / 2026 solved for the per-lap recovery budget (battery kept empty)',
-  hz: 120, tracks: B.trackIds(), tolerance: TOL,
-  reference: { laps: Object.fromEntries(tracks.map((t, i) => [t.id, B.round(refLaps[i], 4)])), ersLapFraction: B.round(B.median(refProbe), 4),
+  method: 'standard car driven by the keyboard racing-line autopilot (devtests/seasons-calib/driver.mjs, 120 Hz, flying lap = best of laps 2..3) deploying the battery (E held on full throttle above 100 km/h, refilled only by harvesting), era grip scale solved so that the median over the circuits of the lap ratio to the 2025 standard car (F1.REF_SPEC, driven the same way) equals the era pace index; ERS harvest of KERS / 2026 solved first for the per-lap recovery budget (battery kept empty)',
+  hz: 120, tracks: B.trackIds(), tolerance: TOL, deploy: true,
+  reference: { laps: Object.fromEntries(tracks.map((t, i) => [t.id, B.round(refLaps[i], 4)])),
+    lapsNoDeploy: Object.fromEntries(tracks.map((t, i) => [t.id, B.round(refLapsNoDeploy[i], 4)])), ersLapFraction: B.round(B.median(refProbe), 4),
     ersLapFractionPerTrack: refProbe.map(v => B.round(v, 3)) },
   seasons: {}
 };
@@ -120,30 +154,32 @@ console.log('reference (2025 standard = F1.REF_SPEC) flying laps: ' + tracks.map
 console.log('reference ERS: a flying lap could recover ' + (B.median(refProbe) * 100).toFixed(1) + ' % of the store (median; ' + refProbe.map(v => (v * 100).toFixed(0)).join(' ') + ')');
 for (const year of YEARS) {
   const idx = indexOf(year);
-  let rec;
+  let rec, s = null;
   if (year === B.CFG.ANCHOR) {
     rec = { index: idx, gripScale: 1, ersHarvest: null, drivenMedian: 1, iterations: 0, profileStart: 1, off: 0, ratios: refLaps.map(() => 1), laps: refLaps };
   } else {
-    // secant on log(grip scale), started from the profile model's solution
-    let x0 = Math.log(B.sig(solveProfile(year))), d0 = drivenRatio(year, Math.exp(x0), R.ers.harvest);
-    let best = { x: x0, d: d0 }, it = 1;
-    let x1 = x0 + 0.05 * (d0.median > idx ? 1 : -1), d1 = null;
-    while (Math.abs(best.d.median - idx) > TOL && it < 12) {
-      d1 = drivenRatio(year, B.sig(Math.exp(x1)), R.ers.harvest); it++;
-      if (Math.abs(d1.median - idx) < Math.abs(best.d.median - idx)) best = { x: x1, d: d1 };
-      if (Math.abs(d1.median - idx) <= TOL) break;
-      const slope = (d1.median - d0.median) / (x1 - x0);
-      const xn = Math.abs(slope) > 1e-9 ? x1 - (d1.median - idx) / slope : x1 + 0.02;
-      x0 = x1; d0 = d1; x1 = Math.max(Math.log(0.2), Math.min(Math.log(4), xn));
+    // the grip scale (started from the profile model's solution, which has no battery); for KERS / 2026 the harvest
+    // first, since it sets what a lap can deploy, then again at the solved grip until it settles
+    const start = B.sig(solveProfile(year)), calH = B.ersCalibrated(eras, year);
+    let x = Math.log(start), H = R.ers.harvest, g = null, its = 0;
+    for (let pass = 0; pass < 4; pass++) {
+      if (calH) {
+        const sn = ersSolve(year, B.sig(Math.exp(x)));
+        if (g && Math.abs(sn.harvest / H - 1) <= 0.005) break;      // settled: keep the harvest the grip was solved with
+        s = sn; H = s.harvest;
+      }
+      g = solveGrip(year, H, x); x = g.x; its += g.iterations;
+      if (!calH) break;
     }
-    const df = B.sig(Math.exp(best.x));
-    rec = { index: idx, gripScale: df, ersHarvest: null, drivenMedian: best.d.median, iterations: it, profileStart: B.round(solveProfile(year), 5),
-      off: best.d.off, ratios: best.d.ratios, laps: best.d.runs.map(r => r.flying) };
-    if (Math.abs(best.d.median - idx) > TOL) console.log('WARNING ' + year + ': driven median ' + best.d.median.toFixed(5) + ' misses the index ' + idx + ' by more than ' + TOL);
+    rec = { index: idx, gripScale: B.sig(Math.exp(x)), ersHarvest: null, drivenMedian: g.d.median, iterations: its, profileStart: B.round(start, 5),
+      off: g.d.off, ratios: g.d.ratios, laps: g.d.runs.map(r => r.flying) };
+    if (Math.abs(g.d.median - idx) > TOL) console.log('WARNING ' + year + ': driven median ' + g.d.median.toFixed(5) + ' misses the index ' + idx + ' by more than ' + TOL);
   }
+  // documentation: the same two cars both WITHOUT the battery (the era order when nobody presses E)
+  const nd = year === B.CFG.ANCHOR ? null : drivenRatio(year, rec.gripScale, s ? s.harvest : R.ers.harvest, {});
+  rec.noDeployMedian = nd ? nd.median : 1;
   let ers = null;
   if (B.ersCalibrated(eras, year)) {
-    const s = ersSolve(year, rec.gripScale);
     rec.ersHarvest = s.harvest;
     const p = G.carPerf(s.spec);
     ers = { store: s.spec.ers.store, power: s.spec.ers.power, harvest: s.harvest, harvestCapped: s.capped, harvestCap: s.cap,
@@ -155,7 +191,8 @@ for (const year of YEARS) {
   const p = G.carPerf(spec);
   out.seasons[year] = {
     index: idx, gripScale: rec.gripScale, ersHarvest: rec.ersHarvest,
-    drivenMedian: B.round(rec.drivenMedian, 5), drivenMean: B.round(B.mean(rec.ratios), 5), profileStart: rec.profileStart, iterations: rec.iterations,
+    drivenMedian: B.round(rec.drivenMedian, 5), drivenMean: B.round(B.mean(rec.ratios), 5), noDeployMedian: B.round(rec.noDeployMedian, 5),
+    profileStart: rec.profileStart, iterations: rec.iterations,
     offTrackRuns: rec.off,
     ratios: Object.fromEntries(tracks.map((t, i) => [t.id, B.round(rec.ratios[i], 5)])),
     laps: Object.fromEntries(tracks.map((t, i) => [t.id, B.round(rec.laps[i], 4)])),
@@ -163,9 +200,10 @@ for (const year of YEARS) {
       traction: spec.traction, topKmh: B.round(p.topSpeed * 3.6, 1), topBoostKmh: B.round(p.topSpeedBoost * 3.6, 1) },
     ers
   };
-  const s = out.seasons[year];
-  console.log(year + '  index ' + idx.toFixed(4) + '  driven ' + s.drivenMedian.toFixed(4) + ' (mean ' + s.drivenMean.toFixed(4) + ', ' + s.iterations + ' drives of ' + tracks.length + ')' +
-    '  grip scale x' + s.gripScale.toFixed(4) + ' (profile start ' + (rec.profileStart || 1).toFixed(3) + ')  top ' + s.physics.topKmh + ' km/h' +
+  const o = out.seasons[year];
+  console.log(year + '  index ' + idx.toFixed(4) + '  driven ' + o.drivenMedian.toFixed(4) + ' (mean ' + o.drivenMean.toFixed(4) + ', ' + o.iterations + ' drives of ' + tracks.length + ')' +
+    '  grip scale x' + o.gripScale.toFixed(4) + ' (profile start ' + (rec.profileStart || 1).toFixed(3) + ')  top ' + o.physics.topKmh + ' / ' + o.physics.topBoostKmh + ' km/h' +
+    '  no battery ' + o.noDeployMedian.toFixed(4) +
     (ers ? '  ERS harvest ' + ers.harvest + ' W/kg' + (ers.harvestCapped ? ' (CAP)' : '') + ': lap ' + ers.lapMeasured + ' stores (target ' + ers.lapTarget + ')' : '') + (rec.off ? '  OFF-TRACK ' + rec.off : ''));
 }
 const text = JSON.stringify(out, null, 1) + '\n';
