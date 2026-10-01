@@ -27,15 +27,19 @@ function check(name, ok, detail) {
   console.log((ok ? 'PASS ' : 'FAIL ') + name + (detail !== undefined ? '  ' + (typeof detail === 'string' ? detail : J(detail)) : ''));
 }
 
+// (v6.1: js/hudmirrors.js after js/cockpit.js - the HUD rear-view mirrors)
 const CONTRACT_ORDER = ['js/boot.js', 'lib/three.min.js', 'tracks-data.js', 'js/seasons-data.js', 'js/cars.js', 'js/track.js', 'js/tyres.js', 'js/car.js',
-  'js/cockpit.js', 'js/gamepad.js', 'js/audio.js', 'js/raceline.js', 'scenery-data.js', 'js/scenery.js', 'js/collide.js',
+  'js/cockpit.js', 'js/hudmirrors.js', 'js/gamepad.js', 'js/audio.js', 'js/raceline.js', 'scenery-data.js', 'js/scenery.js', 'js/collide.js',
   'js/carmodel.js', 'js/laps.js', 'js/pit.js', 'net/session.js', 'js/net.js', 'js/gp.js', 'js/telemetry.js', 'js/ui.js', 'js/main.js'];
-// every id the v6 UI adds (reported to the integrator / end-to-end tests)
+// every id the v6 UI adds (reported to the integrator / end-to-end tests); v6.1: the HUD mirror frames and their switch
 const NEW_IDS = ['hud-telemetry', 'hud-pit', 'hud-pit-limit', 'hud-pit-lim', 'hud-pit-warn', 'hud-pit-box', 'hud-pit-pending', 'hud-pit-svc',
   'hud-pit-svc-label', 'hud-pit-svc-time', 'hud-pit-bar', 'hud-pit-pen', 'hud-gp-year', 'menu-tabs', 'tab-car', 'tab-gp', 'tab-mp', 'tab-set',
   'tab-car-chip', 'tab-gp-dot', 'tab-mp-dot', 'car-panel', 'car-year', 'car-season', 'car-lock', 'car-list', 'car-empty', 'gp-panel', 'gp-car',
   'gp-year', 'gp-car-name', 'gp-car-change', 'gp-wear', 'gp-wear-note', 'mp-section', 'set-panel', 'set-volume', 'set-volume-val', 'set-mute',
-  'set-mute-text', 'keys-kb', 'keys-pad', 'pad-status'];
+  'set-mute-text', 'keys-kb', 'keys-pad', 'pad-status', 'hud-mirror-l', 'hud-mirror-r', 'set-mirrors', 'set-mirrors-text'];
+// the HUD mirror frames (index.html; js/hudmirrors.js draws into them): nothing of the HUD may cover them
+const MIRRORS = ['hud-mirror-l', 'hud-mirror-r'];
+const NEAR_MIRRORS = ['hud-timing', 'hud-map', 'hud-hint', 'hud-gp', 'hud-players', 'gp-results', 'hud-lights', 'hud-pit', 'hud-menu-btn', 'hud-telemetry', 'hud-toast'];
 const GONE_IDS = ['hud-speedo', 'hud-speed', 'hud-gear'];
 
 /* ---------- the test page: index.html without main.js / missing scripts, over a game screenshot ---------- */
@@ -94,6 +98,7 @@ const PAGE_LIB = `(function () {
       onYear: function (y) { __calls.push(['year', y]); },
       onCar: function (id) { __calls.push(['car', id]); },
       onAudio: function (a) { __calls.push(['audio', a]); },
+      onMirrors: function (on) { __calls.push(['mirrors', on]); },
       onProfile: function () {}
     });
     F1.ui.showMenu(window.F1_TRACKS);
@@ -173,7 +178,7 @@ app.whenReady().then(async () => {
 
     const bootErr = await load();
     check('test page boots without the error overlay', !bootErr, bootErr || undefined);
-    check('ui API: v6 functions present', await js(`['setCars','getCar','getYear','getAudio','setAudio','setPit','setGp','setNet','setLights','setPad','updateHUD','toast'].every(function (k) { return typeof F1.ui[k] === 'function'; })`));
+    check('ui API: v6 functions present (v6.1: getMirrors / setMirrors)', await js(`['setCars','getCar','getYear','getAudio','setAudio','setPit','setGp','setNet','setLights','setPad','updateHUD','toast','getMirrors','setMirrors'].every(function (k) { return typeof F1.ui[k] === 'function'; })`));
 
     /* ================= menu ================= */
     if (part('menu')) {
@@ -185,7 +190,15 @@ app.whenReady().then(async () => {
         credits: document.querySelector('.brand .credits').textContent, W: innerWidth, hint: document.querySelector('.keymap').innerText.replace(/\\s+/g, ' ') })`);
       check('menu head: key map rows one line each (1280), table inside the window, head not taller than 130 px', head.kb.h <= 26 && head.pad.h <= 26 && head.table.r <= head.W - 16 && head.head.h <= 130,
         { kb: head.kb.h, pad: head.pad.h, tableRight: head.table.r, headH: head.head.h });
-      check('menu head: new keys and controller mapping listed', ['限速器', '電池', '換胎配方', '靜音', 'Q', 'E', 'T', 'M', 'LB', 'RB', 'Back'].every(s => head.hint.indexOf(s) >= 0), head.hint);
+      check('menu head: new keys and controller mapping listed', ['限速器', '電池', '換胎配方', '靜音', '後照鏡', 'Q', 'E', 'T', 'M', 'V', 'LB', 'RB', 'View', 'Start'].every(s => head.hint.indexOf(s) >= 0), head.hint);
+      // v6.1: the keyboard / controller key of each action, column by column (js/gamepad.js's A B X Y layout, the V key)
+      const cols = await js(`(function () { var h = [].map.call(document.querySelectorAll('.keymap thead th'), function (t) { return t.textContent; }), o = {};
+        var row = function (id) { return [].map.call(document.querySelectorAll('#' + id + ' td'), function (td) { return td.textContent.replace(/\\s+/g, ''); }); };
+        var kb = row('keys-kb'), pad = row('keys-pad'); h.forEach(function (n, i) { o[n] = [kb[i], pad[i]]; }); return o; })()`);
+      const WANT = { '油門': ['W', 'RT'], '重置': ['R', 'Y'], '行車線': ['L', 'View'], '限速器': ['Q', 'B/LB'], '電池（按住）': ['E', 'A/RB'], '換胎配方': ['T', 'X'], '靜音': ['M', '—'], '後照鏡': ['V', '—'],
+        '選單': ['Esc', 'Start'], '視角': ['—', '右搖桿'] };
+      check('menu head: each action\'s key and button (v6.1 pad layout A battery (hold) / B limiter / X compound / Y reset / View line / Start menu; V mirrors)',
+        Object.keys(WANT).every(k => J(cols[k]) === J(WANT[k])), cols);
       check('menu head: F1DB credit next to the OpenStreetMap one', /OpenStreetMap/.test(head.credits) && /F1DB（CC BY 4\.0(，經修改)?）/.test(head.credits), head.credits);
       await js(`F1.ui.setPad(true, 'Xbox Wireless Controller (STANDARD GAMEPAD)')`);
       const padHead = await js(`({ pad: __rect('keys-pad'), tag: __rect('pad-status'), table: __rect(document.querySelector('.keymap')), W: innerWidth })`);
@@ -207,6 +220,11 @@ app.whenReady().then(async () => {
         cols: getComputedStyle(document.getElementById('track-grid')).gridTemplateColumns.split(' ').length })`);
       check('cars 2026: 12 cards, the standard car first, the chosen one (only) highlighted', st.cards === 12 && st.first === '2026-standard' && J(st.on) === J(['2026-mclaren']), st.on);
       check('cars 2026: five rating bars on every card', st.bars.every(n => n === 5), st.bars);
+      // v6.1: each car's battery line (F1.cars.ersNote: the real data's, the mock rows carry none) under its bars
+      const ers26 = await js(`[].map.call(document.querySelectorAll('#car-list .car-card'), function (c) { var e = c.querySelector('.car-ers');
+        return [c.getAttribute('data-id'), e ? e.textContent : null, F1.cars ? F1.cars.ersNote(c.getAttribute('data-id')) : null, !!c.querySelector('.car-noers')]; })`);
+      check('cars 2026: the battery line (電池 + F1.cars.ersNote) on every card that has a note, none on the others (the standard car), no 無 KERS mark',
+        ers26.every(r => r[3] === false && (r[2] ? r[1] === '電池' + r[2] : r[1] === null)) && ers26.filter(r => r[1]).length >= 8 && ers26[0][0] === '2026-standard' && ers26[0][1] === null, ers26);
       check('year selector: 17 seasons newest first, 2026 selected, enabled, no lock text', st.years.length === 17 && st.years[0] === 2026 && st.years[16] === 2010 && st.year === '2026' && !st.disabled && !st.lock, st.years);
       check('cars: team zh + en, car, engine, note and ratings on screen; season line', /麥拉倫\s*McLaren/.test(st.text) && /MCL40/.test(st.text) && /Mercedes-AMG F1 M17 E Performance/.test(st.text) &&
         /極速\s*44/.test(st.text) && /季中升級/.test(st.text) && /12 輛車/.test(st.season), st.season);
@@ -226,8 +244,12 @@ app.whenReady().then(async () => {
       await setCars(cars(L12, { selected: '2012-lotus' }));
       await shot('menu-1280-cars-2012-noers');
       st = await js(`({ bars: [].slice.call(document.querySelectorAll('#car-list .car-card')).map(function (n) { return n.querySelectorAll('.car-bar').length; }),
+        labels: [].slice.call(document.querySelectorAll('#car-list .car-bar em')).map(function (e) { return e.firstChild.textContent; }),
+        noers: [].slice.call(document.querySelectorAll('#car-list .car-card')).map(function (n) { var x = n.querySelector('.car-noers'); return x ? x.textContent : null; }),
         text: __text('car-list'), season: __text('car-season'), year: document.getElementById('car-year').value })`);
-      check('cars 2012 (no ERS): the 電池 bar is left out on every card', st.bars.length === 12 && st.bars.every(n => n === 4) && !/電池/.test(st.text) && st.year === '2012' && /V8/.test(st.season), { bars: st.bars, season: st.season });
+      // (v6.1: a car without a battery may still have a battery line - the real data's "沒有裝 KERS…" - so the bar is looked for, not the word)
+      check('cars 2012 (no ERS): the 電池 bar is left out on every card, 無 KERS where it would be', st.bars.length === 12 && st.bars.every(n => n === 4) && st.labels.indexOf('電池') < 0 &&
+        st.noers.every(t => t === '無 KERS') && st.year === '2012' && /V8/.test(st.season), { bars: st.bars, noers: st.noers, season: st.season });
 
       // host / guest / session
       await setNet(M.NET.host(3)); await setGp(M.V.freeHost);
@@ -265,6 +287,9 @@ app.whenReady().then(async () => {
       await shot('menu-1280-settings');
       st = await js(`({ vol: document.getElementById('set-volume').value, val: __text('set-volume-val'), mute: document.getElementById('set-mute').checked, panel: __rect('set-panel') })`);
       check('設定: volume slider 80 % and mute off by default', st.vol === '80' && st.val === '80%' && !st.mute && st.panel.shown, st);
+      st = await js(`({ on: document.getElementById('set-mirrors').checked, dis: document.getElementById('set-mirrors').disabled, txt: __text('set-mirrors-text'), get: F1.ui.getMirrors(),
+        shown: __rect('set-mirrors').shown, note: __text('set-mirrors-note'), cls: document.getElementById('hud').classList.contains('no-mirrors'), panel: __rect('set-panel'), row: __rect('set-mirrors-text') })`);
+      check('設定 (v6.1): 後照鏡 switch on by default (開), the V key named, the HUD laid out with the mirrors', st.on && !st.dis && st.txt === '開' && st.get === true && st.shown && /V/.test(st.note) && !st.cls && st.row.r <= st.panel.r, st);
 
       // 1920 and narrow
       await size(1920, 1080);
@@ -302,11 +327,18 @@ app.whenReady().then(async () => {
     const hudFrame = o => js(`(function () { var t = F1_TRACKS.filter(function (t) { return (t.name + ' ' + t.id).toLowerCase().indexOf(${J(TRACK)}) >= 0; })[0] || F1_TRACKS[0];
       var h = Object.assign({ lap: 3, lapTotal: 5, curTime: 42.123, lastTime: 83.456, bestTime: 82.901, x: t.points[40][0], z: t.points[40][1], heading: 1.2, others: null }, ${J(M.TEL(o))});
       window.__h = h; for (var i = 0; i < 30; i++) F1.ui.updateHUD(h); return true; })()`);
+    // (v6.1: + the two HUD mirror frames: shown, in the top corners, inside the window, and nothing of the HUD over them)
     const layout = () => js(`(function () { var ids = ['hud-timing', 'hud-map', 'hud-hint', 'hud-gp', 'hud-players', 'gp-results', 'hud-lights', 'hud-pit', 'hud-menu-btn'], o = {};
       for (var i = 0; i < ids.length; i++) o[ids[i]] = __overlap('hud-telemetry', ids[i]);
+      var mir = {}, near = ${J(NEAR_MIRRORS)}, M = ${J(MIRRORS)};
+      for (var m = 0; m < M.length; m++) for (var k = 0; k < near.length; k++) { var a = __overlap(M[m], near[k]); if (a) mir[M[m] + ' x ' + near[k]] = a; }
+      var ml = __rect('hud-mirror-l'), mr = __rect('hud-mirror-r');
       return { tel: __rect('hud-telemetry'), over: o, hint: __rect('hud-hint'), hintMap: __overlap('hud-hint', 'hud-map'), hintGp: __overlap('hud-hint', 'hud-gp'), hintLights: __overlap('hud-hint', 'hud-lights'),
-        pitRes: __overlap('hud-pit', 'hud-gp'), W: innerWidth, H: innerHeight, px: __telPixels() }; })()`);
-    const clear = s => Object.keys(s.over).every(k => s.over[k] === 0) && !s.hintMap && !s.hintGp && !s.hintLights;
+        pitRes: __overlap('hud-pit', 'hud-gp'), W: innerWidth, H: innerHeight, px: __telPixels(), mir: mir, ml: ml, mr: mr,
+        // (frames: 4 px border round a 3 : 1 glass, 12 px from the top, 18 px from the sides)
+        mirOk: ml.shown && mr.shown && ml.y === 12 && mr.y === 12 && ml.x === 18 && mr.r === innerWidth - 18 && ml.r < mr.x && Math.abs(ml.w - mr.w) <= 1 &&
+          Math.abs((ml.w - 8) / (ml.h - 8) - 3) < 0.1 }; })()`);
+    const clear = s => Object.keys(s.over).every(k => s.over[k] === 0) && !s.hintMap && !s.hintGp && !s.hintLights && s.mirOk && Object.keys(s.mir).length === 0;
     if (part('hud') || part('pit')) {
       await js(`(function () { var t = F1_TRACKS.filter(function (t) { return (t.name + ' ' + t.id).toLowerCase().indexOf(${J(TRACK)}) >= 0; })[0] || F1_TRACKS[0];
         F1.ui.setTrack(t); F1.ui.hideMenu(); return true; })()`);
@@ -322,18 +354,20 @@ app.whenReady().then(async () => {
         let s = await layout();
         check(tag + ': telemetry canvas bottom centre, ' + telW + ' px wide, backing store = CSS box x DPR, drawn', s.tel.w === telW && Math.abs((s.tel.x + s.tel.r) / 2 - W / 2) <= 1 &&
           s.tel.b === H - 10 && s.px.w === Math.round(telW * DPR) && s.px.n > 500, { tel: s.tel, px: s.px });
-        check(tag + ': free practice - telemetry clear of the timing box, minimap, key hint and menu button; hint clear of the minimap', clear(s), { over: s.over, hint: s.hint });
+        check(tag + ': free practice - telemetry clear of the timing box, minimap, key hint and menu button; hint clear of the minimap; the two mirror frames in the top corners, nothing over them',
+          clear(s), { over: s.over, hint: s.hint, mir: s.mir, ml: s.ml, mr: s.mr, mirOk: s.mirOk });
         await setNet(M.NET.guest(16)); await setGp(M.V.race16({})); await js(`F1.ui.setLights(4, false)`); await hudFrame({ speedKmh: 88, gear: 3, limiter: true, inPit: true, rpm: 8000 });
-        await js(`F1.ui.setPit(${J(M.PIT.laneAhead)})`);
+        await js(`F1.ui.setPit(${J(M.PIT.laneAhead)}); F1.ui.toast('起跑位置 P5 / 16，燈號全滅就起跑', 60000)`);
         await shot('hud-' + tag + '-race16-lights-pit');
         s = await layout();
-        check(tag + ': race 16 + lights + pit strip - nothing overlaps the telemetry graphic', clear(s) && !s.pitRes, { over: s.over, pitGp: s.pitRes });
-        await js(`F1.ui.setLights(-1, false); F1.ui.setPit(null)`);
+        check(tag + ': race 16 + lights + pit strip + a toast - nothing overlaps the telemetry graphic or the mirrors', clear(s) && !s.pitRes, { over: s.over, pitGp: s.pitRes, mir: s.mir });
+        await js(`F1.ui.setLights(-1, false); F1.ui.setPit(null); F1.ui.toast('')`);
         await setNet(M.NET.host(16)); await setGp(M.V.results16({}));
         await shot('hud-' + tag + '-results16');
         s = await layout();
         const res = await js(`({ res: __rect('gp-results'), body: __rect('gp-results-body'), sub: __text('gp-results-sub'), teams: document.querySelectorAll('#gp-results .gp-team').length, chips: document.querySelectorAll('#gp-results .gp-chip').length })`);
         const inWin = res.res.y >= 0 && res.res.b <= H && res.res.x >= 0 && res.res.r <= W;
+        check(tag + ': results 16 - the mirror frames still in place, nothing over them', s.mirOk && Object.keys(s.mir).length === 0, { mir: s.mir, ml: s.ml, mr: s.mr });
         if (W >= 1260) check(tag + ': results overlay clear of the telemetry graphic and inside the window', !s.over['gp-results'] && inWin, { res: res.res, tel: s.tel });
         else {
           // narrower than 1260 px (index.html): the overlay goes below the top row of boxes (timing box, minimap; under
@@ -351,10 +385,26 @@ app.whenReady().then(async () => {
         await setNet(M.NET.off); await setGp(M.V.freeTrack);
         s = await layout();
         const padHint = await js(`({ text: __text('hud-hint'), keys: __rect('hud-hint-keys').shown, pad: __rect('hud-hint-pad').shown })`);
-        if (W >= 1000) check(tag + ': controller hint shows LB / RB / Back and stays clear', padHint.pad && !padHint.keys && /LB/.test(padHint.text) && /Back/.test(padHint.text) && clear(s), padHint);
+        // (v6.1 layout: A / RB battery (hold), B / LB limiter, X compound, Y reset, View line, Start menu; V mirrors)
+        if (W >= 1000) check(tag + ': controller hint shows the v6.1 layout (A / RB 電池（按住）, B / LB 限速器, X, Y, View, Start, V) and stays clear', padHint.pad && !padHint.keys &&
+          /A\s*\/\s*RB\s*電池（按住）/.test(padHint.text) && /B\s*\/\s*LB\s*限速器/.test(padHint.text) && /X\s*換胎配方/.test(padHint.text) && /Y\s*重置/.test(padHint.text) &&
+          /View\s*行車線/.test(padHint.text) && /Start\s*選單/.test(padHint.text) && /V\s*後照鏡/.test(padHint.text) && clear(s), padHint);
         else check(tag + ': compact window - key hints hidden, only the menu button (clear of everything)', !padHint.pad && !padHint.keys && /選單/.test(padHint.text) && clear(s), padHint);
         await shot('hud-' + tag + '-pad-hint');
         await js(`F1.ui.setPad(false, '')`);
+      }
+      await size(1280, 720);
+      // v6.1: mirrors off (設定 / V): the frames hidden, every box exactly where it was without mirrors (v6)
+      for (const [W, H] of [[1280, 720], [700, 720]]) {
+        await size(W, H);
+        await setNet(M.NET.guest(16)); await setGp(M.V.race16({})); await js(`F1.ui.setLights(4, false); F1.ui.setMirrors({ on: false })`); await hudFrame({});
+        await shot('hud-' + W + '-no-mirrors');
+        const nm = await js(`({ cls: document.getElementById('hud').className, l: __rect('hud-mirror-l').shown, r: __rect('hud-mirror-r').shown, timing: __rect('hud-timing'), map: __rect('hud-map'),
+          gp: __rect('hud-gp'), lights: __rect('hud-lights'), hint: __rect('hud-hint'), toastMax: getComputedStyle(document.getElementById('hud-toast')).maxWidth })`);
+        await js(`F1.ui.setMirrors({ on: true }); F1.ui.setLights(-1, false)`);
+        const ok = W > 720 ? nm.timing.y === 18 && nm.map.y === 18 && nm.gp.y === 196 : nm.timing.y === 18 && nm.lights.y === 176 && nm.gp.y === 284 && nm.hint.y === 174;
+        check(W + ': mirrors off - frames hidden (#hud.no-mirrors), the corner boxes back at their v6 places (timing / minimap 18, session box 196; narrow: lights 176, session 284, 選單 174), the toast as wide as before (60vw)',
+          / no-mirrors|^no-mirrors/.test(nm.cls) && !nm.l && !nm.r && ok && nm.toastMax === Math.round(W * 0.6) + 'px', nm);
       }
       await size(1280, 720);
       await setGp(M.V.race16({})); await setNet(M.NET.guest(16));
@@ -395,7 +445,7 @@ app.whenReady().then(async () => {
           check(tag + ' pit ' + name + ': ' + (want || 'hidden') + '; inside the window, clear of the telemetry / hint / timing box', ok, { text: s.text, strip: s.strip.x + ',' + s.strip.y + ' ' + s.strip.w + 'x' + s.strip.h });
         }
         await js(`F1.ui.setPad(true, 'Pad'); F1.ui.setPit(${J(M.PIT.laneNoLimiter)})`);
-        check(tag + ' pit: with a controller the limiter hint names LB', /請開啟限速器（LB）/.test(await js(`__text('hud-pit')`)));
+        check(tag + ' pit: with a controller the limiter hint names B (v6.1 layout)', /請開啟限速器（B）/.test(await js(`__text('hud-pit')`)));
         await js(`F1.ui.setPad(false, ''); F1.ui.setPit(null)`);
       }
       await size(1280, 720);
@@ -484,6 +534,23 @@ app.whenReady().then(async () => {
       st = await js(`({ calls: JSON.stringify(__calls), get: JSON.stringify(F1.ui.getAudio()), box: document.getElementById('set-mute').checked, vol: document.getElementById('set-volume').value, store: localStorage.getItem('f1drive.audio') })`);
       check('setAudio (M key): shown and remembered, clamped, junk ignored, no onAudio', st.calls === '[]' && st.get === '{"volume":1,"muted":false}' && !st.box && st.vol === '100' && st.store === '{"volume":1,"muted":false}', st);
       await js(`F1.ui.setAudio({ volume: 0.35, muted: true })`);
+      // v6.1: the HUD mirrors switch (real mouse) -> onMirrors(false), remembered, the HUD laid out without them
+      await js(`__calls.length = 0`);
+      await mouseClick('#set-mirrors');
+      st = await js(`({ calls: JSON.stringify(__calls), store: localStorage.getItem('f1drive.hud'), get: F1.ui.getMirrors(), box: document.getElementById('set-mirrors').checked, txt: __text('set-mirrors-text'),
+        cls: document.getElementById('hud').classList.contains('no-mirrors') })`);
+      check('後照鏡 switch (real mouse) -> onMirrors(false), remembered (f1drive.hud), getMirrors, #hud.no-mirrors', st.calls === '[["mirrors",false]]' && st.store === '{"mirrors":false}' &&
+        st.get === false && !st.box && st.txt === '關' && st.cls, st);
+      await js(`__calls.length = 0; F1.ui.setMirrors({ on: true }); F1.ui.setMirrors({ on: 'yes' }); F1.ui.setMirrors(null); F1.ui.setMirrors(7)`);
+      st = await js(`({ calls: JSON.stringify(__calls), store: localStorage.getItem('f1drive.hud'), get: F1.ui.getMirrors(), box: document.getElementById('set-mirrors').checked, cls: document.getElementById('hud').classList.contains('no-mirrors') })`);
+      check('setMirrors({on}) (the V key): shown and remembered, junk ignored, no onMirrors', st.calls === '[]' && st.store === '{"mirrors":true}' && st.get === true && st.box && !st.cls, st);
+      await js(`F1.ui.setMirrors({ available: false })`);
+      st = await js(`({ dis: document.getElementById('set-mirrors').disabled, box: document.getElementById('set-mirrors').checked, txt: __text('set-mirrors-text'), get: F1.ui.getMirrors(),
+        store: localStorage.getItem('f1drive.hud'), cls: document.getElementById('hud').classList.contains('no-mirrors') })`);
+      await mouseClick('#set-mirrors');
+      check('setMirrors({available: false}) (the game cannot draw them): switch disabled (無法顯示), HUD without mirrors, the setting itself kept; a click does nothing',
+        st.dis && !st.box && st.txt === '無法顯示' && st.get === true && st.store === '{"mirrors":true}' && st.cls && (await calls()) === '[]', st);
+      await js(`F1.ui.setMirrors({ available: true }); F1.ui.setMirrors({ on: false })`);
       // session start brings the GP tab forward
       await tab('mp');
       await setGp(M.V.quali3({}));
@@ -493,18 +560,20 @@ app.whenReady().then(async () => {
       // reload: everything restored
       await load();
       st = await js(`({ tab: document.querySelector('.menu-tabs .on').id, car: F1.ui.getCar(), year: F1.ui.getYear(), audio: JSON.stringify(F1.ui.getAudio()), vol: document.getElementById('set-volume').value,
-        mute: document.getElementById('set-mute').checked, wear: document.querySelector('#gp-wear .on').getAttribute('data-w') })`);
-      check('reload: tab, car, year, audio and wear restored', st.tab === 'tab-set' && st.car === '2026-ferrari' && st.year === 2012 && st.audio === '{"volume":0.35,"muted":true}' &&
-        st.vol === '35' && st.mute && st.wear === '3', st);
+        mute: document.getElementById('set-mute').checked, wear: document.querySelector('#gp-wear .on').getAttribute('data-w'), mirrors: F1.ui.getMirrors(), mbox: document.getElementById('set-mirrors').checked,
+        cls: document.getElementById('hud').classList.contains('no-mirrors') })`);
+      check('reload: tab, car, year, audio, wear and the mirrors setting (off) restored', st.tab === 'tab-set' && st.car === '2026-ferrari' && st.year === 2012 && st.audio === '{"volume":0.35,"muted":true}' &&
+        st.vol === '35' && st.mute && st.wear === '3' && st.mirrors === false && !st.mbox && st.cls, st);
       await js(`localStorage.setItem('f1drive.car', '{"year":1999.5,"car":"Constructor Evil!"}'); localStorage.setItem('f1drive.audio', '{"volume":"loud","muted":1}');
-        localStorage.setItem('f1drive.menu', '{"tab":"__proto__"}'); localStorage.setItem('f1drive.gp', '{"q":3,"r":5,"wear":99}')`);
+        localStorage.setItem('f1drive.menu', '{"tab":"__proto__"}'); localStorage.setItem('f1drive.gp', '{"q":3,"r":5,"wear":99}'); localStorage.setItem('f1drive.hud', '{"mirrors":"off"}')`);
       await load();
-      st = await js(`({ tab: document.querySelector('.menu-tabs .on').id, car: F1.ui.getCar(), year: F1.ui.getYear(), audio: JSON.stringify(F1.ui.getAudio()), wear: document.querySelector('#gp-wear .on').getAttribute('data-w') })`);
-      check('reload with junk in storage: validated (car / year null, audio defaults, tab 大獎賽, wear clamped to 5)', st.tab === 'tab-gp' && st.car === null && st.year === null && st.audio === '{"volume":0.8,"muted":false}' && st.wear === '5', st);
-      await js(`localStorage.setItem('f1drive.car', 'not json'); localStorage.setItem('f1drive.audio', '[1,2]'); localStorage.setItem('f1drive.gp', '{"wear":"3"}')`);
+      st = await js(`({ tab: document.querySelector('.menu-tabs .on').id, car: F1.ui.getCar(), year: F1.ui.getYear(), audio: JSON.stringify(F1.ui.getAudio()), wear: document.querySelector('#gp-wear .on').getAttribute('data-w'), mirrors: F1.ui.getMirrors() })`);
+      check('reload with junk in storage: validated (car / year null, audio defaults, tab 大獎賽, wear clamped to 5, mirrors on)', st.tab === 'tab-gp' && st.car === null && st.year === null && st.audio === '{"volume":0.8,"muted":false}' && st.wear === '5' &&
+        st.mirrors === true, st);
+      await js(`localStorage.setItem('f1drive.car', 'not json'); localStorage.setItem('f1drive.audio', '[1,2]'); localStorage.setItem('f1drive.gp', '{"wear":"3"}'); localStorage.setItem('f1drive.hud', 'not json')`);
       await load();
-      st = await js(`({ car: F1.ui.getCar(), audio: JSON.stringify(F1.ui.getAudio()), wear: document.querySelector('#gp-wear .on').getAttribute('data-w') })`);
-      check('reload with corrupt storage: defaults', st.car === null && st.audio === '{"volume":0.8,"muted":false}' && st.wear === '1', st);
+      st = await js(`({ car: F1.ui.getCar(), audio: JSON.stringify(F1.ui.getAudio()), wear: document.querySelector('#gp-wear .on').getAttribute('data-w'), mirrors: F1.ui.getMirrors() })`);
+      check('reload with corrupt storage: defaults', st.car === null && st.audio === '{"volume":0.8,"muted":false}' && st.wear === '1' && st.mirrors === true, st);
     }
 
     /* ================= the real game (v5 main.js until v6 is wired) ================= */

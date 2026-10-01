@@ -200,7 +200,8 @@ function makeWin(tag) {
 /* ---------- menu pieces ---------- */
 
 // 年份: the label is clicked (it focuses the select without opening its popup, which cannot be shown offscreen), then the
-// year is TYPED: the select's type-ahead picks "2012 年" and fires 'change' (2025 -> 2024 -> 2019 -> 2012 on the way).
+// year is TYPED: the select's type-ahead picks "2012 年" and fires 'change' (from a fresh profile's 2026: 2025 -> 2019 ->
+// 2012 on the way; "2026" typed on 2026 goes 2025 -> 2026).
 async function pickYearByKeys(w, year) {
   const before = await w.js(`document.getElementById('car-year').value`);
   await w.js(`window.__yearChanges = []; document.getElementById('car-year').addEventListener('change', function (e) { __yearChanges.push(e.target.value); }); true`);
@@ -400,13 +401,13 @@ async function scenario(w, cfg, rep) {
   check('boots without the error overlay; page helpers installed (solo-page.js + solo-v6-page.js)', !boot.overlay && boot.lib === 'ok' && boot.v6 === 'ok', boot);
   check('menu: the controller is found by the menu-time poll (已連接)', await w.until(`F1.gamepad.state.connected && __e.shown('pad-status')`, 3000, 'pad found'));
   const fresh = await w.js(`({ spec: F1.game.spec.id, stored: localStorage.getItem('f1drive.car') })`);
-  check('a fresh profile: the 2025 standard car, nothing stored', fresh.spec === '2025-standard' && fresh.stored === null, fresh);
+  check('a fresh profile: the 2026 standard car (v6.1: the default season), nothing stored', fresh.spec === '2026-standard' && fresh.stored === null, fresh);
 
   /* ---------- 年份 + car through the 車輛 tab ---------- */
   check('車輛 tab clicked (real click)', await w.click('#tab-car') && await w.shown('#car-panel'));
   const y = await pickYearByKeys(w, year);
   check('年份 ' + year + ' picked with real keys on the select (' + y.how + ', "' + year + '" typed: type-ahead, \'change\' ' + y.changes.length + 'x: ' + y.changes.join(' -> ') + ')',
-    y.value === String(year) && y.text === year + ' 年' && lastOf(y.changes) === String(year) && y.before === '2025', y);
+    y.value === String(year) && y.text === year + ' 年' && lastOf(y.changes) === String(year) && y.before === '2026', y);
   check('the 車輛 list shows the ' + year + ' cars (' + y.cards.length + ': the standard car first, then the teams); the car follows the year at once (' + y.spec + ')',
     y.cards.length >= 11 && y.cards[0] === year + '-standard' && y.cards.every(id => id.indexOf(year + '-') === 0) && y.cards.indexOf(cfg.car) > 0 && y.year === year && y.spec === year + '-standard' && /\d+ 輛車/.test(y.season), y);
   check('car card ' + cfg.car + ' clicked (real click)', await w.click(`#car-list .car-card[data-id="${cfg.car}"]`));
@@ -589,7 +590,7 @@ async function scenario(w, cfg, rep) {
       check('pit: Q (real key) 15 m before the entry curtain: the limiter on before the entry line; on through the whole lane; 已離開維修區 reminder at the exit; Q off once past the exit curtain (' +
         (pv.offAfterExit ? ((pv.offAfterExit.U - pv.offAfterExit.uEx) * ctx.ds).toFixed(0) + ' m after the exit line' : '?') + ')',
         P.limiterAtEntry === true && P.limiterAtExit === true && pv.offAfterExit && pv.offAfterExit.limiter === true && pv.offAfterExit.U > pv.offAfterExit.uEx && pv.dom.exit.limiter === true &&
-        w.toastsSince(pv.from).some(t => /^已離開維修區：按 (LB|Q) 關閉限速器$/.test(t)) && !(await w.js(`F1.game.limiter`)), { dom: pv.dom, off: pv.offAfterExit, rec: { atEntry: P.limiterAtEntry, atExit: P.limiterAtExit } });
+        w.toastsSince(pv.from).some(t => /^已離開維修區：按 (B|Q) 關閉限速器$/.test(t)) && !(await w.js(`F1.game.limiter`)), { dom: pv.dom, off: pv.offAfterExit, rec: { atEntry: P.limiterAtEntry, atExit: P.limiterAtExit } });
       check('pit: the lane driven AT the limit on the limiter (' + P.minLaneKmh.toFixed(1) + '..' + P.maxLaneKmh.toFixed(1) + ' km/h between the curtains away from the box, limit ' + meta.pit.limit + '), never speeding, no penalty',
         P.maxLaneKmh <= meta.pit.limit + 0.5 && P.cruiseKmh >= meta.pit.limit - 2.5 && P.speedingFrames === 0 && P.svcPenalty === 0 && !w.toastsSince(pv.from).some(t => /超速/.test(t)), P);
       check('pit: the service time is random in 2.0..4.5 s: ' + (P.svcWork || 0).toFixed(3) + ' s, no penalty; the HUD counts it down (' + pv.dom.svc1.label + ' ' + pv.dom.svc1.time + ' 1.2 s in)',

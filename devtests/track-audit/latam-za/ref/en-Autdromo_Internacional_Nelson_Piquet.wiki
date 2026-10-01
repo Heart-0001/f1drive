@@ -1,0 +1,200 @@
+{{Short description|Motorsport venue in Rio de Janeiro, Brazil}}
+{{about|''Jacarepaguá'', the motorsport circuit in Rio|another circuit|Autódromo Internacional Nelson Piquet (Brasília)}}
+{{Infobox motorsport venue
+| name           = Autódromo Internacional Nelson Piquet
+| location       = [[Rio de Janeiro]], [[Brazil]]
+| coordinates    = {{coord|22|58|32|S|43|23|42|W|type:landmark|display=it}}
+| image          = [[File:Jacarepaguá-short circuit.png|class=skin-invert|250px]]
+| image_caption  = Short Circuit (1996–2012)
+| capacity       = 90,000
+| events         = [[Formula One]]<br />''[[Brazilian Grand Prix]]'' (1978, 1981–1989)<br />[[Championship Auto Racing Teams|CART]]<br />''[[Rio 200]]'' (1996–2000)<br />[[Grand Prix motorcycle racing]]<br />''[[Rio de Janeiro motorcycle Grand Prix]]'' (1995–2004)<br />[[Stock Car Pro Series|Stock Car Brasil]] (1979–2012)<br />[[Campeonato Sudamericano de GT|Campeonato Brasiliero de GT]] (2008–2012)<br />[[Porsche Cup Brasil]] (2007–2011)<br />[[Stock Car Corrida do Milhão]] (2008)<br />[[Formula 3 Sudamericana|F3 Sudamericana]]<br>(1989–1992, 1997, 1999–2000, 2002–2005, 2008–2009, 2011–2012)
+| broke_ground   = {{Start date and age|df=yes|1971|01}}
+| opened         = {{Start date and age|df=yes|1978|01|27}}
+| closed         = {{Start date and age|df=yes|2012|11}}
+| former_names   = Autódromo de Jacarepaguá (1978–1987)
+| layout         = Short Circuit (1996–2012)
+| surface        = Asphalt
+| length_km      = 3.336
+| length_mi      = 2.073
+| turns          = 7
+| banking        = 
+| record_time    = 1:06.756
+| record_driver  = {{flagicon|BRA}} Leonardo Cordeiro
+| record_car     = [[Dallara F3 cars#F308|Dallara F309]]
+| record_year    = [[2009 Formula 3 Sudamericana season|2009]]
+| record_class   = [[Formula Three|F3]]
+| layout2        = Modified Grand Prix Circuit (1996–2005)
+| surface2       = Asphalt
+| length2_km     = 4.933
+| length2_mi     = 3.065
+| turns2         = 13
+| banking2       = 
+| record_time2   = 1:43.275
+| record_driver2 = {{flagicon|BRA}} [[Alberto Valerio]]
+| record_car2    = [[List of Dallara cars|Dallara F301]]
+| record_year2   = 2005
+| record_class2  = [[Formula Three|F3]]
+| layout3        = Emerson Fittipaldi Speedway (1996–2005)
+| surface3       = Asphalt
+| length3_km     = 3.000
+| length3_mi     = 1.864
+| turns3         = 4
+| banking3       = 
+| record_time3   = 38.891
+| record_driver3 = {{flagicon|COL}} [[Juan Pablo Montoya]]
+| record_car3    = [[Reynard 99I]]
+| record_year3   = [[1999 Grand Prix Telemar Rio 200|1999]]
+| record_class3  = [[Championship Auto Racing Teams|CART]]
+| layout4        = Original Grand Prix Circuit (1978–1995)
+| surface4       = Asphalt
+| length4_km     = 5.031
+| length4_mi     = 3.126
+| turns4         = 11
+| record_time4   = 1:32.507 
+| record_driver4 = {{flagicon|ITA|1946}} [[Riccardo Patrese]] 
+| record_car4    = [[Williams FW12|Williams FW12C]]
+| record_year4   = [[1989 Brazilian Grand Prix|1989]]
+| record_class4  = [[Formula One|F1]]
+}}
+
+The '''Autódromo Internacional Nelson Piquet''' (Nelson Piquet International Racetrack), also known as '''Jacarepaguá''' after [[Jacarepaguá|the neighbourhood]] in which it was located, and also as the '''Autódromo Riocentro''', was a [[motorsport]] circuit in [[Rio de Janeiro]], Brazil. Opened in January 1978, a few weeks before the [[1978 Brazilian Grand Prix]], it hosted the [[Formula One]] [[Brazilian Grand Prix]] on ten occasions, and was also used for [[Championship Auto Racing Teams|CART]], [[Grand Prix motorcycle racing|motorcycle racing]] and [[stock car racing]]. In 2012, it was demolished to make way for facilities to be used at the [[2016 Summer Olympics]].
+
+==The original circuit==
+The original circuit was built between 1971 and 1977 on the site of the Barra da Tijuca road course, which had itself been built on reclaimed [[marsh]]land and was operational from 1964 to 1970.<ref>{{cite web |title=Rio de Janeiro Track info |url=http://www.silhouet.com/motorsport/tracks/riode.html |website=www.silhouet.com}}</ref> It was a relatively flat circuit, with a long pit straight and a longer back straight (which allowed the [[Turbocharger|turbo]]-engined Formula One cars of the mid-1980s to reach speeds of {{cvt|300|km/h|mph|abbr=on}}, and numerous mid-speed to slow-speed corners with plenty of room for overtaking. The maximum spectator capacity was 90,000 with the bulk of the spectators housed in giant grandstands that spanned almost the length of the back straight giving something very rare in Formula One, views of the entire track. With the exception of the 1978 race, the Formula One Grands Prix were held in March or April, in Rio's very hot and humid tropical early autumn weather.
+
+===Formula One===
+[[File:A Escuderia Emerson Fittipaldi Copersucar, Jacarepagua, 1978.tif|thumb|[[Emerson Fittipaldi]] at Jacarepaguá in 1978]]
+[[File:Nelson Piquet Souto Maior.jpg|thumb|Nelson Piquet, 2013]]
+{{Unreferenced section|date=July 2023}}
+The first Brazilian Grand Prix at the circuit took place shortly after its opening in [[1978 Brazilian Grand Prix|1978]], and was won by [[Argentina]]'s [[Carlos Reutemann]] in a [[Flat-twelve engine|Flat-12]] [[Ferrari 312T#312T3|Ferrari 312T3]] in the oppressive heat and humidity of Rio's January summer season, after [[Sweden]]'s [[Ronnie Peterson]] had taken pole position in the revolutionary [[Ground effect (cars)|ground-effect]] [[Lotus 78]]-[[Cosworth DFV|Ford]].
+
+After the [[1979 Brazilian Grand Prix|1979]] and [[1980 Brazilian Grand Prix|1980]] races had been held at the [[Interlagos Circuit|Interlagos circuit]] in [[São Paulo]], the F1 circus left the {{cvt|7.873|km|mi|abbr=on}} Interlagos circuit due to safety concerns with the circuit and the growing slums of the circuit's surrounding areas being at odds with Formula One's new glamour image. Rio's beaches and beautiful scenery were more suited to this new image, and the Brazilian Grand Prix was then held at Jacarepaguá for the remainder of the 1980s. The [[1981 Brazilian Grand Prix|1981 race]] was held in very wet conditions and was again won by Reutemann, this time driving a [[Williams FW07|Williams FW07C]]-Ford, and in controversial circumstances: he disobeyed the team's orders to let teammate and then-reigning World Champion, [[Australia]]'s [[Alan Jones (racing driver)|Alan Jones]], take the win.
+
+The [[1982 Brazilian Grand Prix|1982 race]], held at the height of the [[FISA–FOCA war]], was also shrouded in controversy. Rio born driver [[Nelson Piquet]], who had won the World Championship the year before, finished first in a [[Brabham BT49]]-Ford, with [[Finland]]'s [[Keke Rosberg]] second in a Williams FW07C-Ford. However, both drivers were disqualified for being underweight, having raced with "water-cooled brakes". This promoted [[Alain Prost]], third in the turbocharged [[Renault RE30]], to the win, the first of an eventual five for the Frenchman at the circuit and start a streak of 7 straight wins for turbo powered cars at the circuit until the original turbo era ended following the {{f1|1988}} season. The disqualifications, however, prompted most [[Formula One Constructors Association|FOCA]]-aligned teams – including Brabham and Williams – to boycott the [[1982 San Marino Grand Prix|San Marino Grand Prix]] two races later. However, unlike the [[1980 Spanish Grand Prix]] where the factory teams of [[Scuderia Ferrari|Ferrari]], [[Renault F1|Renault]] and [[Alfa Romeo in Formula One|Alfa Romeo]] (all who were on the [[FIA|FISA]] side of the war) boycotted the race and the results were eventually voided, the 1982 San Marino Grand Prix results without the FOCA teams were counted.
+
+Piquet and Rosberg again crossed the line first and second in the [[1983 Brazilian Grand Prix|1983 race]], although this time only Rosberg was disqualified, having had a push start in the pits after his [[Williams FW08]]-Ford caught fire. Unusually, the drivers below Rosberg were not promoted accordingly. The win was the first of two wins at the circuit for Piquet, who would go on to win his second World Championship that year. Piquet won the race in his [[Brabham BT52|Brabham]]-[[BMW M12|BMW]] turbo and went on to be the first ever F1 World Champion to be powered by a turbocharged engine. From 1983 until 1989, the Brazilian Grand Prix was the opening race of the season.
+
+Both the [[1984 Brazilian Grand Prix|1984]] and [[1985 Brazilian Grand Prix|1985]] races were won by Prost, now racing a [[McLaren MP4/2|McLaren]]-[[Techniques d'Avant Garde|TAG]]. The 1984 race also saw the debut of [[Ayrton Senna]], driving a [[Toleman TG183]]-[[Brian Hart Ltd.|Hart]] where he had the unfortunate 'honour' of being the first retirement of the {{f1|1984}} season. Piquet won the [[1986 Brazilian Grand Prix|1986 race]] in a [[Williams FW11]]-[[Honda F1|Honda]], with Senna making it a Brazilian 1–2 in a [[Lotus 98T]]-Renault, before Prost beat Piquet to win the [[1987 Brazilian Grand Prix|1987 race]] in a [[McLaren MP4/3]]-TAG.
+
+After Piquet won his third (and final) World Championship in {{f1|1987}}, the circuit was named after him in 1988. However, he had to settle for third in a [[Lotus 100T]]-Honda in [[1988 Brazilian Grand Prix|that year's race]], as Prost once again won in a [[McLaren MP4/4]]-Honda. 1988 was the last year of the original turbo era in Formula One. For Prost it was his 5th win in 9 races at the circuit.
+
+The [[1989 Brazilian Grand Prix|1989 race]] was the first to be held following the banning of turbo engines, and [[Great Britain]]'s [[Nigel Mansell]] took a surprise win in his V12 powered [[Ferrari 640]], complete with Formula 1's first [[Semi-automatic transmission|semi-automatic gearbox]]. Another Brazilian driver, [[Maurício Gugelmin]], finished third in a [[March 881]] (Prost finished second), while Senna, who had won his first World Championship the year before, set the fastest ever lap of the circuit in qualifying with a time of 1:25.302 to take pole position in a [[V10 engine|V10]] [[McLaren MP4/5]]-Honda. After winning the race, Mansell joked that with the Ferrari's known reliability problems at the time he had booked an early flight out of Rio in anticipation of a short race for him.
+
+In {{f1|1990}}, the Brazilian Grand Prix moved to a shortened [[Interlagos Circuit|Interlagos]], where it has been held ever since.
+
+===CART===
+{{Unreferenced section|date=July 2023}}
+From 1996 to 2000 the [[Championship Auto Racing Teams|CART]] series staged events at Jacarepaguá in an accessory [[trapezoid]]-shaped speedway named "[[Emerson Fittipaldi]] Speedway", having approximately {{cvt|3.000|km|mi|abbr=on}} length. The race, originally the [[Rio 200|Rio 400]], before being shortened to the Rio 200 in [[1999 Grand Prix Telemar Rio 200|1999]], was first won in [[1996 IndyCar Rio 400|1996]] by Brazilian [[André Ribeiro (racing driver)|André Ribeiro]].
+
+The circuit qualifying record for the Emerson Fittipaldi Speedway was set by Emerson's own nephew [[Christian Fittipaldi]] with a time of 0:38.565 ({{cvt|280|km/h|mph|abbr=on}}) for the {{cvt|3.000|km|mi|abbr=on}} track.
+
+The long back straight of the road course which had grandstands running its entire {{cvt|900|m|yd|abbr=on}} length became the front straight of the Speedway, with the pits located in the area between the straight and the pit straight of the road course.
+
+===Motorcycle racing===
+{{Unreferenced section|date=July 2023}}
+The circuit also hosted the [[Rio de Janeiro motorcycle Grand Prix]] race from 1995 to 2004. [[Valentino Rossi]] won the most races, winning four from 2000 to 2003, while [[Mick Doohan]] won the [[1996 Rio de Janeiro motorcycle Grand Prix|1996]] and [[1997 Rio de Janeiro motorcycle Grand Prix|1997]] races.
+
+The first Rio Motorcycle Grand Prix was won by [[Italian people|Italian]] [[Luca Cadalora]], riding a [[Yamaha YZR500]]. The final race held at the circuit in [[2004 Rio de Janeiro motorcycle Grand Prix|2004]], was won by [[Japanese people|Japanese]] rider [[Makoto Tamada]] riding a [[Honda RC211V]].
+
+[[Honda Racing Corporation|Honda]] won seven of the nine Rio Grands Prix held, with [[Yamaha Motor Company|Yamaha]] winning two.
+
+==Lap records==
+
+The fastest official race lap records at the circuit are listed as follows:
+
+{| class="wikitable"
+!Category!!Time!!Driver!!Vehicle!!Event!!Circuit Map
+|-
+! colspan=6 | Short Circuit: {{cvt|3.336|km|mi|abbr=on}} (1996–2012)
+|-
+| [[Formula Three]] || '''1:06.756'''<ref>{{cite web |title=2009 Rio do Janeiro Sud-Am F3 |url=https://www.motorsportmagazine.com/database/races/2009-rio-do-janeiro-sud-am-f3/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=12 July 2009 |access-date=23 June 2022}}</ref> || Leonardo Cordeiro || [[Dallara F3 cars#F308|Dallara F309]] || [[2009 Formula 3 Sudamericana season|2009 Rio F3 Sudamericana round]] || rowspan=6 | [[File:Jacarepaguá-short circuit.png|class=skin-invert|220px]]
+|-
+| [[Group GT3|GT3]] || '''1:11.257'''<ref name='2011_rio_gt'>{{cite web |title=Brasil GT Rio de Janeiro 2011 |url=https://www.racingsportscars.com/race/Rio_de_Janeiro-2011-09-11-20684.html |date=11 September 2011 |access-date=20 January 2023}}</ref> || [[Alexandre Sarnes Negrão|Xandinho Negrão]]<ref>{{cite web |title=Xandinho Negrão - Driver Database |url=https://www.driverdb.com/drivers/alexandre-sarnes-negrao/ |access-date=20 January 2023}}</ref> || [[Lamborghini Gallardo#Motorsports|Lamborghini Gallardo LP600 GT3]] || [[2011 GT Brasil season|2011 Rio GT Brasil round]]
+|-
+| [[Porsche Carrera Cup]] || '''1:15.171'''<ref>{{cite web |title=Porsche GT3 Cup Challenge 2011 - 6ª Et GT3 Cup - GT3 Cup - Prova 12 Car @ Jacarepaguá (Brazil) • 15 September 2011 |url=https://speedhive.mylaps.com/Sessions/2082755 |date=17 September 2011 |access-date=17 July 2022}}</ref> || [[Constantino de Oliveira Júnior|Constantino Júnior]] || [[Porsche 911 GT3#997 GT3 Cup 3.8 (2009–2013)|Porsche 911 (997) GT3 Cup 3.8]] || [[Porsche Cup Brasil|2011 Rio Porsche Cup Brasil round]]
+|-
+| [[SRO GT4|GT4]] || '''1:17.151'''<ref>{{cite web |title=Brasil GT Rio de Janeiro 2012 |url=https://www.racingsportscars.com/race/Rio_de_Janeiro-2012-07-22-23535.html |date=22 July 2012 |access-date=20 January 2023}}</ref> || {{ill|Alan Hellmeister|pt}}<ref name='alan_hellmeister_driverdb'>{{cite web |title=Alan Hellmeister - Driver Database |url=https://www.driverdb.com/drivers/alan-hellmeister/ |access-date=20 January 2023}}</ref> || [[Aston Martin Vantage (2005)#GT4|Aston Martin V8 Vantage GT4]] || [[2012 Campeonato Brasileiro de GT season|2012 Rio Campeonato Brasileiro de GT round]]
+|-
+| [[Ferrari Challenge]] || '''1:17.777'''<ref name='2011_rio_gt' /> || {{ill|Alan Hellmeister|pt}}<ref name='alan_hellmeister_driverdb' /> || [[Ferrari F430 Challenge]] || [[2011 GT Brasil season|2011 Rio GT Brasil round]]
+|-
+| [[Stock Car Pro Series|Stock Car Brasil]] || '''1:19.127'''<ref>{{cite web |title=2010 Stock Car Pro Series Rio de Janeiro |url=https://www.racingyears.com/race/2010_Stock_Car_Pro_Series_Rio_de_Janeiro |date=23 May 2010 |access-date=21 May 2024}}</ref> || [[Ricardo Maurício]] || [[Opel Vectra#Motorsport|Chevrolet Vectra]] || [[2010 Stock Car Brasil season|2010 Rio Stock Car Brasil round]] 
+|-
+! colspan=6 | Modified Grand Prix Circuit: {{cvt|4.933|km|mi|abbr=on}} (1996–2005)
+|-
+| [[Formula Three]] || '''1:43.275'''<ref>{{cite web |title=2005 Rio do Janeiro Sud-Am F3 - Round 10 |url=https://www.motorsportmagazine.com/database/races/2005-rio-do-janeiro-sud-am-f3-2/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=17 July 2005 |access-date=23 June 2022}}</ref> || [[Alberto Valerio]] || [[List of Dallara cars|Dallara F301]] || 2005 Rio F3 Sudamericana round || rowspan=7 | [[File:Jacarepaguá.svg|class=skin-invert|220px]]
+|-
+| [[Formula Renault#Formula Renault 2.0|Formula Renault 2.0]] || '''1:49.647'''<ref>{{cite web |title=2004 Brazilian Formula Renault Rounds 7&8: Rio de Janeiro, 22nd August Race 2 |url=http://www.dlg.speedfreaks.org/archive/2004/brzfr.html |date=22 August 2004 |access-date=17 July 2022}}</ref> || {{ill|Alan Hellmeister|pt}} || [[Tatuus#Racecars|Tatuus FR2000]] || [[2004 Formula Renault seasons#2004 Formula Renault 2.0 Brazil season|2004 Rio Formula Renault 2.0 Brazil round]]
+|-
+| [[Grand Prix motorcycle racing#MotoGP class|MotoGP]] || '''1:49.789''' || [[Makoto Tamada]] || [[Honda RC211V]] || [[2004 Rio de Janeiro motorcycle Grand Prix]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|500cc]] || '''1:51.928''' || [[Tadayuki Okada]] || [[Honda NSR500]] || [[1997 Rio de Janeiro motorcycle Grand Prix]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|250cc]] || '''1:53.573''' || [[Sebastián Porto]] || [[Aprilia RSV 250]] || [[2004 Rio de Janeiro motorcycle Grand Prix]]
+|-
+| [[Stock Car Pro Series|Stock Car Brasil]] || '''1:56.584'''<ref>{{cite web |title=2005 Brazilian Stock Car Championship Round 3: Rio de Janeiro, 19th June |url=http://www.dlg.speedfreaks.org/archive/2005/brzv8.html |date=19 June 2005 |access-date=16 July 2022}}</ref> || [[Thiago Camilo]] || [[Opel Astra#Motorsport|Chevrolet Astra]] || [[2005 Stock Car Brasil season|2005 1st Rio Stock Car Brasil round]] 
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|125cc]] || '''1:57.789''' || [[Héctor Barberá]] || [[Aprilia RS125R]] || [[2004 Rio de Janeiro motorcycle Grand Prix]]
+|-
+! colspan=6 | Emerson Fittipaldi Speedway: {{cvt|3.000|km|mi|abbr=on}} (1996–2005)
+|-
+| [[Championship Auto Racing Teams|CART]] || '''0:38.891''' || [[Juan Pablo Montoya]] || [[Reynard 99I]] || [[1999 Grand Prix Telemar Rio 200]] || rowspan=2 | [[File:Jacarepaguá-oval.svg|class=skin-invert|220px]]
+|-
+| [[Formula Three]] || '''0:48.045'''<ref>{{cite web |title=1999 Grande Premio do Rio de Janeiro (Race 2) |url=http://www.racingyears.com/race.php?GP=1999%20Grande%20Premio%20do%20Rio%20de%20Janeiro%20(Race%202) |date=15 May 1999 |access-date=13 July 2022}}</ref> || [[Hoover Orsi]] || [[List of Dallara cars|Dallara F394]] || [[Formula 3 Sudamericana|1999 Rio F3 Sudamericana round]]
+|-
+! colspan=6 | Original Grand Prix Circuit: {{cvt|5.032|km|mi|abbr=on}} (1978–1995)
+|-
+| [[Formula One]] || '''1:32.507''' || [[Riccardo Patrese]] || [[Williams FW12|Williams FW12C]] || [[1989 Brazilian Grand Prix]] || rowspan=2 | [[File:Autódromo_de_Jacarepaguá_1978-1995.png|class=skin-invert|220px]]
+|-
+| [[Formula Three]] || '''1:53.070'''<ref>{{cite web |title=1992 Rio do Janeiro Sud-Am F3 |url=https://www.motorsportmagazine.com/database/races/1992-rio-do-janeiro-sud-am-f3/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=18 October 1992 |access-date=23 June 2022}}</ref> || [[Gabriel Furlan]] || [[List of Dallara cars|Dallara F390]] || [[Formula 3 Sudamericana|1992 Rio F3 Sudamericana round]]
+|-
+|}
+
+==Final years==
+
+As of early 2005, there were plans to partially demolish this racetrack to make room for a new sports complex to be used for the [[2007 Pan American Games]]. It would have made the track approximately {{cvt|3.336|km|mi|abbr=on}} long, thus making it too short for most international racing series. However, the [[FIA]]'s ruling on a track's minimum length is ambiguous. In 2006, despite rumors of the race being cancelled, the [[Stock Car Brasil|Brazilian Stock Car]] Rio event was contested on a temporary short circuit combining sections of the oval and normal circuits and the start/finish line was moved to the back stretch, which was cut short to make room for the Pan-American games venues.
+
+Another proposal for the circuit was to have both a club permanent circuit, and an international-length half-permanent, half-car park circuit involving that circuit and an extension which utilises the car parks of the park. That would have been designed by [[Hermann Tilke]].
+
+In January 2008 it was announced that the track was to be demolished to allow the city to build an Olympic Training Centre venue for the [[2016 Summer Olympics]] which Rio was successful in winning.<ref>[http://www.grandprix.com/ns/ns19963.html Jacarepagua to be demolished]</ref>
+
+As of 2008, the {{cvt|3.336|km|mi|abbr=on}} track<ref>[http://tazio.uol.com.br/f-3/textos/4107/ F-3 sul-americana volta ao Rio depois de três anos] {{webarchive |url=https://web.archive.org/web/20110517163651/http://tazio.uol.com.br/f-3/textos/4107/ |date=May 17, 2011 }} – Tazio (in Portuguese)</ref> comprised the original circuit's second half with a hairpin that connects the previous main straight and back straight. It remained active, with races such as [[Stock Car Corrida do Milhão|Stock Car's ''Corrida do Milhão'']].<ref>[http://tazio.uol.com.br/stock-car/textos/4217/ Valdeno Brito ganha Corrida do Milhão no Rio] {{webarchive |url=https://web.archive.org/web/20080909180437/http://tazio.uol.com.br/stock-car/textos/4217/ |date=September 9, 2008 }} – Tazio (in Portuguese)</ref>
+
+The track and adjacent motorsport facilities were finally demolished in November 2012 to make way for new facilities to be used during the [[2016 Summer Olympics]].
+
+In March 2013 [[Bernie Ecclestone]], CEO of the [[Formula One Group]], said discussions were taking place for the Formula 1 Grand Prix to move from the Interlagos Circuit in São Paulo to Rio de Janeiro and a suitable time for this could be 2016, coinciding with the 2016 Olympic Games. Formula 1 last raced at Rio in 1989 before returning to São Paulo in 1990, where it has been held since. As of [[2026 Formula One World Championship|2026]], no Grand Prix has been held in Rio since.
+
+== See also ==
+
+* [[Barra Olympic Park]]
+* [[Autódromo de Deodoro]]
+
+==References==
+{{reflist}}
+
+== External links ==
+{{commons category|Autódromo Internacional Nelson Piquet}}
+* [https://maps.google.com/maps?f=q&hl=en&q=Rio+de+Janeiro,+Brazil&ie=UTF8&z=16&ll=-22.977063,-43.395395&spn=0.016298,0.021994&t=k&om=1 Satellite picture by Google Maps]
+* [https://web.archive.org/web/20070216223441/http://www.trackpedia.com/wiki/Rio_de_Janeiro Trackpedia guide to driving Autódromo Internacional Nelson Piquet]
+* [https://sosautodromorj.blogspot.com/ Save the Rio de Janeiro International Raceway]
+
+=== Official website ===
+* [https://web.archive.org/web/20060412004150/http://www.riogp.com.br/ Autódromo Internacional Nelson Piquet (Rio de Janeiro)]
+
+{{Formula One circuits}}
+{{Champ Car tracks}}
+{{MotoGP circuits}}
+{{Stock Car Brasil circuits}}
+
+{{DEFAULTSORT:Autodromo Internacional Nelson Piquet}}
+[[Category:Champ Car circuits]]
+[[Category:Formula One circuits|Nelson Piquet]]
+[[Category:Grand Prix motorcycle circuits|Nelson Piquet]]
+[[Category:Motorsport venues in Rio de Janeiro (state)|Nelson Piquet]]
+[[Category:Brazilian Grand Prix|Nelson Piquet]]
+[[Category:Sports venues in Rio de Janeiro (city)]]
+[[Category:Defunct motorsport venues]]
+[[Category:Sports venues completed in 1977]]
+[[Category:Sports venues demolished in 2012]]
+[[Category:Defunct sports venues in Brazil]]
+[[Category:Demolished buildings and structures in Brazil]]
+[[Category:Demolished sports venues]]

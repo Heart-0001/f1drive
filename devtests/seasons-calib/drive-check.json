@@ -172,8 +172,8 @@
    "cars": 12,
    "rhoReal": 1,
    "rhoTarget": 1,
-   "rhoCharacter": 0.874,
-   "drivenSpreadPct": 1.316,
+   "rhoCharacter": 0.867,
+   "drivenSpreadPct": 1.235,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 87.283,
@@ -184,14 +184,14 @@
     {
      "id": "2011-red-bull",
      "realGapPct": 0,
-     "targetPct": -0.429,
-     "drivenPct": -0.458,
+     "targetPct": -0.431,
+     "drivenPct": -0.492,
      "perTrackPct": [
-      -0.411,
-      -0.489,
-      -0.475
+      -0.43,
+      -0.532,
+      -0.515
      ],
-     "monzaVmaxKmh": 316.1
+     "monzaVmaxKmh": 316.2
     },
     {
      "id": "2011-mclaren",
@@ -293,37 +293,37 @@
      "id": "2011-lotus-racing",
      "realGapPct": 5.129,
      "targetPct": 0.437,
-     "drivenPct": 0.492,
+     "drivenPct": 0.319,
      "perTrackPct": [
-      0.487,
-      0.524,
-      0.465
+      0.363,
+      0.201,
+      0.394
      ],
-     "monzaVmaxKmh": 313
+     "monzaVmaxKmh": 314.6
     },
     {
      "id": "2011-hrt",
      "realGapPct": 7.41,
-     "targetPct": 0.822,
-     "drivenPct": 0.858,
+     "targetPct": 0.823,
+     "drivenPct": 0.742,
      "perTrackPct": [
-      0.773,
-      0.82,
-      0.98
+      0.678,
+      0.62,
+      0.929
      ],
-     "monzaVmaxKmh": 313.5
+     "monzaVmaxKmh": 315
     },
     {
      "id": "2011-virgin",
      "realGapPct": 6.574,
-     "targetPct": 0.681,
-     "drivenPct": 0.755,
+     "targetPct": 0.683,
+     "drivenPct": 0.602,
      "perTrackPct": [
-      0.907,
-      0.751,
-      0.606
+      0.783,
+      0.498,
+      0.525
      ],
-     "monzaVmaxKmh": 309.9
+     "monzaVmaxKmh": 311.4
     }
    ]
   },
@@ -332,8 +332,8 @@
    "cars": 12,
    "rhoReal": 0.986,
    "rhoTarget": 0.986,
-   "rhoCharacter": 0.72,
-   "drivenSpreadPct": 1.286,
+   "rhoCharacter": 0.755,
+   "drivenSpreadPct": 1.146,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 88.275,
@@ -464,26 +464,26 @@
     {
      "id": "2012-marussia",
      "realGapPct": 4.815,
-     "targetPct": 0.846,
-     "drivenPct": 0.893,
+     "targetPct": 0.845,
+     "drivenPct": 0.76,
      "perTrackPct": [
-      0.868,
-      0.929,
-      0.881
+      0.821,
+      0.637,
+      0.821
      ],
-     "monzaVmaxKmh": 311
+     "monzaVmaxKmh": 312.4
     },
     {
      "id": "2012-hrt",
      "realGapPct": 5.651,
      "targetPct": 1.031,
-     "drivenPct": 1.079,
+     "drivenPct": 0.939,
      "perTrackPct": [
-      0.906,
-      1.144,
-      1.188
+      0.85,
+      0.861,
+      1.108
      ],
-     "monzaVmaxKmh": 312.7
+     "monzaVmaxKmh": 314.1
     }
    ]
   },
@@ -640,8 +640,8 @@
    "cars": 11,
    "rhoReal": 0.973,
    "rhoTarget": 0.973,
-   "rhoCharacter": 0.655,
-   "drivenSpreadPct": 1.2,
+   "rhoCharacter": 0.6,
+   "drivenSpreadPct": 1.19,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 87.05,
@@ -653,37 +653,37 @@
      "id": "2014-mercedes",
      "realGapPct": 0,
      "targetPct": -0.549,
-     "drivenPct": -0.529,
+     "drivenPct": -0.547,
      "perTrackPct": [
-      -0.44,
-      -0.578,
-      -0.568
+      -0.507,
+      -0.586,
+      -0.549
      ],
-     "monzaVmaxKmh": 343.7
+     "monzaVmaxKmh": 342.4
     },
     {
      "id": "2014-red-bull",
      "realGapPct": 0.993,
      "targetPct": -0.278,
-     "drivenPct": -0.262,
+     "drivenPct": -0.335,
      "perTrackPct": [
-      0.029,
-      -0.399,
-      -0.414
+      -0.086,
+      -0.476,
+      -0.443
      ],
-     "monzaVmaxKmh": 338.8
+     "monzaVmaxKmh": 339.3
     },
     {
      "id": "2014-williams",
      "realGapPct": 0.686,
-     "targetPct": -0.361,
-     "drivenPct": -0.337,
+     "targetPct": -0.364,
+     "drivenPct": -0.354,
      "perTrackPct": [
-      -0.373,
-      -0.348,
-      -0.289
+      -0.431,
+      -0.314,
+      -0.318
      ],
-     "monzaVmaxKmh": 345
+     "monzaVmaxKmh": 344.2
     },
     {
      "id": "2014-ferrari",
@@ -700,50 +700,50 @@
     {
      "id": "2014-mclaren",
      "realGapPct": 1.411,
-     "targetPct": -0.165,
-     "drivenPct": -0.195,
+     "targetPct": -0.164,
+     "drivenPct": -0.192,
      "perTrackPct": [
-      -0.345,
-      -0.144,
-      -0.096
+      -0.44,
+      -0.068,
+      -0.067
      ],
-     "monzaVmaxKmh": 347
+     "monzaVmaxKmh": 347.1
     },
     {
      "id": "2014-force-india",
      "realGapPct": 2.006,
-     "targetPct": 0.001,
-     "drivenPct": 0.031,
+     "targetPct": -0.003,
+     "drivenPct": -0.02,
      "perTrackPct": [
-      -0.057,
-      0.025,
-      0.125
+      -0.086,
+      0.017,
+      0.01
      ],
-     "monzaVmaxKmh": 344.6
+     "monzaVmaxKmh": 343.9
     },
     {
      "id": "2014-toro-rosso",
      "realGapPct": 2.02,
-     "targetPct": 0.004,
-     "drivenPct": 0.009,
+     "targetPct": 0.003,
+     "drivenPct": -0.049,
      "perTrackPct": [
-      0,
-      0.008,
-      0.019
+      -0.086,
+      -0.059,
+      0
      ],
-     "monzaVmaxKmh": 342.3
+     "monzaVmaxKmh": 342.1
     },
     {
      "id": "2014-lotus-f1",
      "realGapPct": 2.89,
-     "targetPct": 0.243,
-     "drivenPct": 0.236,
+     "targetPct": 0.244,
+     "drivenPct": 0.168,
      "perTrackPct": [
-      0.335,
-      0.229,
-      0.144
+      0.23,
+      0.11,
+      0.164
      ],
-     "monzaVmaxKmh": 340.4
+     "monzaVmaxKmh": 340.1
     },
     {
      "id": "2014-marussia",
@@ -772,11 +772,11 @@
     {
      "id": "2014-caterham",
      "realGapPct": 4.563,
-     "targetPct": 0.702,
-     "drivenPct": 0.671,
+     "targetPct": 0.699,
+     "drivenPct": 0.601,
      "perTrackPct": [
-      0.546,
-      0.756,
+      0.412,
+      0.68,
       0.712
      ],
      "monzaVmaxKmh": 341.8
@@ -786,10 +786,10 @@
   {
    "year": 2015,
    "cars": 10,
-   "rhoReal": 0.988,
-   "rhoTarget": 0.988,
-   "rhoCharacter": 0.721,
-   "drivenSpreadPct": 1.165,
+   "rhoReal": 0.964,
+   "rhoTarget": 0.964,
+   "rhoCharacter": 0.842,
+   "drivenSpreadPct": 1.196,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 86.717,
@@ -800,14 +800,14 @@
     {
      "id": "2015-mercedes",
      "realGapPct": 0,
-     "targetPct": -0.352,
-     "drivenPct": -0.294,
+     "targetPct": -0.35,
+     "drivenPct": -0.331,
      "perTrackPct": [
-      -0.183,
-      -0.36,
-      -0.34
+      -0.259,
+      -0.385,
+      -0.349
      ],
-     "monzaVmaxKmh": 341
+     "monzaVmaxKmh": 338.3
     },
     {
      "id": "2015-ferrari",
@@ -824,62 +824,62 @@
     {
      "id": "2015-williams",
      "realGapPct": 1.207,
-     "targetPct": -0.122,
-     "drivenPct": -0.105,
+     "targetPct": -0.119,
+     "drivenPct": -0.131,
      "perTrackPct": [
-      -0.259,
-      -0.017,
-      -0.039
+      -0.308,
+      -0.086,
+      0
      ],
-     "monzaVmaxKmh": 345.9
+     "monzaVmaxKmh": 345.3
     },
     {
      "id": "2015-red-bull",
      "realGapPct": 1.371,
-     "targetPct": -0.089,
-     "drivenPct": -0.11,
+     "targetPct": -0.091,
+     "drivenPct": -0.166,
      "perTrackPct": [
-      0.058,
-      -0.154,
-      -0.233
+      -0.029,
+      -0.257,
+      -0.213
      ],
-     "monzaVmaxKmh": 338.9
+     "monzaVmaxKmh": 340.1
     },
     {
      "id": "2015-force-india",
      "realGapPct": 1.679,
-     "targetPct": -0.031,
-     "drivenPct": -0.035,
+     "targetPct": -0.033,
+     "drivenPct": -0.06,
      "perTrackPct": [
-      -0.183,
-      -0.009,
-      0.087
+      -0.24,
+      -0.017,
+      0.078
      ],
-     "monzaVmaxKmh": 345.8
+     "monzaVmaxKmh": 344.9
     },
     {
      "id": "2015-lotus-f1",
      "realGapPct": 2.068,
-     "targetPct": 0.041,
-     "drivenPct": 0.053,
+     "targetPct": 0.043,
+     "drivenPct": 0.036,
      "perTrackPct": [
-      -0.067,
-      0.051,
-      0.175
+      -0.135,
+      0.077,
+      0.165
      ],
-     "monzaVmaxKmh": 345.2
+     "monzaVmaxKmh": 344.3
     },
     {
      "id": "2015-toro-rosso",
      "realGapPct": 2.012,
      "targetPct": 0.032,
-     "drivenPct": 0.028,
+     "drivenPct": -0.042,
      "perTrackPct": [
-      0.115,
-      0.017,
-      -0.049
+      0.019,
+      -0.077,
+      -0.068
      ],
-     "monzaVmaxKmh": 340
+     "monzaVmaxKmh": 340.6
     },
     {
      "id": "2015-sauber",
@@ -897,21 +897,21 @@
      "id": "2015-mclaren",
      "realGapPct": 2.916,
      "targetPct": 0.204,
-     "drivenPct": 0.18,
+     "drivenPct": 0.237,
      "perTrackPct": [
-      0.279,
-      0.146,
-      0.116
+      0.413,
+      0.24,
+      0.058
      ],
-     "monzaVmaxKmh": 339.9
+     "monzaVmaxKmh": 340.2
     },
     {
      "id": "2015-marussia",
      "realGapPct": 6.587,
-     "targetPct": 0.901,
-     "drivenPct": 0.871,
+     "targetPct": 0.899,
+     "drivenPct": 0.865,
      "perTrackPct": [
-      0.605,
+      0.586,
       0.951,
       1.058
      ],
@@ -922,10 +922,10 @@
   {
    "year": 2016,
    "cars": 11,
-   "rhoReal": 0.982,
-   "rhoTarget": 0.982,
-   "rhoCharacter": 0.818,
-   "drivenSpreadPct": 1.15,
+   "rhoReal": 0.991,
+   "rhoTarget": 0.991,
+   "rhoCharacter": 0.873,
+   "drivenSpreadPct": 1.172,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 85.6,
@@ -936,26 +936,26 @@
     {
      "id": "2016-mercedes",
      "realGapPct": 0,
-     "targetPct": -0.723,
-     "drivenPct": -0.7,
+     "targetPct": -0.722,
+     "drivenPct": -0.665,
      "perTrackPct": [
-      -0.613,
-      -0.691,
-      -0.795
+      -0.633,
+      -0.656,
+      -0.706
      ],
-     "monzaVmaxKmh": 339.7
+     "monzaVmaxKmh": 336.6
     },
     {
      "id": "2016-red-bull",
      "realGapPct": 0.722,
-     "targetPct": -0.485,
-     "drivenPct": -0.445,
+     "targetPct": -0.484,
+     "drivenPct": -0.453,
      "perTrackPct": [
-      -0.195,
-      -0.455,
-      -0.686
+      -0.165,
+      -0.499,
+      -0.696
      ],
-     "monzaVmaxKmh": 332.7
+     "monzaVmaxKmh": 335.7
     },
     {
      "id": "2016-ferrari",
@@ -972,50 +972,50 @@
     {
      "id": "2016-force-india",
      "realGapPct": 1.647,
-     "targetPct": -0.176,
-     "drivenPct": -0.105,
+     "targetPct": -0.179,
+     "drivenPct": -0.179,
      "perTrackPct": [
-      -0.029,
-      -0.157,
-      -0.129
+      -0.058,
+      -0.21,
+      -0.268
      ],
-     "monzaVmaxKmh": 338
+     "monzaVmaxKmh": 334.5
     },
     {
      "id": "2016-williams",
      "realGapPct": 1.767,
-     "targetPct": -0.136,
-     "drivenPct": -0.133,
+     "targetPct": -0.139,
+     "drivenPct": -0.112,
      "perTrackPct": [
-      -0.214,
-      -0.245,
-      0.06
+      -0.263,
+      -0.184,
+      0.109
      ],
-     "monzaVmaxKmh": 340.7
+     "monzaVmaxKmh": 337.4
     },
     {
      "id": "2016-mclaren",
      "realGapPct": 2.275,
-     "targetPct": 0.029,
-     "drivenPct": 0.055,
+     "targetPct": 0.031,
+     "drivenPct": 0.008,
      "perTrackPct": [
-      0.049,
-      0.017,
-      0.099
+      0.088,
+      -0.035,
+      -0.03
      ],
-     "monzaVmaxKmh": 337.9
+     "monzaVmaxKmh": 340.8
     },
     {
      "id": "2016-toro-rosso",
      "realGapPct": 2.183,
-     "targetPct": -0.001,
-     "drivenPct": 0.039,
+     "targetPct": 0.001,
+     "drivenPct": 0.019,
      "perTrackPct": [
-      0.058,
-      0,
+      0.068,
+      -0.07,
       0.06
      ],
-     "monzaVmaxKmh": 338.1
+     "monzaVmaxKmh": 339.8
     },
     {
      "id": "2016-haas",
@@ -1032,14 +1032,14 @@
     {
      "id": "2016-renault",
      "realGapPct": 3.369,
-     "targetPct": 0.392,
-     "drivenPct": 0.361,
+     "targetPct": 0.394,
+     "drivenPct": 0.345,
      "perTrackPct": [
-      0.312,
-      0.315,
-      0.457
+      0.282,
+      0.245,
+      0.507
      ],
-     "monzaVmaxKmh": 337.5
+     "monzaVmaxKmh": 342.2
     },
     {
      "id": "2016-sauber",
@@ -1056,14 +1056,14 @@
     {
      "id": "2016-manor",
      "realGapPct": 3.77,
-     "targetPct": 0.526,
-     "drivenPct": 0.45,
+     "targetPct": 0.528,
+     "drivenPct": 0.507,
      "perTrackPct": [
-      0.029,
-      0.516,
-      0.805
+      0.019,
+      0.568,
+      0.934
      ],
-     "monzaVmaxKmh": 346.8
+     "monzaVmaxKmh": 343.5
     }
    ]
   },
@@ -1072,8 +1072,8 @@
    "cars": 10,
    "rhoReal": 0.988,
    "rhoTarget": 0.988,
-   "rhoCharacter": 0.709,
-   "drivenSpreadPct": 1.267,
+   "rhoCharacter": 0.782,
+   "drivenSpreadPct": 1.232,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 85.158,
@@ -1085,13 +1085,13 @@
      "id": "2017-mercedes",
      "realGapPct": 0,
      "targetPct": -0.684,
-     "drivenPct": -0.661,
+     "drivenPct": -0.649,
      "perTrackPct": [
-      -0.656,
-      -0.61,
-      -0.716
+      -0.675,
+      -0.619,
+      -0.654
      ],
-     "monzaVmaxKmh": 324.3
+     "monzaVmaxKmh": 324.1
     },
     {
      "id": "2017-ferrari",
@@ -1108,62 +1108,62 @@
     {
      "id": "2017-red-bull",
      "realGapPct": 0.84,
-     "targetPct": -0.424,
-     "drivenPct": -0.393,
+     "targetPct": -0.423,
+     "drivenPct": -0.378,
      "perTrackPct": [
-      -0.235,
-      -0.269,
-      -0.674
+      -0.215,
+      -0.296,
+      -0.623
      ],
-     "monzaVmaxKmh": 319.5
+     "monzaVmaxKmh": 319.7
     },
     {
      "id": "2017-force-india",
      "realGapPct": 2.197,
      "targetPct": -0.004,
-     "drivenPct": 0.042,
+     "drivenPct": 0.046,
      "perTrackPct": [
       0.068,
-      0.027,
-      0.031
+      0.018,
+      0.052
      ],
-     "monzaVmaxKmh": 321.6
+     "monzaVmaxKmh": 321.1
     },
     {
      "id": "2017-williams",
      "realGapPct": 2.22,
      "targetPct": 0.004,
-     "drivenPct": 0.025,
+     "drivenPct": 0.017,
      "perTrackPct": [
-      -0.059,
-      0.009,
-      0.125
+      -0.078,
+      -0.027,
+      0.156
      ],
-     "monzaVmaxKmh": 323.6
+     "monzaVmaxKmh": 323.1
     },
     {
      "id": "2017-renault",
      "realGapPct": 2.048,
      "targetPct": -0.05,
-     "drivenPct": -0.048,
+     "drivenPct": -0.053,
      "perTrackPct": [
-      0.01,
-      -0.018,
-      -0.135
+      0,
+      -0.036,
+      -0.125
      ],
-     "monzaVmaxKmh": 320.4
+     "monzaVmaxKmh": 320.6
     },
     {
      "id": "2017-toro-rosso",
      "realGapPct": 2.709,
-     "targetPct": 0.155,
-     "drivenPct": 0.148,
+     "targetPct": 0.157,
+     "drivenPct": 0.146,
      "perTrackPct": [
       0.186,
-      0.144,
-      0.114
+      0.117,
+      0.135
      ],
-     "monzaVmaxKmh": 320.2
+     "monzaVmaxKmh": 320.5
     },
     {
      "id": "2017-haas",
@@ -1180,36 +1180,36 @@
     {
      "id": "2017-mclaren",
      "realGapPct": 2.437,
-     "targetPct": 0.072,
-     "drivenPct": 0.086,
+     "targetPct": 0.069,
+     "drivenPct": 0.059,
      "perTrackPct": [
-      0.088,
-      0.099,
+      0.078,
+      0.027,
       0.073
      ],
-     "monzaVmaxKmh": 321.5
+     "monzaVmaxKmh": 322.4
     },
     {
      "id": "2017-sauber",
      "realGapPct": 4.033,
      "targetPct": 0.567,
-     "drivenPct": 0.606,
+     "drivenPct": 0.583,
      "perTrackPct": [
-      0.616,
-      0.547,
-      0.654
+      0.587,
+      0.476,
+      0.685
      ],
-     "monzaVmaxKmh": 320.1
+     "monzaVmaxKmh": 320.9
     }
    ]
   },
   {
    "year": 2018,
    "cars": 10,
-   "rhoReal": 0.988,
-   "rhoTarget": 0.988,
-   "rhoCharacter": 0.83,
-   "drivenSpreadPct": 1.215,
+   "rhoReal": 0.964,
+   "rhoTarget": 0.964,
+   "rhoCharacter": 0.782,
+   "drivenSpreadPct": 1.196,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 84.283,
@@ -1221,13 +1221,13 @@
      "id": "2018-mercedes",
      "realGapPct": 0,
      "targetPct": -0.737,
-     "drivenPct": -0.74,
+     "drivenPct": -0.727,
      "perTrackPct": [
-      -0.801,
-      -0.626,
-      -0.794
+      -0.791,
+      -0.671,
+      -0.72
      ],
-     "monzaVmaxKmh": 324.6
+     "monzaVmaxKmh": 324.5
     },
     {
      "id": "2018-ferrari",
@@ -1244,26 +1244,26 @@
     {
      "id": "2018-red-bull",
      "realGapPct": 0.798,
-     "targetPct": -0.464,
-     "drivenPct": -0.457,
+     "targetPct": -0.463,
+     "drivenPct": -0.463,
      "perTrackPct": [
-      -0.297,
-      -0.344,
-      -0.731
+      -0.287,
+      -0.381,
+      -0.72
      ],
      "monzaVmaxKmh": 318.5
     },
     {
      "id": "2018-renault",
      "realGapPct": 2.176,
-     "targetPct": 0.01,
-     "drivenPct": -0.032,
+     "targetPct": 0.011,
+     "drivenPct": -0.012,
      "perTrackPct": [
-      0.059,
-      -0.027,
-      -0.127
+      0.069,
+      0,
+      -0.106
      ],
-     "monzaVmaxKmh": 318.9
+     "monzaVmaxKmh": 319
     },
     {
      "id": "2018-haas",
@@ -1280,26 +1280,26 @@
     {
      "id": "2018-mclaren",
      "realGapPct": 2.977,
-     "targetPct": 0.285,
-     "drivenPct": 0.252,
+     "targetPct": 0.284,
+     "drivenPct": 0.249,
      "perTrackPct": [
-      0.386,
-      0.245,
-      0.127
+      0.405,
+      0.181,
+      0.159
      ],
-     "monzaVmaxKmh": 317.9
+     "monzaVmaxKmh": 318
     },
     {
      "id": "2018-force-india",
      "realGapPct": 2.119,
-     "targetPct": -0.01,
-     "drivenPct": 0.026,
+     "targetPct": -0.009,
+     "drivenPct": 0.037,
      "perTrackPct": [
       0.198,
-      0.027,
-      -0.148
+      0.018,
+      -0.106
      ],
-     "monzaVmaxKmh": 320.1
+     "monzaVmaxKmh": 319.5
     },
     {
      "id": "2018-sauber",
@@ -1316,26 +1316,26 @@
     {
      "id": "2018-toro-rosso",
      "realGapPct": 2.826,
-     "targetPct": 0.232,
-     "drivenPct": 0.217,
+     "targetPct": 0.234,
+     "drivenPct": 0.235,
      "perTrackPct": [
       0.188,
       0.136,
-      0.328
+      0.381
      ],
-     "monzaVmaxKmh": 322.3
+     "monzaVmaxKmh": 322.7
     },
     {
      "id": "2018-williams",
      "realGapPct": 3.637,
      "targetPct": 0.513,
-     "drivenPct": 0.475,
+     "drivenPct": 0.469,
      "perTrackPct": [
-      0.415,
-      0.29,
+      0.405,
+      0.281,
       0.72
      ],
-     "monzaVmaxKmh": 321.9
+     "monzaVmaxKmh": 321.3
     }
    ]
   },
@@ -1344,7 +1344,7 @@
    "cars": 10,
    "rhoReal": 1,
    "rhoTarget": 1,
-   "rhoCharacter": 0.83,
+   "rhoCharacter": 0.806,
    "drivenSpreadPct": 1.136,
    "offTrackRuns": 0,
    "standardLaps": {
@@ -1356,12 +1356,12 @@
     {
      "id": "2019-mercedes",
      "realGapPct": 0.024,
-     "targetPct": -0.524,
-     "drivenPct": -0.487,
+     "targetPct": -0.526,
+     "drivenPct": -0.495,
      "perTrackPct": [
-      -0.338,
-      -0.373,
-      -0.75
+      -0.348,
+      -0.409,
+      -0.729
      ],
      "monzaVmaxKmh": 325.3
     },
@@ -1380,62 +1380,62 @@
     {
      "id": "2019-red-bull",
      "realGapPct": 0.644,
-     "targetPct": -0.349,
-     "drivenPct": -0.32,
+     "targetPct": -0.348,
+     "drivenPct": -0.329,
      "perTrackPct": [
-      -0.199,
-      -0.255,
-      -0.507
+      -0.219,
+      -0.273,
+      -0.497
      ],
      "monzaVmaxKmh": 324.7
     },
     {
      "id": "2019-mclaren",
      "realGapPct": 1.647,
-     "targetPct": -0.065,
-     "drivenPct": -0.047,
+     "targetPct": -0.063,
+     "drivenPct": -0.042,
      "perTrackPct": [
       -0.03,
-      -0.036,
-      -0.074
+      -0.055,
+      -0.042
      ],
-     "monzaVmaxKmh": 326.5
+     "monzaVmaxKmh": 326.8
     },
     {
      "id": "2019-renault",
      "realGapPct": 1.813,
-     "targetPct": -0.016,
-     "drivenPct": -0.029,
+     "targetPct": -0.019,
+     "drivenPct": -0.012,
      "perTrackPct": [
       -0.03,
-      -0.045,
-      -0.011
+      -0.036,
+      0.032
      ],
-     "monzaVmaxKmh": 326.9
+     "monzaVmaxKmh": 327.1
     },
     {
      "id": "2019-toro-rosso",
      "realGapPct": 2.289,
      "targetPct": 0.119,
-     "drivenPct": 0.107,
+     "drivenPct": 0.08,
      "perTrackPct": [
-      0.189,
-      0.091,
-      0.042
+      0.159,
+      0.082,
+      0
      ],
-     "monzaVmaxKmh": 324.8
+     "monzaVmaxKmh": 324.7
     },
     {
      "id": "2019-racing-point",
      "realGapPct": 2.497,
-     "targetPct": 0.176,
-     "drivenPct": 0.15,
+     "targetPct": 0.178,
+     "drivenPct": 0.142,
      "perTrackPct": [
-      0.149,
-      0.091,
-      0.211
+      0.109,
+      0.073,
+      0.243
      ],
-     "monzaVmaxKmh": 326.7
+     "monzaVmaxKmh": 326.6
     },
     {
      "id": "2019-alfa-romeo",
@@ -1465,13 +1465,13 @@
      "id": "2019-williams",
      "realGapPct": 4.431,
      "targetPct": 0.728,
-     "drivenPct": 0.649,
+     "drivenPct": 0.64,
      "perTrackPct": [
-      0.557,
-      0.482,
-      0.909
+      0.537,
+      0.464,
+      0.919
      ],
-     "monzaVmaxKmh": 327.5
+     "monzaVmaxKmh": 327.3
     }
    ]
   },
@@ -1480,8 +1480,8 @@
    "cars": 10,
    "rhoReal": 0.988,
    "rhoTarget": 0.988,
-   "rhoCharacter": 0.758,
-   "drivenSpreadPct": 1.18,
+   "rhoCharacter": 0.782,
+   "drivenSpreadPct": 1.167,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 83.508,
@@ -1492,132 +1492,132 @@
     {
      "id": "2020-mercedes",
      "realGapPct": 0,
-     "targetPct": -0.666,
-     "drivenPct": -0.633,
+     "targetPct": -0.665,
+     "drivenPct": -0.65,
      "perTrackPct": [
-      -0.709,
-      -0.593,
-      -0.599
+      -0.738,
+      -0.603,
+      -0.609
      ],
      "monzaVmaxKmh": 328.5
     },
     {
      "id": "2020-red-bull",
      "realGapPct": 0.617,
-     "targetPct": -0.385,
-     "drivenPct": -0.337,
+     "targetPct": -0.384,
+     "drivenPct": -0.379,
      "perTrackPct": [
-      -0.329,
-      -0.256,
-      -0.428
+      -0.349,
+      -0.338,
+      -0.449
      ],
-     "monzaVmaxKmh": 326.6
+     "monzaVmaxKmh": 326.5
     },
     {
      "id": "2020-mclaren",
      "realGapPct": 1.365,
-     "targetPct": -0.044,
-     "drivenPct": -0.019,
+     "targetPct": -0.043,
+     "drivenPct": 0.014,
      "perTrackPct": [
-      0,
-      -0.037,
-      -0.021
+      -0.01,
+      0.009,
+      0.043
      ],
-     "monzaVmaxKmh": 328.7
+     "monzaVmaxKmh": 329.1
     },
     {
      "id": "2020-racing-point",
      "realGapPct": 1.212,
-     "targetPct": -0.116,
-     "drivenPct": -0.099,
+     "targetPct": -0.115,
+     "drivenPct": -0.116,
      "perTrackPct": [
+      -0.12,
       -0.1,
-      -0.091,
-      -0.107
+      -0.128
      ],
-     "monzaVmaxKmh": 327
+     "monzaVmaxKmh": 326.9
     },
     {
      "id": "2020-renault",
      "realGapPct": 1.321,
-     "targetPct": -0.066,
-     "drivenPct": -0.072,
+     "targetPct": -0.064,
+     "drivenPct": -0.057,
      "perTrackPct": [
-      -0.23,
+      -0.239,
       -0.146,
-      0.16
+      0.214
      ],
-     "monzaVmaxKmh": 331.3
+     "monzaVmaxKmh": 331.6
     },
     {
      "id": "2020-ferrari",
      "realGapPct": 1.563,
      "targetPct": 0.046,
-     "drivenPct": 0.036,
+     "drivenPct": 0.073,
      "perTrackPct": [
-      0.06,
-      0.037,
-      0.011
+      0.04,
+      0.018,
+      0.16
      ],
-     "monzaVmaxKmh": 326.8
+     "monzaVmaxKmh": 327.4
     },
     {
      "id": "2020-alphatauri",
      "realGapPct": 1.608,
-     "targetPct": 0.065,
-     "drivenPct": 0.069,
+     "targetPct": 0.066,
+     "drivenPct": 0.067,
      "perTrackPct": [
-      0.09,
-      0.064,
-      0.053
+      0.07,
+      0.046,
+      0.086
      ],
-     "monzaVmaxKmh": 326.4
+     "monzaVmaxKmh": 326.3
     },
     {
      "id": "2020-alfa-romeo",
      "realGapPct": 2.552,
-     "targetPct": 0.495,
-     "drivenPct": 0.491,
+     "targetPct": 0.496,
+     "drivenPct": 0.506,
      "perTrackPct": [
-      0.589,
-      0.447,
-      0.438
+      0.579,
+      0.383,
+      0.556
      ],
-     "monzaVmaxKmh": 325.1
+     "monzaVmaxKmh": 325.9
     },
     {
      "id": "2020-haas",
      "realGapPct": 2.748,
-     "targetPct": 0.586,
-     "drivenPct": 0.525,
+     "targetPct": 0.585,
+     "drivenPct": 0.517,
      "perTrackPct": [
-      0.409,
-      0.31,
-      0.855
+      0.379,
+      0.21,
+      0.962
      ],
-     "monzaVmaxKmh": 328.4
+     "monzaVmaxKmh": 329.4
     },
     {
      "id": "2020-williams",
      "realGapPct": 2.702,
-     "targetPct": 0.563,
-     "drivenPct": 0.547,
+     "targetPct": 0.562,
+     "drivenPct": 0.512,
      "perTrackPct": [
-      0.559,
-      0.429,
-      0.652
+      0.569,
+      0.347,
+      0.62
      ],
-     "monzaVmaxKmh": 326
+     "monzaVmaxKmh": 325.6
     }
    ]
   },
   {
    "year": 2021,
    "cars": 10,
-   "rhoReal": 0.988,
-   "rhoTarget": 0.988,
-   "rhoCharacter": 0.855,
-   "drivenSpreadPct": 1.201,
+   "rhoReal": 1,
+   "rhoTarget": 1,
+   "rhoCharacter": 0.903,
+   "drivenSpreadPct": 1.133,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 84.683,
@@ -1628,122 +1628,122 @@
     {
      "id": "2021-mercedes",
      "realGapPct": 0,
-     "targetPct": -0.453,
-     "drivenPct": -0.426,
+     "targetPct": -0.454,
+     "drivenPct": -0.427,
      "perTrackPct": [
-      -0.266,
-      -0.341,
-      -0.67
+      -0.285,
+      -0.368,
+      -0.629
      ],
-     "monzaVmaxKmh": 325.8
+     "monzaVmaxKmh": 325.7
     },
     {
      "id": "2021-red-bull",
      "realGapPct": 0.189,
-     "targetPct": -0.382,
-     "drivenPct": -0.354,
+     "targetPct": -0.384,
+     "drivenPct": -0.372,
      "perTrackPct": [
-      -0.216,
-      -0.27,
-      -0.577
+      -0.236,
+      -0.252,
+      -0.629
      ],
-     "monzaVmaxKmh": 325.2
+     "monzaVmaxKmh": 324.9
     },
     {
      "id": "2021-ferrari",
      "realGapPct": 0.966,
-     "targetPct": -0.09,
-     "drivenPct": -0.073,
+     "targetPct": -0.092,
+     "drivenPct": -0.114,
      "perTrackPct": [
-      -0.01,
-      -0.045,
-      -0.165
+      -0.03,
+      -0.189,
+      -0.124
      ],
-     "monzaVmaxKmh": 326.2
+     "monzaVmaxKmh": 326.6
     },
     {
      "id": "2021-mclaren",
      "realGapPct": 1.009,
      "targetPct": -0.076,
-     "drivenPct": -0.074,
+     "drivenPct": -0.078,
      "perTrackPct": [
-      -0.069,
-      -0.081,
-      -0.072
+      -0.128,
+      -0.054,
+      -0.052
      ],
-     "monzaVmaxKmh": 327.4
+     "monzaVmaxKmh": 327.3
     },
     {
      "id": "2021-alpine",
      "realGapPct": 1.414,
-     "targetPct": 0.075,
-     "drivenPct": 0.055,
+     "targetPct": 0.074,
+     "drivenPct": 0.057,
      "perTrackPct": [
-      0.02,
-      0.072,
-      0.072
+      -0.02,
+      0.036,
+      0.155
      ],
-     "monzaVmaxKmh": 328
+     "monzaVmaxKmh": 328.3
     },
     {
      "id": "2021-alphatauri",
      "realGapPct": 0.899,
-     "targetPct": -0.117,
-     "drivenPct": -0.126,
+     "targetPct": -0.115,
+     "drivenPct": -0.142,
      "perTrackPct": [
-      -0.118,
-      -0.117,
-      -0.144
+      -0.167,
+      0,
+      -0.258
      ],
-     "monzaVmaxKmh": 326.8
+     "monzaVmaxKmh": 326.3
     },
     {
      "id": "2021-aston-martin",
      "realGapPct": 1.721,
-     "targetPct": 0.189,
-     "drivenPct": 0.176,
+     "targetPct": 0.192,
+     "drivenPct": 0.204,
      "perTrackPct": [
       0.157,
-      0.216,
-      0.155
+      0.198,
+      0.258
      ],
-     "monzaVmaxKmh": 327
+     "monzaVmaxKmh": 326.9
     },
     {
      "id": "2021-williams",
      "realGapPct": 2.263,
      "targetPct": 0.395,
-     "drivenPct": 0.359,
+     "drivenPct": 0.348,
      "perTrackPct": [
-      0.157,
-      0.332,
-      0.587
+      0.128,
+      0.359,
+      0.557
      ],
-     "monzaVmaxKmh": 328.9
+     "monzaVmaxKmh": 328.8
     },
     {
      "id": "2021-alfa-romeo",
      "realGapPct": 1.974,
      "targetPct": 0.285,
-     "drivenPct": 0.284,
+     "drivenPct": 0.226,
      "perTrackPct": [
-      0.236,
-      0.287,
-      0.33
+      0.187,
+      0.171,
+      0.319
      ],
-     "monzaVmaxKmh": 327
+     "monzaVmaxKmh": 329.4
     },
     {
      "id": "2021-haas",
      "realGapPct": 3.333,
-     "targetPct": 0.798,
-     "drivenPct": 0.775,
+     "targetPct": 0.793,
+     "drivenPct": 0.705,
      "perTrackPct": [
-      0.492,
-      0.782,
-      1.051
+      0.433,
+      0.539,
+      1.144
      ],
-     "monzaVmaxKmh": 329
+     "monzaVmaxKmh": 333.2
     }
    ]
   },
@@ -1752,8 +1752,8 @@
    "cars": 10,
    "rhoReal": 1,
    "rhoTarget": 1,
-   "rhoCharacter": 0.794,
-   "drivenSpreadPct": 1.167,
+   "rhoCharacter": 0.855,
+   "drivenSpreadPct": 1.114,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 85.625,
@@ -1764,14 +1764,14 @@
     {
      "id": "2022-red-bull",
      "realGapPct": 0.136,
-     "targetPct": -0.713,
-     "drivenPct": -0.724,
+     "targetPct": -0.711,
+     "drivenPct": -0.743,
      "perTrackPct": [
       -0.564,
-      -0.793,
-      -0.815
+      -0.749,
+      -0.916
      ],
-     "monzaVmaxKmh": 330.8
+     "monzaVmaxKmh": 330.4
     },
     {
      "id": "2022-ferrari",
@@ -1788,38 +1788,38 @@
     {
      "id": "2022-mercedes",
      "realGapPct": 0.934,
-     "targetPct": -0.333,
-     "drivenPct": -0.339,
+     "targetPct": -0.334,
+     "drivenPct": -0.335,
      "perTrackPct": [
-      -0.029,
-      -0.405,
-      -0.584
+      -0.049,
+      -0.432,
+      -0.523
      ],
-     "monzaVmaxKmh": 326
+     "monzaVmaxKmh": 326.2
     },
     {
      "id": "2022-alpine",
      "realGapPct": 1.461,
      "targetPct": -0.084,
-     "drivenPct": -0.118,
+     "drivenPct": -0.096,
      "perTrackPct": [
-      -0.156,
-      -0.097,
-      -0.101
+      -0.165,
+      -0.132,
+      0.01
      ],
-     "monzaVmaxKmh": 330.9
+     "monzaVmaxKmh": 333
     },
     {
      "id": "2022-mclaren",
      "realGapPct": 1.309,
      "targetPct": -0.156,
-     "drivenPct": -0.172,
+     "drivenPct": -0.192,
      "perTrackPct": [
-      -0.078,
-      -0.185,
-      -0.252
+      -0.127,
+      -0.229,
+      -0.221
      ],
-     "monzaVmaxKmh": 328.2
+     "monzaVmaxKmh": 328.4
     },
     {
      "id": "2022-alfa-romeo",
@@ -1836,14 +1836,14 @@
     {
      "id": "2022-aston-martin",
      "realGapPct": 2.331,
-     "targetPct": 0.331,
-     "drivenPct": 0.324,
+     "targetPct": 0.332,
+     "drivenPct": 0.245,
      "perTrackPct": [
-      0.302,
-      0.309,
-      0.362
+      0.243,
+      0.22,
+      0.272
      ],
-     "monzaVmaxKmh": 328.1
+     "monzaVmaxKmh": 328.3
     },
     {
      "id": "2022-haas",
@@ -1860,36 +1860,36 @@
     {
      "id": "2022-alphatauri",
      "realGapPct": 1.81,
-     "targetPct": 0.086,
-     "drivenPct": 0.04,
+     "targetPct": 0.085,
+     "drivenPct": 0.062,
      "perTrackPct": [
-      -0.097,
-      0.026,
-      0.191
+      -0.088,
+      0.132,
+      0.141
      ],
-     "monzaVmaxKmh": 332.6
+     "monzaVmaxKmh": 332
     },
     {
      "id": "2022-williams",
      "realGapPct": 2.629,
-     "targetPct": 0.475,
-     "drivenPct": 0.329,
+     "targetPct": 0.472,
+     "drivenPct": 0.277,
      "perTrackPct": [
-      -0.049,
-      0.432,
-      0.604
+      -0.097,
+      0.344,
+      0.584
      ],
-     "monzaVmaxKmh": 332.9
+     "monzaVmaxKmh": 335.6
     }
    ]
   },
   {
    "year": 2023,
    "cars": 10,
-   "rhoReal": 0.988,
-   "rhoTarget": 0.988,
-   "rhoCharacter": 0.624,
-   "drivenSpreadPct": 1.257,
+   "rhoReal": 1,
+   "rhoTarget": 1,
+   "rhoCharacter": 0.612,
+   "drivenSpreadPct": 1.221,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 85.217,
@@ -1901,25 +1901,25 @@
      "id": "2023-red-bull",
      "realGapPct": 0,
      "targetPct": -0.612,
-     "drivenPct": -0.637,
+     "drivenPct": -0.606,
      "perTrackPct": [
       -0.636,
-      -0.685,
-      -0.59
+      -0.543,
+      -0.64
      ],
-     "monzaVmaxKmh": 330.8
+     "monzaVmaxKmh": 330.5
     },
     {
      "id": "2023-mercedes",
      "realGapPct": 0.502,
-     "targetPct": -0.251,
-     "drivenPct": -0.236,
+     "targetPct": -0.25,
+     "drivenPct": -0.266,
      "perTrackPct": [
-      -0.186,
-      -0.258,
-      -0.264
+      -0.235,
+      -0.329,
+      -0.234
      ],
-     "monzaVmaxKmh": 329.1
+     "monzaVmaxKmh": 329.3
     },
     {
      "id": "2023-ferrari",
@@ -1936,62 +1936,62 @@
     {
      "id": "2023-mclaren",
      "realGapPct": 0.654,
-     "targetPct": -0.139,
-     "drivenPct": -0.146,
+     "targetPct": -0.137,
+     "drivenPct": -0.148,
      "perTrackPct": [
-      -0.108,
-      -0.169,
-      -0.163
-     ],
-     "monzaVmaxKmh": 329.1
-    },
-    {
-     "id": "2023-aston-martin",
-     "realGapPct": 0.766,
-     "targetPct": -0.057,
-     "drivenPct": -0.054,
-     "perTrackPct": [
-      0.039,
-      -0.089,
+      -0.137,
+      -0.196,
       -0.112
-     ],
-     "monzaVmaxKmh": 328.2
-    },
-    {
-     "id": "2023-alpine",
-     "realGapPct": 0.925,
-     "targetPct": 0.056,
-     "drivenPct": 0.041,
-     "perTrackPct": [
-      0.039,
-      0.044,
-      0.041
      ],
      "monzaVmaxKmh": 329.4
     },
     {
+     "id": "2023-aston-martin",
+     "realGapPct": 0.766,
+     "targetPct": -0.055,
+     "drivenPct": -0.063,
+     "perTrackPct": [
+      0.02,
+      -0.098,
+      -0.112
+     ],
+     "monzaVmaxKmh": 328.4
+    },
+    {
+     "id": "2023-alpine",
+     "realGapPct": 0.925,
+     "targetPct": 0.059,
+     "drivenPct": 0.065,
+     "perTrackPct": [
+      0.02,
+      0.053,
+      0.122
+     ],
+     "monzaVmaxKmh": 329.9
+    },
+    {
      "id": "2023-williams",
      "realGapPct": 1.628,
-     "targetPct": 0.565,
-     "drivenPct": 0.48,
+     "targetPct": 0.567,
+     "drivenPct": 0.474,
      "perTrackPct": [
-      0.059,
-      0.587,
-      0.793
+      0.02,
+      0.498,
+      0.905
      ],
-     "monzaVmaxKmh": 333.5
+     "monzaVmaxKmh": 333.8
     },
     {
      "id": "2023-alphatauri",
      "realGapPct": 1.706,
-     "targetPct": 0.622,
-     "drivenPct": 0.621,
+     "targetPct": 0.624,
+     "drivenPct": 0.614,
      "perTrackPct": [
-      0.704,
-      0.65,
-      0.508
+      0.714,
+      0.712,
+      0.417
      ],
-     "monzaVmaxKmh": 326.6
+     "monzaVmaxKmh": 326.2
     },
     {
      "id": "2023-alfa-romeo",
@@ -2024,8 +2024,8 @@
    "cars": 10,
    "rhoReal": 1,
    "rhoTarget": 1,
-   "rhoCharacter": 0.903,
-   "drivenSpreadPct": 1.189,
+   "rhoCharacter": 0.879,
+   "drivenSpreadPct": 1.2,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 84.575,
@@ -2037,13 +2037,13 @@
      "id": "2024-mclaren",
      "realGapPct": 0.317,
      "targetPct": -0.533,
-     "drivenPct": -0.503,
+     "drivenPct": -0.519,
      "perTrackPct": [
-      -0.394,
-      -0.432,
-      -0.682
+      -0.424,
+      -0.513,
+      -0.62
      ],
-     "monzaVmaxKmh": 327.2
+     "monzaVmaxKmh": 327.3
     },
     {
      "id": "2024-ferrari",
@@ -2060,50 +2060,50 @@
     {
      "id": "2024-red-bull",
      "realGapPct": 0.034,
-     "targetPct": -0.725,
-     "drivenPct": -0.694,
+     "targetPct": -0.726,
+     "drivenPct": -0.705,
      "perTrackPct": [
-      -0.66,
-      -0.648,
-      -0.775
+      -0.67,
+      -0.639,
+      -0.806
      ],
-     "monzaVmaxKmh": 329.7
+     "monzaVmaxKmh": 329.5
     },
     {
      "id": "2024-mercedes",
      "realGapPct": 0.54,
-     "targetPct": -0.387,
-     "drivenPct": -0.369,
+     "targetPct": -0.386,
+     "drivenPct": -0.406,
      "perTrackPct": [
       -0.286,
-      -0.324,
-      -0.496
+      -0.468,
+      -0.465
      ],
-     "monzaVmaxKmh": 327.3
+     "monzaVmaxKmh": 327.5
     },
     {
      "id": "2024-aston-martin",
      "realGapPct": 1.047,
-     "targetPct": -0.047,
-     "drivenPct": -0.031,
+     "targetPct": -0.048,
+     "drivenPct": -0.059,
      "perTrackPct": [
-      0.069,
-      -0.018,
-      -0.145
+      0.02,
+      -0.072,
+      -0.124
      ],
-     "monzaVmaxKmh": 326.6
+     "monzaVmaxKmh": 326.7
     },
     {
      "id": "2024-alpine",
      "realGapPct": 1.552,
-     "targetPct": 0.29,
-     "drivenPct": 0.279,
+     "targetPct": 0.289,
+     "drivenPct": 0.254,
      "perTrackPct": [
-      0.158,
-      0.234,
-      0.444
+      0.138,
+      0.189,
+      0.434
      ],
-     "monzaVmaxKmh": 330.8
+     "monzaVmaxKmh": 331.3
     },
     {
      "id": "2024-haas",
@@ -2120,26 +2120,26 @@
     {
      "id": "2024-rb",
      "realGapPct": 1.188,
-     "targetPct": 0.049,
-     "drivenPct": 0.052,
+     "targetPct": 0.047,
+     "drivenPct": 0.069,
      "perTrackPct": [
-      0.069,
-      0.036,
-      0.052
+      0.059,
+      0.117,
+      0.031
      ],
-     "monzaVmaxKmh": 329
+     "monzaVmaxKmh": 328.7
     },
     {
      "id": "2024-williams",
      "realGapPct": 1.576,
-     "targetPct": 0.307,
-     "drivenPct": 0.343,
+     "targetPct": 0.306,
+     "drivenPct": 0.285,
      "perTrackPct": [
-      0.463,
-      0.369,
+      0.434,
+      0.225,
       0.196
      ],
-     "monzaVmaxKmh": 325.3
+     "monzaVmaxKmh": 325.5
     },
     {
      "id": "2024-kick-sauber",
@@ -2160,8 +2160,8 @@
    "cars": 10,
    "rhoReal": 0.988,
    "rhoTarget": 0.988,
-   "rhoCharacter": 0.6,
-   "drivenSpreadPct": 1.244,
+   "rhoCharacter": 0.576,
+   "drivenSpreadPct": 1.271,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 84.283,
@@ -2173,37 +2173,37 @@
      "id": "2025-mclaren",
      "realGapPct": 0,
      "targetPct": -0.845,
-     "drivenPct": -0.819,
+     "drivenPct": -0.846,
      "perTrackPct": [
-      -0.702,
-      -0.723,
-      -1.031
+      -0.742,
+      -0.786,
+      -1.01
      ],
-     "monzaVmaxKmh": 328.7
+     "monzaVmaxKmh": 328.8
     },
     {
      "id": "2025-mercedes",
      "realGapPct": 0.346,
      "targetPct": -0.529,
-     "drivenPct": -0.519,
+     "drivenPct": -0.508,
      "perTrackPct": [
-      -0.415,
-      -0.443,
-      -0.698
+      -0.445,
+      -0.497,
+      -0.583
      ],
-     "monzaVmaxKmh": 328.4
+     "monzaVmaxKmh": 328.5
     },
     {
      "id": "2025-red-bull",
      "realGapPct": 0.226,
-     "targetPct": -0.639,
-     "drivenPct": -0.635,
+     "targetPct": -0.637,
+     "drivenPct": -0.626,
      "perTrackPct": [
       -0.623,
-      -0.606,
+      -0.578,
       -0.677
      ],
-     "monzaVmaxKmh": 330.1
+     "monzaVmaxKmh": 329.9
     },
     {
      "id": "2025-ferrari",
@@ -2220,38 +2220,38 @@
     {
      "id": "2025-williams",
      "realGapPct": 0.934,
-     "targetPct": 0.007,
-     "drivenPct": -0.005,
+     "targetPct": 0.008,
+     "drivenPct": -0.024,
      "perTrackPct": [
-      -0.059,
-      -0.027,
-      0.073
+      -0.079,
+      -0.108,
+      0.115
      ],
-     "monzaVmaxKmh": 329.4
+     "monzaVmaxKmh": 329.5
     },
     {
      "id": "2025-racing-bulls",
      "realGapPct": 0.916,
-     "targetPct": -0.007,
-     "drivenPct": 0.005,
+     "targetPct": -0.008,
+     "drivenPct": 0.002,
      "perTrackPct": [
       0.03,
       0.018,
-      -0.031
+      -0.042
      ],
-     "monzaVmaxKmh": 328.4
+     "monzaVmaxKmh": 328.1
     },
     {
      "id": "2025-aston-martin",
      "realGapPct": 1.032,
-     "targetPct": 0.096,
-     "drivenPct": 0.085,
+     "targetPct": 0.097,
+     "drivenPct": 0.066,
      "perTrackPct": [
-      0.069,
-      0.081,
-      0.104
+      0.059,
+      -0.027,
+      0.167
      ],
-     "monzaVmaxKmh": 328.6
+     "monzaVmaxKmh": 328.8
     },
     {
      "id": "2025-haas",
@@ -2280,24 +2280,24 @@
     {
      "id": "2025-alpine",
      "realGapPct": 1.18,
-     "targetPct": 0.234,
-     "drivenPct": 0.206,
+     "targetPct": 0.233,
+     "drivenPct": 0.2,
      "perTrackPct": [
-      0.069,
-      0.09,
-      0.458
+      0.049,
+      0.072,
+      0.479
      ],
-     "monzaVmaxKmh": 331.2
+     "monzaVmaxKmh": 331.6
     }
    ]
   },
   {
    "year": 2026,
    "cars": 11,
-   "rhoReal": 0.973,
-   "rhoTarget": 0.991,
-   "rhoCharacter": 0.1,
-   "drivenSpreadPct": 1.683,
+   "rhoReal": 0.991,
+   "rhoTarget": 1,
+   "rhoCharacter": -0.127,
+   "drivenSpreadPct": 1.643,
    "offTrackRuns": 0,
    "standardLaps": {
     "it-1922": 85.117,
@@ -2308,134 +2308,134 @@
     {
      "id": "2026-mercedes",
      "realGapPct": 0,
-     "targetPct": -0.61,
-     "drivenPct": -0.664,
+     "targetPct": -0.609,
+     "drivenPct": -0.67,
      "perTrackPct": [
-      -0.558,
-      -0.712,
-      -0.723
+      -0.548,
+      -0.729,
+      -0.733
      ],
-     "monzaVmaxKmh": 328.6
+     "monzaVmaxKmh": 328.5
     },
     {
      "id": "2026-ferrari",
      "realGapPct": 0.381,
-     "targetPct": -0.512,
-     "drivenPct": -0.547,
+     "targetPct": -0.514,
+     "drivenPct": -0.57,
      "perTrackPct": [
       -0.411,
-      -0.555,
+      -0.625,
       -0.674
      ],
-     "monzaVmaxKmh": 327.7
+     "monzaVmaxKmh": 327.8
     },
     {
      "id": "2026-mclaren",
      "realGapPct": 0.431,
-     "targetPct": -0.471,
-     "drivenPct": -0.476,
+     "targetPct": -0.468,
+     "drivenPct": -0.479,
      "perTrackPct": [
-      -0.333,
-      -0.529,
-      -0.565
+      -0.352,
+      -0.59,
+      -0.495
      ],
-     "monzaVmaxKmh": 327
+     "monzaVmaxKmh": 327.1
     },
     {
      "id": "2026-red-bull",
      "realGapPct": 0.548,
-     "targetPct": -0.387,
-     "drivenPct": -0.386,
+     "targetPct": -0.388,
+     "drivenPct": -0.398,
      "perTrackPct": [
-      -0.304,
-      -0.399,
-      -0.456
+      -0.284,
+      -0.356,
+      -0.555
      ],
      "monzaVmaxKmh": 327.5
     },
     {
      "id": "2026-racing-bulls",
      "realGapPct": 1.391,
-     "targetPct": -0.043,
-     "drivenPct": -0.054,
+     "targetPct": -0.044,
+     "drivenPct": -0.067,
      "perTrackPct": [
-      -0.069,
-      -0.043,
-      -0.05
+      -0.059,
+      -0.052,
+      -0.089
      ],
      "monzaVmaxKmh": 327.9
     },
     {
      "id": "2026-alpine",
      "realGapPct": 1.631,
-     "targetPct": 0.006,
-     "drivenPct": -0.072,
+     "targetPct": 0.004,
+     "drivenPct": -0.059,
      "perTrackPct": [
-      -0.157,
-      -0.13,
-      0.069
+      -0.137,
+      -0.148,
+      0.109
      ],
      "monzaVmaxKmh": 329.5
     },
     {
      "id": "2026-haas",
      "realGapPct": 2.284,
-     "targetPct": 0.256,
-     "drivenPct": 0.265,
+     "targetPct": 0.253,
+     "drivenPct": 0.266,
      "perTrackPct": [
-      0.245,
-      0.243,
-      0.307
+      0.235,
+      0.295,
+      0.268
      ],
-     "monzaVmaxKmh": 327.3
+     "monzaVmaxKmh": 327.2
     },
     {
      "id": "2026-audi",
      "realGapPct": 1.532,
-     "targetPct": 0.046,
-     "drivenPct": 0.062,
+     "targetPct": 0.049,
+     "drivenPct": 0.046,
      "perTrackPct": [
-      0.039,
-      0.087,
-      0.059
+      0.029,
+      0.078,
+      0.03
      ],
      "monzaVmaxKmh": 327.6
     },
     {
      "id": "2026-williams",
      "realGapPct": 2.447,
-     "targetPct": 0.435,
-     "drivenPct": 0.465,
+     "targetPct": 0.437,
+     "drivenPct": 0.438,
      "perTrackPct": [
-      0.313,
-      0.477,
-      0.604
+      0.323,
+      0.417,
+      0.575
      ],
      "monzaVmaxKmh": 327.7
     },
     {
      "id": "2026-aston-martin",
      "realGapPct": 4.113,
-     "targetPct": 0.921,
-     "drivenPct": 1.019,
+     "targetPct": 0.919,
+     "drivenPct": 0.973,
      "perTrackPct": [
-      1.008,
-      1.068,
+      0.93,
+      1.007,
       0.981
      ],
-     "monzaVmaxKmh": 323.9
+     "monzaVmaxKmh": 324.2
     },
     {
      "id": "2026-cadillac",
      "realGapPct": 3.928,
-     "targetPct": 0.87,
-     "drivenPct": 0.923,
+     "targetPct": 0.873,
+     "drivenPct": 0.949,
      "perTrackPct": [
-      0.754,
+      0.773,
       0.955,
-      1.06
+      1.12
      ],
-     "monzaVmaxKmh": 326.7
+     "monzaVmaxKmh": 326.6
     }
    ]
   }

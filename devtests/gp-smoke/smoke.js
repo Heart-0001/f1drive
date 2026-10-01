@@ -22,6 +22,9 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const fs = require('fs'), path = require('path'), url = require('url');
 const ROOT = path.resolve(__dirname, '..', '..');
 require('../electron-userdata')(app, 'gp-smoke');
+// Every window drives the reference car (2025-standard, the v5 car these checks were written for): picked before the game
+// boots (devtests/ref-car.js), since v6.1 a fresh install drives the 2026 standard car.
+const refCar = require('../ref-car');
 const host = require(path.join(ROOT, 'net', 'host'));
 const OUT = path.join(__dirname, 'out');
 const PORT = Number(process.env.PORT || 24800);
@@ -170,6 +173,7 @@ function makeWin(tag, w0, h0) {
     return false;
   };
   w.open = async noPad => {
+    await refCar.seed(w);                     // the reference car (2025-standard) picked before the game boots
     await w.loadFile(pageFile(noPad));
     await sleep(900);
     await w.js(PAGE_LIB);
@@ -524,17 +528,17 @@ async function partPad() {
   await w.js(`__btn(11, 0)`);
   check('RS click recentres the view at once', near(lookC.y, 0, 1e-6), lookC.y);
 
-  // off the centreline, then A
+  // off the centreline, then Y (the reset button since the v6.1 layout of js/gamepad.js: A = battery, X = compound)
   await w.js(`__btn(7, 1)`); await axes([-0.6]); await sleep(900); await axes([0]); await w.js(`__btn(7, 0)`);
   s = await w.state();
   const off = s.car.d;
-  await press(0);
+  await press(3);
   s = await w.state();
-  check('A resets the car onto the centreline', Math.abs(off) > 0.3 && Math.abs(s.car.d) < 0.01 && Math.abs(s.car.v) < 0.5, { before: off, after: s.car.d, v: s.car.v });
+  check('Y resets the car onto the centreline', Math.abs(off) > 0.3 && Math.abs(s.car.d) < 0.01 && Math.abs(s.car.v) < 0.5, { before: off, after: s.car.d, v: s.car.v });
   const x0 = await w.js(`F1.game.raceLine.group.visible`);
-  await press(2); const x1 = await w.js(`F1.game.raceLine.group.visible`);
-  await press(2); const x2 = await w.js(`F1.game.raceLine.group.visible`);
-  check('X toggles the racing line', x0 === true && x1 === false && x2 === true, [x0, x1, x2]);
+  await press(8); const x1 = await w.js(`F1.game.raceLine.group.visible`);
+  await press(8); const x2 = await w.js(`F1.game.raceLine.group.visible`);
+  check('View (Back) toggles the racing line', x0 === true && x1 === false && x2 === true, [x0, x1, x2]);
   await press(9);
   check('Start opens the menu', await w.js(`!F1.game.running && __t.shown('menu')`));
   await sleep(700);                                          // longer than gamepad.js's 500 ms edge resync
@@ -549,7 +553,7 @@ async function partPad() {
   const rum = await w.js(`({ n: __rumble.length, first: __rumble[0], strongest: __rumble.reduce(function (m, r) { return Math.max(m, r[3]); }, 0), maxHit: window.__maxHit })`);
   check('wall hit -> rumble scaled by the impact', rum.n > 0 && rum.maxHit > 0.03 && rum.first[0] === 'dual-rumble' && rum.strongest > 0.2 && rum.strongest <= 1 &&
     near(rum.strongest, Math.min(1, 0.2 + rum.maxHit), 0.05) && rum.first[1] >= 120 && rum.first[1] <= 400, rum);
-  await press(0);
+  await press(3);
 
   // grid lock applies to the pad too
   await w.js(`__btn(6, 1)`); await w.until(`Math.abs(F1.game.car.state.speed) < 1`, 4000); await w.js(`__btn(6, 0)`);
@@ -557,11 +561,11 @@ async function partPad() {
   await sleep(200);
   const g0 = (await w.state()).car;
   await w.js(`__btn(7, 1); __pad.axes[0] = -1; __pad.axes[2] = -1; true`);
-  await press(0);
+  await press(3);
   await sleep(1200);
   s = await w.state();
   const lookG = await look();
-  check('grid: RT + stick + A do nothing while locked (no move, no steer, no reset)', s.gp.locked && s.car.v === 0 && s.car.x === g0.x && s.car.z === g0.z && inBox(await w.js(`__t.box(0)`)) && s.car.steer === 0, s.car);
+  check('grid: RT + stick + Y do nothing while locked (no move, no steer, no reset)', s.gp.locked && s.car.v === 0 && s.car.x === g0.x && s.car.z === g0.z && inBox(await w.js(`__t.box(0)`)) && s.car.steer === 0, s.car);
   check('grid: the head still turns', near(lookG.y, lookG.max.maxYaw, 0.03), lookG.y);
   await w.shot('c3-grid-pad');
   await axes([0, null, 0, 0]);

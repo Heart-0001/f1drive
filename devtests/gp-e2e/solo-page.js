@@ -119,20 +119,30 @@
       delete o.onBeforeRender;
       if (E.renderer) return;
       E.renderer = r; E.renders++;                  // (this very frame is being drawn for real)
-      var real = r.render;
-      E.realRender = function () { E.renders++; real.call(r, E.scene, F1.game.camera); };
+      var real = r.render, skipping = false;
+      E.realRender = function () { E.renders++; skipping = false; real.call(r, E.scene, F1.game.camera); };
       r.render = function (s, c) {
         // (v6: renders started from inside the main one - the cockpit's live mirrors, from the glass's onBeforeRender -
-        //  go through and are not counted; skipping them breaks three.js's render state in the main render)
-        if (c !== F1.game.camera) return real.call(r, s, c);
-        if (dispatching && !(E.renderEvery > 0 && E.gameFrames % E.renderEvery === 0)) { E.skipped++; return; }
+        //  go through and are not counted; skipping them breaks three.js's render state in the main render.
+        //  v6.1: the HUD mirrors (js/hudmirrors.js) render right AFTER the main render, not inside it: in a frame whose
+        //  main render was skipped they are skipped too - they save and restore the renderer's state themselves)
+        if (c !== F1.game.camera) { if (skipping) return; return real.call(r, s, c); }
+        if (dispatching && !(E.renderEvery > 0 && E.gameFrames % E.renderEvery === 0)) { E.skipped++; skipping = true; return; }
+        skipping = false;
         E.renders++;
         return real.call(r, s, c);
       };
     };
     return true;
   };
-  E.draw = function () { if (!E.realRender) return false; E.realRender(); return true; };
+  // one real frame for a screenshot: the main render and the HUD mirrors over it (their last pose)
+  E.draw = function () {
+    if (!E.realRender) return false;
+    E.realRender();
+    var hm = F1.game && F1.game.hudMirrors;
+    if (hm) hm.render();
+    return true;
+  };
 
   /* ================= fake controller ================= */
   (function () {
@@ -225,12 +235,12 @@
   // own advice (raceLine.levels, the colour of the line just ahead), pure-pursuit steering at a point of the line
   // 7..35 m ahead - here as an analog stick instead of left / right keys. Plus recovery: off the road it slows down
   // and steers back, stuck against a wall it reverses out, and as a last resort (facing the wrong way for a second, or
-  // stuck again) it presses A (reset to the track).
+  // stuck again) it presses Y (reset to the track; A until the v6.1 pad layout of js/gamepad.js).
   var ap = E.ap = { on: false, mode: 'idle', thr: 0, brk: 0, want: 0, still: 0, wrong: 0, rev: 0, lastRecov: -1e9,
     resetState: 0, resetTries: 0, cutPlan: null, cut: null, stats: newStats(), padErr: 0, boost: false, ers: null, pit: null };
   ap.step = function () {
     var g = F1.game, car = g.car, track = g.track, rl = g.raceLine;
-    if (!car || !track || !rl || ap.mode === 'idle') { setPad(0, 0, 0); btn(0, 0); setBoost(false); return; }
+    if (!car || !track || !rl || ap.mode === 'idle') { setPad(0, 0, 0); btn(3, 0); setBoost(false); return; }
     var st = car.state, S = track.samples, N = S.length, ds = track.length / N, P = rl.points;
     var v = Math.max(0, st.speed), idx = T.track === track ? T.idx : st.sampleIndex;
     var locked = g.gp.inputLocked, thr = 0, brk = 0, want = 0;
@@ -248,7 +258,7 @@
     }
     ap.checkPad = true;
 
-    if (ap.mode === 'pit') { setBoost(false); btn(0, 0); pitStep(); return; }
+    if (ap.mode === 'pit') { setBoost(false); btn(3, 0); pitStep(); return; }
 
     if (ap.upset) {
       // (a test of the recovery, asked for by the harness: the car is thrown off through the same controller.
@@ -258,7 +268,7 @@
       if ((u.time -= E.dt) >= 0 && (u.kind !== 'spin' || Math.abs(herr) <= 2.6)) {
         if (u.kind === 'spin') setPad(v < 8 ? 1 : 0, v > 10 ? 1 : 0, v > 10 ? 0 : u.steer);
         else setPad(1, 0, u.steer);
-        btn(0, 0); setBoost(false);
+        btn(3, 0); setBoost(false);
         tally(st, S[idx].halfW || track.halfWidth);
         return;
       }
@@ -312,10 +322,10 @@
         ap.lastRecov = E.clock; ap.still = 0; ap.wrong = 0;
       }
     }
-    // A (reset): a press that a poll() after a long wall-clock gap swallowed is simply repeated
-    if (ap.resetState === 1) { btn(0, 1); ap.resetState = 2; }
+    // Y (reset): a press that a poll() after a long wall-clock gap swallowed is simply repeated
+    if (ap.resetState === 1) { btn(3, 1); ap.resetState = 2; }
     else if (ap.resetState === 2) {
-      btn(0, 0);
+      btn(3, 0);
       ap.resetState = (Math.abs(st.d) < 0.05 && Math.abs(st.speed) < 0.5) || ++ap.resetTries > 5 ? 0 : 1;
     }
     setPad(thr, brk, want);

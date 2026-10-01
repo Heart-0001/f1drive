@@ -6,7 +6,8 @@
 //   - the pit stop: armed with __v6.armPit({ onLap, startM, scale, compound }); on that lap of the race, startM metres
 //     before track.pit.from, the pit plan (pitplan.js) takes over: into the lane (LB: limiter on before the entry line,
 //     off after the exit line), into the box of our room slot, held for the service, out and back onto the racing
-//     line, then the autopilot drives on. compound: Back pressed until F1.game.nextCompound is it (before the stop).
+//     line, then the autopilot drives on. compound: X pressed until F1.game.nextCompound is it (before the stop).
+//     (Pad layout of v6.1, js/gamepad.js: A / RB battery, B / LB limiter, X next compound, Y reset, View line.)
 //   - recorders: ERS use, pit-lane intervals (session clock), the service, what our car felt in the lane, and every
 //     other car seen in the lane while we were in it (drawn translucent? solid for the game? closest distance)
 (function () {
@@ -56,7 +57,7 @@
         if (p.error) V.planErr = p.error; else V.plan = p;
       }
     }
-    if (arm && arm.compound && g.nextCompound !== arm.compound && !V.taps.length && !(g.pit && g.pit.state.service)) tap(8, 'compound');
+    if (arm && arm.compound && g.nextCompound !== arm.compound && !V.taps.length && !(g.pit && g.pit.state.service)) tap(2, 'compound');   // X
     if (V.plan) {
       var keep = c.mode;
       c.mode = 'idle'; step(env); c.mode = keep;      // (the autopilot keeps its bookkeeping fresh, and restarts clean afterwards)

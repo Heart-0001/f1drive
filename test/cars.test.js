@@ -23,7 +23,14 @@ function test(name, fn) {
   catch (e) { failed++; console.log('FAIL ' + name + '\n     ' + (e && e.stack)); }
 }
 const ID_RE = /^[a-z0-9-]{1,40}$/, COLOUR_RE = /^#[0-9a-fA-F]{6}$/;
-const MULT = ['power', 'drag', 'downforce', 'grip', 'brake', 'traction', 'ersPower', 'ersHarvest'];
+const MULT = ['power', 'drag', 'downforce', 'grip', 'brake', 'traction', 'ersPower', 'ersHarvest', 'ersStore'];
+// the multiplier ranges (tools/build-cars.mjs CFG, js/cars.js): the battery's deploy / harvest and store are wider
+const RANGE = k => k === 'ersStore' ? [0.9, 1.1] : (k === 'ersPower' || k === 'ersHarvest' ? [0.75, 1.15] : [0.95, 1.05]);
+const ERS = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools', 'ers-data.json'), 'utf8')).entries;
+const LOG = JSON.parse(fs.readFileSync(path.join(ROOT, 'devtests', 'seasons-calib', 'entries.json'), 'utf8'));
+const EFFECT = JSON.parse(fs.readFileSync(path.join(ROOT, 'devtests', 'seasons-calib', 'ers-effect.json'), 'utf8'));
+// the cars that raced a whole season without KERS (docs/ers-data.md); 2010 had no battery at all
+const NO_KERS = ['2011-lotus-racing', '2011-hrt', '2011-virgin', '2012-hrt', '2012-marussia'];
 const RATINGS = ['topSpeed', 'accel', 'cornering', 'braking', 'ers'];
 const PHYS = ['power', 'dragK', 'downforce', 'latBase', 'latMax', 'brakeBase', 'traction'];
 const SPEC_KEYS = ['id', 'year', 'team', 'teamZh', 'car', 'engine', 'colour', 'colour2', 'ratings', 'note'].concat(PHYS)
@@ -70,13 +77,18 @@ test('cars: standard first with every multiplier 1, ids unique and valid, colour
       if (i === 0) {
         assert.strictEqual(c.id, s.year + '-standard');
         for (const k of MULT) assert.strictEqual(c.perf[k], 1, c.id + '.' + k);
-        for (const k of RATINGS) assert.strictEqual(c.ratings[k], 50, c.id + ' rating ' + k);
+        // 50 everywhere; the battery bar 0 in a season without a battery (2010)
+        for (const k of RATINGS) assert.strictEqual(c.ratings[k], k === 'ers' && !s.era.ers ? 0 : 50, c.id + ' rating ' + k);
+        assert.strictEqual(c.hasErs, !!s.era.ers, c.id + ' hasErs');
+        assert.strictEqual(c.ersNote, '', c.id + ' ersNote');
       } else assert(raw.entries.some(e => e.id === c.id), c.id + ' is an F1DB entry');
       assert(COLOUR_RE.test(c.colour) && COLOUR_RE.test(c.colour2), c.id + ' colours ' + c.colour + ' ' + c.colour2);
-      for (const k of MULT) assert(c.perf[k] >= 0.95 && c.perf[k] <= 1.05, c.id + '.' + k + ' = ' + c.perf[k]);
+      for (const k of MULT) assert(c.perf[k] >= RANGE(k)[0] && c.perf[k] <= RANGE(k)[1], c.id + '.' + k + ' = ' + c.perf[k]);
       for (const k of RATINGS) assert(Number.isInteger(c.ratings[k]) && c.ratings[k] >= 0 && c.ratings[k] <= 100, c.id + ' rating ' + k);
       for (const k of ['team', 'teamZh', 'car', 'engine']) assert(typeof c[k] === 'string' && c[k].length > 0 && c[k].length <= 120, c.id + '.' + k);
       assert(typeof c.note === 'string' && c.note.length <= 120, c.id + ' note');
+      assert(typeof c.hasErs === 'boolean', c.id + ' hasErs');
+      assert(typeof c.ersNote === 'string' && c.ersNote.length <= 120 && !/[\r\n]/.test(c.ersNote), c.id + ' ersNote');
       assert(ID_RE.test(c.lineage), c.id + ' lineage');
       assert(c.cylinders === s.era.cylinders && c.aspiration === s.era.aspiration, c.id + ' engine layout matches the era');
     });
@@ -86,16 +98,21 @@ test('cars: standard first with every multiplier 1, ids unique and valid, colour
 
 // the menu bars: 50 + 50 tanh(gain x / 50) (tools/build-cars.mjs ratingOf) never pins a car at 0 / 100, and keeps the
 // order of the measured differences (devtests/seasons-calib/entries.json ratingX) inside every season
-test('menu ratings are never pinned at 0 / 100 and follow the order of the measured differences', () => {
-  const LOG = JSON.parse(fs.readFileSync(path.join(ROOT, 'devtests', 'seasons-calib', 'entries.json'), 'utf8'));
+test('menu ratings are never pinned at 0 / 100 (the battery of a car without one is 0) and follow the order of the measured differences', () => {
   for (const s of SEASONS) {
     const ls = LOG.seasons.find(q => q.year === s.year);
-    for (const c of s.cars) for (const k of RATINGS) assert(c.ratings[k] > 0 && c.ratings[k] < 100, c.id + ' rating ' + k + ' = ' + c.ratings[k]);
+    for (const c of s.cars) for (const k of RATINGS) {
+      if (k === 'ers' && !c.hasErs) assert.strictEqual(c.ratings[k], 0, c.id + ' has no battery: its bar is 0');
+      else assert(c.ratings[k] > 0 && c.ratings[k] < 100, c.id + ' rating ' + k + ' = ' + c.ratings[k]);
+    }
     for (const k of RATINGS) {
-      const rows = ls.cars.map(c => ({ id: c.id, x: c.ratingX[k], r: s.cars.find(q => q.id === c.id).ratings[k] })).sort((a, b) => a.x - b.x);
+      const rows = ls.cars.filter(c => c.ratingX[k] !== null).map(c => ({ id: c.id, x: c.ratingX[k], r: s.cars.find(q => q.id === c.id).ratings[k] })).sort((a, b) => a.x - b.x);
       for (let i = 1; i < rows.length; i++) assert(rows[i].r >= rows[i - 1].r, s.year + ' ' + k + ': ' + rows[i - 1].id + ' ' + rows[i - 1].r + ' > ' + rows[i].id + ' ' + rows[i].r);
     }
   }
+  // the battery bar spreads over the range: the weakest (Honda 2015) low, the strongest (Mercedes 2014-16, Honda 2021) high
+  const all = SEASONS.flatMap(s => s.cars.filter(c => c.hasErs)).map(c => c.ratings.ers);
+  assert(Math.min(...all) <= 10 && Math.max(...all) >= 80, 'ers bar range ' + Math.min(...all) + '..' + Math.max(...all));
   // the 2010 back markers no longer share a 0 (their measured standing starts differ: HRT -7.1 %, Virgin -5.8 %)
   assert(F1.cars.get('2010-hrt').ratings.accel < F1.cars.get('2010-virgin').ratings.accel);
 });
@@ -144,7 +161,9 @@ test('multipliers are applied to the era: CarSpec = era x perf', () => {
   assert.strictEqual(spec.traction, s.era.traction * c.perf.traction);
   assert.strictEqual(spec.ers.power, s.era.ers.power * c.perf.ersPower);
   assert.strictEqual(spec.ers.harvest, s.era.ers.harvest * c.perf.ersHarvest);
-  assert.strictEqual(spec.ers.store, s.era.ers.store);
+  assert.strictEqual(spec.ers.store, s.era.ers.store * c.perf.ersStore);
+  assert.strictEqual(c.perf.ersPower, 1.08, 'deploy from tools/ers-data.json');
+  assert.strictEqual(c.perf.ersHarvest, 1.12, 'harvest from tools/ers-data.json');
   assert.strictEqual(spec.team, 'Mercedes');
   assert.strictEqual(spec.car, 'F1 W05 Hybrid');
 });
@@ -198,19 +217,132 @@ test('2026 battery: deploying all the way, every 2026 car tops out at 345 km/h a
 const LIVERIES = Object.assign({}, ...['2010-2017.json', '2018-2026.json'].map(f =>
   JSON.parse(fs.readFileSync(path.join(ROOT, 'tools', 'liveries', f), 'utf8')).entries));
 
-test('the 2026 cars are js/cars-data.js (multipliers, notes, colours, names; Chinese name from the livery files)', () => {
+// v6.1: the battery is tools/ers-data.json's (it replaces js/cars-data.js's ersPower / ersHarvest), and one chassis level L
+// on js/cars-data.js's downforce / grip / brake / traction keeps the car's pace with it; power and drag are untouched
+test('the 2026 cars are js/cars-data.js (power, drag, chassis + one level, notes, colours, names; Chinese name from the livery files)', () => {
   const s = SEASONS.find(q => q.year === 2026);
   for (const c of CARS26) {
     if (c.id === 'standard') continue;
     const d = s.cars.find(q => q.id === '2026-' + c.id);
     assert(d, '2026-' + c.id);
-    assert.deepStrictEqual(d.perf, c.perf, c.id + ' perf');
+    assert.strictEqual(d.perf.power, c.perf.power, c.id + ' power');
+    assert.strictEqual(d.perf.drag, c.perf.drag, c.id + ' drag');
+    const L = ['downforce', 'grip', 'brake', 'traction'].map(k => d.perf[k] - c.perf[k]);
+    assert(Math.max(...L) - Math.min(...L) <= 1.0001e-4, c.id + ': one level on the four chassis multipliers ' + L.join(' '));
+    const e = ERS[d.id];
+    assert.strictEqual(d.perf.ersPower, e.deploy, c.id + ' deploy');
+    assert.strictEqual(d.perf.ersHarvest, c.id === 'mercedes' ? 1.0502 : e.harvest, c.id + ' harvest (Mercedes 1.08 cut to the F1.sanitizeSpec ceiling)');
+    assert.strictEqual(d.perf.ersStore, e.store, c.id + ' store');
     assert.strictEqual(d.note, c.note);
     assert.strictEqual(d.colour, c.colour);
     assert.strictEqual(d.colour2, c.colour2);
     assert.strictEqual(d.team, c.teamEn);
     assert.strictEqual(d.teamZh, LIVERIES[d.id].teamZh || c.teamZh, d.id + ' teamZh: the fact-checked livery name');
     assert.strictEqual(d.car, c.id === 'mercedes' ? 'F1 W17 E Performance' : c.car);
+  }
+});
+
+// ---- v6.1: every car's own battery (tools/ers-data.json, docs/ers-data.md) ----------------------------------------------
+test('per-car battery: the five cars that raced without KERS (and all of 2010) have ers null, every other car its own', () => {
+  const none = [];
+  for (const s of SEASONS) for (const c of s.cars) {
+    const spec = F1.cars.get(c.id);
+    assert.strictEqual(spec.ers === null, !c.hasErs, c.id + ': CarSpec.ers null <=> hasErs false');
+    if (!c.hasErs) { none.push(c.id); assert.strictEqual(spec.ratings.ers, 0, c.id + ' battery bar 0'); }
+    if (s.year === 2010) { assert.strictEqual(spec.ers, null, c.id); continue; }
+    if (c.id.endsWith('-standard')) { assert.deepStrictEqual(plain(spec.ers), plain(s.era.ers), c.id + ': the era battery'); continue; }
+    const e = ERS[c.id];
+    assert(e, c.id + ' is in tools/ers-data.json');
+    assert.strictEqual(c.hasErs, e.hasErs !== false, c.id + ' hasErs');
+    assert.strictEqual(c.ersNote, e.note, c.id + ' ersNote = the data note');
+    assert.strictEqual(F1.cars.ersNote(c.id), e.note, c.id + ' F1.cars.ersNote');
+    if (c.hasErs) {
+      assert.strictEqual(c.perf.ersPower, e.deploy, c.id + ' deploy');
+      if (c.id !== '2026-mercedes') assert.strictEqual(c.perf.ersHarvest, e.harvest, c.id + ' harvest');
+      assert.strictEqual(c.perf.ersStore, e.store, c.id + ' store');
+      assert(spec.ers.power === s.era.ers.power * c.perf.ersPower && spec.ers.harvest === s.era.ers.harvest * c.perf.ersHarvest &&
+        spec.ers.store === s.era.ers.store * c.perf.ersStore, c.id + ': era x multiplier');
+    }
+  }
+  assert.deepStrictEqual(none.filter(id => !/^2010-/.test(id)).sort(), NO_KERS.slice().sort());
+  assert.strictEqual(none.filter(id => /^2010-/.test(id)).length, 13, '2010: no battery for anybody (12 cars + the standard car)');
+  // 2013: everybody had KERS (Marussia's first, Caterham's Red Bull system)
+  for (const spec of F1.cars.list(2013)) assert(spec.ers, spec.id);
+  // the notes the menu can show: one line, non-empty where the data has one
+  assert(SEASONS.flatMap(s => s.cars).filter(c => c.ersNote).length >= 100);
+  for (const bad of ['constructor', '__proto__', 'toString', '', null, undefined, 5, {}, '2014-standard', '2010-red-bull', 'nope']) assert.strictEqual(F1.cars.ersNote(bad), '', String(bad));
+});
+
+test('battery multipliers stay in their ranges (deploy / harvest 0.75..1.15, store 0.9..1.1) and inside js/car.js\'s window', () => {
+  const R = F1.REF_SPEC.ers;
+  let lo = Infinity, hi = -Infinity;
+  for (const s of SEASONS) for (const c of s.cars) {
+    for (const k of ['ersPower', 'ersHarvest']) { assert(c.perf[k] >= 0.75 && c.perf[k] <= 1.15, c.id + '.' + k); lo = Math.min(lo, c.perf[k]); hi = Math.max(hi, c.perf[k]); }
+    assert(c.perf.ersStore >= 0.9 && c.perf.ersStore <= 1.1, c.id + '.ersStore');
+    const spec = F1.cars.get(c.id);
+    if (spec.ers) for (const k of ['store', 'power', 'harvest']) assert(spec.ers[k] >= R[k] / 10 && spec.ers[k] <= R[k] * 10, c.id + '.ers.' + k);
+  }
+  assert(lo <= 0.8 && hi >= 1.1, 'the per-car batteries use the wider range: ' + lo + '..' + hi);
+  // 2026's harvest sits at the window's ceiling / 1.05: Mercedes' 1.08 is cut to 1.0502, not dropped to the reference's
+  assert(F1.cars.get('2026-mercedes').ers.harvest <= R.harvest * 10 && F1.cars.get('2026-mercedes').ers.harvest > F1.cars.get('2026-mclaren').ers.harvest);
+});
+
+test('battery order: 2014 Mercedes > 2014 Renault (Red Bull) > 2015 Honda (McLaren) in deploy and in harvest; 2021 Honda the strongest', () => {
+  const g = id => F1.cars.get(id);
+  for (const k of ['power', 'harvest']) {
+    assert(g('2014-mercedes').ers[k] > g('2014-red-bull').ers[k] && g('2014-red-bull').ers[k] > g('2015-mclaren').ers[k], k);
+    assert(g('2014-williams').ers[k] === g('2014-mercedes').ers[k], k + ': customers get the supplier\'s battery');
+    assert(g('2014-ferrari').ers[k] === g('2014-standard').ers[k], k + ': Ferrari 2014 neutral');
+  }
+  assert(g('2014-mercedes').ratings.ers > g('2014-ferrari').ratings.ers && g('2014-ferrari').ratings.ers > g('2014-red-bull').ratings.ers && g('2014-red-bull').ratings.ers > g('2015-mclaren').ratings.ers);
+  assert(g('2021-red-bull').ers.power > g('2021-mercedes').ers.power, '2021: Honda deploys best');
+  assert(g('2026-aston-martin').ers.power < g('2026-standard').ers.power && g('2026-aston-martin').ratings.ers < g('2026-audi').ratings.ers);
+});
+
+// the lap-time targets hold WITH the battery deployed: the chassis level absorbs the battery's driven effect
+test('pace with the battery: every car on its target, the battery effect absorbed by the chassis level (entries.json, ers-effect.json)', () => {
+  for (const ls of LOG.seasons) {
+    const s = SEASONS.find(q => q.year === ls.year);
+    for (const c of ls.cars) {
+      const d = s.cars.find(q => q.id === c.id), k = c.battery.key;
+      assert(Math.abs(c.lapPct - c.targetPct) <= 0.01, c.id + ': ' + c.lapPct + ' vs target ' + c.targetPct);
+      assert(Math.abs(c.profilePct + c.ersPct - c.lapPct) < 2e-4, c.id + ': lap = profile + battery');
+      const fx = k === null ? 0 : EFFECT.seasons[ls.year].combos[k].meanPct;
+      assert(Math.abs(c.ersPct - fx) < 1e-4, c.id + ': the driven battery effect of ers-effect.json');
+      assert.strictEqual(d.est.ersPct, Math.round(fx * 1000) / 1000, c.id + ' est.ersPct');
+      if (k !== null) assert(EFFECT.seasons[ls.year].combos[k].cars.includes(c.id), c.id + ' measured with its own battery');
+    }
+  }
+  const row = id => LOG.seasons.find(q => q.year === +id.slice(0, 4)).cars.find(c => c.id === id);
+  // no KERS costs lap time (0.4..0.7 s a lap): those cars get a stronger chassis than their pace alone would give
+  for (const id of NO_KERS) assert(row(id).ersPct > 0.3 && row(id).profilePct < row(id).targetPct - 0.3, id + ' ' + JSON.stringify([row(id).ersPct, row(id).profilePct, row(id).targetPct]));
+  // a strong battery is faster, a weak one slower (driven)
+  assert(row('2014-mercedes').ersPct < 0 && row('2014-red-bull').ersPct > 0 && row('2015-mclaren').ersPct > row('2015-red-bull').ersPct);
+  assert(row('2026-aston-martin').ersPct > 0 && row('2026-mercedes').ersPct < 0);
+  // the character: Mercedes 2014's chassis alone is slower than its lap (the battery makes up), McLaren-Honda 2015's faster
+  assert(row('2014-mercedes').profilePct > row('2014-mercedes').targetPct && row('2015-mclaren').profilePct < row('2015-mclaren').targetPct);
+});
+
+test('2026: the order of js/cars-data.js is kept with the new batteries (lap with the battery deployed)', () => {
+  const s = SEASONS.find(q => q.year === 2026);
+  const ours = s.cars.slice(1).slice().sort((a, b) => a.est.lapPct - b.est.lapPct).map(c => c.id.slice(5));
+  const theirs = CARS26.filter(c => c.id !== 'standard').sort((a, b) => a.est.lapPct - b.est.lapPct).map(c => c.id);
+  assert.deepStrictEqual(ours, theirs);
+  // Aston Martin's weak battery (0.88 / 0.88) costs lap time, so its chassis level is raised; Mercedes' lowered
+  const lvl = id => LOG.seasons.find(q => q.year === 2026).cars.find(c => c.id === id).levelPct;
+  assert(lvl('2026-aston-martin') > 0 && lvl('2026-mercedes') < 0, 'levels ' + lvl('2026-aston-martin') + ' / ' + lvl('2026-mercedes'));
+});
+
+// determinism: the driven battery effect is re-measured (the same deterministic drive as ers-effect.mjs) on two circuits
+test('ers-effect.json is reproducible: the 2014 Mercedes battery and 2011 no-KERS re-driven on Monza and the Hungaroring', () => {
+  for (const [y, k] of [[2014, '1.08/1.12/1'], [2011, 'none']]) {
+    const r = spawnSync(process.execPath, [path.join(ROOT, 'devtests', 'seasons-calib', 'ers-effect.mjs'), '--probe', String(y), k, 'it-1922,hu-1986'], { cwd: ROOT, encoding: 'utf8', timeout: 120000 });
+    assert.strictEqual(r.status, 0, (r.stdout || '') + (r.stderr || ''));
+    const got = JSON.parse(r.stdout), want = EFFECT.seasons[y];
+    for (const t of ['it-1922', 'hu-1986']) {
+      assert.strictEqual(got.stdLaps[t], want.stdLaps[t], y + ' standard lap ' + t);
+      assert.strictEqual(got.perTrackPct[t], want.combos[k].perTrackPct[t], y + ' ' + k + ' ' + t);
+    }
   }
 });
 
@@ -392,7 +524,9 @@ test('corrupted data (fuzzed): every CarSpec is exactly what js/car.js drives (F
     // era values at the edge of the range, times the largest multiplier
     if (rnd() < 0.2) { e.power = R.power * 4; e.traction = R.traction / 4; }
     s.cars.forEach(c => {
-      if (rnd() < 0.3) c.perf = { power: junk(), drag: junk(), downforce: 1.05, grip: 0.95, brake: junk(), traction: 1.05, ersPower: 1.05, ersHarvest: junk() };
+      if (rnd() < 0.3) c.perf = { power: junk(), drag: junk(), downforce: 1.05, grip: 0.95, brake: junk(), traction: 1.05, ersPower: pick([1.05, 1.15, junk()]), ersHarvest: junk(), ersStore: pick([1.1, 0.9, junk()]) };
+      if (rnd() < 0.2) c.hasErs = pick([false, true, junk()]);
+      if (rnd() < 0.1) c.ersNote = junk();
       if (rnd() < 0.2) c.cylinders = junk();
       if (rnd() < 0.2) c.aspiration = junk();
       if (rnd() < 0.2) c.ratings = { topSpeed: junk(), accel: -5, cornering: 101 };
@@ -412,6 +546,36 @@ test('corrupted data (fuzzed): every CarSpec is exactly what js/car.js drives (F
   const cars = sandbox([s], null);
   assert.strictEqual(cars.get(s.cars[1].id).power, R.power);
   assert.strictEqual(cars.list(2014)[0].power, R.power * 4, 'the standard car keeps the edge value');
+});
+
+test('js/cars.js battery: hasErs false -> ers null (never the standard car), multipliers clamped to their ranges, the product kept in js/car.js\'s window', () => {
+  const R = F1.REF_SPEC.ers;
+  const s = JSON.parse(JSON.stringify(SEASONS.find(q => q.year === 2014)));
+  s.cars[0].hasErs = false;                                                // the standard car: ignored
+  s.cars[1].hasErs = false; s.cars[1].ersNote = '沒有電池';
+  s.cars[2].perf = Object.assign({}, s.cars[2].perf, { ersPower: 1.3, ersHarvest: 0.5, ersStore: 2 });
+  s.cars[3].perf = Object.assign({}, s.cars[3].perf, { ersPower: 'x', ersHarvest: NaN, ersStore: null });
+  s.cars[4].hasErs = 'no';                                                 // only false removes the battery
+  s.cars[5].ersNote = 'x'.repeat(300);
+  const cars = sandbox([s], null), e = s.era.ers;
+  assert.deepStrictEqual(plain(cars.list(2014)[0].ers), plain(e), 'the standard car keeps the era battery');
+  assert.strictEqual(cars.get(s.cars[1].id).ers, null);
+  assert.strictEqual(cars.get(s.cars[1].id).ratings.ers, 0, 'no battery: bar 0');
+  assert.deepStrictEqual(F1.sanitizeSpec(plain(cars.get(s.cars[1].id))), plain(cars.get(s.cars[1].id)), 'js/car.js keeps ers null');
+  assert.strictEqual(cars.ersNote(s.cars[1].id), '沒有電池');
+  const c2 = cars.get(s.cars[2].id).ers;
+  assert.deepStrictEqual([c2.power, c2.harvest, c2.store], [e.power * 1.15, e.harvest * 0.75, e.store * 1.1], 'clamped to 0.75..1.15 / 0.9..1.1');
+  const c3 = cars.get(s.cars[3].id).ers;
+  assert.deepStrictEqual([c3.power, c3.harvest, c3.store], [e.power, e.harvest, e.store], 'junk multipliers = 1');
+  assert(cars.get(s.cars[4].id).ers, 'hasErs "no" keeps the battery');
+  assert.strictEqual(cars.ersNote(s.cars[5].id).length, 120);
+  // an era battery at the window's edge (2026's harvest is calibrated at 10 x the reference / 1.05): x 1.15 is clamped
+  // to the edge, not replaced by the reference's tenfold smaller harvest
+  const t = JSON.parse(JSON.stringify(SEASONS.find(q => q.year === 2026)));
+  t.cars[1].perf = Object.assign({}, t.cars[1].perf, { ersHarvest: 1.15 });
+  const h = sandbox([t], null).get(t.cars[1].id).ers.harvest;
+  assert.strictEqual(h, R.harvest * 10);
+  assert.strictEqual(F1.sanitizeSpec({ ers: { store: R.store, power: R.power, harvest: h } }).ers.harvest, h);
 });
 
 test('ers.taperKmh: a valid era taper reaches every car of the season (frozen), a broken one none, and car.js keeps it', () => {

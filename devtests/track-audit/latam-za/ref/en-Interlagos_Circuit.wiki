@@ -1,0 +1,393 @@
+{{Short description|Motorsport circuit in São Paulo, Brazil}}
+{{Use dmy dates|date=January 2025}}
+{{Infobox motorsport venue
+| name           = Autódromo José Carlos Pace
+| location       = [[Interlagos]], São Paulo, Brazil
+| coordinates    = {{coord|23|42|4|S|46|41|50|W|region:BR-SP_type:landmark_scale:10000|display=inline,title}}
+| image          = [[File:Autódromo José Carlos Pace (AKA Interlagos) track map.svg|class=skin-invert|260px]]
+| image_caption  = Grand Prix Circuit (5th Variation) (1999–present)
+| capacity       = 60,000
+| fia_grade      = 1<ref>{{cite web |title=LIST OF FIA LICENSED CIRCUITS UPDATED ON : 2026-03-31 |url=https://www.fia.com/sites/default/files/circuits_fia20260331_0.pdf |publisher=[[Fédération Internationale de l'Automobile]] |date=31 March 2026 |access-date=28 August 2026}}</ref>
+| broke_ground   = 1938
+| opened         = {{Start date|df=yes|1940|05|12}}
+| former_names   = Autódromo de Interlagos (1940–1984)
+| events         = '''Current:'''<br />'''[[Formula One]]'''<br />''[[Brazilian Grand Prix]]'' (1972–1977, 1979–1980, 1990–2019)<br />''[[São Paulo Grand Prix]]'' (2021–present)<br />'''[[FIA World Endurance Championship|FIA WEC]]'''<br />''[[6 Hours of São Paulo]]'' (2012–2014, 2024–present)<br />'''[[Mil Milhas Brasil]]''' (1956–1961, 1965–1967, 1970, 1973, 1981, 1983–1990, 1992–1996, 1998, 2001–2008, 2020–present)<br />'''[[TCR South America Touring Car Championship|TCR South America]]''' (2021–present)<br />'''[[Stock Car Pro Series]]''' (1979–present)<br />'''Former:'''<br />[[Grand Prix motorcycle racing]]<br />''[[Brazilian motorcycle Grand Prix]]'' (1992)<br />[[TCR World Tour]] (2024)<br />[[World Series Formula V8 3.5|World Series by Nissan]] (2002)<br />[[South American Super Touring Car Championship|SASTC]] (1997–1999)<br />[[TC2000 Championship|TC2000]] (2007)
+| layout         = Grand Prix Circuit (5th Variation)<br />(1999–present)
+| length_km      = 4.309
+| length_mi      = 2.677
+| turns          = 15
+| record_time    = 1:10.540
+| record_driver  = {{flagicon|FIN}} [[Valtteri Bottas]]
+| record_car     = [[Mercedes AMG F1 W09 EQ Power+|Mercedes W09]]
+| record_year    = [[2018 Brazilian Grand Prix|2018]]
+| record_class   = [[Formula One|F1]]
+| layout2        = Stock Car Circuit with Chicane (2011–2017)
+| length2_km     = 4.314
+| length2_mi     = 2.681
+| turns2         = 17
+| record_time2   = 1:40.066
+| record_driver2 = {{flagicon|BRA}} [[Júlio Campos]]
+| record_car2    = [[Chevrolet Cruze#Motorsport|Chevrolet Cruze Stock Car]]
+| record_year2   = [[2016 Stock Car Brasil Championship|2016]]
+| record_class2  = [[Stock Car Pro Series|Stock Car Brasil]]
+| layout3        = Grand Prix Circuit (4th Variation)<br />(1996–1998)
+| length3_km     = 4.292
+| length3_mi     = 2.667
+| turns3         = 15
+| record_time3   = 1:18.397
+| record_driver3 = {{flagicon|CAN}} [[Jacques Villeneuve]]
+| record_car3    = [[Williams FW19]]
+| record_year3   = [[1997 Brazilian Grand Prix|1997]]
+| record_class3  = [[Formula One|F1]]
+| layout4        = Grand Prix Circuit (3rd Variation)<br />(1990–1995)
+| length4_km     = 4.325
+| length4_mi     = 2.687
+| turns4         = 15
+| record_time4   = 1:18.455
+| record_driver4 = {{flagicon|DEU}} [[Michael Schumacher]]
+| record_car4    = [[Benetton B194]]
+| record_year4   = [[1994 Brazilian Grand Prix|1994]]
+| record_class4  = [[Formula One|F1]]
+| layout5        = Motorcycle Circuit (1992)
+| length5_km     = 4.352
+| length5_mi     = 2.705
+| turns5         = 17
+| record_time5   = 1:42.872
+| record_driver5 = {{flagicon|USA}} [[Wayne Rainey]]
+| record_car5    = [[Yamaha YZR500]]
+| record_year5   = [[1992 Brazilian motorcycle Grand Prix|1992]]
+| record_class5  = [[Grand Prix motorcycle racing#Pre-MotoGP era|500cc]]
+| layout6        = Grand Prix Circuit (2nd Variation)<br />(1980–1989)
+| length6_km     = 7.873
+| length6_mi     = 4.893
+| turns6         = 26
+| record_time6   = 2:27.311
+| record_driver6 = {{flagicon|FRA|1974}} [[René Arnoux]]
+| record_car6    = [[Renault RE20]]
+| record_year6   = [[1980 Brazilian Grand Prix|1980]]
+| record_class6  = [[Formula One|F1]]
+| layout7        = Original Grand Prix Circuit (1940–1979)
+| length7_km     = 7.960
+| length7_mi     = 4.946
+| turns7         = 26
+| record_time7   = 2:28.76
+| record_driver7 = {{flagicon|FRA|1974}} [[Jacques Laffite]]
+| record_car7    = [[Ligier JS11]]
+| record_year7   = [[1979 Brazilian Grand Prix|1979]]
+| record_class7  = [[Formula One|F1]]
+| website        = https://f1saopaulo.com.br/interlagos/<br />https://autodromodeinterlagos.com.br/
+}}
+
+The '''Autódromo José Carlos Pace''', better known as '''Interlagos''', is a {{cvt|4.309|km|mi|abbr=on}} [[motorsport]] [[race track|circuit]] located in the city of [[São Paulo]], Brazil. It was inaugurated on 12 May 1940, by the federal intervener of the state of São Paulo, [[Adhemar de Barros]]. In 1985, the circuit was renamed to honor the Formula 1 driver [[Carlos Pace|José Carlos Pace]], who died in a plane crash in 1977. It is also his final resting place since 2024. It runs [[counterclockwise]]. The facilities also include a [[Kart racing|kart]] circuit named after [[Ayrton Senna]].
+
+The circuit has hosted the [[Formula One]] [[Brazilian Grand Prix]] since 1973, with the current contract set to expire in 2030.<ref>{{Cite web|url=https://www.formula1.com/en/latest/article/formula-1-to-race-in-sao-paolo-until-2030-after-new-five-year-extension.5UhmDjszyMNhTSbmPloxt9|title=Formula 1 to race in Sao Paulo until 2030|website=Formula1.com|date=3 November 2023|access-date=10 March 2025|archive-date=14 September 2024|archive-url=https://web.archive.org/web/20240914231032/https://www.formula1.com/en/latest/article/formula-1-to-race-in-sao-paolo-until-2030-after-new-five-year-extension.5UhmDjszyMNhTSbmPloxt9|url-status=live}}</ref> It previously hosted the [[Brazilian motorcycle Grand Prix]] in 1992, the [[Deutsche Tourenwagen Meisterschaft]] in 1996, the [[FIA GT1 World Championship]] in 2010, and the [[FIA World Endurance Championship]] from 2012 to 2014 only to return in 2024. As the major racetrack in the country it also hosted many previous and active national championships such as [[Stock Car Brasil]], [[Campeonato Sudamericano de GT]], [[Fórmula Truck]], [[Copa Truck]], [[Formula 3 Sudamericana]], [[Brazilian Formula Three Championship]], and [[Mil Milhas Brasil]].
+
+In addition, the [[Prova Ciclística 9 de Julho]] road cycling race was held at the venue from 2002 to 2006 and from 2008 to 2013. A local version of the [[Lollapalooza]] music festival has been held at the venue since 2014.
+
+==History==
+[[File:Jose Carlos Pace bust.jpg|left|thumb|100px|The bust of [[José Carlos Pace]] in the circuit]]
+The land on which the circuit is located was originally bought in 1926 by property developers who wanted to build housing.<ref name="history">[http://www.gpbrasil.com.br/_site11e/historia.asp Interlagos circuit history] {{webarchive |url=https://web.archive.org/web/20111130103041/http://www.gpbrasil.com.br/_site11e/historia.asp |date=30 November 2011}} – Official Brazilian Grand Prix website</ref> Following difficulties partly due to the [[Wall Street crash of 1929|1929 stock market crash]], it was decided to build a racing circuit instead; construction started in 1938 and the track was inaugurated on 12 May 1940.<ref name="history"/> Its design was inspired by tracks such as the [[Indianapolis Motor Speedway]] and [[Roosevelt Raceway]] in the United States, [[Brooklands]] in England, and [[Autodrome de Linas-Montlhéry|Montlhéry]] in France.<ref name=Wolfe234>{{citation | title = Autos and Progress: The Brazilian search for Modernity | ref = JW1 | publisher = Oxford UP | location = New York City | date = 2010 | isbn = 978-0-19-517456-4 | page = 234 (footnote 66) | last = Wolfe | first = Joel}}</ref><ref name="aihistory" />
+
+The traditional name of the circuit, [[Interlagos]] (in Portuguese, "between lakes"), comes from its location on the neighborhood of the same name, a region between two large artificial lakes, [[Guarapiranga]] and [[Billings Reservoir|Billings]], built in the early 20th century to supply the metropolitan region of São Paulo with water and electric power. The name "Interlagos" was suggested by the French architect and urban planner [[Alfred Agache (architect)|Alfred Agache]] after the [[Interlaken]] region located in Switzerland.<ref name="aihistory">{{cite news|url=http://www.autodromodeinterlagos.com.br/wp1/conheca-interlagos/historia/?lang=en |title=History – The Interlagos Race Track|publisher=autodromointerlagos.com|archive-url=https://web.archive.org/web/20160701202037/http://www.autodromodeinterlagos.com.br/wp1/conheca-interlagos/historia/?lang=en |archive-date=1 July 2016 }}</ref> Interlagos was renamed in 1985 to "Autódromo José Carlos Pace" in honor of the Brazilian Formula One driver [[José Carlos Pace]], also known as "Moco", who died in a plane crash in 1977.<ref name="aihistory" />
+
+Formula One started racing at Interlagos in 1972, when the event was run as a non-championship race (won by Argentinean [[Carlos Reutemann]]). The first World Championship Brazilian Grand Prix was held there in [[1973 Brazilian Grand Prix|1973]], and it was won by defending Formula One World Champion and São Paulo local [[Emerson Fittipaldi]]. Fittipaldi won the race again the [[1974 Brazilian Grand Prix|following year]], and [[José Carlos Pace]] won his only race at Interlagos in [[1975 Brazilian Grand Prix|1975]].
+
+Due to safety concerns with the {{cvt|7.960|km|mi|abbr=on}} original layout, including the bumpy surface, inadequate barriers, deep ditches and embankments, the last Formula One race held on the original Interlagos was in [[1980 Brazilian Grand Prix|1980]], when it was nearly cancelled after protests by many Formula One drivers – including defending world champion [[Jody Scheckter]]. The safety concerns were directed towards the track surface, which BBC commentator Murray Walker described as "appallingly bumpy". Most of the ground-effect cars of 1980 were designed in such a way that bumpy surfaces were barely tolerable for the drivers. These factors meant that Formula One would move back to the [[Autódromo Internacional Nelson Piquet|Jacarepaguá]] circuit in Rio de Janeiro, hometown of [[Nelson Piquet]] and where the Brazilian Grand Prix was held in 1978. Formula One returned to the circuit in [[1990 Brazilian Grand Prix|1990]] after it had been shortened and modified at a cost of $15 million. The track layout, aside from the pit exit being extended along the "Curva do Sol" turn, has remained the same since 1990.
+    
+The circuit is often witness to dramatic results when it hosts the Formula One [[Brazilian Grand Prix]], especially since its move to an end of season slot in 2004.<ref>{{Cite news |last=Keilloh |first=Graham |title=Rain, fire and the winds of change: the 2003 Brazilian GP may be F1's craziest race |url=https://www.motorsportmagazine.com/articles/single-seaters/f1/rain-fire-and-winds-change-2003-brazilian-gp-may-be-f1s-craziest-race |archive-url= https://web.archive.org/web/20230630020853/https://www.motorsportmagazine.com/articles/single-seaters/f1/rain-fire-and-winds-change-2003-brazilian-gp-may-be-f1s-craziest-race/ |work=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=8 January 2020 |archive-date=30 June 2023 |access-date=25 April 2021 |url-status=live}}</ref> [[Fernando Alonso]] won both the 2005 and 2006 world titles in Brazil, with Renault also clinching the constructors' title in 2006. [[Kimi Räikkönen]] won the [[2007 FIA Formula One World Championship|2007 World Championship]] here after being seven points down and in third place in the championship entering the final race of the season. [[Felipe Massa]] almost won the 2008 Driver's World Championship when he finished the [[2008 Brazilian Grand Prix]] as winner, but was denied by [[Lewis Hamilton]] when he overtook [[Timo Glock]] in the final lap. Despite [[Rubens Barrichello]]'s pole position in [[2009 Brazilian Grand Prix|2009]], [[Mark Webber (racing driver)|Mark Webber]] won the race and [[Jenson Button]] won the championship for [[Brawn GP|Brawn]] after starting 14th. [[Williams Grand Prix Engineering|Williams]] got their first pole since 2005 here at the [[2010 Brazilian Grand Prix]] with [[Nico Hülkenberg]]. The race was won by [[Sebastian Vettel]], and with Mark Webber coming second, [[Red Bull Racing|Red Bull]] secured the constructors title; however the driver's title was not confirmed until the [[2010 Abu Dhabi Grand Prix|last race of the season]].
+
+During the weekend of the 2023 race, one roof in the complex came off because of strong winds from a storm.<ref>{{cite web |title=Storm rips roof off stand at Sao Paulo GP qualifying &#124; 'This is absolutely crazy!' |url=https://www.skysports.com/watch/video/sports/f1/13000006/storm-causes-havoc-at-brazilian-gp-qualifying-this-is-absolutely-crazy |archive-url=https://web.archive.org/web/20231107044854/https://www.skysports.com/watch/video/sports/f1/13000006/storm-causes-havoc-at-brazilian-gp-qualifying-this-is-absolutely-crazy |date=4 November 2023 |archive-date=7 November 2023 |access-date=7 November 2023 |url-status=live}}</ref>
+
+===Tribute to José Carlos Pace===
+
+In August 2024, the body of José Carlos Pace was transferred from his vandalized mausoleum to the race circuit to be laid to rest in the race track named after him. The idea for this came from, and was organized by, the president of the Confederação Brasileira de Automobilismo (Brazilian Automobile Confederation) (CBA), Paulo "Loco" Figueiredo, the president of the Comissão Nacional de Carros Clássicos (National Classic Car Commission) and journalist Ricardo Caruso.
+
+Pace's body arrived in Interlagos where he was buried next to the bust that stands there in his honor. The emotional ceremony was attended by Pace's family (his widow Elda, his children Patrícia and Rodrigo, and his grandchildren), friends, other drivers, journalists and admirers of "Moco". José Carlos Pace took one last lap around the track, where Rodrigo, "Moco's" son, drove a 1967 [[Karmann-Ghia]] racing car that was used by his father, from the old [[Dacon]] team, where Pace formed a trio with none other than the Fittipaldi brothers [[Emerson Fittipaldi|Emerson]] and [[Wilson Fittipaldi|Wilson Jr.]] at the time. This makes Pace the first deceased driver ever to be buried in a race circuit.
+
+==Characteristics==
+[[File:Grande Prêmio São Paulo de Fórmula 1 (52497080967).jpg|thumb|left|Aerial view of the circuit in 2022]]
+One of the main characteristics of Interlagos is that it was not built on flat terrain, but follows the ups and downs of hilly ground, which makes it harder to drive and demands more power from the cars' engines. The races therefore can be tough on the car and physically demanding on the drivers, also because the circuit runs counterclockwise where the centrifugal forces push the drivers' necks to the right, instead of left as in most of the circuits on the F1 calendar. The hilly course is also a good feature for [[road bicycle racing|road cycling]] races, which are usually held at the circuit.
+
+Additionally to the physical aspects there is also a climate component to the venue, the region where the track is located is known for having rapid changes in weather with outbursts of rain being common, which can vary from a short lived drizzle to a torrential storm. This can add a degree of unpredictability to the races and it's classically associated with the circuit. The city of [[São Paulo]] where the circuit is located is known by the nickname "Land of the Drizzle".
+
+===First reform===
+
+In 1979 upgrading work was done and the pit lane was extended past the first left-hand turn (1), making the corner more narrow, and the pit lane ended right in the middle of turn 1 and 2. The present design of the track dates back to 1990, when the original circuit was shortened from {{cvt|7.87385|km|mi|abbr=on}} to {{cvt|4.325|km|mi|abbr=on}}. As a consequence of the reduction, the track lost three long straight sections and nine fast curves (5 were lost forever, 4 were made slower and are still present). The original track was full of fast corners and it allowed cars to keep maximum speed for many seconds; it was considered dangerous, and in 1990 the old layout was mostly revised. The new track still had a very long top-speed section that contained bumps, high-speed turns and little run-off area though the track was very wide at this point.
+
+===Improvement in 2007===
+For the [[2007 Brazilian Grand Prix]], the largest-scale repairs in the last 35 years were carried out at the circuit, to fundamentally solve problems with the track surface.<ref>{{cite news|url=http://www.folhadaregiao.com.br/link.php?codigo=70051 |title=Interlagos será fechado para reforma |publisher=folhadaregiao.com.br|date=14 June 2007 |access-date=5 August 2007 |language=pt}} {{dead link|date=October 2016 |bot=InternetArchiveBot |fix-attempted=yes}}</ref><ref>{{cite news|url=http://www.autodromointerlagos.com/fotoobras.htm |title=As obras em Interlagos |publisher=autodromointerlagos.com|date=4 September 2007 |access-date=8 September 2007 |language=pt |archive-url=https://web.archive.org/web/20071013060659/http://www.autodromointerlagos.com/fotoobras.htm |archive-date=13 October 2007}}</ref> The existing asphalt was entirely replaced,<ref>{{cite news|url=http://www.gpbrasil.com.br/site2007/coluna.asp?id=23# |title=FIA tem uma justificada preocupação com o GP Brasil de Fórmula 1 |publisher=gpbrasil.com.br|access-date=5 August 2007 |language=pt |archive-url=https://web.archive.org/web/20070807164948/http://www.gpbrasil.com.br/site2007/coluna.asp?id=23%23 |archive-date=7 August 2007 }}</ref> resulting in a much smoother track surface. At the same time, the pit lane entrance was enhanced to improve safety and to add a new fixed grand stand.<ref>{{cite news|url=http://www.autodromointerlagos.com/IMG_2705.jpg |title=Alargamento da entrada dos boxes, para maior segurança dos pilotos |publisher=autodromointerlagos.com|access-date=5 August 2007 |language=pt |archive-url=https://web.archive.org/web/20070807235849/http://www.autodromointerlagos.com/IMG_2705.jpg |archive-date=7 August 2007 }}</ref> To facilitate the work, the circuit was closed and no events were held in the five months immediately preceding the race.<ref>{{cite news|url=http://www.clicabrasilia.com.br/torcida/materia.php?IdNoticia=34304 |title=Reforma deve acabar com problemas no asfalto de Interlagos |publisher=clicabrasilia.com.br|date=13 June 2007 |access-date=5 August 2007 |language=pt |archive-url=https://web.archive.org/web/20070927213007/http://www.clicabrasilia.com.br/torcida/materia.php?IdNoticia=34304 |archive-date=27 September 2007 }}</ref>
+
+On 17 October 2007, [[Companhia Paulista de Trens Metropolitanos]] (CPTM) began to operate the new station of the Line C (currently called [[Line 9 (CPTM)|Line 9]]), ''Autódromo'', near the circuit.<ref>{{cite news |title=Estação Autódromo é inaugurada nesta quarta-feira |trans-title=Autodromo station opens this Wednesday |url=http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3669 |archive-url=https://web.archive.org/web/20110706160843/http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3669 |publisher=CET – Companhia de Engenharia de Tráfego |date=16 October 2007 |archive-date=6 July 2011 |access-date=23 October 2007 |language=pt }}</ref><ref>{{cite news |title=Inauguração da estação Autódromo dá largada para o metrô de superfície em SP |trans-title=Autódromo station inauguration signals beginning of light rail in SP |url=http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3675 |archive-url=https://web.archive.org/web/20110706160857/http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3675 |publisher=CET – Companhia de Engenharia de Tráfego |date=18 October 2007 |archive-date=6 July 2011 |access-date=23 October 2007 |language=pt }}</ref><ref>
+{{cite news |title=Circulação de trens ganha esquema especial para GP Brasil de F1 |trans-title=Train circulation to follow special scheme for Brazilian F1 GP |url=http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3683 |archive-url=https://web.archive.org/web/20071023172703/http://cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3683 |publisher=CET – Companhia de Engenharia de Tráfego |date=18 October 2007 |archive-date=23 October 2007 |access-date=23 October 2007 |language=pt }}</ref><ref>{{cite news |title=Inauguração da estação Autódromo marca início do metrô de superfície, na capital |trans-title=Autódromo station inauguration marks beginning of light rail in the capital |url=http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3717 |archive-url=https://web.archive.org/web/20110706160919/http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3717 |publisher=CET – Companhia de Engenharia de Tráfego |date=22 October 2007 |archive-date=6 July 2011 |access-date=23 October 2007 |language=pt }}</ref> The Line C had been extended to improve the access between the center of [[São Paulo]] and southern region of the [[Greater São Paulo]] including the circuit,<ref>{{cite news|url=http://www.cetsp.com.br/internew/informativo/interlagos/2007/quemvai.htm#2010 |title=CET Operação Interlagos 2007 |publisher=CET – Companhia de Engenharia de Tráfego |access-date=17 October 2007 |language=pt |archive-url=https://web.archive.org/web/20071012030938/http://www.cetsp.com.br/internew/informativo/interlagos/2007/quemvai.htm |archive-date=12 October 2007 }}</ref><ref>{{cite news|url=http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=643 |title=Governador Geraldo Alckmin dá Início Às Obras de Extensão da Linha C |publisher=CPTM – [[Companhia Paulista de Trens Metropolitanos]] |date=21 November 2005 |access-date=17 October 2007 |language=pt |archive-url=https://web.archive.org/web/20110706160819/http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=643 |archive-date=6 July 2011}}</ref><ref>{{cite news|url=http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=753 |title=Companhia Inicia Obras Para Beneficiar População da Grande São Paulo |publisher=CPTM – [[Companhia Paulista de Trens Metropolitanos]] |date=27 December 2005 |access-date=17 October 2007 |language=pt |archive-url=https://web.archive.org/web/20110706160833/http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=753 |archive-date=6 July 2011}}</ref> improving circuit accessibility.
+
+===2012 redevelopment===
+Shortly before the [[2011 Brazilian Grand Prix]], [[FIA]] race director [[Charlie Whiting]] detailed several planned upgrades of the circuit, including a new pit entrance and expanded run-off at the final corner, as a response to several fatal accidents at the circuit in 2011.<ref name="DRS">{{cite news|title=Single DRS zone in Brazil and track changes for 2012|url=http://www.f1fanatic.co.uk/2011/11/22/single-drs-zone-brazilian-grand-prix/|first=Keith|last=Collantine|work=F1 Fanatic|publisher=Keith Collantine|date=22 November 2011|access-date=23 November 2011|archive-date=25 November 2011|archive-url=https://web.archive.org/web/20111125005300/http://www.f1fanatic.co.uk/2011/11/22/single-drs-zone-brazilian-grand-prix/|url-status=live}}</ref> In June 2012, further details of the proposed plans emerged, calling for the construction of a brand new pit building and the relocation of the start line from its current position between Arquibancadas and the Senna 'S' to Reta Oposta.<ref>{{cite news|title=F1: Ecclestone Approves Plan To Move Interlagos Pits |url=http://formula-one.speedtv.com/article/f1-bernie-ecclestone-approves-plan-to-move-interlagos-pits/ |work=[[Speed (TV channel)|SPEED]] |publisher=[[News Corporation (1980–2013)|News Corporation]] |date=15 June 2012 |access-date=16 June 2012 |archive-url=https://web.archive.org/web/20120617040547/http://formula-one.speedtv.com/article/f1-bernie-ecclestone-approves-plan-to-move-interlagos-pits/ |archive-date=17 June 2012}}</ref> However, later it was decided to keep start/finish straight at its current location along with the new pit building.<ref>{{cite news|title=Brazilian Grand Prix F1 venue Interlagos begins major revamp|url=http://www.autosport.com/news/report.php/id/115292|work=Edd Straw|publisher=[[Autosport]]|date=5 August 2014|access-date=6 August 2014|archive-date=7 August 2014|archive-url=https://web.archive.org/web/20140807060423/http://www.autosport.com/news/report.php/id/115292|url-status=live}}</ref>
+
+===Pit lane===
+Interlagos has one of the longest pit-lanes ever used in Formula One, starting just before the start-finish straight and rejoining the main course after Curva do Sol. Entering the pits was originally not a trivial task, as the high speed and the left turning may force the car rightwards, out of the pits. The pit lane entrance received some changes to become safer for the [[2007 Brazilian Grand Prix|2007 Formula One Brazilian Grand Prix]], and later for the [[2014 Brazilian Grand Prix|2014 Formula One Brazilian Grand Prix]], when a [[chicane]] was added.
+
+==Track layout==
+[[File:Michael Schumacher 2006 Brazil last overtaking.jpg|thumb|250px|The first corner is the most popular overtaking spot. [[Michael Schumacher]] (red car) passes [[Kimi Räikkönen]] at the [[2006 Brazilian Grand Prix|2006 Brazilian GP]].]]
+
+Race start is in the "Tribunas" section and features a long straight with an upward inclination, then comes "S do Senna" (the Senna S) [1,2], a pair of alternating downward turns (left then right) that exhibit different attack angles and inclinations.
+
+"S do Senna" connects with "Curva do Sol" (Curve of the Sun) [3], a round-shaped large-radius left turn that leads to "Reta Oposta" (Opposite Straight) the track's longest (but not the fastest) straight. Reta Oposta is succeeded by a pair of downhill left turns that are called "Descida do Lago" (Lake's Descent) [4,5] into a short straight section that climbs up towards the back of the pit buildings.
+
+This is followed by a slow section, with small, kart-like turns and elevation changes. The first of these turns is known as "Ferradura" (Horseshoe) [6,7] downhill and right into "Laranjinha" (Little Orange) [8], another right turn and the slowest point of the circuit; the next turn leads into "Pinheirinho" (Little Pine Tree) [9], left on a plain field; then comes "Bico de Pato" (Duck Bill) [10] a right turn with a tight hairpin like shape; and then "Mergulho" (Dive) [11], a constant-radius left-hand turn that slings the driver straight into a harder left at "Junção" (Junction) [12].
+
+Turn [13] "Café" (Coffee), is a left up-hill kink and marks the start of the long top-speed section. Rising up through "Subida dos Boxes" (Up to the Pits) [14], the driver encounters a long uphill left turn with a gradient of 10% that demands a lot of power from the cars. At the end of it comes Arquibancadas (Bleachers) [15], a wide high velocity left turn that connects to the "Tribunas" straight to complete the final section of the track.
+
+The series of left turns from the exit of "Junção" all the way to Turn 1 is typically taken at full throttle and treated as a long straight. This section is one of the longest full-throttle stretches on the Formula 1 calendar, and thus demanding of the engine's reliability. Other notable stretches of this nature are the "Rettifilo Tribune" straight at [[Autodromo Nazionale di Monza]] and the Kemmel Straight at [[Circuit de Spa-Francorchamps]].
+
+List of the corners with their names (the numbers correspond to the current layout, from start to finish line):
+* 'S' do Senna (Senna S) (1,2)
+* Curva do Sol (Curve of the Sun) (3)
+* Descida do Lago (Lake's Descent) (4,5)
+* Ferradura (Horseshoe) (6,7)
+* Laranjinha (Little Orange) (8)
+* Pinheirinho (Little Pine Tree) (9)
+* Bico de Pato (Duck's Bill) (10)
+* Mergulho (Dive) (11)
+* Junção (Junction) (12)
+* Café (Coffee) (13)
+* Subida dos Boxes (Up to the Pits) (14)
+* Arquibancadas (Bleachers) (15)
+
+==Layout history==
+
+{{Gallery
+| title        = Interlagos Circuit Layout History
+| align        = center
+| footer       = 
+| style        = text-align:center;
+| mode         = packed
+| File:Circuit Interlagos 1977.svg
+ | Original Grand Prix Circuit (1940–1979)
+| File:Interlagos 1979.jpg
+ | Grand Prix Circuit (2nd Variation) (1980–1989)
+| File:Circuit Interlagos.svg
+ | Grand Prix Circuit (5th Variation) (1999–present)
+| File:Autódromo José Carlos Pace moto.svg
+ | Motorcycle Circuit (1992)
+| File:Interlagosoverlay.jpg
+ | Overlay showing the differences between present-day and 1973 layouts
+}}
+
+==Events==
+
+; Current
+
+* January: [[Mil Milhas Brasil]]
+* February: [[Fórmula Truck]], [[Brazilian Superbike Championship]]
+* March: [[Porsche Cup Brasil]]
+* April: [[TCR South America Touring Car Championship]], [[Stock Car Pro Series]], [[Stock Light]], [[TCR Brazil Touring Car Championship]], [[F4 Brazilian Championship]], [[Brazilian Superbike Championship]], [[Moto 1000 GP]]
+* May: [[NASCAR Brasil Series]], [[Copa Truck]], [[Brazilian Superbike Championship]], [[Império Endurance Brasil]]
+* June: [[Brazilian Superbike Championship]]
+* July: [[FIA World Endurance Championship]] ''[[6 Hours of São Paulo]]'', [[Brazilian Superbike Championship]]
+* August: [[Moto 1000 GP]]
+* September: [[Porsche Cup Brasil]], [[F4 Brazilian Championship]]
+* November: [[Formula One]] ''[[Brazilian Grand Prix|São Paulo Grand Prix]]'', [[Porsche Cup Brasil]], [[F4 Brazilian Championship]]
+* December: [[Stock Car Pro Series]], [[Stock Light]], [[F4 Brazilian Championship]], [[Turismo Nacional BR]], [[Brazilian Superbike Championship]]
+
+; Former
+
+* [[Brasileiro de Marcas]] (2011–2018)
+* [[Brazilian Formula Three Championship]] (1989–1994, 2014–2017)
+* [[Campeonato Sudamericano de GT]] (2007–2013)
+* [[Ferrari Challenge#Ferrari Challenge North America|Ferrari Challenge North America]] (2013)
+* [[FIA GT1 World Championship]] (2010)
+* [[Fórmula Academy Sudamericana]] (2018–2019)
+* [[Formula BMW#United States & Americas|Formula BMW Americas]] (2008)
+* [[Formula 3 Brazil Open]] (2010–2014)
+* [[Formula 3 Sudamericana]] (1987, 1989–1993, 1995, 1998–1999, 2003–2011, 2013)
+* [[Formula One]]
+** ''[[Brazilian Grand Prix]]'' (1972–1977, 1979–1980, 1990–2019)
+* [[Grand Prix motorcycle racing]]
+** ''[[Brazilian motorcycle Grand Prix]]'' (1992)
+* [[International Formula 3000]] (2001–2002)
+* [[Deutsche Tourenwagen Meisterschaft#DTM to ITC and demise|International Touring Car Championship]] (1996)
+* [[European Le Mans Series|Le Mans Series]] (2007)
+* [[Prova Ciclística 9 de Julho]] (2002–2006, 2008–2013)
+* [[South American Super Touring Car Championship]] (1997–1999)
+* [[Stock Car Pro Series|Stock Car Brasil]]
+** ''[[Stock Car Corrida do Milhão]]'' (2010–2013, 2016, 2019–2020)
+* [[TC2000 Championship]] (2007)
+* [[TCR World Tour]] (2024)
+* [[Top Race V6]] (2009–2010)
+* [[World Series Formula V8 3.5|World Series by Nissan]] (2002)
+
+==Lap records==
+
+As of April 2026, the fastest official lap records at the Autódromo José Carlos Pace are listed as:
+
+{| class="wikitable"
+!Category !! Time !! Driver !! Vehicle !! Event
+|-
+! colspan=5 | Grand Prix Circuit (1999–present): {{cvt|4.309|km|mi|abbr=on}}
+|-
+| [[Formula One]] || '''1:10.540''' || [[Valtteri Bottas]] || [[Mercedes AMG F1 W09 EQ Power+]] || [[2018 Brazilian Grand Prix]] <!-- Lap records set during races only (Official).-->
+|-
+| [[Le Mans Prototype#LMP1|LMP1]] || '''1:18.367'''<ref name='2014_6h_SaoPaulo'>{{cite web |title=2014 FIA WEC – 6 Hours of São Paulo – Race – Final Classification by Class |url=http://fiawec.alkamelsystems.com/Results/04_2014/08_INTERLAGOS/73_FIA%20WEC/201411301300_Race/Hour%206/05_ClassificationByClass_Race.PDF |archive-url=https://web.archive.org/web/20221217085724/http://fiawec.alkamelsystems.com/Results/04_2014/08_INTERLAGOS/73_FIA%20WEC/201411301300_Race/Hour%206/05_ClassificationByClass_Race.PDF |publisher=[[Fédération Internationale de l'Automobile|Fédération Internationale de l'Automobile (FIA)]] |website=fiawec.alkamelsystems.com |date=30 November 2014 |archive-date=17 December 2022 |access-date=23 June 2022 |url-status=live}}</ref> || [[Andre Lotterer]] || [[Audi R18#2014-spec R18 e-tron quattro|Audi R18 e-tron quattro]] || [[2014 6 Hours of São Paulo]]
+|-
+| [[LMDh]] || '''1:24.498'''<ref name='2025_wec_saopaulo'>{{cite web |title=2025 FIA WEC – Rolex 6 Hours of São Paulo – Final Classification By Driver Fastest Lap |url=https://fiawec.alkamelsystems.com/Results/14_2025/05_SAO%20PAULO/613_FIA%20WEC/202507131130_Race/06_Hour%206/07_FastestLapByDriver_Race_Hour%206.PDF |archive-url=https://web.archive.org/web/20251219034808/https://fiawec.alkamelsystems.com/Results/14_2025/05_SAO%20PAULO/613_FIA%20WEC/202507131130_Race/06_Hour%206/07_FastestLapByDriver_Race_Hour%206.PDF |publisher=[[Fédération Internationale de l'Automobile|Fédération Internationale de l'Automobile (FIA)]] |website=fiawec.alkamelsystems.com |date=13 July 2025 |archive-date=19 December 2025 |access-date=15 July 2025 |url-status=live}}</ref> || [[Will Stevens]] || [[Cadillac V-Series.R]] || [[2025 6 Hours of São Paulo]]
+|-
+| [[Le Mans Hypercar|LMH]] || '''1:24.801'''<ref name='2024_wec_saopaulo'>{{cite web |title=2024 FIA WEC – Rolex 6 Hours of São Paulo – Final Classification By Driver Fastest Lap |url=http://fiawec.alkamelsystems.com/Results/13_2024/05_SAO%20PAULO/552_FIA%20WEC/202407141130_Race/Hour%206/07_FastestLapByDriver_Race_Hour%206.PDF |publisher=[[Fédération Internationale de l'Automobile|Fédération Internationale de l'Automobile (FIA)]] |website=fiawec.alkamelsystems.com |date=14 July 2024 |access-date=14 July 2024}}</ref> || [[Mike Conway]] || [[Toyota GR010]] || [[2024 6 Hours of São Paulo]]
+|-
+| [[Le Mans Prototype#LMP2|LMP2]] || '''1:24.916'''<ref name='2014_6h_SaoPaulo' /> || [[Olivier Pla]] || [[Ligier JS P2]] || [[2014 6 Hours of São Paulo]]
+|-
+| [[Formula 3000|F3000]] || '''1:27.323'''<ref>{{cite web |title=2002 F3000 International Championship Interlagos Race Statistics |url=https://motorsportstats.com/results/f3000-international-championship/2002/interlagos/stats |archive-url=https://web.archive.org/web/20221030204939/https://motorsportstats.com/results/f3000-international-championship/2002/interlagos/stats |date=30 March 2002 |archive-date=30 October 2022 |access-date=30 October 2022 |url-status=live}}</ref> || [[Sébastien Bourdais]] || [[Lola F3000 cars#B02/50|Lola B02/50]] || [[2002 International Formula 3000 Championship|2002 Interlagos F3000 round]]
+|-
+| [[Formula Three]] || '''1:28.282'''<ref>{{cite web |title=Samaia e Iorio são os vencedores da F-3 Brasil em Interlagos |url=https://www.f1mania.net/outros/f3/samaia-e-iorio-sao-os-vencedores-da-f-3-brasil-em-interlagos/ |archive-url=https://web.archive.org/web/20230628152109/https://www.f1mania.net/outros/f3/samaia-e-iorio-sao-os-vencedores-da-f-3-brasil-em-interlagos/ |date=11 September 2016 |archive-date=28 June 2023 |access-date=26 April 2026 |url-status=live}}</ref> || [[Guilherme Samaia]] || [[Dallara F3 cars#F308|Dallara F309]] || [[2016 Formula 3 Brasil season|2016 1st Interlagos Formula 3 Brasil round]]
+|-
+| [[Formula Nissan]] || '''1:28.656'''<ref>{{cite web |title=2002 Formula Nissan Interlagos (Race 2) |url=https://www.racingyears.com/race/2002_Formula_Nissan_Interlagos_(Race_2) |date=8 December 2002 |access-date=4 May 2026}}</ref> || [[Bas Leinders]] || [[Dallara SN01]] || [[2002 World Series by Nissan|2002 Interlagos World Series by Nissan round]]
+|-
+| [[Group GT1#GTS "GT1" (2000–2009)|GT1 (GTS)]] || '''1:30.074'''<ref>{{cite web |title=2007 Le Mans Series Mil Milhas |url=https://www.racingyears.com/race/2007_Le_Mans_Series_Mil_Milhas |archive-url=https://web.archive.org/web/20240503225932/https://www.racingyears.com/race/2007_Le_Mans_Series_Mil_Milhas |date=10 November 2007 |archive-date=3 May 2024 |access-date=4 May 2024 |url-status=live}}</ref> || [[Oliver Gavin]] || [[Chevrolet Corvette C6.R]] || [[2007 Mil Milhas Brasil]]
+|-
+| [[LM GTE]] || '''1:30.101'''<ref name='2014_6h_SaoPaulo' /> || [[Patrick Pilet]] || [[Porsche 911 RSR]] || [[2014 6 Hours of São Paulo]]
+|-
+| [[Group GT3|GT3]] || '''1:32.303'''<ref>{{cite web |title=Interlagos 500 Kilometres 2018 |url=https://www.racingsportscars.com/race/Interlagos-2018-12-21.html |archive-url=https://web.archive.org/web/20221229033357/https://www.racingsportscars.com/race/Interlagos-2018-12-21.html |date=21 December 2018 |archive-date=29 December 2022 |access-date=20 January 2023 |url-status=live}}</ref> || [[Victor Franzoni]]<ref>{{cite web |title=500 km de Interlagos 34° edição 2018 standings |url=https://www.driverdb.com/championships/standings/500km-interlagos/2018/ |archive-url=https://web.archive.org/web/20221229033403/https://www.driverdb.com/championships/standings/500km-interlagos/2018/ |archive-date=29 December 2022 |access-date=20 January 2023 |url-status=live}}</ref> || [[Lamborghini Huracán GT3#Huracán GT3 (2015–2019)|Lamborghini Huracán GT3]] || [[2018 500&nbsp;km of Interlagos]]
+|-
+| [[Sports car prototype]] || '''1:34.489'''<ref>{{cite web |title=2022 1000 Milhas – Corrida – Provisional Results |url=https://racehero.io/events/1000-milhas/results/1073743135 |archive-url=https://web.archive.org/web/20241211005031/https://racehero.io/events/1000-milhas/results/1073743135 |date=23 January 2022 |archive-date=11 December 2024 |access-date=18 January 2025 |url-status=dead}}</ref> || [[Aldo Piedade Jr.]]<ref>{{cite web |title=39° 1000 Milhas do Brasil 2022 standings |url=https://www.driverdb.com/championships/standings/mil-milhas-brasileiras/2022/ |archive-url=https://web.archive.org/web/20230120083248/https://www.driverdb.com/championships/standings/mil-milhas-brasileiras/2022/ |archive-date=20 January 2023 |access-date=21 June 2023 |url-status=live}}</ref> || [[Sigma P1 G4]] || [[Mil Milhas Brasil|2022 Mil Milhas Brasil]]
+|-
+| [[Formula 4]] || '''1:34.821'''<ref>{{cite web |title=2024 Brazilian Formula 4 Interlagos (Race 1) |url=https://www.racingyears.com/race/2024_Brazilian_Formula_4_Interlagos_(Race_1) |archive-url=https://web.archive.org/web/20250123070605/https://www.racingyears.com/race/2024_Brazilian_Formula_4_Interlagos_(Race_1) |date=2 November 2024 |archive-date=23 January 2025 |access-date=15 November 2024 |url-status=live}}</ref> || [[Gino Trappa]] || [[Tatuus F4-T421]] || [[2024 F4 Brazilian Championship|2024 2nd Interlagos F4 Brazil round]]
+|-
+| [[Porsche Carrera Cup]] || '''1:35.744'''<ref>{{cite web |title=6E – Porsche Cup C6 Bank 2024 – Corrida 2 – Provisional Results |url=https://racehero.io/events/6e-porsche-cup-c6-bank-2024/results/1073746630 |archive-url=https://web.archive.org/web/20241209051759/https://racehero.io/events/6e-porsche-cup-c6-bank-2024/results/1073746630 |date=15 November 2024 |archive-date=9 December 2024 |access-date=18 January 2025 |url-status=dead}}</ref> || [[Werner Neugebauer]] || [[Porsche 911 GT3#992 GT3 Cup (2021–2025)|Porsche 911 (992 I) GT3 Cup]] || [[Porsche Cup Brasil|2024 3rd Interlagos Porsche Cup Brasil round]]
+|-
+| [[Stock Car Pro Series|Stock Car Brasil]] || '''1:36.058'''<ref>{{cite web |title=2019 Campeonato Brasiliero de Stock Car - Interlagos - 7ª Etapa, 25/8/2019 - Classification |url=https://www.chronon.com.br/wp-content/uploads/2019/10/S19_7_P1_RES_R2.pdf |date=25 August 2019 |access-date=4 May 2026}}</ref> || [[Ricardo Mauricio]] || [[Chevrolet Cruze#Motorsport|Chevrolet Cruze Stock Car]] || [[2019 Stock Car Brasil Championship|2019 Corrida do Milhão]]
+|-
+| [[Formula Renault#Formula Renault 2.0|Formula Renault 2.0]] || '''1:36.105'''<ref>{{cite web |title=2004 Brazilian Formula Renault Round 11: Interlagos, 24th October – Race Result |url=http://www.dlg.speedfreaks.org/archive/2004/brzfr.html |archive-url=https://web.archive.org/web/20220717114649/http://www.dlg.speedfreaks.org/archive/2004/brzfr.html |date=13 December 2004 |archive-date=17 July 2022 |access-date=17 July 2022 |url-status=live}}</ref> || [[Alberto Valerio]] || [[Tatuus#Racecars|Tatuus FR2000]] || [[2004 Formula Renault seasons#2004 Formula Renault 2.0 Brazil season|2004 1st Interlagos Formula Renault 2.0 Brazil round]]
+|-
+| [[SRO GT4|GT4]] || '''1:40.417'''<ref>{{cite web |title=Mil Milhas Brasileiras 2020 |url=https://www.racingsportscars.com/race/Interlagos-2020-02-16.html |archive-url=https://web.archive.org/web/20230120083610/https://www.racingsportscars.com/race/Interlagos-2020-02-16.html |date=16 February 2020 |archive-date=20 January 2023 |access-date=20 January 2023 |url-status=live}}</ref> || [[Renato Braga]]<ref>{{cite web |title=37° 1000 Milhas do Brasil 2020 standings |url=https://www.driverdb.com/championships/standings/mil-milhas-brasileiras/2020/ |archive-url=https://web.archive.org/web/20230120163429/https://www.driverdb.com/championships/standings/mil-milhas-brasileiras/2020/ |archive-date=20 January 2023 |access-date=21 June 2023 |url-status=live}}</ref> || [[Mercedes-AMG GT#AMG GT4 (2017–present)|Mercedes-AMG GT4]] || [[Mil Milhas Brasil|2020 Mil Milhas Brasil]]
+|-
+| [[Formula BMW]] || '''1:40.842'''<ref>{{Cite web |title=2008 Formula BMW Americas Interlagos (Race 1) |url=https://www.racingyears.com/race/2008_Formula_BMW_Americas_Interlagos_(Race_1) |archive-url=https://web.archive.org/web/20240216225514/https://www.racingyears.com/race/2008_Formula_BMW_Americas_Interlagos_(Race_1) |date=1 November 2008 |archive-date=16 February 2024 |access-date=17 February 2024 |url-status=live}}</ref> || [[Alexander Rossi]] || [[Mygale FB02]] || [[2008 Formula BMW Americas season|2008 Interlagos Formula BMW Americas round]]
+|-
+| [[TCR Touring Car]] || '''1:42.044'''<ref>{{cite web |title=2025 10ª Etapa TCR SA/4ª Etapa TCR Br - 13-12-2025 / Interlagos - 4.309m - Carrera 1 |url=https://www.chronon.com.br/wp-content/uploads/2025/12/TCR25_5_P1_RES.pdf |date=13 December 2025 |access-date=13 December 2025}}</ref> || Pedro Cardoso || [[Peugeot 308|Peugeot 308 GTi TCR]] || [[2025 TCR South America Touring Car Championship|2025 Interlagos TCR South America round]]
+|-
+| [[Stock Light]] || '''1:42.439'''<ref>{{cite web |title=2026 – 1ª Etapa Stock Light - 26-04-2026 / Interlagos - 4.309m – 2a Corrida |url=https://www.chronon.com.br/wp-content/uploads/2026/04/SL26_1_P2_RES.pdf |date=26 April 2026 |access-date=27 April 2026}}</ref> || [[Victor Tieri]] || [[Chevrolet Cruze#Motorsport|Chevrolet Cruze JL-G12]] || [[2026 Stock Light|2026 1st Interlagos Stock Light round]] 
+|-
+| [[Group N-GT|N-GT]] || '''1:42.569'''<ref>{{cite web |title=Mil Milhas Brasileiras 2001 |url=https://www.racingsportscars.com/race/Interlagos-2001-01-28-9475.html |archive-url=https://web.archive.org/web/20230628074813/https://www.racingsportscars.com/race/Interlagos-2001-01-28-9475.html |date=28 January 2001 |archive-date=28 June 2023 |access-date=23 June 2022 |url-status=live}}</ref> || [[Max Wilson (racing driver)|Max Wilson]] || [[Porsche 911 GT3#996 GT3 RS (2001)|Porsche 911 (996) GT3-RS]] || [[Mil Milhas Brasil|2001 Mil Milhas Brasileiras]] 
+|-
+| [[Ferrari Challenge]] || '''1:42.598'''<ref>{{cite web |title=Brasil GT São Paulo 2010 /2 |url=https://www.racingsportscars.com/race/Interlagos-2010-05-16-19766.html |archive-url=https://web.archive.org/web/20230120083251/https://www.racingsportscars.com/race/Interlagos-2010-05-16-19766.html |date=16 May 2010 |archive-date=20 January 2023 |access-date=20 January 2023 |url-status=live}}</ref> || {{ill|Alan Hellmeister|pt}}<ref>{{cite web |title=Alan Hellmeister – Driver Database |url=https://www.driverdb.com/drivers/alan-hellmeister/ |archive-url=https://web.archive.org/web/20230120054810/https://www.driverdb.com/drivers/alan-hellmeister/ |archive-date=20 January 2023 |access-date=21 June 2023 |url-status=live}}</ref> || [[Ferrari F430 Challenge]] || [[2010 GT Brasil season|2010 2nd Interlagos GT Brasil round]]
+|-
+| [[Trofeo Maserati]] || '''1:43.885'''<ref>{{cite web |title=Brasil GT São Paulo 2011 /3 |url=https://www.racingsportscars.com/race/Interlagos-2011-12-18-20687.html |archive-url=https://web.archive.org/web/20230120083606/https://www.racingsportscars.com/race/Interlagos-2011-12-18-20687.html |date=18 December 2011 |archive-date=20 January 2023 |access-date=20 January 2023 |url-status=live}}</ref> || [[Fábio Greco]]<ref>{{cite web |title=Fábio Greco – Driver Database |url=https://www.driverdb.com/drivers/fabio-greco/ |archive-url=https://web.archive.org/web/20230121012127/https://www.driverdb.com/drivers/fabio-greco/ |archive-date=21 January 2023 |access-date=21 June 2023 |url-status=live}}</ref> || [[Maserati Coupé#Maserati Trofeo|Maserati Trofeo Light]] || [[2011 GT Brasil season|2011 3rd Interlagos GT Brasil round]]
+|-
+| [[Super Touring]] || '''1:45.131'''<ref>{{cite web |title=SASTC 1999 » Autódromo José Carlos Pace Round 1 Results |url=https://www.touringcars.net/database/race.php?id=1343 |archive-url=https://web.archive.org/web/20230628131818/https://www.touringcars.net/database/race.php?id=1343 |date=11 April 1999 |archive-date=28 June 2023 |access-date=24 April 2022 |url-status=live}}</ref> || [[Cacá Bueno]] || [[Peugeot 406#Motorsport|Peugeot 406]] || [[South American Super Touring Car Championship|1999 Interlagos SASTC round]]
+|-
+| [[TC2000 Championship|TC2000]] || '''1:46.030'''<ref>{{cite web |title=2007 Turismo Competición 2000 São Paulo |url=https://www.racingyears.com/race/2007_Turismo_Competici%C3%B3n_2000_S%C3%A3o_Paulo |date=17 June 2007 |access-date=4 May 2026}}</ref> || {{ill|Marcelo Bugliotti|es}} || [[Opel Astra#Chevrolet Astra|Chevrolet Astra]] || [[2007 TC 2000 Championship|2007 Interlagos TC2000 round]]
+|-
+| [[Grand Prix motorcycle racing#Moto3 class|Moto3]] || '''1:47.597'''<ref>{{cite web |title=2026 1ª Etapa Camp. Brasileiro Motovelocidade - 1ª Corrida Moto 4 LA - Corrida |url=https://m1gp.com.br/wp-content/uploads/resultados/2026/etapa_01/moto4/CORRIDA_1_MOTO4.pdf |date=11 April 2026 |access-date=4 May 2026}}</ref> || [[Kensei Matsudaira]] || [[Honda NSF250R]] || 2026 Interlagos Moto4 Latin Cup round
+|-
+| [[Formula Renault#Formula Renault 1.6L|Formula Renault 1.6]] || '''1:48.924'''<ref>{{cite web |title=2019 Resultados, Fecha 1, Interlagos SP – Carrera 1 |url=http://f4sudamericana.com/resultados-fecha-1-interlagos-sp/ |archive-url=https://web.archive.org/web/20200128003524/http://f4sudamericana.com/resultados-fecha-1-interlagos-sp/ |date=8 September 2019 |archive-date=28 January 2020 |access-date=20 January 2023 |url-status=dead}}</ref> || [[Juan Vieira]] || [[Signatech|Signatech FR 1.6]] || [[2019 Formula Academy Sudamericana season|2019 Interlagos Formula Academy Sudamericana round]] 
+|-
+| [[NASCAR Brasil Series|NASCAR Brasil]] || '''1:49.364'''<ref>{{cite web |title=2025 Copa Truck/NASCAR Brasil/Copa HB20 – 3a Etapa - São Paulo/SP - Autódromo de Interlagos - NASCAR Brasil - Corrida 1 |url=https://www.fastcrono.com.br/wp-content/uploads/2025/05/nasc1.pdf |archive-url=https://web.archive.org/web/20251003061623/https://www.fastcrono.com.br/wp-content/uploads/2025/05/nasc1.pdf |date=17 May 2025 |archive-date=3 October 2025 |access-date=24 May 2025 |url-status=live}}</ref> || [[Galid Osman]] || [[Chevrolet Camaro (sixth generation)#NASCAR|Chevrolet Camaro SS]] || [[2025 NASCAR Brasil Series|2025 1st Interlagos NASCAR Brasil round]] 
+|-
+| [[Turismo Nacional BR]] || '''1:55.776'''<ref>{{cite web |title=1ª Etapa Turismo Nacional - 04-05-2025 08:23:00 / Interlagos - 4.309m – 5a Corrida |url=https://www.chronon.com.br/wp-content/uploads/2025/05/TN25_1_P5_RES_ALT.pdf |archive-url=https://web.archive.org/web/20251003061623/https://www.chronon.com.br/wp-content/uploads/2025/05/TN25_1_P5_RES_ALT.pdf |date=4 May 2025 |archive-date=3 October 2025 |access-date=4 May 2025 |url-status=live}}</ref> || [[Augusto Sangalli]] || [[Chevrolet Onix|Chevrolet New Onix]] || [[Turismo Nacional BR|2025 1st Interlagos Turismo Nacional Brasil round]]
+|-
+| [[Truck racing]] || '''2:04.355'''<ref>{{cite web |title=2025 Copa Truck/NASCAR Brasil/Copa HB20 – 3a Etapa - São Paulo/SP - Autódromo de Interlagos - Copa Truck - Corrida 1 |url=https://www.fastcrono.com.br/wp-content/uploads/2025/05/trc1.pdf |archive-url=https://web.archive.org/web/20260114194352/https://www.fastcrono.com.br/wp-content/uploads/2025/05/trc1.pdf |date=18 May 2025 |archive-date=14 January 2026 |access-date=24 May 2025 |url-status=live}}</ref> || {{ill|Leandro Totti|pt}} || [[Iveco|Iveco Truck]] || [[2025 Copa Truck season|2025 1st Interlagos Copa Truck round]]
+|-
+! colspan=5 | Stock Car Circuit with Chicane (2011–2017): {{cvt|4.314|km|mi|abbr=on}}
+|-
+| [[Stock Car Pro Series|Stock Car Brasil]] || '''1:40.066'''<ref>{{cite web |title=2016 Stock Car Pro Series Interlagos |url=https://www.racingyears.com/race/2016_Stock_Car_Pro_Series_Interlagos |date=11 September 2016 |access-date=4 May 2026}}</ref> || [[Júlio Campos]] || [[Chevrolet Cruze#Motorsport|Chevrolet Cruze Stock Car]] || [[2016 Stock Car Brasil Championship|2016 Corrida do Milhão]]
+|-
+! colspan=5 | Grand Prix Circuit (1996–1998): {{cvt|4.292|km|mi|abbr=on}}
+|-
+| [[Formula One]] || '''1:18.397''' || [[Jacques Villeneuve]] || [[Williams FW19]] || [[1997 Brazilian Grand Prix]]
+|-
+| [[Formula Three]] || '''1:34.320'''<ref>{{cite web |title=1998 Formula 3 Sudamericana Grande Prêmio de Sao Paulo |url=https://www.racingyears.com/race/1998_Formula_3_Sudamericana_Grande_Pr%C3%AAmio_de_Sao_Paulo |date=27 September 1998 |access-date=4 May 2026}}</ref> || [[Jaime Melo]] || [[List of Dallara cars|Dallara F394]] || [[Formula 3 Sudamericana|1998 Interlagos F3 Sudamericana round]]
+|-
+| [[Class 1 Touring Cars]] || '''1:35.014''' || [[Alessandro Nannini]] || [[Alfa Romeo 155#155 V6 TI|Alfa Romeo 155 V6 TI]] || [[1996 ITC Interlagos round|1996 Interlagos ITC round]]
+|-
+| [[Group GT1#List of FIA GT1 cars|GT2]] || '''1:42.329'''<ref>{{cite web |title=500 km Interlagos 1997 |url=https://www.racingsportscars.com/race/Interlagos-1997-09-08-14057.html |archive-url=https://web.archive.org/web/20230628074732/https://www.racingsportscars.com/race/Interlagos-1997-09-08-14057.html |date=8 September 1997 |archive-date=28 June 2023 |access-date=23 June 2022 |url-status=live}}</ref> || [[Antônio Hermann]] || [[Porsche 911 GT2#993 generation|Porsche 911 (993) GT2]] || [[1997 500&nbsp;km of Interlagos]]
+|-
+| [[Super Touring]] || '''1:48.062'''<ref>{{cite web |title=SASTC 1998 » Autódromo José Carlos Pace Round 12 Results |url=https://www.touringcars.net/database/race.php?id=1340 |archive-url=https://web.archive.org/web/20230628131821/https://www.touringcars.net/database/race.php?id=1340 |date=13 December 1998 |archive-date=28 June 2023 |access-date=24 April 2022 |url-status=live}}</ref> || [[Nonô Figueiredo]] || [[Opel Vectra#Chevrolet Vectra (Brazil)|Chevrolet Vectra]] || [[South American Super Touring Car Championship|1998 Interlagos SASTC round]]
+|-
+! colspan=5 | Grand Prix Circuit (1990–1995): {{cvt|4.325|km|mi|abbr=on}}
+|-
+| [[Formula One]] || '''1:18.455''' || [[Michael Schumacher]] || [[Benetton B194]] || [[1994 Brazilian Grand Prix]]
+|-
+| [[Formula Three]] || '''1:36.990'''<ref>{{cite web |title=1993 Interlagos Sud-Am F3 – Round 5 |url=https://www.motorsportmagazine.com/database/races/1993-interlagos-sud-am-f3-2/ |archive-url=https://web.archive.org/web/20230628074733/https://www.motorsportmagazine.com/database/races/1993-interlagos-sud-am-f3-2/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=18 July 1993 |archive-date=28 June 2023 |access-date=23 June 2022 |url-status=live}}</ref> || [[Fernando Croceri]] || [[Ralt RT33]] || [[Formula 3 Sudamericana|1993 Interlagos Formula 3 Sudamericana round]]
+|-
+| [[Group B]] || '''1:43.440'''<ref>{{cite web |title=Mil Milhas Brasileiras 1994 |url=https://www.racingsportscars.com/race/Interlagos-1994-01-22-2584.html |archive-url=https://web.archive.org/web/20230628074731/https://www.racingsportscars.com/race/Interlagos-1994-01-22-2584.html |date=22 January 1994 |archive-date=28 June 2023 |access-date=23 June 2022 |url-status=live}}</ref> || [[Christian Fittipaldi]] || [[Porsche 964|Porsche 911 Carrera RSR 3.8]] || [[Mil Milhas Brasil|1994 Mil Milhas Brasileiras]]
+|-
+! colspan=5 | Motorcycle Circuit (1992): {{cvt|4.352|km|mi|abbr=on}}<ref>{{cite web |title=Autódromo José Carlos Pace – Motorcycle Variant |url=http://www.the-fastlane.co.uk/racingcircuits/Brazil/index.html |archive-url=https://web.archive.org/web/20120820234424/http://www.the-fastlane.co.uk/racingcircuits/Brazil/index.html |website=RacingCircuits.info |archive-date=20 August 2012 |access-date=11 December 2022 |url-status=live}}</ref>
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|500cc]] || '''1:42.872''' || [[Wayne Rainey]] || [[Yamaha YZR500]] || [[1992 Brazilian motorcycle Grand Prix]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|250cc]] || '''1:44.478''' || [[Loris Reggiani]] || [[Aprilia RSV 250]] || [[1992 Brazilian motorcycle Grand Prix]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|125cc]] || '''1:50.262''' || [[Dirk Raudies]] || [[Honda RS125R]] || [[1992 Brazilian motorcycle Grand Prix]]
+|-
+! colspan=5 | Grand Prix Circuit (1980–1989): {{cvt|7.873|km|mi|abbr=on}}
+|-
+| [[Formula One]] || '''2:27.311'''<ref name='interlagos_msportmagazine'>{{cite web |title=Interlagos – Motor Sport Magazine |url=https://www.motorsportmagazine.com/database/circuits/interlagos/ |archive-url=https://web.archive.org/web/20230628074731/https://www.motorsportmagazine.com/database/circuits/interlagos/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |archive-date=28 June 2023 |access-date=24 April 2022 |url-status=live}}</ref> || [[René Arnoux]] || [[Renault RE20]] || [[1980 Brazilian Grand Prix]]
+|-
+! colspan=5 | Original Grand Prix Circuit (1940–1979): {{cvt|7.960|km|mi|abbr=on}}
+|-
+| [[Formula One]] || '''2:28.760'''<ref name='interlagos_msportmagazine' /> || [[Jacques Laffite]] || [[Ligier JS11]] || [[1979 Brazilian Grand Prix]]
+|-
+| [[Formula Two]] || '''2:37.900'''<ref>{{cite web |title=1972 Interlagos F2 |url=https://www.motorsportmagazine.com/database/races/1972-interlagos-f2/ |archive-url=https://web.archive.org/web/20230628110553/https://www.motorsportmagazine.com/database/races/1972-interlagos-f2/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=12 November 1972 |archive-date=28 June 2023 |access-date=23 June 2022 |url-status=live}}</ref> || [[Carlos Pace]] || [[Surtees TS15]] || [[Torneio F2|1972 3rd Interlagos Torneio F2 round]]
+|-
+| [[Group 5 (motorsport)#2nd Generation Group 5 – "Sports Cars" (1970 to 1971)|Group 5]] || '''2:43.070'''<ref>{{cite web |title=Copa Brasil Interlagos 1972 |url=https://www.racingsportscars.com/race/Interlagos-1972-12-17-3766.html |archive-url=https://web.archive.org/web/20230628074815/https://www.racingsportscars.com/race/Interlagos-1972-12-17-3766.html |date=17 December 1972 |archive-date=28 June 2023 |access-date=23 June 2022 |url-status=live}}</ref> || [[Wilson Fittipaldi]] || [[Porsche 917]] || 1972 Interlagos Copa Brasil round
+|-
+| [[Group 6 (motorsport)#Group 6 Prototype-Sports Cars (1966 to 1971)|Group 6]] || '''2:50.800'''<ref>{{cite web |title=Sud-Am Tournoi de Sao-Paulo 1971 |url=https://www.racingsportscars.com/race/Interlagos-1971-12-12-3825.html |archive-url=https://web.archive.org/web/20230628074734/https://www.racingsportscars.com/race/Interlagos-1971-12-12-3825.html |date=12 December 1971 |archive-date=28 June 2023 |access-date=23 June 2022 |url-status=live}}</ref> || [[Luís Pereira Bueno]] || [[Porsche 908|Porsche 908/02]] || 1971 Sud-Am Tournoi de Sao-Paulo 
+|-
+| [[Formula Three]] || '''3:01.800'''<ref>{{cite web |title=I Torneio Internacional de Formula 3 Race 2 |url=https://www.racingyears.com/race/I_Torneio_Internacional_de_Formula_3_Race_2 |date=17 January 1971 |access-date=4 May 2026}}</ref> || [[Carlos Pace]] || [[Lotus 59]] || 1971 2nd Interlagos Torneio F3 round
+|-
+| [[Formula Libre]] || '''3:46.600'''<ref>{{cite web |title=GP Interlagos 1952 |url=https://www.racingsportscars.com/race/Interlagos-1952-01-13-14333.html |archive-url=https://web.archive.org/web/20230628074733/https://www.racingsportscars.com/race/Interlagos-1952-01-13-14333.html |date=13 January 1952 |archive-date=28 June 2023 |access-date=23 June 2022 |url-status=live}}</ref> || [[Chico Landi]] || [[Ferrari 125 C]] || [[1952 Interlagos Grand Prix]]
+|-
+|}
+
+==See also==
+* [[Cidade Dutra]]
+* [[Socorro (district of São Paulo)|Socorro]]
+* [[Roman Catholic Diocese of Santo Amaro]]
+* [[Subprefecture of Capela do Socorro]]
+
+==References==
+{{Reflist}}
+
+== External links ==
+{{Commons and category|Autódromo José Carlos Pace}}
+* [http://www.autodromointerlagos.com/ Official website] {{Webarchive|url=https://web.archive.org/web/20090220024920/http://autodromointerlagos.com/ |date=20 February 2009}}
+* [http://www.formula1.com/races/in_detail/brazil_804/ Info from the Official Formula 1 Website] {{Webarchive|url=https://web.archive.org/web/20130530215132/http://www.formula1.com/races/in_detail/brazil_804/ |date=30 May 2013 }}
+* [https://web.archive.org/web/20141108222018/http://www.gpbrasil.com/ Official Brazilian Grand Prix website] ([https://web.archive.org/web/20180115124721/http://www.gpbrasil.com/?lang=en English site])
+* [https://web.archive.org/web/20090309020819/http://saopauloesportes.com/ SaoPauloEsportes.com]
+* [https://news.bbc.co.uk/sport2/hi/motorsport/formula_one/circuit_guide/4257987.stm Info from BBC's circuit guide]
+* [https://web.archive.org/web/20061021022150/http://www.f1db.com/f1/page/Autodromo_Jose_Carlos_Pace Autodromo Jose Carlos Pace History and Statistics]
+* [https://www.google.com/maps/d/viewer?mid=zAwYScNYWOgU.kH5VtuiZLUz4 Autódromo José Carlos Pace on Google Maps (Current Formula 1 Tracks)]
+* [https://web.archive.org/web/20071230150235/http://www.geocities.com/ciroalbertopabon/Circuitos_eng.htm Ciro Pabón's Racetracks] 3D views and virtual laps of all F1 circuits, including this one, via Google Earth
+* {{Osmrelation|2560355}}
+* [http://capeladosocorro.prefeitura.sp.gov.br Subprefecture of Capela do Socorro]
+
+{{Navboxes
+|list1 =
+{{São Paulo}}
+{{Formula One circuits}}
+{{FIA WEC circuits}}
+{{TCR South America circuits}}
+{{Stock Car Brasil circuits}}
+{{NASCAR Brasil racetracks}}
+{{Copa Truck circuits}}
+{{Fórmula Truck circuits}}
+{{MotoGP circuits}}
+{{TCR World Tour circuits}}
+{{European Le Mans Series circuits}}
+{{DTM circuits}}
+{{TC 2000 circuits}}
+{{FIA GT1 circuits}}
+{{International Formula 3000 circuits}}
+{{World Series by Renault circuits}}
+}}
+{{Portal bar|Formula One|South America|Brazil}}
+{{Authority control}}
+
+[[Category:Formula One circuits]]
+[[Category:Grand Prix motorcycle circuits]]
+[[Category:FIA GT1 World Championship circuits]]
+[[Category:Motorsport venues in São Paulo (state)]]
+[[Category:FIA World Endurance Championship circuits]]
+[[Category:Sports venues in São Paulo]]
+[[Category:Brazilian Grand Prix]]
+[[Category:Sports venues completed in 1940]]
+[[Category:1940 establishments in Brazil]]
+[[Category:NASCAR tracks]]

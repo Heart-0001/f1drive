@@ -1,0 +1,310 @@
+{{Short description|Race track in Midrand, Gauteng, South Africa}}
+{{About|the motor racing circuit in Gauteng, South Africa}}
+{{Use dmy dates|date=July 2019}}
+{{Use South African English|date=April 2012}}
+{{Infobox motorsport venue
+|name             = Kyalami Grand Prix Circuit
+|location         = [[Midrand]], Gauteng, South Africa
+|coordinates      = {{coord|25|59|53|S|28|4|08|E|display=it}}
+|fia_grade        = 2{{efn|name=Kyalami G2|Kyalami's Grade 2 licence expired on 18 August 2025.}}
+|image            = [[File:Kyalami 16.png|class=skin-invert|frameless|Kyalami Grand Prix Circuit (2015–present)]]
+|image_caption    = Grand Prix Circuit (2015–present) 
+|owner            = Toby Venter (July 2014–present) 
+|capacity         = 100,000 
+|broke_ground     = 1961
+|opened           = {{Start date and age|df=yes|1961|11|04}}
+|events           = '''Current:'''<br />'''[[Kyalami 9 Hours]]''' (1958–1979, 1981–1984, 1986–1988, 1998–2000, 2019–2020, 2022–present)<br />'''Future:'''<br />'''[[Kyalami 24 Hours]]''' (2027)<br />'''Former:'''<br />[[Intercontinental GT Challenge]] (2019–2020, 2022–2023)<br />[[Formula One]]<br />''[[South African Grand Prix]]'' (1967–1985, 1992–1993)<br />[[Grand Prix motorcycle racing]]<br />''[[South African motorcycle Grand Prix]]'' (1983–1985, 1992)<br />[[Superbike World Championship|World SBK]] (1998–2002, 2009–2010)<br />[[A1 Grand Prix]] (2009)<br />[[World Sportscar Championship]] (1974, 1983–1984)<br />[[Rand Grand Prix]] (1961–1965)
+|layout           = Grand Prix Circuit (2015–present)
+|surface          = Asphalt
+|length_km        = 4.529
+|length_mi        = 2.814
+|turns            = 16
+|record_time      = 1:40.120 
+|record_driver    = {{flagicon|RSA}} Charl Michael Visser
+|record_car       = [[Nova NP02|Nova Proto NP02]]
+|record_year      = 2025
+|record_class     = [[Sports prototype]]
+|layout2          = Grand Prix Circuit (1992–1993 and 2009–2015)
+|surface2         = Asphalt
+|length2_km       = 4.261
+|length2_mi       = 2.648
+|turns2           = 13
+|record_time2     = 1:17.578
+|record_driver2   = {{flagicon|GBR}} [[Nigel Mansell]]
+|record_car2      = [[Williams FW14#Williams FW14B|Williams FW14B]]
+|record_year2     = [[1992 South African Grand Prix|1992]]
+|record_class2    = [[Formula One|F1]]
+|layout3          = Grand Prix Circuit (1994–2009)
+|surface3         = Asphalt
+|length3_km       = 4.2606
+|length3_mi       = 2.647
+|turns3           = 13
+|record_time3     = 1:28.306
+|record_driver3   = {{flagicon|MYS}} [[Fairuz Fauzy]]
+|record_car3      = [[Ferrari F2004#A1GP Powered by Ferrari car|A1GP Ferrari]]
+|record_year3     = [[2009 Kyalami A1GP round|2009]]
+|record_class3    = [[A1 Grand Prix|A1GP]]
+|layout4          = Grand Prix Circuit (1989–1991)
+|surface4         = Asphalt
+|length4_km       = 3.888
+|length4_mi       = 2.416
+|turns4           = 11
+|record_time4     = 1:30.660
+|record_driver4   = {{flagicon|GER}} [[Roland Asch]]
+|record_car4      = [[Mercedes-Benz W201#Evolution II|Mercedes 190E 2.5-16 Evo2]]
+|record_year4     = 1990
+|record_class4    = [[Group A#Touring car racing|Group A]]
+|layout5          = Grand Prix Circuit (1968–1988)
+|surface5         = Asphalt
+|length5_km       = 4.104
+|length5_mi       = 2.550
+|turns5           = 9
+|record_time5     = 1:08.149
+|record_driver5   = {{flagicon|FIN}} [[Keke Rosberg]]
+|record_car5      = [[Williams FW10]]
+|record_year5     = [[1985 South African Grand Prix|1985]]
+|record_class5    = [[Formula One|F1]]
+|layout6          = Original Grand Prix Circuit (1961–1967)
+|surface6         = Asphalt
+|length6_km       = 4.094
+|length6_mi       = 2.544
+|turns6           = 9
+|record_time6     = 1:27.600
+|record_driver6   = {{flagicon|RSA|1928}} [[Dave Charlton]]
+|record_car6      = [[Brabham BT11]]
+|record_year6     = [[South African Formula One Championship|1967]]
+|record_class6    = [[Formula One|F1]]
+|website          = [http://kyalamigrandprixcircuit.com/ kyalamigrandprixcircuit.com]
+}}
+
+'''Kyalami Grand Prix Circuit''' (from ''Khaya lami'', ''My home'' in [[Zulu language|Zulu]]) is a {{cvt|4.529|km|mi|abbr=on}} motor racing circuit located in [[Midrand]], [[Gauteng]], [[South Africa]], just north of [[Johannesburg]]. The name '''Kyalami''' also commonly refers to the suburb where the race track is located. The circuit has been used for [[Grand Prix motor racing|Grand Prix]] and [[Formula One]] races and has hosted the [[South African Grand Prix]] twenty times. Among the [[Formula One]] races held at the track the [[1977 South African Grand Prix]] stands out, as it is principally remembered for the fatal accident that claimed the lives of race marshal Frederick Jansen van Vuuren and driver [[Tom Pryce]]. In recent years, the area surrounding the circuit has developed into a residential and commercial suburb of [[Johannesburg]]. More recently, Kyalami has played host to five rounds of the [[Superbike World Championship]] from 1998 to 2002 and later in 2009 and 2010, the season finale of the [[Superstars Series]] in 2009 and 2010, and the South African round of the [[2008–09 A1 Grand Prix season]]. International racing returned to the circuit in November 2019, when it hosted the [[2019 Kyalami 9 Hours]], serving as the season finale of the [[2019 Intercontinental GT Challenge]].
+
+== History ==
+The original, sweeping circuit was designed and cleared by Harry Pierce and Dick Bremner along with a few friends and workers in the mid-1950s. The two were also responsible for the hosting and housing of early race teams that ventured to Africa to try out the new track with Bremner being the chairman of the South African Automotive Racing Association. The circuit was opened on 4 November 1961 with the race of [[Kyalami 9 Hours]].<ref name='kyalami_circuit_facts'>{{cite web |title=Kyalami - Circuit Facts |url=http://kyalamigrandprixcircuit.com/pebble.asp?relid=260 |website=Kyalami Grand Prix Circuit |access-date=1 December 2019}}</ref><ref name='kyalami_circuit_history'>{{cite web |title=Kyalami - Circuit History |url=https://kyalamigrandprixcircuit.com/pebble.asp?relid=264 |website=Kyalami Grand Prix Circuit |access-date=20 April 2025}}</ref> Its first major international event was in [[1961 Rand Grand Prix|1961]] until political sanctions (due to [[apartheid]] policies) eliminated the [[List of Formula One Grands Prix|Grand Prix]] after the [[1985 South African Grand Prix|1985 race]].<ref>{{cite web |last= |first= |title=Kyalami |url=http://www.grandprix.com/gpe/cir-069.html |website=grandprix.com}}</ref> The final race at the original circuit was held on 26 November 1988.<ref name='kyalami_circuit_history' />
+
+===Original layout: 1961–1988===
+[[File:Kyalami 1968layout.svg|thumb|left|Original layout of Kyalami]]
+
+The clockwise track layout was based on a long straight with nine corners that had their naming inspired by a mix of local geography, South African cultural elements, and racing terminology. A lap started in close to the pit lane entrance on the '''Main Straight''' - a straight that lead downhill into the first bend.<ref name='kyalami_circuit_history' />
+# '''Crowthorne Corner''' – A tight right-hander, being the first turn after the start-finish straight.  The corner was named after the [[Crowthorne, Gauteng|Crowthorne Hotel]], located near this particular section of the circuit.
+# '''Barbecue Bend''' A second right-hand medium speed bend likely named after the tradition of South African [[Regional variations of barbecue#Africa|barbecues (braais)]], which were often held near this section of the track during race events.
+# '''Jukskei Sweep''' This was a long, fast left-hand curve, named for the [[Jukskei River]], which runs near the track. The river itself is named after the traditional Afrikaner game of [[Jukskei]] (similar to horse-shoes), which was played by early settlers.{{cn|date=April 2026}}
+# '''Sunset Bend''' A fast right-hander considered one of the iconic corners on the track. It was so named because the corner often forced drives to face the setting sun while navigating this section of the track.
+# '''Clubhouse Bend'''  A 90-degree left-hander named after the motorsport clubhouse that was located at this bend on the track.
+# '''Esses 1''' Bend one:  initial left-hander.
+# '''Esses 2'''. Right-handed 90-degree bend, leading to steep uphill into turn 8.
+# '''Leeukop Bend''' Leeukop was a tight right-hand hairpin that led onto the initial part of the long straight.  This corner was named after Leeukop hill (Lion's Head), a common and prominent geographical naming feature in South African topography.  It also referred to the [[Leeukop Prison]] that was located behind the hill on adjacent land.
+# '''The Kink''' This was a right deviation in the track splitting the main straight into two sections.
+
+===Revised layout: 1989 to present===
+When the circuit was rebuilt in 1989 as part of a commercial development, Leeukop Bend, the Kink, Pit lane, the start/finish straight, Crowthorne Corner and Barbecue Bend were all eliminated.<ref name='kyalami_circuit_history' /> Jukskei Sweep was heavily modified to create the entrance into the bend before the then newly built Pit lane and start/finish straight. The remaining part of the old fast circuit, modified to a lesser degree were Sunset Bend, Clubhouse Bend and the Esses still incorporated into the current configuration, with the result that the circuit became a narrow, twisty ribbon rather than one of the fastest circuits on the calendar. Formula One abandoned the rebuilt circuit in [[1993 Formula One season|1993]] after just two races on the new layout, caused by a bankruptcy on the part of the promoter.
+
+It hosted the [[South African motorcycle Grand Prix]] until 1992.
+
+Kyalami was changed again with the building of the current pit lane and start/finish straight and later again changes were made, with the addition of a chicane which in turn was removed again for the 2009 World Superbike race.<ref name='kyalami_circuit_history' /><ref>{{cite web|url=http://www.gdecarli.it/php/circuit.php?var1=713&var2=2|title=TRACKS: KYALAMI|first=Guido|last=de Carli|website=gdecarli.it|access-date=24 May 2012|archive-date=3 March 2016|archive-url=https://web.archive.org/web/20160303225703/http://www.gdecarli.it/php/circuit.php?var1=713&var2=2|url-status=dead}}</ref> Kyalami came under new management and 2008 saw the 50th anniversary of the 9-hour revival being held at Kyalami with golden oldies like [[David Piper (racing driver)|David Piper]] and others.<ref>{{cite news|url=http://www.motoring.co.za/index.php?fArticleId=4722182|title=THREE-HOUR ENDURANCE RACE FOR HISTORIC CARS|date=20 November 2008|publisher=[[Independent Online (South Africa)|Independent Online]]|access-date=23 February 2009}}</ref> On 6 June 2014, it was announced that Kyalami would be auctioned off on 24 July without reserve.<ref>{{cite web|url=http://www.enca.com/kyalami-race-track-goes-under-hammer|title=Kyalami race track to go under the hammer|first=Bianca|last=Ackroyd|website=enca.com|access-date=11 June 2014|archive-date=6 October 2022|archive-url=https://web.archive.org/web/20221006132144/https://www.enca.com/kyalami-race-track-goes-under-hammer|url-status=dead}}</ref> On 24 July 2014, it was auctioned off for R205&nbsp;million. The winning bidder was [[Toby Venter]], owner of [[Porsche|Porsche South Africa]].<ref name='kyalami_circuit_history' /><ref>{{cite web|url=http://www.timeslive.co.za/local/2014/07/24/kyalami-race-track-auctioned-for-r205-million-in-under-two-minutes|title=TimesLIVE|website=Sunday Times (Johannesburg)|access-date=25 July 2014|archive-date=1 January 2018|archive-url=https://web.archive.org/web/20180101030646/http://www.timeslive.co.za/local/2014/07/24/kyalami-race-track-auctioned-for-r205-million-in-under-two-minutes|url-status=dead}}</ref> R100 million was invested to upgrade the circuit, allowing it to successfully obtain an [[FIA]] Grade 2 status.<ref name='kyalami_rcircuits'>{{cite web |title=Kyalami - Racing Circuits |url=https://www.racingcircuits.info/africa/south-africa/kyalami.html |website=RacingCircuits.info |access-date=11 December 2019}}</ref>
+
+On 12 December 2019, the provisional calendar for the [[2020–21 FIA World Endurance Championship]] was announced, containing a six-hour race at Kyalami scheduled for 6 February 2021.<ref name="prov cal">{{cite web |title=Monza and Kyalami on 2020–2021 WEC calendar |url=https://www.grandprix247.com/2019/12/12/monza-and-kyalami-on-2020-2021-wec-calendar/ |website=GrandPrix247 |date=12 December 2019 |access-date=12 December 2019}}</ref> However, after the calendar was revised due to the [[COVID-19 pandemic]], Kyalami was removed.<ref>{{Cite web|url=https://www.motorsport.com/wec/news/2021-calendar-abandons-winter-format/4776572/|title=WEC shelves winter calendar format for 2021|website=www.motorsport.com|language=en|access-date=19 March 2021}}</ref><ref>{{Cite web|title=2021 FIA WEC provisional calendar revealed|url=https://www.fiawec.com/en/news/2021-fia-wec-provisional-calendar-revealed/6859|access-date=19 March 2021|website=www.fiawec.com|language=en}}</ref>
+
+==Layout history==
+<gallery>
+File:Kyalami 1961 - 1967.jpg|The original grand prix circuit layout in red built in 1961, 26 feet wide and measuring {{cvt|4.094|km|mi|abbr=on}}
+File:Kyalami 1968 - 1987.jpg|The widened layout in red built in 1968, 36 feet wide and 40 feet from the Kink to Crowthorne and measuring {{cvt|4.104|km|mi|abbr=on}}
+File:Kyalami 1961 - 1988 Layout.png|Kyalami Grand Prix Circuit (1968–1988)
+File:Kyalami1988.png|Kyalami Grand Prix Circuit (1989–1991)
+File:Kyalami 1992 Layout.png|Kyalami Grand Prix Circuit (1992–1993, 2009–2015)
+File:Kyalami.svg|Kyalami Grand Prix Circuit (1994–2008)
+File:Kyalami 16.png|Kyalami Grand Prix Circuit (2015–present)
+</gallery>
+
+==South African Grand Prix==
+From [[1967 Formula One Season|1967]] to [[1993 Formula One Season|1993]], Kyalami hosted 21 editions of the South African Grand Prix. Perhaps the most infamous of these was the [[1982 South African Grand Prix|1982 edition]], when the [[Grand Prix Drivers' Association]] staged a [[Strike action|strike]] in protest of new [[superlicence]] conditions imposed by [[Fédération Internationale du Sport Automobile|FISA]].
+
+[[Niki Lauda]] became the most successful driver at Kyalami, taking his third victory at the circuit in [[1984 South African Grand Prix|1984]]. [[Alain Prost]], [[Nigel Mansell]] and [[Jackie Stewart]] are the joint second-most successful drivers at the circuit, with two wins each. [[Jody Scheckter]] became the first and only South African driver to win their home race during the [[1975 South African Grand Prix|1975 edition]]. [[Scuderia Ferrari|Ferrari]] and [[Williams Grand Prix Engineering|Williams]] are the most successful constructors at the circuit, with four wins each.
+
+In June 2022 it was reported that [[Stefano Domenicali]], the President of Formula One, had flown to South Africa to meet representatives of the circuit about a possible return for F1 in 2023, but the course was not included in the 2023 provisional calendar.<ref>{{Cite news |title=F1 closes in on deal for South African GP |url=https://www.bbc.com/sport/formula1/61786715 |language=en-GB |work=BBC Sport |access-date=13 June 2022}}</ref>
+
+==Events==
+
+; Current
+
+* August: Festival of Motoring
+* November: South African Endurance Series ''[[Kyalami 9 Hours]]''
+
+; Future
+
+* [[Kyalami 24 Hours]] (2027)
+
+; Former:
+
+* [[A1 Grand Prix]]
+** ''[[2008–09 A1 Grand Prix of Nations, South Africa]]'' (2009)
+* [[1995 Birkin Cars/TVR Invitational Race|Birkin Cars/TVR Invitational Race]] (1995)
+* [[Formula One]]
+** ''[[South African Grand Prix]]'' (1967–1985, 1992–1993)
+* [[Grand Prix Masters]] (2005)
+* [[Grand Prix motorcycle racing]]
+** ''[[South African motorcycle Grand Prix]]'' (1983–1985, 1992)
+* [[Intercontinental GT Challenge]]
+** ''[[Kyalami 9 Hours]]'' (2019–2020, 2022–2023)
+* [[Rand Grand Prix]] (1961–1965)
+* [[South African Formula Atlantic Championship]] (1976–1979)
+* [[South African Formula One Championship]] (1961–1975)
+* [[South African Springbok Championship Series]]
+** ''[[Kyalami 9 Hours]]'' (1965–1973)
+* [[Sidecar World Championship]] (2000, 2002)
+* [[FIA Sportscar Championship|Sports Racing World Cup]]
+** ''[[Kyalami 9 Hours|Vodacom Festival of Motor Racing]]'' (1998–2000)
+* [[Superbike World Championship]]
+** ''[[Kyalami Superbike World Championship round]]'' (1998–2002, 2009–2010)
+* [[Supersport World Championship]] (1998–1999, 2002, 2009–2010)
+* [[Superstars Series]] (2009–2010)
+* [[World Sportscar Championship]]
+** ''[[Kyalami 9 Hours|Kyalami 1000 km]]'' (1974, 1983–1984)
+
+==Lap records==
+
+As of July 2025, the fastest official race lap records of the Kyalami Grand Prix Circuit are listed as:
+
+{| class="wikitable"
+!Category!!Time!!Driver!!Vehicle!!Event
+|-
+! colspan=5 | Grand Prix Circuit (6th Configuration) (2015–present): {{cvt|4.529|km|mi|abbr=on}}<ref name='kyalami_rcircuits' /><ref name='kyalami_msportmagazine'>{{cite web |title=Kyalami - Motor Sport Magazine |url=https://www.motorsportmagazine.com/database/circuits/kyalami/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |access-date=20 April 2025}}</ref>
+|-
+| [[Sports prototype]] || '''1:40.120'''<ref>{{cite web |title=Charl Visser Breaks Kyalami Lap Record |url=https://www.motorsport.co.za/charl-visser-breaks-kyalami-lap-record/ |date=28 July 2025 |access-date=19 September 2026}}</ref><ref>{{cite web |title=2025 SAES Round 4 - 4 Hours of Kyalami - Endurance Race |url=https://speedhive.mylaps.com/sessions/10946656 |date=26 July 2025 |access-date=19 September 2026}}</ref> || Charl Michael Visser || [[Nova NP02|Nova Proto NP02]] || 2025 SAES 4 Hours of Kyalami
+|-
+| [[Group GT3|GT3]] || '''1:41.425'''<ref>{{Cite web |last=Kelly |first=Brendan |title=New lap record for Michael Stephen at Kyalami |url=https://www.heraldlive.co.za/sport/2023-08-28-new-lap-record-for-michael-stephen-at-kyalami/ |website=Herald Live |archive-url=https://web.archive.org/web/20230829075235/https://www.heraldlive.co.za/sport/2023-08-28-new-lap-record-for-michael-stephen-at-kyalami/ |date=28 August 2023 |archive-date=29 August 2023 |access-date=5 August 2024 |url-status=live}}</ref> || Michael Stephen || [[Audi R8 (Type 4S)#R8 LMS (GT3)|Audi R8 LMS GT3]] || 2023 Kyalami Festival of Motoring
+|-
+| [[Group CN]] || '''1:47.188'''<ref name='2023_kyalami_wildrose'>{{cite web |title=2023 Intercontinental GT Challenge - Kyalami 9 Hour - Wild Rose Gin Sports & GT - Race 2 - Classification |url=https://www.tsl-timing.com/file/?f=INTGTC/2023/230812rc2sgt.pdf |date=23 February 2023 |access-date=26 February 2023}}</ref> || [[Mikaeel Pitamber]] || [[Ligier JS53]] || 2023 Kyalami Wild Rose Gin Sports & GT round
+|-
+| [[Superbike racing|Superbike]] || '''1:47.562'''<ref>{{cite web |title=2024 Kyalami Festival of Motoring - Sunbet ZX10 Masters Cup - Round 8 Race 1 |url=https://speedhive.mylaps.com/sessions/9581638 |date=1 September 2024 |access-date=20 April 2025}}</ref> || Clinton Seller || [[Kawasaki Ninja ZX-10R]] || 2024 2nd Kyalami ZX10 Masters round
+|-
+| [[Touring car racing]] || '''1:48.495'''<ref name='2023_kyalami_bmw' >{{cite web |title=2023 Intercontinental GT Challenge - Kyalami 9 Hour - BMW M Performance Parts Race Series - Race 2 - Classification - Amended |url=https://www.tsl-timing.com/file/?f=INTGTC/2023/230812rc2bmw.pdf |date=25 February 2023 |access-date=26 February 2023}}</ref> || [[Paulo Loureiro]] || [[BMW 3 Series (F30)|BMW 335i]] || 2023 Kyalami BMW M Performance Parts Race Series round
+|-
+| [[Global Touring Car Championship#GTC|GTC]] || '''1:50.256'''<ref>{{cite web |title=2024 National and Regional Extreme Festival - South African Touring Cars incl. SupaCup - Race 1 |url=https://speedhive.mylaps.com/sessions/8772687 |date=13 April 2024 |access-date=20 April 2025}}</ref> || Michael Stephen || [[BMW 1 Series (F40)|BMW 128TC]]<ref>{{cite web |title=Champion Stephen Returns To SATC At Kyalami |url=https://www.motorsport.co.za/champion-stephen-returns-to-satc-at-kyalami/ |date=8 April 2024 |access-date=20 April 2025}}</ref> || [[Global Touring Car Championship|2024 Kyalami Global Touring Car Championship round]]
+|-
+| [[Porsche Carrera Cup]] || '''1:51.774'''<ref name='2023_kyalami_wildrose' /> || [[Nicky Dicks]] || [[Porsche 911 GT3#991.2 GT3 Cup (2017–2020)|Porsche 911 (991 II) GT3 Cup]] || 2023 Kyalami Wild Rose Gin Sports & GT round
+|-
+| [[Formula Ford]] || '''1:51.927'''<ref>{{cite web |title=2024 National and Regional Extreme Festival - Investchem F1600 incl. Formula Ford Kent - Race 1 |url=https://speedhive.mylaps.com/sessions/8772669 |date=13 April 2024 |access-date=20 April 2025}}</ref> || [[KC Ensor-Smith]] || [[Mygale#Racing cars|Mygale M13-SJ]] || 2024 Kyalami Investchem F1600 round
+|-
+| [[SRO GT4|GT4]] || '''1:52.127'''<ref>{{cite web |title=2023 Kyalami Festival of Motoring - G&H Transport Extreme Supercars - Race 2 |url=https://speedhive.mylaps.com/sessions/8019259 |date=27 August 2023 |access-date=1 June 2024}}</ref> || [[Joseph Ellerine]] || [[Audi R8 (Type 4S)#R8 LMS (GT4)|Audi R8 LMS GT4]] || 2023 Kyalami Extreme Supercars round
+|-
+| [[Global Touring Car Championship#GTC2/GTC Supacup|SupaCup]] || '''1:54.958'''<ref>{{cite web |title=2023 Intercontinental GT Challenge - Kyalami 9 Hour - Global Touring Car and SupaCup Championships - Race 1 - Classification |url=https://media.gtcafrica.co.za/wp-content/uploads/2023/02/24143714/GTC-Race-1.pdf |date=24 February 2023 |access-date=6 August 2023 }}{{Dead link|date=August 2026 |bot=InternetArchiveBot }}</ref> || [[Jonathan Mogotsi]] || [[Volkswagen Polo#Sixth generation (AW/BZ; 2017)|Volkswagen Polo VI]] || [[2023 Global Touring Car Championship|2023 Kyalami Global Touring Car Championship round]]
+|-
+| [[Super Touring]] || '''1:57.480'''<ref name='2023_kyalami_bmw' /> || [[Andreas Meier]] || [[BMW 3 Series (E36)#Motorsports|BMW E36 STC]] || 2023 Kyalami BMW M Performance Parts Race Series round
+|-
+| [[Toyota 86#Motorsport|Gazoo Cup]] || '''2:07.105'''<ref>{{cite web |title=2024 National and Regional Extreme Festival - Gazoo Racing SA Cup - Race 1 |url=https://speedhive.mylaps.com/sessions/8772651 |date=13 April 2024 |access-date=20 April 2025}}</ref> || Alex Shahini || [[Toyota 86#Second generation (ZN8/ZD8; 2021)|Toyota GR86]] || 2024 Kyalami Gazoo Racing SA Cup round
+|-
+! colspan=5 | Grand Prix Circuit (4th Configuration) (1992–1993 and 2009–2015): {{cvt|4.261|km|mi|abbr=on}}<ref name='kyalami_msportmagazine' />
+|-
+| [[Formula One]] || '''1:17.578''' || [[Nigel Mansell]] || [[Williams FW14#Williams FW14B|Williams FW14B]] || [[1992 South African Grand Prix]]
+|-
+| [[Superbike World Championship|World SBK]] || '''1:38.170''' || [[Michel Fabrizio]] || [[Ducati 1098#Racing|Ducati 1098R]] || [[2010 Kyalami Superbike World Championship round|2010 Kyalami World SBK round]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|500cc]] || '''1:39.952''' || [[Wayne Gardner]] || [[Honda NSR500]] || [[1992 South African motorcycle Grand Prix]]
+|-
+| [[Supersport World Championship|World SSP]] || '''1:41.053''' || [[Eugene Laverty]] || [[Honda CBR600RR]] || [[2009 Kyalami Superbike World Championship round|2009 Kyalami World SSP round]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|250cc]] || '''1:42.094''' || [[Max Biaggi]] || [[Aprilia RSV 250]] || [[1992 South African motorcycle Grand Prix]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|125cc]] || '''1:48.687''' || [[Carlos Giró Jr]] || [[Aprilia RS125R]] || [[1992 South African motorcycle Grand Prix]]
+|-
+! colspan=5 | Grand Prix Circuit (5th Configuration) (1994–2009): {{cvt|4.2606|km|mi|abbr=on}}<ref name='kyalami_msportmagazine' />
+|-
+| [[A1 Grand Prix|A1GP]] || '''1:28.306''' || [[Fairuz Fauzy]] || [[Ferrari F2004#A1GP Powered by Ferrari car|A1GP Powered by Ferrari car]] || [[2009 Kyalami A1GP round]]
+|-
+| [[Formula 3000|F3000]] || '''1:29.855'''<ref>{{cite web |title=1995 Kyalami F3000 |url=https://www.motorsportmagazine.com/database/races/1995-kyalami-f3000/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=29 January 1995 |access-date=1 May 2022}}</ref> || [[Kenny Bräck]] || [[Reynard F3000 cars#94D|Reynard 94D]] || [[1995 Birkin Cars/TVR Invitational Race]]
+|-
+| [[Le Mans Prototype#History|WSC]] || '''1:34.776'''<ref>{{cite web |title=2 h 30 min Kyalami 1998 |url=https://www.racingsportscars.com/race/Kyalami-1998-12-06.html |date=6 December 1998 |access-date=7 August 2021}}</ref> || [[Mauro Baldi]] || [[Ferrari 333 SP]] || [[1998 International Sports Racing Series|1998 2 h 30 min Kyalami]]
+|-
+| [[Grand Prix Masters|GP Masters]] || '''1:36.390'''<ref>{{cite web |title=2005 Kyalami Grand Prix Masters |url=https://www.motorsportmagazine.com/database/races/2005-kyalami-grand-prix-masters/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=13 November 2005 |access-date=20 April 2022}}</ref> || [[Nigel Mansell]] || [[Delta Motorsport]] [[Grand Prix Masters#Car|GP Masters car]]<ref>{{Cite web|url=https://www.automobilsport.com/gp-masters-grand-prix-2-seater-like-no-other-600-brake-horsepower-fireproof-nomex-kevlar-powered-nicholson-mclaren-cosworth-qatar-april-silverstone-nick-carpenter---13116.html|archive-url=https://web.archive.org/web/20070131105713/http://www.automobilsport.com/gp-masters-grand-prix-2-seater-like-no-other-600-brake-horsepower-fireproof-nomex-kevlar-powered-nicholson-mclaren-cosworth-qatar-april-silverstone-nick-carpenter---13116.html|url-status=usurped|archive-date=31 January 2007|title=THE HOTTEST SEAT IN MOTORSPORT' Grand Prix Masters launches 2-seater like no other - automobilsport.com|website=www.automobilsport.com}}</ref><ref>{{Cite web|url=https://rmsothebys.com/en/auctions/mc22/monaco/lots/r0011-2005-reynard-2ki-grand-prix-masters/1222920|title = 2005 Reynard 2KI Grand Prix Masters &#124; Monaco 2022}}</ref> || [[Grand Prix Masters#2005|2005 Kyalami Grand Prix Masters]]
+|-
+| [[Le Mans Prototype#History|LMP900]] || '''1:36.756'''<ref>{{cite web |title=2 h 30 min Kyalami 1999 |url=https://www.racingsportscars.com/race/Kyalami-1999-11-28.html |date=28 November 1999 |access-date=29 January 2023}}</ref> || [[Éric Bernard]] || [[Lola B98/10]] || [[1999 SportsRacing World Cup|1999 SportsRacing World Cup Kyalami]]
+|-
+| [[Superbike World Championship|World SBK]] || '''1:42.178'''<ref>{{cite web |title=Superbike - Kyalami 5–6–7 April 2002 - Results Race 2 |url=https://resources.worldsbk.com/files/results/2002/RSA/SBK/002/CLA/Results.pdf |website=World Superbike |date=7 April 2002 |access-date=29 January 2023}}</ref> || [[Noriyuki Haga]] || [[Aprilia RSV Mille|Aprilia RSV 1000]] || [[2002 Superbike World Championship|2002 Kyalami World SBK round]]
+|-
+| [[Le Mans Prototype#History|LMP675]] || '''1:43.070'''<ref name='kyalami_srwc_2000'>{{cite web |title=Vodacom Speed Festival Kyalami |url=https://www.racingsportscars.com/race/Kyalami-2000-11-26.html |date=26 November 2000 |access-date=19 May 2022}}</ref> || [[Mark Smithson]] || [[Pilbeam MP84]] || [[2000 SportsRacing World Cup Kyalami|2000 Vodacom Speed Festival Kyalami]]
+|-
+| {{ill|WesBank V8 Challenge|nl|WesBank V8 Supercars}} || '''1:46.230'''<ref name='kyalami_srwc_2000' /> || [[Sarel van der Merwe]] || [[Chevrolet Camaro (fourth generation)|Chevrolet Camaro]] || [[2000 SportsRacing World Cup Kyalami|2000 Vodacom Speed Festival Kyalami]]
+|-
+| [[Supersport World Championship|World SSP]] || '''1:46.975'''<ref>{{cite web |title=Supersport - Kyalami 5–6–7 April 2002 - Results Race |url=https://resources.worldsbk.com/files/results/2002/RSA/SSP/001/CLA/Results.pdf |website=World Superbike |date=7 April 2002 |access-date=7 August 2021}}</ref> || [[James Whitham]] || [[Yamaha YZF-R6]] || [[Supersport World Championship|2002 Kyalami World SSP round]]
+|-
+! colspan=5 | Grand Prix Circuit (3rd Configuration) (1989–1991): {{cvt|3.888|km|mi|abbr=on}}<ref name='kyalami_msportmagazine' />
+|-
+| [[Group A#Touring car racing|Group A]] || '''1:30.660'''<ref>{{cite web |title=1990 Yellow Pages 200 |url=http://touringcarracing.net/Races/1990%20Kyalami.html |date=18 November 1990 |access-date=20 May 2022}}</ref> || [[Roland Asch]] || [[Mercedes-Benz W201#Evolution II|Mercedes 190E 2.5-16 Evo2]] || 1990 Yellow Pages 200
+|-
+! colspan=5 | Grand Prix Circuit (2nd Configuration) (1968–1988): {{cvt|4.104|km|mi|abbr=on}}<ref name='kyalami_msportmagazine' />
+|-
+| [[Formula One]] || '''1:08.149''' || [[Keke Rosberg]] || [[Williams FW10]] || [[1985 South African Grand Prix]]
+|-
+| [[Group C|Group C1]] || '''1:11.170'''<ref>{{cite web |title=Kyalami 500 Kilometres 1986 |url=https://www.racingsportscars.com/race/Kyalami-1986-11-23.html |date=23 November 1986 |access-date=7 August 2021}}</ref> || [[Jochen Mass]] || [[Porsche 956]] || [[Kyalami 9 Hours#Kyalami|1986 Southern Sun 500]]
+|-
+| [[Group 5 (motorsport)#3rd Generation Group 5 – "Sports Cars" (1972 to 1975)|Group 5]] || '''1:19.300'''<ref>{{cite web |title=Kyalami 6 Hours 1974 |url=https://www.racingsportscars.com/race/Kyalami-1974-11-09.html |date=9 November 1974 |access-date=19 May 2022}}</ref> || [[Gérard Larrousse]] || [[Matra-Simca MS670#1974|Matra-Simca MS670C]] || [[1974 World Sportscar Championship|1974 Kyalami 6 Hours]]
+|-
+| [[Group 6 (motorsport)#Group 6 Prototype-Sports Cars (1966 to 1971)|Group 6]] || '''1:20.100'''<ref>{{cite web |title=Kyalami 9 Hours 1971 |url=https://www.racingsportscars.com/race/Kyalami-1971-11-06.html |date=6 November 1971 |access-date=5 February 2023}}</ref> || [[Mario Andretti]] || [[Ferrari 312 PB]] || [[Kyalami 9 Hours#Kyalami|1971 Kyalami 9 Hours]] 
+|-
+| [[Group C|Group C2]] || '''1:20.680'''<ref>{{cite web |title=Group C2 Kyalami 1987 |url=https://www.racingsportscars.com/race/Kyalami-1987-12-05-2585.html |date=5 December 1987 |access-date=22 November 2022}}</ref> || [[Wayne Taylor]] || [[Tiga GC287]] || 1987 Kyalami Group C2 race
+|-
+| [[Formula Two]] || '''1:22.970'''<ref>{{cite web |title=IV Highveld 100 |url=https://www.racingyears.com/race/IV_Highveld_100 |date=27 January 1973 |access-date=20 April 2025}}</ref> || [[John Love (racing driver)|John Love]] || [[Chevron Cars Ltd#Cars|Chevron B25]] || [[South African Formula One Championship|1973 Highveld 100]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|500cc]] || '''1:24.910''' || [[Freddie Spencer]] || [[Honda NSR500]] || [[1985 South African motorcycle Grand Prix]]
+|-
+| [[Group 4 (motorsport)|Group 4]] || '''1:25.340'''<ref>{{cite web |title=Kyalami 1000 Kilometres 1979 |url=https://www.racingsportscars.com/race/Kyalami-1979-11-03.html |date=3 November 1979 |access-date=5 February 2023}}</ref> || [[Jochen Mass]] || [[BMW M1]] || [[Kyalami 9 Hours#Kyalami|1979 1000 km of Kyalami]]
+|-
+| [[Group 2 (motorsport)|Group 2]] || '''1:27.400'''<ref>{{cite web |title=1975 Wynn’s 1000 km Kyalami |url=http://touringcarracing.net/Races/1975%20Kyalami.html |date=1 November 1975 |access-date=20 April 2025}}</ref> || [[Hans-Joachim Stuck]] || [[BMW E9#3.0 CSL|BMW 3.0 CSL]] || [[Kyalami 9 Hours#Kyalami|1975 1000 km of Kyalami]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|250cc]] || '''1:28.140''' || [[Mario Rademeyer]] || [[Yamaha TZ 250]] || [[1985 South African motorcycle Grand Prix]]
+|-
+! colspan=5 | Original Grand Prix Circuit (1st Configuration) (1961–1967): {{cvt|4.094|km|mi|abbr=on}}<ref name='kyalami_msportmagazine' /> 
+|-
+| [[Formula One]] || '''1:27.600'''<ref>{{cite web |title=VII Rand Spring Trophy |url=https://www.racingyears.com/race/VII_Rand_Spring_Trophy |date=7 October 1967 |access-date=20 April 2025}}</ref> || [[Dave Charlton]] || [[Brabham BT11]] || [[South African Formula One Championship|1967 Rand Spring Trophy]]
+|-
+| [[Formula Two]] || '''1:39.100'''<ref>{{cite web |title=IV Rand Grand Prix |url=https://www.racingyears.com/race/IV_Rand_Grand_Prix |date=9 December 1961 |access-date=20 April 2025}}</ref> || [[Jo Bonnier]] || [[Porsche 718#718/2|Porsche 718/2]] || [[1961 Rand Grand Prix]]
+|-
+|}
+
+==See also==
+{{commons category|Kyalami}}
+* [[Francis Tucker]]
+* [[List of Kyalami Grand Prix Circuit fatalities]]
+
+==Notes==
+{{notelist}}
+
+== References ==
+{{reflist|2}}
+
+==Bibliography==
+{{cite book |last=Klopper |first=Denis |title=Kyalami Grand Prix Circuit – 60 Years of Memories |date=2021 |publisher=SA Motorsport Memories |isbn=978-0-620-95195-1 |location=Johannesburg }}
+
+==External links==
+*[http://racingcircuits.info/africa/south-africa/kyalami/#.Vl-wQHarTcs Map and circuit history at RacingCircuits.info] {{Webarchive|url=https://web.archive.org/web/20210515194337/http://racingcircuits.info/africa/south-africa/kyalami/#.Vl-wQHarTcs |date=15 May 2021 }}
+*[http://www.kma.org.za Kyalami Marshals Association]
+*[https://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q=kyalami,+Gauteng,+South+Africa&sll=-26.275715,28.162251&sspn=0.018163,0.027637&ie=UTF8&ll=-25.997164,28.066893&spn=0.009103,0.013819&t=k&z=16 Satellite picture by Google Maps]
+*[http://www.sportstar.co.za Kyalami Kart Circuit]
+*[https://web.archive.org/web/20051215063625/http://www.shelbycanam.co.za/ Shelby Can-Am]
+
+{{Navboxes
+|list1 =
+{{24H Series circuits}}
+{{Formula One circuits}}
+{{MotoGP circuits}}
+{{SBK circuits}}
+{{Intercontinental GT Challenge circuits}}
+{{Sidecar World Championship circuits}}
+{{DTM circuits}}
+{{World Sportscar Championship circuits}}
+{{A1 Grand Prix circuits}}
+{{Superstars Series circuits}}
+{{Greater Johannesburg|sports}}
+}}
+
+[[Category:Formula One circuits]]
+[[Category:Grand Prix motorcycle circuits]]
+[[Category:Superbike World Championship circuits]]
+[[Category:A1 Grand Prix circuits]]
+[[Category:World Sportscar Championship circuits]]
+[[Category:Motorsport venues in South Africa]]
+[[Category:South African Grand Prix]]
+[[Category:South African motorcycle Grand Prix]]
+[[Category:Sports venues in Johannesburg]]
+[[Category:Sports venues completed in 1961]]

@@ -1,64 +1,68 @@
 # F1Drive
 
-First-person F1 driving game: Electron + Three.js r149 (UMD, `lib/three.min.js`), classic browser scripts on
-`window.F1`, no bundler. 40 real circuits with real elevation, OpenStreetMap scenery, racing line, multiplayer.
-The user writes Traditional Chinese; UI text is Traditional Chinese.
+First-person F1 driving game: Electron 44 + Three.js r149 (UMD, `lib/three.min.js`), classic browser scripts on
+`window.F1`, no bundler, no asset files (sound, textures, data are generated in code). 40 real circuits with real
+elevation, OpenStreetMap scenery, racing line, multiplayer, Grand Prix mode, seasons 2010..2026 with each team's car.
+The user writes Traditional Chinese; UI text is Traditional Chinese (Taiwan usage).
 
 - Run: `npm install`, then `npm start`. Package: `npm run dist` → `dist/F1Drive.exe` (portable).
 - Dedicated multiplayer server: `npm run server` (TCP 24500).
-- Module contract: `js/README-interfaces.md` (read this first). Original plan: `docs/original-plan.md`.
-- Regenerate data: `node tools/build-tracks.mjs` (elevation cached in `tools/elevation-cache.json`),
-  `node tools/build-scenery.mjs` (Overpass cache `tools/scenery-cache/` is NOT in git: ~54 MB, ~45 min to refetch;
-  `scenery-data.js` itself is committed).
-- Tests: `node test/collide.test.js`, `node test/server.test.js`, `node test/session.test.js`.
-  `devtests/` holds the agents' scratch suites (track build, physics, raceline drive test, scenery corridor
-  check, gamepad, Electron screenshot harnesses). They were written against absolute paths under
-  `C:\Users\user\Desktop\f1drive` and `%TEMP%\f1drive-*-test` — fix the paths before running elsewhere.
+- Module contract: `js/README-interfaces.md` (read this first; v5 and v6 sections). Original plan: `docs/original-plan.md`.
+  Live plan, decisions taken for the user, and the pause state: `docs/v6-plan.md`.
+- Data: `node tools/build-tracks.mjs` (tracks-data.js; DEM caches tools/elevation-cache*.json),
+  `node tools/build-scenery.mjs` (Overpass cache not in git, ~45 min to refetch), `node tools/build-seasons.mjs`
+  (F1DB → tools/seasons-raw.json), `node tools/build-cars.mjs [--check]` (js/seasons-data.js from seasons-raw,
+  tools/eras.json, tools/liveries/, tools/ers-data.json, js/cars-data.js and the driven calibration
+  devtests/seasons-calib/calibration.json — rerun `node devtests/seasons-calib/calibrate.mjs` (~22 min) whenever
+  js/car.js physics, js/raceline.js, js/track.js, tracks-data.js or tools/eras.json change).
+- Tests: `for f in test/*.test.js; do node $f; done` (11 suites). Electron harnesses and how to run them:
+  `devtests/README.md` (v6-smoke, v6-critic, gp-smoke, ui-gp, ui-v6, hudmirrors-test, gp-e2e solo / solo-v6 /
+  online / online-v6, mp-e2e, exe-smoke ...). Every harness window is MUTED by devtests/electron-userdata.js (the
+  user heard the offscreen windows' engines once; never set SOUND=1 unless the user asks).
 - `package.json` sets `signAndEditExecutable: false` because electron-builder's winCodeSign extraction fails
   without the symlink privilege.
 
 ## How the user wants the work done
 
-- Delegate freely to Opus subagents (any number), one owner per file, contract in `js/README-interfaces.md`.
-- When everything is finished, have a Fable agent do an independent review (give it code + requirements, not
-  conclusions), fix what it confirms, then repackage. A first review was done on v1; a SECOND one is still owed.
+- Delegate freely to Opus subagents / workflows (any number), one owner per file, contract in `js/README-interfaces.md`.
+- After a round of work, have Fable agents do an independent review (code + requirements, not conclusions), verify
+  each finding with a second agent, fix what is confirmed, re-run everything, repackage.
+- Commit locally when asked; do NOT push (the user said "commit 就好" — they still want to change things).
+- The user leaves work running unattended (overnight / while out): keep going, take sensible defaults, record them
+  in docs/v6-plan.md; `node tools/watchdog.mjs` + `tools/keepawake.ps1` exist for that.
 
-## State when paused (2026-09-30) — work was interrupted mid-task
+## State when paused (2026-10-01 15:10) — paused on purpose (the user's weekly usage was full; they are updating
+Claude and will say "continue")
 
-Done and working (game launches, smoke-tested on Monza/Spa):
-- 3D tracks: elevation (`elev`), curvature-derived banking, shared mid walls at close parallel roads,
-  per-sample wall distances, terrain, `groundY` / `terrainY` / `nearest` / `inCorridor`.
-- Load-based car physics (banking, slope gravity, crest/dip load, v² downforce), `F1.CAR_PERF` helpers.
-- Racing line (`js/raceline.js`, `L` toggles): 40/40 tracks pass the colour-following drive test.
-- Scenery: `scenery-data.js` (OSM, ODbL — credit shown in the menu) + `js/scenery.js`, sky dome.
-- Multiplayer: `net/server.js`, `net/host.js`, `preload.js`, `js/net.js`, `js/carmodel.js`, `js/collide.js`.
-  Host clicks 建立房間, others 加入房間 with IP[:port]. Tested with two windows in one process only.
-- Gamepad module `js/gamepad.js`, analog input in `js/car.js`, head-look in `js/cockpit.js` (`setLook`,
-  `centreLook`) — all tested with a stubbed Gamepad API.
+Last fully verified commit: `e02cf43` (v5 + v6 + the final Fable review's fixes; all node suites and every Electron
+harness green on Electron 44.5.1). Built exes: `dist/F1Drive-v5-GrandPrix.exe` (01:46), `dist/F1Drive-v6-preview.exe`
+(07:47, older than e02cf43). The FINAL `dist/F1Drive.exe` has NOT been built yet.
 
-IN PROGRESS / NOT DONE (the agent doing these was stopped part-way; review its partial work before trusting it):
-1. **Gamepad is NOT wired** into `js/main.js` / `index.html` yet. Wiring: add `<script src="js/gamepad.js">`
-   after cockpit.js; in `frame()` poll the pad, `cockpit.setLook(ps.lookX, ps.lookY)`, handle
-   `ps.pressed.{menu,reset,line,recentre}`, pass `F1.gamepad.mergeInput(input, driveInput)` to `car.update`,
-   `F1.gamepad.rumble(...)` on hits, poll on an interval while the menu is open so Start can resume, add a
-   controller hint to both hint blocks. Must respect the Grand Prix start-light input lock.
-2. **Grand Prix mode** (user request: X laps of individual qualifying decide the grid, then an X-lap race; both
-   X configurable; host starts it; also usable single-player; no AI cars). Partial: `net/session.js` (rules
-   module) + `test/session.test.js`, `js/laps.js`, and partial edits in `net/server.js` / `js/net.js`.
-   Not yet done: `js/main.js`, `js/ui.js`, `index.html` integration (config panel, quali HUD + timing table,
-   ghost cars in quali, grid placement, synchronised 5-light start with input lock, race standings,
-   chequered-flag rule, results screen), server integration tests, end-to-end Electron test. Also verify lap
-   counting at Suzuka's flat crossover, where `car.state.sampleIndex` can briefly jump to the other branch.
-3. `npm run dist`, launch the exe, then the second Fable review (include: all of the above, a visual spot-check
-   of scenery on tracks nobody looked at, multiplayer protocol hardening).
+Working tree = WIP v6.1 on top of e02cf43, committed as a separate WIP commit (see git log). At pause time the 11
+node suites pass, `build-cars --check` passes, and the game boots and drives (devtests/integration/shot.js), but the
+Electron harnesses were mid-update and were NOT re-run.
 
-Known leftovers:
-- COTA elevation is too flat (90 m DEM; a 30 m source for that track would fix it); Monaco is exaggerated.
-- Monaco's `points[0]` is up the hill towards Casino, not on the harbour start straight.
-- Kyalami's racing direction may be reversed in the dataset (unverified).
-- Never tested: real two-machine / internet multiplayer (port forwarding, firewall), a physical controller,
-  the packaged exe with multiplayer.
-- Cosmetic: no Monaco tunnel, raster-stepped sand/water patch edges, no driver arms in the cockpit.
-- Low-speed slide down banking was requested as optional and not implemented.
+What was in flight (details, run ids, reports: `docs/v6-plan.md` "PAUSED" section and `docs/agent-runs/2026-10-01/`):
+1. v6.1 (user requests 10-01 ~11:30) — workflow script `docs/agent-runs/2026-10-01/scripts/wf-v61.js`:
+   DONE: per-car battery data (tools/ers-data.json → build-cars / js/cars.js; 5 cars without KERS in 2011-12),
+   gamepad on A/B/X/Y (A battery hold, B limiter, X next compound, Y reset, View racing line, RB / LB alternates).
+   PARTIAL (glue agent stopped mid-way): START_YEAR 2026 in js/main.js, HUD rear-view mirrors top-left / top-right
+   (js/hudmirrors.js, layout A, setting + key V — the V hint already shows), hints, harness updates for the new
+   default year and pad indices. NOT DONE: the critic + full re-run stage.
+2. v6.2 prep (stopped): js/tunnels.js (Monaco tunnel module, partial, not wired), devtests/tunnel-test/,
+   devtests/handling-test/ (steering-lock + banking analysis on copies, partial).
+3. Track data audit of all 40 circuits (stopped early: only caches / partial notes in devtests/track-audit/, no
+   per-circuit results yet) — script `docs/agent-runs/2026-10-01/scripts/f1drive-track-audit.js`.
 
-`docs/claude-memory/` is a copy of the Claude Code project memory from the original machine.
+Next, in order: finish v6.1 (re-run its glue / critic stages on the current tree), then v6.2 (steering law so
+Monaco's hairpin is drivable — today the car's min turning radius is 10 m at 10 km/h vs a 9.4 m centreline radius;
+banking / slope presentation (Zandvoort, Madring, Spa Raidillon "not felt"); Monaco tunnel with lighting + reverb;
+the pad compound choice made visible (pit-lane prompt, telemetry / pit strip "下一組 … X / T", GP starting
+compound); the track audit and its verified data corrections; recalibration), then the full re-run, `npm run dist`,
+`node devtests/exe-smoke/smoke-exe.js dist/win-unpacked/F1Drive.exe`, docs, local commit.
+
+Known leftovers / not verified: real two-machine internet play, a physical controller (only stubbed), anyone
+listening to the sound (only measured), Electron 44 on another machine; COTA total elevation 30 m vs the published
+41 m (lidar says the surface cannot reach 41 m).
+
+`docs/claude-memory/` is a copy of the Claude Code project memory (for other machines).

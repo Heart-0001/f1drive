@@ -1,0 +1,318 @@
+{{Info/Autódromo
+| nome             = Autódromo Internacional Nelson Piquet
+| apelido          = Autódromo de Jacarepaguá
+| fuso_horário     = [[UTC−3]]
+| localização      = [[Rio de Janeiro]], [[Rio de Janeiro (Brasil)|Rio de Janeiro]], [[Brasil]]
+| coordenadas      = {{coor dms|display=título,emlinha|22|58|25|S|43|23|41|W|E_type:landmark}}
+| logo             = <!-- apenas o nome do ficheiro -->
+| imagem           = Autódromo_de_Jacarepaguá_1978-1995.png
+| legenda          = Mapa do circuito original entre 1978 e 1995.
+| imagem2          = Jacarepaguá-oval.svg
+| legenda2         = Mapa do circuito oval usado entre 1996 e 2005.
+| capacidade       = 
+| proprietário     = 
+| operador         = 
+| inauguração      = <!-- {{dtlink|DD|MM|AAAA}} --> 
+| abertura         = 1977
+| fechamento       = Novembro de 2012
+| custo_construção = 
+| arquiteto        = David Cardeman
+| nomes_anteriores = 
+| eventos          = 
+'''[[Fórmula 1]]''' <br/> [[Grande Prêmio do Brasil|GP do Brasil]] <br/> {{small|(1978, 1981–1989)}}
+
+'''[[Champ Car|CART]]''' <br/> {{small|(1996–2000)}}
+
+'''[[MotoGP]]''' <br/> [[Grande Prêmio do Brasil de Motovelocidade|GP do Rio de Janeiro]] <br/> {{small|(1995–2004)}}
+
+'''[[Stock Car Brasil]]''' <br/> {{small|(1979–2012)}}
+
+'''[[Fórmula 3 Sul-Americana]]''' <br/> {{small|(até 2012)}}
+
+| traçado1         = Circuito Grande Prêmio (1978–1994)
+| superfície       = Asfalto
+| comprimento_km   = 5 031
+| comprimento_mi   = 3 126
+| curvas           = 11
+| tempo_recorde    = 1:32.507
+| piloto_recorde   = [[Riccardo Patrese]]
+| equipe_recorde   = [[Williams Grand Prix Engineering|Williams]]-[[Renault na Fórmula 1|Renault]]
+| ano_recorde      = [[Grande Prêmio do Brasil de 1989|1989]]
+| cat_recorde      = [[Fórmula 1]]
+| traçado2         = Circuito Grande Prêmio (1995–2005)
+| superfície2      = Asfalto
+| comprimento_km2  = 4 933
+| comprimento_mi2  = 3 065
+| curvas2          = 13
+| tempo_recorde2   =
+| piloto_recorde2  =
+| equipe_recorde2  =
+| ano_recorde2     =
+| cat_recorde2     =
+| traçado3         = Circuito curto (1995–2005), <br/> Circuito Grande Prêmio (2006–2012)
+| superfície3      = Asfalto
+| comprimento_km3  = 3 336
+| comprimento_mi3  = 2 073
+| curvas3          = 7
+| tempo_recorde3   =
+| piloto_recorde3  =
+| equipe_recorde3  =
+| ano_recorde3     =
+| cat_recorde3     =
+| traçado4         = Emerson Fittipaldi Speedway (1996–2005)
+| superfície4      = Asfalto
+| comprimento_km4  = 3
+| comprimento_mi4  = 1 864
+| curvas4          = 4
+| inclinação4      =
+| tempo_recorde4   = 38.565
+| piloto_recorde4  = [[Christian Fittipaldi]]
+| equipe_recorde4  = [[Newman-Haas]]
+| ano_recorde4     = 1999
+| cat_recorde4     = [[Champ Car World Series|CART]]
+| rodapé           = 
+}}
+[[Ficheiro:Küste bei Rio de Janeiro - panoramio.jpg|miniaturadaimagem|Vista do autódromo em imagem aérea da [[lagoa de Jacarepaguá|Lagoa de Jacarepaguá]].]]
+O '''Autódromo Internacional Nelson Piquet''', mais conhecido como '''Autódromo de Jacarepaguá''', por estar localizado às margens da [[lagoa]] [[lagoa de Jacarepaguá|homônima]], em [[Jacarepaguá]], foi um autódromo [[Brasil|brasileiro]] da [[cidade]] do [[Rio de Janeiro]], desativado e demolido em [[2012]] para as obras dos [[Jogos Olímpicos de Verão de 2016]].<ref>{{Citar web|url=https://www.racingcircuits.info/south-america/brazil/jacarepagua.html|titulo=Jacarepagua in Racing Circuits|data= |autor= |primeiro=Neil|ultimo=Tipton|obra= |publicado=Racing Circuits|website=https://www.racingcircuits.info|acessodata=10/12/2023|arquivourl= |arquivodata= |urlmorta= |lingua=en}}</ref> Recebeu o [[Grande Prêmio do Brasil]] da [[Fórmula 1]] nas décadas de 1970 e 1980, além da [[MotoGP]] entre 1995 e 2004.
+
+O autódromo original teve traçado desenhado por Ayrton Cornelsen, mas o que aparece aqui é de autoria do arquiteto David Cardeman. Este lançou o livro "Autódromo do Rio Janeiro Construção de um Sonho", publicado pela Editora Paisagens Híbridas, em 27 de março de 2025.<ref>Atualizado por Fernando Calmon, em 4/4/2025.</ref>
+
+==História==
+
+=== Início (1966-1977) ===
+O autódromo, originalmente, havia sido construído em 1966, sendo nomeado como '''Autódromo da Nova Caledônia'''. O autódromo, com sua pista original, durou até 1970, quando uma reforma foi necessária, reforma essa, que terminou em 1977, com o lançamento do Autódromo de Jacarepaguá.<ref>{{Citar web|url=https://ge.globo.com/motor/formula-1/blogs/f1-memoria/post/2021/01/29/circuitos-classicos-12-por-dez-vezes-jacarepagua-recebeu-gp-do-brasil-de-formula-1.ghtml|titulo=Circuitos clássicos #12: por dez vezes, Jacarepaguá recebeu GP do Brasil de Fórmula 1|data=2021-01-29|acessodata=2023-11-26|primeiro=Fred|ultimo=Sabino|publicado=ge|website=https://ge.globo.com|lingua=pt-br}}</ref>
+
+=== Fórmula 1 (1978, 1981-1989) ===
+O autódromo sediou o [[Grande Prêmio do Brasil]] de [[Fórmula 1]] a partir de {{AnosF1|1978}} até {{AnosF1|1989}}, exceto em {{AnosF1|1979}} e {{AnosF1|1980}}. Para 1990, a presença de Jacarepaguá no calendário estava incerta, muito por conta da falta de segurança do circuito, entretanto, um acidente durante testes da equipe [[Automobiles Gonfaronnaises Sportives|AGS]] acabou deixando o ex-piloto [[Philippe Streiff]] tetraplégico por conta do mau atendimento do local,<ref>{{Citar web|url=https://ricardoshimosakai.com.br/philippe-streiff-tetraplegico-desde-1989-fala-sobre-sua-trajetoria-e-acidente-na-formula-1/|titulo=Philippe Streiff: Tetraplégico desde 1989, fala sobre sua trajetória e acidente na Fórmula 1
+|data=22/02/2014|primeiro=Ricardo|ultimo=Shimosakai|obra= |publicado=Ricardo Shimosakai|website=https://ricardoshimosakai.com.br|acessodata=10/12/2023|arquivourl= |arquivodata= |urlmorta= |lingua=}}</ref> comprometendo qualquer chance do Rio de Janeiro sediar uma corrida de Fórmula 1 no autódromo. Com isso, a corrida foi transferida para o [[Autódromo de Interlagos|Interlagos]], em [[São Paulo]].
+
+=== MotoGP (1995-1997, 1999-2004) ===
+De 1995 a 2004, com exceção de 1998, o circuito sediou o [[Grande Prêmio do Rio de Janeiro de Motovelocidade]] da [[MotoGP]]. A primeira etapa foi vencida pelo italiano [[Luca Cadalora]].<ref>{{Citar web|url=https://www.motorsportmagazine.com/database/races/1995-brazilian-motogp/|titulo=1995 Brazilian MotoGP
+|data= |autor= |primeiro= |ultimo= |obra= |publicado=Motorsport Magazine|website=https://www.motorsportmagazine.com|acessodata=10/12/2023|arquivourl= |arquivodata= |urlmorta= |lingua=en}}</ref>
+
+=== CART (1996-2000) ===
+
+Em 1996, foi construído um circuito oval em formato de trapézio chamado de "Emerson Fittipaldi Speedway" com 3 km (1.8 mi) de extensão, na qual recebeu corridas da [[CART]] entre os anos de [[Temporada da CART World Series de 1996|1996]] até [[Temporada da CART World Series de 2000|2000]]. O primeiro vencedor da etapa foi o brasileiro [[André Ribeiro]].<ref>{{Citar web|url=https://www.motorsportmagazine.com/database/races/1996-rio-do-janeiro-champ-cars/|titulo=1996 Rio do Janeiro Champ Cars|data= |autor= |primeiro= |ultimo= |obra= |publicado=Motorsport Magazine|website=https://www.motorsportmagazine.com|acessodata=10/12/2023|arquivourl= |arquivodata= |urlmorta= |lingua=en}}</ref>
+
+=== Decadência, últimos anos e demolição (2005-2012) ===
+
+Após a MotoGP em 2004, o circuito recebeu apenas competições nacionais e de menor expressão, apesar de terem havido conversas para novas corridas da maior categoria de motocicletas do mundo.<ref>{{Citar web|url=https://www.f1mania.net/motogp/12165-autodromo-de-jacarepagua-sera-inspecionado-dia-28/|titulo=Autódromo de Jacarepaguá será inspecionado dia 28|data=26/01/2005|autor= |primeiro=Victor|ultimo=D. Berto|obra= |publicado=F1 Mania|website=https://www.f1mania.net|acessodata=10/12/2023|arquivourl= |arquivodata= |urlmorta= |lingua=}}</ref> 
+[[Ficheiro:Parque Olímpico Rio 2016 (cropped).jpg|miniaturadaimagem|esquerda|Parque olímpico  construído onde era o autódromo.]]
+Para os [[Jogos Pan-Americanos de 2007]], o autódromo passou por intervenções para dar lugar ao [[Complexo Esportivo Cidade dos Esportes]], e, portanto, teve sua pista reduzida, deixando de ter a curva Norte, uma das mais desafiadoras do circuito, mas mantendo o circuito "oval". Em [[2008]], foi anunciada oficialmente a demolição do autódromo, com o objetivo de abrigar instalações para os [[Jogos Olímpicos de Verão de 2016|Jogos Olímpicos de 2016]].<ref>{{Citar web|ultimo=|primeiro=|url=https://www.clarin.com/ultimo-momento/demoleran-autodromo-brasileno-jacarepagua_0_SJZqwRRTtx.html|titulo=Demolerán el autódromo brasileño de Jacarepaguá|data=09/01/2008|acessodata=10/12/2023|website=https://www.clarin.com|obra=|publicado=Clarín|autor=|lingua=es|arquivourl=|arquivodata=|urlmorta=}}</ref><ref>{{citar web |url=http://www.estadao.com.br/esportes/not_esp106070,0.htm |título=Autódromo de Jacarepaguá dará lugar a centro olímpico |autor= LOUSADA, Bruno |publicado=Estadão |data=8 de janeiro de 2008}}</ref> 
+
+O autódromo continuou recebendo apenas competições nacionais, como as etapas da [[Stock Car Brasil]], [[Fórmula Truck]] e o [[Campeonato Brasileiro de Motovelocidade|Brasileiro de Motovelocidade]], até o encerramento de suas atividades em [[2012]]. Em agosto desse mesmo ano, parte do autódromo que não estava sendo utilizado começou a ser demolido.<ref>{{citar web|url=http://www1.folha.uol.com.br/esporte/1133475-trecho-desativado-de-jacarepagua-comeca-a-ser-demolido.shtml|título=Trecho desativado de Jacarepaguá começa a ser demolido|primeiro=Milton|último=Pazzi Jr.|publicado=Folha de S. Paulo|data=7 de agosto de 2012|acessodata=11 de agosto de 2012}}</ref><ref>{{Citar web|url=https://ge.globo.com/motor/noticia/2012/08/parte-antiga-do-autodromo-do-rio-de-janeiro-comeca-ter-asfalto-retirado.html|titulo=Parte antiga do Autódromo do Rio de Janeiro começa a ter asfalto retirado|data=07/08/2012|autor= Felipe Siqueira, Rafael Lopes e Alexander Grünwald|primeiro= |ultimo= |obra= |publicado=ge|website=https://ge.globo.com|acessodata=10 de dezembro de 2023|arquivourl= |arquivodata= |urlmorta= |lingua=}}</ref> Em 28 de outubro de 2012, ocorreu a última corrida no autódromo, uma etapa do '''Campeonato Estadual de Marcas do Rio de Janeiro''',<ref>{{Citar web|url=https://www.uol.com.br/esporte/rio-2016/ultimas-noticias/2012/10/28/autodromo-de-jacarepagua-recebe-ultima-corrida-e-fecha-por-obras-da-olimpiada-de-2016.htm|titulo=Autódromo de Jacarepaguá recebe última corrida e fecha por obras da Olimpíada de 2016|data=28/10/2012|autor= |primeiro=Vinicius|ultimo=Konchinski|obra= |publicado=UOL|website=https://www.uol.com.br|acessodata=10/12/2023|arquivourl= |arquivodata= |urlmorta= |lingua=}}</ref> sendo completamente destruído em novembro daquele ano, caracterizando o fechamento do autódromo após mais de 35 anos de existência.
+
+Com isso, posteriormente foi criado e aprovado o projeto para a construção do [[Autódromo de Deodoro|novo autódromo do Rio de Janeiro]] que ficaria localizado no bairro de [[Deodoro (Rio de Janeiro)|Deodoro]], seguindo os padrões da [[Federação Internacional do Automóvel|FIA]]. Entretanto, os planos não foram concretizados.<ref>{{Citar web|url=https://www.correiobraziliense.com.br/brasil/2021/11/4963404-em-deodoro-floresta-vira-unidade-de-conservacao-e-impede-novo-autodromo-no-rio.html|titulo=Em Deodoro, floresta vira unidade de conservação e impede novo autódromo no Rio|data=16/11/2021|autor= |primeiro= |ultimo= |obra= |publicado=Correio Braziliense|website=https://www.correiobraziliense.com.br|acessodata=10 de dezembro de 2023|arquivourl= |arquivodata= |urlmorta= |lingua=}}</ref>
+
+== Curvas ==
+No circuito usado na Fórmula 1, possuía onze curvas, distribuídas entre setores técnicos e rápidos.<ref>{{Citar web|url=https://f1templo.com/historia-dos-circuitos-da-formula-1-jacarepagua/|titulo=História dos Circuitos da Fórmula 1 – Jacarepaguá|data=11/03/2019|primeiro= |ultimo= |publicado=F1 Templo|website=https://f1templo.com|data= |acessodata=10/12/2023}}</ref>
+* '''Molykote''': É a primeira curva do autódromo. Seu nome era uma referência a uma marca de lubrificantes automotivos.
+* '''Carlos Pace''': Era uma curva de baixa/média velocidade feita para a esquerda, que fazia os pilotos abusarem dos freios e terem uma certeira redução para a terceira marcha na sua primeira parte. Nesse setor, um dos maiores desafios dos pilotos eram os balanços que os carros faziam ao contorná-la.
+* '''Suspiro''': Uma das mais desafiadoras curvas de todo o traçado. Um setor veloz para a esquerda, com diversas ondulações e a uma [[área de escape]] minúscula. Foi nesta curva que o piloto francês Philippe Streiff sofreu o acidente que encerrou sua carreira.
+
+* '''Nonato''': Outra curva que possuía um elevado grau de dificuldade na sua execução. Sua entrada era praticamente cega e obrigava que a velocidade dos carros fosse cuidadosamente controlada pelos pilotos, e terminava em uma forte freada para curva Norte.
+* '''Norte''': Considerada a curva mais difícil do circuito, tratava-se de um inclinado ''hairpin'' fechado e de baixa velocidade tangenciado para a esquerda, tudo isso combinado com os balanços dos carros. Também era dos melhores pontos de ultrapassagem do autódromo.
+* '''Sul''': Era uma curva de raio bem longo e feita em alta velocidade.
+* '''Girão''' e '''Morette''': Duas curvas seguidas de 90 graus que eram contornadas em média velocidade, sendo Girão feita para a direita, e Morette conduzida para a esquerda.
+* '''Lagoa''': Era uma curva fechada para a esquerda, feita em baixa velocidade que necessitava de exatidão no uso dos freios por parte dos pilotos. Era outro ponto de ultrapassagem da pista.
+* '''Box''': Penúltima curva do traçado, era de 90º assim como Girão e Morette. Entretanto, possuía uma angulação mais fechada, sendo contornada em baixa velocidade.
+* '''Curva da Vitória''': Ultima curva do circuito, consistia em um gancho contornado em baixa velocidade. Tinha esse nome pelo fato de algumas corridas disputadas no circuito terem sido decididas nessa curva.
+
+== Traçados ==
+<gallery>
+File:Correio da Manhã AN 187.jpg|Autódromo da Nova Caledônia (1967-1970
+File:Autódromo de Jacarepaguá 1978-1995.png|Circuito Grand Prix (1977-1994)
+File:Jacarepaguá.svg|Circuito Grand Prix (1995-2005)
+File:Jacarepaguá-oval.svg|Oval Speedway (1995-2005)
+File:Jacarepaguá-short circuit.png|Circuito Grand Prix (2006-2012)
+</gallery>
+
+== Resultados ==
+
+=== [[Fórmula 1]] ===
+{| class="wikitable" style="font-size: 95%;"
+|-
+! Ano
+! Piloto 
+! Construtor
+! Resumo
+|-
+! {{AnosF1|1978}}
+| {{flagicon|Argentina}} [[Carlos Reutemann]]
+| {{Ferrari F1}}
+| {{GPF1|do Brasil|1978|Detalhes}}
+|-
+|align="center" bgcolor="#DDDDDD" COLSPAN=4| '''''Não houve em 1979 e 1980'''''
+|-
+! {{AnosF1|1981}}
+| {{flagicon|Argentina}} [[Carlos Reutemann]]
+| {{Williams F1}}-{{MotorF1|Cosworth|Ford}}
+| {{GPF1|do Brasil|1981|Detalhes}}
+|-
+! {{AnosF1|1982}}
+| {{flagicon|France}} [[Alain Prost]]
+| {{Renault F1}}
+| {{GPF1|do Brasil|1982|Detalhes}}
+|-
+! {{AnosF1|1983}}
+| {{flagicon|Brazil}} [[Nelson Piquet]]
+| {{Brabham F1|BMW}}
+| {{GPF1|do Brasil|1983|Detalhes}}
+|-
+! {{AnosF1|1984}}
+| {{flagicon|France}} [[Alain Prost]]
+| {{McLaren F1|TAG}}/[[Porsche na Fórmula 1|Porsche]]
+| {{GPF1|do Brasil|1984|Detalhes}}
+|-
+! {{AnosF1|1985}}
+| {{flagicon|France}} [[Alain Prost]]
+| {{McLaren F1|TAG}}/[[Porsche na Fórmula 1|Porsche]]
+| {{GPF1|do Brasil|1985|Detalhes}}
+|-
+! {{AnosF1|1986}}
+| {{flagicon|Brazil}} [[Nelson Piquet]]
+| {{Williams F1|Honda}}
+| {{GPF1|do Brasil|1986|Detalhes}}
+|-
+! {{AnosF1|1987}}
+| {{flagicon|France}} [[Alain Prost]]
+| {{McLaren F1|TAG}}/[[Porsche na Fórmula 1|Porsche]]
+| {{GPF1|do Brasil|1987|Detalhes}}
+|-
+! {{AnosF1|1988}}
+| {{flagicon|France}} [[Alain Prost]]
+| {{McLaren F1|Honda}}
+| {{GPF1|do Brasil|1988|Detalhes}}
+|-
+! {{AnosF1|1989}}
+| {{flagicon|United Kingdom}} [[Nigel Mansell]]
+| {{Ferrari F1}}
+| {{GPF1|do Brasil|1989|Detalhes}}
+|-
+|}
+
+=== [[MotoGP]] ===
+{|class="wikitable" style="font-size: 95%;"
+|-
+! Ano !! 125 cc !! 250 cc !! MotoGP
+|-
+! [[Temporada de MotoGP de 2004|2004]]
+| {{flagicon|Spain}} [[Héctor Barberá]] ([[Aprilia (empresa)|Aprilia]])
+|rowspan=2| {{flagicon|San Marino}} [[Manuel Poggiali]] ([[Aprilia (empresa)|Aprilia]])
+| {{flagicon|Japan}}  [[Makoto Tamada]] ([[Honda]])
+|-
+! [[Temporada de MotoGP de 2003|2003]]
+| {{flagicon|Spain}} [[Jorge Lorenzo]] ([[Derbi]])
+|rowspan=2| {{flagicon|Italy}}  [[Valentino Rossi]] ([[Honda]])
+|-
+! [[Temporada de MotoGP de 2002|2002]]
+| {{flagicon|Japan}} [[Masao Azuma]] ([[Honda]])
+| {{flagicon|Argentina}} [[Sebastian Porto]] ([[Yamaha Motor Company|Yamaha]])
+|-
+! Ano !! 125 cc !! 250 cc !! 500 cc
+|-
+! [[Temporada de MotoGP de 2001|2001]]
+| {{flagicon|Japan}} [[Youichi Ui]] ([[Derbi]])
+|rowspan=2| {{flagicon|JPN}} [[Daijiro Kato]] ([[Honda]])
+|rowspan=2| {{flagicon|Italy}}  [[Valentino Rossi]] ([[Honda]])
+|-
+! [[Temporada de MotoGP de 2000|2000]]
+| {{flagicon|Italy}} [[Simone Sanna]] ([[Aprilia (empresa)|Aprilia]])
+|-
+! [[Temporada de MotoGP de 1999|1999]]
+| {{flagicon|JPN}} [[Noboru Ueda]] ([[Honda]])
+| {{flagicon|Italy}} [[Valentino Rossi]] ([[Aprilia (empresa)|Aprilia]])
+| {{flagicon|JPN}} [[Norifumi Abe]] ([[Yamaha]])
+|-
+! [[Temporada de MotoGP de 1997|1997]]
+| {{flagicon|Italy}} [[Valentino Rossi]] ([[Aprilia (empresa)|Aprilia]])
+|rowspan=2| {{flagicon|France}} [[Olivier Jacque]] ([[Honda]])
+|rowspan=2| {{flagicon|Australia}} [[Michael Doohan]] ([[Honda]])
+|-
+! [[Temporada de MotoGP de 1996|1996]]
+| {{flagicon|JPN}} [[Haruchika Aoki]] ([[Honda]])
+|-
+! [[Temporada de MotoGP de 1995|1995]]
+| {{flagicon|Japan}} [[Masaki Tokudome]] ([[Aprilia (empresa)|Aprilia]])
+| {{flagicon|Italy}} [[Doriano Romboni]] ([[Honda]])
+| {{flagicon|Italy}} [[Luca Cadalora]] ([[Yamaha]])
+|}
+
+=== [[Champ Car|CART Champ Car]] ===
+{| class="wikitable" style="font-size: 95%;"
+|-
+! Temporada
+! Data
+! Nome da corrida
+! Piloto vencedor
+! Chassis
+! Motor
+! Equipe
+|-
+! [[Temporada da CART World Series de 2000|2000]]
+| 30 de abril
+| Rio 200
+| {{flagicon|MEX}} [[Adrian Fernández]]
+| [[Reynard Motorsport|Reynard]]
+| [[Ford Cosworth]]
+| [[Patrick Racing]]
+|-
+! [[Temporada da CART World Series de 1999|1999]]
+| 15 de maio
+| GP Telemar Rio 200
+| {{flagicon|COL}} [[Juan Pablo Montoya]]
+| [[Reynard Motorsport|Reynard]]
+| [[Honda]]
+| [[Chip Ganassi Racing]]
+|-
+! [[Temporada da CART World Series de 1998|1998]]
+| 10 de maio
+| Rio 400k
+| {{flagicon|CAN}} [[Greg Moore]]
+| [[Reynard Motorsport|Reynard]]
+| [[Mercedes-Benz]]
+| [[Forsythe Racing]]
+|-
+! [[Temporada da CART World Series de 1997|1997]]
+| 10 de maio
+| Hollywood Rio 400k
+| {{flagicon|CAN}} [[Paul Tracy]]
+| [[Penske Racing|Penske]]
+| [[Mercedes-Benz]]
+| [[Penske Racing]]
+|-
+! [[Temporada da CART World Series de 1996|1996]]
+| 17 de março
+| Rio 400
+| {{flagicon|BRA}} [[André Ribeiro]]
+| [[Lola Racing Cars|Lola]]
+| [[Honda]]
+| [[Tasman Motorsports]]
+|-
+|}
+
+{{Referências}}
+
+== Ligações externas ==
+{{Commonscat|Autódromo Internacional Nelson Piquet circuit maps}}
+
+* [http://www.silhouet.com/motorsport/tracks/riode.html Autódromo Internacional Nelson Piquet (Rio de Janeiro) on http://www.silhouet.com]
+* [http://www.riogp.com.br/ Autódromo Internacional Nelson Piquet (Rio de Janeiro)]
+* [http://www.kartcarioca.com.br/ Kartódromo no Autódromo Internacional Nelson Piquet (Rio de Janeiro)]
+
+{{Circuitos da Fórmula Um}}
+{{Circuitos da Champ Car}}
+{{Circuitos da MotoGP}}
+{{Circuitos da Stock Car Brasil}}
+{{Sedes do Pan 2007}}
+{{Cidade do Rio de Janeiro}}
+
+[[Categoria:Autódromos do Rio de Janeiro (estado)|Jacarepaguá]]
+[[Categoria:Locais de competição dos Jogos Pan-Americanos de 2007]]
+[[Categoria:Esporte da cidade do Rio de Janeiro|Jacarepaguá]]
+[[Categoria:Grande Prêmio do Brasil|*]]
+[[Categoria:Grande Prêmio do Rio de Janeiro de Motovelocidade|*]]
+[[Categoria:Barra da Tijuca]]
+[[Categoria:Autódromos da Fórmula 1|Jacarepaguá]]
+[[Categoria:Fundações no Rio de Janeiro em 1977]]
+[[Categoria:Autódromos extintos|Jacarepaguá]]

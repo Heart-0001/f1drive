@@ -1,0 +1,190 @@
+
+################ net + session + gp (car, year, wear)
+
+== summary
+I built the v6 network / session / Grand Prix controller side per the contract in js/README-interfaces.md ('Network, session, Grand Prix controller'), keeping the v5 hardening: every inbound field is validated, sizes are bounded, nothing throws, broadcasts are coalesced.
+- net/session.js: start({q, r, len, year, wear}). year must be a whole 2010..2100, otherwise null; it is never clamped, because a clamped year would be a different season. wear is clamped and rounded to 1..5, default 1. The snapshot carries both. 'again' keeps them; 'free' keeps those of the last session, like q / r.
+- net/server.js: every player has a `car` (from hello, any phase; '' = not chosen). The roster rows carry it. `profile` updates it only in phase 'free' (parc fermé); name and colour still change during a session.
+- net/server.js, room year: new host-only `year {y}` message, accepted only in 'free' and rate-limited exactly like the track message. The year goes out in `welcome` and in every `players` message. It stays on host migration and in an empty room. A host `gp start` puts the room's own year into the session and ignores any client-supplied year. It also forwards `wear`.
+- js/net.js: net.year, net.setYear(y) -> bool, and a 'year' event (also fired once after 'connected', before 'track'). setProfile / getProfile gain car; roster and players[i] gain car; hello sends it; gp('start') forwards wear. cleanSession types year and wear. A car chosen during a session is re-sent automatically once the room is back in free practice.
+- js/gp.js: start({q, r, year, wear}, len). Offline both go into the local session; online only wear goes through net.gp. view() gains year and wear. cleanSnapshot sanitises both.
+- Tests added: session +2 (28 total), gp +3 (19), server +6 (38): validation, host-only, phase rule, rate limit, host migration, snapshot content, garbage input, the real js/net.js against the real server, and a hostile server sending garbage year / car / wear.
+- server.test.js still takes 14.6 s: I split the two slow v6 tests (the year rate limit runs on real time) into new concurrent lanes `year` and `year2`.
+- devtests/net-gp (my scratch): new Electron harness electron-v6.js + page-v6.html (22/22 checks); both fuzzers extended. The existing electron-net.js (20/20) and gp-test/browser-load.js still pass.
+
+== openIssues
+ - js/main.js and js/ui.js are not wired (owned by others). The integration steps are in apiNotes (host setYear on connect, car in setProfile, the 'year' handler, gp.start with wear/year, onGpStart passing wear). The v6 behaviour is therefore not verified inside the real game, only in my Electron harness pages.
+ - For the future js/cars.js: ids arriving from the wire only match /^[a-z0-9-]{1,40}$/, and 'constructor' passes that test. F1.cars.get / resolve must look ids up as own properties (hasOwnProperty, a Map or Object.create(null)), or a hostile peer's car 'constructor' could resolve to Object.prototype.constructor.
+ - For the seasons builder: CarSpec ids must match /^[a-z0-9-]{1,40}$/ (no underscore, lowercase). js/cars-data.js documents its team ids as /^[a-z0-9_-]{1,24}$/; the current ids have no underscore, but one would make that car 'not chosen' ('') on the wire.
+ - Needs a decision: the 16-player roster test bound in test/server.test.js went from 2048 B to 3072 B because v6 rows carry a car id (measured 2629 B with 40-character ids). 2 KB is only the limit on what a client may SEND; if a 2 KB outbound roster really matters, car ids would have to be shortened.
+ - Not my files, please update: devtests/README.md should list `npx electron devtests/net-gp/electron-v6.js` (22 checks, exit code, PORT default 24780, ~5 s) and the fuzzers' new year/car/wear coverage; the wire-protocol lines in js/README-interfaces.md could take the exact formats from apiNotes.
+ - Decision (edge of the rate limit): a host who changes the year and then starts a Grand Prix within the same second gets the year he picked last, because the start applies his waiting pick. Each such start also broadcasts a snapshot, so this adds no new amplification path.
+
+################ pit.js
+
+== summary
+I wrote js/pit.js (F1.createPit) and test/pit.test.js (22 tests, all passing), and checked the module against the real track.pit on every track, in node and in Chromium.
+
+- **The module:** pure logic, classic ES5 IIFE. No DOM, no THREE, no timers. It works as a browser script (window.F1.createPit) and in node (module.exports = createPit), and the random generator can be injected.
+- **Visits:** entering and leaving the lane comes from track.pit.inLane(sampleIndex, d). Positions are counted along the lane from the entry line in lap order, so a lane across the start/finish line works when the sample index wraps.
+- **Speeding:** more than 3 km/h over the lane limit, flagged once per visit. It adds 5 s to a pending hold. The next stop serves the whole pending hold, whether it happens in this visit or a later one.
+- **Service:** it starts when the car is at rest (under 0.5 m/s) in its own box, at most once per visit. The tyre change takes a random 2.0 to 4.5 s, mostly 2.2 to 3.2 s.
+- **Robustness:** 'exit' only fires once the car is 6 to 8 m past a line on two updates in a row. So a car sitting on a line, reversing a little over it, or a one-step index glitch does not fire events twice. Every 'enter' gets exactly one 'exit'.
+
+The fuzz test found a real flaw in my first design: a car reversing back in after 'exit' could get 'speeding' outside a visit. I fixed it.
+
+What I checked:
+1. **Unit tests** against stub lanes: straight across the start line, the same lane not wrapping, and a 160 m-radius curved lane. They cover everything on the task list. 16 deliberately broken copies of pit.js were each caught.
+2. **Real tracks:** devtests/pit-logic/real-track.js drives the lane on all 40 tracks, locating the car with track.locate as car.js does. On the 39 tracks that have a real lane, the car stops where pit.js's own boxAhead reaches 0: within 0.3 m of the box point and 5° of its heading. It gets its service and exits, and a run through the lane too fast gives exactly one penalty. The one track without a lane (mc-1929) is inert.
+3. **Browser:** an Electron page check loads the module in Chromium with no script errors and passes.
+
+**What the real track.js does with boxes:** box (x, z) is the centre of the painted box, and the yellow stop bar for the nose is 2.85 m ahead of it. With main.js's CAR_NOSE of 2.8 m, the car's origin stops 5 cm from the box point. So pit.js treats the box point as the car's position, which is the default (boxBack = 0).
+
+**Cost:** each update takes at most about 0.3 µs, and the heap did not grow over 2 million updates.
+
+== openIssues
+ - main.js integration (a later step): see the numbered list in apiNotes. The critical point is calling pit.update with the frame dt while the car is frozen for a service; otherwise the service never ends.
+ - Decisions I made that you may want to change:
+- Every speeding visit adds its own 5 s to the pending hold, with no cap.
+- reset() clears the pending hold too, and I recommend calling it at each session placement.
+- Visits end 6..8 m after a line.
+- A car put at rest into its box gets no service until it has driven.
+- Out-of-range slots wrap around the 16 boxes.
+- The service can be aborted, with the extra event 'serviceAbort'.
+ - track.js (other owner), state at my last run: mc-1929 (Monaco) has track.pit = null. Earlier runs also showed no pit on az-2016, fr-1960, be-1925 (Spa), ca-1978 and us-2022; the track agent was still iterating, and limits and lane lengths changed between my runs. pit.js is inert where the pit is null. Re-run `node devtests/pit-logic/real-track.js` once track.js is final.
+ - devtests/README.md is not mine: the orchestrator may want to add devtests/pit-logic. Commands:
+- `node devtests/pit-logic/real-track.js [regex]` (MOCK=1 [MOCK_SIDE=1] for a mock lane), exit code 1 on failure;
+- `npx electron devtests/pit-logic/page-check.js` (TRACKS=id,id), exit code 1 on failure.
+ - Not verified: the real car physics driving into a box (car.js's pit wall and asphalt are another owner's job). My harness moves the car kinematically and locates it with track.locate.
+
+################ tyres.js
+
+== summary
+I built the tyre model in js/tyres.js and its test suite in test/tyres.test.js. All 13 tests pass. I also added verification harnesses under devtests/tyres-test/. The model follows the contract (createTyres, fit, setWearRate, update, state) and is pure logic: no DOM or THREE, it works in the browser (window.F1) and in node (module.exports), it is deterministic given random(), and update() allocates nothing (checked with V8's GC trace).
+
+Model. Each tyre's work each step is u^2 * a(v) * v, where u is the share of grip in use and a(v) is the reference car's limit at that speed. Cornering work goes 55 % to the fronts and 72 % of each axle to the outside tyre. Braking goes 64 % to the fronts, traction all to the rears. Sliding adds slip * a_lat(v) * v * 4, mostly on the tyres that slide. Rolling adds 0.25*v per tyre and grass 12*v. The fronts wear 1.55 times faster for the same work because they are narrower.
+- **Wear:** each step adds rate * compound wear * 3.9e-6 * work * dt, raised further when the tyre is overheated.
+- **Grip vs wear:** no loss up to 20 % wear, 0.8 % at 50 %, 4 % at 75 %, 12 % at 90 %, 31 % at 100 %.
+- **Punctures:** a tyre worn past 100 % punctures somewhere between 103 % and 112 %, drawn when the set is fitted. A heavy impact has a chance of 0.8*(hit-0.4)/0.6. One puncture at a time, cured only by fit().
+- **Temperature:** hard racing keeps tyres at 90-99 °C, inside every compound's window (S up to 105, M 110, H 115). Sustained sliding overheats them: the grip drops and they cool in 5-10 s at speed. There are no cold tyres.
+- **Dirt:** grass dirties the tyres (-12 % grip). They clean in about 150 m of asphalt, 3.3 s at 45 m/s.
+- **Flat spots:** heavy sliding over slip 0.4 (mostly lock-ups under braking) or an impact over 0.2 leaves one. It never heals, vibrates more with speed and costs up to 6 % braking grip on that tyre.
+- **Car-level multipliers:** lateral grip is weighted towards the loaded outside tyres, braking towards the fronts (62 %), traction on the rears. All are continuous; a new, clean medium set gives exactly 1 / 1 / 1.
+- **Compounds:** soft +1.5 % grip and twice the wear, hard -1.5 % and half the wear.
+
+Measured stint lengths:
+- **All 40 tracks,** the reference car on the racing line with analog pedals, medium at rate 1: mean 15.1 laps of 5 km (75.3 km), median 15.5, range 11.5-18.6. Keyboard-style driving, with every brake and throttle at 100 %, wears faster: mean 10.9.
+- **Test lap (Albert Park, 5.28 km),** laps until the most worn tyre reaches 100 %, with 4 %-grip-loss laps in brackets:
+
+| Compound | ×1 | ×2 | ×5 |
+|---|---|---|---|
+| Soft | 7.5 (5.6) | 3.7 | 1.5 |
+| Medium | 15.0 (11.3) | 7.5 | 3.0 |
+| Hard | 30.0 (22.5) | 15.0 | 6.0 |
+
+- **Through the car (medium, rate 1)**, lap time against the best lap: +0.00 s up to lap 4, +0.08 at lap 8, +0.56 at lap 12, +2.2 at lap 14, then the cliff at lap 15 with a rear-left puncture.
+
+Golden rule. I patched a copy of the v5 car in memory to apply the grip multipliers and call update() every step, then drove it next to the untouched car. On 7 tracks the two cars are bit-identical at every step while the multipliers are exactly 1. That lasts 2.3-2.9 laps from the start of timing at rate 1, and all 3 laps at Monaco and Bahrain. Lap times match to the millisecond through lap 3.
+
+== openIssues
+ - car.js owner: must make car.js work without F1.createTyres (node devtests don't load js/tyres.js), and must use the slip scale I assumed (slip = min(1, 2*(latReq/latMax - 1))) or tell me theirs so the flat-spot/slide thresholds can be retuned. Reference implementation of the hook and the load: the patch strings in devtests/tyres-test/golden.js.
+ - Decision: calibrated '15 hard laps' on the e2e autopilot driving the racing line at pace 1 with analog pedals (mean 15.1 five-km laps). Keyboard players, whose brake/throttle is always 100 %, get about 11. If the user plays mostly on keyboard and wants ~15 there, raise WEAR_K's divisor by ~1.35 (WEAR_K 3.9e-6 -> ~2.9e-6).
+ - Decision: no cold-tyre model. Sets are fitted at 90 °C and never cool below it, so grid waits and pit crawls cannot change the reference car. Only overheating is modelled.
+ - Decision: rate 0 freezes temperature and dirt too, not just wear, flat spots and punctures, so it is an exact test/reference mode.
+ - Decision: the flat-spot and impact-puncture chances do not scale with the GP wear multiplier; only wear does, so worn-out punctures still arrive 5x sooner at x5.
+ - Wear starts to cost grip after 20 % (about 3 hard laps on medium at rate 1). Multi-lap v6 end-to-end runs at rate 1 therefore drift from v5 by at most ~0.1 % grip in laps 3-5; runs at wear x5 (GP option) drift much more. Stage H should set rate 0 where it needs exact v5 behaviour.
+ - The racing line / autopilot is computed for full grip. On soft tyres the autopilot cannot use the extra grip, and on worn tyres it overdrives corners. If AI or autopilot pace ever matters, F1.buildRaceLine(track, perf) could take the grip multipliers into account.
+ - devtests/README.md is not mine: the orchestrator may want to add an entry for devtests/tyres-test (trace.js, golden.js, alloc.js, browser-load.js; car-v5.js is the golden-rule reference copy). README-interfaces.md could note F1.Tyres, the stricter rate-0 semantics, and the slip-scale expectation.
+ - Not verified: the real game with the tyres wired in. main.js and car.js are not wired yet and index.html is not mine; verification was done in node, through a patched car and in an Electron test page.
+
+################ telemetry.js
+
+== summary
+Built js/telemetry.js (F1.telemetry.init / draw), the broadcast-style bottom-centre graphic, and an offscreen-Electron harness in devtests/telemetry-test/. Final run: 38 / 38 checks pass at devicePixelRatio 1 and 2, and a devicePixelRatio 1.5 screenshot pass is also clean.
+
+What the graphic shows, in a 520 x 156 CSS px design space:
+- A dark translucent panel with a gauge disc rising out of its top.
+- A 240-degree segmented rev arc (white, then amber, then a red zone past rpmShift, with a needle at the tip) and 15 shift lights (green / red / blue) in a pill above it. At the shift point all 15 strobe blue.
+- Inside the arc: a green throttle arc on the right and a red brake arc on the left, the speed as a big italic Bahnschrift number right-aligned in fixed digit cells (so nothing moves between 0 / 9 / 99 / 345), and KM/H under it.
+- The gear as a large italic character (N grey, R amber) with a team-colour underline.
+- Left wing: a slanted team-colour strip and wash, team and car in uppercase condensed type, and a 10-cell battery bar with its percentage. While deploying the bar turns yellow and glows, with 放電中 and outgoing chevrons. While harvesting it shows 充電中 with incoming chevrons. At 0 % it flashes red with 電量耗盡.
+- Without ERS (battery null) the battery block is left out and the left wing closes up around the team name; the gauge stays centred.
+- Right wing: four tyre icons in car layout. The outline colour runs green -> yellow -> red with wear, and the fill level shows the remaining tread. A flat spot is a bright white patch across the tread plus a marker; a puncture is a squat dark-red tyre with a flashing outline and a white X. Also the Pirelli-style compound badge (S red, M yellow, H white) and 下一組 with the next compound, dimmed when it equals the current one.
+- Pit limiter: the light bar is replaced by a wide amber band 維修區限速 80 flashing at 2 Hz. The rev arc and the speed digits also turn amber. In the pit lane a PIT chip is added. In the lane without the limiter the band is red, and the band and speed flash when more than 3 km/h over the limit.
+
+Engineering:
+- The backing store comes from a ResizeObserver (device-pixel-content-box), with window resize and matchMedia(resolution) as fallbacks; nothing is measured per frame. Device px per design unit is capped at 5.
+- Static layer on an offscreen canvas, plus a sprite atlas at device resolution for every changing text, the lit LED bar, the battery bars and the pit-band variants. Both are rebuilt only when size, team / car / colours, rpm range, battery presence or the pit limit change.
+- A frame is one static blit, a few arcs and paths, and sprite blits at whole device pixels.
+- Light exponential smoothing (pedals tau 28 ms, rpm 30 ms): a keyboard throttle step shows 87 % after 50 ms.
+- Every field is sanitised and draw() is wrapped in try/catch: it never throws and warns once.
+
+Measured cost of draw() over 10 000 frames:
+- Back to back: average 0.022-0.026 ms; worst batch-of-100 average 0.034-0.044 ms.
+- Once per requestAnimationFrame, as in the game: average 0.076-0.097 ms, p99 0.2, p99.9 0.3, max 0.4-0.8 ms.
+- Before the sprite atlas the per-frame cost was about 0.23-0.27 ms; measurement showed font switches plus fillText dominated.
+
+== openIssues
+ - Not yet seen in the real game: main.js is wired by a later step. Verified only through the harness page, with the canvas over a real 1920x1080 game screenshot (devtests/gp-smoke/out/a2-driving.png).
+ - Layout clash for the UI owner: at 1280 wide the panel spans about x 380..900 at the bottom and overlaps the right part of the current bottom-left key-hint line (#hud-hint). The hint should move or shorten. The old #hud-speedo box becomes redundant.
+ - The panel's shift-light pill sits over the cockpit steering wheel's display area in first person (cosmetic, by design of 'bottom centre').
+ - Heap claim, stated exactly: draw() creates no objects, arrays, strings or closures per frame, and only numbers are boxed. The harness measures about 74 B per draw with one object cycling through 28 states; the profiler shows about 11 B per draw is the performance.now() read. The harness check is a tripwire at < 128 B per draw, not a proof.
+ - Design decision: the speed is right-aligned in three fixed digit cells (no layout jump), so 0-99 km/h sits right of the gauge centre. Another decision: the next-compound badge is dimmed when it equals the current compound.
+ - Fonts: Bahnschrift (Windows 10+) with fallbacks from --num-font. On a system without it the digits fall back to Segoe UI and so on; the fixed digit cells still prevent jumps.
+ - devtests/README.md is not my file. Suggested entry: '## telemetry-test — js/telemetry.js: `npx electron devtests/telemetry-test/shots.js` — the broadcast graphic over a game screenshot at 1280x720 / 1920x1080, DPR 1 then 2 (child process): contact sheets out/sheet-*.png, sizing, fixed digits, junk input, pedal smoothing, no DOM access / boxed numbers only per frame, hidden canvas, zoom; draw() cost over 10 000 frames. 19 + 19 checks. Exit code. Env DPR=1|2|1.5, ONLY=shots,checks,bench, FR
+ - Nothing committed (as instructed).
+
+################ track.js pit lane
+
+== summary
+Every one of the 40 tracks now has a pit lane in js/track.js (track.pit + track.update). All required checks pass. One exception: at Monaco the entry line is 22 m after the start/finish line instead of before it.
+
+How the lane is laid out: it follows the centreline as an offset curve, up to 250 m before and after the line, and gets shorter where a bend or another part of the circuit is in the way. From the track outwards: runoff, a pit wall (0.8 m thick, open at the entry and exit tapers), a 7 m lane, a strip of 16 boxes, and a 6 m garage face that is the outer wall. The tapers are C2 S-curves of 60-80 m. The side comes from the scenery-data 'pit' buildings when they exist (checked to be next to the line)
+
+Room rule: the whole complex stays 1.5 m inside the halfway line between this straight and any other road or the inside of a bend. So it never folds, never touches another part of the circuit, and nearest() / locate() / inCorridor() / groundY() needed no changes.
+
+If a layout does not fit, the code tries in this order: less runoff in front of the pit wall, then 60 km/h (8 m/s² at 80 km/h, 12 m/s² at 60), then a narrow cross-section (6 m lane), then a last resort where the entry line may come after the start line. Monaco is the only track that needs the last resort: its line sits in Casino Square between a 30 m and a 25 m radius bend.
+
+On the racing surface nothing changed. Every sample field is identical to git HEAD except the pit-side wall distance and flag inside the lane, which only move outwards. Grid, crossings, road and paint vertices, and locate / nearest / surfaceY / groundY / inCorridor on the road all match the v5 baseline, and the racing line is identical. Build time goes up about 5-10% (+4-6 ms per track). The layout search itself costs 0.2 ms; the rest is about 4.5% more vertices through the existing buffer code.
+
+Visuals are checked in the real game (offscreen Electron) on Monza, Monaco, Suzuka, Spa and Singapore, and I looked at every view. The first curtains were additive and looked washed-out white against the daytime sky. I switched them to translucent RGBA with normal blending: now amber at the entry, green at the exit, clearly different. No scenery stands inside any lane, no wall blocks an entry, no z-fighting is visible. The 3d-test surfaceY check also failed at first on Imola, Monaco and Sochi, b
+
+== openIssues
+ - Monaco (mc-1929) needs a decision. The data's start line is at Casino Square, between a 30 m and a 25 m radius bend. No lane can have its entry line before the line there, so the last-resort layout starts the lane 52 m before the line (from = -52) but puts the entry line at +22 m. check.js reports this as a warning. Consequences: the Monaco lane is not in the speed-limit zone when the car crosses the start/finish line, and the lap crossing happens on the road part of the entry taper. The real
+ - js/scenery.js (not mine): where there is no pit data it builds its own procedural pit building, pit-lane asphalt fill and pit-wall timing stands, using insideSign and the corridor edge. Now that the corridor includes the pit complex, these land behind the garage face. Suggest: use track.pit.side, skip the procedural lane asphalt and timing stands when track.pit exists, and put the pit building right behind the garage face (sample wallPosDist/wallNegDist + CLEAR). OSM pit buildings are already
+ - js/car.js (not mine): pit wall collision, paved-not-grass, inPit and the RESYNC_DIST note are in apiNotes. Until then a car can pass through the pit wall position from the runoff.
+ - js/main.js (not mine): optionally call track.update(performance.now() / 1000) once per frame; nothing else is needed to show the pit lane.
+ - devtests/README.md and js/README-interfaces.md (not mine) need a pit-test section and the API additions (paved, length, boxLen, boxW, F1.PIT_DEBUG, the late-entry rule). Suggested README entry: `node devtests/pit-test/check.js [regex]` (60 s, exit code), `node devtests/pit-test/drive.js [regex|all] [today|paved|both]` (2 s / 8 s, exit code), `npx electron devtests/pit-test/shots.js` (env TRACKS, VIEWS; ~90 s), `node devtests/pit-test/plot.js [ids|all] [whole|entry|exit|all]` + `npx electron d
+ - plot.js writes .svg files into devtests/pit-test/out/, and .gitignore only covers *.png. I deleted the SVGs; if the orchestrator wants them ignored, add devtests/pit-test/out/*.svg to .gitignore (not my file).
+ - Build time: +5-10% per track (4-6 ms on 50-110 ms builds), from about 4.5% more vertices going through the existing buffer and normal code. Not optimised further.
+ - With today's car.js the lane counts as grass, which holds about 78-80 km/h at full throttle. The drive check therefore also runs a 'paved' mode through a proxy track (lane samples' halfW widened) to show the 80 km/h path works once car.js treats the lane as asphalt. Las Vegas cruises at only 71 km/h even in paved mode, because boxes 14 and 3 are close together in its short lane.
+ - Not done: no pit lane lights or gantries, no pit-entry chevron hatching, no fence on the pit wall. The garage face is a plain 6 m facade (doors, team-colour bands); numbers are painted on the ground only.
+
+################ cockpit.js + carmodel.js
+
+== summary
+I rebuilt the first-person car in js/cockpit.js, generated entirely in code. The bodywork is lofted with a curved chassis and nose. The front wing has 3 to 5 cambered elements plus endplates (pylons on the high-nose styles). The front suspension has wishbones, a push rod and a track rod. There are brake ducts, and from 2022 on, wake deflectors over the tyres. The tyres have a rounded shoulder, sidewall lettering ("APEX" plus the compound name), the S/M/H compound band, lettering that blurs at sp
+
+The livery uses colour as the base, with colour2 for the spine, flanks, sidepod sweep, cockpit lip and wing flaps. The accent goes on pinstripes, the halo tip and the camera pods. The car number sits on the nose tip and sides. Sponsor blocks use the scenery's fictional brands (KRONOS, HALCYON, VELOCITA, NORDSEE OIL, APEX).
+
+There are two steering wheels. 2010-2013 cars get a rounder wheel with a small amber screen; 2014 on get a big colour screen. Both have an LED strip, rotary dials, buttons and paddles. The screen is a live canvas redrawn at most 15 times a second and only when a value changes. It shows the gear, speed, 15 shift lights from rpmShift*0.85 to rpmShift, the battery bar, PIT LIMIT, the tyre compound, and the lap time or live delta. Values the car does not report yet (gear, rpm, battery and so on) are
+
+Materials are MeshStandardMaterial with a 256x128 generated environment map; no lights or scene changes are needed. Static parts are merged per material: the whole car is 17 draw calls, down from 83. setCar(spec, accent) rebuilds only when the style, wheel type, nose or tyre width changes, disposes what it replaces, and otherwise just redraws the livery.
+
+The camera code is unchanged apart from a vibration shake from state.vib. It matches the v5 cockpit exactly: 0 difference over 600 frames that include hits, grass and head look.
+
+In js/carmodel.js I added setLivery(colour, colour2, accent), which recolours existing vertex groups only; geometry and draw calls are unchanged. setColour(c) is identical to v5.
+
+Verification: 86 screenshots of the real game in offscreen Electron, which I looked at, plus before/after composites. The previously skipped "centred view identical" check in the gamepad cockpit test now runs against a frozen copy of the v5 cockpit and passes. Performance was measured in the real game.
+
+== openIssues
+ - main.js is not wired yet (not my file): it should call cockpit.setCar(spec, profileColour) on car or colour changes, cockpit.setSources({car, lap}) after every new lap counter, and model.setLivery(...) instead of model.setColour(...) for remote cars.
+ - Layout conflict: the v6 telemetry graphic in the bottom centre (js/telemetry.js / index.html) will sit over the steering wheel and its live display. Someone should check the overlap in the integrated game; the canvas might need to sit lower or be semi-transparent.
+ - Wing visibility is realistic but may disappoint: the front-wing endplates are modelled but hidden behind the front tyres from the driver's eye, as on the real cars. Only the flaps show, as a thin band between the nose and the tyres. They are fully visible in the outside views.
+ - Still weak visually: gloves are rounded blobs and forearms are rigid tapered tubes. There are no real shadows; occlusion is only baked into vertex colours and the livery, plus contact-shadow quads under the car, so the car looks the same under a bridge.
+ - Still weak visually: the mirrors reflect the generated environment, not the real track or cars behind. The sidepod tops are large flat colour areas at the bottom corners. Steering-wheel buttons have no labels.
+ - Livery choice: the sponsor logo and car number on the nose read from the front, so they are upside down to the driver. That is authentic, and I made the chassis logo tone-on-tone so it is subtle; flip them in drawLivery if the user finds it odd.
+ - The spec has no car-number field in the contract. I read spec.number / num / carNumber and otherwise derive a stable number from spec.id, so if the season data adds numbers they are picked up.
+ - Performance numbers are from an offscreen Electron window while other agents were also running Electron, with performance.now() at 0.1 ms resolution; they are means of 150 interleaved samples. First-render costs are not measured separately: PMREM generation from the environment map and shader compiles happen once when the cockpit first appears.
+ - Not my files, for the owners: devtests/README.md could get a 'cockpit-test' section (shots.js groups and env TAG / ONLY / PERF / COCKPIT, api.test.js, compare.js, the frozen v5 baselines). .gitignore could add devtests/cockpit-test/out/, whose index-ck.html and perf.json are not covered by devtests/**/*.png. F1.game could expose `cockpit` for tests; today the harness catches it by wrapping F1.createCockpit.
+ - Unverified: head look while the car is pitched or rolled hard, e.g. at the Eau Rouge compression (only placements on the centreline were shot). No real controller was used; head look was driven through the harness and the stubbed-pad smoke test.

@@ -1,0 +1,48 @@
+diff --git "a/C:\\Users\\Heart\\Desktop\\f1Drive\\js\\raceline.js" "b/C:\\Users\\Heart\\Desktop\\f1Drive\\devtests\\handling-test\\variants\\raceline.proposed.js"
+index 4738884..bde18bf 100644
+--- "a/C:\\Users\\Heart\\Desktop\\f1Drive\\js\\raceline.js"
++++ "b/C:\\Users\\Heart\\Desktop\\f1Drive\\devtests\\handling-test\\variants\\raceline.proposed.js"
+@@ -50,11 +50,12 @@
+            GRAV * Math.sin(pitch);
+   }
+   var maxLatAccel = fbMaxLat, maxAccel = fbMaxAccel, maxDecel = fbMaxDecel;
++  var steerLockAt = null;     // perf.steerLockAt (js/car.js) when present: the car's own lock law (speed, banking)
+ 
+   // perf: the limits of the car the line is built for (F1.carPerf(spec)); default F1.CAR_PERF (the reference car)
+   function syncCarPerf(perf) {
+     var p = perf && typeof perf === 'object' ? perf : F1.CAR_PERF;
+-    maxLatAccel = fbMaxLat; maxAccel = fbMaxAccel; maxDecel = fbMaxDecel;
++    maxLatAccel = fbMaxLat; maxAccel = fbMaxAccel; maxDecel = fbMaxDecel; steerLockAt = null;
+     if (!p) return;
+     function pick(v, fb) { return typeof v === 'number' && v === v ? v : fb; }
+     TOP_SPEED = pick(p.topSpeed, TOP_SPEED); DRAG_K = pick(p.dragK, DRAG_K); ROLL = pick(p.roll, ROLL);
+@@ -68,6 +69,7 @@
+     if (typeof p.maxLatAccel === 'function' && typeof p.maxAccel === 'function' && typeof p.maxDecel === 'function') {
+       maxLatAccel = p.maxLatAccel; maxAccel = p.maxAccel; maxDecel = p.maxDecel;
+     }
++    if (typeof p.steerLockAt === 'function') steerLockAt = p.steerLockAt;
+   }
+ 
+   // ---- line / safety tuning ----
+@@ -112,9 +114,19 @@
+         v = lo;
+       }
+     }
+-    // steering lock: tan(STEER_LOCK / (1 + (v/ref)^2)) / WHEELBASE >= k * margin
++    // steering lock: tan(lock(v)) / WHEELBASE >= k * margin
+     var x = Math.atan(WHEELBASE * k * STEER_MARGIN);
+-    if (x >= STEER_LOCK) v = MIN_SPEED;
++    if (steerLockAt) {
++      // the car's law (js/car.js perf.steerLockAt: speed, banking); it falls with speed: the fastest speed whose lock is enough
++      if (steerLockAt(v, bank, turnSign) < x) {
++        var a = MIN_SPEED, b = v, c;
++        if (steerLockAt(a, bank, turnSign) < x) v = MIN_SPEED;
++        else {
++          for (var n = 0; n < 18; n++) { c = 0.5 * (a + b); if (steerLockAt(c, bank, turnSign) >= x) a = c; else b = c; }
++          v = a;
++        }
++      }
++    } else if (x >= STEER_LOCK) v = MIN_SPEED;
+     else v = Math.min(v, STEER_SPEED_REF * Math.sqrt(STEER_LOCK / x - 1));
+     return Math.max(MIN_SPEED, Math.min(TOP_SPEED, v));
+   }

@@ -16,7 +16,7 @@ const PORT = Number(process.env.PORT || 24870);
 async function partNewbie() {
   state.part = 'newbie';
   const w = makeWin('newbie');
-  const err = await w.open();
+  const err = await w.open({ fresh: true });             // a new player: a fresh install (v6.1: the 2026 standard car)
   check('boots without the error overlay', !err, err);
   await w.shot('newbie-01-menu');
   const m = await w.js(`({ tab: document.querySelector('.menu-tabs button.on').getAttribute('data-tab'), grid: __t.rect('track-grid'), panel: __t.rect('mp-panel'),
@@ -25,7 +25,7 @@ async function partNewbie() {
     hint: __t.shown('gp-hint') ? __t.text('gp-hint') : '' })`);
   note('menu: ' + J(m));
   check('the track grid is visible next to the side panel (cards at least 150 px wide, not covered)', m.firstCard && m.firstCard.w >= 150 && m.grid.w > 300 && m.panel.x >= m.grid.x + m.grid.w - 2, m);
-  check('the key map names Q / E / T / M', /限速器/.test(m.keymap) && /電池/.test(m.keymap) && /換胎配方/.test(m.keymap) && /靜音/.test(m.keymap), m.keymap);
+  check('the key map names Q / E / T / M / V', /限速器/.test(m.keymap) && /電池/.test(m.keymap) && /換胎配方/.test(m.keymap) && /靜音/.test(m.keymap) && /後照鏡/.test(m.keymap), m.keymap);
   for (const t of ['car', 'mp', 'set', 'gp']) { await w.click('#tab-' + t); await w.shot('newbie-02-tab-' + t); }
   const car = await w.js(`(function () { var c = document.querySelector('#car-list .car-card.on'); return { season: __t.text('car-season'), sel: c ? c.getAttribute('data-id') : null,
     selText: c ? c.innerText.replace(/\\s+/g, ' ') : '', year: document.getElementById('car-year').value }; })()`);
@@ -36,7 +36,7 @@ async function partNewbie() {
   await w.shot('newbie-03-standing');
   const hint = await w.js(`({ keys: __t.text('hud-hint-keys'), shown: __t.shown('hud-hint-keys'), tel: __t.rect('hud-telemetry'), hintR: __t.rect('hud-hint'), toast: __t.shown('hud-toast') ? __t.text('hud-toast') : '' })`);
   note('HUD: ' + J(hint));
-  check('the HUD hint names Q / E / T / M', hint.shown && /Q/.test(hint.keys) && /E/.test(hint.keys) && /T/.test(hint.keys) && /M/.test(hint.keys), hint.keys);
+  check('the HUD hint names Q / E / T / M / V', hint.shown && /Q/.test(hint.keys) && /E/.test(hint.keys) && /T/.test(hint.keys) && /M/.test(hint.keys) && /V\s*後照鏡/.test(hint.keys), hint.keys);
   check('the hint does not overlap the telemetry graphic', hint.hintR && hint.tel && (hint.hintR.x >= hint.tel.x + hint.tel.w || hint.hintR.y + hint.hintR.h <= hint.tel.y), { hint: hint.hintR, tel: hint.tel });
   w.key('W', true); await sleep(2500);
   await w.shot('newbie-04-accelerating');
@@ -68,7 +68,7 @@ async function partNewbie() {
   // other window sizes: the menu and the HUD
   for (const s of [[1024, 640], [1920, 1080], [800, 600]]) {
     const v = makeWin('size' + s[0], { w: s[0], h: s[1] });
-    await v.open();
+    await v.open({ fresh: true });
     await v.shot('newbie-11-menu-' + s[0]);
     await v.click('#tab-car');
     await v.shot('newbie-12-car-' + s[0]);
@@ -170,10 +170,10 @@ async function pitLasVegas() {
     onService: async w => {
       const r = {};
       r.s0 = await w.js(svcState);
-      // R and the pad's A in the box: ignored
+      // R and the pad's reset button (Y since v6.1) in the box: ignored
       await w.tap('R'); await w.frames(3);
-      await w.js(`__e.pad.buttons[0].value = 1; __e.pad.buttons[0].pressed = true; true`); await w.frames(3);
-      await w.js(`__e.pad.buttons[0].value = 0; __e.pad.buttons[0].pressed = false; true`); await w.frames(3);
+      await w.js(`__e.pad.buttons[3].value = 1; __e.pad.buttons[3].pressed = true; true`); await w.frames(3);
+      await w.js(`__e.pad.buttons[3].value = 0; __e.pad.buttons[3].pressed = false; true`); await w.frames(3);
       r.s1 = await w.js(svcState);
       // Esc: the menu over the box
       await w.tap('Escape');
@@ -198,14 +198,14 @@ async function pitLasVegas() {
   if (!v || !v.svcStarted) { check(tag + ': a stop in the box', false, v); await w.noErrors(); w.destroy(); return; }
   const t = v.svcTest;
   note(tag + ': ' + J({ strip: v.strip, during: v.during, svcTest: t, after: v.after, toasts: v.toasts, info: v.info && { stopped: v.info.stopped, rec: { maxLane: v.info.rec.maxLaneKmh, hits: v.info.rec.hits, grass: v.info.rec.grass } } }));
-  check(tag + ': R / pad A in the box change nothing (service on, car still)', t.s1.svc && t.s1.x === t.s0.x && t.s1.z === t.s0.z && t.s1.svc.left < t.s0.svc.left, { s0: t.s0, s1: t.s1 });
+  check(tag + ': R / pad Y in the box change nothing (service on, car still)', t.s1.svc && t.s1.x === t.s0.x && t.s1.z === t.s0.z && t.s1.svc.left < t.s0.svc.left, { s0: t.s0, s1: t.s1 });
   check(tag + ': Esc during the service: the menu opens, the service waits (paused), the car stays', t.menu.running === false && t.menuFrames.idle && t.s2.svc && t.s2.svc.left === t.menu.svc.left && t.s2.x === t.menu.x,
     { menu: t.menu, s2: t.s2 });
   note(tag + ': car picked in the box: ' + J(t.picked));
   check(tag + ': resumed: the service runs to its end with the car held (not released early), then new softs', t.moveBad.bad === 0 && t.moveBad.frames > 10 && !t.s3.svc && v.after.tyres === 'S' && v.after.stops === 1, { moveBad: t.moveBad, s3: t.s3, after: v.after });
   check(tag + ': no contact / grass in the short lane, speed capped', v.info && v.info.rec.hits === 0 && v.info.rec.grass === 0 && v.info.rec.maxLaneKmh < 81, v.info && v.info.rec);
   const exitToast = await w.js(`__v.toasts.map(function (t) { return t.text; }).filter(function (t) { return /已離開維修區/.test(t); })`);
-  check(tag + ': leaving the lane with the limiter still on: a reminder to switch it off (LB: a pad is connected)', exitToast.length === 1 && /LB/.test(exitToast[0]), exitToast);
+  check(tag + ': leaving the lane with the limiter still on: a reminder to switch it off (B: a pad is connected)', exitToast.length === 1 && /按 B 關閉限速器/.test(exitToast[0]), exitToast);
   await w.noErrors();
   w.destroy();
 }
@@ -527,7 +527,7 @@ async function partMash() {
   await w.pickTrack('it-1922');
   let seed = 12345;
   const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
-  const KEYS = ['Q', 'E', 'T', 'M', 'R', 'Escape', 'W', 'S', 'A', 'D', 'L'];
+  const KEYS = ['Q', 'E', 'T', 'M', 'R', 'Escape', 'W', 'S', 'A', 'D', 'L', 'V'];   // (V: the HUD mirrors, v6.1)
   const held = {};
   const t0 = Date.now();
   let n = 0;
@@ -553,7 +553,7 @@ async function partMash() {
   const v = await w.js(`({ v: F1.game.car.state.speed * 3.6, running: F1.game.running, limiter: F1.game.limiter, muted: F1.audio.muted, boost: F1.game.boost, input: F1.game.input })`);
   w.key('W', false);
   note('after mashing: ' + J({ st, v }));
-  check('after 20 s of mashing Q / E / T / M / R / Esc / WASD / L and pad buttons: nothing threw, the car drives again', !st.overlay && v.running && v.v > 20, { st, v });
+  check('after 20 s of mashing Q / E / T / M / R / Esc / WASD / L / V and pad buttons: nothing threw, the car drives again', !st.overlay && v.running && v.v > 20, { st, v });
   await w.noErrors('mash');
   // the same on the grid of an offline Grand Prix (lights: input locked)
   await w.tap('Escape');

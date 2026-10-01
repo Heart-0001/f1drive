@@ -33,7 +33,7 @@ needed are granted. Do not wait for the user; decide sensible defaults and recor
 | H | end-to-end: update `devtests/gp-e2e` (solo + online) for v6, new pit / tyre / year scenarios, fix loop | workflow f1drive-v6-e2e (wf_f1d4d7c9-b43) | DONE ~10:40: solo 588/588, solo-v6 295/295 (2012 KERS + 2026 ERS, wear x5, one-stop races, speeding penalty), online 141/141, online-v6 65/65 (password room, 2014, three cars in the lane at once), v6-smoke 129/129, gp-smoke 197/197, ui 117 + 124, mp-e2e 30/30, all node + devtests suites; fixed: box vs curtain clearance (PIT_BOX_MARGIN 12 m; Monaco entry 14 m after the line), Monaco gantry vs curtain, refused lap shown as best lap, car card name wrap; harness windows proven silent (Windows mixer, 49 min) |
 | I | `npm run dist`, launch the exe, smoke it (remote-debugging port), screenshots | orchestrator | not started |
 | J0 | EARLY Fable review pass 1 of the stable modules (multiplayer / driving model / world + visual spot-check of 12 unvisited tracks / sound + graphics), each finding verified by an independent Opus agent; NO fixes in the run | workflow `f1drive-fable-review-1` (wf_83c1d2a6-190), launched ~03:30 in parallel with F | multiplayer / driving / media verified (15 real, mostly minor; scratchpad j0-confirmed.json); their fixes run in workflow f1drive-j0-fixes (wf_2d87efd2-7fc) since ~04:45 in parallel with G (disjoint files); world verified ~05:00: 5 real (banking synthetic — no real banked corners; COTA / Monaco / Las Vegas elevation; pit-building texture stacked; kerb paint on the pit taper; groundY beside the pit) -> workflow f1drive-world-fixes (wf_24e3e0cc-046): track data + track.js, scenery.js, then RE-CALIBRATION of the seasons data (track change invalidates it) |
-| J | Fable review (independent: code + requirements, not conclusions; scope = everything since v1 incl. v6; visual spot-check of scenery on tracks nobody looked at; multiplayer protocol hardening) -> adversarial verification -> fixes by file owners -> all suites -> final `npm run dist` | workflow (reviewers `model: 'fable'`) | running: workflow f1drive-fable-final (wf_64daa6f3-2d9) since ~10:45 |
+| J | Fable review (independent: code + requirements, not conclusions; scope = everything since v1 incl. v6; visual spot-check of scenery on tracks nobody looked at; multiplayer protocol hardening) -> adversarial verification -> fixes by file owners -> all suites -> final `npm run dist` | workflow (reviewers `model: 'fable'`) | DONE ~13:50: workflow f1drive-fable-final (wf_64daa6f3-2d9): 34 confirmed findings fixed (pit-lane R / speeding exit-line hold, ERS traction-limited + 2026 fade, recalibration WITH the battery, Monaco start / grid / pit on the harbour straight via OSM start-finish node, Zandvoort pit 80, Singapore 60, CSP, crash handling, icon, Electron 44.5.1); re-run all green on Electron 44 (11 node suites, v6-smoke 133, critic 85, gp-smoke 197, ui 117 + 124, solo 588, solo-v6 295, online 141, online-v6 65, mp-e2e 30, track / pit / scenery / audio). Committed locally e02cf43 |
 | K | docs: `CLAUDE.md` state section, `docs/claude-memory/`, README contract notes, `devtests/README.md` | orchestrator | not started |
 
 Stage E's workflow script is already written: `%TEMP%\claude\C--Users-Heart-Desktop-f1Drive\c2c193e6-e2b5-4b48-8955-beed8746e07e\scratchpad\wf-v6-modules.js`
@@ -110,6 +110,7 @@ Never run two agents that own the same file at the same time; heavy Electron har
 - 08:20 keep-awake restarted for 16 h (pid in tools/watchdog-out/keepawake.pid).
 - ~10:40 stage H DONE; ~10:45 final Fable review (stage J) launched.
 - ~12:10 stage J: 34 confirmed findings (R in the pit lane skips the lane, pit speeding unpunished without a stop, ERS bypasses the traction cap / no 2026 taper, seasons uncalibrated with the battery, Monaco start at Casino Square, Electron 33 EOL, no CSP, renderer crash handling, portable exe self-extract, ...). Fixers done except data; the net fixer moved package.json to Electron ^44.5.1 (+ icon, electronLanguages zh-TW / en-US, js/cars-data.js no longer packaged) and I ran npm install at ~12:40 (installed 44.5.1). The re-run stage verifies everything on 44.
+- ~13:50 stage J DONE, committed e02cf43 (local). ~13:55 v6.1 workflow launched (wf_7e983c92-8d1): per-car ERS, pad ABXY, default 2026, HUD mirrors, critic + full re-run. Then: npm run dist, exe smoke, CLAUDE.md / docs, local commit.
 
 ## User answers, 10-01 ~11:30 (v6.1)
 
@@ -121,6 +122,51 @@ Never run two agents that own the same file at the same time; heavy Electron har
 6. NEW: two small HUD rear-view mirrors at the top-left and top-right of the screen (js/hudmirrors.js, prep running), with a setting / key to hide them.
 
 Prep DONE ~12:00: tools/ers-data.json + docs/ers-data.md (168 cars; 5 no-KERS cars 2011-2012; Mercedes 2014-16 strongest, Honda 2015 weakest; deploy/harvest REPLACE perf.ersPower/ersHarvest; widen sanitising to 0.75..1.15; lower the ratings.ers gain to ~3-4) and js/hudmirrors.js + devtests/hudmirrors-test (33/33; layout A: mirrors in the top corners, timing box / minimap / session box moved down under them; +0.45..0.6 ms; exact main.js / index.html edits in scratchpad mirrors-report.txt). Plan: after the final review finishes -> v6.1 integration workflow (script ready: scratchpad wf-v61.js; launch when the final review incl. its fixes + re-run has finished) (build-cars + cars.js ERS, gamepad remap, START_YEAR 2026, HUD mirrors in main / ui / index, harness updates for the default year and the pad map) -> full re-run -> npm run dist -> exe smoke -> docs -> local commit.
+
+## User feedback 10-01 ~14:30 (after playing the preview build)
+
+- 2023 Red Bull feels strong (good).
+- Monaco: the slowest hairpin cannot be taken even at 20 km/h. Measured: Monaco's tightest centreline radius is 9.4 m (sample 631, s 1262 m), while the car's minimum turning radius is 10.0 m at 10 km/h, 10.5 m at 20, 13.3 m at 45 km/h, because js/car.js reduces the steering lock with speed from standstill on (lock = 0.35 / (1 + (v/22)^2)). Real F1 cars take it at ~45-50 km/h with full lock using the whole width. TODO after v6.1: give full lock at low speed (keep the reduction only where it matters, e.g. above ~70 km/h), check against the real hairpin geometry, update the golden oracle (devtests/car-v6/car-v5.js) and recalibrate (calibration fingerprints car.js).
+- Battery: 'does it really never run out?' — explained (2014-2025 real cars may deploy 4 MJ = ~33 s per lap; Monaco has little full throttle and lots of braking, so running out there is rare even in reality; 2026 empties in ~11 s). The preview exe they played predates the final review's ERS fixes (traction-limited deploy, 2026 fade). Possible follow-up if wanted: the real per-lap deploy limit (KERS 400 kJ, ERS 4 MJ) shown in the HUD.
+
+## More user feedback 10-01 ~14:40 -> v6.2
+
+- Banked corners (Madring, Zandvoort) do not feel pronounced; Spa's steep climb is not felt visually; Monaco tunnel wanted; "re-check the data of ALL circuits".
+- Running in parallel with v6.1 (research / new files only): f1drive-v62-prep (wf_637f2699-28a: Monaco tunnel module js/tunnels.js + data; steering-lock + banking analysis on copies) and f1drive-track-audit (wf_009442b9-534: 8 regional auditors + a perception analyst + verification -> tools/track-audit.json, docs/track-audit.md).
+- User 10-01 ~14:50 asked for no tyre wear in qualifying, then (~14:55, after hearing qualifying is already fixed at x1 since the final review) said: KEEP qualifying at x1 — no change. Still to do: the pad's compound choice is not discoverable -> show it: pit strip / telemetry "下一組 M（T / X 切換）", a prompt on entering the pit lane, hints, and a starting-compound choice in the Grand Prix panel.
+- After v6.1: v6.2 integration = steering law (Monaco hairpin), banking / slope presentation, Monaco tunnel (+ lighting + reverb), the verified track-data corrections via tools/build-tracks.mjs, recalibration, full re-run; then dist + exe smoke + docs + local commit.
+
+## PAUSED 2026-10-01 15:10 (user's weekly usage full; they are updating Claude and will say "continue")
+
+Stopped on purpose: workflows f1drive-v61 (wf_7e983c92-8d1), f1drive-v62-prep (wf_637f2699-28a), f1drive-track-audit
+(wf_009442b9-534); the session cron watchdog tick; the keep-awake helper; leftover Electron / Overpass processes.
+Workflow run ids only resume inside the SAME Claude session: after a restart, relaunch from the scripts copied to
+docs/agent-runs/2026-10-01/scripts/ (agent reports in docs/agent-runs/2026-10-01/reports/; dump-journal.js reads a
+workflow journal).
+
+State of the tree: e02cf43 = last fully verified commit; on top of it a WIP commit with the paused v6.1 work. At pause:
+11 node suites pass, build-cars --check passes, the game boots and drives; Electron harnesses NOT re-run.
+
+v6.1 stream (script wf-v61.js; stages: Modules -> Glue -> Critic):
+- Modules DONE: per-car ERS (tools/ers-data.json applied in tools/build-cars.mjs + js/cars.js, regenerated
+  js/seasons-data.js, test/cars.test.js; devtests/seasons-calib/ers-effect.mjs), gamepad ABXY (js/gamepad.js,
+  devtests/gamepad-test incl. game-map.js).
+- Glue PARTIAL (stopped while adapting devtests/hudmirrors-test/run.js): js/main.js / js/ui.js / index.html edited
+  (START_YEAR 2026?, HUD mirrors + V key + setting, hints) and many harnesses edited (gp-e2e, gp-smoke, ui-gp, ui-v6,
+  v6-critic, v6-smoke) for the default year / pad indices — verify each against the task text before trusting.
+- To resume: re-run the Glue stage's task on the current tree (it is idempotent: check what is already done),
+  then the Critic stage (play + full re-run).
+
+v6.2 prep (script f1drive-v62-prep.js): js/tunnels.js was being written (partial); devtests/tunnel-test/;
+devtests/handling-test/ (steering-lock + banking analysis on copies; big ref dumps git-ignored). Relaunch both
+agents (they create new files only) or fold them into the v6.2 integration.
+
+Track audit (script f1drive-track-audit.js): stopped while fetching OSM / DEM data — devtests/track-audit/ has
+caches (git-ignored cache/) and partial notes per region, no per-circuit results. Relaunch as is.
+
+Then: v6.2 integration (steering law, banking / slope presentation, Monaco tunnel + lighting + reverb, pad compound
+visibility, verified track-data corrections, recalibration ~22 min), full re-run, npm run dist, exe smoke, docs,
+local commit (no push).
 
 ## Watchdog (asked for by the user)
 

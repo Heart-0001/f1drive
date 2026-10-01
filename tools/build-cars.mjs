@@ -14,6 +14,11 @@
 //   tools/eras.json                 regulation periods: power-to-weight, top speeds, grip notes, ERS, rpm, gears
 //   tools/liveries/*.json           colours, Traditional Chinese team names and notes per entry
 //   js/cars-data.js                 the hand-researched 2026 grid (multipliers, notes, colours take precedence)
+//   tools/ers-data.json             every car's battery 2011-2026 (docs/ers-data.md): hasErs, deploy / harvest / store
+//                                   multipliers and a one-line Traditional Chinese note
+//   devtests/seasons-calib/ers-effect.json   the DRIVEN lap-time effect of every car's battery (the season's standard
+//                                   car with that battery, deploying, on every calibration circuit), written by
+//                                   node devtests/seasons-calib/ers-effect.mjs; refused when stale or incomplete
 //   devtests/seasons-calib/calibration.json   the DRIVEN calibration of every season's standard car (the era grip
 //                                   scale and the ERS harvest of the KERS / 2026 seasons), written by
 //                                   node devtests/seasons-calib/calibrate.mjs with the real js/car.js + autopilot;
@@ -55,10 +60,18 @@
 //     lean of the group, %) / 100, and ENGINE_TRACTION of that on traction. Wing level: drag = downforce = 1 - TRIM_GAIN
 //     x (the team's own lean minus its engine group's) / 100 (a fast-circuit car runs less wing). Chassis level L:
 //     grip, brake, traction and downforce + L (as js/cars-data.js's method), solved (profile model = js/raceline.js's
-//     speed profile on the calibration circuits, mean lap delta) so that the lap-time target is hit. ERS multipliers 1
-//     (no documented source). 2026: js/cars-data.js as it is.
+//     speed profile on the calibration circuits, mean lap delta) so that the lap-time target is hit.
+//     Battery (tools/ers-data.json, 2011-2026): deploy / harvest / store are the car's ersPower / ersHarvest / ersStore
+//     (they REPLACE any other ERS multiplier, js/cars-data.js's 2026 ones included); hasErs false = no battery (ers: null).
+//     The lap-time target is the lap WITH the battery deployed (as the calibration drives it), and the profile model has
+//     no battery, so the car's battery effect (ers-effect.json: mean over the calibration circuits of the driven lap of
+//     the season's standard car with this battery / without a change, %) is added to the profile delta: a strong battery
+//     gets a correspondingly weaker chassis level L, a car without KERS a stronger one (same lap time, other character).
+//     2026: js/cars-data.js's power, drag and chassis multipliers, its target the profile delta they give (the cars-data
+//     pace was derived without the battery), then the same level L on top so that the new battery keeps that lap time.
 //  C. Ratings 0..100 (50 = the season's standard car): the measures and gains of js/cars-data.js
-//     (devtests/cars-data/derive.js), 50 + gain x near 50, compressed with a tanh towards the ends (RATING, ratingOf).
+//     (devtests/cars-data/derive.js), 50 + gain x near 50, compressed with a tanh towards the ends (RATING, ratingOf);
+//     the battery's gain lowered for the wider ERS range, 0 for a car without a battery.
 'use strict';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -74,6 +87,8 @@ const P = (...a) => join(ROOT, ...a);
 export const OUT_JS = P('js', 'seasons-data.js');
 export const CALIB_FILE = P('devtests', 'seasons-calib', 'calibration.json');
 export const ENTRIES_FILE = P('devtests', 'seasons-calib', 'entries.json');
+export const ERS_FILE = P('tools', 'ers-data.json');
+export const ERS_EFFECT_FILE = P('devtests', 'seasons-calib', 'ers-effect.json');
 
 // ---- configuration ------------------------------------------------------------------------------------------------
 export const CFG = {
@@ -93,6 +108,10 @@ export const CFG = {
   ENGINE_SINGLE: 0.5,           // an engine used by one team only: this share of its lean is the engine's
   TRIM_GAIN: 5,                 // drag and downforce % per % of the team's own lean beyond its engine group's
   MIN: 0.95, MAX: 1.05, DECIMALS: 4,
+  // the battery multipliers (tools/ers-data.json): deploy / harvest and store have wider ranges than the rest. A product
+  // with the era value must also stay inside js/car.js's F1.sanitizeSpec window (1/10..10 x the reference): 2026's
+  // harvest is calibrated at 2190 W/kg = that ceiling / 1.05, so a 2026 harvest above 1.0502 is cut to it
+  ERS_MIN: 0.75, ERS_MAX: 1.15, STORE_MIN: 0.9, STORE_MAX: 1.1,
   INDEX_TOL: 0.003,             // |driven median - era index| the task allows (0.3 %); a calibration beyond it is refused
                                 // (beyond calibration.json's own, tighter tolerance it is reported as a warning)
   SIG: 6                        // significant digits of the era physics (the 2025 anchor is written unrounded)
@@ -106,10 +125,15 @@ export const RATING = {
   accel: { gain: 12, x: '0–300 km/h（乘以該年標準車極速 / 330 km/h）所需時間比標準車少的百分比' },
   cornering: { gain: 23, x: '半徑 30 / 60 / 120 m 平地彎的過彎速度，比標準車高的百分比（三者平均）' },
   braking: { gain: 20, x: '300→80 km/h 煞車距離比標準車短的百分比' },
-  ers: { gain: 13, x: '(ersPower − 1) 與 (ersHarvest − 1) 的平均，%' }
+  // (js/cars-data.js: 13 for its 0.97..1.02; the per-car batteries span 0.76..1.12, so 3.5: Honda 2015 6, Mercedes 2014 80)
+  ers: { gain: 3.5, x: '(ersPower − 1) 與 (ersHarvest − 1) 的平均，%；沒有電池的車 0 分' }
 };
-export const MULT_KEYS = ['power', 'drag', 'downforce', 'grip', 'brake', 'traction', 'ersPower', 'ersHarvest'];
-const ONES = { power: 1, drag: 1, downforce: 1, grip: 1, brake: 1, traction: 1, ersPower: 1, ersHarvest: 1 };
+export const MULT_KEYS = ['power', 'drag', 'downforce', 'grip', 'brake', 'traction', 'ersPower', 'ersHarvest', 'ersStore'];
+export const ERS_KEYS = ['ersPower', 'ersHarvest', 'ersStore'];
+const ONES = { power: 1, drag: 1, downforce: 1, grip: 1, brake: 1, traction: 1, ersPower: 1, ersHarvest: 1, ersStore: 1 };
+// the allowed range of a multiplier (the same as js/cars.js clamps to)
+export const multRange = k => k === 'ersStore' ? [CFG.STORE_MIN, CFG.STORE_MAX] :
+  (k === 'ersPower' || k === 'ersHarvest' ? [CFG.ERS_MIN, CFG.ERS_MAX] : [CFG.MIN, CFG.MAX]);
 const CORNER_RADII = [30, 60, 120];
 
 // ---- documented display overrides (applied here; tools/seasons-raw.json itself is never edited) --------------------
@@ -142,7 +166,8 @@ export function loadInputs() {
   const liveries = {};
   for (const f of ['2010-2017.json', '2018-2026.json']) Object.assign(liveries, readJson(P('tools', 'liveries', f)).entries);
   const cars2026 = require(P('js', 'cars-data.js'));
-  return { raw, eras, liveries, cars2026 };
+  const ersData = readJson(ERS_FILE);
+  return { raw, eras, liveries, cars2026, ersData };
 }
 
 // ---- the real game modules (node: window = global) ------------------------------------------------------------------
@@ -414,18 +439,78 @@ export function geometries() {
 }
 
 // ---- CarSpec from the era + multipliers (the same arithmetic as js/cars.js) ------------------------------------------
-export function applyMult(era, m) {
+// hasErs false: the car raced without a battery (ers: null) whatever its era has
+export function applyMult(era, m, hasErs) {
+  const bat = !!era.ers && hasErs !== false, st = m.ersStore === undefined ? 1 : m.ersStore;
   const s = {
     power: era.power * m.power, dragK: era.dragK * m.drag, downforce: era.downforce * m.downforce,
     latBase: era.latBase * m.grip, latMax: era.latMax * m.grip, brakeBase: era.brakeBase * m.brake,
     traction: era.traction * m.traction,
     gearKmh: era.gearKmh.slice(), topKmh: era.topKmh, rpmIdle: era.rpmIdle, rpmShift: era.rpmShift, rpmMax: era.rpmMax,
     shiftTime: era.shiftTime, cylinders: era.cylinders, aspiration: era.aspiration,
-    ers: era.ers ? { store: era.ers.store, power: era.ers.power * m.ersPower, harvest: era.ers.harvest * m.ersHarvest } : null,
+    ers: bat ? { store: era.ers.store * st, power: era.ers.power * m.ersPower, harvest: era.ers.harvest * m.ersHarvest } : null,
     cockpit: era.cockpit
   };
-  if (era.ers && era.ers.taperKmh) s.ers.taperKmh = era.ers.taperKmh.slice();
+  if (bat && era.ers.taperKmh) s.ers.taperKmh = era.ers.taperKmh.slice();
   return s;
+}
+
+// ---- the batteries (tools/ers-data.json) -------------------------------------------------------------------------------
+// A car's battery on its era: { hasErs, ersPower, ersHarvest, ersStore (multipliers, 4 decimals, inside multRange and
+// the F1.sanitizeSpec window of the product), note, cut: [keys cut to that window], src: the ers-data entry | null }.
+// No battery in the era (2010): hasErs false and no note. hasErs false in the data: multipliers 1 (ignored).
+const ERS_FIELD = { ersPower: ['deploy', 'power'], ersHarvest: ['harvest', 'harvest'], ersStore: ['store', 'store'] };
+export function carErs(ersData, id, eraErs) {
+  const none = { hasErs: false, ersPower: 1, ersHarvest: 1, ersStore: 1, note: '', cut: [], src: null };
+  if (!eraErs) return Object.assign(none, { eraNone: true });      // like the standard car of that season
+  const ent = ersData && ersData.entries && Object.prototype.hasOwnProperty.call(ersData.entries, id) ? ersData.entries[id] : null;
+  if (!ent) throw new Error('tools/ers-data.json has no entry for ' + id);
+  const note = typeof ent.note === 'string' ? ent.note : '';
+  if (ent.hasErs === false) return Object.assign({}, none, { note, src: ent });
+  const R = loadGame().REF_SPEC.ers, out = { hasErs: true, note, cut: [], src: ent };
+  for (const k of ERS_KEYS) {
+    const [field, ek] = ERS_FIELD[k], v = ent[field], [lo, hi] = multRange(k);
+    if (typeof v !== 'number' || !isFinite(v)) throw new Error('tools/ers-data.json ' + id + '.' + field + ' is not a number');
+    // its range (multRange), 4 decimals, then the window of the product: each change is reported (NOTE)
+    let m = round(clamp(v, lo, hi), CFG.DECIMALS);
+    const top = Math.floor(R[ek] * 10 / eraErs[ek] * 1e4) / 1e4, bot = Math.ceil(R[ek] / 10 / eraErs[ek] * 1e4) / 1e4;
+    if (m > top) m = top;
+    if (m < bot) m = bot;
+    if (m !== v) out.cut.push(k);
+    out[k] = m;
+  }
+  return out;
+}
+// the key of a battery inside its season (ers-effect.json): 'none' or 'deploy/harvest/store'; null = the standard car's
+// (also no battery in a season without one)
+export const ersKey = b => b.eraNone ? null : (!b.hasErs ? 'none' :
+  (b.ersPower === 1 && b.ersHarvest === 1 && b.ersStore === 1 ? null : [b.ersPower, b.ersHarvest, b.ersStore].join('/')));
+// The standard car of a season (F1.REF_SPEC with the era part) from the driven calibration
+export function standardSpec(eras, year, calib) {
+  const cal = calib.seasons[year];
+  return Object.assign({}, loadGame().REF_SPEC, eraSpec(eras, year, cal.gripScale, cal.ersHarvest));
+}
+// Every battery the cars of 2011..2026 have that differs from their season's standard car:
+// [{ year, key, hasErs, ersPower, ersHarvest, ersStore, cars: [ids] }] (seasons ascending, keys in first-car order)
+export function ersCombos(inp, calib) {
+  const out = [];
+  for (let year = CFG.FIRST; year <= CFG.LAST; year++) {
+    const rs = inp.raw.seasons.find(s => s.year === year), era = eraSpec(inp.eras, year, calib.seasons[year].gripScale, calib.seasons[year].ersHarvest);
+    for (const e of rs.entries) {
+      const b = carErs(inp.ersData, e.id, era.ers), key = ersKey(b);
+      if (key === null) continue;
+      let c = out.find(q => q.year === year && q.key === key);
+      if (!c) out.push(c = { year, key, hasErs: b.hasErs, ersPower: b.ersPower, ersHarvest: b.ersHarvest, ersStore: b.ersStore, cars: [] });
+      c.cars.push(e.id);
+    }
+  }
+  return out;
+}
+// what a stored ers-effect.json was measured on: the calibration (its fingerprint and each season's solved numbers)
+export function ersEffectFingerprint(calib) {
+  const s = {};
+  for (const y of Object.keys(calib.seasons).sort()) s[y] = [calib.seasons[y].gripScale, calib.seasons[y].ersHarvest];
+  return createHash('sha256').update(JSON.stringify({ calib: calib.fingerprint, deploy: calib.deploy === true, tracks: calib.tracks, s })).digest('hex').slice(0, 16);
 }
 
 // flat-road figures of a perf (menu ratings, documentation). The standing start runs to accelKmh: 300 km/h scaled
@@ -443,16 +528,17 @@ export function metrics(perf, accelKmh) {
   };
   return { topKmh: perf.topSpeed / KMH, topBoostKmh: perf.topSpeedBoost / KMH, t0to300: t, accelKmh: accelKmh, brake300to80: d, corner: CORNER_RADII.map(corner) };
 }
-export function ratingsFor(met, stdMet, m) {
+// hasErs false (no battery: the era's or the car's): the battery bar is 0 (the menu hides it for ers: null), x.ers null
+export function ratingsFor(met, stdMet, m, hasErs) {
   const x = {
     topSpeed: met.topKmh - stdMet.topKmh,
     accel: (1 - met.t0to300 / stdMet.t0to300) * 100,
     cornering: mean(met.corner.map((c, i) => (c / stdMet.corner[i] - 1) * 100)),
     braking: (1 - met.brake300to80 / stdMet.brake300to80) * 100,
-    ers: 0.5 * ((m.ersPower - 1) + (m.ersHarvest - 1)) * 100
+    ers: hasErs === false ? null : 0.5 * ((m.ersPower - 1) + (m.ersHarvest - 1)) * 100
   };
   const r = {};
-  for (const k of Object.keys(RATING)) r[k] = ratingOf(RATING[k].gain * x[k]);
+  for (const k of Object.keys(RATING)) r[k] = x[k] === null ? 0 : ratingOf(RATING[k].gain * x[k]);
   return { ratings: r, x };
 }
 
@@ -470,12 +556,24 @@ function engineDisplay(e) {
 export function build(opts) {
   opts = opts || {};
   const G = loadGame(), R = G.REF_SPEC;
-  const { raw, eras, liveries, cars2026 } = loadInputs();
-  const problems = [], warnings = [];
+  const { raw, eras, liveries, cars2026, ersData } = loadInputs();
+  const problems = [], warnings = [], notes = [];
   if (!existsSync(CALIB_FILE)) throw new Error('missing ' + relative(ROOT, CALIB_FILE) + ': run node devtests/seasons-calib/calibrate.mjs');
   const calib = readJson(CALIB_FILE);
   const fp = priorsFingerprint(eras, raw);
   if (calib.fingerprint !== fp) problems.push('devtests/seasons-calib/calibration.json is stale (fingerprint ' + calib.fingerprint + ', inputs now ' + fp + '): run node devtests/seasons-calib/calibrate.mjs');
+  // the driven lap-time effect of the batteries (devtests/seasons-calib/ers-effect.mjs)
+  const ERS_RUN = 'run node devtests/seasons-calib/ers-effect.mjs';
+  const ersFx = existsSync(ERS_EFFECT_FILE) ? readJson(ERS_EFFECT_FILE) : null, efp = ersEffectFingerprint(calib);
+  if (!ersFx) problems.push('missing devtests/seasons-calib/ers-effect.json: ' + ERS_RUN);
+  else if (ersFx.fingerprint !== efp) problems.push('devtests/seasons-calib/ers-effect.json is stale (fingerprint ' + ersFx.fingerprint + ', calibration now ' + efp + '): ' + ERS_RUN);
+  const hasOwn = (o, k) => !!o && typeof o === 'object' && Object.prototype.hasOwnProperty.call(o, k);
+  const ersPctOf = (year, key, id) => {
+    if (key === null) return 0;
+    const s = hasOwn(ersFx && ersFx.seasons, year) ? ersFx.seasons[year] : null, c = s && hasOwn(s.combos, key) ? s.combos[key] : null;
+    if (!c || typeof c.meanPct !== 'number' || !isFinite(c.meanPct)) { if (ersFx) problems.push(id + ': ers-effect.json has no driven effect of the battery ' + year + ' ' + key + ': ' + ERS_RUN); return 0; }
+    return c.meanPct;
+  };
   const geos = geometries();
   const lapsOf = spec => { const p = G.carPerf(spec); return geos.map(g => profileLap(g, p)); };
 
@@ -499,8 +597,8 @@ export function build(opts) {
     const stdCar = {
       id: year + '-standard', lineage: 'standard', team: R.team, teamZh: R.teamZh, car: R.car,
       engine: year === CFG.ANCHOR ? R.engine : stdEngine, cylinders: era.cylinders, aspiration: era.aspiration,
-      colour: R.colour, colour2: R.colour2, ratings: Object.assign({}, R.ratings),
-      perf: Object.assign({}, ONES), note: '', est: { lapPct: 0, topKmh: round(stdMet.topKmh, 1) }
+      colour: R.colour, colour2: R.colour2, ratings: Object.assign({}, R.ratings, era.ers ? {} : { ers: 0 }),
+      perf: Object.assign({}, ONES), hasErs: !!era.ers, note: '', ersNote: '', est: { lapPct: 0, ersPct: 0, topKmh: round(stdMet.topKmh, 1) }
     };
     if (year === CFG.ANCHOR && stdCar.engine !== stdEngine) problems.push('the anchor standard engine "' + R.engine + '" differs from eras.json "' + stdEngine + '"');
     const cars = [stdCar];
@@ -510,18 +608,49 @@ export function build(opts) {
     const E = rs.entries.map(e => ({ src: e, id: e.id }));
     const liv = id => liveries[id] || null;
     for (const e of E) if (!liv(e.id)) problems.push('no livery for ' + e.id);
+    // every car's battery (tools/ers-data.json) and its driven lap-time effect on the season's standard car
+    for (const e of E) {
+      try { e.bat = carErs(ersData, e.id, era.ers); }
+      catch (err) { problems.push(err.message); e.bat = { hasErs: !!era.ers, ersPower: 1, ersHarvest: 1, ersStore: 1, note: '', cut: [], src: null }; }
+      e.ersKey = ersKey(e.bat);
+      e.ersPct = ersPctOf(year, e.ersKey, e.id);
+      for (const k of e.bat.cut) notes.push(e.id + ': ' + k + ' ' + e.bat.src[ERS_FIELD[k][0]] + ' cut to ' + e.bat[k] + ' (its range ' + multRange(k).join('..') +
+        ', 4 decimals, and era x multiplier inside F1.sanitizeSpec\'s 1/10..10 x the reference)');
+    }
+    const ersOf = e => ({ ersPower: e.bat.ersPower, ersHarvest: e.bat.ersHarvest, ersStore: e.bat.ersStore });
+    // the chassis level L: lap delta of the profile model (no battery) + the battery's driven effect = the target
+    const solveLevel = (e, multFor) => {
+      const f = L => mean(lapDeltas(applyWith(std, multFor(L), e.bat.hasErs))) + e.ersPct - e.target;
+      // secant on L (lap delta falls monotonically with L), bracketed
+      let a = -0.02, b = 0.02, fa = f(a), fb = f(b), L = 0;
+      for (let it = 0; it < 40; it++) {
+        L = b - fb * (b - a) / (fb - fa);
+        if (!isFinite(L)) L = 0.5 * (a + b);
+        const fl = f(L);
+        if (Math.abs(fl) < 1e-5) break;
+        a = b; fa = fb; b = L; fb = fl;
+      }
+      e.L = L;
+      e.exact = multFor(L);
+      e.mult = {};
+      for (const k of MULT_KEYS) e.mult[k] = round(e.exact[k], CFG.DECIMALS);
+    };
     if (year === CFG.CURRENT) {
-      // the hand-researched grid: multipliers, notes, colours, names as they are
+      // the hand-researched grid: notes, colours, names as they are; power, drag and the chassis multipliers of
+      // js/cars-data.js with their pace (its profile delta: derived without the battery), the battery of ers-data.json
+      // and the chassis level L that keeps that pace with it
       for (const e of E) {
         const c = cars2026.find(x => '2026-' + x.id === e.id);
         if (!c) { problems.push('js/cars-data.js has no car for ' + e.id); continue; }
-        e.mult = Object.assign({}, c.perf); e.exact = Object.assign({}, c.perf);
+        const base = c.perf;
+        e.target = mean(lapDeltas(applyWith(std, Object.assign({}, ONES, base))));
+        solveLevel(e, L => Object.assign({ power: base.power, drag: base.drag, downforce: base.downforce + L, grip: base.grip + L,
+          brake: base.brake + L, traction: base.traction + L }, ersOf(e)));
         // multipliers, notes and colours of js/cars-data.js take precedence; the Chinese team name is the fact-checked
         // one of tools/liveries (Taiwan usage, one name per lineage: 紅牛二隊 for Toro Rosso .. Racing Bulls, where
         // js/cars-data.js says 小紅牛), the chassis name the documented full name (CHASSIS_NAMES)
         const lv = liv(e.id) || {};
         e.display = { team: c.teamEn, teamZh: lv.teamZh || c.teamZh, car: CHASSIS_NAMES[e.id] || c.car, engine: c.engine, colour: c.colour, colour2: c.colour2, note: c.note };
-        e.target = null;
       }
       for (const c of cars2026) if (c.id !== 'standard' && !E.find(e => e.id === '2026-' + c.id)) problems.push('js/cars-data.js car ' + c.id + ' is not in the 2026 raw season');
     } else {
@@ -547,22 +676,8 @@ export function build(opts) {
         e.engine = 1 + CFG.ENGINE_GAIN * gl / 100;
         e.trim = 1 - CFG.TRIM_GAIN * (lean - gl) / 100;
         e.leanOwn = lean - gl;
-        const multFor = L => ({ power: e.engine, traction: 1 + L + CFG.ENGINE_TRACTION * (e.engine - 1), drag: e.trim, downforce: e.trim + L,
-          grip: 1 + L, brake: 1 + L, ersPower: 1, ersHarvest: 1 });
-        const f = L => mean(lapDeltas(applyWith(std, multFor(L)))) - e.target;
-        // secant on L (lap delta falls monotonically with L), bracketed
-        let a = -0.02, b = 0.02, fa = f(a), fb = f(b), L = 0;
-        for (let it = 0; it < 40; it++) {
-          L = b - fb * (b - a) / (fb - fa);
-          if (!isFinite(L)) L = 0.5 * (a + b);
-          const fl = f(L);
-          if (Math.abs(fl) < 1e-5) break;
-          a = b; fa = fb; b = L; fb = fl;
-        }
-        e.L = L;
-        e.exact = multFor(L);
-        e.mult = {};
-        for (const k of MULT_KEYS) e.mult[k] = round(e.exact[k], CFG.DECIMALS);
+        solveLevel(e, L => Object.assign({ power: e.engine, traction: 1 + L + CFG.ENGINE_TRACTION * (e.engine - 1), drag: e.trim, downforce: e.trim + L,
+          grip: 1 + L, brake: 1 + L }, ersOf(e)));
         const s = e.src, lv = liv(e.id) || {};
         const team = TEAM_NAMES[e.id] ? TEAM_NAMES[e.id].value : s.constructor;
         e.display = {
@@ -574,30 +689,34 @@ export function build(opts) {
     // ---- rounded multipliers -> reported figures, ratings, checks
     for (const e of E) {
       if (!e.mult) continue;
-      const spec = applyWith(std, e.mult), perf = G.carPerf(spec), met = metrics(perf, accelKmh);
+      const spec = applyWith(std, e.mult, e.bat.hasErs), perf = G.carPerf(spec), met = metrics(perf, accelKmh);
       // js/car.js must take the car as it is (F1.sanitizeSpec replaces out-of-range values with the reference's)
       const san = G.sanitizeSpec(spec);
       for (const k of ['power', 'dragK', 'downforce', 'latBase', 'latMax', 'brakeBase', 'traction', 'topKmh', 'rpmIdle', 'rpmShift', 'rpmMax', 'shiftTime', 'cylinders'])
         if (!Object.is(san[k], spec[k])) problems.push(e.id + ': F1.sanitizeSpec changes ' + k + ' ' + spec[k] + ' -> ' + san[k]);
       if (JSON.stringify(san.ers) !== JSON.stringify(spec.ers) || JSON.stringify(san.gearKmh) !== JSON.stringify(spec.gearKmh)) problems.push(e.id + ': F1.sanitizeSpec changes the ERS or the gears');
       e.perTrack = lapDeltas(spec);
-      e.lapPct = mean(e.perTrack);
+      e.profilePct = mean(e.perTrack);
+      e.lapPct = e.profilePct + e.ersPct;                 // the lap with the battery deployed, vs the standard car's
       e.met = met;
-      const rr = ratingsFor(met, stdMet, e.mult);
+      const rr = ratingsFor(met, stdMet, e.mult, e.bat.hasErs);
       e.ratings = rr.ratings; e.ratingX = rr.x;
-      for (const k of MULT_KEYS) if (!(e.exact[k] >= CFG.MIN && e.exact[k] <= CFG.MAX)) problems.push(e.id + '.' + k + ' out of range: ' + e.exact[k]);
-      if (e.target !== null && Math.abs(e.lapPct - e.target) > 0.01) problems.push(e.id + ': lap delta ' + e.lapPct.toFixed(4) + ' % misses the target ' + e.target.toFixed(4) + ' %');
+      for (const k of MULT_KEYS) { const [lo, hi] = multRange(k); if (!(e.exact[k] >= lo && e.exact[k] <= hi)) problems.push(e.id + '.' + k + ' out of range: ' + e.exact[k]); }
+      if (Math.abs(e.lapPct - e.target) > 0.01) problems.push(e.id + ': lap delta ' + e.lapPct.toFixed(4) + ' % misses the target ' + e.target.toFixed(4) + ' %');
       const s = e.src, d = e.display;
       cars.push({
         id: e.id, lineage: s.lineage, team: d.team, teamZh: d.teamZh, car: d.car, engine: d.engine,
         cylinders: s.engine.cylinders, aspiration: /^(na|naturally)/i.test(s.engine.aspiration) ? 'na' : 'hybrid',
-        colour: d.colour, colour2: d.colour2, ratings: e.ratings, perf: e.mult, note: d.note,
-        est: { lapPct: round(e.lapPct, 3), topKmh: round(met.topKmh, 1) }
+        colour: d.colour, colour2: d.colour2, ratings: e.ratings, perf: e.mult, hasErs: e.bat.hasErs, note: d.note, ersNote: e.bat.note,
+        est: { lapPct: round(e.lapPct, 3), ersPct: round(e.ersPct, 3), topKmh: round(met.topKmh, 1) }
       });
-      slog.cars.push({ id: e.id, gapPct: s.pace.medianGapPct, rank: s.pace.rank, leanPct: s.character.vsFieldPct, targetPct: e.target === null ? null : round(e.target, 4),
-        lapPct: round(e.lapPct, 4), levelPct: e.L === undefined ? null : round(e.L * 100, 3), perf: e.mult, perTrackPct: e.perTrack.map(v => round(v, 3)),
+      const b = e.bat.src;
+      slog.cars.push({ id: e.id, gapPct: s.pace.medianGapPct, rank: s.pace.rank, leanPct: s.character.vsFieldPct, targetPct: round(e.target, 4),
+        lapPct: round(e.lapPct, 4), profilePct: round(e.profilePct, 4), ersPct: round(e.ersPct, 4), levelPct: round(e.L * 100, 3), perf: e.mult,
+        battery: { hasErs: e.bat.hasErs, key: e.ersKey, cut: e.bat.cut, data: b ? { hasErs: b.hasErs, deploy: b.deploy, harvest: b.harvest, store: b.store, confidence: b.confidence, group: b.group } : null },
+        perTrackPct: e.perTrack.map(v => round(v, 3)),
         topKmh: round(met.topKmh, 2), t0to300: round(met.t0to300, 3), brake300to80: round(met.brake300to80, 2), cornerKmh: met.corner.map(v => round(v, 2)),
-        ratingX: Object.fromEntries(Object.keys(e.ratingX).map(k => [k, round(e.ratingX[k], 3)])), ratings: e.ratings });
+        ratingX: Object.fromEntries(Object.keys(e.ratingX).map(k => [k, e.ratingX[k] === null ? null : round(e.ratingX[k], 3)])), ratings: e.ratings });
     }
     // checks inside the season
     const ids = new Set(), lineages = new Set();
@@ -607,8 +726,13 @@ export function build(opts) {
       if (lineages.has(c.lineage)) problems.push(year + ': two cars of lineage ' + c.lineage);
       lineages.add(c.lineage);
       for (const k of ['colour', 'colour2']) if (!/^#[0-9a-fA-F]{6}$/.test(c[k])) problems.push(c.id + '.' + k + ' is not #rrggbb: ' + c[k]);
-      for (const k of MULT_KEYS) if (!(c.perf[k] >= CFG.MIN && c.perf[k] <= CFG.MAX) || (i === 0 && c.perf[k] !== 1)) problems.push(c.id + '.perf.' + k + ' = ' + c.perf[k]);
-      for (const k of Object.keys(RATING)) if (!(c.ratings[k] >= 0 && c.ratings[k] <= 100) || (i === 0 && c.ratings[k] !== 50)) problems.push(c.id + ' rating ' + k + ' = ' + c.ratings[k]);
+      for (const k of MULT_KEYS) { const [lo, hi] = multRange(k); if (!(c.perf[k] >= lo && c.perf[k] <= hi) || (i === 0 && c.perf[k] !== 1)) problems.push(c.id + '.perf.' + k + ' = ' + c.perf[k]); }
+      // the standard car: 50 everywhere, the battery 0 where the era has none
+      for (const k of Object.keys(RATING)) if (!(c.ratings[k] >= 0 && c.ratings[k] <= 100) || (i === 0 && c.ratings[k] !== (k === 'ers' && !era.ers ? 0 : 50))) problems.push(c.id + ' rating ' + k + ' = ' + c.ratings[k]);
+      // no battery: only where the era has none or tools/ers-data.json says so; its bar 0
+      if (typeof c.hasErs !== 'boolean' || (c.hasErs && !era.ers) || (!c.hasErs && era.ers && i === 0)) problems.push(c.id + '.hasErs = ' + c.hasErs);
+      if (!c.hasErs && c.ratings.ers !== 0) problems.push(c.id + ': no battery but an ers rating ' + c.ratings.ers);
+      if (typeof c.ersNote !== 'string' || c.ersNote.length > 120 || /[\r\n]/.test(c.ersNote)) problems.push(c.id + '.ersNote is not one line');
       for (const k of ['team', 'teamZh', 'car', 'engine']) if (typeof c[k] !== 'string' || !c[k]) problems.push(c.id + '.' + k + ' empty');
     });
     const teamsOnly = cars.slice(1);
@@ -628,9 +752,14 @@ export function build(opts) {
     }
     if (JSON.stringify(e.gearKmh) !== JSON.stringify(R.gearKmh) || JSON.stringify(e.ers) !== JSON.stringify(R.ers)) problems.push('anchor gears / ers differ from F1.REF_SPEC');
   }
-  return { seasons, log, problems, warnings, calib, raw, fingerprint: fp };
+  // every documented no-KERS car of tools/ers-data.json has no battery, and no other car of 2011..2026
+  for (const s of seasons) for (const c of s.cars.slice(1)) {
+    const ent = hasOwn(ersData.entries, c.id) ? ersData.entries[c.id] : null;
+    if (ent && c.hasErs !== (ent.hasErs !== false)) problems.push(c.id + ': hasErs ' + c.hasErs + ' but tools/ers-data.json says ' + ent.hasErs);
+  }
+  return { seasons, log, problems, warnings, notes, calib, raw, fingerprint: fp };
 }
-const applyWith = (std, m) => Object.assign({}, std, applyMult(std, m));
+export const applyWith = (std, m, hasErs) => Object.assign({}, std, applyMult(std, m, hasErs));
 
 // ---- output -----------------------------------------------------------------------------------------------------------
 export function seasonsJs(b) {
@@ -649,15 +778,22 @@ export function seasonsJs(b) {
   L.push('// standard car (the era physics, every multiplier 1) first, then every team as the constructors\' championship');
   L.push('// classified it. ESTIMATES derived from public data for a game, NOT official specifications.');
   L.push('// Sources: ' + src.attributionShort + ' (' + src.url + ', ' + src.release + '); tools/eras.json; tools/liveries/*.json;');
-  L.push('// the 2026 grid from js/cars-data.js. Method and calibration: docs/seasons-data.md.');
+  L.push('// the 2026 grid from js/cars-data.js; every car\'s battery from tools/ers-data.json (docs/ers-data.md).');
+  L.push('// Method and calibration: docs/seasons-data.md.');
   L.push('//');
   L.push('// window.F1_SEASONS = [{ year, label, engine, paceIndex (real pole-time index, 2025 = 1),');
   L.push('//   era: { power, dragK, downforce, latBase, latMax, brakeBase, traction, gearKmh, topKmh, rpmIdle, rpmShift, rpmMax,');
   L.push('//          shiftTime, cylinders, aspiration, ers: null | { store, power, harvest, taperKmh? }, cockpit }   (absolute CarSpec values)');
   L.push('//   cars: [{ id, lineage, team, teamZh, car, engine, cylinders, aspiration, colour, colour2,');
-  L.push('//            ratings: { topSpeed, accel, cornering, braking, ers },   0..100, 50 = the season\'s standard car');
-  L.push('//            perf: { power, drag, downforce, grip, brake, traction, ersPower, ersHarvest },   multipliers on the era');
-  L.push('//            note, est: { lapPct, topKmh } }] }]      est = profile-model lap time vs the standard car (%), top speed');
+  L.push('//            ratings: { topSpeed, accel, cornering, braking, ers },   0..100, 50 = the season\'s standard car;');
+  L.push('//                                                     ers 0 for a car without a battery');
+  L.push('//            perf: { power, drag, downforce, grip, brake, traction,   multipliers on the era, 0.95..1.05;');
+  L.push('//                    ersPower, ersHarvest, ersStore },                   the battery\'s 0.75..1.15 (store 0.9..1.1)');
+  L.push('//            hasErs,      false: no battery (ers: null) - the era has none (2010) or the car raced without KERS');
+  L.push('//            note,        one line, Traditional Chinese, or \'\'');
+  L.push('//            ersNote,     one line about the car\'s battery, Traditional Chinese, or \'\' (tools/ers-data.json)');
+  L.push('//            est: { lapPct, ersPct, topKmh } }] }]   model lap time vs the standard car (%), both deploying the');
+  L.push('//                         battery; ersPct = the battery\'s share of it (driven); top speed without the battery');
   L.push('// window.F1_SEASONS_INFO = { attribution, attributionShort, sources2026, disclaimer, f1db }');
   L.push('(function (root) {');
   L.push("  'use strict';");
@@ -738,11 +874,13 @@ async function main() {
       console.log('== ' + s.year + ' index ' + s.index + '  std top ' + s.stdTopKmh.toFixed(1) + ' km/h  spread ' + s.spreadPct.toFixed(3) + ' %' + (s.K ? '  K ' + s.K.toFixed(4) : ''));
       for (const c of s.cars) {
         console.log('  ' + c.id.padEnd(22) + (c.gapPct === undefined ? '' : String(c.gapPct).padStart(6)) + (c.targetPct === null ? '       -' : c.targetPct.toFixed(3).padStart(8)) + c.lapPct.toFixed(3).padStart(8) +
+          ' (E ' + (c.ersPct >= 0 ? '+' : '') + c.ersPct.toFixed(3) + (c.battery.hasErs ? '' : ' none') + ')' +
           (c.levelPct === null ? '      -' : c.levelPct.toFixed(2).padStart(7)) + '  ' + MULT_KEYS.map(k => c.perf[k].toFixed(4)).join(' ') + '  ' + c.topKmh.toFixed(1) + ' | ' +
           Object.keys(RATING).map(k => String(c.ratings[k]).padStart(3)).join(' '));
       }
     }
   }
+  for (const n of b.notes) console.log('NOTE ' + n);
   for (const w of b.warnings) console.log('WARNING ' + w);
   const outputs = b.problems.length ? [] : [[OUT_JS, seasonsJs(b)], [ENTRIES_FILE, entriesJson(b)], [DOC_FILE, docText(b)]];
   if (b.problems.length) { console.log('PROBLEMS (nothing written):\n  ' + b.problems.join('\n  ')); process.exitCode = 1; }

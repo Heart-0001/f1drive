@@ -1,6 +1,7 @@
 // Runs INSIDE the game page (injected as text by the harnesses after autopilot.js): window.__e2e.
-//   - a standard-mapping controller behind navigator.getGamepads whose sticks / triggers / A button are set by the
-//     autopilot: the game reads it through its real input path (F1.gamepad.poll -> mergeInput -> car.update)
+//   - a standard-mapping controller behind navigator.getGamepads whose sticks / triggers / Y button (reset; A until the
+//     v6.1 pad layout) are set by the autopilot: the game reads it through its real input path (F1.gamepad.poll ->
+//     mergeInput -> car.update)
 //   - programmes the harness arms in advance, run from the page's own events so nothing depends on polling latency:
 //     onPhase[phase] / onGo (autopilot settings applied when the session changes phase / the lights go out),
 //     ram (drive at another car until touching / overlapping it), onHit (settings applied when a solid car hits us),
@@ -62,7 +63,7 @@
     if (t - lastDrive < 2) return;                      // (rumble() reads the pad again in the same frame)
     lastDrive = t;
     pad.timestamp = t;
-    if (resetHeld && --resetHeld === 0) btn(0, 0);
+    if (resetHeld && --resetHeld === 0) btn(3, 0);
     if (!e2e.on || !g || !g.running || !g.car || !g.track || !g.raceLine) {
       pad.axes[0] = 0; btn(6, 0); btn(7, 0);
       last.steer = last.throttle = last.brake = 0;
@@ -75,7 +76,7 @@
     var o = ap.step(env);
     pad.axes[0] = stickFor(o.steer);
     btn(7, trig(o.throttle)); btn(6, trig(o.brake));
-    if (o.reset) { btn(0, 1); resetHeld = 2; e2e.resetPresses++; }
+    if (o.reset) { btn(3, 1); resetHeld = 2; e2e.resetPresses++; }
     last.steer = o.steer; last.throttle = o.throttle; last.brake = o.brake;
   }
 

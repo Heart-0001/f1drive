@@ -120,6 +120,12 @@ const PAGE_SETUP = `(function () {
     var w = Math.min(p.r, q.r) - Math.max(p.x, q.x), h = Math.min(p.b, q.b) - Math.max(p.y, q.y);
     return w > 0 && h > 0 ? w * h : 0;
   };
+  // v6.1: px^2 the given boxes cover of the two HUD mirror frames (index.html: nothing of the HUD may lie on them)
+  window.__mirOver = function (ids) {
+    var n = 0;
+    ['hud-mirror-l', 'hud-mirror-r'].forEach(function (m) { ids.forEach(function (id) { n += __overlap(m, id); }); });
+    return n;
+  };
   // every standings row: is anything cut off / squeezed?
   window.__rows = function (sel) {
     var bad = [], rows = document.querySelectorAll(sel);
@@ -172,8 +178,9 @@ app.whenReady().then(async () => {
     const bootErr = await load();
     check('page boots without the error overlay', !bootErr, bootErr || undefined);
     const order = await js(`[].slice.call(document.querySelectorAll('script[src]')).map(function (s) { return s.getAttribute('src'); }).join(' ')`);
+    // (v6.1: js/hudmirrors.js, the HUD rear-view mirrors, after js/cockpit.js)
     check('script order matches the contract', order === 'js/boot.js lib/three.min.js tracks-data.js js/seasons-data.js js/cars.js js/track.js js/tyres.js js/car.js ' +
-      'js/cockpit.js js/gamepad.js js/audio.js js/raceline.js scenery-data.js js/scenery.js js/collide.js js/carmodel.js js/laps.js js/pit.js ' +
+      'js/cockpit.js js/hudmirrors.js js/gamepad.js js/audio.js js/raceline.js scenery-data.js js/scenery.js js/collide.js js/carmodel.js js/laps.js js/pit.js ' +
       'net/session.js js/net.js js/gp.js js/telemetry.js js/ui.js js/main.js', order);
     check('ui API present', await js(`['setGp','setLights','setPad','updateHUD','setNet','toast','showMenu','hideMenu'].every(function (k) { return typeof F1.ui[k] === 'function'; })`));
 
@@ -304,10 +311,10 @@ app.whenReady().then(async () => {
           await shot('hud-' + tag + '-grid-' + name);
           const st = await js(`({ on: document.querySelectorAll('#hud-lights i.on').length, go: document.getElementById('hud-lights').classList.contains('go'),
             text: document.getElementById('hud-lights-text').textContent, box: __rect('hud-lights'), lamp: __rect(document.querySelector('#hud-lights i')),
-            toast: __rect('hud-toast'), map: __rect('hud-map'), timing: __rect('hud-timing'), W: innerWidth })`);
-          check(tag + ' lights ' + name, st.on === (go ? 0 : n) && st.go === go && st.text === (go ? 'GO' : '準備起跑') && st.box.shown &&
-            st.box.y >= st.toast.b && st.box.x > st.timing.r && st.box.r < st.map.x && Math.abs((st.box.x + st.box.r) / 2 - st.W / 2) <= 1 && st.lamp.w >= 40,
-            { on: st.on, go: st.go, text: st.text, box: st.box.x + ',' + st.box.y + ' ' + st.box.w + 'x' + st.box.h, lamp: st.lamp.w });
+            toast: __rect('hud-toast'), map: __rect('hud-map'), timing: __rect('hud-timing'), W: innerWidth, mir: __mirOver(['hud-lights', 'hud-toast']), mirShown: __rect('hud-mirror-l').shown && __rect('hud-mirror-r').shown })`);
+          check(tag + ' lights ' + name + ' (clear of the toast and of the HUD mirrors)', st.on === (go ? 0 : n) && st.go === go && st.text === (go ? 'GO' : '準備起跑') && st.box.shown &&
+            st.box.y >= st.toast.b && st.box.x > st.timing.r && st.box.r < st.map.x && Math.abs((st.box.x + st.box.r) / 2 - st.W / 2) <= 1 && st.lamp.w >= 40 && st.mir === 0 && st.mirShown,
+            { on: st.on, go: st.go, text: st.text, box: st.box.x + ',' + st.box.y + ' ' + st.box.w + 'x' + st.box.h, lamp: st.lamp.w, mir: st.mir, mirShown: st.mirShown });
         }
         // third argument: the viewer only watches the start (spectator)
         for (const [n, go, name, text] of [[4, false, 'l4', '正賽即將起跑'], [0, true, 'go', '正賽開始']]) {
@@ -333,10 +340,11 @@ app.whenReady().then(async () => {
           await setNet(NET.guest(view.count)); await setGp(view); await js(`window.__hud = { lap: 3, lapTotal: ${lapTotal} }`);
           await shot('hud-' + tag + '-' + name);
           const st = await js(`({ gp: __rect('hud-gp'), timing: __rect('hud-timing'), hint: __rect('hud-hint'), rows: __rows('#hud-gp .gp-row'),
-            tel: __rect('hud-telemetry'), telGp: __overlap('hud-gp', 'hud-telemetry'), hintGp: __overlap('hud-gp', 'hud-hint'), H: innerHeight, text: document.getElementById('hud-gp').innerText.replace(/\\s+/g, ' ') })`);
-          check(tag + ' ' + name + ': session box fits (no clipping, clear of timing box and hint)', st.rows.n === view.count && st.rows.bad.length === 0 &&
-            st.gp.sh <= st.gp.ch + 1 && st.gp.y >= st.timing.b && !st.hintGp && !st.telGp && st.gp.r < st.tel.x,
-            { box: st.gp.y + '..' + st.gp.b + ' of ' + st.H, content: st.gp.sh + '/' + st.gp.ch, timingBottom: st.timing.b, hintOverlap: st.hintGp, telOverlap: st.telGp, bad: st.rows.bad });
+            tel: __rect('hud-telemetry'), telGp: __overlap('hud-gp', 'hud-telemetry'), hintGp: __overlap('hud-gp', 'hud-hint'), H: innerHeight, text: document.getElementById('hud-gp').innerText.replace(/\\s+/g, ' '),
+            mir: __mirOver(['hud-gp', 'hud-timing']) })`);
+          check(tag + ' ' + name + ': session box fits (no clipping, clear of timing box, hint and the HUD mirrors)', st.rows.n === view.count && st.rows.bad.length === 0 &&
+            st.gp.sh <= st.gp.ch + 1 && st.gp.y >= st.timing.b && !st.hintGp && !st.telGp && st.gp.r < st.tel.x && st.mir === 0,
+            { box: st.gp.y + '..' + st.gp.b + ' of ' + st.H, content: st.gp.sh + '/' + st.gp.ch, timingBottom: st.timing.b, hintOverlap: st.hintGp, telOverlap: st.telGp, mir: st.mir, bad: st.rows.bad });
           if (name === 'race16') {
             check(tag + ' race16 texts', /P5\s*\/ 16/.test(st.text) && /4 \/ 5/.test(st.text) && /完賽/.test(st.text) && /\+1\.234/.test(st.text) && /\+1:02\.345/.test(st.text) &&
               /\+1 圈/.test(st.text) && /\+2 圈/.test(st.text) && /未完賽 DNF/.test(st.text) && /離線/.test(st.text) && /比賽將在 1:2\d 後結束/.test(st.text) && /觀戰：晚到的小華、Late <i>Joiner<\/i>/.test(st.text), st.text);
@@ -352,10 +360,10 @@ app.whenReady().then(async () => {
           cut: [].slice.call(document.querySelectorAll('#gp-results td')).filter(function (td) { return td.className !== 'c-name' && td.scrollWidth > td.clientWidth + 1; }).length,
           names: [].slice.call(document.querySelectorAll('#gp-results .mp-pname')).map(function (n) { return n.scrollWidth > n.clientWidth + 1 ? Math.round(n.getBoundingClientRect().width) : 999; }),
           fl: (function () { var f = document.querySelectorAll('#gp-results td.fl'); return f.length ? getComputedStyle(f[0]).color + '|' + f.length : ''; })(),
-          text: document.getElementById('gp-results').innerText.replace(/\\s+/g, ' ') })`);
-        check(tag + ' results overlay: 16 rows inside the window, no scrolling needed, clear of the session box', st.rows === 16 && st.res.shown && st.res.x >= 0 && st.res.y >= 0 &&
-          st.res.r <= st.W && st.res.b <= st.H && st.body.sh <= st.body.ch + 1 && st.cut === 0 && st.res.x >= st.gp.r && Math.min.apply(null, st.names) >= 120 && st.fl === 'rgb(201, 139, 255)|1',
-          { res: st.res.x + ',' + st.res.y + ' ' + st.res.w + 'x' + st.res.h, body: st.body.sh + '/' + st.body.ch, gpRight: st.gp.r, minCutName: Math.min.apply(null, st.names), fl: st.fl });
+          text: document.getElementById('gp-results').innerText.replace(/\\s+/g, ' '), mir: __mirOver(['gp-results', 'hud-gp']) })`);
+        check(tag + ' results overlay: 16 rows inside the window, no scrolling needed, clear of the session box and the HUD mirrors', st.rows === 16 && st.res.shown && st.res.x >= 0 && st.res.y >= 0 &&
+          st.res.r <= st.W && st.res.b <= st.H && st.body.sh <= st.body.ch + 1 && st.cut === 0 && st.res.x >= st.gp.r && Math.min.apply(null, st.names) >= 120 && st.fl === 'rgb(201, 139, 255)|1' && st.mir === 0,
+          { res: st.res.x + ',' + st.res.y + ' ' + st.res.w + 'x' + st.res.h, body: st.body.sh + '/' + st.body.ch, gpRight: st.gp.r, minCutName: Math.min.apply(null, st.names), fl: st.fl, mir: st.mir });
         check(tag + ' results overlay (host): again / end / close shown', st.again.shown && st.end.shown && st.close.shown);
         check(tag + ' results texts', /7:11\.234/.test(st.text) && /\+2\.137/.test(st.text) && /\+1:02\.345/.test(st.text) && /\+1 圈/.test(st.text) && /未完賽 DNF/.test(st.text) && /離線/.test(st.text) && /1:22\.901/.test(st.text), st.text);
         await setNet(NET.guest(16)); await setGp(V.results16({ canControl: false }));

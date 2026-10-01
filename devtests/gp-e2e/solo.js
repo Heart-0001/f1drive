@@ -42,7 +42,9 @@
 //           own box, a new set, Q off after the exit) before the flying lap that must be normal again
 // v6 (2026-10-01): the stored Grand Prix setup is {q, r, wear}; the speed is drawn by the telemetry graphic (no
 // #hud-speed: what main.js hands F1.telemetry.draw is checked); the results subtitle names the season (2025: the
-// reference car of a fresh profile). Under the warp: the pit service counts down on the GAME clock (pit.update every
+// reference car, picked before the game boots - devtests/ref-car.js; since v6.1 a fresh profile would drive the 2026
+// standard car - as the autopilot and every lap-time check here were made for it). Under the warp: the pit service
+// counts down on the GAME clock (pit.update every
 // physics step, the car held, the lap clock running: solo-page.js counts those held steps into the ground truth), the
 // telemetry graphic is put on the game clock, toasts are read from a log of the F1.ui.toast calls (game clock) as well.
 // The v6 Grand Prix (years, cars, battery, tyre wear, pit stops) is devtests/gp-e2e/solo-v6.js.
@@ -57,6 +59,7 @@ const { app, BrowserWindow } = require('electron');
 const fs = require('fs'), path = require('path'), url = require('url');
 const ROOT = path.resolve(__dirname, '..', '..');
 require('../electron-userdata')(app, 'gp-e2e-solo');
+const refCar = require('../ref-car');
 const OUT = path.join(__dirname, 'out-solo');
 const ONLY = (process.env.ONLY || '').toLowerCase().split(',').filter(Boolean);
 const VERBOSE = !!process.env.VERBOSE;
@@ -130,6 +133,7 @@ function makeWin(tag) {
   w.webContents.on('render-process-gone', (e, d) => { w.errors.push('renderer gone: ' + d.reason); console.log('[' + tag + '] renderer gone', d.reason); });
   w.js = code => w.webContents.executeJavaScript(code);
   w.open = async () => {
+    await refCar.seed(w);                     // the reference car (2025-standard) picked before the game boots
     await w.loadFile(pageFile());
     await sleep(700);
     const lib = await w.js(PAGE_LIB);
@@ -318,8 +322,9 @@ async function scenario(w, cfg, rep) {
   check('quali: car on the start position, standing; lap counter reset', s.car.i === N - 10 && Math.abs(s.car.d) < 0.01 && s.car.v === 0 && !s.lap.started && s.lap.n === 0 && s.lap.last === null, { car: s.car, lap: s.lap });
   // (v6: the stored object is {q, r, wear}; nothing here touches the 輪胎損耗 buttons: a fresh profile's x1)
   check('Q / R remembered in localStorage (v6: with the tyre wear x1 of a fresh profile)', (await w.js(`localStorage.getItem('f1drive.gp')`)) === J({ q: Q, r: R, wear: 1 }), await w.js(`localStorage.getItem('f1drive.gp')`));
-  // v6: the session carries the season and the tyre wear; a fresh profile drives the reference car (F1.REF_SPEC, 2025)
-  check('quali: v6 session config: season ' + meta.year + ' (the car\'s, a fresh profile\'s 2025 standard car = F1.REF_SPEC), tyre wear x1 (the tyres wear at the normal rate)',
+  // v6: the session carries the season and the tyre wear; the window drives the reference car (F1.REF_SPEC, 2025: picked
+  // before the game booted, see the header)
+  check('quali: v6 session config: season ' + meta.year + ' (the car\'s: the 2025 standard car = F1.REF_SPEC), tyre wear x1 (the tyres wear at the normal rate)',
     s.snapshot.year === meta.year && meta.year === 2025 && meta.refCar && s.snapshot.wear === 1 && s.tyres && s.tyres.rate === 1 && s.tyres.compound === 'M' && Math.max.apply(null, s.tyres.wear) === 0,
     { year: s.snapshot.year, wear: s.snapshot.wear, spec: meta.spec, tyres: s.tyres });
   await w.frames(2);

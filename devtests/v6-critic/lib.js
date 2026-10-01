@@ -6,6 +6,7 @@ const { BrowserWindow } = require('electron');
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const host = require(path.join(ROOT, 'net', 'host'));
+const refCar = require('../ref-car');
 const OUT = path.join(__dirname, 'out');
 const WARP = fs.readFileSync(path.join(ROOT, 'devtests', 'gp-e2e', 'solo-page.js'), 'utf8');   // time warp, fake pad, autopilot
 const V6 = fs.readFileSync(path.join(ROOT, 'devtests', 'v6-smoke', 'page.js'), 'utf8');         // observers, pit driver
@@ -78,8 +79,12 @@ function makeWin(tag, opts) {
     console.log('TIMEOUT ' + tag + ': ' + (what || code));
     return false;
   };
+  // o.warp: the time warp + fake controller; o.fresh: a fresh install (v6.1: the 2026 standard car) - else the window
+  // drives the reference car (2025-standard), picked before the game boots (devtests/ref-car.js), as the critic's
+  // drivers, timings and car lists (2025 cars) were written for it
   w.open = async o => {
     o = o || {};
+    if (!o.fresh) await refCar.seed(w);
     await w.loadFile(path.join(ROOT, 'index.html'));
     await sleep(900);
     await w.js(T_LIB);

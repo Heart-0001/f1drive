@@ -4,8 +4,11 @@
 //   env ONLY=boot,year,golden,battery,pit,monaco,tyres,audio,room,pad (default: all)   PORT=24820 (room)
 //       V5=<folder of a v5 build> (golden; default: the scratch worktree of the v5 snapshot, see below)
 // Screenshots go to devtests/v6-smoke/out/ (READ them). Exit code 1 when a check fails.
-//   boot     boots clean; F1.game peek (cockpit, pit, tyres, spec); a fresh install drives the reference car (F1.REF_SPEC);
-//            the 車輛 tab; the room password fields; the F1DB credit
+//   boot     boots clean; F1.game peek (cockpit, pit, tyres, spec); a fresh install drives the 2026 standard car (v6.1),
+//            the 車輛 tab on 2026; the 2025 standard car picked before boot is the reference car (F1.REF_SPEC); the room
+//            password fields; the F1DB credit
+// Every other window has the reference car (2025-standard) picked before the game boots (devtests/ref-car.js): the
+// checks, the line / pit drivers and the golden rule below were written for it.
 //   year     2012 + a 2012 car picked in the menu -> car.spec is it (7 gears, V8 rpm, KERS), cockpit 'modern', the
 //            telemetry shows its team, racing line rebuilt for it; 2021 + a car -> halo; back to the 2025 standard car
 //   golden   the 2025 standard car driven 10 s of recorded input (time-warped frames) next to the v5 game: the same
@@ -25,11 +28,13 @@
 //   room     host + guest: the host picks 2014, the guest follows (toast, a 2014 car); different teams, liveries on each
 //            other's car (screenshot), remote engine voices, a Grand Prix with wear x3 shows the year, parc fermé; cars in
 //            the pit lane are ghosts to each other
-//   pad      fake controller: RB / B boost, LB limiter, Back compound (the v5 pad checks are devtests/gp-smoke part pad)
+//   pad      fake controller (v6.1 layout): A / RB boost, B / LB limiter, X compound, the hints (the v5 pad checks are
+//            devtests/gp-smoke part pad)
 const { app, BrowserWindow, ipcMain } = require('electron');
 const fs = require('fs'), path = require('path'), url = require('url');
 const ROOT = path.resolve(__dirname, '..', '..');
 require('../electron-userdata')(app, 'v6-smoke');
+const refCar = require('../ref-car');
 const host = require(path.join(ROOT, 'net', 'host'));
 const OUT = path.join(__dirname, 'out');
 const PORT = Number(process.env.PORT || 24820);
@@ -106,8 +111,10 @@ function makeWin(tag, opts) {
     return false;
   };
   // opts.warp: inject the time warp + fake controller of gp-e2e/solo-page.js before anything asks for a frame
+  // opts.fresh: a fresh install (else the reference car is picked before the game boots: devtests/ref-car.js)
   w.open = async (which, o) => {
     o = o || {};
+    if (which !== 'v5' && !o.fresh) await refCar.seed(w);
     await w.loadFile(pageFile(which));
     await sleep(900);
     await w.js(T_LIB);
@@ -164,27 +171,56 @@ function makeWin(tag, opts) {
 }
 
 /* ================= boot ================= */
+const CAR_TAB = `({ year: document.getElementById('car-year').value, years: document.getElementById('car-year').options.length, disabled: document.getElementById('car-year').disabled,
+    cards: document.querySelectorAll('#car-list .car-card').length, on: (document.querySelector('#car-list .car-card.on') || {}).getAttribute ? document.querySelector('#car-list .car-card.on').getAttribute('data-id') : null,
+    locked: document.getElementById('car-list').classList.contains('locked'), lock: __t.shown('car-lock') })`;
+// one car card of the 車輛 tab: its rating bars, the battery line (F1.cars.ersNote) and the 無 KERS mark
+const CARD = id => `(function () { var c = document.querySelector('#car-list .car-card[data-id="${id}"]'); if (!c) return null;
+    var e = c.querySelector('.car-ers'), n = c.querySelector('.car-noers');
+    return { bars: [].map.call(c.querySelectorAll('.car-bar em'), function (x) { return x.firstChild.textContent; }), ers: e ? e.textContent : null, noers: n ? n.textContent : null,
+      note: F1.cars.ersNote(${J(id)}), spec: (F1.cars.get(${J(id)}) || {}).ers === null ? 'null' : 'battery', overflow: c.scrollWidth > c.clientWidth + 1 }; })()`;
 async function partBoot() {
   part = 'boot';
   const w = makeWin('boot');
-  const err = await w.open('v6');
+  const err = await w.open('v6', { fresh: true });
   check('boots without the error overlay', !err, err || undefined);
   check('v6 modules present', await w.js(`!!(F1.cars && F1.createPit && F1.Tyres && F1.audio && F1.telemetry && F1.REF_SPEC && F1.carPerf && F1.buildRaceLine)`));
   const peek = await w.js(`(function () { var g = F1.game; return { cockpit: g.cockpit, pit: !!g.pit, tyres: !!g.tyres, spec: g.spec && g.spec.id, input: Object.keys(g.input).join(','),
     desc: ['cockpit', 'pit', 'tyres', 'spec'].map(function (k) { var d = Object.getOwnPropertyDescriptor(g, k); return !!d.get && !d.set; }) }; })()`);
   check('F1.game peek: cockpit (none before a track), pit, tyres, spec; read-only getters; input unchanged', peek.cockpit === null && peek.pit && peek.tyres && peek.spec && peek.desc.every(Boolean) &&
     peek.input === 'up,down,left,right', peek);
-  const ref = await w.js(`(function () { function eq(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
-    var s = F1.game.spec; return { id: s.id, eqRef: eq(s, F1.REF_SPEC), keysRef: eq(Object.keys(s), Object.keys(F1.REF_SPEC)), perfSame: Object.keys(F1.CAR_PERF).every(function (k) { var a = F1.CAR_PERF[k], b = F1.game.car.perf[k]; return typeof a === 'function' || (a && typeof a === 'object' ? eq(a, b) : a === b); }),
-      tyres: F1.game.tyres.state.compound, rate: F1.game.tyres.wearRate, battery: F1.game.car.state.battery }; })()`);
-  check('a fresh install drives the reference car: 2025-standard, deep-equal to F1.REF_SPEC, the same perf numbers, medium tyres, battery full', ref.id === '2025-standard' && ref.eqRef && ref.keysRef && ref.perfSame &&
-    ref.tyres === 'M' && ref.battery === 1, ref);
+  // v6.1: a fresh install opens on 2026 and drives its standard car
+  const fresh = await w.js(`(function () { var s = F1.game.spec, std = F1.cars.list(2026)[0]; return { id: s.id, year: s.year, eqStd: JSON.stringify(s) === JSON.stringify(std), stdId: std.id,
+    tyres: F1.game.tyres.state.compound, battery: F1.game.car.state.battery, stored: localStorage.getItem('f1drive.car') }; })()`);
+  check('a fresh install (v6.1) drives the 2026 standard car (= F1.cars.list(2026)[0]), medium tyres, battery full, nothing stored', fresh.id === '2026-standard' && fresh.year === 2026 &&
+    fresh.eqStd && fresh.stdId === '2026-standard' && fresh.tyres === 'M' && fresh.battery === 1 && fresh.stored === null, fresh);
   await w.click('#tab-car');
-  const menu = await w.js(`({ year: document.getElementById('car-year').value, years: document.getElementById('car-year').options.length, disabled: document.getElementById('car-year').disabled,
-    cards: document.querySelectorAll('#car-list .car-card').length, on: (document.querySelector('#car-list .car-card.on') || {}).getAttribute ? document.querySelector('#car-list .car-card.on').getAttribute('data-id') : null,
-    locked: document.getElementById('car-list').classList.contains('locked'), lock: __t.shown('car-lock') })`);
-  check('車輛 tab: 年份 2025 of 17 seasons, the 2025 cars, the standard car highlighted, both enabled', menu.year === '2025' && menu.years === 17 && !menu.disabled && menu.cards === 11 && menu.on === '2025-standard' &&
+  const menu = await w.js(CAR_TAB);
+  check('車輛 tab: 年份 2026 of 17 seasons, the 2026 cars (12), the standard car highlighted, both enabled', menu.year === '2026' && menu.years === 17 && !menu.disabled && menu.cards === 12 && menu.on === '2026-standard' &&
     !menu.locked && !menu.lock, menu);
+  // v6.1: every car its own battery: a line about it on its card; a car that raced without KERS: no 電池 bar, 無 KERS
+  const c26 = await w.js(CARD('2026-aston-martin')), c26s = await w.js(CARD('2026-standard'));
+  await w.pickYear(2011);
+  await sleep(200);
+  const hrt = await w.js(CARD('2011-hrt')), rb11 = await w.js(CARD('2011-red-bull'));
+  await w.shot('boot-1b-cars-2011');
+  await w.pickYear(2015);
+  await sleep(200);
+  const mcl = await w.js(CARD('2015-mclaren'));
+  await w.pickYear(2010);
+  await sleep(200);
+  const s10 = await w.js(CARD('2010-standard'));
+  console.log('car cards: ' + J({ c26, c26s, hrt, rb11, mcl, s10 }));
+  const withNote = c => c && c.spec === 'battery' && c.bars.length === 5 && c.bars[4] === '電池' && !c.noers && c.note && c.ers === '電池' + c.note && !c.overflow;
+  check('car cards: a car with a battery shows the 電池 bar and its battery line (F1.cars.ersNote): 2026 Aston Martin, 2011 Red Bull, 2015 McLaren ("MGU-H 回收不足…")',
+    withNote(c26) && withNote(rb11) && withNote(mcl) && /^MGU-H 回收不足/.test(mcl.note), { c26, rb11, mcl });
+  check('car cards: no battery line where there is no note (the standard car)', c26s && c26s.bars.length === 5 && c26s.ers === null && c26s.note === '' && !c26s.noers, c26s);
+  check('car cards: no KERS (2011 HRT, the 2010 standard car): no 電池 bar, 無 KERS where the bar would be; the battery line only where there is a note (HRT: "沒有裝 KERS…")',
+    [hrt, s10].every(c => c && c.spec === 'null' && c.bars.length === 4 && c.bars.indexOf('電池') < 0 && c.noers === '無 KERS' && !c.overflow && (c.note ? c.ers === '電池' + c.note : c.ers === null)) &&
+    /^沒有裝 KERS/.test(hrt.note) && s10.note === '', { hrt, s10 });
+  await w.pickYear(2026);
+  await sleep(200);
+  check('back on 2026 (the standard car again; nothing else picked)', (await w.js(`F1.game.spec.id`)) === '2026-standard');
   const credit = await w.js(`({ text: __t.text('.brand .credits'), title: document.querySelector('.brand .credits').title })`);
   check('credits: OpenStreetMap + F1DB (CC BY 4.0, modified); the full F1DB attribution on hover', /OpenStreetMap/.test(credit.text) && /F1DB（CC BY 4.0，經修改）/.test(credit.text) && /F1DB v\d/.test(credit.title) && /CC BY 4\.0/.test(credit.title), credit);
   await w.shot('boot-1-car-tab');
@@ -196,6 +232,21 @@ async function partBoot() {
   await w.click('#tab-gp');
   await w.noErrors();
   w.destroy();
+  // the reference car: '2025-standard' picked (stored) before the game boots, as every other part of this harness does
+  const r = makeWin('boot-ref');
+  const err2 = await r.open('v6');
+  check('boots with the 2025 standard car picked (stored before boot)', !err2, err2 || undefined);
+  const ref = await r.js(`(function () { function eq(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+    var s = F1.game.spec; return { id: s.id, eqRef: eq(s, F1.REF_SPEC), keysRef: eq(Object.keys(s), Object.keys(F1.REF_SPEC)), perfSame: Object.keys(F1.CAR_PERF).every(function (k) { var a = F1.CAR_PERF[k], b = F1.game.car.perf[k]; return typeof a === 'function' || (a && typeof a === 'object' ? eq(a, b) : a === b); }),
+      tyres: F1.game.tyres.state.compound, rate: F1.game.tyres.wearRate, battery: F1.game.car.state.battery }; })()`);
+  check('the 2025 standard car is the reference car: 2025-standard, deep-equal to F1.REF_SPEC, the same perf numbers, medium tyres, battery full', ref.id === '2025-standard' && ref.eqRef && ref.keysRef && ref.perfSame &&
+    ref.tyres === 'M' && ref.battery === 1, ref);
+  await r.click('#tab-car');
+  const menu2 = await r.js(CAR_TAB);
+  check('車輛 tab: 年份 2025 of 17 seasons, the 2025 cars, the standard car highlighted, both enabled', menu2.year === '2025' && menu2.years === 17 && !menu2.disabled && menu2.cards === 11 && menu2.on === '2025-standard' &&
+    !menu2.locked && !menu2.lock, menu2);
+  await r.noErrors();
+  r.destroy();
 }
 
 /* ================= year / car ================= */
@@ -385,6 +436,13 @@ async function partBattery() {
   check('2010 car: E does nothing (no deploy, the same speed to the last bit)', d.keys && d.maxDeploy === 0 && d.car.v === c.car.v && d.car.x === c.car.x, { v: [c.car.v, d.car.v], deploy: d.maxDeploy });
   await d.w.shot('battery-3-2010-no-battery', true);
   await c.w.noErrors(); await d.w.noErrors(); c.w.destroy(); d.w.destroy();
+  // v6.1 (every car its own battery): a 2011 car that raced without KERS - the HRT - has none either
+  const hr = await batteryRun('bat-2011hrt', 2011, '2011-hrt', true);
+  check('2011 HRT (raced without KERS): spec.ers null, battery 0, the telemetry gets battery null (hidden), E held deploys nothing', hr.car.spec === '2011-hrt' &&
+    (await hr.w.js(`F1.game.spec.ers === null`)) && hr.car.battery === 0 && hr.hud.battery === null && hr.keys && hr.maxDeploy === 0 && hr.frames === 480 && hr.grass === 0,
+    { spec: hr.car.spec, battery: hr.car.battery, hud: hr.hud, deploy: hr.maxDeploy, keys: hr.keys, frames: hr.frames, grass: hr.grass });
+  await hr.w.shot('battery-4-2011-hrt-no-kers', true);
+  await hr.w.noErrors(); hr.w.destroy();
 }
 
 /* ================= pit lane ================= */
@@ -614,7 +672,7 @@ async function partRoom() {
   }
   await B.js(`document.getElementById('mp-join').click()`);
   check('B joins', await B.until(`F1.net.connected && !F1.net.isHost`, 6000), await B.js(`__t.text('mp-status')`));
-  check('the room has the host\'s season (2025, the default) and both drive 2025 cars', await A.until(`F1.net.year === 2025`, 3000) && await B.until(`F1.net.year === 2025 && F1.game.spec.year === 2025`, 3000));
+  check('the room has the host\'s season (2025, its pick) and both drive 2025 cars', await A.until(`F1.net.year === 2025`, 3000) && await B.until(`F1.net.year === 2025 && F1.game.spec.year === 2025`, 3000));
   // the host picks 2014
   const y = await A.pickYear(2014);
   const followed = await A.until(`F1.net.year === 2014 && F1.game.spec.year === 2014`, 4000, 'A 2014') && await B.until(`F1.net.year === 2014 && F1.game.spec.year === 2014`, 4000, 'B 2014');
@@ -712,14 +770,14 @@ async function partPad() {
   await w.js(`__btn(5, 0); window.__dep = 0; true`);
   await sleep(500);
   const off = await w.js(`({ dep: F1.game.car.state.deploy, boost: F1.gamepad.state.boost })`);
-  await w.js(`__btn(1, 1); window.__dep = 0; true`);
+  await w.js(`__btn(0, 1); window.__dep = 0; true`);
   await sleep(800);
   const bb = await w.js(`({ dep: window.__dep, boost: F1.gamepad.state.boost })`);
-  await w.js(`__btn(1, 0); __btn(7, 0); __btn(6, 1); clearInterval(window.__di); true`);
+  await w.js(`__btn(0, 0); __btn(7, 0); __btn(6, 1); clearInterval(window.__di); true`);
   // (state.deploy = the share of the battery's power used: since 2026-10-01 the deploy adds to the engine's drive only up to
   // what the tyres transmit, so in these 3.5 s from a standstill it peaks near 0.43, full only above the traction cap's speed)
   check('RB held: the battery deploys (state.deploy > 0, battery drains); released: no deploy', rb.dep > 0.25 && rb.battery < 1 && rb.boost && off.dep === 0 && !off.boost, { rb, off });
-  check('B held: deploys too', bb.dep > 0.5 && bb.boost, bb);
+  check('A held (v6.1: the battery button): deploys too', bb.dep > 0.5 && bb.boost, bb);
   await w.until(`Math.abs(F1.game.car.state.speed) < 1`, 6000); await w.js(`__btn(6, 0)`);
   const l0 = await w.js(`F1.game.limiter`);
   await press(4);
@@ -728,14 +786,21 @@ async function partPad() {
   await press(4);
   const l2 = await w.js(`({ lim: F1.game.limiter, strip: __t.shown('hud-pit') })`);
   check('LB toggles the pit limiter (the strip shows 限速器 開, hidden again when off)', l0 === false && l1.lim === true && l1.strip && /限速器 開/.test(l1.lim2) && l2.lim === false && !l2.strip, { l0, l1, l2 });
+  await press(1);
+  const b1 = await w.js(`({ lim: F1.game.limiter, strip: __t.shown('hud-pit'), lim2: __t.text('hud-pit-lim') })`);
+  await press(1);
+  const b2 = await w.js(`({ lim: F1.game.limiter, strip: __t.shown('hud-pit') })`);
+  check('B (v6.1) toggles the pit limiter too', b1.lim === true && b1.strip && /限速器 開/.test(b1.lim2) && b2.lim === false && !b2.strip, { b1, b2 });
   const c0 = await w.js(`F1.game.nextCompound`);
-  await press(8);
+  await press(2);
   const c1 = await w.js(`F1.game.nextCompound`);
-  await press(8);
+  await press(2);
   const c2 = await w.js(`({ next: F1.game.nextCompound, hud: __v.hud.nextCompound })`);
-  check('Back picks the next compound (M -> H -> S), shown in the telemetry', c0 === 'M' && c1 === 'H' && c2.next === 'S' && c2.hud === 'S', { c0, c1, c2 });
-  const hint = await w.js(`__t.text('hud-hint-pad')`);
-  check('controller hints name LB / RB / B / Back', /LB/.test(hint) && /RB/.test(hint) && /Back/.test(hint), hint);
+  check('X (v6.1) picks the next compound (M -> H -> S), shown in the telemetry', c0 === 'M' && c1 === 'H' && c2.next === 'S' && c2.hud === 'S', { c0, c1, c2 });
+  const hint = await w.js(`({ text: __t.text('hud-hint-pad'), keys: [].map.call(document.querySelectorAll('#hud-hint-pad kbd'), function (k) { return k.textContent; }), shown: __t.shown('hud-hint-pad') })`);
+  check('controller hints (v6.1 layout) name A / RB 電池（按住）, B / LB 限速器, X 換胎配方, Y 重置, View 行車線, Start 選單 and V 後照鏡', hint.shown &&
+    ['RT', 'LT', 'A', 'RB', 'B', 'LB', 'X', 'Y', 'View', 'Start', 'V'].every(k => hint.keys.indexOf(k) >= 0) && /A\s*\/\s*RB\s*電池（按住）/.test(hint.text) && /B\s*\/\s*LB\s*限速器/.test(hint.text) &&
+    /X\s*換胎配方/.test(hint.text) && /Y\s*重置/.test(hint.text) && /View\s*行車線/.test(hint.text) && /Start\s*選單/.test(hint.text) && /V\s*後照鏡/.test(hint.text), hint);
   await w.noErrors();
   w.destroy();
 }

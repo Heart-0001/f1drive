@@ -1,0 +1,433 @@
+{{Short description|Race track in Buenos Aires, Argentina}}
+{{Motorsport venue
+| name              = Autódromo de Buenos Aires <br> Oscar y Juan Gálvez <!-- (Racetrack Juan & Oscar Gálvez) -->
+| nicknames         = ''Autódromo''
+| logo              = [[file:Logo Ciudad Autódromo.png|class=skin-invert|100px]]
+| logo_caption      = Circuit logo 
+| image             = [[File:Autódromo Oscar y Juan Gálvez Detalles.svg|class=skin-invert|250px]] 
+| image_caption     = Details of all its circuit layouts
+| track_map         = 
+| track_map_caption =
+| location          = [[Buenos Aires]], [[Argentina]]
+| coordinates       = {{coord|34|41|39.38|S|58|27|33.65|W|type:landmark|display=it}}
+| capacity          = 45,000
+| fia_grade         = 4 (No. 6)
+| operator          = Secretaría de Deportes of GCBA <ref>[https://radiomitre.cienradios.com/deportes/fuerte-disputa-por-el-manejo-del-autodromo-de-la-ciudad-de-buenos-aires-crece-la-grieta-entre-el-aca-y-la-actc/ Fuerte disputa por el manejo del autódromo de la Ciudad de Buenos Aires: crece la grieta entre el ACA y la ACTC] on Radio Mitre, 27 Mar 2024</ref>
+| opened            = {{Start date and age|df=yes|1952|03|09}}
+| former_names      = {{collapsible list|
+* Autódromo Oscar Alfredo Gálvez (1989–2008)
+* Autódromo Municipal del Parque Almirante Brown de la Ciudad de Buenos Aires (1960s–1989)
+* Autódromo Municipal Ciudad de Buenos Aires (1955–1960s)
+* Autódromo 17 de Octubre (1952–1955)
+}}
+| events            = '''Future:'''<br />'''[[Grand Prix motorcycle racing]]'''<br>''[[Argentine motorcycle Grand Prix]]'' (1961–1963, 1981–1982, 1987, 1994–1995, 1998–1999, 2027)<br />'''Former:'''<br />[[Formula One]]<br>''[[Argentine Grand Prix]]'' (1953–1958, 1960, 1972–1975, 1977–1981, 1995–1998)<br />[[TCR South America Touring Car Championship|TCR South America]] (2021–2022, 2024)<br />[[Stock Car Pro Series]] (2005–2007, 2017, 2023–2024)<br />[[TC2000 Championship|TC2000]] (1979–2010, 2014, 2016–2025)<br />[[Turismo Carretera]] (1952–1955, 1958–1970, 1974–1979, 1981–2014, 2017–2018, 2020–2021, 2023–2025)<br />[[Turismo Nacional]] (1963–1997, 2000–2003, 2017, 2021–2025)<br />[[Top Race V6]] (1997–2000, 2002–2003, 2007–2011, 2017, 2020–2025)<br />[[World Sportscar Championship]] (1954–1958, 1960, 1971–1972)<br />[[Buenos Aires Grand Prix (motor racing)|Buenos Aires Grand Prix]] (1952–1955, 1957–1959, 1964, 1966–1968, 1978, 1983, 1985, 1987, 1989–1999, 2001, 2006, 2008–2009)
+| layout            = No. 6 circuit with Senna S (1995–present)
+| length_km         = 4.259
+| length_mi         = 2.614
+| turns             = 19
+| record_time       = 1:27.981
+| record_driver     = {{flagicon|AUT}} [[Gerhard Berger]]
+| record_car        = [[Benetton B197]]
+| record_year       = [[1997 Argentine Grand Prix|1997]]
+| record_class      = [[Formula One|F1]]
+| layout2           = No. 6 circuit (1972–present)
+| length2_km        = 4.101
+| length2_mi        = 2.548
+| turns2            = 16
+| record_time2      = 1:40.006
+| record_driver2    = {{flagicon|ARG}} [[Gino Trappa]]
+| record_car2       = [[Tatuus F4-T421]]
+| record_year2      = [[2024 F4 Brazilian Championship|2024]]
+| record_class2     = [[Formula 4|F4]]
+| layout3           = No. 15 circuit (1972–present)
+| length3_km        = 5.968
+| length3_mi        = 3.708
+| turns3            = 16
+| record_time3      = 1:45.287
+| record_driver3    = {{flagicon|BRA|1968}} [[Nelson Piquet]]
+| record_car3       = [[Brabham BT49|Brabham BT49C]]
+| record_year3      = [[1981 Argentine Grand Prix|1981]]
+| record_class3     = [[Formula One|F1]]
+| layout4           = No. 12 circuit (1972–present)
+| length4_km        = 5.651
+| length4_mi        = 3.503
+| turns4            = 8
+| record_time4      = 1:30.127
+| record_driver4    = {{flagicon|ARG}} {{ill|Juan Martín Trucco|es}}
+| record_car4       = [[Dodge Challenger (2008)#Racing|Dodge Challenger SRT Hellcat]]
+| record_year4      = [[2024 Turismo Carretera|2024]]
+| record_class4     = [[Turismo Carretera|TC]]
+| layout5           = No. 9 circuit (1972–present)
+| length5_km        = 3.353
+| length5_mi        = 2.084
+| turns5            = 14
+| record_time5      = 1:09.300
+| record_driver5    = {{flagicon|ITA|1946}} [[Andrea Montermini]]
+| record_car5       = [[Reynard 91D]]
+| record_year5      = [[1992 Buenos Aires Grand Prix – World Cup Formula 3000|1992]]
+| record_class5     = [[Formula 3000|F3000]]
+| layout6           = No. 8 circuit (1972–present)
+| length6_km        = 3.380
+| length6_mi        = 2.100
+| turns6            = 9
+| record_time6      = 1:13.279
+| record_driver6    = {{flagicon|BRA}} [[Juliano Moro]]
+| record_car6       = [[List of Dallara cars|Dallara F301]]
+| record_year6      = [[2001 Buenos Aires Grand Prix|2001]]
+| record_class6     = [[Formula Three|F3]]
+| layout7           = No. 5 circuit (1972–present)
+| length7_km        = 2.115
+| length7_mi        = 1.314
+| turns7            = 8
+| record_time7      = 0:54.637
+| record_driver7    = {{flagicon|ARG|1861}} [[Javier Balzano]]
+| record_car7       = [[Opel Vectra|Chevrolet Vectra 16v]]
+| record_year7      = [[South American Super Touring Car Championship|1997]]
+| record_class7     = [[Super Touring]]
+| layout8           = No. 7 circuit (1972–present)
+| length8_km        = 2.607
+| length8_mi        = 1.620
+| turns8            = 4
+| record_time8      = 0:46.114
+| record_driver8    = {{flagicon|BRA}} [[Diego Nunes (racing driver)|Diego Nunes]]
+| record_car8       = [[List of Dallara cars|Dallara F301]]
+| record_year8      = [[2006 Buenos Aires Grand Prix Race 2|2006]]
+| record_class8     = [[Formula Three|F3]]
+| layout9           = No. 14 circuit (1968–1971)
+| length9_km        = 6.122
+| length9_mi        = 3.805
+| turns9            = 13
+| record_time9      = 1:50.230
+| record_driver9    = {{flagicon|GBR}} [[Chris Craft (racing driver)|Chris Craft]]
+| record_car9       = [[McLaren M8A#M8C|McLaren M8C]]
+| record_year9      = [[1971 1000 km Buenos Aires|1971]]
+| record_class9     = [[Group 7 (motorsport)|Group 7]]
+| layout10          = No. 2 circuit (1952–1971)
+| length10_km       = 3.912
+| length10_mi       = 2.431
+| turns10           = 13
+| record_time10     = 1:36.100
+| record_driver10   = {{flagicon|GBR}} [[Stirling Moss]]
+| record_car10      = [[Cooper T51]]
+| record_year10     = [[1960 Argentine Grand Prix|1960]]
+| record_class10    = [[Formula One|F1]]
+| layout11          = No. 4 circuit (1952–1971)
+| length11_km       = 4.706
+| length11_mi       = 2.924
+| turns11           = 16
+| record_time11     = 1:49.300
+| record_driver11   = {{flagicon|ITA|1946}} [[Ernesto Brambilla]]
+| record_car11      = [[Ferrari Dino 166 F2]]
+| record_year11     = [[Buenos Aires Grand Prix (motor racing)#Results|1968]]
+| record_class11    = [[Formula Three|F3]]
+| website           = {{url|https://www.ciudadautodromo.com/| ciudadautodromo.com}}
+}}
+
+The '''Autódromo de Buenos Aires Oscar y Juan Gálvez'''<!-- ''Racetrack Juan & Oscar Gálvez'' (official name) --><ref>{{cite web |title=Buenos Aires (Tracks) |url=https://www.silhouet.com/motorsport/tracks/buenos.html |publisher=silhouet.com |access-date=20 March 2014}}</ref><ref name="buenos_aires_rcircuits">{{cite web |title=Buenos Aires - Racing Circuits |url=https://www.racingcircuits.info/south-america/argentina/buenos-aires.html |website=RacingCircuits.info |access-date=21 August 2023}}</ref> is a 45,000 capacity motor racing circuit in [[Buenos Aires]], [[Argentina]] built in 1952 under president [[Juan Perón]], named ''Autódromo 17 de Octubre'' after the date of [[Loyalty Day (Argentina)|Loyalty Day]] until Perón's overthrow. It was later renamed after Argentinian racing driver brothers, [[Juan Gálvez (racing driver)|Juan Gálvez]] (1916–1963) and [[Oscar Alfredo Gálvez]] (1913–1989).
+
+==Description==
+[[Image:Autodromo galvez en 2023.jpg|thumb|left|Main entrance to Autódromo Oscar y Juan Gálvez]]
+The circuit was originally constructed on swampland in [[Villa Riachuelo]], the southernmost ''barrio'' of Buenos Aires, and is situated on flat lands surrounded by large grandstands, giving most spectators an excellent view area of the whole circuit. The circuit is notable for the large number of alternative layouts to accommodate different forms of racing, with some races run without the twisty infield section, reducing lap times significantly.
+
+The [[1000 km Buenos Aires]] [[sports car racing|sports car]] event used the ''Autódromo'' as well as sections of highway situated near the track from 1954 to 1960. The 1000&nbsp;km event would return again from 1970 to 1972, but using just the ''Autódromo'' section.
+
+The 20 [[Formula One]] [[Argentine Grand Prix]] races were held in the ''Autódromo'' between {{F1|1953}} and {{F1|1998}}. Formula One used a number of different configurations—the No.2 circuit was used from 1954–1960, the No.9 circuit was used from 1971–1973, and the very fast No.15 layout was used from 1974–1981 which added 2 long straights and a long third corner between the two straights often taken in top gear flat out, which provided an exciting view for spectators, especially when the cars exited the third corner often on the brink of spinning off or crashing at {{cvt|305|km/h|mph|abbr=on}}. Going through the section, the cars were flat out for 40 seconds. The Argentine Grand Prix was dropped from the 1982 calendar because of Argentina's [[1982 invasion of the Falkland Islands|invasion]] of the [[Falkland Islands]] and [[Carlos Reutemann]]'s sudden retirement after the [[1982 Brazilian Grand Prix]]. The twisty No.6 configuration, though using S de Senna instead of Tobogán, was used from 1995–1998, but that version of the circuit was not popular with Formula One. After the 1998 race, there was no money for the race to be held and it was dropped.
+
+Ten [[Argentine motorcycle Grand Prix]] races were held in the Autódromo between {{MGP|1961}} and {{MGP|1999}} and will return in 2027 with a major redevelopment programme to bring the track to [[List of motor racing circuits by FIA grade|FIA Grade 2]] (Then Grade 1) to host [[Grand Prix motorcycle racing|MotoGP]].<ref>{{Cite web |title=MotoGP to race in Buenos Aires from 2027 |url=https://www.motogp.com/en/news/2025/07/21/motogp-to-race-in-buenos-aires-from-2027/755347 |website=motogp.com |publisher=The Official Home of MotoGP |language=en |date=21 July 2025 |access-date=21 July 2025}}</ref>
+
+The [[Buenos Aires Grand Prix (motor racing)|Buenos Aires Grand Prix]] was held in the Autódromo from 1952 to 2009.
+
+==Names==
+*1952–1955: Autódromo 17 de Octubre
+*1955 – mid-1960s: Autódromo Municipal Ciudad de Buenos Aires
+*Mid-1960s – 1989: Autódromo Municipal del Parque Almirante Brown de la Ciudad de Buenos Aires
+*1989–2008: Autódromo [[Oscar Alfredo Gálvez]]
+*2008–present: Autódromo [[Oscar Alfredo Gálvez|Oscar]] y [[Juan Gálvez (racing driver)|Juan Gálvez]]
+
+==Circuits==
+{{Gallery
+| title        = 
+| align        =
+| footer       =
+| style        =
+| state        =
+| height       = 100
+| width        = 100
+| perrow       = 3
+| mode         = packed
+| whitebg      = 
+| noborder     =
+| captionstyle =
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 6 por Senna.svg|Main track with as used for F1 between 1995 and 1998 
+|file:Autódromo Oscar y Juan Gálvez Circuito N° 15.svg|Entire track including the lake extension, as used for F1 from 1974 to 1981
+|File:Circuit-galvez-1952-No1.png|Circuit N° 1 (1952–1971)
+|File:Circuit-galvez-1952-No2.png|Circuit N° 2 (1952–1971)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 2 (-) (Histórico).svg|Reverse version of Circuit N° 2, used for 1954 Argentine Grand Prix
+|-
+|File:Circuit-galvez-1952-No3.png|Circuit N° 3 (1952–1971)
+|File:Circuit-galvez-1952-No4.png|Circuit N° 4 (1952–1971)
+|File:Circuit-callejero-buenos -aires-1000km-1954-(openstreetmap).png|Buenos Aires 1000&nbsp;km Circuit (1954, 1956, 1958, 1960)
+|File:Circuit-callejero-buenos -aires-1000km-1957-(openstreetmap).png|Buenos Aires 1000&nbsp;km Circuit (1955)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 5.svg|Circuit N° 5 (1972–present)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 6.svg|Circuit N° 6 (1972–present)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 6 por Senna.svg|Circuit N° 6 with Senna S used for Formula One 1995–1998 (1995–present)
+|File:Autódromo Gálvez moto.svg|Circuit N° 6 in the version used for motorcycle racing 1987, 1994–1995, 1998–1999
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 7.svg|Circuit N° 7 (1972–present)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 8.svg|Circuit N° 8 (1972–present)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 9 xT.svg|Circuit N° 9 (1972–present)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 9.svg|Circuit N° 9 with Senna S (1995–present)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 12.svg|Circuit N° 12 (1972–present)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 14 (Histórico).svg|Circuit N° 14 (1968–1971)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 15.svg|Circuit N° 15 (1972–present)
+|File:Autódromo Oscar y Juan Gálvez Circuito N° 15 Senna.svg|Circuit N° 15 with Senna S (1995–present)
+}}
+
+; Layout usage
+* 1952–1958: [[Buenos Aires Grand Prix (motor racing)|Buenos Aires Grand Prix]] (La Temporada)&nbsp;– [[Formula Libre]]<ref>{{cite web |url=http://www.teamdan.com/archive/gen/temporad.html |title=South American Formula Libre/Temporada Races |publisher=teamdan.com |access-date=June 14, 2015 |archive-url=https://web.archive.org/web/20160123172355/http://www.teamdan.com/archive/gen/temporad.html |archive-date=January 23, 2016 |url-status=dead }}</ref> (Circuits: No.4 for 1952, No.2 for 1953–1958)
+* {{F1|1953}}–{{F1|1998}}: [[Argentine Grand Prix]]&nbsp;– [[Formula One|Formula 1]]<ref>{{cite web|url=https://www.jmfangio.org/gp195301argentina.htm |title=1953 Argentina&nbsp;– I Gran Premio de la Republica Argentina|publisher=jmfangio.org |access-date=March 20, 2014}}</ref><ref>{{cite web|url=http://www.formula2.net/F253_1.htm |title=VII Gran Premio de la Republica Argentina 1953|publisher=formula2.net |access-date=April 12, 2014}}</ref> (Circuits: No.2 for 1953–1960, No.9 for 1971–1973, No.15 for 1974–1981, No.6 with Senna S for 1995–1998)
+* 1964–1978: [[Buenos Aires Grand Prix (motor racing)|Buenos Aires Grand Prix]]&nbsp;– [[Formula Two|Formula 2]], [[Formula Three|Formula 3]], [[Formula Junior]] (Circuits: No.4 for 1964, No.15 for 1966–1968, No.12 for 1978)
+* 1983–1985: [[Buenos Aires Grand Prix (motor racing)|Buenos Aires Grand Prix]]&nbsp;– [[Formula Two|Formula 2]] Codasur (Circuit No.4)
+* 1954–1960 / 1970–1972: [[1000 km Buenos Aires|1000 km of Buenos Aires]] [[sports car racing|sports car]] series Grand Prix<ref>{{cite web|url=https://www.racingsportscars.com/track/archive/Buenos%20Aires.html |title=Buenos Aires&nbsp;– List of Races (Sports Car) |publisher=racingsportscars.com |access-date=June 14, 2015}}</ref><ref>{{cite web|url=http://www.wsrp.cz/laraces1954.html#7 |title=Latin American Sports Car Races (1954 National Buenos Aires) |publisher=wsrp.cz |access-date=June 14, 2015}}</ref> (No.1 plus various street layouts for 1954, 1956, 1958, 1960, No. 1 with longer section of Autopista General Pablo Riccheri for 1955, No.14 for 1970–1971, No.15 for 1972)
+* 1961–1999: [[Argentine motorcycle Grand Prix]]<ref>{{cite web |url=http://www.motogp.com/en/Results+Statistics/1961/ARG/250cc |title=250cc Race Classification 1961 |publisher=motogp.com |access-date=April 12, 2014 |archive-date=July 23, 2014 |archive-url=https://web.archive.org/web/20140723191606/http://www.motogp.com/en/Results+Statistics/1961/ARG/250cc |url-status=dead }}</ref> (Circuits: No.2 for 1961 and 1963, No.1 for 1962, No.8 for 1982 and 1987, No.6 for 1981, 1994–1995 and 1998–1999)
+* 2017–2018: [[1000 km Buenos Aires|1000 km of Buenos Aires]] [[Turismo Carretera]] Grand Prix (Circuit No.12)
+
+==Fatal accidents==
+{{Main article|List of Autodromo de Buenos Aires fatalities}}
+
+==Events==
+
+; Future
+
+* [[Grand Prix motorcycle racing]]
+** ''[[Argentine motorcycle Grand Prix]]'' (1961–1963, 1981–1982, 1987, 1994–1995, 1998–1999, 2027)
+
+; Former
+
+* [[200 Miles of Buenos Aires]] (1970)
+* [[Buenos Aires Grand Prix (motor racing)|Buenos Aires Grand Prix]] (1952–1955, 1957–1959, 1964, 1966–1968, 1978, 1983, 1985, 1987, 1989–1999, 2001, 2006, 2008–2009)
+* [[Campeonato Sudamericano de GT]] (2013)
+* [[Copa Truck]] (2018)
+* [[F4 Argentina Championship]] (2021)
+* [[F4 Brazilian Championship]] (2024)
+* {{ill|Formula 2 Argentina|es}} (2024)
+* [[Formula 3 Sudamericana]]
+** ''[[Buenos Aires Grand Prix (motor racing)|Buenos Aires Grand Prix]]'' (1987, 1989–1999, 2001, 2006, 2008–2009)
+* [[Fórmula Nacional Argentina]] (1980–2010, 2014, 2016–2025)
+* [[Formula One]]
+** ''[[Argentine Grand Prix]]'' (1953–1958, 1960, 1972–1975, 1977–1981, 1995–1998)
+* [[Formula Truck]] (2009–2011)
+* [[Porsche Cup Brasil]] (2011, 2017)
+* {{ill|Porsche GT3 Cup Trophy Argentina|es}} (2018–2019)
+* [[Sport Prototipo Argentino]] (1969-1973)
+* {{ill|Sport Prototipo Argentino (2023-)|es}} (2023)
+* [[South American Super Touring Car Championship]] (1997–2001)
+* [[Stock Car Pro Series]] (2005–2007, 2017, 2023–2024)
+* [[TC2000 Championship]] (1979–2010, 2014, 2016–2025)
+* [[TC2000 Championship]]
+** ''[[200 km de Buenos Aires]]'' (2004–2010, 2014, 2016–2019, 2021–2025)
+* [[Top Race V6]] (1997–2000, 2002–2003, 2007–2011, 2017, 2020–2025)
+* [[Turismo Carretera]] (1952–1955, 1958–1970, 1974–1979, 1981–2014, 2017–2018, 2020–2021, 2023–2025)
+* {{ill|Turismo Carretera 2000|es}} (2025)
+* [[TC Pista|Turismo Carretera Pista]] (1995–2014, 2017–2018, 2020–2021, 2023–2025)
+* [[Turismo Nacional]] (1963–1997, 2000–2003, 2017, 2021–2025)
+* [[TCR Brazil Touring Car Championship]] (2024)
+* [[TCR South America Touring Car Championship]] (2021–2022, 2024)
+* [[World Sportscar Championship]]
+** ''[[1000 km Buenos Aires]]'' (1954–1958, 1960, 1971–1972)
+
+== Lap records ==
+
+As of August 2025, the fastest official race lap records at the Autódromo Oscar y Juan Gálvez are listed as:
+
+{| class="wikitable"
+!Category!!Time!!Driver!!Vehicle!!Event
+|-
+! colspan="5" | No.6 Circuit with Senna "S" (1995–2026): {{cvt|4.259|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Formula One]] || '''1:27.981''' || [[Gerhard Berger]] || [[Benetton B197]] || [[1997 Argentine Grand Prix]]
+|-
+| [[Porsche Carrera Cup]] || '''1:53.636'''<ref>{{cite web |title=2011 2° Etapa Porsche GT3 Brasil Cup - Porsche GT3 Cup - Corrida 1 |url=https://speedhive.mylaps.com/Sessions/1874040 |date=14 May 2011 |access-date=8 January 2023}}</ref> || [[Ricardo Rosset]] || [[Porsche 911 GT3#997 GT3 Cup 3.8 (2009–2013)|Porsche 911 (997 II) GT3 Cup]] || [[Porsche Cup Brasil|2011 Buenos Aires Porsche Cup Brasil round]]
+|-
+! colspan="5" | No.6 Circuit (1972–present): {{cvt|4.101|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Formula 4]] || '''1:40.006'''<ref>{{cite web |title=2024 Festival Sudamericano de Velocidad - F4 - 5ª Etapa F4 Brazilian - 3a Prova |url=https://www.chronon.com.br/wp-content/uploads/2024/10/F424_5_P3_RES.pdf |date=6 October 2024 |access-date=7 October 2024}}</ref> || [[Gino Trappa]] || [[Tatuus F4-T421]] || [[2024 F4 Brazilian Championship|2024 Buenos Aires F4 Brazil round]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|500cc]] || '''1:44.122''' || [[Tadayuki Okada]] || [[Honda NSR500]] || [[1998 Argentine motorcycle Grand Prix]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|250cc]] || '''1:45.473''' || [[Valentino Rossi]] || [[Aprilia RS250]] || [[1998 Argentine motorcycle Grand Prix]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|125cc]] || '''1:49.917''' || [[Masao Azuma]] || [[Honda RS125R]] || [[1998 Argentine motorcycle Grand Prix]]
+|-
+| [[Formula Renault#Formula Renault 2.0|Formula Renault 2.0]] || '''1:50.349'''<ref>{{cite web |title=Formula Renault Argentina 2021 - Fecha 08 - Buenos Aires - Carrera Domingo |url=https://formulanacional.com.ar/carreras.php?accion=tiempos&id=489&temp=2021 |date=14 February 2021 |access-date=2 October 2022}}</ref> || {{ill|Jorge Barrio|es}} || [[Tito F4-A|Tito F4-A Renault]] || [[Fórmula Nacional Argentina|2021 2nd Buenos Aires Formula Renault Argentina round]]
+|-
+| [[TC2000 Championship|Súper TC2000]] || '''1:50.438'''<ref>{{cite web |title=2020 Súper TC 2000 Buenos Aires 3 (Race 1) |url=https://www.racingyears.com/race/2020%2520S%25C3%25BAper%2520TC%25202000%2520Buenos%2520Aires%25203%2520(Race%25201) |date=28 November 2020 |access-date=13 July 2022}}</ref> || [[Rubens Barrichello]] || [[Toyota Corolla (E210)|Toyota Corolla Mk.12]] || [[2020 Súper TC 2000|2020 3rd Buenos Aires Súper TC2000 round]]
+|-
+! colspan="5" | No.8 Circuit (1972–2026): {{cvt|3.380|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Formula Three]] || '''1:13.279'''<ref>{{cite web |title=2001 Buenos Aires Sud-Am F3 |url=https://www.motorsportmagazine.com/database/races/2001-buenos-aires-sud-am-f3/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=17 June 2001 |access-date=23 June 2022}}</ref> || [[Juliano Moro]] || [[List of Dallara cars|Dallara F301]] || [[2001 Buenos Aires Grand Prix]]
+|-
+| [[Stock Car Pro Series]] || '''1:17.657'''<ref>{{cite web |title=2023 Stock Car Pro Series Buenos Aires Race 1 |url=https://www.chronon.com.br/wp-content/uploads/2023/10/SP23_9_P1_RES.pdf |date=8 October 2023 |access-date=8 October 2023}}</ref> || [[Gabriel Casagrande]] || [[Chevrolet Cruze#Motorsport|Chevrolet Cruze Stock Car]] || [[2023 Stock Car Pro Series|2023 Buenos Aires Stock Car Pro Series round]]
+|-
+| [[TC2000 Championship|TC2000]] || '''1:18.970'''<ref>{{cite web |title=TC2000 2025 » Autódromo Juan y Oscar Gálvez No. 8 Round 2 Results |url=https://www.touringcars.net/database/race.php?id=5357 |date=25 May 2025 |access-date=26 May 2025}}</ref> || [[Matías Rossi]] || [[Toyota Corolla Cross]] || [[2025 TC2000 Championship|2025 Buenos Aires TC2000 round]]
+|-
+| [[TCR Touring Car]] || '''1:21.345'''<ref>{{cite web |title=TCR SA 2022 » Autódromo Juan y Oscar Gálvez No. 8 Round 11 Results |url=https://www.touringcars.net/database/race.php?id=4561 |date=18 September 2022 |access-date=18 September 2022}}</ref> || {{ill|Jorge Barrio|es}} || [[Toyota GR Corolla|Toyota GR Corolla Sport TCR]] || [[2022 TCR South America Touring Car Championship|2022 Buenos Aires TCR South America round]]
+|-
+| [[Formula Renault#Formula Renault 2.0|Formula Renault 2.0]] || '''1:21.355'''<ref>{{cite web |title=Fórmula Nacional Argentina 2023 - Fecha 10 - 200km Buenos Aires - Carrera Final Domingo |url=https://formulanacional.com.ar/carreras.php?accion=tiempos&id=524&temp= |date=8 October 2023 |access-date=8 October 2023}}</ref> || [[Emiliano Stang]] || [[Tito F4-A|Tito F4-A Renault]] || [[2023 Fórmula Nacional Argentina|2023 2nd Buenos Aires Fórmula Nacional Argentina round]]
+|-
+| [[Formula 4]] || '''1:21.372'''<ref>{{cite web |title=2021 Round 10 TCR South America - Buenos Aires 1ra Final Formula 4 Carrera (25:00 Tiempo) |url=https://f4argentina.com/wp-content/uploads/2020/08/6.-1RA-FINAL-F4-2-1.pdf |archive-url=https://web.archive.org/web/20220518170627/https://f4argentina.com/wp-content/uploads/2020/08/6.-1RA-FINAL-F4-2-1.pdf |date=12 November 2021 |archive-date=18 May 2022 |access-date=15 May 2024 |url-status=usurped}}</ref> || {{ill|Federico Hermida|es}} || [[Mygale M14-F4]] || [[2021 F4 Argentina Championship|2021 2nd Buenos Aires F4 Argentina round]]
+|-
+| [[Super Touring]] || '''1:24.442'''<ref>{{cite web |title=SASTC 2000 » Autódromo Juan y Oscar Gálvez No. 8 Round 3 Results |url=https://www.touringcars.net/database/race.php?id=1467 |date=11 June 2000 |access-date=24 April 2022}}</ref> || [[Oscar Larrauri]] || [[Alfa Romeo 156#Motorsport|Alfa Romeo 156 TS]] || [[South American Super Touring Car Championship|2000 2nd Buenos Aires SASTC round]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|500cc]] || '''1:33.140''' || [[Kenny Roberts]] || [[Yamaha YZR500]] || [[1982 Argentine motorcycle Grand Prix]]
+|-
+| [[Truck racing]] || '''1:39.515'''<ref>{{cite web |title=Copa Truck – Giaffone vence as duas corridas em Buenos Aires |url=https://www.autoracing.com.br/copa-truck-giaffone-vence-as-duas-corridas-em-buenos-aires/ |date=16 September 2018 |access-date=21 January 2023}}</ref> || [[Beto Monteiro]] || [[Iveco|Iveco Truck]] || [[2018 Copa Truck season|2018 Buenos Aires Copa Truck round]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|125cc]] || '''1:43.190''' || [[Ricardo Tormo]] || [[Sanvenero 125]] || [[1982 Argentine motorcycle Grand Prix]]
+|-
+! colspan="5" | No.15 Circuit (1972–2026): {{cvt|5.968|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Formula One]] || '''1:45.287''' || [[Nelson Piquet]] || [[Brabham BT49|Brabham BT49C]] || [[1981 Argentine Grand Prix]]
+|-
+| [[Group 6 (motorsport)|Group 6]] || '''1:58.390'''<ref>{{cite web |title=Buenos Aires 1000 Kilometres 1972 |url=https://www.racingsportscars.com/race/Buenos_Aires-1972-01-09.html |date=9 January 1972 |access-date=24 April 2022}}</ref> || [[Reine Wisell]] || [[Lola T280]] || [[1972 1000 km Buenos Aires]]
+|-
+| [[TC2000 Championship|Súper TC2000]] || '''2:09.572'''<ref>{{cite web |title=2017 Súper TC 2000 Buenos Aires |url=https://www.racingyears.com/race/2017%2520S%25C3%25BAper%2520TC%25202000%2520Buenos%2520Aires |date=1 October 2017 |access-date=13 July 2022}}</ref> || {{ill|Juan Ángel Rosso|es}} || [[Ford Focus#Touring cars|Ford Focus]] || [[2017 Buenos Aires 200km]]
+|-
+! colspan="5" | No.12 Circuit (1972–present): {{cvt|5.651|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Turismo Carretera]] || '''1:30.127'''<ref>{{cite web |title=Turismo Carretera / Final (18/08/2024) - Carrera Nro 10 / Campeonato 2024 - Resultado de tanda - Oscar y Juan Gálvez |url=https://www.actc.org.ar/modules/ppcev/downloadpdf.php?idrace=1505&idround=8 |date=18 August 2024 |access-date=19 August 2024}}</ref> || {{ill|Juan Martín Trucco|es}} || [[Dodge Challenger (2008)#Racing|Dodge Challenger SRT Hellcat]] || [[2024 Turismo Carretera|2024 Buenos Aires Grand Prix]]
+|-
+| [[Porsche Carrera Cup]] || '''1:37.879'''<ref>{{cite web |title=La Porsche GT3 Cup Vio Ganar a Zanazzi y Lorio |url=https://cordobacompeticion.com/nacionales/la-porsche-gt3-cup-vio-ganar-a-zanazzi-y-lorio/ |date=19 August 2018 |access-date=18 January 2023}}</ref> || [[Juan Lorio]] || [[Porsche 911 GT3#991 GT3 Cup (2013–2017)|Porsche 911 (997 I) GT3 Cup]] || [[:es:Anexo:Temporada 2018 de la Porsche GT3 Cup Trophy Argentina|2018 1st Buenos Aires Porsche GT3 Cup Trophy Argentina round]]
+|-
+| [[TC2000 Championship|TC2000]] || '''1:38.915'''<ref>{{cite web |title=2010 Turismo Competición 2000 Buenos Aires |url=https://www.racingyears.com/race/2010%2520Turismo%2520Competici%25C3%25B3n%25202000%2520Buenos%2520Aires |date=7 November 2010 |access-date=13 July 2022}}</ref> || [[Mariano Werner]] || [[Toyota Corolla (E140)|Toyota Corolla Mk.10]] || [[2010 Buenos Aires 200km]]
+|-
+| [[Turismo Nacional|Turismo Nacional Clase 2]] || '''1:47.486'''<ref>{{Cite web |title=9na Fecha Turismo Nacional Buenos Aires - 3ra Serie Turismo Nacional Clase 2 |url=https://beta.speedhive.com/sessions/8048146 |date=2 September 2023 |access-date=9 September 2023}}</ref> || [[Juan Manuel Damiani]] || [[Toyota Etios]] || [[:es:Anexo:Temporada 2023 de Turismo Nacional|2023 Buenos Aires Turismo Nacional round]]
+|-
+| [[Turismo Nacional|Turismo Nacional Clase 3]] || '''1:56.048'''<ref>{{Cite web |title=9na Fecha Turismo Nacional Buenos Aires - 2da Serie Turismo Nacional Clase 3 |url=https://speedhive.mylaps.com/Sessions/6547381 |date=3 September 2023 |access-date=9 September 2023}}</ref> || [[José Manuel Urcera]] || [[Ford Focus (third generation)|Ford Focus III]] || [[:es:Anexo:Temporada 2023 de Turismo Nacional|2023 Buenos Aires Turismo Nacional round]]
+|-
+! colspan="5" | No.9 Circuit (1972–2026): {{cvt|3.353|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Formula 3000]] || '''1:09.300'''<ref>{{cite web |title=1992 Buenos Aires F3000 |url=https://www.motorsportmagazine.com/database/races/1992-buenos-aires-f3000/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=13 December 1992 |access-date=24 April 2022}}</ref> || [[Andrea Montermini]] || [[Reynard F3000 cars#91D|Reynard 91D]] || [[1992 Buenos Aires Grand Prix – World Cup Formula 3000]]
+|-
+| [[Formula Three]] || '''1:10.816'''<ref>{{cite web |title=2008 Buenos Aires Sud-Am F3 - Round 9 |url=https://www.motorsportmagazine.com/database/races/2008-buenos-aires-sud-am-f3-2/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=9 August 2008 |access-date=23 June 2022}}</ref> || [[Nelson Merlo]] || [[List of Dallara cars|Dallara F301]] || [[2008 Buenos Aires Grand Prix Race 2|2008 Buenos Aires Grand Prix]]
+|-
+| [[Formula One]] || '''1:11.220'''<ref>{{cite web |title=1973 Argentine Grand Prix |url=https://www.motorsportmagazine.com/database/races/1973-argentine-grand-prix/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=28 January 1973 |access-date=18 July 2022}}</ref> || [[Emerson Fittipaldi]] || [[Lotus 72#1971–1972|Lotus 72D]] || [[1973 Argentine Grand Prix]]
+|-
+| [[Formula Two]] || '''1:11.800'''<ref>{{cite web |title=1978 Buenos Aires F2 |url=https://www.motorsportmagazine.com/database/races/1978-buenos-aires-f2/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=12 November 1978 |access-date=23 June 2022}}</ref> || [[Clay Regazzoni]] || [[Chevron Cars Ltd#Cars|Chevron B40]] || [[1978 Buenos Aires Grand Prix]]
+|-
+| [[Stock Car Pro Series]] || '''1:15.753'''<ref>{{cite web |title=2024 Festival Sudamericano de Velocidad -  9a Etapa Stock Car Pro Series - 2a Prova |url=https://www.chronon.com.br/wp-content/uploads/2024/10/SP24_9_P2_RES.pdf |date=6 October 2024 |access-date=7 October 2024}}</ref> || [[Rafael Suzuki]] || [[Chevrolet Cruze#Motorsport|Chevrolet Cruze Stock Car]] || [[2024 Stock Car Pro Series|2024 Buenos Aires Stock Car Pro Series round]]
+|-
+| [[TC2000 Championship|Súper TC2000]] || '''1:18.239'''<ref>{{cite web |title=2024 TC2000 - Fecha 09 / 200 km Buenos Aires - Carrera Final Domingo |url=https://tc2000.com.ar/carreras.php?accion=tiempos&id=394 |date=6 October 2024 |access-date=7 October 2024}}</ref> || {{ill|Damián Fineschi|es}} || [[Chevrolet Cruze#Second generation (J400)|Chevrolet Cruze Mk.2]] || [[2024 TC2000 Championship|2024 200 km de Buenos Aires]]
+|-
+| [[TCR Touring Car]] || '''1:18.962'''<ref>{{cite web |title=2024 Festival Sudamericano de Velocidad - 6a Etapa TCR SA/TCR Brasil - Carrera 1 |url=https://www.chronon.com.br/wp-content/uploads/2024/10/TCRSA24_6_P1_RESII.pdf |date=5 October 2024 |access-date=6 October 2024}}</ref> || [[Matias Cravero]] || [[Honda Civic Type R TCR#FK7/FK8 (2017)|Honda Civic Type R TCR (FK7)]] || [[2024 TCR South America Touring Car Championship|2024 Buenos Aires TCR South America round]]
+|-
+| [[Formula Renault#Formula Renault 2.0|Formula Renault 2.0]] || '''1:20.257'''<ref>{{cite web |title=Formula Renault Argentina 2021 - Fecha 01 - Buenos Aires - Carrera Domingo |url=https://formulanacional.com.ar/carreras.php?accion=tiempos&id=491&temp=2021 |date=21 March 2021 |access-date=2 October 2022}}</ref> || {{ill|Jorge Barrio|es}} || [[Tito F4-A|Tito F4-A Renault]] || [[Fórmula Nacional Argentina|2021 3rd Buenos Aires Formula Renault Argentina round]]
+|-
+| [[Porsche Carrera Cup]] || '''1:20.695'''<ref>{{cite web |title=2019 Porsche GT3 Cup Trophy 7° Y 8° Fecha - Sabado - Carrera 1 |url=https://speedhive.mylaps.com/Sessions/5509922 |date=3 August 2019 |access-date=8 January 2023}}</ref> || [[Pablo Otero]] || [[Porsche 911 GT3#991 GT3 Cup (2013–2017)|Porsche 911 (991 I) GT3 Cup]] || [[:es:Anexo:Temporada 2019 de la Porsche GT3 Cup Trophy Argentina|2019 3rd Buenos Aires Porsche GT3 Cup Trophy Argentina round]]
+|-
+| [[Super Touring]] || '''1:33.786'''<ref>{{cite web |title=SASTC 1997 » Autódromo Juan y Oscar Gálvez No. 9 Round 10 Results |url=https://www.touringcars.net/database/race.php?id=1254 |date=14 December 1997 |access-date=24 April 2022}}</ref> || [[Ricardo Risatti]] || [[Ford Mondeo#Motorsport|Ford Mondeo Ghia]] || [[South American Super Touring Car Championship|1997 4th Buenos Aires SASTC round]]
+|-
+! colspan="5" | No.5 Circuit (1972–2026): {{cvt|2.215|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Super Touring]] || '''0:54.637'''<ref>{{cite web |title=SASTC 1997 » SASTC 1997 » Autódromo Juan y Oscar Gálvez Short Round 6 Results |url=https://www.touringcars.net/database/race.php?id=1242 |date=14 September 1997 |access-date=24 April 2022}}</ref> || [[Javier Balzano]] || [[Opel Vectra|Chevrolet Vectra 16v]] || [[South American Super Touring Car Championship|1997 2nd Buenos Aires SASTC round]]
+|-
+! colspan="5" | No.7 Circuit (1972–2026): {{cvt|2.607|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Formula Three]] || '''0:46.114'''<ref>{{cite web |title=2006 Buenos Aires Sud-Am F3 |url=https://www.motorsportmagazine.com/database/races/2006-buenos-aires-sud-am-f3/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=29 October 2006 |access-date=23 June 2022}}</ref> || [[Diego Nunes (racing driver)|Diego Nunes]] || [[List of Dallara cars|Dallara F301]] || [[2006 Buenos Aires Grand Prix Race 2|2006 Buenos Aires Grand Prix]]
+|-
+| [[Stock Car Pro Series|Stock Car Brasil]] || '''0.51.712'''<ref>{{cite web |title=2005 Brazilian Stock Car Championship Round 10: Buenos Aires, 29th October Race Result |url=http://www.dlg.speedfreaks.org/archive/2005/brzv8.html |date=29 October 2005 |access-date=17 July 2022}}</ref> || {{ill|Ruben Fontes|pt}} || [[Opel Astra#Stock Car Brazil|Chevrolet Astra]] || [[2005 Stock Car Brasil season|2005 Buenos Aires Stock Car Brasil round]]
+|-
+| [[TC2000 Championship|Súper TC2000]] || '''0:52.243'''<ref>{{cite web |title=2020 Súper TC 2000 Buenos Aires 4 (Race 2) |url=https://www.racingyears.com/race/2020%2520S%25C3%25BAper%2520TC%25202000%2520Buenos%2520Aires%25204%2520(Race%25202) |date=6 December 2020 |access-date=13 July 2022}}</ref> || [[Julián Santero]] || [[Toyota Corolla (E210)|Toyota Corolla Mk.12]] || [[2020 Súper TC 2000|2020 4th Buenos Aires Súper TC2000 round]]
+|-
+| [[Formula Renault#Formula Renault 2.0|Formula Renault 2.0]] || '''0:52.306'''<ref>{{cite web |title=Fórmula 2 Argentina – Fecha 8 - 2025 - Final |url=https://formula2.com.ar/fecha-8-2025/ |date=18 August 2024 |access-date=10 September 2025}}</ref> || [[Valentín Jara]] || [[Tito F4-A]] || [[2025 Fórmula 2 Argentina|2025 Buenos Aires Fórmula 2 Argentina round]]
+|-
+! colspan="5" | No.14 Circuit (1968–1971): {{cvt|6.122|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Group 7 (motorsport)#Group 7 two-seater racing cars (1966 to 1975)|Group 7]] || '''1:50.230'''<ref name="buenos_aires_1000km_1971">{{cite web |title=XVIII Buenos Aires 1000 kms |url=https://www.racingyears.com/race/XVIII%2520Buenos%2520Aires%25201000%2520kms |date=10 January 1971 |access-date=5 December 2022}}</ref> || [[Chris Craft (racing driver)|Chris Craft]] || [[McLaren M8A#M8C|McLaren M8C]] || [[1971 1000 km Buenos Aires]]
+|-
+| [[Group 5 (motorsport)#2nd Generation Group 5 - "Sports Cars" (1970 to 1971)|Group 5]] || '''1:51.080'''<ref name="buenos_aires_1000km_1971"/> || [[Gérard Larrousse]] || [[Porsche 917#1971|Porsche 917K]] || [[1971 1000 km Buenos Aires]]
+|-
+! colspan="5" | No.2 Circuit (1952–1971): {{cvt|3.912|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Formula One]] || '''1:36.100''' || [[Stirling Moss]] || [[Cooper T51]] || [[1960 Argentine Grand Prix]]
+|-
+| [[Formula Three]] || '''1:38.700'''<ref>{{cite web |title=1967 Buenos Aires Temporada |url=https://www.motorsportmagazine.com/database/races/1967-buenos-aires-temporada/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=22 January 1967 |access-date=14 July 2022}}</ref> || [[Jean-Pierre Beltoise]] || [[Matra MS5]] || [[1967 Buenos Aires Grand Prix]]
+|-
+| [[Formula Junior]] || '''1:43.100'''<ref>{{cite web |title=1964 Buenos Aires Temporada - Round 1 |url=https://www.motorsportmagazine.com/database/races/1964-buenos-aires-temporada-2/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=16 February 1964 |access-date=14 July 2022}}</ref> || [[Alberico Passadore (racing driver)|Alberico Passadore]] || [[Lotus 27]] || [[1964 Buenos Aires Grand Prix]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|500cc]] || '''1:47.000''' || [[Mike Hailwood]] || [[MV Agusta 500 racers#MV Agusta 500 4C 1950–1966|MV Agusta 500]] || {{ill|1963 Argentine motorcycle Grand Prix|it|Gran Premio motociclistico d'Argentina 1963}}
+|-
+| [[Formula Two]] || '''1:48.400''' || [[Alberto Ascari]] || [[Ferrari Tipo 500]] || [[1953 Argentine Grand Prix]]
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|250cc]] || '''1:48.600''' || [[Tom Phillis]] || [[Honda RC162]] || {{ill|1961 Argentine motorcycle Grand Prix|it|Gran Premio motociclistico d'Argentina 1961}}
+|-
+| [[Sports car racing]] || '''1:59.300'''<ref>{{cite web |title=National Buenos Aires 1953 |url=https://www.racingsportscars.com/race/Buenos_Aires-1953-02-01-6073.html |date=1 February 1953 |access-date=5 December 2022}}</ref> || [[José M. Collazo]] || [[Ferrari 225 S|Ferrari 225 S Berlinetta]] || 1953 Buenos Aires National race
+|-
+! colspan="5" | No.1 Circuit (1952–1971): {{cvt|2.620|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|500cc]] || '''1:17.700''' || [[Benedicto Caldarella]] || [[Matchless G50]] || {{ill|1962 Argentine motorcycle Grand Prix|it|Gran Premio motociclistico d'Argentina 1962}}
+|-
+! colspan="5" | No.10 Circuit (1952–1971): {{cvt|3.140|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Grand Prix motorcycle racing#Pre-MotoGP era|125cc]] || '''1:22.100''' || [[Tom Phillis]] || [[Honda RC143#2RC143|Honda 2RC143]] || {{ill|1961 Argentine motorcycle Grand Prix|it|Gran Premio motociclistico d'Argentina 1961}}
+|-
+! colspan="5" | No.4 Circuit (1952–1971): {{cvt|4.706|km|mi|abbr=on}}<ref name="buenos_aires_rcircuits"/>
+|-
+| [[Formula Two]] || '''1:49.300'''<ref>{{cite web |title=1968 Buenos Aires Temporada - Round 4 |url=https://www.motorsportmagazine.com/database/races/1968-buenos-aires-temporada-2/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=22 December 1968 |access-date=14 July 2022}}</ref> || [[Ernesto Brambilla]] || [[Ferrari Dino 166 F2]] || [[Buenos Aires Grand Prix (motor racing)#Results|1968 Gran Premio Argentine Airlines]]
+|-
+| [[Formula Junior]] || '''2:16.100'''<ref>{{cite web |title=1964 Buenos Aires Temporada - Round 1 |url=https://www.motorsportmagazine.com/database/races/1964-buenos-aires-temporada-2/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=16 February 1964 |access-date=14 July 2022}}</ref> || [[Silvio Moser]] || [[List of Brabham racing cars|Brabham BT6]] || [[Buenos Aires Grand Prix (motor racing)#Results|1964 Gran Premio Internacional ACA]]
+|-
+| [[Formula One]] || '''2:19.500'''<ref>{{cite web |title=1955 Buenos Aires Grand Prix |url=https://www.motorsportmagazine.com/database/races/1955-buenos-aires-grand-prix/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |date=30 January 1955 |access-date=14 July 2022}}</ref> || [[Stirling Moss]]{{efn|name=Buenos Aires GP 1955|Both drivers took the same lap time in this race independently.}}<br />[[Giuseppe Farina]]{{efn|name=Buenos Aires GP 1955|Both drivers took the same lap time in this race independently.}} || [[Mercedes-Benz W196]]{{efn|name=Buenos Aires GP 1955|Both drivers took the same lap time in this race independently.}}<br />[[Ferrari Tipo 500#625 F1|Ferrari 625 F1]]{{efn|name=Buenos Aires GP 1955|Both drivers took the same lap time in this race independently.}} || [[1955 Buenos Aires Grand Prix]]
+|-
+! colspan="5" | Buenos Aires 1000&nbsp;km Circuit (1955): {{cvt|17.136|km|mi|abbr=on}}
+|-
+| [[Sports car racing]] || '''6:06.100'''<ref name="buenos_aires_1000km_1955">{{cite web |title=1000 km Buenos Aires 1955 |url=https://www.racingsportscars.com/race/Buenos_Aires-1955-01-23-2309.html |date=23 January 1955 |access-date=5 December 2022}}</ref> || [[José Froilán González]] || [[Ferrari 376 S#Racing|Ferrari 118 LM]] || [[1955 1000 km Buenos Aires]] 
+|-
+| [[Turismo Carretera]] || '''7:16.600'''<ref name="buenos_aires_1000km_1955"/> || [[Pablo Birger]] || [[Ford Cupé V-8|Ford V-8]] || [[1955 1000 km Buenos Aires]] 
+|-
+! colspan="5" | Buenos Aires 1000&nbsp;km Circuit (1954, 1956, 1958, 1960): {{cvt|9.476|km|mi|abbr=on}}
+|-
+| [[Sports car racing]] || '''3:22.400'''<ref>{{cite web |title=1000 km Buenos Aires 1960 |url=https://www.racingsportscars.com/race/Buenos_Aires-1960-01-31-2345.html |date=31 January 1960 |access-date=5 December 2022}}</ref> || [[Richie Ginther]] || [[Ferrari 250 Testa Rossa#1960: TR60 and TRI60|Ferrari 250 TR 59/60 Fantuzzi Spyder]] || [[1960 1000 km Buenos Aires]]
+|-
+|}
+
+==Concerts==
+The 2007, 2008, 2010 and 2011 [[Creamfields BA|Creamfields]] editions were held in the track, [[The Chemical Brothers]], [[Carl Cox]], [[John Digweed]], [[LCD Soundsystem]], James Zabiela, [[2 Many DJs]], [[Tiefschwarz]], [[Steve Lawler (DJ)|Steve Lawler]], [[Satoshi Tomiie]], [[Booka Shade]], [[Deadmau5]], [[David Guetta]], [[Calvin Harris]], among others playing here.
+
+==Notes==
+{{Notelist}}
+
+==References==
+{{Reflist}}
+
+==External links==
+{{Commons category}}
+* {{Official website}}
+* [https://maps.google.com/maps?f=q&hl=en&q=buenos+aires+argentina&ie=UTF8&z=16&ll=-34.694274,-58.459346&spn=0.012314,0.024247&t=k&om=0 Aerial photo (Google Maps)]
+
+{{navboxes
+|titlestyle = background:#ccccff
+|list       =
+{{MotoGP circuits}}
+{{TC 2000 circuits}}
+{{Turismo Carretera circuits}}
+{{Formula One circuits}}
+{{TCR South America circuits}}
+{{Stock Car Brasil circuits}}
+{{Copa Truck circuits}}
+{{Fórmula Truck circuits}}
+{{World Sportscar Championship circuits}}
+{{Buenos Aires landmarks}}
+}}
+{{Authority control}}
+{{Portal bar|Argentina}}
+
+{{DEFAULTSORT:Autodromo Oscar y Juan Galvez}}
+[[Category:Argentine Grand Prix]]
+[[Category:Buenos Aires Grand Prix| ]]
+[[Category:Formula One circuits|Oscar y Juan Galvez]]
+[[Category:Grand Prix motorcycle circuits|Oscar y Juan Galvez]]
+[[Category:World Sportscar Championship circuits]]
+[[Category:Sports venues in Buenos Aires]]
+[[Category:Sports venues completed in 1952]]
+[[Category:Motorsport venues in Buenos Aires]]
+[[Category:FIA Grade 4 circuit]]

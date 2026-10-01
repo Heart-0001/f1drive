@@ -1,0 +1,568 @@
+{{Referencias adicionales|t=20201114031838}}
+{{Ficha de circuito de carreras
+|nombre           = {{bandera|ARG}} Autódromo Oscar y Juan Gálvez
+|imagen           = [[Archivo:Autódromo Oscar y Juan Gálvez Detalles.svg|270px]]
+|tamaño de imagen = 
+|pie de imagen    =
+|sitio_web        = [https://www.ciudadautodromo.com/ www.ciudadautodromo.com]
+|ubicación        = [[Buenos Aires]], {{Bandera2|Argentina}}
+|longitud km      = 4,259
+|curvas           = 15
+<!--
+|eventos          = [[Turismo Carretera]]<br>[[Súper TC 2000]]<br> [[TC 2000 (2012-)|TC 2000]]<br>[[Top Race]]<br>[[Track Fest]]<br>[[Campeonato Mundial de Motociclismo]]<br> [[Fórmula 1]]
+-->
+<!-- estadísticas -->
+|Record_driver    = 
+|Record_team      = -
+|Record_year      = 
+}}
+
+El '''Autódromo [[Oscar Alfredo Gálvez|Oscar]] y [[Juan Gálvez (piloto)|Juan Gálvez]]''',<ref>{{Cita web|url=https://www.clarin.com/deportes/fangio-circuit-llamara-renovado-autodromo-buenos-aires_0_lB8utYgL4m.html|título="Fangio Circuit": así se llamará el renovado Autódromo de Buenos Aires|fechaacceso=2026-08-21|apellido=Clarín|nombre=Redacción|fecha=2026-08-20|sitioweb=Clarín|idioma=es}}</ref> anteriormente '''Autódromo 17 de Octubre''', '''Autódromo Municipal''' y '''Autódromo Oscar Alfredo Gálvez''', es un [[autódromo]] ubicado en el barrio de [[Villa Riachuelo]], en la [[Comuna 8 (Ciudad de Buenos Aires)|Comuna 8]] de la [[Ciudad Autónoma de Buenos Aires]] ([[Argentina]]). Fue inaugurado en 1952, gracias a la iniciativa de varios corredores argentinos entre los que se encontraba [[Juan Manuel Fangio]]. Debe su nombre a los [[Hermanos Gálvez]], ídolos de las décadas de los años 40, 50 y 60 del [[Turismo Carretera]], quienes dominaran gran parte de la década del 50, cosechando 14 títulos que fueron repartidos entre 5 para [[Oscar Alfredo Gálvez]] (el mayor) y 9 para [[Juan Gálvez (piloto)|Juan Gálvez]] (el menor).
+
+Debido a su infraestructura es conocida como la ''Catedral del Automovilismo Argentino'' y el ''Coliseo Porteño''. Fue sede en veinte oportunidades del [[Gran Premio de Argentina]] de [[Fórmula 1]], así como del [[Gran Premio de Argentina de Motociclismo]], del cual se disputó 10 veces. Otra carrera memorable que se llevó a cabo en 9 ediciones fueron los [[1000 km de la Ciudad de Buenos Aires|1000 km de Buenos Aires]], que se disputaron entre 1954 y 1972.
+
+El escenario recibe frecuentemente a las principales categorías argentinas de automovilismo de velocidad, tales como el [[Turismo Carretera]], [[Turismo Competición 2000|TC 2000]], [[Top Race]] y [[Turismo Nacional]], demás de competencias de motociclismo y zonales. También es utilizado como pista de 1/4 de milla, separado en dos pistas con categorías.
+
+El circuito no siempre fue conocido por su nombre actual, ya que en su año inauguración fue bautizado como '''Autódromo 17 de Octubre''', como homenaje a la fecha del Día de la lealtad Peronista. Tras la llegada del golpe de Estado de la [[Revolución Libertadora (Argentina)]] en 1955, que implicó la proscripción del peronismo y la prohibición de todos sus símbolos, el autódromo fue rebautizado como '''Autódromo Municipal'''.<ref name=":0">{{Cita web|url=https://www.diarioeltiempo.com.ar/nota-a-70-anos-del-nacimiento-del-autodromo-oscar-y-juan-galvez-184166|título=A 70 años del nacimiento del autódromo Oscar y Juan Gálvez|fechaacceso=2025-01-17|apellido=Tiempo|nombre=Diario El|sitioweb=www.diarioeltiempo.com.ar}}</ref><ref name=":1">{{Cita publicación|url=https://www.senado.gob.ar/parlamentario/parlamentaria/395887/downloadPdf|título=(S-3624/17) PROYECTO DE DECLARACION|apellidos=Pereyra|nombre=Guillermo J.|fecha=2017|publicación=}}</ref>
+
+Debido al fallecimiento del excampeón de [[Turismo Carretera]], [[Oscar Alfredo Gálvez]], el 16 de diciembre de 1989, el autódromo fue bautizado con su nombre en homenaje por su fallecimiento. Al nombre impuesto en 1989, finalmente se le adosaría sobre finales de 2005 el del hermano del homenajeado, el también excampeón de TC [[Juan Gálvez (piloto)|Juan Gálvez]], máximo monarca de la especialidad, dándole el nombre definitivo con el cual hoy es conocido el circuito.<ref>{{Enlace roto|1=[http://gpcars.com.ar/turismo-carretera/el-autodromo-de-buenos-aires-cumple-60-anos/ el Autódromo Oscar Alfredo y Juan Gálvez cumple 60 años] |2=http://gpcars.com.ar/turismo-carretera/el-autodromo-de-buenos-aires-cumple-60-anos/ |bot=InternetArchiveBot }}</ref>
+
+Las hinchadas de las cuatro marcas del Turismo Carretera se identifican con el número de la tribuna que suelen colmar: [[Ford Motor Company|Ford]] en la 4, [[Dodge]] en la 7, [[Chevrolet]] en la 15, y [[IKA-Renault Torino|Torino]] en la 16.<ref>[https://www.infobae.com/deportes/2021/03/07/emocion-banderas-y-otra-vez-cuatro-hinchadas-juntas-como-fue-la-vuelta-del-publico-al-turismo-carretera-y-el-gran-triunfo-de-jose-manuel-urcera/ Emoción, banderas y otra vez cuatro hinchadas juntas: cómo fue la vuelta del público al Turismo Carretera y el gran triunfo de José Manuel Urcera] - Darío Coronel, Infobae, 7 de marzo de 2021</ref>
+
+== Historia ==
+[[Archivo:Autodromo Buenos Aires.jpg|miniatura|izquierda|300px|Vista del autódromo de Buenos Aires.]]
+El autódromo fue construido por iniciativa de varios corredores argentinos, entre los que se encontraba Bucci y el ganador del [[Campeonato Mundial de Fórmula 1]] de 1951, [[Juan Manuel Fangio]]. Ante el desarrollo del automovilismo argentino, el gobierno del Presidente [[Juan Domingo Perón]] decidió construir el autódromo en el sur de la [[Ciudad de Buenos Aires]], en un predio de más de 200 ha, en el barrio de [[Villa Riachuelo]]. El autódromo fue inaugurado por el intendente [[Jorge Sabaté]]<ref>[http://www.pagina12.com.ar/diario/suplementos/m2/10-1768-2009-12-27.html Un arquitecto para Eva] Suplemento "M2" del diario "Página/12", 27/12/2009</ref> el 9 de marzo de 1952, bajo el nombre de '''Autódromo 17 de Octubre''', en honor al [[Día de la Lealtad|Día de la Lealtad peronista]].
+
+Para la inauguración fueron organizadas tres pruebas, pero la más importante fue la realización de la ''Copa Perón'' en la modalidad Fórmula Libre, ganada por [[Juan Manuel Fangio]]. Fangio tardó 1:17.19.230 h para cubrir las 30 vueltas del circuito 4 del autódromo, al mando de una Ferrari 166FL. En segundo lugar llegó [[Froilán González]] con su Ferrari 166C y tercero el brasileño [[Francisco Landi]] en su Ferrari 125C.
+
+En 1953 se corrió allí el primer [[Gran Premio de Argentina]], la primera competencia fuera de [[Europa]], ganado en esa ocasión por el piloto italiano [[Alberto Ascari]], que corría para la escudería [[Scuderia Ferrari]]. El corredor argentino [[Juan Manuel Fangio]] tuvo que abandonar en la vuelta 36 cuando falló la transmisión de su [[Maserati en Fórmula 1|Maserati]]. Durante esa carrera ocurrió un accidente que se cobró la vida de 9 personas.
+
+=== Los primeros años ===
+Por iniciativa conjunta entre el Automóvil Club Argentino y la Municipalidad de la Ciudad de Buenos Aires, el 9 de marzo de 1952, se inauguró el Autódromo 17 de Octubre, siendo portada de las principales revistas deportivas.
+
+El presidente de entonces, [[Juan Domingo Perón]], decidió que un Campeón del mundo de Fórmula 1, como [[Juan Manuel Fangio]] debía correr, precisamente en su país, como habitualmente lo hacía en los circuitos de Europa y no por los tradicionales trazados callejeros de Palermo, Retiro o Mar del Plata, donde se desarrollaban las famosas temporadas de aquella época. Se modificaron algunos sectores de la pista como la S del Ciervo y dos chicanas, convirtiéndose definitivamente, en uno de los más seguros del mundo. Concebido a lo grande, con la mejor infraestructura de la época, el Autódromo fue una de las obras más importantes de la arquitectura deportiva moderna. En el diseño original, el Autódromo presentaba diez circuitos alternativos.
+
+Más allá de los resultados, el objetivo era mejorar y ubicarse dentro de los mejores del mundo, misión ampliamente cumplida, considerando la envergadura de la obra que permaneció sin cambios por más de 15 años (no así su nombre que fue modificado por el de “Autódromo Municipal” tras instalarse en el poder la dictadura autodenominada [[Revolución Libertadora (Argentina)|Revolución Libertadora]] y desde 1989, fue bautizado definitivamente, “Oscar Alfredo Gálvez” quien fuera en cinco oportunidades campeón de [[Turismo Carretera]] (TC) y el primer volante argentino en vencer a corredores europeos.<ref name=":0" /><ref name=":1" /><ref>{{Cita web|url=https://www.infobae.com/deportes/2021/10/07/el-dia-que-oscar-galvez-lleno-el-autodromo-de-buenos-aires-sin-que-hubiese-una-carrera/#:~:text=Fue%20para%20rebautizar%20el%20circuito,una%20fiesta%20del%20automovilismo%20argentino|título=El día que Oscar Gálvez llenó el Autódromo de Buenos Aires sin que hubiese una carrera|fechaacceso=2025-01-17|apellido=Coronel|nombre=Darío|fecha=2021-10-07|sitioweb=infobae|idioma=es-ES}}</ref>
+
+A pesar de que durante estos últimos 51 años, el automovilismo y el motociclismo deportivo crecieron a pasos agigantados, no ocurrió lo mismo con el aspecto edilicio y de seguridad, que obviamente sufrieron menores variantes.
+
+=== Los últimos años ===
+El Autódromo entró durante la década de 1990 dentro del proyecto de reestructuración del Estado, fue privatizado. La empresa D'Port Motor {{ord|3.|er}} Milenio S.A., conformada por dirigentes del automovilismo local y empresarios del motociclismo, se hizo cargo de la concesión y volvieron las carreras internacionales con espectáculos de Fórmula 3000, el Continental Circus y durante cuatro años entre 1995 y 1998 la Fórmula 1. 
+
+En 1994 se firmó un contrato con la empresa Gran Premio de la República Argentina S.A., la cual transfirió su conocimiento al gerenciador ACBA S.A (Autódromo de la Ciudad de Buenos Aires S.A) para la realización de los grandes premios de Fórmula 1, y así se organizaron los Grandes Premios de la República Argentina desde 1995 hasta 1998. Fueron necesarias grandes inversiones de infraestructura: boxes, sala de prensa, torre de control, 3 bandejas de talud, tribuna horquilla, edificios corporativos y repavimentación completa de los circuitos. El Autódromo de Buenos Aires se convirtió en uno de los más grandes de Sudamérica, habiendo recibido en el mes de diciembre de 2004 la categorización clase A, según normas de la C.D.A. del A.C.A.
+
+En abril de 2003 se produce el fallecimiento del titular de D'Port Motor {{ord|3.|er}} Milenio S.A. y la concesión pasa por un momento de transición hasta abril de 2005 cuando se inicia una nueva gestión, a cargo de ACBA S.A con un programa de mejoras e inversiones que no fue tal, producto de una mala administración y absoluto desconocimiento del deporte motor. La concesión estuvo vigente hasta abril de 2015. Esta empresa privada se ocupó desde entonces en explotar un bien del Estado y por ende de todos los argentinos y cobrar a los distintos clubes de automovilismo que intentan utilizar las instalaciones en la actividad para la que fue creado. Les cobraban sumas siderales que impiden el desarrollo del automovilismo en este lugar.
+
+En 2015 el macrismo presentó un proyecto en el encuentro de la Comisión de Planeamiento Urbano de la Legislatura para demoler el autódromo Oscar Alfredo Gálvez del barrio de Villa Riachuelo y allí construir una planta de tratamiento de residuos.<ref>http://www.infobae.com/2013/10/09/1514760-polemica-el-pro-quiere-demoler-el-autodromo-instalar-una-planta-procesadora-residuos</ref> Meses después el [[PRO]], partido gobernante de la Ciudad de Buenos Aires presentó un proyecto para reformarlo y cederlo el autódromo en concesión a empresas privadas por 30 años.<ref>{{Cita web |url=http://www.larazon.com.ar/ciudad/Avanza-proyecto-transformar-Autodromo_0_725100055.html |título=Copia archivada |fechaacceso=26 de octubre de 2015 |urlarchivo=https://web.archive.org/web/20151019173229/http://www.larazon.com.ar/ciudad/Avanza-proyecto-transformar-Autodromo_0_725100055.html |fechaarchivo=19 de octubre de 2015 }}</ref> También es el escenario del mayor evento de autos multimarca de América llamado SRS (Street Racing Shell) que reúne más de doce mil personas por fecha y alrededor de cuatro mil autos.
+
+Finalmente en septiembre de 2016 un grupo de automovilistas reunidos bajo la tutela de la Asociación Argentina de Volantes, presidida por Juan María Traverso, comienza a encarar en conjunto con el Gobierno de la Ciudad de Buenos Aires un proyecto de "Puesta en Valor" del coloso porteño. Esto, decantó en mini obras y arreglos menores de pinturas, siendo finalmente una lavada de cara que no mejoró el estado de infraestructura en el que se encuentra el Coliseo Porteño.{{Cita requerida}}
+
+=== Renovación ===
+En 2024, con la llegada de [[Franco Colapinto]] a la [[Fórmula 1]] resurgió la idea de que la máxima categoría vuelva a la Argentina. Ante esto, el Secretario de Turismo [[Daniel Scioli]] se reunió con autoridades de la Fórmula 1, donde el circuito más probable para desarrollar el Gran Premio es el Autódromo de la Ciudad de Buenos Aires.<ref>{{Cita web|url=https://www.clarin.com/deportes/efecto-colapinto-scioli-junto-ceo-formula-1-puso-fecha-traer-vez-categoria-argentina_0_gjpkp0MLQo.html|título=Efecto Colapinto: Scioli se juntó con el CEO de la Fórmula 1 y puso fecha para traer otra vez a la categoría a la Argentina|fechaacceso=2024-11-02|apellido=Faija|nombre=Sabrina|fecha=2024-11-01|sitioweb=Clarín|idioma=es}}</ref>
+
+Finalmente, en marzo de 2025 y en el marco de la apertura de sesiones ordinarias de la [[Legislatura de la Ciudad Autónoma de Buenos Aires]], el [[Jefe de Gobierno de la ciudad de Buenos Aires|Jefe de Gobierno porteño]] [[Jorge Macri]] anunció que la ciudad estaba lista para comenzar con las obras de renovación del autódromo bajo las normas de la [[Federación Internacional del Automóvil|Federación Internacional del Automóvil (FIA)]] con el objetivo de recibir a las dos máximas categorías del automovilismo mundial: la [[Fórmula 1]] y la [[MotoGP]] en 2027<ref>{{Cita web|url=https://campeones.com.ar/la-ciudad-de-buenos-aires-apunta-a-tener-la-formula-1-y-el-motogp/|título=El Gobierno de la Ciudad de Bs.As. ratificó la intención de traer la F1 y el MotoGP|fechaacceso=2026-03-11|apellido=Acosta|nombre=Gino Nicolás|fecha=2025-03-04|sitioweb=Campeones|idioma=es}}</ref>
+
+La idea es una renovación de la pista y de las instalaciones, con nuevos trazados pero conservando lugares históricos, como el Circuito 12.<ref name="dup-0-59">{{Cita web|url=https://campeones.com.ar/que-pasara-con-los-circuitos-del-galvez-la-respuesta-del-gobierno-de-caba/|título=¿Qué pasará con los circuitos del "Gálvez"? La respuesta del Gobierno de CABA|fechaacceso=2026-03-11|apellido=Acosta|nombre=Gino Nicolás|fecha=2025-07-21|sitioweb=Campeones|idioma=es}}</ref><ref>{{Cita web|url=https://campeones.com.ar/exclusivo-fabian-turnes-aclaro-que-el-12-de-buenos-aires-no-se-toca/|título=EXCLUSIVO: Fabián Turnes aclaró que "el '12' de Buenos Aires no se toca"|fechaacceso=2026-03-11|apellido=Campeones|nombre=Redacción|fecha=2025-07-23|sitioweb=Campeones|idioma=es}}</ref>
+
+El 13 de noviembre se abrió la licitación tanto de las obras propias del autódromo como para el montaje del nuevo [[Circuito callejero de la Ciudad de Buenos Aires]] en inmediaciones del mismo.<ref>{{Cita web|url=https://campeones.com.ar/el-autodromo-galvez-se-prepara-para-las-obras/|título=El autódromo Gálvez se prepara para las obras|fechaacceso=2026-03-11|apellido=Cinti|nombre=Iván|fecha=2025-12-22|sitioweb=Campeones|idioma=es}}</ref>
+
+Mientras que el 19 de enero de 2026 comenzó la primera fase de las obras, que implicó la demolición del sector de boxes, y semanas después, el inicio de la reformulación de la pista, con la controversia de que las obras contemplan la demolición de la Tribuna 15, identificada con los [[Hinchada|Hinchas]] de [[Chevrolet]].<ref>{{Cita web|url=https://campeones.com.ar/obras-de-remodelacion-en-el-autodromo-de-buenos-aires-oscar-y-juan-galvez/|título=Obras de remodelación en el Autódromo de Buenos Aires Oscar y Juan Gálvez|fechaacceso=2026-03-11|apellido=Dominico|nombre=Jorge|fecha=2026-02-26|sitioweb=Campeones|idioma=es}}</ref>
+
+== Circuitos ==
+El autódromo hasta 2025 contaba con varios trazados:
+* '''Circuito N.º&nbsp;5''' (2.196 metros): Circuito histórico, se continúa utilizando hoy en día en categorías zonales. Se eliminó a la salida de la horquilla la Islita, y se conecta la curva 1 con el Tobogán a través de una pequeña viborita, conocida popularmente como la Curva de los Giles o Curva de los Tontos. <u>''Recorrido'': Recta principal, Curva 1, Curva de los Tontos, Tobogán, Horquilla Parga</u>.<ref>{{cita web |url=https://v8project.com.ar/2017/04/06/g-cars-por-los-tontos-y-el-tobogan/ |título=G-Cars por "Los Tontos y "El Tobogán" |sitioweb=V8 Project |fecha=6 de abril de 2017}}</ref>
+* '''Circuito N.º&nbsp;6''' (4.259,45 metros) Es muy utilizado por categorías intermedias. Cuenta con una parte rápida y con una trabada. Se destaca la Curva de la Viborita, el Ombu y la Bajada del Tobogán. Sus medidas anteriores con subida del tobogan era de 4.208,22 metros, antes con la llegada de la Fórmula 1 Internacional en los años 1995 a 1998, Fórmula 3 Sudamericana años 1995 y 1996, Fórmula Honda año 1997 y Copa de las Naciones año 1997 con horquilla corta, 4350 metros pasaría con su ampliación a 49̟42 metros con bajada del tobogan. <u>''Recorrido'': Recta principal, Curva 1, Curva de la Confitería, Curva 8, Recta Opuesta, retome de la Chicana de Ascari, Entrada a los Mixtos, Vivorita, Curvas del Ombu y del Cajon, Tobogán, Horquilla Parga</u>.
+* '''Circuito N.º&nbsp;7''' (2.607 metros): Extremadamente veloz, se continúa utilizando hoy en día en categorías zonales. En 2017 fue utilizado por el Top Race. Sus medidas anteriores eran de 2.640.85 metros (2.649 metros).<u>''Recorrido'': Recta principal, Curvón del Ciervo, Recta Opuesta, retome de la Chicana de Ascari, Recta de la Horquilla, Horquilla Parga</u>.
+* '''Circuito N.º&nbsp;8''' (3.337,30 metros): Cuenta con una parte rápida y con una trabada. Se utilizó dos veces para los [[200 km de TC 2000]] y una vez para la Carrera de los 200 Pilotos del [[Turismo Nacional]] su anterior median 3.435,41 metros con horquilla larga y 3.380 metros con horquilla corta.<u>''Recorrido'': Recta principal, Curva 1, Curva de la confitería, Curva 8, Recta Opuesta, retome de la Chicana de Ascari, Recta de la Horquilla, Horquilla Parga</u>.
+* '''Circuito N.º&nbsp;9''' (3.353 metros): Similar al Circuito 6, se utilizó en el Gran Premio de Argentina de Fórmula 1 durante la década de 1970. Es un circuito muy trabado. Se destaca la curva de Ascari y la S de Senna construida especialmente para el Gran Premio. Sus otras medidas eran (3.345,50 metros) (3.417,70 metros) y (3.413,66 metros).<u>''Recorrido'': Recta principal, Curva 1, Curva de la confitería, Curva 8, Recta Opuesta, retome de la Chicana de Ascari, Entrada a los Mixtos, Vivorita, Curvas del Ombu y del Cajon, S de Senna, Horquilla Parga</u>.
+* '''Circuito N.º&nbsp;12''' (5.651 metros): Es el escenario que utiliza el Turismo Carretera, y en el 2010 lo utilizaron también el [[Top Race]], el [[Turismo Competición 2000|TC 2000]] para los [[200 km de Buenos Aires]]. Cuenta con tres largas rectas, el curvón Salotto, la Ese del Siervo y la chicana de Ascari. La Ese del Siervo original se volvió a usar en la última carrera de Turismo Carretera. Sus medidas anteriores eran: (5.240,10 metros) y (5.641,62 metros).<u>''Recorrido'': Recta principal, S del Ciervo con o sin chicana, Recta del Fondo, Curvón Salotto, Recta del lago, Chicana de Ascari, Recta de la Horquilla, Horquilla Parga  ahora con la ampliación pasaría a medir 6.073 metros.</u>
+* '''Circuito N.º&nbsp;15''' (5.948 metros): Era utilizada para la realización del Gran Premio de Fórmula 1 entre los años 1974 al 1981 (5.968.20 metros) (5.958 metros). El trazado es igual al n.º&nbsp;12 pero utilizando la zona de los mixtos, donde se encuentran la Curva de la Viborita, el Ombu y la Bajada del Tobogán. Fue utilizado por última vez en 2017 por el STC2000. En Sport Prototipos del Campeonato del Mundo media 6.122 metros. Sus anteriores medidas eran de 5.968,20 metros y 5.958 metros. <u>''Recorrido'': Recta principal, S del Ciervo, Recta del Fondo, Curvón Salotto, Recta del Lago, Chicana de Ascari, Entrada a los Mixtos, Vivorita, Curvas del Ombu y del Cajon, Tobogán, Horquilla Parga</u>.
+* '''Circuito N.°18''' Era utilizado por categorías zonales, Ej Fórmula 07. Se gira en sentido contrario al actual, subiendo el tobogan, transitando el ombu, el cajon, la vivorita, la curva de entrada al 9, todos estos sectores a contramano de su sentido habitual de giro, para utilizar la recta que lleva hacia la horquilla, pero solo hasta la altura del tobogan, para subirlo y completar la vuelta. <u>''Recorrido'': Recta de la Horquilla, Tobogan, Curvas del Ombú y del Cajón, Vivorita, Entrada a los Mixtos mediria 2850 metros aproximadamente con su ampliación va a medir 3272 metros.</u>
+
+<gallery>
+Archivo:Autódromo Oscar y Juan Gálvez Circuito N° 5.svg| Circuito N.º&nbsp;5
+Archivo:Autódromo Oscar y Juan Gálvez Circuito N° 6.svg| Circuito N.º&nbsp;6
+Archivo:Autódromo Oscar y Juan Gálvez Circuito N° 7.svg| Circuito N.º&nbsp;7
+Archivo:Autódromo Oscar y Juan Gálvez Circuito N° 8.svg| Circuito N.º&nbsp;8
+Archivo:Autódromo Oscar y Juan Gálvez Circuito N° 9.svg| Circuito N.º&nbsp;9
+Archivo:Autódromo Oscar y Juan Gálvez Circuito N° 12.svg| Circuito N.º&nbsp;12
+Archivo:Autódromo Oscar y Juan Gálvez Circuito N° 15.svg| Circuito N.º&nbsp;15
+</gallery>
+
+Con las obras iniciadas en 2026, estos circuitos quedarían deshabilitados, siendo el histórico Circuito 12 el que sobreviviría, pero con la supresión de la "S del Ciervo"<ref name="dup-0-59" />
+
+Anteriormente existía una segunda horquilla, donde ahora se ubica el kartódromo, al que correspondían los siguientes trazados.
+* '''Circuito N.º&nbsp;1''' (3.139,55 metros): Era igual al trazado n.º 7, pero con la horquilla larga. Éste fue el circuito que utilizó el turismo carretera hasta finales de la década del 60, cuando se inaugura el trazado n.º&nbsp;12.<ref>[https://campeones.com.ar/la-primera-vez-del-tc-en-el-autodromo/ La primera vez del TC en el Autódromo] - Miguel Paez, Campeones Media, 24 de mayo de 2022</ref><u>''Recorrido'': Recta principal, Curvón del Ciervo, Recta Opuesta, retome de la Chicana de Ascari, Recta de la Horquilla, Horquilla Larga</u>.
+* '''Circuito N.º&nbsp;2''' (3.912,36 metros): Era igual al trazado n.º&nbsp;9.<u>''Recorrido'': Recta principal, Curvón del Ciervo, Recta Opuesta, retome de la Chicana de Ascari, Ingreso a los Mixtos, Vivorita, Curvas del Cajón y del Ombú, Tobogán, Recta de la Horquilla, Horquilla Larga</u>
+* '''Circuito N.º&nbsp;3''' (3.929 metros con horquilla corta) (3.984 metros con horquilla larga): Era igual al trazado n.º&nbsp;8. <u>''Recorrido'': Recta principal, Curva 1, Curva de la Confitería, Curva 8, Recta Opuesta, retome de la Chicana de Ascari, Recta de la Horquilla, Horquilla Larga</u>
+* '''Circuito N.º&nbsp;4''' (4.706 metros): Era igual al trazado n.º&nbsp;6.  <u>''Recorrido'': Recta principal, Curva 1, Curva de la Confitería, Curva 8, Recta Opuesta, retome de la Chicana de Ascari, Ingreso a los Mixtos, Vivorita, Curvas del Cajón y del Ombú, Tobogán, Recta de la Horquilla, Horquilla Larga</u>
+* '''Circuito N.º&nbsp;10''' (2.620 metros): Era igual al trazado n.º&nbsp;5.<u>''Recorrido'': Recta principal, Curva 1, Curva de los Tontos, Tobogán, Horquilla Larga</u>.
+* '''Circuito N.º&nbsp;11''': (5.208,10 metros) Era igual al trazado n.º&nbsp;12. pero cuando no existía la chicana de la Curva de Ascari. <u>''Recorrido'': Recta principal, S del Ciervo, Recta del Fondo, Curvón Salotto, Recta del lago, Curva de Ascari, Recta de la Horquilla, Horquilla Larga</u>.
+* '''Circuito N.º&nbsp;14''' (6.218 metros): Era igual al trazado n.º&nbsp;15, cuando tampoco existía la chicana Ascari, y fue el trazado más largo del autódromo. <u>''Recorrido'': Recta principal, S del Ciervo, Recta del Fondo, Curvón Salotto, Recta del lago, Curva de Ascari, Ingreso a los Mixtos, Vivorita, Curvas del Cajón y del Ombú, Tobogán, Recta de la Horquilla, Horquilla Larga</u>
+* '''Circuito N.°17''' estaba emplazado, (en parte) donde hoy esta el kartodromo, Era utilizado por categorías zonales, Ej Fórmula 07, especialmente carreras nocturnas. se utilizaba la horquilla larga, un tramo de la recta principal sentido a boxes hasta pasar la islita que ya no esta, para retomar la misma a contramano al igual que la horquilla corta, retomando la recta hacia gral paz (horquilla larga) y completar la vuelta.
+
+El Circuito N.º&nbsp;13 no existe, por motivos cabalísticos.
+
+<gallery>
+Archivo:Buenos Aires 1954 1.png|Circuito N.º&nbsp;2
+Archivo:Circuit-galvez-1952-No3.png|Circuito N.º&nbsp;3
+Archivo:Autódromo Oscar y Juan Gálvez Circuito N° 4 (Histórico).svg|Circuito N.º&nbsp;4
+Archivo:Autódromo Oscar y Juan Gálvez Circuito N° 14 (Histórico).svg|Circuito N.º&nbsp;14
+</gallery>
+
+== Curvas y detalles ==
+* En marrón claro: Bancos de material suelto
+* En azul: Boxes
+* En magenta: Tribunas
+* En celeste: Lago
+* En gris claro: Kartódromo
+[[Archivo:Autódromo Oscar y Juan Gálvez Detalles.svg|800px]]
+* Sectores originales de 1951
+** Recta principal [[Juan Manuel Fangio]]:
+** Curva N.º&nbsp;1:
+** Curvón del Ciervo:
+** Curva de la Confitería
+** Curva N° 8
+** Recta Opuesta
+** Curva de acceso a la Recta de la Horquilla (posteriormente cumplió como retome de la Chicana de Ascari)
+** Recta de la Horquilla
+** Entrada a los mixtos:
+** La vivorita:
+** Curva del ombú:
+** Curva del cajón:
+** Tobogán [[Juan María Traverso]]
+** Horquilla larga (eliminada en 1995)
+** Horquilla Parga
+* Sectores agregados en 1952
+** S del Ciervo
+** Recta del fondo:
+** Curvón Salotto:
+** Recta del lago:
+** Curva de [[Alberto Ascari]] (suprimida en 1953 en favor de la Chicana homónima):
+* Sector agregado en 1995
+** S de [[Ayrton Senna]]
+* Sector agregado en 2000
+** Chicana de la S del Ciervo En el plano llaman curva del Cajón a la curva del Ombú y viceversa:
+
+== Ganadores ==
+
+=== [[Fórmula 1]] ===
+[[Archivo:1957ArgentineGP03.jpg|miniaturadeimagen|275x275px|Previa del comienzo del [[Anexo:Gran Premio de Argentina de 1957|Gran Premio de 1957]].]]
+{| class="wikitable"
+|- bgcolor="#EDEDED"
+! Año
+! Piloto
+! Constructor
+! Fecha
+! Resultados
+! Trazado
+|-
+! {{F1|1953}}
+| {{bandera|ITA}} [[Alberto Ascari]]
+| [[Scuderia Ferrari|Ferrari]]
+| 18 de enero
+| [[Gran Premio de Argentina de 1953|Resultados]]
+| Circuito n.º&nbsp;2
+|-
+! {{F1|1954}}
+| {{bandera|ARG}} [[Juan Manuel Fangio]]
+| [[Maserati en Fórmula 1|Maserati]]
+| 17 de enero
+| [[Gran Premio de Argentina de 1954|Resultados]]
+| Circuito n.º&nbsp;2
+|-
+! {{F1|1955}}
+| {{bandera|ARG}} [[Juan Manuel Fangio]]
+|[[Mercedes-Benz en Fórmula 1|Mercedes]]
+| 16 de enero
+| [[Gran Premio de Argentina de 1955|Resultados]]
+| Circuito n.º&nbsp;2
+|-
+! {{F1|1956}}
+| {{bandera|ARG}} [[Juan Manuel Fangio]]
+| [[Scuderia Ferrari|Ferrari]]
+| 22 de enero
+| [[Gran Premio de Argentina de 1956|Resultados]]
+| Circuito n.º&nbsp;2
+|-
+! {{F1|1957}}
+| {{bandera|ARG}} [[Juan Manuel Fangio]]
+| [[Maserati en Fórmula 1|Maserati]]
+| 13 de enero
+| [[Gran Premio de Argentina de 1957|Resultados]]
+| Circuito n.º&nbsp;2
+|-
+! {{F1|1958}}
+| {{bandera|GBR}} [[Stirling Moss]]
+| [[Cooper Car Company|Cooper]]-[[Coventry Climax|Climax]]
+| 19 de enero
+| [[Gran Premio de Argentina de 1958|Resultados]]
+| Circuito n.º&nbsp;2
+|-
+! {{F1|1960}}
+| {{bandera|NZL}} [[Bruce McLaren]]
+| [[Cooper Car Company|Cooper]]-[[Coventry Climax|Climax]]
+| 7 de febrero
+| [[Gran Premio de Argentina de 1960|Resultados]]
+| Circuito n.º&nbsp;2
+|-
+! {{F1|1972}}
+| {{bandera|GBR}} [[Jackie Stewart]]
+| [[Tyrrell Racing|Tyrrell]]-[[Ford Motor Company|Ford]]
+| 23 de enero
+| [[Gran Premio de Argentina de 1972|Resultados]]
+| Circuito n.º&nbsp;9
+|-
+! {{F1|1973}}
+| {{bandera|BRA}} [[Emerson Fittipaldi]]
+| [[Team Lotus|Lotus]]-[[Ford Motor Company|Ford]]
+| 28 de enero
+| [[Gran Premio de Argentina de 1973|Resultados]]
+| Circuito n.º&nbsp;9
+|-
+! {{F1|1974}}
+| {{bandera|NZL}} [[Denny Hulme]]
+| [[McLaren]]-[[Ford Motor Company|Ford]]
+| 13 de enero
+| [[Gran Premio de Argentina de 1974|Resultados]]
+| Circuito n.º&nbsp;15
+|-
+! {{F1|1975}}
+| {{bandera|BRA}} [[Emerson Fittipaldi]]
+| [[McLaren]]-[[Ford Motor Company|Ford]]
+| 12 de enero
+| [[Gran Premio de Argentina de 1975|Resultados]]
+| Circuito n.º&nbsp;15
+|-
+! {{F1|1977}}
+| {{bandera|RSA|1928}} [[Jody Scheckter]]
+| [[Walter Wolf Racing|Wolf]]-[[Ford Motor Company|Ford]]
+| 9 de enero
+| [[Gran Premio de Argentina de 1977|Resultados]]
+| Circuito n.º&nbsp;15
+|-
+! {{F1|1978}}
+| {{bandera|USA}} [[Mario Andretti]]
+| [[Team Lotus|Lotus]]-[[Ford Motor Company|Ford]]
+| 15 de enero
+| [[Gran Premio de Argentina de 1978|Resultados]]
+| Circuito n.º&nbsp;15
+|-
+! {{F1|1979}}
+| {{bandera|FRA}} [[Jacques Laffite]]
+| [[Equipe Ligier|Ligier]]-[[Ford Motor Company|Ford]]
+| 21 de enero
+| [[Gran Premio de Argentina de 1979|Resultados]]
+| Circuito n.º&nbsp;15
+|-
+! {{F1|1980}}
+| {{bandera|AUS}} [[Alan Jones]]
+| [[Williams Grand Prix Engineering|Williams]]-[[Ford Motor Company|Ford]]
+| 13 de enero
+| [[Gran Premio de Argentina de 1980|Resultados]]
+| Circuito n.º&nbsp;15
+|-
+! {{F1|1981}}
+| {{bandera|BRA}} [[Nelson Piquet]]
+| [[Brabham Racing Organisation|Brabham]]-[[Ford Motor Company|Ford]]
+| 12 de abril
+| [[Gran Premio de Argentina de 1981|Resultados]]
+| Circuito n.º&nbsp;15
+|-
+! {{F1|1995}}
+| {{bandera|GBR}} [[Damon Hill]]
+| [[Williams Grand Prix Engineering|Williams]]-[[Renault en Fórmula 1|Renault]]
+| 9 de abril
+| [[Gran Premio de Argentina de 1995|Resultados]]
+| Circuito n.º&nbsp;6
+|-
+! {{F1|1996}}
+| {{bandera|GBR}} [[Damon Hill]]
+| [[Williams Grand Prix Engineering|Williams]]-[[Renault en Fórmula 1|Renault]]
+| 7 de abril
+| [[Gran Premio de Argentina de 1996|Resultados]]
+| Circuito n.º&nbsp;6
+|-
+! {{F1|1997}}
+| {{bandera|CAN}} [[Jacques Villeneuve]]
+| [[Williams Grand Prix Engineering|Williams]]-[[Renault en Fórmula 1|Renault]]
+| 13 de abril
+| [[Gran Premio de Argentina de 1997|Resultados]]
+| Circuito n.º&nbsp;6
+|-
+! {{F1|1998}}
+| {{bandera|GER}} [[Michael Schumacher]]
+| [[Scuderia Ferrari|Ferrari]]
+| 12 de abril
+| [[Gran Premio de Argentina de 1998|Resultados]]
+| Circuito n.º&nbsp;6
+|}
+
+=== 2 Horas de Buenos Aires del [[Turismo Carretera]] ===
+
+{| class="wikitable"
+|-
+! Año
+!colspan=2| Pilotos
+! Automóvil
+|-
+! [[Anexo:Temporada 1993 de Turismo Carretera|1993]]
+| {{bandera|ARG}} [[Juan Antonio De Benedictis]]
+| {{bandera|ARG}} Mariano Calamante
+| [[Ford Falcon (Argentina)|Ford Falcon]]
+|-
+! [[Anexo:Temporada 1994 de Turismo Carretera|1994]]
+| {{bandera|ARG}} [[Fabián Acuña]]
+| {{bandera|ARG}} [[Guillermo Ortelli]]
+| [[Ford Falcon (Argentina)|Ford Falcon]]
+|-
+! [[Anexo:Temporada 1995 de Turismo Carretera|1995]]
+| {{bandera|ARG}} [[Juan María Traverso]]
+| {{bandera|ARG}} [[Miguel Ángel Guerra (piloto)|Miguel Ángel Guerra]]
+| [[Chevrolet Chevy]]
+|-
+! [[Anexo:Temporada 1996 de Turismo Carretera|1996]]
+| {{bandera|ARG}} [[Emilio Satriano]]
+| {{bandera|ARG}} [[Patricio Di Palma]]
+| [[Chevrolet Chevy]]
+|}
+
+=== 1000 km de Buenos Aires del [[Turismo Carretera]] ===
+
+{| class="wikitable"
+|-
+! Año
+!colspan=2| Pilotos
+! Automóvil
+|-
+! [[Anexo:Temporada 2017 de Turismo Carretera|2017]]
+| {{bandera|ARG}} [[Juan Manuel Silva]]
+| {{bandera|ARG}} [[Juan Catalán Magni]]
+| [[Ford Falcon (Argentina)|Ford Falcon]]
+|-
+! [[Anexo:Temporada 2018 de Turismo Carretera|2018]]
+| {{bandera|ARG}} [[Agustín Canapino]]
+| {{bandera|ARG}} [[Martin Ponte]] y [[Federico Alonso]]
+| [[Chevrolet Chevy]]
+|}
+
+=== 200 km de Buenos Aires del [[Súper TC 2000|TC2000]] ===
+{| class="wikitable"
+|-
+! Año
+!colspan=2| Pilotos
+! Automóvil
+! Equipo
+! Trazado
+! Resultados
+|-
+! [[Temporada 2004 de Turismo Competición 2000|2004]]
+| {{bandera|ARG}} [[Gabriel Ponce de León]] || {{bandera|ARG}} [[Patricio Di Palma]]
+| [[Ford Focus]]
+| [[Ford TC2000|Ford YPF Berta Motorsport]]
+| Circuito n.º&nbsp;9
+| [[Anexo:200 km de Buenos Aires 2004|2004]]
+|-
+! [[Temporada 2005 de Turismo Competición 2000|2005]]
+| {{bandera|ARG}} [[Diego Aventín]] || {{bandera|Brasil}} [[Luciano Burti]]
+| [[Ford Focus]]
+| [[Ford TC2000|Ford YPF Berta Motorsport]]
+| Circuito n.º&nbsp;12
+| [[Anexo:200 km de Buenos Aires 2005|2005]]
+|-
+! [[Temporada 2006 de Turismo Competición 2000|2006]]
+| {{bandera|ARG}} [[Matías Rossi]] || {{bandera|SUI}} [[Alain Menu]]
+| [[Chevrolet Astra]]
+| [[General Motors TC 2000|Chevrolet Elaion Pro Racing]]
+| Circuito n.º&nbsp;12
+| [[Anexo:200 km de Buenos Aires 2006|2006]]
+|-
+! [[Temporada 2007 de Turismo Competición 2000|2007]]
+| {{bandera|ARG}} [[Juan Manuel Silva]] || {{bandera|ARG}} [[Ezequiel Bosio]]
+| [[Honda Civic#Octava generación (2006-2011) FK/FN/FD/FA|Honda Civic VIII]]
+| [[Honda TC 2000|Honda Petrobras]]
+| Circuito n.º&nbsp;9
+| [[Anexo:200 km de Buenos Aires 2007|2007]]
+|-
+! [[Temporada 2008 de Turismo Competición 2000|2008]]
+| {{bandera|ARG}} [[José María López]] || {{bandera|GBR}} [[Anthony Reid]]
+| [[Honda Civic#Octava generación (2006-2011) FK/FN/FD/FA|Honda Civic VIII]]
+| [[Honda TC 2000|Honda Petrobras]]
+| Circuito n.º&nbsp;9
+| [[Anexo:200 km de Buenos Aires 2008|2008]]
+|-
+! [[Temporada 2009 de Turismo Competición 2000|2009]]
+| {{bandera|ARG}} [[Norberto Fontana]] || {{bandera|Brasil}} [[Ricardo Maurício]]
+| [[Toyota Corolla]]
+| [[Toyota TC 2000|Toyota Team Argentina]]
+| Circuito n.º&nbsp;12
+| [[Anexo:200 km de Buenos Aires 2009|2009]]
+|-
+! [[Temporada 2010 de Turismo Competición 2000|2010]]
+| {{bandera|ARG}} [[Bernardo Llaver]] || {{bandera|ARG}} [[Mauro Giallombardo]]
+| [[Toyota Corolla]]
+| [[Toyota TC 2000|Toyota Team Argentina]]
+| Circuito n.º&nbsp;12
+| [[Anexo:200 km de Buenos Aires 2010|2010]]
+|-
+! [[Temporada 2014 del Súper TC 2000|2014]]
+| {{bandera|ARG}} [[Néstor Girolami]] || {{bandera|ARG}} [[Mauro Giallombardo]]
+| [[Peugeot 408]]
+| [[Peugeot TC 2000|Peugeot Team]]
+| Circuito n.º&nbsp;8
+| [[Anexo:200 km de Buenos Aires 2014|2014]]
+|-
+! [[Temporada 2016 del Súper TC 2000|2016]]
+| {{bandera|ARG}} [[Agustín Canapino]] || {{bandera|ARG}} [[Guillermo Ortelli]]
+| [[Chevrolet Cruze I]]
+| [[Chevrolet TC 2000|Chevrolet YPF]]-[[Pro Racing]]
+| Circuito n.º&nbsp;9
+| [[Anexo:200 km de Buenos Aires 2016|2016]]
+|-
+![[Temporada 2017 del Súper TC 2000|2017]]
+|{{bandera|ARG}} [[Emiliano Spataro]]
+|{{bandera|ARG}} [[Christian Ledesma]]
+|[[Renault Fluence]]
+|[[Sport Team|Sportteam]]
+|Circuito n.º&nbsp;15
+|[[Anexo:200 km de Buenos Aires 2017|2017]]
+|-
+![[Temporada 2018 del Súper TC 2000|2018]]
+|{{bandera|ARG}} [[Facundo Ardusso]]
+|{{bandera|ARG}} [[Mariano Altuna]]
+|[[Renault Fluence]]
+|[[Renault TC 2000|Renault Sport-Ambrogio Racing]]
+|Circuito n.º 8
+|[[200 km de Buenos Aires 2018|2018]]
+|-
+![[Temporada 2019 del Súper TC 2000|2019]]
+|{{bandera|ARG}}[[Leonel Pernía]]
+|{{bandera|ARG}}[[Damián Fineschi|Damian Fineschi]]
+|[[Renault Fluence]]
+|[[Renault TC 2000|Renault Sport-Ambrogio Racing]]
+|Circuito n.º 9
+|2019
+|}
+
+=== [[Campeonato Mundial de Motociclismo]] ===
+{| class="wikitable" style="font-size:95%;"
+!Año
+!500cc
+!350cc
+!250cc
+!125cc
+!50cc
+!Resultados
+|-
+![[Temporada 1961 del Campeonato del Mundo de Motociclismo|1961]]
+|{{bandera|Argentina}} [[Jorge Kissling]] ([[Matchless]])
+| align="center"| -
+|{{bandera|Australia}} [[Tom Phillis]] ([[Historia de Honda en los deportes de motor|Honda]])
+|{{bandera|Australia}} [[Tom Phillis]] ([[Historia de Honda en los deportes de motor|Honda]])
+|align="center"| -
+|[[Gran Premio de Argentina de Motociclismo de 1961|Resultados]]
+|-
+![[Temporada 1962 del Campeonato del Mundo de Motociclismo|1962]]
+|{{bandera|Argentina}} [[Benedicto Caldarella]] ([[Matchless]])
+| align="center"| -
+|{{bandera|Reino Unido}} [[Arthur Wheeler]] ([[Moto Guzzi]])
+|{{bandera|Nueva Zelanda}} [[Hugh Anderson]] ([[Suzuki]])
+|{{bandera|Nueva Zelanda}} [[Hugh Anderson]] ([[Suzuki]])
+|[[Gran Premio de Argentina de Motociclismo de 1962|Resultados]]
+|-
+![[Temporada 1963 del Campeonato del Mundo de Motociclismo|1963]]
+|{{bandera|Reino Unido}} [[Mike Hailwood]] ([[MV Agusta]])
+| align="center"| -
+|{{bandera|Italia}} [[Tarquinio Provini]] ([[Moto Morini]])
+|[[Archivo:Flag of the Federation of Rhodesia and Nyasaland (1953–1963).svg|22px]] [[Jim Redman]] ([[Historia de Honda en los deportes de motor|Honda]])
+|{{bandera|Nueva Zelanda}} [[Hugh Anderson]] ([[Suzuki]])
+|[[Gran Premio de Argentina de Motociclismo de 1963|Resultados]]
+|-
+| colspan=6 |
+|
+|-
+![[Temporada 1981 del Campeonato del Mundo de Motociclismo|1981]]
+| align="center"| -
+|{{Bandera|Alemania Occidental}} [[Anton Mang]] ([[Kawasaki Heavy Industries|Kawasaki]])
+|{{bandera|Francia}} [[Jean-François Baldé]] ([[Kawasaki Heavy Industries|Kawasaki]])
+|{{bandera|España}} [[Ángel Nieto]] ([[Minarelli]])
+| align="center"| -
+|[[Gran Premio de Argentina de Motociclismo de 1981|Resultados]]
+|-
+![[Temporada 1982 del Campeonato del Mundo de Motociclismo|1982]]
+|{{bandera|Estados Unidos}} [[Kenny Roberts]] ([[Yamaha Motor Company|Yamaha]])
+|{{bandera|Venezuela|1930}} [[Carlos Lavado]] ([[Yamaha Motor Company|Yamaha]])
+| align="center"| -
+|{{bandera|España}} [[Ángel Nieto]] ([[Garelli Motorcycles|Garelli]])
+| align="center"| -
+|[[Gran Premio de Argentina de Motociclismo de 1982|Resultados]]
+|-
+| colspan=6 |
+|
+|-
+![[Temporada 1987 del Campeonato del Mundo de Motociclismo|1987]]
+|{{bandera|Estados Unidos}} [[Eddie Lawson]] ([[Yamaha Motor Company|Yamaha]])
+| align="center"| -
+|{{bandera|España}} [[Sito Pons]] ([[Historia de Honda en los deportes de motor|Honda]])
+| align="center"| -
+| align="center"| -
+|[[Gran Premio de Argentina de Motociclismo de 1987|Resultados]]
+|-
+| colspan=6 |
+|
+|-
+![[Temporada 1994 del Campeonato del Mundo de Motociclismo|1994]]
+|{{bandera|Australia}} [[Mick Doohan]] ([[Historia de Honda en los deportes de motor|Honda]])
+| align="center"| -
+|{{bandera|Japón}} [[Tadayuki Okada]] ([[Historia de Honda en los deportes de motor|Honda]])
+|{{bandera|España}} [[Jorge Martínez (motociclista)|Jorge Martínez]] ([[Yamaha Motor Company|Yamaha]])
+| align="center"| -
+|[[Gran Premio de Argentina de Motociclismo de 1994|Resultados]]
+|-
+![[Temporada 1995 del Campeonato del Mundo de Motociclismo|1995]]
+|{{bandera|Australia}} [[Mick Doohan]] ([[Historia de Honda en los deportes de motor|Honda]])
+| align="center"| -
+|{{bandera|Italia}} [[Max Biaggi]] ([[Aprilia]])
+|{{bandera|España}} [[Emilio Alzamora]] ([[Historia de Honda en los deportes de motor|Honda]])
+| align="center"| -
+|[[Gran Premio de Argentina de Motociclismo de 1995|Resultados]]
+|-
+| colspan=6 |
+|
+|-
+![[Temporada 1998 del Campeonato del Mundo de Motociclismo|1998]]
+|{{bandera|Australia}} [[Mick Doohan]] ([[Historia de Honda en los deportes de motor|Honda]])
+| align="center"| -
+|{{bandera|Italia}} [[Valentino Rossi]] ([[Aprilia]])
+|{{bandera|Japón}} [[Tomomi Manako]] ([[Historia de Honda en los deportes de motor|Honda]])
+| align="center"| -
+|[[Gran Premio de Argentina de Motociclismo de 1998|Resultados]]
+|-
+![[Temporada 1999 del Campeonato del Mundo de Motociclismo|1999]]
+|{{bandera|Estados Unidos}} [[Kenny Roberts, Jr.]] ([[Suzuki]])
+| align="center"| -
+|{{bandera|Francia}} [[Olivier Jacque]] ([[Yamaha Motor Company|Yamaha]])
+||{{bandera|Italia}} [[Marco Melandri]] ([[Historia de Honda en los deportes de motor|Honda]])
+| align="center"| -
+|[[Gran Premio de Argentina de Motociclismo de 1999|Resultados]]
+|}
+
+== Referencias ==
+{{listaref}}
+
+== Véase también ==
+* [[Juan Gálvez (piloto)|Juan Gálvez]]
+* [[Oscar Alfredo Gálvez]]
+* [[Turismo Competición 2000|TC 2000]]
+
+== Enlaces externos ==
+{{commonscat|Autódromo Oscar Alfredo Gálvez}}
+
+* [https://www.ciudadautodromo.com/ Sitio oficial]
+
+{{Control de autoridades}}
+[[Categoría:Instalaciones deportivas de la ciudad de Buenos Aires]]
+[[Categoría:Circuitos de Fórmula 1|Oscar Alfredo Gálvez]]
+[[Categoría:Circuitos de carreras de Argentina|Oscar Alfredo Gálvez]]
+[[Categoría:Villa Riachuelo]]
+[[Categoría:Circuitos de carreras de la Ciudad de Buenos Aires]]

@@ -1,0 +1,56 @@
+
+################ HUD mirrors module
+
+== summary
+I built `js/hudmirrors.js` (new) and tested it in the real game. It draws two HUD rear-view mirrors into the main canvas after the main render, at the top-left and top-right of the screen. The harness is `devtests/hudmirrors-test/` (also new). It loads the real `index.html` in an offscreen Electron window, muted through `devtests/electron-userdata.js`, and patches the module in from the page. No existing file was edited.
+
+Final run: **33 of 33 checks pass**, with no page or console errors. I read the screenshots myself.
+
+**What the mirrors do**
+- Each mirror has its own camera beside the driver's head, looking back and turned 12° outwards, tilted 1.5° down. The field of view is 40° wide at about 3:1.
+- Each camera draws into a small render target (MSAA 4). That is then copied into the canvas through `setViewport` / `setScissor` / `setScissorTest`, flipped left-right like a real mirror, with rounded corners and a slightly darker glass look.
+- The scene's fog and sky come along. Left out of the mirrors: `userData.mirror === false` objects (the name tags), checked on scene children and grandchildren like `cockpit.js` does, and the `exclude` list (pass `cockpit.group`).
+- Left/right is verified by pixels with three test cars:
+  - A car behind-left shows only in the left mirror, on its outer side.
+  - A car behind-right shows only in the right mirror, on its outer side.
+  - A car straight behind shows on the inner side of both mirrors.
+
+**Edge cases (all tested)**
+- **No track loaded:** works; it draws only the sky.
+- **Bad pose:** a missing or NaN pose draws nothing.
+- **Resize and pixel ratio:** follows window resize and device-pixel-ratio changes (1.5 to 2.25).
+- **`setVisible(false)`:** zero cost — no passes, render targets freed, frames hidden.
+- **Menu open:** the frames sit inside `#hud`, so they hide with it and even a stray call draws nothing.
+- **WebGL context loss / restore:** the module pauses while lost and draws again after restore. The game itself also recovers.
+
+**Layout chosen: A — mirrors in the top corners, the corner boxes moved down under them.**
+- B (mirrors in the corners, timing box and minimap moved inwards beside them) puts the timing box and minimap under the start lights at 1280, and the timing box onto the session box.
+- C (mirrors at the top, inside the existing corner boxes) needs the lights and toast pushed below the mirrors, where they land on top of each other.
+- A has no HUD box overlaps at 1280x720 or 1920x1080. The start lights and toasts don't move.
+
+**Cost** — measured at 1920x1080, canvas 2880x1620 device px because this machine runs at 150% scaling. Monza with trees, two 543x183 targets, MSAA 4, RTX 5070 Ti through ANGLE D3D11, Ryzen 7 9700X:
+
+| Setting | Added CPU per frame | Module's own average | CPU+GPU, synchronised |
+|---|---|---|---|
+| Both mirrors every frame | +0.6 ms (1.23 → 1.85 ms) | 0.36 ms | 1.02 ms |
+| Alternating mirrors | +0.45 ms | 0.21 ms | 0.56 ms |
+
+For comparison, the synchronised main render is 1.33 ms. The GPU timer shows 0.15 ms for both mirrors against 0.35 ms for the main render. Turning off MSAA or the trees saves under 0.1 ms, so both stay on.
+
+The default rate is `'auto'`: both mirrors every frame, dropping to alternating if `render()` averages over 1 ms of CPU for 90 frames, and back after 450 frames under 0.35 ms. This switching is tested.
+
+== apiNotes
+ - API: `hm = F1.createHudMirrors(renderer, scene, { exclude: [cockpit.group], elements: [frameL, frameR], rate: 'auto'|1|2, hfov: 40, yaw: 12, pitch: -1.5, trees: true, msaa: 4 })`. Methods: `hm.render(pose, dt)` (= `update(pose, dt)` + `render()`; pose is car.state {x,y,z,heading,pitch,roll}), `update(pose, dt)`, `render()`, `setVisible(on) -> on`, `visible` (getter), `setRects(fn(cssW, cssH) -> [[x,y,w,h],[x,y,w,h]] | null)`, `relayout()`, `setExclude(list)`, `setOptions(o)`, `dispose()`, `info() -> {visible, lost, rate, rateMode, passes, blits, ms, msMax, pixelRatio, rects, target, hfov, yaw, pitch, source}`. Also exported: `F1.hudMirrorsLayout(w, h)`, the built-in rects used when no elements are passed.
+ - Script order in index.html: add `<script src="js/hudmirrors.js"></script>` after js/cockpit.js and before js/main.js. It needs THREE only when createHudMirrors is called. package.json build.files already covers js/*.js.
+ - main.js, three edits. (1) In loadTrack, right after `cockpit = F1.createCockpit(camera); scene.add(cockpit.group);` (created once): `if (!hudMirrors && typeof F1.createHudMirrors === 'function') { hudMirrors = F1.createHudMirrors(renderer, scene, { exclude: [cockpit.group], elements: [document.getElementById('hud-mirror-l'), document.getElementById('hud-mirror-r')] }); hudMirrors.setVisible(mirrorsOn); }`. (2) In frame(), right after `renderer.render(scene, camera);`: `if (hudMirrors) hudMirrors.render(car.state, dt);`. (3) Toggle with key V (free; main.js uses W/A/S/D, arrows, R L Q E T M, Esc, F11): `mirrorsOn = hudMirrors.setVisible(!hudMirrors.visible); document.getElementById('hud').classList.toggle('no-mirrors', !mirrorsOn);` then persist it in localStorage and add 'V 後照鏡' to the key hints and keymap. Don't call render() for the still frames behind the menu. Always pass cockpit.group in exclude: then the cockpit glass's onBeforeRender cannot start its own mirror pass nested inside ours.
+ - index.html DOM: two empty divs as the FIRST children of `<div id="hud">`, so they hide with the HUD while the menu is open and every HUD box paints over them: `<div id="hud-mirror-l" class="hud-mirror"></div><div id="hud-mirror-r" class="hud-mirror"></div>`. z-order: inside #hud (z-index 5, above canvas #game), with z-index 0, so below every HUD box, #gp-results, #menu (10) and #hud-toast (20). pointer-events none. setVisible() sets their style.display to '' / 'none' itself.
+ - index.html CSS for layout A (the chosen one), new rules: `:root { --mir-gw: clamp(224px, 18.75vw, 400px); --mir-gh: calc(var(--mir-gw) / 3); --mir-b: 4px; --mir-top: 12px; --mir-side: 18px; --mir-oh: calc(var(--mir-gh) + 2 * var(--mir-b)); }` (on :root because #hud-toast is outside #hud) `.hud-mirror { position: absolute; z-index: 0; box-sizing: content-box; padding: 0; top: var(--mir-top); width: var(--mir-gw); height: var(--mir-gh); border: var(--mir-b) solid #15181d; border-color: #20242b #15181d #0d0f12; border-radius: 11px; background: transparent; box-shadow: 0 3px 12px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.07); pointer-events: none; } #hud-mirror-l { left: var(--mir-side); } #hud-mirror-r { right: var(--mir-side); } #hud.no-mirrors { --mir-oh: -4px; }`. With --mir-oh = -4px every shifted value below lands exactly on today's value.
+ - index.html CSS for layout A, changes to existing rules: #hud-timing and #hud-map `top: 18px` -> `top: calc(var(--mir-top) + var(--mir-oh) + 10px)`. #hud-players and #hud-gp `top: 196px` -> `top: calc(200px + var(--mir-oh))`. #hud-gp `max-height: calc(100vh - 244px)` -> `calc(100vh - 248px - var(--mir-oh))`. @media (max-width:1119px) `calc(100vh - 204px - var(--tel-top))` -> `calc(100vh - 208px - var(--mir-oh) - var(--tel-top))`. @media (max-width:999px) #hud-hint `top: 234px` -> `calc(238px + var(--mir-oh))`. @media (max-width:720px): #hud-lights `176px` -> `calc(180px + var(--mir-oh))`, #hud-gp `284px` -> `calc(288px + var(--mir-oh))`, #hud-hint `174px` -> `calc(178px + var(--mir-oh))`. #hud-lights and #hud-toast don't move.
+ - Pixel rects. The glass is each frame's padding box: `gw = clamp(224, 0.1875 * W, 400)`, `gh = gw / 3`, at (22, 16) and (W - 22 - gw, 16) in CSS px from the canvas top-left. That gives 240x80 at 1280x720, 300x100 at 1600x900, 360x120 at 1920x1080. With `elements` the module measures `getBoundingClientRect` + clientLeft/clientTop/clientWidth/clientHeight and renders 1 CSS px beyond on each side, tucked under the border: at 1280 that is [21,15,242,82] and [1017,15,242,82]. It measures again on window resize, on a ResizeObserver change, on relayout() / setVisible(true), and every 2 s. The GL viewport is `setViewport(x, H - y - h, w, h)` with the same scissor. Each render target is the glass in device px, capped at 720 px wide (363x123 at 1280 and DPR 1.5; 543x183 at 1920 and DPR 1.5). Without elements, `F1.hudMirrorsLayout` returns the same glass rects with no bleed. Corner radius: 7 px glass (11 px frame minus 4 px border).
+
+== openIssues
+ - The integration (main.js, index.html, ui.js key hint, settings toggle) is not done, as instructed. The CSS deltas above are based on today's index.html: if the review fixers change #hud-timing / #hud-gp / #hud-map / #hud-hint / #hud-lights positions, re-base the numbers. With `--mir-oh: -4px` every shifted value should come back exactly to the un-mirrored value. Re-run `npx electron devtests/hudmirrors-test/run.js` after integrating; it still patches the module in from the page, so after integration it will be a second instance unless page.js is pointed at the game's own.
+ - Excluding cockpit.group currently makes no visible difference (a-1280-cockpit-not-excluded.png looks the same as a-1280-free.png). The cameras sit beside the helmet looking back, and the cockpit model has nothing behind the head. Keep passing it anyway: it guards against future modelling, and it stops the cockpit glass's onBeforeRender from starting an in-car mirror pass inside ours.
+ - The in-car glass mirrors (cockpit.js) stay on as well; the costs add up. Earlier notes put them at +0.2 ms, and that is already in the 'hidden' baseline above. If the user prefers only HUD mirrors, `cockpit.setMirrors(false)` can be tied to the same setting.
+ - This machine runs Windows at 150% scaling, so the offscreen windows have devicePixelRatio 1.5: the '1280x720' shots are 1920x1080 px and the '1920x1080' shots are 2880x1620 px. Costs were measured on a fast desktop (RTX 5070 Ti). On weaker hardware the `'auto'` rate halves the mirror cost by alternating them, but this has not been measured on such a machine.
+ - Pitch and roll fed to the mirror cameras are low-pass filtered (60 ms); heading is not. The mirror cameras don't take the cockpit's hit shake or vibration.

@@ -6,7 +6,7 @@
 // running). Screenshots: devtests/gp-e2e/out/v6-NN-phase-role.png (READ them).
 //
 // Cars are driven through the game's real input path (page.js: a fake standard controller; autopilot.js), on top of it
-// online-v6-page.js: RB (ERS) on the straights, LB (pit limiter) and Back (next compound) tapped by the pit plan
+// online-v6-page.js: RB (ERS) on the straights, LB (pit limiter) and X (next compound) tapped by the pit plan
 // (pitplan.js: into the lane, into the box of the room slot, held for the service, out again). Nothing is time-warped.
 //
 // Scenario (A = Alice, the host; B = Bob; C = Carol; D = Dave, a spectator who joins during the race):
@@ -22,7 +22,7 @@
 //            qualifying takes part in it.)
 //   race     race paces the other way round (A 0.90, B 0.95, C 1.0): B and C catch A and follow it (the autopilot keeps
 //            a gap to a solid car ahead), so the three reach the pit lane together at the end of lap 1. Each stops in the
-//            box of its ROOM slot (0, 1, 2): limiter on before the entry line, off after the exit line, Back for the next
+//            box of its ROOM slot (0, 1, 2): limiter on before the entry line, off after the exit line, X for the next
 //            compound (A and C hard, B medium); the light curtains on screen; two or three cars in the lane at once,
 //            ghosts to each other (translucent, no impact); the service a random 2.0 .. 4.5 s with the car held and the
 //            lap clock running on; new tyres. All three deploy ERS.
@@ -89,7 +89,8 @@ async function agree(wins, tries) {
 }
 
 function makeWin(tag) {
-  const w = L.makeWin(electron, host, tag, { fps: 60 }); w.name = NAMES[tag]; W[tag] = w;
+  // (fresh installs: the room starts in the host's default season, 2026 since v6.1; the race is driven in 2014 cars)
+  const w = L.makeWin(electron, host, tag, { fps: 60, fresh: true }); w.name = NAMES[tag]; W[tag] = w;
   // v6: the menu's side panel is tabbed; a control can only be clicked in the open tab (car / gp / mp / set)
   w.tab = async t => (await w.click('tab-' + t)) && w.js(`!document.getElementById(${J({ car: 'car-panel', gp: 'gp-panel', mp: 'mp-section', set: 'set-panel' }[t])}).classList.contains('hidden')`);
   // a real mouse click on the element a CSS selector finds (scrolled into view first)
@@ -176,7 +177,7 @@ async function scenario() {
   const pit = await A.js(`(function () { var p = F1.game.track.pit; return { from: p.from, to: p.to, entry: p.entry, exit: p.exit, limit: p.limitKmh, boxes: p.boxes.slice(0, 4).map(function (b) { return { index: b.index, d: +b.d.toFixed(2), x: b.x, z: b.z, heading: b.heading }; }), N: F1.game.track.samples.length, len: F1.game.track.length }; })()`);
   info('Monaco pit lane: entry line at sample ' + pit.entry + ', exit line ' + pit.exit + ', limit ' + pit.limit + ' km/h, boxes of slots 0 / 1 / 2 at samples ' + pit.boxes.slice(0, 3).map(b => b.index).join(' / '));
   const season0 = await all(ABC, w => w.js(`({ room: F1.net.year, car: F1.game.spec.id })`));
-  check('the room starts in the host\'s season (a fresh install: 2025) with the 2025 standard car everywhere', season0.every(s => s.room === 2025 && s.car === '2025-standard'), season0);
+  check('the room starts in the host\'s season (a fresh install: 2026) with the 2026 standard car everywhere', season0.every(s => s.room === 2026 && s.car === '2026-standard'), season0);
   await shot(B, '01-room-free-B');
 
   /* ---------------- season and cars (free practice) ---------------- */
@@ -388,7 +389,7 @@ async function scenario() {
   check('during the service the car was held (did not move) while its lap clock ran on (lap clock = real time = the service)', held.every(h => h && h[0] === 0 && h[1] === 0) &&
     lapRan.every((l, k) => l && near(l.lap, l.wall, 0.12) && near(l.lap, svc[k], 0.15)), { held, lapRan, svc });
   const tyres = ABC.map((w, k) => ({ before: svcOn[k] && { c: svcOn[k].compound, wear: svcOn[k].wear }, after: svcOff[k] && { c: svcOff[k].compound, wear: svcOff[k].wear }, want: COMPOUND[w.tag] }));
-  check('new tyres at the stop: the compound chosen with Back (A hard, B medium, C hard), wear back to 0; the old set had worn (x3) over the first lap', tyres.every(t => t.before && t.after && t.before.c === 'M' &&
+  check('new tyres at the stop: the compound chosen with X (A hard, B medium, C hard), wear back to 0; the old set had worn (x3) over the first lap', tyres.every(t => t.before && t.after && t.before.c === 'M' &&
     Math.max(...t.before.wear) > 0.02 && t.after.c === t.want && t.after.wear.every(v => v < 0.001)), tyres);
   check('the pit strip showed the service countdown (換胎)', svcOn.every(e => e && /換胎/.test(e.strip)), svcOn.map(e => e && e.strip));
   const laneSpeed = vi.map(x => x.plan && x.plan.rec ? x.plan.rec.maxLaneKmh : null);

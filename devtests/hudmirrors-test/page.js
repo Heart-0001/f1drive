@@ -1,15 +1,17 @@
-// Lives in the PAGE of the real game (injected by devtests/hudmirrors-test/run.js with executeJavaScript, after
-// js/hudmirrors.js itself). window.__hm: installs the HUD mirrors into the running game WITHOUT editing main.js:
-//   - the renderer is taken from the scene's onBeforeRender (three.js hands it over), then renderer.render is wrapped:
-//     right after main.js's own renderer.render(scene, camera) of a game frame (F1.game.running) it calls
-//     hm.render(car.state, dt) - exactly the one line main.js will get;
-//   - the two frame elements are added to #hud (the layout CSS comes from layouts.css through insertCSS);
+// Lives in the PAGE of the real game (injected by devtests/hudmirrors-test/run.js with executeJavaScript).
+// window.__hm: test tools around the HUD rear-view mirrors that the game itself draws since v6.1 (js/main.js creates
+// F1.createHudMirrors once with the cockpit, exclude [cockpit.group], the frames #hud-mirror-l / -r of index.html, and
+// calls hm.render(car.state, dt) right after its main render; key V / the 後照鏡 switch of 設定 hide them):
+//   - the renderer is taken from the scene's onBeforeRender (three.js hands it over) - for a separate instance of the
+//     module (the no-track checks) and the cost loops; renderer.render is wrapped only to count the game's main renders
+//     and, with __hm.follow, to put the test cars behind our car right before them;
+//   - __hm.game(): the game's own instance (F1.game.hudMirrors) and frames;
 //   - test cars (magenta behind-left, cyan behind-right, yellow straight behind) can follow our car;
-//   - frame cost: requestAnimationFrame callbacks timed (main.js's whole frame), GPU-synced cost loops.
+//   - frame cost: requestAnimationFrame callbacks timed (main.js's whole frame, mirrors included), GPU-synced cost loops.
 (function () {
   'use strict';
   if (window.__hm) return 'already';
-  var H = window.__hm = { auto: true, follow: false, hm: null, renderer: null, scene: null, frames: [], errs: [], mainRenders: 0 };
+  var H = window.__hm = { follow: false, hm: null, renderer: null, scene: null, frames: [], errs: [], mainRenders: 0 };
   window.addEventListener('error', function (e) { H.errs.push(String(e && (e.message || e.type))); });
   window.addEventListener('unhandledrejection', function (e) { H.errs.push('rejection: ' + String(e && e.reason)); });
 
@@ -31,21 +33,7 @@
              p95: +(f[Math.floor(f.length * 0.95)] || 0).toFixed(3), max: +(f[f.length - 1] || 0).toFixed(3) };
   };
 
-  // ---- renderer capture + the per-frame call ----
-  H.hook = function () {
-    if (H.renderer) return 'hooked';
-    var s = F1.game.camera;
-    while (s && !s.isScene) s = s.parent;
-    if (!s) {                       // no track yet: the camera is not in the scene. The scene is main.js's only Scene;
-      return 'no-scene';            // find it on the first render instead (any Scene rendered with the main camera)
-    }
-    H.scene = s;
-    s.onBeforeRender = function (r) {
-      delete s.onBeforeRender;
-      H.wrap(r);
-    };
-    return 'armed';
-  };
+  // ---- renderer capture ----
   // before a track is loaded: catch the renderer from the scene that main.js renders with its camera (menu still)
   H.hookAny = function () {
     if (H.renderer) return 'hooked';
@@ -62,47 +50,16 @@
     r.render = function (sc, c) {
       var main = sc === H.scene && c === F1.game.camera && r.getRenderTarget() === null;
       if (main && H.follow && F1.game.car) H.placeCars();
-      var out = real.call(r, sc, c);
-      if (main) {
-        H.mainRenders++;
-        if (H.hm && H.auto && F1.game.running) {
-          var now = performance.now(), dt = H.lastT ? (now - H.lastT) / 1000 : 0;
-          H.lastT = now;
-          H.hm.render(F1.game.car.state, dt);       // <- the one line for main.js
-        }
-      }
-      return out;
+      if (main) H.mainRenders++;
+      return real.call(r, sc, c);
     };
   };
 
-  H.makeFrames = function () {
-    var hud = document.getElementById('hud');
-    if (H.frames.length) return true;
-    ['hud-mirror-l', 'hud-mirror-r'].forEach(function (id) {
-      var d = document.createElement('div');
-      d.id = id; d.className = 'hud-mirror';
-      hud.insertBefore(d, hud.firstChild);
-      H.frames.push(d);
-    });
-    // insertBefore(firstChild) twice put r before l: keep l first in the tree
-    hud.insertBefore(H.frames[0], H.frames[1]);
-    return true;
-  };
-  H.layout = function (name) {
-    document.body.classList.remove('mir-a', 'mir-b', 'mir-c');
-    if (name) document.body.classList.add('mir-' + name);
-    if (H.hm) H.hm.relayout();
-    return name;
-  };
-
-  H.create = function (opts) {
-    if (H.hm) H.hm.dispose();
-    opts = opts || {};
-    var o = { exclude: F1.game.cockpit ? [F1.game.cockpit.group] : [] };
-    if (opts.elements !== false) { H.makeFrames(); o.elements = H.frames; }
-    for (var k in opts) if (k !== 'elements') o[k] = opts[k];
-    H.hm = F1.createHudMirrors(H.renderer, H.scene, o);
-    return H.hm.info();
+  // ---- the game's own mirrors ----
+  H.game = function () {
+    H.hm = F1.game.hudMirrors || null;
+    H.frames = [document.getElementById('hud-mirror-l'), document.getElementById('hud-mirror-r')];
+    return H.hm ? H.hm.info() : null;
   };
 
   // ---- test cars ----
@@ -141,7 +98,28 @@
     return true;
   };
 
+  // ---- is the cockpit left out of the mirror passes? A cockpit mesh, never frustum-culled for the test, counts the
+  //      passes of the mirror cameras that draw it (none while main.js's exclude [cockpit.group] is in force) ----
+  H.cockpitProbe = function () {
+    var mesh = null, noop = THREE.Object3D.prototype.onBeforeRender;
+    // (not the glass of the in-car mirrors: its own onBeforeRender draws them)
+    F1.game.cockpit.group.traverse(function (o) { if (!mesh && o.isMesh && o.visible && o.onBeforeRender === noop) mesh = o; });
+    if (!mesh) return null;
+    var p = { mesh: mesh, seen: 0, main: 0, culled: mesh.frustumCulled, before: mesh.onBeforeRender };
+    mesh.frustumCulled = false;
+    mesh.onBeforeRender = function (r, s, c) { if (c && c.name === 'hud-mirror-camera') p.seen++; else p.main++; };
+    H.probe = p;
+    return true;
+  };
+  H.cockpitProbeEnd = function () {
+    var p = H.probe; if (!p) return null;
+    p.mesh.frustumCulled = p.culled; p.mesh.onBeforeRender = p.before;
+    H.probe = null;
+    return { seen: p.seen, main: p.main };
+  };
+
   // ---- GPU-synced cost: n times [fn + 1-pixel readPixels] minus n times [readPixels] ----
+  // (synchronous: no game frame runs in between)
   H.syncCost = function (what, n) {
     n = n || 60;
     var r = H.renderer, gl = r.getContext(), px = new Uint8Array(4), st = F1.game.car.state;
@@ -150,24 +128,20 @@
            : what === 'mirrors' ? function () { H.hm.render(st, 1 / 60); }
            : what === 'both' ? function () { H.realRender(H.scene, F1.game.camera); H.hm.render(st, 1 / 60); }
            : function () {};
-    var auto = H.auto; H.auto = false;
-    try {
-      for (var w = 0; w < 10; w++) { fn(); sync(); }
-      var t0 = performance.now();
-      for (var i = 0; i < n; i++) sync();
-      var base = (performance.now() - t0) / n;
-      var t1 = performance.now();
-      for (var j = 0; j < n; j++) { fn(); sync(); }
-      var tot = (performance.now() - t1) / n;
-      return { what: what, ms: +(tot - base).toFixed(3), sync: +base.toFixed(3) };
-    } finally { H.auto = auto; }
+    for (var w = 0; w < 10; w++) { fn(); sync(); }
+    var t0 = performance.now();
+    for (var i = 0; i < n; i++) sync();
+    var base = (performance.now() - t0) / n;
+    var t1 = performance.now();
+    for (var j = 0; j < n; j++) { fn(); sync(); }
+    var tot = (performance.now() - t1) / n;
+    return { what: what, ms: +(tot - base).toFixed(3), sync: +base.toFixed(3) };
   };
   // GPU time through EXT_disjoint_timer_query_webgl2, when the browser offers it
   H.gpuTime = function (what, n) {
     var r = H.renderer, gl = r.getContext(), ext = gl.getExtension('EXT_disjoint_timer_query_webgl2');
     if (!ext) return Promise.resolve({ what: what, unavailable: true });
-    var st = F1.game.car.state, qs = [], auto = H.auto;
-    H.auto = false;
+    var st = F1.game.car.state, qs = [];
     for (var i = 0; i < (n || 30); i++) {
       var q = gl.createQuery();
       gl.beginQuery(ext.TIME_ELAPSED_EXT, q);
@@ -175,7 +149,6 @@
       gl.endQuery(ext.TIME_ELAPSED_EXT);
       qs.push(q);
     }
-    H.auto = auto;
     return new Promise(function (res) {
       var tries = 0;
       (function poll() {

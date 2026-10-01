@@ -62,13 +62,18 @@
       delete o.onBeforeRender;
       if (E.renderer) return;
       E.renderer = r; E.renders++;
-      var real = r.render;
-      E.realRender = function () { E.renders++; real.call(r, E.scene, F1.game.camera); };
+      var real = r.render, skipping = false;
+      E.realRender = function () { E.renders++; skipping = false; real.call(r, E.scene, F1.game.camera); };
       r.render = function (s, c) {
-        if (inRun && c === F1.game.camera) { E.skipped++; return; }
+        // (v6.1: the HUD mirrors of js/hudmirrors.js render right AFTER the main render, not inside it: skipped along
+        //  with a skipped main render; they save and restore the renderer's state themselves)
+        if (c !== F1.game.camera) { if (skipping) return; E.renders++; return real.call(r, s, c); }
+        if (inRun) { E.skipped++; skipping = true; return; }
+        skipping = false;
         E.renders++;
         return real.call(r, s, c);
       };
+      // (a screenshot frame: solo-page.js's __e.draw() calls E.realRender and then the HUD mirrors)
     };
     return true;
   };

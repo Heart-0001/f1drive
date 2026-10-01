@@ -1,0 +1,506 @@
+{{Short description|Auto race track in Mexico City, Mexico}}
+{{Use dmy dates|date=November 2015}}
+{{Infobox motorsport venue
+|name           = Autódromo Hermanos Rodríguez
+|location       = [[Mexico City]], Mexico
+|coordinates    = {{coord|19|24|22|N|99|5|33|W|type:landmark_region:MX_source:kolossus-nnwiki|display=it}}
+|logo           = [[File:Autodromo Hermanos Rodriguez 2017 logo.gif|240px]]
+|image          = [[File:Autódromo Hermanos Rodríguez 2015.svg|class=skin-invert|250px]]<br />The Autódromo Hermanos Rodríguez Grand Prix circuit (2015–present)<br />[[File:Autódromo Hermanos Rodríguez FormulaE 2020.svg|class=skin-invert|250px]]<br />The Autódromo Hermanos Rodríguez Formula E circuit (2020–2022, 2026)
+[[File:Autodromo Hermanos Rodriguez (National Circuit with Foro Sol).png|class=skin-invert|250px]]<br />The Autódromo Hermanos Rodríguez National Circuit with Foro Sol (2015–present)
+|capacity       = 110,000
+|fia_grade      = 1 (GP)<br />FE (Formula E)<ref name="2026_march_list">{{cite web |title=LIST OF FIA LICENSED CIRCUITS UPDATED ON : 2026-03-31 |url=https://www.fia.com/sites/default/files/circuits_fia20260331_0.pdf |publisher=[[Fédération Internationale de l'Automobile]] |date=31 March 2026 |access-date=1 May 2026}}</ref>
+|broke_ground   = 1959
+|opened         = {{Start date and age|df=yes|1959|11|20}}
+|former_names   = Autódromo Magdalena Mixhuca (1959–1979)
+|events         = '''Current:'''<br />'''[[Formula One]]'''<br />''[[Mexico City Grand Prix]]''<br>(2021–present) <br>''[[Mexican Grand Prix]]''<br>(1962–1970, 1986–1992, 2015–2019)<br />'''[[FIA Formula E Championship]]'''<br />''[[Mexico City ePrix]]''<br>(2016–2020, 2022–present)<br />'''[[NASCAR Mexico Series]]'''<br>(2004–2019, 2022–present)<br />'''Former:'''<br />[[FIA World Endurance Championship|FIA WEC]]<br />''[[6 Hours of Mexico]]'' (1989–1991, 2016–2017)<br />[[NASCAR Cup Series]]<br>''[[NASCAR Cup Series at Mexico City|Viva México 250]]'' (2025)<br />[[NASCAR O'Reilly Auto Parts Series|NASCAR Xfinity Series]]<br />''[[NASCAR Xfinity Series at Mexico City|The Chilango 150]]'' (2005–2008, 2025)<br />[[TCR World Tour]] (2025)<br />[[Race of Champions]] (2019)<br />[[Trans-Am Series]] (1978–1979, 1991)<br />[[Championship Auto Racing Teams|CART/Champ Car World Series]]<br />''[[Gran Premio Tecate]]''<br />(1980–1981, 2002–2007)<br />[[Grand American Road Racing Association|Grand Am]] [[Rolex Sports Car Series]] <br />''Mexico City 400k'' (2005–2008)<br>[[A1 Grand Prix]] (2007–2008)<br />[[IMSA GT Championship]] (1974)<br />[[United States Road Racing Championship|USRRC]] (1968)
+|layout         = Grand Prix Circuit (2015–present)<ref name="tilke"/>
+|surface        = Asphalt
+|length_km      = 4.304
+|length_mi      = 2.674
+|turns          = 17
+|record_time    = 1:17.774
+|record_driver  = {{flagicon|FIN}} [[Valtteri Bottas]]
+|record_car     = [[Mercedes W12]]
+|record_year    = [[2021 Mexico City Grand Prix|2021]]
+|record_class   = [[Formula One|F1]]
+|layout2        = Formula E Circuit (2020–2022, 2026)
+|surface2       = Asphalt
+|length2_km     = 2.606
+|length2_mi     = 1.619
+|turns2         = 16
+|record_time2   = 1:07.474
+|record_driver2 = {{flagicon|GBR}} [[Jake Dennis]]
+|record_car2    = [[Formula E Gen3#Gen 3 Evo|Porsche 99X Electric]]
+|record_year2   = [[2026 Mexico City ePrix|2026]]
+|record_class2  = [[Formula E|F-E]]
+|layout3        = National Circuit (2015–present)
+|surface3       = Asphalt
+|length3_km     = 3.909
+|length3_mi     = 2.429
+|turns3         = 15
+|record_time3   = 1:33.010
+|record_driver3 = {{flagicon|MEX}} [[Axel Matus]]
+|record_car3    = [[Mygale M14-F4]]
+|record_year3   = [[2015–16 NACAM Formula 4 Championship|2016]]
+|record_class3  = [[Formula 4|F4]]
+|layout4        = Oval Circuit (1962–present)
+|surface4       = Asphalt
+|length4_km     = 1.609
+|length4_mi     = 1.000
+|turns4         = 4
+|banking4       =
+|record_time4   = 0:32.081
+|record_driver4 = {{flagicon|MEX}} [[Antonio Pérez (racing driver)|Antonio Pérez]]
+|record_car4    = [[Toyota Camry (XV50)|Toyota Camry NASCAR]]
+|record_year4   = [[2015 NASCAR Mexico Series|2015]]
+|record_class4  = [[Stock car racing]]
+|layout5        = Formula E Circuit (2023–2025)
+|surface5       = Asphalt
+|length5_km     = 2.628
+|length5_mi     = 1.633
+|turns5         = 19
+|record_time5   = 1:12.547
+|record_driver5 = {{flagicon|SUI}} [[Sébastien Buemi]]
+|record_car5    = [[Formula E Gen3#Gen 3 Evo|Jaguar I-Type 7]]
+|record_year5   = [[2025 Mexico City ePrix|2025]]
+|record_class5  = [[Formula E|F-E]]
+|layout6        = Formula E Circuit (2017–2019)
+|surface6       = Asphalt
+|length6_km     = 2.093
+|length6_mi     = 1.300
+|turns6         = 17
+|record_time6   = 1:01.112
+|record_driver6 = {{flagicon|GER}} [[Pascal Wehrlein]]
+|record_car6    = [[Spark SRT05e|Mahindra M5Electro]]
+|record_year6   = [[2019 Mexico City ePrix|2019]]
+|record_class6  = [[Formula E|F-E]]
+|layout7        = Original Formula E Circuit (2016)
+|surface7       = Asphalt
+|length7_km     = 2.091
+|length7_mi     = 1.299
+|turns7         = 18
+|record_time7   = 1:04.569
+|record_driver7 = {{flagicon|FRA|1974}} [[Nico Prost]]
+|record_car7    = [[Spark-Renault SRT_01E|Renault Z.E 15]]
+|record_year7   = [[2016 Mexico City ePrix|2016]]
+|record_class7  = [[Formula E|F-E]]
+|layout8        = Grand Prix Circuit (1986–2014)
+|surface8       = Asphalt
+|length8_km     = 4.421
+|length8_mi     = 2.747
+|turns8         = 14
+|record_time8   = 1:16.788
+|record_driver8 = {{flagicon|GBR}} [[Nigel Mansell]]
+|record_car8    = [[Williams FW14]]
+|record_year8   = [[1991 Mexican Grand Prix|1991]]
+|record_class8  = [[Formula One|F1]]
+|layout9        = NASCAR Circuit (2007–2014)
+|surface9       = Asphalt
+|length9_km     = 4.053
+|length9_mi     = 2.518
+|turns9         = 16
+|record_time9   = 1:20.521
+|record_driver9 = {{flagicon|USA}} [[Alex Gurney]]
+|record_car9    = [[Riley MkXI|Riley Mk XX]]
+|record_year9   = [[2008 Rolex Sports Car Series|2008]]
+|record_class9  = [[Daytona Prototype|DP]]
+|layout10       = Champ Car Grand Prix Circuit (2006–2007)
+|surface10      = Asphalt
+|length10_km    = 4.463
+|length10_mi    = 2.774
+|turns10        = 17
+|record_time10  = 1:24.713
+|record_driver10= {{flagicon|NED}} [[Robert Doornbos]]
+|record_car10   = [[Panoz DP01]]
+|record_year10  = [[2007 Gran Premio Tecate|2007]]
+|record_class10 = [[Champ Car World Series|Champ Car]]
+|layout11       = NASCAR Circuit (2005–2006)
+|surface11      = Asphalt
+|length11_km    = 4.052
+|length11_mi    = 2.517
+|turns11        = 16
+|record_time11  = 1:22.931
+|record_driver11= {{flagicon|USA}} [[Scott Pruett]]
+|record_car11   = [[Riley MkXI|Riley Mk XI]]
+|record_year11  = [[2006 Rolex Sports Car Series|2006]]
+|record_class11 = [[Daytona Prototype|DP]]
+|layout12       = CART/Champ Car Grand Prix Circuit (2002–2005)
+|surface12      = Asphalt
+|length12_km    = 4.484
+|length12_mi    = 2.786
+|turns12        = 17
+|record_time12  = 1:27.248
+|record_driver12= {{flagicon|JPN}} [[Shinji Nakano]]
+|record_car12   = [[Lola B02/00]]
+|record_year12  = [[2002 Gran Premio Telmex-Gigante|2002]]
+|record_class12 = [[Championship Auto Racing Teams|CART]]
+|layout13       = Original Grand Prix Circuit (1959–1985)
+|surface13      = Asphalt
+|length13_km    = 5.000
+|length13_mi    = 3.107
+|turns13        = 14
+|record_time13  = 1:43.050
+|record_driver13= {{flagicon|BEL}} [[Jacky Ickx]]
+|record_car13   = [[Brabham BT26|Brabham BT26A]]
+|record_year13  = [[1969 Mexican Grand Prix|1969]]
+|record_class13 = [[Formula One|F1]]
+|layout14       = Original Short Circuit (1959–1985)
+|surface14      = Asphalt
+|length14_km    = 3.991
+|length14_mi    = 2.480
+|turns14        = 10
+|record_time14  = 1:17.631
+|record_driver14= {{flagicon|USA}} [[Norm Hunter]] 
+|record_car14   = [[Ralt RT4]]
+|record_year14  = [[Atlantic Championship|1982]]
+|record_class14 = [[Formula Atlantic]]
+|website        = https://ahr.mx/
+}}
+
+The '''Autódromo Hermanos Rodríguez''' is a {{cvt|4.304|km|mi|abbr=on}} [[motorsport]] [[race track]] in [[Mexico City]], Mexico, named after the racing drivers [[Ricardo Rodríguez (racing driver)|Ricardo Rodríguez]] (1942–1962) and [[Pedro Rodríguez (racing driver)|Pedro Rodríguez]] (1940–1971). The circuit got its current name in 1979 after [[Ricardo Rodríguez (Formula One)|Ricardo Rodríguez]] died in practice for the non-Championship [[1962 Mexican Grand Prix]] and his brother [[Pedro Rodríguez (racing driver)|Pedro]] was also killed behind the wheel nine years later. Since [[2015 Mexican Grand Prix|2015]], the track has once again hosted the [[Formula One]] [[Mexican Grand Prix]], an event it previously hosted in two separate periods on a different layout, the last occasion of which was in [[1992 Mexican Grand Prix|1992]]. Since [[2021 Mexico City Grand Prix|2021]] the event has been held under the name "Mexico City Grand Prix".
+
+The circuit is located within the public park of the [[Magdalena Mixhuca Sports City]] in southeast Mexico City. The circuit is owned by the Government of the City, but is currently operated under concession by Corporación Interamericana de Entretenimiento (CIE) through OCESA, one of CIE's subsidiaries. CIE also organizes the [[NASCAR Mexico Series]] races in this circuit and rents the circuits to other parties, including race organizers, automobile clubs and track amateurs for fees that are controversial due to their disproportionately high amounts compared to other ex-F1 courses.
+
+The [[NASCAR O'Reilly Auto Parts Series|NASCAR Xfinity Series]] started racing at Autódromo Hermanos Rodríguez in the 2005 season and ended in the 2008 season, with a one off return in 2025. [[Martin Truex Jr.]] won the race in 2005, and [[Denny Hamlin]] won in 2006. For the 2007 race, the chicane was removed to increase passing opportunities down the front straight and into turn 1, and [[Juan Pablo Montoya]] from [[Bogotá]], [[Colombia]], won the race. [[Kyle Busch]] was the winner of the race in 2008. The layout was changed for 2025 and [[Daniel Suárez]] won the race.
+
+The [[A1 Grand Prix]] series started racing at Autódromo Hermanos Rodríguez in the [[2006–07 A1 Grand Prix season|2006–07 season]] using the full-track configuration used by [[Formula One]]. [[Alex Yoong]] from [[A1 Team Malaysia|Malaysia]] won the sprint race and [[Oliver Jarvis]] from the [[United Kingdom]] won the feature race. In the [[2007–08 A1 Grand Prix season|2007–08 season]], [[Jonny Reid]] from [[A1 Team New Zealand|New Zealand]] won the sprint race and [[Adam Carroll (racing driver)|Adam Carroll]] of [[A1 Team Ireland|Team Ireland]] won the feature race.
+
+==History==
+[[File:003729-003 TOMAS AE╠üREAS DE LA CIUDAD NOVIEMBRE 1962 (31757748046).jpg|thumb|Aerial view of the circuit, November 1962.|alt=|left]]
+Built in the Magdalena Mixhuca public park in 1959, the circuit hosted its first [[Formula One]] [[Grand Prix motor racing|Grand Prix]] in 1962, as a non-Championship race. The following year the [[Mexican Grand Prix]] became a full World Championship event.  The circuit remained part of the F1 calendar through 1970, when spectator overcrowding caused unsafe conditions.  When F1 returned in 1986, the circuit boasted a new pit complex, as well as improved safety all around, but left again after 1992 due to safety concerns.
+
+In 2001 CIE and Forsythe Racing tasked D3 Motorsport Development with revamping the circuit. A redesign to include the Foro and a complete upgrade of the circuit was done. It saw a record crowd of 402,413 people attend a round of the CART Championship in 2002.
+
+It was announced in May 2012, that the circuit would again host the [[Mexican Grand Prix]] from 2013, in a five-year deal that would see it replace the [[European Grand Prix]] in [[Valencia Street Circuit|Valencia]],<ref>{{cite web |url=http://www.marca.com/2012/05/29/motor/formula1/1338288393.html |title=México tendrá gran premio ya para 2013 |publisher=MARCA.com |access-date=30 May 2012 |archive-date=30 May 2012 |archive-url=https://web.archive.org/web/20120530140906/http://www.marca.com/2012/05/29/motor/formula1/1338288393.html |url-status=live }}</ref> but this did not happen. The FIA listed the Mexican Grand Prix as the 19th round of the provisional schedule for the [[2014 Formula One season|2014 season]],<ref>{{cite web |url=http://www.f1fanatic.co.uk/2013/09/05/mexico-in-new-jersey-out-on-21-race-2014-calendar/ |title=2014 Calendar draft has 21 races including Mexico |date=5 September 2013 |publisher=f1fanatic.co.uk |access-date=5 September 2013 |archive-date=4 March 2016 |archive-url=https://web.archive.org/web/20160304004056/http://www.f1fanatic.co.uk/2013/09/05/mexico-in-new-jersey-out-on-21-race-2014-calendar/ |url-status=live }}</ref> but it was not on the final schedule. The Mexican Grand Prix was listed on the 2015 Formula One calendar published by the FIA on 3 December 2014, with [[Formula One]] making its return to the circuit with the race on 1 November 2015.<ref>{{cite web|title=World Motor Sport Council 2014 - Doha |url=http://www.fia.com/node/9172 |publisher=FIA |access-date=22 December 2014 |date=3 December 2014 |url-status=dead |archive-url=https://web.archive.org/web/20150319200239/http://www.fia.com/node/9172 |archive-date=19 March 2015 |df=dmy }}</ref>
+
+The racetrack is also home to [[Electric Daisy Carnival]] (EDC Mexico), a music festival attended by over 200,000 people.<ref>{{cite web|url=https://mexico.electricdaisycarnival.com/en/travel/#location|title=TRAVEL - EDC Mexico 2018|website=electricdaisycarnival.com|access-date=13 February 2018|archive-date=13 February 2018|archive-url=https://web.archive.org/web/20180213195246/https://mexico.electricdaisycarnival.com/en/travel/#location|url-status=live}}</ref>
+
+== The Grand Prix circuit ==
+[[File:Autódromo Hermanos Rodríguez, June 4, 2018 SkySat (cropped).jpg|thumb|left|Satellite view of the circuit, as it appeared in 2018]]
+[[File:Grand-Am Rolex Series Mexico 2008.jpg|thumb|left|220x220px|[[Grand-Am Rolex Series]] taking a bypass from turn 4 to turn 8|alt=]]
+
+Designed as his [[thesis]] by student Óscar Fernández in 1953,<ref>{{cite web|url=https://www.theguardian.com/sport/2019/oct/26/mexican-grand-prix-circuit |title=Mexican circuit designed by a student will be examination for Mercedes |work=The Guardian |date=26 October 2019 |access-date=27 October 2019}}</ref> the circuit has an elevation of {{cvt|2238|m|ft|abbr=on}}; the thin air causes difficulties for both the drivers and their cars.{{citation needed|date=April 2021}} It also reduces the levels of [[aerodynamic drag]] that cars experience, meaning that higher downforce setups can be used with less impact on straight-line speed.<ref>{{Cite news |last=Holding |first=Joe |title=High-downforce tracks vs power tracks in F1 – differences explained |url=https://www.autosport.com/f1/news/high-downforce-track-vs-power-track-f1/6130208/ |work=[[Autosport]] |date=7 April 2021 |access-date=7 April 2021 |url-access=limited}}</ref>
+
+The circuit has an extremely fast final corner (the ''Peraltada'', turn 17) before a long start/finish straight, and thus reminded some of [[Monza Circuit]]; however, unlike Monza's ''Parabolica'' curve, the ''Peraltada'' curve is slightly banked, allowing even more speed through the corner. It was at this corner that the younger Rodríguez fatally crashed, due to suspension failure. After the last F1 Mexican Grand Prix in 1992, a baseball stadium called the ''"Foro"'' was built on the inner part of this curve. When the [[American open-wheel car racing|Champ Car]] series began using the track in 2002, the ''Peraltada'' curve was partially bypassed by a series of sharp turns entering and exiting the ''Foro''; re-entering the ''Peraltada'' halfway through.
+
+After the Peraltada comes the long {{cvt|1.2|km|mi|abbr=on}} front straight. During the original turbo era in Formula One the faster cars were regularly clocking speeds of up to {{cvt|330|kph|mph|0|abbr=on}} on the straight.
+
+In the [[2005 NASCAR Busch Series]] season, there was a [[chicane]] on the main straightaway to slow the cars down. They also introduced a curve between the short course and the Ese del Lago to bypass the latter, but avoiding the stadium detour.
+
+The Grand Prix circuit underwent a significant renovation under the direction of [[Hermann Tilke]] for the return of [[Formula One]] in {{F1|2015}}. The front straight was slightly extended and reprofiled to accommodate a new media center and paddock. The iconic esses between turns 7 and 13 were significantly modified; the prolific, high radius turns largely diminished and some replaced with fixed angle turns. The baseball field portion of the track was also altered to a low-speed left-right combination that bypassed the first half of the Peraltada, allowing the cars to re-enter the Peraltada halfway through the corner. At {{cvt|4.304|km|mi|abbr=on}}, the course is {{cvt|170|m|ft|abbr=on}} shorter than the previous Grand Prix layout, and [[Mexican Grand Prix]] organizers predicted lap times of around 75 seconds and speeds in excess of {{cvt|328|km/h|mph|0|abbr=on}} for the [[Formula one engines#Since 2014|current turbocharged Formula One cars]], which eliminate the adverse effects of altitude present in naturally aspirated cars.<ref name="tilke">{{cite web |title=FORMULA 1 GRAN PREMIO DE MÉXICO 2015 |url=http://www.formula1.com/content/fom-website/en/championship/races/2015/Mexico.html |archive-url=https://web.archive.org/web/20151015190133/http://www.formula1.com/content/fom-website/en/championship/races/2015/Mexico.html |archive-date=15 October 2015 |access-date=10 October 2015 |df=dmy-all |url-status=dead}}</ref> However, the modern V6 hybrid turbo Formula One cars actually managed to reach top speeds in excess of {{cvt|370|km/h|mph|0|abbr=on}} down the main straight.
+
+The maximum speed recorded in a {{F1|2025}} Formula One car was {{cvt|363|km/h|mph|abbr=on}}, established at the end of the start/finish straight.<ref>{{cite web |title=Formula 1 Gran Premio de la Ciudad de México 2025 – Race Maximum Speeds |url=https://www.fia.com/sites/default/files/2025_20_mex_f1_r0_timing_racemaximumspeeds_v01.pdf |publisher=[[Fédération Internationale de l'Automobile]] |date=26 October 2025 |access-date=26 October 2025}}</ref>
+
+== Layout history ==
+
+{{Gallery
+| title        = Autódromo Hermanos Rodríguez layout history
+| align        = center
+| footer       = 
+| style        = text-align:center;
+| mode         = packed
+| File:Autódromo Hermanos Rodríguez 1959-1985.svg
+ | Grand Prix Circuit (1959–1985)
+| File:Autódromo Hermanos Rodriguez - oval.svg
+ | Oval Circuit (1962–present)
+| File:Autódromo Hermanos Rodríguez.svg
+ | Grand Prix Circuit (1986–2014)
+| File:Mexico City CART Layout 2002.png
+ | CART/Champ Car Grand Prix Circuit (2002–2005)
+| File:Mexico City NASCAR 2005.png
+ | NASCAR Circuit (2005–2006)
+| File:Mexico City Champ Car Layout 2006.png
+ | Champ Car Grand Prix Circuit (2006–2007)
+| File:Mexico City NASCAR 2007.png
+ | NASCAR Circuit (2007–2014)
+| File:Mexico City A1GP 2008.png
+ | A1GP Grand Prix Circuit (2008)
+| File:Circuit Hermanosrodrigues.png
+ | Differences between 1959–1985 layout and 1986–2014 layout
+| File:Autódromo Hermanos Rodríguez 2015.svg
+ | Grand Prix Circuit (2015–present)
+| File:Autódromo Hermanos Rodríguez 1986 vs 2015.svg
+ | Differences between 1986–2014 layout and 2015 layout
+| File:Autodromo Hermanos Rodriguez (National Circuit with Foro Sol).png
+ | National Circuit with Foro Sol (2015–present)
+| File:Autódromo Hermanos Rodríguez formula-e.svg
+ | Formula E Circuit (2016)
+| File:Mexico City Layout 2017.png
+ | Formula E Circuit (2017–2019)
+| File:Autodromo Hermanos Rodriguez (Formula E Layout 2023).png
+ | Formula E Circuit (2023–2025)
+| File:Autódromo Hermanos Rodríguez FormulaE 2020.svg
+ | Formula E Circuit (2020–2022, 2026)
+}}
+
+== Oval track ==
+
+The circuit also features an oval layout due to the inclusion of a flat turn that goes from the middle of the main straight to the beginning of the backstretch of circuit. Unlike the road course, the oval is raced in counter-clockwise direction (except for the Formula E race).
+
+The oval configuration of this Mexico City facility is arguably the most dangerous racetrack in Mexico, because of the limited visibility at the exit of turns 2 and 4. This is because the [[Foro Sol]] baseball stadium is located inside turns 1 and 2; and several trees are located inside turns 3 and 4.
+
+During the 2006 season, two accidents occurred in the oval track during [[NASCAR Mexico T4 Series]] events, which took several drivers out of the race, with some needing hospital treatment.
+
+The oval configuration is used at least twice a year, with two double-feature events featuring the [[NASCAR Mexico Series]] and the [[NASCAR Mexico T4 Series]].
+
+The oval configuration also forms the base of the [[FIA Formula E Championship]] circuit for the [[Mexico City ePrix]]; the oval is raced clockwise, but there is a chicane prior to the entrance of turn 4, with a second chicane on the backstretch, followed by a modified [[Foro Sol]] section that exits for the full Peraltada, and a third chicane midway through the Peraltada (turns 1 and 2 of the oval). FIA Formula E track design was modified by Agustin Delicado Zomeño. Starting from season 3 (2016–2017), the first chicane is removed and now it is a right-hand corner.
+
+In season 6, the track is extended and the two chicanes at the back straight and the Peraltada are removed. The track also uses more of the Formula 1 layout. After turn 2 (Formula E track), the track will turn left instead of right and the extended part includes a 4-turn sequence before going back to the original circuit and the stadium section.
+
+== Renamed turns ==
+Before the 1986 Formula One race, the first turn (now turns 1-3) was named in honour of [[Moisés Solana]], Mexico's third F1 driver. It is still called ''Ese Moisés Solana'', often referred to as the "Solana Complex" in English.
+
+In September 2002, Mexico's fourth and, then most recent, F1 driver [[Héctor Rebaque]]'s achievements both in F1 and CART were recognized by renaming turn 6 of the Autodromo as ''Recorte Rebaque'' instead of the previous name of ''Recorte de Gran Premio''.
+
+In 2015, turn 17 was named in honour of [[Nigel Mansell]], twice winner of the Mexican Grand Prix in [[1987 Mexican Grand Prix|1987]] and [[1992 Mexican Grand Prix|1992]] and the scene of his daring pass around the outside of [[Gerhard Berger]] in [[1990 Mexican Grand Prix|1990]].<ref>{{cite web |title=Mexico names final corner after Nigel Mansell |url=https://www.formula1.com/en/latest/headlines/2015/9/mexico-names-final-corner-after-nigel-mansell.html |website=formula1.com |date=15 September 2015 |access-date=13 February 2018 |archive-date=13 February 2018 |archive-url=https://web.archive.org/web/20180213195500/https://www.formula1.com/en/latest/headlines/2015/9/mexico-names-final-corner-after-nigel-mansell.html |url-status=live }}</ref>
+
+On 20 September 2016 [[Adrián Fernández]]'s achievements have been recognized by the naming of turn 12 of the Autodromo in his honour.<ref>{{cite web |title=Adrian Fernandez has corner named after him in Mexico City |url=http://www.motorsport.com/f1/news/adrian-fernandez-has-corner-named-after-him-in-mexico-city-829213/ |archive-url=https://web.archive.org/web/20160924033508/http://www.motorsport.com/f1/news/adrian-fernandez-has-corner-named-after-him-in-mexico-city-829213/ |website=motorsport.com |date=22 September 2016 |archive-date=24 September 2016 |access-date=6 May 2025 |url-status=dead}}</ref>
+
+==Events==
+
+; Current
+
+* January: [[FIA Formula E Championship]] ''[[Mexico City ePrix]]''
+* March: [[NACAM Formula 4 Championship]], TCR Mexico Series
+* May: [[NACAM Formula 4 Championship]], TCR Mexico Series
+* July: [[NACAM Formula 4 Championship]], TCR Mexico Series
+* November: [[Formula One]] ''[[Mexican Grand Prix|Mexico City Grand Prix]]'', [[NASCAR Mexico Series]], [[NACAM Formula 4 Championship]], TCR Mexico Series
+* December: Endurance 24
+
+; Former
+
+* [[A1 Grand Prix]] (2007–2008)
+* [[Atlantic Championship]] (1980–1982)
+* [[Championship Auto Racing Teams|CART/Champ Car World Series]]
+** ''[[Gran Premio Tecate]]'' (1980–1981, 2002–2007)
+* [[FIA World Endurance Championship]]
+** ''[[6 Hours of Mexico]]'' (2016–2017)
+* {{ill|Fórmula de las Américas/Mexican Formula 3000 Championship|es|Fórmula 2 Mexicana}} (1988–1990, 1992–2001)
+* [[2008 Formula BMW World Final|Formula BMW World Final]] (2008)
+* [[Formula One]]
+** ''[[Mexican Grand Prix]]'' (1962–1970, 1986–1992, 2015–2019)
+* [[Panam GP Series|Fórmula Panam]] (2003–2005, 2007–2008, 2012–2013, 2015–2018)
+* [[Grand American Road Racing Association|Grand Am]] [[Rolex Sports Car Series]]
+** ''Mexico City 250'' (2005–2008)
+* [[IMSA GT Championship]]
+** ''[[6 Hours of Mexico|1000 km of Mexico City]]'' (1974)
+* [[Jaguar I-Pace eTrophy]] (2019–2020)
+* [[LATAM Challenge Series]] (2011–2013)
+* [[Mexican Formula Three Championship]] (1990–2001)
+* [[NASCAR Cup Series]]
+** ''[[NASCAR Cup Series at Mexico City|Viva México 250]]'' (2025)
+* [[NASCAR Mexico T4 Series]] (2005–2010)
+* [[NASCAR Stock V6 Series]] (2011–2015)
+* [[NASCAR O'Reilly Auto Parts Series|NASCAR Xfinity Series]]
+** ''[[NASCAR Xfinity Series at Mexico City|The Chilango 150]]'' (2005–2008, 2025)
+* [[Porsche Supercup]] (2017–2019)
+* [[Race of Champions]] (2019)
+* [[TCR World Tour]] (2025)
+* [[Trans-Am Series]] (1978–1979, 1991)
+* [[United States Road Racing Championship]] (1968)
+* [[World Series Formula V8 3.5]] (2017)
+* [[World Sportscar Championship]]
+** ''[[6 Hours of Mexico|Trofeo Hermanos Rodríguez]]'' (1989–1991)
+
+== Lap records ==
+
+The official lap record for the current circuit layout is 1:17.774, set by [[Valtteri Bottas]] driving for [[Mercedes-Benz in Formula One|Mercedes]] in the [[2021 Mexico City Grand Prix]], while the unofficial all-time track record is 1:14.758, set by [[Max Verstappen]] driving for [[Red Bull Racing]] in the qualifying of the [[2019 Mexican Grand Prix]]. As of July 2026, the fastest official race lap records at the Autódromo Hermanos Rodríguez are listed as:
+
+{| class="wikitable"
+!Category !! Time !! Driver !! Vehicle !! Event
+|-
+! colspan=5 | Grand Prix Circuit with Foro Sol (2015–present): {{cvt|4.304|km|mi|abbr=on}}<ref name="mexico_circuito">{{cite web |title=Autódromo Hermanos Rodríguez - Circuito |url=http://www.autodromohr.com/static/wp/circuito.php |archive-url=https://web.archive.org/web/20220627015334/http://www.autodromohr.com/static/wp/circuito.php |archive-date=27 June 2022 |access-date=16 July 2022 |url-status=dead}}</ref><ref name="mexico_rcircuits">{{cite web |title=Mexico City - Racing Circuits |url=https://www.racingcircuits.info/north-america/mexico/mexico-city.html |archive-url=https://web.archive.org/web/20220716161952/https://www.racingcircuits.info/north-america/mexico/mexico-city.html |archive-date=16 July 2022 |access-date=16 July 2022 |url-status=live}}</ref><ref>{{cite web |title=Mexico City - Motor Sport Magazine |url=https://www.motorsportmagazine.com/database/circuits/mexico-city |archive-url=https://web.archive.org/web/20230114221940/https://www.motorsportmagazine.com/database/circuits/mexico-city/ |website=[[Motor Sport (magazine)|Motor Sport Magazine]] |archive-date=14 January 2023 |access-date=15 January 2023 |url-status=live}}</ref>
+|-
+| [[Formula One]] || '''1:17.774''' || [[Valtteri Bottas]] || [[Mercedes W12|Mercedes-AMG W12 E Performance]]|| [[2021 Mexico City Grand Prix]]
+|-
+| [[Le Mans Prototype#LMP1|LMP1]] || '''1:25.730'''<ref name="2017_wec_mexico">{{cite web |title=2017 6 Hours of Mexico - Final Classification By Class |url=http://fiawec.alkamelsystems.com/Results/07_2017/05_AUTODROMO%20HERMANOS%20RODRIGUEZ/185_FIA%20WEC/201709031200_Race/Hour%206/05_ClassificationByClass_Race.PDF |archive-url=https://web.archive.org/web/20210126181137/http://fiawec.alkamelsystems.com/Results/07_2017/05_AUTODROMO%20HERMANOS%20RODRIGUEZ/185_FIA%20WEC/201709031200_Race/Hour%206/05_ClassificationByClass_Race.PDF |publisher=[[Fédération Internationale de l'Automobile|Fédération Internationale de l'Automobile (FIA)]] |date=3 September 2017 |archive-date=26 January 2021 |access-date=15 March 2021 |url-status=live}}</ref> || [[Brendon Hartley]] || [[Porsche 919 Hybrid]] || [[2017 6 Hours of Mexico]]
+|-
+| [[World Series Formula V8 3.5|Formula V8]] || '''1:32.144'''<ref>{{cite web |title=2017 World Series Formula V8 3.5 - 6 Hours of Mexico - Race 2 (40' +1 lap) - Final Classification |url=http://worldseriesv8.alkamelsystems.com/Results/01_2017/07_AUTODROMO%20HERMANOS%20RODRIGUEZ/186_World%20Series%20Formula%20V8%203.5/201709030955_Race%202/03_Classification_Race%202.PDF |archive-url=https://web.archive.org/web/20240317125659/http://worldseriesv8.alkamelsystems.com/Results/01_2017/07_AUTODROMO%20HERMANOS%20RODRIGUEZ/186_World%20Series%20Formula%20V8%203.5/201709030955_Race%202/03_Classification_Race%202.PDF |date=3 September 2017 |archive-date=17 March 2024 |access-date=17 March 2024 |url-status=live}}</ref> || [[Matevos Isaakyan]] || [[Dallara T12]] || [[2017 World Series Formula V8 3.5|2017 Mexico City Formula V8 round]]
+|-
+| [[Le Mans Prototype#LMP2|LMP2]] || '''1:33.670'''<ref name="2017_wec_mexico"/> || [[Bruno Senna]] || [[Oreca 07]] || [[2017 6 Hours of Mexico]]
+|-
+| [[LM GTE]] || '''1:40.212'''<ref name="2017_wec_mexico"/> || [[Sam Bird]] || [[Ferrari 488 GTE]] || [[2017 6 Hours of Mexico]]
+|-
+| [[Porsche Carrera Cup]] || '''1:43.593'''<ref>{{cite web |title=2018 Porsche Supercup Mexico (Race 2) |url=https://www.racingyears.com/race/2018%2520Porsche%2520Supercup%2520Mexico%2520(Race%25202) |archive-url=https://web.archive.org/web/20240827200231/https://www.racingyears.com/race/2018%2520Porsche%2520Supercup%2520Mexico%2520(Race%25202) |date=28 October 2018 |archive-date=27 August 2024 |access-date=15 October 2022 |url-status=live}}</ref> || [[Thomas Preining]] || [[Porsche 911 GT3#991.2 GT3 Cup (2017–2020)|Porsche 911 (991 II) GT3 Cup]] || [[2018 Porsche Supercup|2018 2nd Mexico City Porsche Supercup round]]
+|-
+| [[Formula 4]] || '''1:46.087'''<ref>{{cite web |title=2017 F4 NACAM Championship - 6 Hours of Mexico - Race 2 (26' +1 lap) - Final Classification |url=http://fiawec.alkamelsystems.com/Results/07_2017/05_AUTODROMO%20HERMANOS%20RODRIGUEZ/188_F4%20Nacam%20Championship/201709030855_Race%202/03_Classification_Race%202.PDF |archive-url=https://web.archive.org/web/20210517101402/http://fiawec.alkamelsystems.com/Results/07_2017/05_AUTODROMO%20HERMANOS%20RODRIGUEZ/188_F4%20Nacam%20Championship/201709030855_Race%202/03_Classification_Race%202.PDF |publisher=[[Fédération Internationale de l'Automobile|Fédération Internationale de l'Automobile (FIA)]] |date=3 September 2017 |archive-date=17 May 2021 |access-date=17 May 2021 |url-status=live}}</ref> || [[Moisés de la Vara]] || [[Mygale M14-F4]] || [[2017–18 NACAM Formula 4 Championship|2017 2nd Mexico City NACAM F4 round]]
+|-
+| [[TCR Touring Car]] || '''1:48.795'''<ref>{{cite web |title=Formula 1 Gran Premio de la Ciudad de México 2025 - Mexico City - Race 2 Classification after 13 Laps |url=https://duncanwebmin.notiauto.com/repository/s/pdf/2025_20_MEX_TCR_R2_Timing_Race2Classification_V01.pdf |date=25 October 2025 |access-date=5 November 2025}}</ref> || [[Pablo Cervantes]]<ref>{{cite web |title=El Peralta Racing se apodera de la segunda carrera de los TCR México |url=https://tcrmexico.com/noticia/4252-El-Peralta-Racing-se-apodera-de-la-segunda-carrera-de-los-TCR-Mxico |archive-url=https://web.archive.org/web/20251205204412/https://tcrmexico.com/noticia/4252-El-Peralta-Racing-se-apodera-de-la-segunda-carrera-de-los-TCR-Mxico |language=es |date=25 October 2025 |archive-date=5 December 2025 |access-date=5 December 2025 |url-status=live}}</ref> || [[SEAT León#León Competición and León VZ TCR|CUPRA León VZ TCR]]<ref>{{cite web |title=Pablo Cervantes DriverDB |url=https://www.driverdb.com/drivers/pablo-cervantes |archive-url=https://web.archive.org/web/20250711085543/https://www.driverdb.com/drivers/pablo-cervantes |archive-date=11 July 2025 |access-date=5 November 2025 |url-status=live}}</ref> || [[2025 TCR Mexico Series|2025 6th Mexico City TCR Mexico round]]
+|-
+! colspan=5 | Grand Prix Circuit without Foro Sol (2015–present): {{cvt|4.256|km|mi|abbr=on}}<ref name="mexico_circuito"/><ref name="mexico_rcircuits"/>
+|-
+| [[Formula 4]] || '''1:35.175'''<ref>{{Cite web |title=2024 Endurance 24H - Carrera 2 F4 NACAM |url=https://speedhive.mylaps.com/sessions/10004559 |date=17 December 2024 |access-date=21 December 2024}}</ref> || [[Nerea Martí]] || [[Tatuus F4-T421]] || [[2024–25 NACAM Formula 4 Championship|2024 2nd Mexico City NACAM F4 round]]
+|-
+! colspan=5 | Formula E Circuit (2020–2022, 2026): {{cvt|2.606|km|mi|abbr=on}}<ref name="mexico_rcircuits"/>
+|-
+| [[Formula E]] || '''1:07.474'''<ref>{{Cite web |title=Formula E 2026 Mexico City ePrix - FL |url=https://www.motorsport.com/formula-e/results/2026/mexico-city-eprix-663592/?st=FL |date=10 January 2026 |access-date=11 January 2026}}</ref> || [[Jake Dennis]] || [[Formula E Gen3#Gen 3 Evo|Porsche 99X Electric]] || [[2026 Mexico City ePrix]]
+|-
+| [[Jaguar I-Pace eTrophy]] || '''1:25.045'''<ref>{{cite web |title=Jaguar I-PACE eTROPHY Series Round 3 - Mexico City ePrix - Race (25' +1 Lap) - Final Classification |url=https://results.fiaformulae.com/37fc4b41-34c6-4bfa-8ac8-b1f0c6d40e9e |date=15 February 2020 |access-date=15 January 2023}}{{Dead link|date=September 2023 |bot=InternetArchiveBot |fix-attempted=yes}}</ref> || [[Cacá Bueno]] || [[Jaguar I-Pace#Racing car|Jaguar I-Pace eTrophy car]] || [[2019–20 Jaguar I-Pace eTrophy|2020 Mexico City Jaguar I-Pace eTrophy round]]
+|-
+! colspan=5 | National Circuit with Foro Sol (2015–present): {{cvt|3.909|km|mi|abbr=on}}<ref name="mexico_circuito"/><ref name="mexico_rcircuits"/>
+|-
+| [[Formula 4]] || '''1:33.010'''<ref>{{cite web |title=FIA NACAM F4 - Gran Final - 05 - F4 Nacam Carrera 2 Car - Autodromo Hnos. Rodriguez (Mexico) |url=https://speedhive.mylaps.com/Sessions/4013611 |date=25 June 2016 |access-date=16 July 2022}}</ref> || [[Axel Matus]] || [[Mygale M14-F4]] || [[2015–16 NACAM Formula 4 Championship|2016 1st Mexico City NACAM F4 round]]
+|-
+| [[NASCAR O'Reilly Auto Parts Series|NASCAR Xfinity]] || '''1:33.565'''<ref>{{Cite web |title=2025 NASCAR Xfinity Series Race Number 15 - Race Results for The Chilango 150 - Saturday, June 14, 2025 - Autódromo Hermanos Rodríguez - Mexico City, MX - 2.42 - Mile Paved |url=https://www.jayski.com/wp-content/uploads/sites/31/2025/6/14/15-nxs-2025-results.pdf |date=14 June 2025 |access-date=15 June 2025}}</ref> || [[Ty Gibbs]] || [[Toyota GR Supra#NASCAR|Toyota GR Supra NASCAR]] || [[2025 The Chilango 150]]
+|-
+| [[NASCAR Cup Series|NASCAR Cup]] || '''1:33.782'''<ref>{{Cite web |title=2025 NASCAR Cup Series Viva Mexico 250 |url=https://www.racingyears.com/race/2025_NASCAR_Cup_Series_Viva_Mexico_250 |date=15 June 2025 |access-date=16 June 2025}}</ref> || [[Kyle Larson]] || [[Chevrolet Camaro (sixth generation)#NASCAR|Chevrolet Camaro ZL1]] || [[2025 Viva México 250]]
+|-
+| [[TCR Touring Car]] || '''1:34.842'''<ref>{{cite web |title=Autódromo Hermanos Rodríguez - Kumho FIA TCR World Tour - Race 2 - Final Results (Amended) - May 3rd, 2025 |url=https://www.fiatcrworldtour.com/images/2025/01_Mexico/Results/2025_FIA_TCR_WT_01_Mexico_Race_2_amended_final.pdf |archive-url=https://web.archive.org/web/20250513172447/https://www.fiatcrworldtour.com/images/2025/01_Mexico/Results/2025_FIA_TCR_WT_01_Mexico_Race_2_amended_final.pdf |date=3 May 2025 |archive-date=13 May 2025 |access-date=4 May 2025 |url-status=live}}</ref> || [[Esteban Guerrieri]] || [[Honda Civic Type R TCR#FL5 (2023)|Honda Civic Type R TCR]] || [[2025 TCR World Tour|2025 Mexico City TCR World Tour round]]
+|-
+! colspan=5 | National Circuit without Foro Sol (2015–present): {{cvt|3.850|km|mi|abbr=on}}<ref name="mexico_circuito"/><ref name="mexico_rcircuits"/>
+|-
+| [[TCR Touring Car]] || '''1:25.134'''<ref>{{cite web |title=2024 SpeedFest Vibra México - Autódromo Hnos. Rodríguez - Carrera 1 TCR + ST |url=https://duncanwebmin.notiauto.com/repository/sitios/innerpdfs/tinyimg1726588288965576803.pdf |date=14 September 2024 |access-date=26 October 2024}}</ref> || {{ill|Gerardo Nieto|es|Gerardo Nieto (piloto)}} || [[Audi RS 3 LMS#Typ 8Y (2021)|Audi RS 3 LMS TCR (2021)]] || [[2024 TCR Mexico Series|2024 2nd Mexico City TCR Mexico round]]
+|-
+| [[Formula 4]] || '''1:30.874'''<ref>{{cite web |title=2026 F4 NACAM Championship - Rounds 10–12 - Autódromo Hnos. Rodríguez - México City - July 24th—25th, 2026 - Race 3 Race Results (Round 12) |url=https://duncanwebmin.notiauto.com/repository/s/pdf/F8-26-F4-Results-Booklet-Rounds-10_12.pdf |date=25 July 2026 |access-date=8 August 2026}}</ref> || [[Julio Rejón]] || [[Tatuus F4-T421]] || [[2026 NACAM Formula 4 Championship|2026 3rd Mexico City NACAM F4 round]]
+|-
+! colspan=5 | National Circuit with Chicane (2015–present): {{cvt|3.850|km|mi|abbr=on}}
+|-
+| [[TCR Touring Car]] || '''1:33.711'''<ref>{{cite web |title=2026 BYD Mexico Racing Cup - El Gran Premio LTH -  Autódromo Hnos. Rodríguez - 25 de Julio de 2026 - Carrera 2 TCR México + ST |url=https://duncanwebmin.notiauto.com/repository/s/pdf/F8-26-TCR-ST-Libreta-de-Resultados-1.pdf |date=25 July 2026 |access-date=8 August 2026}}</ref> || [[Juan Pablo Sierra]] || [[SEAT León#León Competición and León VZ TCR|CUPRA León VZ TCR]] || [[2026 TCR Mexico Series|2026 3rd Mexico City TCR Mexico round]]
+|-
+! colspan=5 | Vintage Circuit (2020–present): {{cvt|2.844|km|mi|abbr=on}}<ref>{{cite web |title=Circuito Vintage en el AHR para La Batalla Final 2020 |url=http://www.autodromohr.com/app/n/i/22964 |archive-url=https://web.archive.org/web/20220716162012/http://www.autodromohr.com/app/n/i/22964 |archive-date=16 July 2022 |access-date=16 July 2022 |url-status=live}}</ref><ref>{{cite web |title=Formula 4 NACAM Circuito Vintage |url=https://www.instagram.com/p/Cd8_a_wBKN6/ |access-date=16 July 2022}}</ref>
+|-
+| [[Formula 4]] || '''1:18.538'''<ref>{{cite web |title=Endurance 500 Km - Carrera 2 F4 NACAM Car - Autodromo Hnos. Rodriguez (V) (Mexico) |url=https://speedhive.mylaps.com/Sessions/6565437 |date=22 May 2022 |access-date=16 July 2022}}</ref> || [[Julio Rejón]] || [[Mygale M14-F4]] || [[2022 NACAM Formula 4 Championship|2022 1st Mexico City NACAM F4 round]]
+|-
+! colspan=5 | Oval Circuit with Foro Sol (2015–present): {{cvt|1.665|km|mi|abbr=on}}<ref name="mexico_circuito"/><ref name="mexico_rcircuits"/>
+|-
+| [[Formula Abarth]] || '''0:41.510'''<ref>{{Cite web |title=2015 Super Copa Telcel Df Final - PANAM - Carrera - Autodromo Hnos. Rodriguez (Mexico) |url=https://speedhive.mylaps.com/Sessions/3796238 |date=13 December 2015 |access-date=16 July 2022}}</ref> || [[Luis Alfonso Perez]] || [[Tatuus FA010]] || [[Panam GP Series|2015 Mexico City Fórmula Panam round]]
+|-
+| [[Stock car racing]] || '''0:44.395'''<ref>{{Cite web |title=Nascar Peak México Cdmx Final - Nascar Peak Carrera - Autodromo Hnos. Rodriguez (Mexico) |url=https://speedhive.mylaps.com/Sessions/4684509 |archive-url=https://web.archive.org/web/20220716120555/https://speedhive.mylaps.com/Sessions/4684509 |date=12 November 2017 |archive-date=16 July 2022 |access-date=16 July 2022 |url-status=live}}</ref> || [[Xavi Razo]]{{efn|name=NASCAR CDMX 2017|Both drivers took the same lap time in this race independently.}}<br />[[José Luis Ramírez (racing driver)|José Luis Ramírez]]{{efn|name=NASCAR CDMX 2017|Both drivers took the same lap time in this race independently.}} || [[Toyota Camry (XV50)|Toyota Camry NASCAR]]{{efn|name=NASCAR CDMX 2017|Both drivers took the same lap time in this race independently.}}<br />[[Ford Fusion (Americas)#NASCAR|Ford Fusion NASCAR]]{{efn|name=NASCAR CDMX 2017|Both drivers took the same lap time in this race independently.}} || [[2017 NASCAR PEAK Mexico Series|2017 Gran Premio FedEx]]
+|-
+! colspan=5 | Oval Circuit (1959–present): {{cvt|1.609|km|mi|abbr=on}}<ref name="mexico_circuito"/><ref name="mexico_rcircuits"/>
+|-
+| [[Stock car racing]] || '''0:32.081'''<ref>{{Cite web |title=13° y 14° Fecha NASCAR Mexico Series - Carrera NMxFS3 Car - Autodromo Hnos. Rodriguez (Ovalo) (Mexico) |url=https://speedhive.mylaps.com/Sessions/3776050 |date=8 November 2015 |access-date=16 July 2022}}</ref> || [[Antonio Pérez (racing driver)|Antonio Pérez]] || [[Toyota Camry (XV50)|Toyota Camry NASCAR]] || [[2015 NASCAR Mexico Series|2015 Alcatel OneTouch 240]]
+|-
+! colspan=5 | Formula E Circuit (2023–2025): {{cvt|2.628|km|mi|abbr=on}}<ref name="mexico_rcircuits"/>
+|-
+| [[Formula E]] || '''1:12.547''' || [[Sébastien Buemi]] || [[Formula E Gen3#Gen 3 Evo|Jaguar I-Type 7]] || [[2025 Mexico City ePrix]]
+|-
+! colspan=5 | Original Formula E Circuit (2017–2019): {{cvt|2.093|km|mi|abbr=on}}<ref name="mexico_rcircuits"/>
+|-
+| [[Formula E]] || '''1:01.112''' || [[Pascal Wehrlein]] || [[Spark SRT05e|Mahindra M5Electro]] || [[2019 Mexico City ePrix]]
+|-
+| [[Jaguar I-Pace eTrophy]] || '''1:15.516'''<ref>{{cite web |title=Jaguar I-PACE eTROPHY Series Round 2 - Mexico City ePrix - Race (25' +1 Lap) - Final Classification |url=https://results.fiaformulae.com/7a46440f-4fbf-40a4-b4df-6e155e821a63 |date=16 February 2019 |access-date=15 January 2023}}{{Dead link|date=September 2023 |bot=InternetArchiveBot |fix-attempted=yes}}</ref> || [[Bryan Sellers]] || [[Jaguar I-Pace eTrophy (racecar)]] || [[2018–19 Jaguar I-Pace eTrophy|2019 Mexico City Jaguar I-Pace eTrophy round]]
+|-
+! colspan=5 | Original Formula E Circuit (2016): {{cvt|2.092|km|mi|abbr=on}}<ref name="mexico_rcircuits"/>
+|-
+| [[Formula E]] || '''1:04.569''' || [[Nico Prost]] || [[Spark-Renault SRT_01E|Renault Z.E 15]] || [[2016 Mexico City ePrix]]
+|-
+! colspan=5 | Modified Grand Prix Circuit: {{cvt|4.421|km|mi|abbr=on}} (1986–2014)<ref name="mexico_rcircuits"/>
+|-
+| [[Formula One]] || '''1:16.788''' || [[Nigel Mansell]] || [[Williams FW14]] || [[1991 Mexican Grand Prix]]
+|-
+| [[Group C]] || '''1:21.611'''<ref>{{cite web |title=Sportscar World Championship Mexico 1991 |url=https://www.racingsportscars.com/race/Mexico-1991-10-06.html |archive-url=https://web.archive.org/web/20220407233122/https://www.racingsportscars.com/race/Mexico-1991-10-06.html |date=6 October 1991 |archive-date=7 April 2022 |url-status=live}}</ref> || [[Michael Schumacher]] || [[Mercedes-Benz C291]] || [[1991 430 km of Mexico City]]
+|-
+| [[Formula Three]] || '''1:21.753'''<ref>{{cite web |title=1999 Mexican F3/Formula Reynard Mexico City - 23 May Race Result |url=http://www.dlg.speedfreaks.org/archive/1999/mexf3.html#round1 |archive-url=https://web.archive.org/web/20230113155036/http://www.dlg.speedfreaks.org/archive/1999/mexf3.html#round1 |date=23 May 1999 |archive-date=13 January 2023 |access-date=13 January 2023 |url-status=live}}</ref> || [[Javier Pelayo]] || [[List of Reynard Motorsport cars|Reynard 933]] || [[Mexican Formula Three Championship|1999 2nd Monterrey Mexican F3 round]]
+|-
+| [[A1 Grand Prix|A1GP]] || '''1:27.534'''<ref>{{cite web |title=Round 9: Mexico - A1GP World Cup Of Motorsport - Sprint Race - Classification By Fastest Lap |url=http://a1gp.alkamelsystems.com/Results/02_2006-07/09_MEXICO,%20MEXICO/Mexico,%20Mexico.pdf |archive-url=https://web.archive.org/web/20220716162012/http://a1gp.alkamelsystems.com/Results/02_2006-07/09_MEXICO%2C%20MEXICO/Mexico%2C%20Mexico.pdf |date=25 March 2007 |archive-date=16 July 2022 |access-date=17 March 2024 |url-status=dead}}</ref> || [[Salvador Durán]] || [[A1 Grand Prix#First generation|Lola A1GP]] || [[2007 Mexico City A1GP round]]
+|-
+| [[Group C|Group C2]] || '''1:31.929'''<ref>{{cite web |title=World Sports Prototype Championship Mexico 1989 |url=https://www.racingsportscars.com/race/Mexico-1989-10-29.html |date=29 October 1989 |access-date=17 May 2021}}</ref> || [[Chris Hodgetts]] || [[Spice SE87C]] || [[1989 480 km of Mexico]]
+|-
+| [[Trans-Am Series|Trans-Am]] || '''1:39.030'''<ref>{{cite web |title=1991 Liquid Tide Trans-Am Tour - Copa Mexico - Race Results |url=http://autocourse.ca/archives/usa/transam/1991.pdf |date=19 May 1991 |access-date=31 December 2024}}</ref> || [[Darin Brassfield]] || [[Oldsmobile Cutlass|Oldsmobile Cutlass Trans-Am]] || [[1991 Trans-Am Series|1991 Mexico City Trans-Am round]]  
+|-
+! colspan=5 | National Circuit (1986–2014): {{cvt|4.000|km|mi|abbr=on}}<ref name="mexico_rcircuits"/>
+|-
+| [[Indy NXT|Indy Lights]] || '''1:15.386'''<ref name="mexico_f3000">{{Cite web |title=Mexican Top Formula Fact Book |url=http://www.gdecarli.it/Risultati/Piget/Mexico/ILP%2096-02.pdf |archive-url=https://web.archive.org/web/20230329212825/http://www.gdecarli.it/Risultati/Piget/Mexico/ILP%2096-02.pdf |date=30 July 2000 |archive-date=29 March 2023 |access-date=14 January 2023 |url-status=live}}</ref> || [[Oswaldo Negri Jr.]] || [[Lola T93/20|Lola T96/20]] || 2000 2nd Mexico City Fórmula de las Américas round
+|-
+| [[Formula 3000]] || '''1:16.005'''<ref name="mexico_f3000"/> || [[Mario Domínguez (racing driver)|Mario Domínguez]] || [[Lola Cars#Formula Two / Formula 3000 / A1GP|Lola T96/70]] || 1997 2nd Mexico City Mexican F3000 round
+|-
+| [[Formula Three]] || '''1:16.751'''<ref>{{cite web |title=MONTANA GRAND PRIX, INT'L. F-3. ROUND 1 OF 10, MEXICO CITY, MAY 11, 1997 |url=http://www.dlg.speedfreaks.org/archive/1997/mexf3.html |archive-url=https://web.archive.org/web/20230325102138/http://www.dlg.speedfreaks.org/archive/1997/mexf3.html |date=11 May 1997 |archive-date=25 March 2023 |access-date=13 January 2023 |url-status=live}}</ref> || [[Waldemar Coronas]] || [[List of Reynard Motorsport cars|Reynard 933]] || [[Mexican Formula Three Championship|1997 1st Mexico City Mexican F3 round]]
+|-
+| [[Formula Abarth]] || '''1:18.287'''<ref>{{Cite web |title=PANAM GP SERIES - CARRERA 02 Car - Autodromo Hnos. Rodriguez (Mexico) |url=https://speedhive.mylaps.com/Sessions/2318377 |date=3 June 2012 |access-date=16 July 2022}}</ref> || {{ill|Gerardo Nieto|es|Gerardo Nieto (piloto)}} || [[Tatuus FA010]] || [[2012 Panam GP Series|2012 Mexico City Panam GP round]]
+|-
+! colspan=5 | NASCAR Circuit (2007-2014): {{cvt|4.053|km|mi|abbr=on}}<ref name="mexico_rcircuits"/>
+|-
+| [[Daytona Prototype]] || '''1:20.521'''<ref>{{cite web |title=2008 Mexico City 250 |url=https://www.racing-reference.info/race-results/2008_Mexico_City_250/GA |archive-url=https://web.archive.org/web/20240425120429/https://www.racing-reference.info/race-results/2008_Mexico_City_250/GA/ |date=19 April 2008 |archive-date=25 April 2024 |access-date=6 May 2025 |url-status=live}}</ref> || [[Alex Gurney]] || [[Riley MkXI|Riley Mk XX]] || [[2008 Rolex Sports Car Series|2008 Mexico City 250]]
+|-
+! colspan=5 | A1GP Grand Prix Circuit (NASCAR Circuit with chicane) (2008): {{cvt|4.084|km|mi|abbr=on}}<ref name="2008_a1gp_mexico">{{cite web |title=Round 8: Mexico - A1GP World Cup Of Motorsport - Feature Race - Classification By Fastest Lap |url=http://a1gp.alkamelsystems.com/Results/04_2007-08/07_MEXICO,%20MEXICO/10_Feature%20Race/01_Classification_Feature%20Race.PDF |archive-url=https://web.archive.org/web/20220716161951/http://a1gp.alkamelsystems.com/Results/04_2007-08/07_MEXICO,%20MEXICO/10_Feature%20Race/01_Classification_Feature%20Race.PDF |date=16 March 2008 |archive-date=16 July 2022 |access-date=17 March 2024 |url-status=dead}}</ref>
+|-
+| [[A1 Grand Prix|A1GP]] || '''1:21.417'''<ref name="2008_a1gp_mexico"/> || [[Oliver Jarvis]] || [[A1 Grand Prix#First generation|Lola A1GP]] || [[2008 Mexico City A1GP round]]
+|-
+! colspan=5 | Champ Car Grand Prix Circuit (Modified Grand Prix Circuit with chicane) (2006–2007): {{cvt|4.463|km|mi|abbr=on}} <ref name="mexico_rcircuits"/>
+|-
+| [[Champ Car World Series|Champ Car]] || '''1:24.713''' || [[Robert Doornbos]] || [[Panoz DP01]] || [[2007 Gran Premio Tecate]]
+|-
+! colspan=5 | NASCAR Circuit (2005–2006): {{cvt|4.052|km|mi|abbr=on}}<ref name="mexico_rcircuits"/>
+|-
+| [[Daytona Prototype]] || '''1:22.931'''<ref>{{cite web |title=2006 Mexico City 250 |url=https://www.racing-reference.info/race-results/2006_Mexico_City_250/GA |archive-url=https://web.archive.org/web/20250829080257/https://www.racing-reference.info/race-results/2006_Mexico_City_250/GA |date=4 March 2006 |archive-date=29 August 2025 |access-date=23 May 2025 |url-status=live}}</ref> || [[Scott Pruett]] || [[Riley MkXI|Riley Mk XI]] || [[2006 Rolex Sports Car Series|2006 Mexico City 400 km]]
+|-
+! colspan=5 | CART/Champ Car Grand Prix Circuit (Modified Grand Prix Circuit with Foro Sol) (2002–2005): {{cvt|4.484|km|mi|abbr=on}}<ref name="mexico_rcircuits"/>
+|-
+| [[Championship Auto Racing Teams|CART]] || '''1:27.248''' || [[Shinji Nakano]] || [[Lola B02/00]] || [[2002 Gran Premio Telmex-Gigante]]
+|-
+| [[Champ Car World Series|Champ Car]] || '''1:28.479''' || [[Justin Wilson (racing driver)|Justin Wilson]]  || [[Lola B02/00]] || [[2005 Gran Premio Telmex/Tecate]]
+|-
+| [[Daytona Prototype]] || '''1:45.331'''<ref name="2005_grandam_mexico">{{cite web |title=250 mile Mexico 2005 |url=https://www.racingsportscars.com/race/Mexico_City-2005-11-05-14410.html |date=5 November 2005 |access-date=17 May 2021}}</ref> || [[Max Angelelli]] || [[Riley MkXI|Riley Mk XI]] || [[2005 Rolex Sports Car Series|2005 Mexico City 250]]
+|-
+| [[Formula Renault#Formula Renault 2.0|Formula Renault 2.0]] || '''1:48.798'''<ref>{{Cite web |title=Mexico Grand Prix - Carrera Formula Renault 2000 de America Car - Autodromo Hnos. Rodriguez (Mexico) |url=https://speedhive.mylaps.com/Sessions/107572 |archive-url=https://web.archive.org/web/20220716120554/https://speedhive.mylaps.com/Sessions/107572 |date=5 November 2004 |archive-date=16 July 2022 |access-date=16 July 2022 |url-status=live}}</ref> || [[Hugo Oliveras]] || [[Tatuus#Racecars|Tatuus FR2000]] || [[2004 Formula Renault seasons#2004 Copa Corona Formula Renault 2000 de America season|2004 Mexico City Formula Renault 2000 America round]]
+|-
+| [[LM GTE#History|Grand Touring]] || '''1:54.099'''<ref name="2005_grandam_mexico"/> || [[Bill Auberlen]] || [[BMW M3#E46 generation (2000–2006)|BMW M3 (E46) GTR]] || [[2005 Rolex Sports Car Series|2005 Mexico City 250]]
+|-
+! colspan=5 | Original Grand Prix Circuit (1959–1985): {{cvt|5.000|km|mi|abbr=on}}<ref name="mexico_rcircuits"/>
+|-
+| [[Formula One]] || '''1:43.050''' || [[Jacky Ickx]] || [[Brabham BT26|Brabham BT26A]] || [[1969 Mexican Grand Prix]]
+|-
+| [[Group 4 (motorsport)|Group 4]] || '''1:48.910'''<ref>{{cite web |title=USRRC Mexico City 1968 |url=https://www.racingsportscars.com/race/Mexico-1968-03-31.html |archive-url=https://web.archive.org/web/20181020032821/http://www.racingsportscars.com/race/Mexico-1968-03-31.html |date=31 March 1968 |archive-date=20 October 2018 |access-date=27 May 2022 |url-status=live}}</ref> || [[Peter Revson]] || [[Lola T70]] || [[1968 United States Road Racing Championship|1968 Mexico City USRRC round]]
+|-
+! colspan=5 | Original Short Circuit (1959–1985): {{cvt|3.991|km|mi|abbr=on}}<ref name="mexico_rcircuits"/>
+|-
+| [[Formula Atlantic]] || '''1:17.631'''<ref>{{cite web |title=Ricardo Rodriguez Autodrome, Copa Mexico - Formula Atlantic - 25 Avril 1982 |url=http://www.autocourse.ca/archives/usa/fatlantic/1982-fatlantic.htm |archive-url=https://web.archive.org/web/20220603053331/http://www.autocourse.ca/archives/usa/fatlantic/1982-fatlantic.htm |date=25 April 1982 |archive-date=3 June 2022 |access-date=3 June 2022 |url-status=live}}</ref> || [[Norm Hunter]] || [[Ralt RT4]] || [[Atlantic Championship|1982 Mexico City Formula Atlantic round]]
+|-
+|}
+
+== The baseball stadium ==
+{{Main|Estadio GNP Seguros}}
+
+The Autódromo includes a baseball stadium inside turn 14 (Peraltada). The stadium, called [[Estadio GNP Seguros]] since 2024 and formerly known as Foro Sol, was home to the [[Diablos Rojos del México]] and also hosts music concerts. Some of the artists who played there include [[Iron Maiden]], [[Paul McCartney]], [[Britney Spears]], [[Metallica]], [[Pink Floyd]], [[Santana (band)|Santana]], [[Lady Gaga]], [[The Rolling Stones]], [[Madonna (entertainer)|Madonna]], [[Taylor Swift]], [[Stone Temple Pilots]], [[Nine Inch Nails]], [[Shakira]], [[U2]], [[Radiohead]], and [[Guns N' Roses]]. The Diablos Rojos later left the then-called Foro Sol in order to build a new baseball stadium named [[Estadio Alfredo Harp Helú]], which was later completed on 23 March 2019. Unlike Estadio GNP, it was built inside of the race track near turns 1 and 3.<ref>[https://www.milb.com/mexican/news/gran-ambiente-en-inauguraci243n-del-estadio-ahh/c-305643060 Gran ambiente en inauguración del Estadio AHH.]</ref><ref>{{Cite web |url=https://www.elfinanciero.com.mx/nacional/amlo-inaugurara-nuevo-estadio-de-los-diablos-rojos-del-mexico-en-2019 |title=“AMLO inaugurará nuevo estadio de los Diablos Rojos del México en 2019”. |access-date=30 October 2022 |archive-date=30 October 2022 |archive-url=https://web.archive.org/web/20221030015322/https://www.elfinanciero.com.mx/nacional/amlo-inaugurara-nuevo-estadio-de-los-diablos-rojos-del-mexico-en-2019/ |url-status=live }}</ref>
+
+== Notes ==
+{{notelist}}
+
+== References ==
+{{reflist|2}}
+
+== External links ==
+* {{Official website| https://ahr.mx/}}
+* [http://www.grandprix.com/gpe/cir-043.html Autódromo Hermanos Rodríguez Page] at GrandPrix.com (focusing on [[Formula One]] history)
+
+{{Navboxes
+|list =
+{{Formula One circuits}}
+{{Formula E circuits}}
+{{FIA WEC circuits}}
+{{TCR World Tour circuits}}
+{{Porsche Supercup circuits}}
+{{NASCAR Cup Series racetracks}}
+{{NASCAR O'Reilly Auto Parts Series racetracks}}
+{{NASCAR Mexico Series racetracks}}
+{{Trans-Am tracks}}
+{{World Sportscar Championship circuits}}
+{{Champ Car tracks}}
+{{IMSA GT circuits}}
+{{Grand-Am circuits}}
+{{A1 Grand Prix circuits}}
+{{LATAM Challenge Series racetracks}}
+{{Mexico motor racing circuits}}
+{{Iztacalco}}
+}}
+{{Authority control}}
+
+{{DEFAULTSORT:Autodromo Hermanos Rodriguez}}
+[[Category:Sports venues in Mexico City]]
+[[Category:Motorsport venues in Mexico|Hermanos]]
+[[Category:Mexican Grand Prix]]
+[[Category:Porsche Supercup circuits]]
+[[Category:Mexico City ePrix]]
+[[Category:Champ Car circuits]]
+[[Category:Formula One circuits|Hermanos]]
+[[Category:NASCAR tracks|Hermanos]]
+[[Category:Atlantic Championship Series circuits]]
+[[Category:A1 Grand Prix circuits]]
+[[Category:FIA World Endurance Championship circuits]]
+[[Category:Trans-Am tracks]]
+[[Category:IMSA GT Championship circuits]]
+[[Category:Grand-Am circuits]]
+[[Category:Formula E circuits]]
+[[Category:1962 establishments in Mexico]]
+[[Category:Sports venues completed in 1962]]

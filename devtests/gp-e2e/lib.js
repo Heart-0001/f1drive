@@ -11,6 +11,7 @@
 //   e.g. PATCH='js/ui.js=devtests/gp-e2e/patched/ui.js' npx electron devtests/gp-e2e/online.js
 'use strict';
 const fs = require('fs'), path = require('path'), url = require('url'), Module = require('module');
+const refCar = require('../ref-car');
 const ROOT = path.resolve(__dirname, '..', '..');
 const OUT = path.join(__dirname, 'out');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -87,7 +88,9 @@ const AUTOPILOT = fs.readFileSync(path.join(__dirname, 'autopilot.js'), 'utf8');
 const PAGE = fs.readFileSync(path.join(__dirname, 'page.js'), 'utf8');
 let winSeq = 0;
 
-// electron = require('electron'), host = require(ROOT/net/host) (or null: no room), opts {fps, width, height}
+// electron = require('electron'), host = require(ROOT/net/host) (or null: no room), opts {fps, width, height, fresh}
+// The window drives the reference car (2025-standard, the v5 car the autopilot was tuned on): picked before the game
+// boots (devtests/ref-car.js; since v6.1 a fresh install drives the 2026 standard car). opts.fresh: a fresh install.
 function makeWin(electron, host, tag, opts) {
   opts = opts || {};
   const w = new electron.BrowserWindow({
@@ -125,6 +128,7 @@ function makeWin(electron, host, tag, opts) {
     return false;
   };
   w.open = async () => {
+    if (!opts.fresh) await refCar.seed(w);
     await w.loadFile(pageFile());
     await sleep(900);
     await w.js(AUTOPILOT + '\n;true');

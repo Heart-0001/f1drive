@@ -1,7 +1,8 @@
-/* F1.ui — menu (track picker; side panel with the tabs 車輛 (year + that year's cars), 大獎賽, 多人連線, 設定 (volume))
-   + HUD (lap times, minimap, player list, Grand Prix session box, start lights, results, pit lane strip; speed, gear,
-   pedals, battery and tyres are the telemetry graphic of js/telemetry.js, drawn from updateHUD).
-   Classic script; uses F1.telemetry when it is loaded. */
+/* F1.ui — menu (track picker; side panel with the tabs 車輛 (year + that year's cars), 大獎賽, 多人連線, 設定 (volume,
+   HUD mirrors)) + HUD (lap times, minimap, player list, Grand Prix session box, start lights, results, pit lane strip;
+   speed, gear, pedals, battery and tyres are the telemetry graphic of js/telemetry.js, drawn from updateHUD; the two
+   HUD rear-view mirrors are drawn by js/hudmirrors.js into the frames #hud-mirror-l / -r, laid out by index.html).
+   Classic script; uses F1.telemetry when it is loaded, F1.cars.ersNote for the battery line of the car cards. */
 (function () {
   'use strict';
   var F1 = (window.F1 = window.F1 || {});
@@ -11,7 +12,7 @@
     onSelectTrack: null, onExitToMenu: null,
     onCreateRoom: null, onJoinRoom: null, onLeaveRoom: null, onProfile: null,
     onGpStart: null, onGpAction: null,
-    onYear: null, onCar: null, onAudio: null
+    onYear: null, onCar: null, onAudio: null, onMirrors: null
   };
   var inited = false;
   var tele = null;          // F1.telemetry once init() found it and its canvas
@@ -37,6 +38,11 @@
   // 設定: audio
   var AUDIO_STORE_KEY = 'f1drive.audio';
   var audio = { volume: 0.8, muted: false };
+
+  // 設定: the HUD rear-view mirrors (on by default, remembered); `available` false when the game cannot draw them
+  // (main.js: js/hudmirrors.js missing / failed): the switch is disabled and the HUD laid out without them
+  var VIEW_STORE_KEY = 'f1drive.hud';
+  var view = { mirrors: true, available: true };
 
   // pit strip: the last input, in the units shown (setPit is called every frame)
   var pitC = { shown: false, inLane: false, limiter: false, speeding: false, limit: 0, slot: -1, box: 0,
@@ -833,20 +839,33 @@
     return (c.ers && typeof c.ers === 'object') || rating(c.ratings && c.ratings.ers) !== null;
   }
 
+  // One line about the car's battery (Traditional Chinese, '' when there is none; a car without KERS may have one too):
+  // the row's own ersNote if it carries one, else F1.cars.ersNote(id) (the CarSpec does not carry it).
+  function ersNote(c) {
+    if (typeof c.ersNote === 'string') return c.ersNote;
+    var C = F1.cars;
+    if (!C || typeof C.ersNote !== 'function') return '';
+    try { return str(C.ersNote(c.id)); } catch (err) { return ''; }
+  }
+
   function carCardHtml(c) {
-    var r = c.ratings && typeof c.ratings === 'object' ? c.ratings : {}, bars = '';
+    var r = c.ratings && typeof c.ratings === 'object' ? c.ratings : {}, bars = '', ers = hasErs(c);
     for (var k = 0; k < RATING_KEYS.length; k++) {
-      if (k === 4 && !hasErs(c)) continue;
+      if (k === 4 && !ers) continue;
       var v = rating(r[RATING_KEYS[k]]);
       bars += '<span class="car-bar"><em>' + RATING_NAMES[k] + '<b>' + (v === null ? '--' : v) + '</b></em>' +
         '<i><s style="width:' + (v || 0) + '%"></s></i></span>';
     }
+    // a car known to have no battery (spec.ers null: all of 2010, a few 2011-2012 teams): said where its bar would be
+    if (c.ers === null) bars += '<span class="car-noers" title="這輛車沒有 KERS（動能回收系統）：E 沒有作用">無 KERS</span>';
+    var en = ersNote(c);
     return '<button type="button" class="car-card" data-id="' + c.id + '" aria-pressed="false">' +
       '<span class="car-head"><i class="car-chip" style="background:' + cleanColour(c.colour) + '"></i>' +
       (isColour(c.colour2) ? '<i class="car-chip" style="background:' + c.colour2 + '"></i>' : '') +
       '<span class="car-team">' + teamHtml(c) + '</span><span class="car-model">' + esc(c.car) + '</span></span>' +
       (c.engine ? '<span class="car-engine">' + esc(c.engine) + '</span>' : '') +
       '<span class="car-bars">' + bars + '</span>' +
+      (en ? '<span class="car-ers"><b>電池</b>' + esc(en) + '</span>' : '') +
       (c.note ? '<span class="car-note">' + esc(c.note) + '</span>' : '') + '</button>';
   }
 
@@ -1012,6 +1031,46 @@
       changed();
     });
     renderAudio();
+    initMirrorSetting();
+  }
+
+  /* ---------- 設定: HUD rear-view mirrors ---------- */
+
+  function loadViewStore() {
+    try {
+      var o = JSON.parse(window.localStorage.getItem(VIEW_STORE_KEY) || 'null');
+      if (o && typeof o === 'object' && typeof o.mirrors === 'boolean') view.mirrors = o.mirrors;
+    } catch (err) { /* storage unavailable or corrupt: mirrors on */ }
+  }
+
+  function saveViewStore() {
+    try { window.localStorage.setItem(VIEW_STORE_KEY, JSON.stringify({ mirrors: view.mirrors })); } catch (err) { /* ignore */ }
+  }
+
+  // the switch, and the HUD laid out with or without the mirrors (#hud.no-mirrors: index.html moves the corner boxes
+  // back up and hides the frames)
+  function renderMirrors() {
+    if (!inited) return;
+    var on = view.mirrors && view.available;
+    if (el.setMirrors) {
+      if (el.setMirrors.checked !== on) el.setMirrors.checked = on;
+      if (el.setMirrors.disabled !== !view.available) el.setMirrors.disabled = !view.available;
+      setText('mirrorstxt', el.setMirrorsText, view.available ? (on ? '開' : '關') : '無法顯示');
+    }
+    if (cache.nomirrors !== !on) { cache.nomirrors = !on; el.hud.classList.toggle('no-mirrors', !on); }
+  }
+
+  function initMirrorSetting() {
+    loadViewStore();
+    if (el.setMirrors) el.setMirrors.addEventListener('change', function () {
+      el.setMirrors.blur();
+      if (!view.available || el.setMirrors.checked === view.mirrors) return;
+      view.mirrors = el.setMirrors.checked;
+      saveViewStore();
+      renderMirrors();
+      if (callbacks.onMirrors) callbacks.onMirrors(view.mirrors);
+    });
+    renderMirrors();
   }
 
   /* ---------- HUD: pit lane strip ---------- */
@@ -1026,7 +1085,7 @@
     setHtml('pitlimit', el.pitLimit, '維修區 限速<b>' + c.limit + '</b>');
     setText('pitlim', el.pitLim, c.limiter ? '限速器 開' : '限速器 關');
     setClass('pitlimcls', el.pitLim, 'pit-chip ' + (c.limiter ? 'on' : c.inLane ? 'warn' : 'off'));
-    var warn = c.speeding ? '超速！罰停 +5 s' : (c.inLane && !c.limiter && c.tenths < 0 ? '請開啟限速器（' + (c.pad ? 'LB' : 'Q') + '）' : '');
+    var warn = c.speeding ? '超速！罰停 +5 s' : (c.inLane && !c.limiter && c.tenths < 0 ? '請開啟限速器（' + (c.pad ? 'B' : 'Q') + '）' : '');
     setText('pitwarn', el.pitWarn, warn);
     setShown('pitwarnon', el.pitWarn, warn);
     setClass('pitwarncls', el.pitWarn, 'pit-warn' + (c.speeding ? ' hot' : ''));
@@ -1147,6 +1206,7 @@
     // 設定
     el.setVolume = $('set-volume'); el.setVolumeVal = $('set-volume-val');
     el.setMute = $('set-mute'); el.setMuteText = $('set-mute-text');
+    el.setMirrors = $('set-mirrors'); el.setMirrorsText = $('set-mirrors-text');   // HUD rear-view mirrors
     el.credits = $('credits'); el.setCredits = $('set-credits');   // credits line -> 資料來源與授權
     // HUD pit strip
     el.pit = $('hud-pit'); el.pitLimit = $('hud-pit-limit'); el.pitLim = $('hud-pit-lim'); el.pitWarn = $('hud-pit-warn');
@@ -1197,6 +1257,7 @@
       callbacks.onYear = opts.onYear || null;            // (year): the player picked a season
       callbacks.onCar = opts.onCar || null;              // (id): the player picked a car of the list
       callbacks.onAudio = opts.onAudio || null;          // ({volume, muted}): slider / mute switch moved
+      callbacks.onMirrors = opts.onMirrors || null;      // (on): the 後照鏡 switch of 設定 flipped
       if (inited) return;
       findElements();
       inited = true;                         // from here on setNet / setGp / setLights / setPad / setCars render
@@ -1318,6 +1379,22 @@
       audio.volume = v; audio.muted = m;
       saveAudioStore();
       renderAudio();
+    },
+
+    /** The HUD rear-view mirrors setting of 設定 (on by default, remembered in localStorage 'f1drive.hud'). */
+    getMirrors: function () { return view.mirrors; },
+
+    /**
+     * The mirrors changed elsewhere: m = { on (bool: the V key; shown and remembered), available (bool: false = the
+     * game cannot draw them; the switch is disabled and the HUD laid out without them, the setting itself is kept) }.
+     * Missing or invalid fields keep their value. Does not call onMirrors.
+     */
+    setMirrors: function (m) {
+      if (!m || typeof m !== 'object') return;
+      var on = typeof m.on === 'boolean' ? m.on : view.mirrors, av = typeof m.available === 'boolean' ? m.available : view.available;
+      if (on !== view.mirrors) { view.mirrors = on; saveViewStore(); }
+      view.available = av;
+      renderMirrors();
     },
 
     /**

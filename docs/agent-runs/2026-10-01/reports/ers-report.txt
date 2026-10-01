@@ -1,0 +1,42 @@
+
+################ ERS data per car
+
+== summary
+I wrote tools/ers-data.json (new) and docs/ers-data.md (new, Traditional Chinese, with sources). The JSON has per-car battery (KERS/ERS) data for all 168 entry ids of tools/seasons-raw.json from 2011 to 2026, each id exactly once. A node check passed: the ids match seasons-raw one-to-one, deploy and harvest stay within 0.75..1.15 and store within 0.9..1.1, every entry has https sources, a confidence level and a reason, and exactly the five documented no-KERS cars are marked. No existing file was edited and no Electron window was started.
+
+Only five cars raced with no KERS at all (hasErs false): 2011 Team Lotus (id lotus-racing), Virgin and HRT, and 2012 HRT and Marussia. In 2013 every car had KERS: Marussia's first, designed by Williams, and Caterham with the Red Bull Technologies system it has used since 2012.
+
+How the numbers are set: multiplier = 1 + 0.04 x score. The scores come from statements specifically about the energy-recovery system, sorted by evidence strength into levels 0, +/-1, +/-2 and +/-3; down to -6 is used only for Honda 2015. All numbers are estimates and are marked as such. Store is 1 everywhere because the rules fix the usable energy and I found no documented exception. Customer teams get their engine supplier's figures unless a team-specific fact is documented.
+
+Per season (d = deploy, h = harvest; cars not listed are 1.0):
+- 2011: Red Bull d0.92/h0.92 (KERS not fitted at round 1, problems at round 2).
+- 2012 and 2013: everything else 1.0 (no public data on KERS efficiency differences).
+- 2014: Mercedes engine (Mercedes, Williams, McLaren, Force India) d1.08/h1.12; Renault engine (Red Bull, Toro Rosso, Lotus, Caterham) d0.88/h0.92; Ferrari engine 1.0.
+- 2015: Mercedes engine d1.08/h1.12; Renault engine d0.88/h0.92; McLaren-Honda d0.84/h0.76; Marussia (year-old engine) d0.96/h0.96.
+- 2016: Mercedes engine (incl. Manor) d1.08/h1.12; Renault/TAG Heuer d0.96/h0.96; McLaren-Honda d0.92/h0.88; Toro Rosso (year-old Ferrari engine) d0.96/h0.96.
+- 2017: Mercedes engine d1.04/h1.08; Renault engine d0.96/h0.96; McLaren-Honda d0.88/h0.84; Sauber (year-old Ferrari engine) d0.96/h0.96.
+- 2018: Mercedes engine d1.04/h1.08; Renault engine (incl. McLaren) and Toro Rosso-Honda d0.96/h0.96.
+- 2019: Mercedes engine (incl. Racing Point) d1.04/h1.08; Honda d1.04/h1.04; Renault engine d0.96/h0.96; Ferrari 1.0.
+- 2020: Mercedes engine d1.04/h1.08; Honda d1.04/h1.08; Renault engine d0.96/h0.96; Ferrari, Alfa Romeo, Haas d0.92/h0.96.
+- 2021: Honda (Red Bull, AlphaTauri) d1.12/h1.12; Mercedes engine d1.04/h1.08; Ferrari works d0.96/h1.0; Alfa Romeo and Haas d0.92/h0.96; Alpine d0.96/h0.96.
+- 2022-2025: Honda/RBPT d1.04/h1.04; Mercedes engine d1.0/h1.04; Ferrari engine 1.0; Alpine (Renault) d0.96/h0.96.
+- 2026: Mercedes d1.04/h1.08; McLaren d0.98/h1.04; Alpine d1.01/h1.04; Williams d1.02/h1.04; Ferrari d0.98/h0.96; Haas d1.0/h0.96; Cadillac d0.98/h0.96; Red Bull and Racing Bulls d1.02/h1.0; Audi d1.0/h0.92; Aston Martin d0.88/h0.88.
+
+The sources are mainly Wikipedia car, power-unit and race articles, plus Autosport, The Race and Motorsport.com articles. The 2026 values are the js/cars-data.js scores with their deviation from 1 multiplied by 4, and The Race's September 2026 Monza energy analysis agrees with their order.
+
+== apiNotes
+ - File shape: { source: string, rules: string, entries: { '<year>-<team>': { hasErs: bool, deploy: number, harvest: number, store: number, note: string (one line of Traditional Chinese for the menu; empty where nothing about the battery system is sourced), confidence: 'high'|'medium'|'low', sources: [https URLs], reason: string (English: evidence and score), group: string (supplier-season key) } } }. The reason and group fields are additions beyond the requested shape; they can be ignored.
+ - deploy multiplies the era's ers.power, harvest multiplies ers.harvest, store multiplies ers.store. These REPLACE perf.ersPower / perf.ersHarvest (js/seasons-data.js / js/cars-data.js, today 0.95..1.05). Do not multiply them on top, or 2026 would count the cars-data values twice.
+ - hasErs false means the CarSpec gets ers: null (no battery, telemetry hides the bar). Its deploy/harvest/store are 1 and must be ignored. This applies only to 2011-hrt, 2011-lotus-racing, 2011-virgin, 2012-hrt and 2012-marussia.
+ - The generator must widen its sanitising of these multipliers: today cars.js and build-cars keep perf multipliers within 0.95..1.05, while this file uses 0.76..1.12. The ERS limits of F1.sanitizeSpec (1/10..10 x) are not a problem.
+ - The ratings.ers bar (build-cars: 0.5*((ersPower-1)+(ersHarvest-1))*100 with gain 13) will saturate at 0/100 for the larger values. The gain should be lowered (about 3..4) or the bar clamped.
+ - store is 1 for every entry (the rules fix the usable energy), so the integrator can skip it.
+ - Generator and validator (reproducible; they read seasons-raw and js/cars-data.js) are in the scratchpad: C:\Users\Heart\AppData\Local\Temp\claude\C--Users-Heart-Desktop-f1Drive\c2c193e6-e2b5-4b48-8955-beed8746e07e\scratchpad\ers\gen-ers.mjs and check-ers.js. To change a number, change its group's score there.
+
+== openIssues
+ - The web search quota for this session ran out on the first query. All research was done by fetching known pages directly (Wikipedia car, power-unit and race articles, plus a few articles at Autosport, The Race and Motorsport.com). As a result, 2011-2013 differences between KERS suppliers and Ferrari's 2014-2019 battery performance have no specific sources and stay at 1.0. The user's hint about Ferrari gains in 2017-2019 could not be backed: Ferrari's 2019 straight-line edge is documented only as linked to the fuel-flow dispute (the combustion engine).
+ - Mercedes 2017-2025, Renault 2016-2025, RBPT 2022-2025 and the three year-old-engine customers carry a supplier characteristic over from other years or infer it; their confidence is 'low'.
+ - Ferrari's 2021 hybrid upgrade is documented only for Ferrari's own cars, so Alfa Romeo and Haas 2021 keep the 2020 figures (d0.92/h0.96, confidence low). This is unverified either way.
+ - For 2026 the cars-data.js values were scaled by 4 for consistency with the rest of the file. The 2026 deploy proxy is straight-end telemetry, which also includes drag (as docs/cars-data-sources.md already notes).
+ - 2012 and 2013 show no per-car differences apart from the no-KERS cars, because no season-level differences between KERS systems are documented. Single race failures were deliberately not counted.
+ - Not done here: integrating the data into tools/build-cars.mjs / js/seasons-data.js, and showing the note line in the car menu. Both are for the integrator after the review fixes land.

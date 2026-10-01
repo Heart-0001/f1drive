@@ -37,8 +37,9 @@
 // lap / race times.
 //
 // v6 (2026-10-01): the menu's side panel is tabbed (車輛 / 大獎賽 / 多人連線 / 設定): the harness opens the tab whose
-// controls it clicks (a control in a hidden tab cannot be clicked). The room's season is the host's (a fresh install:
-// 2025, the 2025 standard car = the v5 car), and the results subtitle names it. The server wants every lap backed by
+// controls it clicks (a control in a hidden tab cannot be clicked). The room's season is the host's (every window has
+// the 2025 standard car = the v5 car picked before it boots, lib.js / ref-car.js: since v6.1 a fresh install would drive
+// the 2026 one), and the results subtitle names it. The server wants every lap backed by
 // driving it has seen: besides the three impossible laps C also reports a plausible one while it has covered less than
 // a lap ('not-driven'), and in session 2 D drives a real lap but stands 55 s of it beside the road while its "network"
 // delivers none of its car states ('no-data'); both refused with their toasts, the standings unchanged. Impacts are relayed by the server only
@@ -213,7 +214,7 @@ async function scenario() {
     !p0[1].setup && p0[1].hint === '由房主開始大獎賽，開始後房間裡所有人會一起進入排位賽。' && p0[2].hint === p0[1].hint, p0.map(p => p.hint));
   const season = await all(ABC, w => w.js(`({ room: F1.net.year, car: F1.game.spec.id })`));
   YEAR = season[0].room;
-  check('v6: the room has the host\'s season (a fresh install: 2025) and everybody drives the 2025 standard car (the v5 car)', season.every(s => s.room === 2025 && s.car === '2025-standard'), season);
+  check('v6: the room has the host\'s season (its pick: 2025) and everybody drives the 2025 standard car (the v5 car)', season.every(s => s.room === 2025 && s.car === '2025-standard'), season);
   const picked = await A.pick(TRACK);
   check('A picks ' + picked + ': all three load it', await waitAll(ABC, onTrack, 25000, 'track'));
   const hostStatus = await A.e(`text('mp-status')`);

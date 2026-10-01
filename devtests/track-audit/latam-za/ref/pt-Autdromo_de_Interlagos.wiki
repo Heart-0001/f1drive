@@ -1,0 +1,755 @@
+{{Coord|display=title|23|42|03|S|46|41|48|W|type=}}
+{{Info/Autódromo
+| nome             = Autódromo José Carlos Pace
+| apelido          = Autódromo de Interlagos
+| fuso_horário     = [[UTC−3]]
+| localização      = [[São Paulo]], [[São Paulo (estado)|São Paulo]], [[Brasil]]
+| coordenadas      = {{coord|display=título|23|42|03|S|46|41|48|W|E_type:landmark}}
+| logo             = Autódromo de Interlagos logo.png
+| imagem           = Grande_Prêmio_São_Paulo_de_Fórmula_1_(52497080967).jpg
+| imagem_tamanho   = 300px
+| legenda          = Imagem aérea do autódromo
+| capacidade       = 60000
+| licença          = Grau 1
+| proprietário     = 
+| operador         = 
+| inauguração      = 1938
+| abertura         = 1940
+| fechamento       = <!-- {{dtlink|DD|MM|AAAA}} -->
+| custo_construção = 
+| arquiteto        = 
+| nomes_anteriores = Autódromo de Interlagos (1940–1985)
+| eventos          = 
+'''[[Fórmula 1]]''' <br /> [[Grande Prêmio do Brasil|GP do Brasil]] <br /> {{small|(1972–1977, 1979–1980, 1990–2019)}} <br /> [[Grande Prêmio de São Paulo|GP de São Paulo]] <br /> {{small|(2021–presente)}}
+
+'''[[Campeonato Mundial de Endurance da FIA|WEC]]''' <br /> [[6 Horas de São Paulo]] <br /> {{small|(2012–2014, 2024–presente)}}
+
+'''[[TCR World Tour]]''' <br /> {{small|(2024–presente)}}
+
+'''TCR South America''' <br /> {{small|(2021–presente)}}
+
+'''[[Mil Milhas Brasil]]''' <br /> {{small|(1956–1961, 1965–1967 1970, 1973, 1981, 1983–1990, 1992–1999, 2001–2008, 2020–presente)}}
+
+'''[[Stock Car Brasil]]''' <br /> {{small|(1979–presente)}}
+
+'''[[Copa Truck]]''' <br /> {{small|(2017–presente)}}
+
+'''[[Fórmula Truck]]''' <br > {{small|(até 2016)}}
+
+'''[[TC 2000]]''' <br > {{small|(2007)}}
+
+'''[[Fórmula 3 Sul-americana]]''' <br > {{small|(até 2013)}}
+
+'''[[Campeonato brasileiro de Fórmula 3|Fórmula 3 Brasil]]''' <br /> {{small|(2014–presente)}}
+
+| traçado1         = Circuito atual (2000–presente)
+| superfície       = 
+| comprimento_km   = 4.309
+| comprimento_mi   = 2.677
+| curvas           = 15
+| inclinação       = 
+| tempo_recorde    = 1:10.540
+| piloto_recorde   = [[Valtteri Bottas]]
+| equipe_recorde   = [[Mercedes-Benz na Fórmula 1|Mercedes]]
+| ano_recorde      = [[Grande Prêmio do Brasil de 2018|2018]]
+| cat_recorde      = [[Fórmula 1]]
+| traçado2         = 4.ª variante (1997–1999)
+| superfície2      =
+| comprimento_km2  = 4.292
+| comprimento_mi2  = 2.667
+| curvas2          = 15
+| inclinação2      =
+| tempo_recorde2   = 1:18.397
+| piloto_recorde2  = [[Jacques Villeneuve]]
+| equipe_recorde2  = [[WilliamsF1|Williams]]-[[Motores Renault na Fórmula 1|Renault]]
+| ano_recorde2     = [[Grande Prêmio do Brasil de 1997|1997]]
+| cat_recorde2     = [[Fórmula 1]]
+| traçado3         = 3.ª variante (1990–1996)
+| superfície3      =
+| comprimento_km3  = 4.325
+| comprimento_mi3  = 2.687
+| curvas3          = 15
+| inclinação3      =
+| tempo_recorde3   = 1:18.455
+| piloto_recorde3  = [[Michael Schumacher]]
+| equipe_recorde3  = [[Benetton Formula|Benetton]]-[[Ford Motor Company|Ford]]
+| ano_recorde3     = [[Grande Prêmio do Brasil de 1994|1994]]
+| cat_recorde3     = [[Fórmula 1]]
+| traçado4         = 2.ª variante (1979–1989)
+| superfície4      =
+| comprimento_km4  = 7.873
+| comprimento_mi4  = 4.893
+| curvas4          = 26
+| inclinação4      =
+| tempo_recorde4   = 2:27.31
+| piloto_recorde4  = [[René Arnoux]]
+| equipe_recorde4  = [[Renault na Fórmula 1|Renault]]
+| ano_recorde4     = [[Grande Prêmio do Brasil de 1980|1980]]
+| cat_recorde4     = [[Fórmula 1]]
+| traçado5         = Circuito original (1940–1978)
+| superfície5      =
+| comprimento_km5  = 7.960
+| comprimento_mi5  = 4.946
+| curvas5          = 26
+| inclinação5      =
+| tempo_recorde5   = 2:34.16
+| piloto_recorde5  = [[Jean-Pierre Jarier]]
+| equipe_recorde5  = [[Shadow Racing Cars|Shadow]]-[[Ford Motor Company|Ford]]
+| ano_recorde5     = [[Grande Prêmio do Brasil de 1975|1975]]
+| cat_recorde5     = [[Fórmula 1]]
+| rodapé           = 
+|Maior velocidade alcançada=347.8 Km/h|Elevação (máx)=43.0 metros|Volta qualificatória mais rápida=[[Lewis Hamilton ( 1:07:281 )]]}}
+'''Autódromo José Carlos Pace''' é um [[autódromo]] municipal localizado no [[distrito]] de [[Cidade Dutra]], na [[Zona Sul de São Paulo|Zona Sul]] do [[Municípios do Brasil|município brasileiro]] de [[São Paulo]], e considerado um dos melhores e mais importantes circuitos de corrida do mundo.<ref>{{Citar web|url=https://www.redbull.com/int-en/worlds-best-racing-circuits|titulo=A white-knuckle journey through the world's best racing circuits|data=2024-04-19|acessodata=2026-03-28|website=Red Bull|língua=en}}</ref><ref>{{Citar web|ultimo=|primeiro=|url=https://casadaboiacultural.com.br/a-conquista-historica-de-senna-e-o-autodromo-de-interlagos/|titulo=A conquista histórica de Senna e o Autódromo de Interlagos|data=2025-03-27|acessodata=2026-03-28|website=Casa da Boia Cultural|língua=pt-BR}}</ref><ref>{{citar web|url=https://prefeitura.sp.gov.br/w/f%C3%A3s-da-f%C3%B3rmula-1-de-todo-o-mundo-elegem-gp-s%C3%A3o-paulo-como-o-melhor-da-temporada-2024%C2%A0|titulo=Fãs da Fórmula 1 de todo o mundo elegem GP São Paulo como o melhor da temporada 2024|data=18 de dezembro de 2024|acessodata=28 de março de 2026|website=Prefeitura do Município de São Paulo}}</ref> Pela proximidade com o [[bairro]] de [[Interlagos (bairro)|Interlagos]], situado no distrito vizinho do [[Socorro (distrito de São Paulo)|Socorro]], é popularmente chamado de '''Autódromo de Interlagos'''. Foi inaugurado em [[12 de maio]] de [[1940]] pelo interventor [[Ademar de Barros]], e nos anos de 1972 a 1977, 1979 e 1980 e de 1990 a 2019, sediou o [[Grande Prêmio do Brasil]] de [[Fórmula 1]]. Desde 2021, o autódromo sedia o [[Grande Prêmio de São Paulo]].
+
+O nome tradicional do bairro (e consequentemente do circuito) vem do fato da localização em uma região entre dois lagos artificiais, [[Represa de Guarapiranga|Guarapiranga]] e [[Represa Billings|Billings]], que foram construídos no começo do século XX para suprir a cidade com água e energia elétrica. O nome foi sugerido pelo arquiteto e urbanista francês [[Alfred Agache (arquiteto)|Alfred Agache]] devido a semelhança da região com a cidade de [[Interlaken]] (literalmente "entre lagos"), na [[Suíça]].<ref>{{Citar web|título = História – Autódromo de Interlagos - Autódromo José Carlos Pace|URL = http://www.autodromodeinterlagos.com.br/wp1/conheca-interlagos/historia/|obra = Autódromo de Interlagos - Autódromo José Carlos Pace|acessadoem = 2015-12-30}}</ref> Em 1985, foi renomeado para homenagear o piloto de Fórmula 1 [[José Carlos Pace]], falecido em 1977. Anexo à sua construção, há o [[Kartódromo Municipal Ayrton Senna]].
+
+O circuito tem sentido anti-horário. Nesse autódromo são realizadas as principais competições de [[Automobilismo]] do [[Brasil]]. É conhecido internacionalmente por sediar a etapa do [[Grande Prêmio do Brasil]] de [[Fórmula 1]] e os festivais de música ''[[Lollapalooza (Brasil)|Lollapalooza]]'' e ''[[The Town Festival|The Town]]''.
+
+== História ==
+[[Ficheiro:Autódromo_José_Carlos_Pace,_July_3,_2018_SkySat_(cropped).jpg|thumb|left|250px|[[Fotografia aérea]] do Autódromo de Interlagos]]
+
+No fim da [[década de 1920]], o engenheiro britânico Luiz Romero Sanson idealizou uma região de lazer entre as represas Billings e Guarapiranga, sendo que sua filha escolheu o nome [[Interlagos (bairro de São Paulo)|Interlagos]] para o local. A ideia era atender a população mais rica da cidade, que se interessava pelo automobilismo. A construção do circuito também foi incentivada por um acidente acontecido em 1936, quando foi realizada a primeira prova internacional de São Paulo nas ruas da cidade. A francesa Hellé-Nice sofreu um acidente que causou seis mortes e deixou mais de 30 pessoas feridas.<ref name=":0">{{citar web|url=https://www.estadao.com.br/infograficos/esportes,com-futuro-incerto-autodromo-de-interlagos-celebra-80-anos,1094426|titulo=Com futuro incerto, Autódromo de Interlagos celebra 80 anos|data=12/05/2020|acessodata=12/05/2020|publicado=O Estado de São Paulo|ultimo=Magatti|primeiro=Ricardo}}</ref><ref name=":1">{{citar web|url=https://agenciabrasil.ebc.com.br/esportes/noticia/2020-05/autodromo-de-interlagos-completa-80-anos-com-futuro-indefinido|titulo=Autódromo de Interlagos completa 80 anos com futuro indefinido|data=12/05/2020|acessodata=12/05/2020|publicado=Agência Brasil|ultimo=Bocchini|primeiro=Bruno}}</ref> A iniciativa da construção foi de Sanson e do Automóvel Clube do Brasil. O traçado foi inspirado nas pistas de Indianapolis, nos Estados Unidos, Brooklands, na Inglaterra e Monthony, na França.<ref name=":0" />
+
+Em abril de 1939, com o autódromo ainda em obras, um grupo de pilotos liderado por [[Manoel de Teffé]] deu as primeiras voltas na pista. Um ano após houve a grande inauguração no dia 12 de maio de 1940, quando o autódromo abriu suas portas. Tinha, à época, uma extensão total de {{Fmtn|7960}} m.<ref name=":0" /> Nesse dia, o autódromo recebeu 15 mil pessoas para duas corridas: uma de motos, com 96&nbsp;km (12 voltas), e o Grande Prêmio São Paulo, com 200&nbsp;km (25 voltas).<ref name=":1" /> O vencedor foi o piloto Artur Nascimento Júnior, que percorreu 25 voltas da prova no tempo de 1 hora, 46 minutos e 44 segundos. A estrutura ainda não estava pronta e ainda não havia arquibancadas, boxes, lanchonetes, banheiros, torre de cronometragem e de transmissão.<ref name=":0" />
+
+Fechado para reformas em 1967, só foi reaberto em 1 de março de 1970, para a realização de uma prova do campeonato internacional de [[Fórmula Ford]]. Em 1971, o autódromo passou novamente por reformas para abrigar no ano seguinte, pela primeira vez, um Grande Prêmio de [[Fórmula 1]]. Em 1972 houve o primeiro [[Grande Prêmio do Brasil]] de [[Fórmula 1]] sem contar pontos para o campeonato, sendo vencido pelo argentino [[Carlos Reutemann]], piloto da equipe [[Brabham]]. Em 1973, a prova já era válida pelo campeonato mundial de equipes e pilotos, sendo vencida pelo brasileiro [[Emerson Fittipaldi]], da [[Team Lotus|Lotus]]. Em 1975, o autódromo foi palco da primeira dobradinha de brasileiros na Fórmula 1: [[José Carlos Pace]] foi o vencedor, seguido de Fittipaldi.<ref name=":0" /> Até 1980, o autódromo recebeu o Grande Prêmio sucessivamente, com exceção de 1978 que foi no [[Autódromo de Jacarepaguá]] devido a reformas no circuito. Devido às condições precárias e poucas manutenções, Interlagos ficou impossibilitada de realizar corridas de Fórmula 1 e, consequentemente, o Grande Prêmio do Brasil de Fórmula 1 passou a ser realizado no [[Rio de Janeiro]] em [[Jacarepaguá]] de 1981 até 1989.<ref name=":1" /> Em 29 de junho de 1988, o Autódromo de Interlagos recebeu o 1° Hanabi Matsuri, em comemoração aos 80 anos da [[Imigração japonesa no Brasil]].
+
+=== Retorno da Formula 1 ===
+[[Ficheiro:Autodromo Jose Carlos Pace main straight and controle tower.jpg|thumb|left|Torre de controle do Autódromo de Interlagos]]
+
+Por conta da não-renovação do acordo com o Rio de Janeiro por questões políticas e financeiras (o acidente de [[Philippe Streiff]], pedidos de propina e a negativa de realização de obras profundas em Jacarepaguá), a F1 considerou buscar outro lugar para completar o calendário. Graças à tenacidade de [[Piero Gancia]], Presidente da CBA, a Prefeitura de São Paulo, então comandada por [[Luiza Erundina]], comprou o projeto de reformar Interlagos para receber a F1. Erundina firmou uma parceria com a [[Shell plc|Shell]] e fez uma profunda transformação em Interlagos em pouco mais de 90 dias.<ref>{{Citar web|ultimo=Milani|primeiro=Sérgio|url=https://www.terra.com.br/esportes/automobilismo/formula1/1990-quando-o-brasil-quase-nao-teve-o-seu-gp-de-f1,7eede7ac52c47509dc81c42042e079c7x7ijl2sh.html|titulo=1990: Quando o Brasil quase não teve o seu GP de F1|data=02/11/2022|acessodata=2026-03-13|website=[[Terra (empresa)|Terra]]|língua=pt-BR}}</ref>
+
+Em 1989, a Prefeitura de São Paulo, com o apoio da [[Confederação Brasileira de Automobilismo]], iniciou negociações para trazer de volta a Interlagos o Grande Prêmio Brasil de Fórmula 1. Iniciou-se, assim, uma grande reforma que mudaria completamente o traçado original do circuito e, em 1990, o evento voltou para [[São Paulo]], onde continua até o presente momento de forma ininterrupta. A extensão foi diminuída pela metade, chegando a {{Fmtn|4325}} m. Atualmente, o percurso é de {{Fmtn|4309}} m.<ref name=":0" />
+
+O plano original previa a redução do traçado do circuito, preservando, contudo, as curvas 1 e 2 do antigo percurso de 7,9 km. Diante da possibilidade de realização de uma corrida da [[IndyCar Series|Fórmula Indy]] no anel externo do autódromo, [[Bernie Ecclestone]], então dirigente da Fórmula 1, defendeu a eliminação dessas duas curvas. A justificativa oficial baseava-se em preocupações com a segurança, o que gerou um impasse no processo de redefinição do traçado. Por sugestão de [[Ayrton Senna]], foi então concebida uma sequência em descida ligando a antiga curva 1 à Curva do Sol. Esse trecho passou a ser denominado “S do Senna”, em homenagem ao tricampeão mundial.<ref>{{Citar web|ultimo=Sabino|primeiro=Fred|url=https://ge.globo.com/motor/formula-1/blogs/f1-memoria/post/2020/02/01/com-participacao-de-ayrton-senna-pista-de-interlagos-ganhou-novo-tracado-ha-30-anos.ghtml|titulo=Com participação de Ayrton Senna, pista de Interlagos ganhou novo traçado há 30 anos|data=2020-02-01|acessodata=2026-03-13|website=[[ge (portal)|ge]]|língua=pt-BR}}</ref><ref>{{Citar web|ultimo=ESPN.com.br|url=https://www.espn.com.br/f1/artigo/_/id/14395074/formula-1-como-surgiu-s-do-senna-autodromo-interlagos|titulo=Fórmula 1: como surgiu o 'S do Senna' no autódromo de Interlagos|data=2024-11-03|acessodata=2026-03-13|website=[[ESPN.com]]|língua=pt}}</ref>
+
+No fim de 2019, a prefeitura de São Paulo apresentou duas vezes um edital para concessão do autódromo à iniciativa privada. Porém, o leilão está suspenso desde abril de 2020 pelo Tribunal de Contas do Município.<ref name=":1" />
+
+No ano de 2020, devido à [[pandemia de COVID-19]], o Grande Prêmio do Brasil, que estava em seu último ano de contrato com a [[Fórmula 1]], foi cancelado. Em razão disso, surgiu uma série de incertezas sobre a permanência do evento em Interlagos, com a realização da corrida no [[Brasil]] para os anos seguintes, sendo disputada entre o Autódromo de Interlagos e a Rio Motorsports, uma empresa que almejava construir o [[Autódromo de Deodoro]] e levar o Grande Prêmio do Brasil de volta para o [[Rio de Janeiro (estado)|Rio de Janeiro]]. Porém, devido a problemas com liberação ambiental, o autódromo foi inviabilizado, garantindo assim que Interlagos assinasse um novo contrato com a Fórmula 1 para receber uma etapa da categoria até 2025, mas com o evento passando a se chamar [[Grande Prêmio de São Paulo]].<ref>{{citar web|data=12 de novembro de 2020|título=Governador de SP anuncia acordo com F1 para realizar corrida em Interlagos até 2025|url=https://globoesporte.globo.com/motor/formula-1/noticia/governador-de-sp-confirma-contrato-com-f1-para-realizar-gp-do-brasil-em-interlagos-ate-2025.ghtml|website=globoesporte.globo.com|acessodata=6 de maio de 2024}}</ref><ref>{{citar web |ultimo= |primeiro= |url=https://www.formula1.com/en/latest/article.sao-paulos-interlagos-circuit-to-host-brazilian-grand-prix-until-2025.7d5nbQbkoQy7QxL4TEojO.html |titulo=Sao Paulo’s Interlagos Circuit to host Brazilian Grand Prix until 2025 |data=16 de dezembro de 2020 |publicado=Formula1.com|acessodata=6 de maio de 2024}}</ref><ref>{{citar web |url=https://jovempan.com.br/esportes/outros-esportes/governo-de-sao-paulo-renova-com-a-formula-1-por-cinco-anos.html |titulo=Governo de São Paulo renova com a Fórmula 1 por cinco anos |data=2020-11-12 |publicado=Jovem Pan |acessodata=6 de maio de 2024}}</ref>
+
+Em novembro de 2023 o chefe executivo da F1, [[Stefano Domenicali]], disse: “Tenho o prazer de anunciar que ficaremos em Interlagos até 2030, e mal posso esperar por muitos anos mais da maravilhosa atmosfera que os torcedores brasileiros trazem”.<ref>{{Citar web|ultimo=Nair|primeiro=Rohith|url=https://www.cnnbrasil.com.br/esportes/gp-de-sao-paulo-f1-renova-com-interlagos-ate-2030/|titulo=GP de São Paulo: F1 renova com Interlagos até 2030|acessodata=2023-11-03|website=CNN Brasil}}</ref>
+
+=== Homenagem a José Carlos Pace ===
+Em agosto de 2024, o corpo de José Carlos Pace foi transferido de seu mausoléu vandalizado para o autódromo, onde foi sepultado no autódromo que leva seu nome. A ideia para isso surgiu de uma iniciativa do presidente da [[Confederação Brasileira de Automobilismo]] (CBA), Paulo "Loco" Figueiredo, do presidente da Comissão Nacional de Carros Clássicos e do jornalista Ricardo Caruso. O corpo de Pace chegou a Interlagos, onde foi sepultado ao lado do busto que ali se ergue em sua homenagem. A cerimônia emocionante contou com a presença da família de Pace (sua viúva Elda, seus filhos Patrícia e Rodrigo, e seus netos), amigos, outros pilotos, jornalistas e admiradores de "Moco". José Carlos Pace deu uma última volta na pista, onde Rodrigo, filho de "Moco", pilotou um carro de corrida [[Volkswagen Karmann-Ghia|Karmann-Ghia]] 1967, usado por seu pai, da antiga equipe Dacon, onde Pace formava um trio com ninguém menos que os irmãos Fittipaldi, [[Emerson Fittipaldi|Emerson]] e [[Wilson Fittipaldi Júnior]], na época. Isso faz de Pace o primeiro piloto falecido a ser sepultado em um circuito de corrida.<ref>{{Citar web|url=https://www.cba.org.br/noticias/noticiasinfo/2838/cba-celebra-a-memoria-de-jose-carlos-pace-com-traslado-de-seus-restos-mortais-para-o-autodromo-de-interlagos-|titulo=CBA celebra a memória de José Carlos Pace com traslado de seus restos mortais para o Autódromo de Interlagos {{!}} CBA - Confederação Brasileira de Automobilismo|acessodata=2025-09-09|website=www.cba.org.br}}</ref>
+
+=== Melhorias ===
+Para o [[Grande Prêmio do Brasil de 2007]], foram realizados os reparos de maior escala dos últimos 35 anos do circuito, para resolver fundamentalmente problemas com a superfície da pista.<ref>{{citar jornal| url =http://64.233.169.104/search?q=cache:hxA99iE4FTIJ:www.folhadaregiao.com.br/link.php%3Fcodigo%3D70051 |título=Interlagos será fechado para reforma |publicado=www.folhadaregiao.com.br/ |páginas=|página=|data=2007-06-14 |acessodata=2007-08-05 }}</ref><ref>{{citar jornal| url =http://www.autodromointerlagos.com/fotoobras.htm |título=As obras em Interlagos |publicado=www.autodromointerlagos.com/ |páginas=|página=|data=2007-09-04 |acessodata=2007-09-08 }}</ref> O asfalto existente foi totalmente substituído,<ref>{{citar jornal| url =http://www.gpbrasil.com.br/site2007/coluna.asp?id=23# |título=FIA tem uma justificada preocupação com o GP Brasil de Fórmula 1 |publicado=www.gpbrasil.com.br/ |páginas=|página=|data=|acessodata=2007-08-05 }}</ref> resultando em uma superfície da pista muito lisa. Ao mesmo tempo, a entrada do ''pit lane'' foi reforçada para melhorar a segurança e foi construído um novo e maior stand fixo.<ref>{{citar jornal| url =http://www.autodromointerlagos.com/IMG_2705.jpg |título=Alargamento da entrada dos boxes, para maior segurança dos pilotos |publicado=www.autodromointerlagos.com/ |páginas=|página=|data=|acessodata=2007-08-05 }}</ref> Para facilitar o trabalho, o circuito foi fechado e não foram realizados eventos nos cinco meses imediatamente anteriores à corrida.<ref>{{citar jornal| url =http://www.clicabrasilia.com.br/torcida/materia.php?IdNoticia=34304 |título=Reforma deve acabar com problemas no asfalto de Interlagos |publicado=www.clicabrasilia.com.br/ |páginas=|página=|data=2007-06-13 |acessodata=2007-08-05 }}</ref>
+
+Em 17 de outubro de 2007, começou a operar a nova [[Estação Autódromo]] da [[Linha 9 do Trem Metropolitano de São Paulo|Linha 9–Esmeralda]], situada perto do circuito.<ref>{{citar jornal| url =http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3669 |título=ESTAÇÃO AUTÓDROMO É INAUGURADA NESTA QUARTA-FEIRA |publicado=CET - Companhia de Engenharia de Tráfego |páginas=|página=|data=2007-10-16 |acessodata=2007-10-23 }}</ref><ref>{{citar jornal| url =http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3675 |título=INAUGURAÇÃO DA ESTAÇÃO AUTÓDROMO DÁ LARGADA PARA O METRÔ DE SUPERFÍCIE EM SP |publicado=CET - Companhia de Engenharia de Tráfego |páginas=|página=|data=2007-10-18 |acessodata=2007-10-23 }}</ref><ref>{{citar jornal| url =http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3683 |título=CIRCULAÇÃO DE TRENS GANHA ESQUEMA ESPECIAL PARA GP BRASIL DE F1 |publicado=CET - Companhia de Engenharia de Tráfego |páginas=|página=|data=2007-10-18 |acessodata=2007-10-23 }}</ref><ref>{{citar jornal| url =http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=3717 |título=INAUGURAÇÃO DA ESTAÇÃO AUTÓDROMO MARCA INÍCIO DO METRÔ DE SUPERFÍCIE, NA CAPITAL |publicado=CET - Companhia de Engenharia de Tráfego |páginas=|página=|data=2007-10-22 |acessodata=2007-10-23 }}</ref> A linha foi prolongada para melhorar o acesso entre o [[Zona Central de São Paulo|centro de São Paulo]] e a região sul da capital, incluindo o circuito.<ref>{{citar jornal| url =http://www.cetsp.com.br/internew/informativo/interlagos/2007/quemvai.htm#2010 |título=CET Operação Interlagos 2007 |publicado=CET - Companhia de Engenharia de Tráfego |páginas=|página=|data=|acessodata=2007-10-17 }}</ref><ref>{{citar jornal| url =http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=643 |título=GOVERNADOR GERALDO ALCKMIN DÁ INÍCIO ÀS OBRAS DE EXTENSÃO DA LINHA C |publicado=CPTM - [[Companhia Paulista de Trens Metropolitanos]] |páginas=|página=|data=2005-11-21 |acessodata=2007-10-17 }}</ref><ref>{{citar jornal| url =http://www.cptm.sp.gov.br/e_noticias/webnoticias/one_news.asp?IDNews=753 |título=COMPANHIA INICIA OBRAS PARA BENEFICIAR POPULAÇÃO DA GRANDE SÃO PAULO |publicado=CPTM - [[Companhia Paulista de Trens Metropolitanos]] |páginas=|página=|data=2005-12-27 |acessodata=2007-10-17 }}</ref> A estação, que fez parte dos planos de extensão da linha, localiza-se a 600 metros do portão do Setor G do autódromo.
+
+Em dias de grandes eventos, mais notavelmente [[Lollapalooza]], [[The Town Festival|The Town]] e [[Fórmula 1]], é disponibilizado um serviço de trens expressos até a região do autódromo com partidas da [[Terminal Intermodal Pinheiros|Estação Pinheiros]] (integrada à [[Linha 4 do Metropolitano de São Paulo|Linha 4 do Metrô]]), fazendo parada única na [[Estação Morumbi]], visando proporcionar viagens mais rápidas para o público que se desloca a esses eventos.<ref>{{citar web|url=https://www.band.com.br/entretenimento/saiba-onde-vai-ser-o-the-town-2023-e-qual-e-o-jeito-mais-facil-de-chegar-16629274|título=Saiba onde vai ser o The Town 2023 e qual é o jeito mais fácil de chegar|publicado=Band|data=31 de agosto de 2023|acessodata=16 de setembro de 2025}}</ref><ref>{{citar web|url=https://www.radiorock.com.br/2025/03/24/lollapalooza-brasil-2025-trem-expresso-facilitara-acesso-ao-festival/|título=Lollapalooza Brasil 2025: trem expresso facilitará acesso ao festival|publicado=[[89 FM A Rádio Rock|A Rádio Rock]]|data=24 de março de 2025|acessodata=16 de setembro de 2025|arquivourl=https://web.archive.org/web/20250423053318/https://www.radiorock.com.br/2025/03/24/lollapalooza-brasil-2025-trem-expresso-facilitara-acesso-ao-festival/|arquivodata=23 de abril de 2025}}</ref><ref>{{citar web|url=https://vejasp.abril.com.br/cidades/saiba-como-chegar-ao-gp-de-formula-1-de-sao-paulo/|título=Saiba como chegar ao GP de Fórmula 1, de São Paulo|publicado=[[Veja (revista)|Veja São Paulo]]|data=31 de outubro de 2024|acessodata=16 de setembro de 2025}}</ref> No caso do The Town, também é disponibilizado um serviço expresso de trens que partem da [[Estação Barueri]] da [[Linha 8 do Trem Metropolitano de São Paulo|Linha 8]], com parada única na própria Estação Pinheiros.<ref>{{Citar web|url=https://www.metrocptm.com.br/viamobilidade-monta-plataforma-provisoria-na-antiga-estacao-cidade-dutra/|titulo=ViaMobilidade monta plataforma provisória na antiga estação Cidade Dutra|publicado=Metrô CPTM|data=25 de agosto de 2025|acessodata=16 de setembro de 2025}}</ref> 
+
+[[Ficheiro:Interlagos -big.jpg|800px|thumb|centro|Panorâmica da reta principal do autódromo, tirada da arquibancada M, durante o treino de sexta-feira para o Grande Prêmio Petrobras do Brasil de Fórmula Um 2009]]
+
+Interlagos sofreu reformas a serem entregues em 2015 ao custo de 130 milhões de reais para atender novas exigências da FIA. A pista foi inteiramente recapeada para o [[Grande Prêmio do Brasil de 2014 (Fórmula 1)|Grande Prêmio do Brasil de Fórmula 1 de 2014]], assim como foram refeitas a entrada dos boxes e a área de escape da segunda perna do S do Senna. Para 2015, o [[paddock]] existente foi inteiramente remodelado. O então prefeito [[Fernando Haddad]] estudou construir novos boxes na reta oposta, porém a ideia foi abandonada.<ref>[https://www1.folha.uol.com.br/esporte/2013/11/1376077-obras-em-interlagos-custarao-r-130-milhoes.shtml Obras em Interlagos custarão R$ 130 milhões], Folha de S. Paulo</ref> 
+
+Em 2024 o autódromo foi interditado após a etapa da [[Campeonato Mundial de Endurance da FIA de 2024|WEC]] para uma reforma orçada em 275 milhões de reais<ref>{{Citar web|ultimo=Franco|primeiro=Pedro|url=https://sportbuzz.com.br/formula-1/2024/10/20/autodromo-de-interlagos-tera-reforma-que-custara-r-275-milhoes/|titulo=Autódromo de Interlagos terá reforma que custará R$ 275 milhões|data=2024-10-20|acessodata=2025-01-06|website=Sportbuzz|lingua=pt-BR}}</ref> para a corrida da Fórmula 1 em novembro, com renovação completa do asfalto após 10 anos.<ref>{{Citar web|ultimo=Nascimento|primeiro=Jairo|url=https://www.cnnbrasil.com.br/esportes/automobilismo/asfalto-de-interlagos-e-recapeado-apos-10-anos/|titulo=Asfalto de Interlagos é recapeado após 10 anos|acessodata=2025-01-06|website=CNN Brasil|lingua=pt-BR}}</ref> Após este recapeamento, os tempos de volta caíram consideravelmente em diversas categorias; como exemplo, nas provas de carros turismo e GT que correram no mesmo ano em Interlagos, a queda foi de cerca de 1,5 a 2 segundos para a Porsche Cup e StockCar Pro Series.<ref>{{Citar web|ultimo=Franco|primeiro=Pedro|url=https://sportbuzz.com.br/formula-1/2024/10/20/autodromo-de-interlagos-tera-reforma-que-custara-r-275-milhoes/|titulo=Autódromo de Interlagos terá reforma que custará R$ 275 milhões|data=2024-10-20|acessodata=2025-01-06|website=Sportbuzz|lingua=pt-BR}}</ref><ref>{{Citar web|ultimo=Balsa|primeiro=Daniel|url=https://www.grandepremio.com.br/f1/noticias/do-novo-asfalto-zebras-mais-coloridas-que-muda-interlagos-para-f1-2024/|titulo=Do novo asfalto a zebras mais coloridas: o que muda em Interlagos para F1 2024 {{!}} Notícia de Fórmula 1|data=2024-10-23|acessodata=2025-01-06|website=Grande Prêmio|lingua=pt-br}}</ref>
+
+=== Eventos musicais ===
+O autódromo hospedou apresentações do [[KISS]] em 1999,<ref>{{Citar web|título=Kiss reúne 40 mil em Interlagos|url=https://www.dgabc.com.br/Noticia/173182/kiss-reune-40-mil-em-interlagos|publicado=[[Diário do Grande ABC]]|data=18 de abril de 1999|acessodata=3 de agosto de 2025}}</ref> do [[Iron Maiden]] em 2009<ref>{{Citar web|url=https://guia.folha.uol.com.br/shows/ult10052u535284.shtml|título=Iron Maiden supera caos e lama diante de 60 mil em SP
+|publicado=Guia Folha|data=15 de março de 2009|acessodata=3 de agosto de 2025}}</ref> e do [[System of a Down]] em 2025,<ref>{{Citar web|url=https://billboard.com.br/como-foi-o-ultimo-show-do-system-of-a-down-no-brasil-em-interlagos/|título=Como foi o último show do System of a Down no Brasil|publicado=[[Billboard Brasil]]|data=15 de maio de 2025|acessodata=3 de agosto de 2025}}</ref> e desde 2014 é sede da edição brasileira do festival [[Lollapalooza (Brasil)|Lollapalooza]].<ref>{{Citar web|título=Lollapalooza 2014 muda para Autódromo de Interlagos e reduz dias|url=https://www.terra.com.br/diversao/musica/lollapalooza-2014-muda-para-autodromo-de-interlagos-e-reduz-dias,d385bd25652a1410VgnVCM20000099cceb0aRCRD.html|obra=Terra|acessadoem=2019-10-13}}</ref> Em 2023 se tornou sede de outros dois eventos musicais, o [[The Town Festival]]<ref>{{Citar web|ultimo=Soares|primeiro=Carol|url=https://oclb.com.br/como-foi-a-primeira-edicao-do-the-town-em-sao-paulo/|titulo=Como foi a primeira edição do The Town em São Paulo - oclb|data=2023-09-12|acessodata=2024-10-22|lingua=pt-BR}}</ref> e o Primavera Sound Brasil,<ref>{{citar web|url=https://istoe.com.br/primavera-sound-2023-se-destaca-pela-organizacao-mas-line-up-nao-impressiona/|título=Primavera Sound 2023 se destaca pela organização, mas line-up não impressiona|data=5 de dezembro de 2023|acessodata=1 de novembro de 2025|publicado=[[IstoÉ]]}}</ref> sendo que este voltará a ser realizado em 2026 após dois anos de hiato, tomando lugar, novamente, no autódromo.<ref>{{citar web|url=https://rollingstone.com.br/musica/primavera-sound-sao-paulo-anuncia-retorno-para-2026-saiba-quando-sera/|título=Primavera Sound São Paulo anuncia retorno para 2026; saiba quando será|data=17 de outubro de 2025|acessodata=1 de novembro de 2025|publicado=[[Rolling Stone Brasil]]}}</ref> Também foi palco do Electric Zoo Brasil em 2017, o qual estava inicialmente previsto para acontecer no [[Jockey Club de São Paulo|Jockey Club]] e teve seu local alterado para o autódromo faltando poucas semanas para sua realização.<ref>{{citar web|url=https://www.omelete.com.br/musica/electric-zoo-brasil-festival-chega-ao-brasil-sem-o-brilho-da-edicao-norte-americana|título=Electric Zoo Brasil - Festival chega ao Brasil sem o brilho da edição norte-americana|publicado=[[Omelete (site)|Omelete]]|data=25 de abril de 2017|acessodata=1 de novembro de 2025}}</ref>
+
+<center><gallery>
+Ficheiro:Interlagos 1973.jpg|Circuito de Interlagos em 1973
+Ficheiro:Interlagos 1979.jpg|Circuito de Interlagos Interlagos em 1979
+Ficheiro:Interlagos 1990.jpg|Circuito em 1990-1996
+Ficheiro:Autódromo José Carlos Pace (AKA Interlagos) track map.svg|Circuito em 1997-2013
+Ficheiro:2014 Interlagos circuit map.svg| Circuito em 2014-hoje (reforma na entrada dos boxes)
+</gallery></center>
+
+== Comparação ==
+{{Mais fontes|Esta seção|esp|data=Setembro de 2025}}
+Comparação das voltas mais rápidas por categorias.
+
+{| class="wikitable sortable"
+!Categoria!!Tempo!!Piloto!!Carro / Equipe!! Data/Evento
+|-
+| [[Fórmula 1|F1]] || '''1:07.281''' || [[Lewis Hamilton]] || [[Mercedes AMG F1 W09 EQ Power+|W09 EQ Power+]] / [[Mercedes-Benz Grand Prix Limited|Mercedes]] || [[Grande Prêmio do Brasil de 2018]]
+|-
+| [[Campeonato Mundial de Endurance da FIA|FIA WEC-]][[Protótipo de Le Mans|LMP1]]
+| '''1:17.442''' || Timo Bernhard / [[Mark Webber]] / [[Brendon Hartley]] || [[Porsche 919 Hybrid]] / Porsche Motorsport LMP1
+| 6 Horas de São Paulo de 2014
+|-
+| [[Campeonato Mundial de Endurance da FIA|Le Mans Series-]][[Protótipo de Le Mans|LMP1]] || '''1:18.787''' || [[Pedro Lamy]] / [[Stéphane Sarrazin]] || Peugeot 908 HDi FAP / Peugeot Sport Total || [[Mil Milhas Brasileiras|Mil Milhas Brasil de 2007]]
+|-
+|[[Campeonato Mundial de Endurance da FIA|FIA WEC-]][[LMDh]]
+|'''1:22.570'''
+|[[Alex Lynn]] / [[Norman Nato]] /[[Will Stevens]]
+|[[Cadillac V-Series.R]]/ Hertz Team Jota
+|6 Horas de São Paulo de 2025
+|-
+|[[Campeonato Mundial de Endurance da FIA|FIA WEC-]][[Le Mans Hypercar|LMH]]
+|'''1:23.140'''
+|[[Mike Conway]] / [[Kamui Kobayashi]] /[[Nyck de Vries]]
+|[[Toyota GR010 Hybrid]] / [[Toyota Gazoo Racing Europe|Toyota Gazoo Racing]]
+|6 Horas de São Paulo de 2024
+|-
+| [[Campeonato Mundial de Endurance da FIA|Le Mans Series]]-[[Le Mans Prototype|LMP2]] || '''1:23.449''' || Juan Barazi / Michael Vergers / Karim Ojjeh || Zytek 07S || [[Mil Milhas Brasileiras|Mil Milhas Brasil de 2007]]<ref>http://www.automobilsport.com/mil-milhas-interlagos-qualifying-result-team-peugeot-creation-pescarolo-barazi-epsilon-embassy-racing-bruneau-alphand-jmb---29992.html</ref>
+|-
+| [[World Series by Nissan]] || '''1:25.480''' || [[Ricardo Zonta]] || [[Dallara Automobili|Dallara]] SN01-Nissan VQ / Gabord Competicion || 8 de dezembro de 2002
+|-
+|Imperio Endurance Brasil
+|'''1:26.022'''
+|Fernando Ohashi / Emilio Padron / William Freire
+|AJR Metalmoro / Motorcar Motorsports
+|Treino classificatório Etapa de Interlagos. William Freire<br>20 de maio de 2022
+|-
+| [[Fórmula 3000 Internacional|FIA Formula 3000 International Championship]] || '''1:26.060 ''' || [[Sebastien Bourdais]] || [[Lola Cars|Lola]] B02 / 50-Zytek / Super Nova Racing || 30 de março de 2002
+|-
+| [[Fórmula 3|F3 Brasil]] || '''1:28.129''' || [[Matheus Iorio]] || [[Dallara Automobili|Dallara]] F-309-Berta 2.3L / [[Cesário Fórmula]] || 10 de dezembro de 2016
+|-
+| FIA WEC-LMGTE PRO GT2  || '''1:29.858''' || Stefan Mücke / Darren Turner  || Aston Martin Vantage V8 / [[Aston Martin Racing]]  || 6 Horas de São Paulo de 2014
+|-
+| Endurance Brasil-GTP1 || '''1:30.247'''|| Paulo Roberto Bonifácio / [[Felipe Giaffone]] / [[Vitor Meira]] || Prototótipo ZF01 / Scuderia 111 || [[Mil Milhas Brasileiras|Mil Milhas Brasil de 2006]]
+|-
+| Endurance Brasil-GT1 || '''1:31.570''' || [[Xandy Negrão]] / Guto Negrão || Audi TTR DTM / Medley Genéricos|| 500&nbsp;km de Interlagos de 2004
+|-
+| [[FIA GT|FIA GT1 Championship]] || '''1:32.060''' || [[Enrique Bernoldi]] / [[Xandinho Negrão]] || Maserati MC12 / Vitaphone Racing || 27 de novembro de 2010
+|-
+| Endurance Brasil-GT3 || '''1:34.646''' || [[Max Wilson]] / [[Raul Boesel]] / Marcel Visconde || Porsche 911 GT3 RSR / Stuttgart Sportcar-Dener Motorsport || [[Mil Milhas Brasileiras|Mil Milhas Brasil de 2008]]
+|-
+| [[GT Brasil|Brasil GT3 Championship]] || '''1:34.997''' || [[Daniel Serra]] / Chico Longo || Lamborghini LP 560 || 7 de agosto de 2008
+|-
+| SuperBike Brasil || '''1:35.380''' || [[Eric Granado]] || Honda CBR 1000 RR / Honda Racing || 24 de junho de 2017
+|-
+| [[Fórmula Renault]] 2.0 Brasil || '''1:35.809''' || [[Nelson Merlo]] || Tatuus FR2000-F4R 2.0L / [[Bassani Racing]] || 6 de novembro de 2005
+|-
+| [[Stock Car Brasil|Stock Car V8 Brasil]]  || '''1:37.032''' || [[Daniel Serra]] / [[João Paulo de Oliveira]] || Eurofarma RC || 9 de março de 2018
+|-
+| Porsche GT3 Cup Challenge Brasil || '''1:37.331''' || [[Alan Hellmeister]] / [[Nelsinho Piquet]] || Porsche 911 (Type 991 Cup) GT3-Cup / FS Hero || 500&nbsp;km de Interlagos Porsche Cup 2016
+|-
+|[[StockCar Brasil|Stock Car Pro Series]]
+|'''1:38.693'''
+|Enzo Elias
+|Crown Race
+|Treino Livre 2. 12ª Etapa<br>13 de dezembro de 2024
+|-
+| Endurance Brasil-GT1 || '''1:42.088''' || Lucas Molo / Nelson Silva Júnior || Ferrari 550 Maranello / Tekpron ||300 Milhas de Interlagos de 2005
+|-
+|[[Stock Car Light|Stock Series (antigo Stock Car Light)]]
+|'''1:42.628'''
+|Arthur Gama
+|JLG12 V8
+|TL3, 6ª etapa<br>13 de dezembro de 2024
+|-
+| [[TC2000]] || '''1:43.425''' || [[Cacá Bueno]] || Honda Civic/ Honda Lubrax || 16 de junho de 2007
+|-
+| [[Spyder Race]] || '''1:43.496''' || Sergio Pistili || AT Autosport || 2008
+|-
+| Top Race V6 || '''1:44.352''' || Agustin Canapino || Mercedes-Benz C203 || 24 de julho de 2010
+|-
+| [[Copa Chevrolet Montana]] || '''1:44.557''' || [[Rafael Daniel]] || Gramacho Racing || 2 de abril de 2011
+|-
+| [[Stock Car Light]] || '''1:44.841''' || [[Gustavo Sondermann]] || FTS Competições || 8 de dezembro de 2007
+|-
+| [[Pick-up Racing]] || '''1:46.740''' || Rodrigo Navarro || Chevrolet / Gramacho Racing || 5 de julho de 2009
+|-
+| Troféu Maserati || '''1:47.655''' || Guto Negrão || Maserati Coupé Cambiocorsa / Medley || 25 de março de 2006
+|-
+|[[Fórmula Inter|Formula Inter]] || '''1:45:296''' || Gabriel Salomão || Fórmula Inter / Fórmula Inter ||14 de julho de 2019
+|-
+| Copa Brasil de Marcas || '''1:48.252''' || Guilherme Salas || Renault Fluence / Greco || 9 de setembro de 2016
+|-
+| Sprint Race || '''1:48.948''' || Yuri / Yago Cesário || Sprint Race Pro || 11 de maio de 2017
+|-
+| Mercedes-Benz Grand Challenge || '''1:50.436''' || [[Fernando Fortes]] || CLA AMG-Cup / Mottin Racing || 10 de dezembro de 2016
+|-
+| [[Campeonato Brasileiro de Turismo]] || '''1:55.846''' || Felipe Guimarães || W2 Racing ||12 de dezembro de 2015
+|-
+| AUDI DTCC || '''1:57.526''' || Felipe Gama || MC Tubarão ||13 de novembro de 2012
+|-
+| Fórmula 1600 || '''1:58.523''' || Emilio Padron || Della Barba Racing || 30 de julho de 2016
+|-
+| [[Stock Jr]] || '''1:58.614''' || Eduardo Leite || JL Racing-Yamaha || 2006
+|-
+| Campeonato Paulista de Marcas e Pilotos ||'''1.59.660''' || Faio Ebrahim || VW Gol/ EGB Valorem || 2006
+|-
+| [[Copa Renault Clio]] || '''1:59.981 ''' || Rodolfo Pousa || M2 Competições || 28 de novembro de 2009
+|-
+| [[Fórmula Truck|Copa Truck]] || '''2:00.542''' || [[Felipe Giaffone]] || Volkswagen / RM Competições || 2 de julho de 2011<ref>{{Citar periódico|data=2011-07-03|titulo=F Truck: Felipe Giaffone coloca Volkswagen na pole position da etapa de Interlagos|jornal=Blog do Caminhoneiro|url=http://blogdocaminhoneiro.com/2011/07/f-truck-felipe-giaffone-coloca-volkswagen-na-pole-position-da-etapa-de-interlagos/|idioma=pt-BR}}</ref>
+|}
+
+== Fórmula 1 ==
+{{Artigo principal|Grande Prêmio do Brasil|Grande Prêmio de São Paulo}}
+[[Ficheiro:Michael Schumacher 2006 Brazil last overtaking.jpg|thumb|200px|right|A pista paulista marcou a última corrida de [[Michael Schumacher]] (antes do abandono da aposentadoria)]]
+[[Ficheiro:2007 Brazilian GP 4 drivers at start.jpg|200px|thumb|[[Grande Prêmio do Brasil de 2007 (Fórmula 1)|Grande Prêmio do Brasil de 2007]]]]
+
+O Autódromo de Interlagos foi palco do [[Grande Prêmio do Brasil]] de [[Fórmula 1]] nos anos de: 1972 a 1977, 1979, 1980 e de 1990 até 2019. E, desde 2021 sedia o [[Grande Prêmio de São Paulo]].
+
+'''Provas disputadas e vencedores:'''
+
+''O fundo rosa indica que a prova não fez parte do campeonato mundial da Fórmula 1''.
+{| class="wikitable" style="font-size: 95%;"
+|-
+! Ano
+! Piloto
+! Equipe
+! Detalhes
+|- bgcolor="#FFCCCC"
+|align="center" bgcolor="#FFCCCC" | '''[[Temporada de Fórmula 1 de 1972|1972]]'''
+|bgcolor="#FFCCCC" | {{flagicon|Argentina}} [[Carlos Reutemann]]
+|bgcolor="#FFCCCC" | [[Brabham]]-[[Motores Ford na Fórmula 1|Ford]]
+|bgcolor="#FFCCCC" | [[Grande Prêmio do Brasil de 1972|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1973|1973]]
+|rowspan=2| {{BRAb}} [[Emerson Fittipaldi]]
+| [[Team Lotus|Lotus]]-[[Motores Ford na Fórmula 1|Ford]]
+| [[Grande Prêmio do Brasil de 1973|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1974|1974]]
+| [[McLaren]]-[[Motores Ford na Fórmula 1|Ford]]
+| [[Grande Prêmio do Brasil de 1974|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1975|1975]]
+| {{BRAb}} [[José Carlos Pace]]
+| [[Brabham]]-[[Motores Ford na Fórmula 1|Ford]]
+| [[Grande Prêmio do Brasil de 1975|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1976|1976]]
+| {{AUTb}} [[Niki Lauda]]
+| [[Scuderia Ferrari|Ferrari]]
+| [[Grande Prêmio do Brasil de 1976|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1977|1977]]
+| {{ARGb}} [[Carlos Reutemann]]
+| [[Scuderia Ferrari|Ferrari]]
+| [[Grande Prêmio do Brasil de 1977|Detalhes]]
+|-
+|align="center" bgcolor="#DDDDDD" COLSPAN=5 | '''''Não houve em 1978'''''
+|-
+! [[Temporada de Fórmula 1 de 1979|1979]]
+| {{FRAb}} [[Jacques Laffite]]
+| [[Ligier]]-[[Motores Ford na Fórmula 1|Ford]]
+| [[Grande Prêmio do Brasil de 1979|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1980|1980]]
+| {{FRAb}} [[René Arnoux]]
+| [[Renault na Fórmula 1|Renault]]
+| [[Grande Prêmio do Brasil de 1980|Detalhes]]
+|-
+|align="center" bgcolor="#DDDDDD" COLSPAN=5 | '''''Não houve de 1981 a 1989'''''
+|-
+! [[Temporada de Fórmula 1 de 1990|1990]]
+| {{FRAb}} [[Alain Prost]]
+| [[Scuderia Ferrari|Ferrari]]
+| [[Grande Prêmio do Brasil de 1990|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1991|1991]]
+| {{BRAb}} [[Ayrton Senna]]
+| {{McLaren F1|Honda}}
+| [[Grande Prêmio do Brasil de 1991|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1992|1992]]
+| {{UKb}} [[Nigel Mansell]]
+| {{Williams F1|Renault}}
+| [[Grande Prêmio do Brasil de 1992|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1993|1993]]
+| {{BRAb}} [[Ayrton Senna]]
+| {{McLaren F1|Ford}}
+| [[Grande Prêmio do Brasil de 1993|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1994|1994]]
+|rowspan=2| {{GERb}} [[Michael Schumacher]]
+| [[Benetton Formula|Benetton]]-[[Motores Ford na Fórmula 1|Ford]]
+| [[Grande Prêmio do Brasil de 1994|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1995|1995]]
+| [[Benetton Formula|Benetton]]-[[Motores Renault na Fórmula 1|Renault]]
+| [[Grande Prêmio do Brasil de 1995|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1996|1996]]
+| {{UKb}} [[Damon Hill]]
+|rowspan=2| {{Williams F1|Renault}}
+| [[Grande Prêmio do Brasil de 1996|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1997|1997]]
+| {{CANb}} [[Jacques Villeneuve]]
+| [[Grande Prêmio do Brasil de 1997|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1998|1998]]
+|rowspan=2| {{FINb}} [[Mika Häkkinen]]
+|rowspan=2| {{McLaren F1|Mercedes}}
+| [[Grande Prêmio do Brasil de 1998|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 1999|1999]]
+| [[Grande Prêmio do Brasil de 1999|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2000|2000]]
+| {{GERb}} [[Michael Schumacher]]
+| [[Scuderia Ferrari|Ferrari]]
+| [[Grande Prêmio do Brasil de 2000|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2001|2001]]
+| {{UKb}} [[David Coulthard]]
+| {{McLaren F1|Mercedes}}
+| [[Grande Prêmio do Brasil de 2001|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2002|2002]]
+| {{GERb}} [[Michael Schumacher]]
+| [[Scuderia Ferrari|Ferrari]]
+| [[Grande Prêmio do Brasil de 2002|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2003|2003]]
+| {{ITAb}} [[Giancarlo Fisichella]]
+| [[Jordan Grand Prix|Jordan]]-[[Motores Ford na Fórmula 1|Ford]]
+| [[Grande Prêmio do Brasil de 2003|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2004|2004]]
+|rowspan=2| {{COLb}} [[Juan Pablo Montoya]]
+| {{Williams F1|BMW}}
+| [[Grande Prêmio do Brasil de 2004|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2005|2005]]
+| {{McLaren F1|Mercedes}}
+| [[Grande Prêmio do Brasil de 2005|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2006|2006]]
+| {{BRAb}} [[Felipe Massa]]
+|rowspan=3| [[Scuderia Ferrari|Ferrari]]
+| [[Grande Prêmio do Brasil de 2006|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2007|2007]]
+| {{FINb}} [[Kimi Räikkönen]]
+| [[Grande Prêmio do Brasil de 2007|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2008|2008]]
+| {{BRAb}} [[Felipe Massa]]
+| [[Grande Prêmio do Brasil de 2008|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2009|2009]]
+| {{AUSb}} [[Mark Webber]]
+|rowspan=3| {{Red Bull F1|Renault}}
+| [[Grande Prêmio do Brasil de 2009|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2010|2010]]
+| {{GERb}} [[Sebastian Vettel]]
+| [[Grande Prêmio do Brasil de 2010|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2011|2011]]
+| {{AUSb}} [[Mark Webber]]
+| [[Grande Prêmio do Brasil de 2011|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2012|2012]]
+| {{UKb}} [[Jenson Button]]
+| {{McLaren F1|Mercedes}}
+| [[Grande Prêmio do Brasil de 2012|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2013|2013]]
+| {{GERb}} [[Sebastian Vettel]]
+| {{Red Bull F1|Renault}}
+| [[Grande Prêmio do Brasil de 2013|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2014|2014]]
+|rowspan=2| {{GERb}} [[Nico Rosberg]]
+|rowspan=3| [[Mercedes-Benz na Fórmula 1|Mercedes]]
+| [[Grande Prêmio do Brasil de 2014|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2015|2015]]
+| [[Grande Prêmio do Brasil de 2015|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2016|2016]]
+| {{UKb}} [[Lewis Hamilton]]
+| [[Grande Prêmio do Brasil de 2016|Detalhes]]
+|-
+! [[Temporada de Fórmula 1 de 2017|2017]]
+|{{GERb}} [[Sebastian Vettel]]
+| [[Scuderia Ferrari|Ferrari]]
+| [[Grande Prêmio do Brasil de 2017|Detalhes]]
+|-
+![[Temporada de Fórmula 1 de 2018|2018]]
+|{{UKb}} [[Lewis Hamilton]]
+|[[Mercedes-Benz na Fórmula 1|Mercedes]]
+|[[Grande Prêmio do Brasil de 2018|Detalhes]]
+|-
+![[Temporada de Fórmula 1 de 2019|2019]]
+|{{NEDb}} [[Max Verstappen]]
+|{{Red Bull F1|Honda}}
+|[[Grande Prêmio do Brasil de 2019|Detalhes]]
+|-
+| colspan="5" align="center" bgcolor="#DDDDDD" | '''''Não houve em 2020 devido à [[pandemia de COVID-19]]'''''
+|-
+![[Temporada de Fórmula 1 de 2021|2021]]
+|{{UKb}} [[Lewis Hamilton]]
+| rowspan="2" |[[Mercedes-Benz na Fórmula 1|Mercedes]]
+|[[Grande Prêmio de São Paulo de 2021|Detalhes]]
+|-
+![[Campeonato Mundial de Fórmula 1 de 2022|2022]]
+|{{UKb}} [[George Russell (automobilista)|George Russell]]
+|[[Grande Prêmio de São Paulo de 2022|Detalhes]]
+|-
+![[Campeonato Mundial de Fórmula 1 de 2023|2023]]
+| rowspan="2" |{{NEDb}} [[Max Verstappen]]
+| rowspan="2" |{{Red Bull F1|Honda RBPT}}
+|[[Grande Prêmio de São Paulo de 2023|Detalhes]]
+|-
+![[Campeonato Mundial de Fórmula 1 de 2024|2024]]
+|[[Grande Prêmio de São Paulo de 2024|Detalhes]]
+|-
+! [[Campeonato Mundial de Fórmula 1 de 2025|2025]]
+| {{UKb}} [[Lando Norris]]
+| {{McLaren F1|Mercedes}}
+| [[Grande Prêmio de São Paulo de 2025|Detalhes]]
+|}
+
+=== Por pilotos, equipes e países que venceram{{Ref|1|1}} ===
+{|class="wikitable collapsible" style="font-size:95%"
+|-
+!colspan=45| Pilotos
+|-
+|bgcolor="#000000" COLSPAN=3 |
+|-
+! Vitórias
+! Pilotos
+! Edições
+|-
+! 4
+| {{GERb}} [[Michael Schumacher]]
+| [[Grande Prêmio do Brasil de 1994|1994]], [[Grande Prêmio do Brasil de 1995|1995]], [[Grande Prêmio do Brasil de 2000|2000]], [[Grande Prêmio do Brasil de 2002|2002]]
+|-
+! rowspan="3" | 3
+| {{GERb}} [[Sebastian Vettel]]
+| | [[Grande Prêmio do Brasil de 2010|2010]], [[Grande Prêmio do Brasil de 2013|2013]], [[Grande Prêmio do Brasil de 2017|2017]]
+|-
+| {{UKb}} [[Lewis Hamilton]]
+| [[Grande Prêmio do Brasil de 2016|2016]], [[Grande Prêmio do Brasil de 2018|2018]], [[Grande Prêmio de São Paulo de 2021|2021]]
+|-
+| {{NEDb}} [[Max Verstappen]]
+| [[Grande Prêmio do Brasil de 2019|2019]], [[Grande Prêmio de São Paulo de 2023|2023]], [[Grande Prêmio de São Paulo de 2024|2024]]
+|-
+! rowspan="7" | 2
+| {{BRAb}} [[Emerson Fittipaldi]]
+| [[Grande Prêmio do Brasil de 1973|1973]], [[Grande Prêmio do Brasil de 1974|1974]]
+|-
+| {{BRAb}} [[Ayrton Senna]]
+| [[Grande Prêmio do Brasil de 1991|1991]], [[Grande Prêmio do Brasil de 1993|1993]]
+|-
+| {{FINb}} [[Mika Häkkinen]]
+| [[Grande Prêmio do Brasil de 1998|1998]], [[Grande Prêmio do Brasil de 1999|1999]]
+|-
+| {{COLb}} [[Juan Pablo Montoya]]
+| [[Grande Prêmio do Brasil de 2004|2004]], [[Grande Prêmio do Brasil de 2005|2005]]
+|-
+| {{BRAb}} [[Felipe Massa]]
+| [[Grande Prêmio do Brasil de 2006|2006]], [[Grande Prêmio do Brasil de 2008|2008]]
+|-
+| {{AUSb}} [[Mark Webber]]
+| [[Grande Prêmio do Brasil de 2009|2009]], [[Grande Prêmio do Brasil de 2011|2011]]
+|-
+| {{GERb}} [[Nico Rosberg]]
+| [[Grande Prêmio do Brasil de 2014|2014]], [[Grande Prêmio do Brasil de 2015|2015]]
+|-
+! rowspan="15" | 1
+| {{BRAb}} [[José Carlos Pace]]
+| [[Grande Prêmio do Brasil de 1975|1975]]
+|-
+| {{AUTb}} [[Niki Lauda]]
+| [[Grande Prêmio do Brasil de 1976|1976]]
+|-
+| {{ARGb}} [[Carlos Reutemann]]
+| [[Grande Prêmio do Brasil de 1977|1977]]
+|-
+| {{FRAb}} [[Jacques Laffite]]
+| [[Grande Prêmio do Brasil de 1979|1979]]
+|-
+| {{FRAb}} [[René Arnoux]]
+| [[Grande Prêmio do Brasil de 1980|1980]]
+|-
+| {{FRAb}} [[Alain Prost]]
+|  [[Grande Prêmio do Brasil de 1990|1990]]
+|-
+| {{UKb}} [[Nigel Mansell]]
+| [[Grande Prêmio do Brasil de 1992|1992]]
+|-
+| {{UKb}} [[Damon Hill]]
+| [[Grande Prêmio do Brasil de 1996|1996]]
+|-
+| {{CANb}} [[Jacques Villeneuve]]
+| [[Grande Prêmio do Brasil de 1997|1997]]
+|-
+| {{UKb}} [[David Coulthard]]
+| [[Grande Prêmio do Brasil de 2001|2001]]
+|-
+| {{ITAb}} [[Giancarlo Fisichella]]
+| [[Grande Prêmio do Brasil de 2003|2003]]
+|-
+| {{FINb}} [[Kimi Räikkönen]]
+| [[Grande Prêmio do Brasil de 2007|2007]]
+|-
+| {{UKb}} [[Jenson Button]]
+| [[Grande Prêmio do Brasil de 2012|2012]]
+|-
+|{{UKb}} [[George Russell (automobilista)|George Russell]]
+|[[Grande Prêmio de São Paulo de 2022|2022]]
+|-
+|{{UKb}} [[Lando Norris]]
+|[[Grande Prêmio de São Paulo de 2025|2025]]
+|}
+
+{|class="wikitable collapsible" style="font-size:95%"
+|-
+!colspan=45| Equipes
+|-
+|bgcolor="#000000" COLSPAN=3 |
+|-
+! Vitórias
+! Construtor
+! Edições
+|-
+!rowspan=2| 9
+| {{ITAb}} [[Scuderia Ferrari|Ferrari]]
+| [[Grande Prêmio do Brasil de 1976|1976]], [[Grande Prêmio do Brasil de 1977|1977]], [[Grande Prêmio do Brasil de 1990|1990]], [[Grande Prêmio do Brasil de 2000|2000]], [[Grande Prêmio do Brasil de 2002|2002]], [[Grande Prêmio do Brasil de 2006|2006]], [[Grande Prêmio do Brasil de 2007|2007]], [[Grande Prêmio do Brasil de 2008|2008]], [[Grande Prêmio do Brasil de 2017|2017]]
+|-
+| {{UKb}} [[Team McLaren|McLaren]]
+| [[Grande Prêmio do Brasil de 1974|1974]], [[Grande Prêmio do Brasil de 1991|1991]], [[Grande Prêmio do Brasil de 1993|1993]], [[Grande Prêmio do Brasil de 1998|1998]], [[Grande Prêmio do Brasil de 1999|1999]], [[Grande Prêmio do Brasil de 2001|2001]], [[Grande Prêmio do Brasil de 2005|2005]], [[Grande Prêmio do Brasil de 2012|2012]], [[Grande Prêmio de São Paulo de 2025|2025]]
+|-
+!7
+| {{AUTb}} [[Red Bull Racing|Red Bull]]
+| [[Grande Prêmio do Brasil de 2009|2009]], [[Grande Prêmio do Brasil de 2010|2010]], [[Grande Prêmio do Brasil de 2011|2011]], [[Grande Prêmio do Brasil de 2013|2013]], [[Grande Prêmio do Brasil de 2019|2019]], [[Grande Prêmio de São Paulo de 2023|2023]], [[Grande Prêmio de São Paulo de 2024|2024]]
+|-
+!6
+|{{GERb}} [[Mercedes-Benz na Fórmula 1|Mercedes]]
+|[[Grande Prêmio do Brasil de 2014|2014]], [[Grande Prêmio do Brasil de 2015|2015]], [[Grande Prêmio do Brasil de 2016|2016]], [[Grande Prêmio do Brasil de 2018|2018]], [[Grande Prêmio de São Paulo de 2021|2021]], [[Grande Prêmio de São Paulo de 2022|2022]]
+|-
+! 4
+| {{UKb}} [[Williams F1|Williams]]
+| [[Grande Prêmio do Brasil de 1992|1992]], [[Grande Prêmio do Brasil de 1996|1996]], [[Grande Prêmio do Brasil de 1997|1997]], [[Grande Prêmio do Brasil de 2004|2004]]
+|-
+! 2
+| {{UKb}} [[Benetton Formula|Benetton]]
+| [[Grande Prêmio do Brasil de 1994|1994]], [[Grande Prêmio do Brasil de 1995|1995]]
+|-
+!rowspan=5| 1
+| {{UKb}} [[Brabham]]
+| [[Grande Prêmio do Brasil de 1975|1975]]
+|-
+| {{FRAb}} [[Renault F1|Renault]]
+| [[Grande Prêmio do Brasil de 1980|1980]]
+|-
+| {{UKb}}  [[Team Lotus|Lotus]]
+| [[Grande Prêmio do Brasil de 1973|1973]]
+|-
+| {{FRAb}} [[Ligier]]
+| [[Grande Prêmio do Brasil de 1979|1979]]
+|-
+| {{IRLb}} [[Jordan Grand Prix|Jordan]]
+| [[Grande Prêmio do Brasil de 2003|2003]]
+|}
+
+{|class="wikitable collapsible" style="font-size:95%"
+|-
+!colspan=45| Países
+|-
+|bgcolor="#000000" COLSPAN=3 |
+|-
+! Vitórias
+! País
+! Edições
+|-
+! rowspan=2| 9
+| {{GER}}
+| [[Grande Prêmio do Brasil de 1994|1994]], [[Grande Prêmio do Brasil de 1995|1995]], [[Grande Prêmio do Brasil de 2000|2000]], [[Grande Prêmio do Brasil de 2002|2002]], [[Grande Prêmio do Brasil de 2010|2010]], [[Grande Prêmio do Brasil de 2013|2013]], [[Grande Prêmio do Brasil de 2014|2014]], [[Grande Prêmio do Brasil de 2015|2015]], [[Grande Prêmio do Brasil de 2017|2017]]
+|-
+|{{UK}}
+|[[Grande Prêmio do Brasil de 1992|1992]], [[Grande Prêmio do Brasil de 1996|1996]], [[Grande Prêmio do Brasil de 2001|2001]], [[Grande Prêmio do Brasil de 2012|2012]], [[Grande Prêmio do Brasil de 2016|2016]], [[Grande Prêmio do Brasil de 2018|2018]], [[Grande Prêmio de São Paulo de 2021|2021]], [[Grande Prêmio de São Paulo de 2022|2022]], [[Grande Prêmio de São Paulo de 2025|2025]]
+|-
+! 7
+| {{BRA}}
+| [[Grande Prêmio do Brasil de 1973|1973]], [[Grande Prêmio do Brasil de 1974|1974]], [[Grande Prêmio do Brasil de 1975|1975]], [[Grande Prêmio do Brasil de 1991|1991]], [[Grande Prêmio do Brasil de 1993|1993]], [[Grande Prêmio do Brasil de 2006|2006]], [[Grande Prêmio do Brasil de 2008|2008]]
+|-
+! rowspan="3" | 3
+| {{FRA}}
+| [[Grande Prêmio do Brasil de 1979|1979]], [[Grande Prêmio do Brasil de 1980|1980]], [[Grande Prêmio do Brasil de 1990|1990]]
+|-
+| {{FIN}}
+| [[Grande Prêmio do Brasil de 1998|1998]], [[Grande Prêmio do Brasil de 1999|1999]], [[Grande Prêmio do Brasil de 2007|2007]]
+|-
+| {{NED}}
+| [[Grande Prêmio do Brasil de 2019|2019]], [[Grande Prêmio de São Paulo de 2023|2023]], [[Grande Prêmio de São Paulo de 2024|2024]]
+|-
+! rowspan="2" | 2
+| {{COL}}
+| [[Grande Prêmio do Brasil de 2004|2004]], [[Grande Prêmio do Brasil de 2005|2005]]
+|-
+| {{AUS}}
+| [[Grande Prêmio do Brasil de 2009|2009]], [[Grande Prêmio do Brasil de 2011|2011]]
+|-
+! rowspan="4" | 1
+| {{AUT}}
+| [[Grande Prêmio do Brasil de 1976|1976]]
+|-
+| {{ARG}}
+| [[Grande Prêmio do Brasil de 1977|1977]]
+|-
+| {{CAN}}
+| [[Grande Prêmio do Brasil de 1997|1997]]
+|-
+| {{ITA}}
+| [[Grande Prêmio do Brasil de 2003|2003]]
+|}
+
+{{Nota|1|1}}(Última atualização: [[Grande Prêmio de São Paulo de 2025]])<br />Contabilizados somente os resultados válidos pelo Mundial de Fórmula 1.
+
+== Recordes em Interlagos ==
+{| class="wikitable"
+|-
+!
+! Piloto
+! Chassi/Motor
+! Tempo
+! Extensão
+! Ano
+|-
+! Pole Position
+|align="center"| {{UKb}} [[Lewis Hamilton]]
+|align="center"| [[Mercedes-Benz Grand Prix Limited|Mercedes]] [[Motor V6|V6]] [[Turbo]] [[Automóvel híbrido elétrico|Híbrido]]
+|align="center"| 1min 07s 281
+|align="center"| 4 309&nbsp;km
+|align="center"| 2018
+|-
+! Melhor Volta na Prova
+|align="center"| {{FINb}} [[Valtteri Bottas]]
+|align="center"| [[Mercedes-Benz Grand Prix Limited|Mercedes]] [[Motor V6|V6]] [[Turbo]] [[Automóvel híbrido elétrico|Híbrido]]
+|align="center"| 1min 10s 540
+|align="center"| 4 309&nbsp;km
+|align="center"| 2018
+|}
+
+== Desafio "50 mil quilômetros" ==
+Para promover o Renault Dauphine - Gordini e com o slogan "40&nbsp;hp de emoção", em 1964, o jornalista e publicitário Mauro Salles propôs um desafio de resistência para o carro. Com a aprovação de William Max Pearce, o presidente da Willys, o Autódromo de Interlagos foi preparado. Um veículo da marca, escolhido aleatoriamente na linha de produção e sem qualquer preparo especial, foi escolhido para percorrer, dentro do autódromo, a marca de 50 mil quilômetros em menos de um mês. Paul Massonet, representante da [[Federação Internacional do Automóvel]], foi convocado para homologar a marca e a prova de resistência foi iniciada em 26 de outubro de 1964. Para a tarefa, os pilotos [[Bird Clemente]], [[Luiz Pereira Bueno]], [[José Carlos Pace]], Chiquinho Lameirão, [[Wilson Fittipaldi Júnior]], Carol Figueiredo, Geraldo Meirelles, Luís Antônio Greco, o chefe da escuderia, além do convidados Vladimir Costa, Danilo de Lemos e [[Vitório Andreatta]], foram escolhidos para o desafio. No oitavo dia ocorreu um acidente, quando Bird Clemente entrou rápido demais na "Curva 3" e capotou. O carro rolou e parou sobre as quatro rodas. Depois de desvirado, desamassado e sem para-brisas (deste momento, os pilotos só usaram capacete com viseiras), a prova continuou. A cada reabastecimento, ocorria a troca de piloto. Após 22 dias, em 17 de novembro, a Willys deu a maratona por terminada. O carro foi batizado de "teimoso" e depois da prova, desapareceu. Como homenagem, a empresa lançou uma versão, em 1965, denominada de ''Teimoso''.<ref>{{citar web|URL=https://motor1.uol.com.br/features/519483/gordini-desafio-rodar-50mil-km/|título=AMASSADO E SEM VIDROS - o incrível desafio de rodar 50 mil km em 22 dias|autor=|data=|publicado= Revista Motor 1|acessodata=6 de agosto de 2022}}</ref>
+
+{{Referências}}
+
+== Ligações externas ==
+
+{{correlatos
+| commons = Autódromo José Carlos Pace
+| commonscat = Autódromo José Carlos Pace
+| wikidata = q171387
+}}
+* {{Link||2=http://www.autodromointerlagos.com/ |3=Autodromo Interlagos}}
+* {{Link||2=https://WikiMapia.org/51505/ |3=Autódromo de Interlagos no WikiMapia}}
+* {{Link||2=https://www.saopauloesportes.com/ |3=São Paulo Esportes}}
+* {{Link||2=http://www.classificadosdeinterlagos.com.br/ |3=Classificados de Interlagos}}
+* [https://www.gpbrasil.com.br/pt-br GP Brasil de F1 - Site Oficial]
+* [http://capeladosocorro.prefeitura.sp.gov.br Prefeitura Regional da Capela do Socorro]
+
+{{Circuitos do Campeonato Mundial de Resistência}}
+{{Circuitos da Copa Truck}}
+{{Circuitos da Fórmula Um}}
+{{Circuitos da DTM}}
+{{Circuitos da MotoGP}}
+{{Circuitos da Stock Car Brasil}}
+{{Cidade de São Paulo}}
+
+{{Portal3|Automobilismo|Fórmula 1|São Paulo|Brasil}}
+
+{{DEFAULTSORT:Autodromo Interlagos}}
+[[Categoria:Autódromos do estado de São Paulo|Interlagos]]
+[[Categoria:Autódromos da Fórmula 1|Interlagos]]
+[[Categoria:Construções da cidade de São Paulo]]
+[[Categoria:Atrações turísticas da cidade de São Paulo]]
+[[Categoria:Esporte na cidade de São Paulo]]
+[[Categoria:Grande Prêmio do Brasil]]
+[[Categoria:Grande Prêmio de São Paulo]]
+[[Categoria:Cidade Dutra]]
