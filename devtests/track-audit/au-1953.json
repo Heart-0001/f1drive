@@ -1,0 +1,972 @@
+{
+ "id": "au-1953",
+ "name": "Albert Park Circuit",
+ "auditedAt": "2026-10-01",
+ "auditor": "track-audit APAC (devtests/track-audit/apac/)",
+ "verdict": "major issues",
+ "summary": "Length (5.278 km), direction, pit side, the 80 km/h limit and the start line (45 m) are about right, but two stretches of the dataset leave the real road: the Lakeside Drive run after T8 bulges up to 22.5 m towards the lake through grass, and T11 (the old T13, rebuilt 2021) is cut diagonally across the park, turning ~45 m early. Height range 4.0 m (cap) vs 2.6 m published, with the high and low points in the wrong places.",
+ "findings": [
+  {
+   "aspect": "layout",
+   "severity": "major",
+   "game": "T11 (old T13, s 4099-4224): the dataset turns ~73 deg at one vertex 25 m before the real corner (the junction vertex of the OSM relation, -37.8533681, 144.9786557) and runs diagonally across the grass (max 21.5 m off at s 4119); the built corner has a 10 m minimum radius (80 deg, apex s 4091) — as tight as the Monaco hairpin problem; after T8 (s 2519-2699): an invented right-left bulge up to 22.5 m towards the lake (max at s 2589), where the real road (Lakeside Drive) is almost straight",
+   "real": "OSM relation 280443 on the asphalt (checked on 2025-11-25 imagery): T11 is a ~90 deg right at the Lakeside Drive / Ross Gregory Drive junction; Lakeside Drive after T8 has only a gentle bend (the 2021-22 works removed the T9/T10 chicane)",
+   "proposedFix": "replace the dataset vertices between game s 2440-2780 and 4030-4300 by the OSM relation vertices (proposedCorrections.layoutPatches; at T11 the OSM road centreline has a sharp junction vertex too: round it with an arc that stays on the paved junction, checked on the imagery, so the built radius is not ~10 m again), or take the whole centreline from relation 280443 (5293 m true, 0.3 % from 5.278 km; scenery-data is OSM so it aligns better; the start line / pit stay; seasons calibration must be re-run)",
+   "sources": [
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+    "Esri World Imagery (Vantor / Maxar), checked by eye with devtests/track-audit/apac/imagery.mjs; tiles cached in devtests/track-audit/cache/imagery/",
+    "en.wikipedia.org/wiki/Albert_Park_Circuit (\"Turn 13 was significantly altered, and turns 9 and 10 were removed\")"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "minor",
+   "game": "range 4.01 m, high s 1649 (Albert Road Drive), low s 2689 (Lakeside Drive)",
+   "real": "2.6 m, high approaching (old) T13, low on the start-finish straight (formula1.com); all grades < 1 % either way",
+   "proposedFix": "FLAT cap for au-1953 = 2.6 m; without lidar keep the shape (or a hand profile: low on the main straight, rising ~2.6 m to the approach of T11)",
+   "sources": [
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)",
+    "Copernicus DEM GLO-30 (30 m surface model, TanDEM-X 2011-2015), AWS open data COG https://copernicus-dem-30m.s3.amazonaws.com (cache/glo30/<id>-apac.json)"
+   ]
+  },
+  {
+   "aspect": "start",
+   "severity": "minor",
+   "game": "line 45 m after the OSM start-finish node",
+   "real": "OSM node 9123374386 raceway=start-finish (-37.8500562, 144.9689843); painted line visible there",
+   "proposedFix": "START_AT['au-1953'] = [-37.8500562, 144.9689843]",
+   "sources": [
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+    "Esri World Imagery (Vantor / Maxar), checked by eye with devtests/track-audit/apac/imagery.mjs; tiles cached in devtests/track-audit/cache/imagery/"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "right side (ok), 500 m, entry 167 m before / exit 164 m after the line",
+   "real": "right side, entry 605 m before the line, exit 125 m after, 712 m (OSM relation member 28119448, role pit_lane)",
+   "proposedFix": "optional entry / exit data",
+   "sources": [
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "layoutPatches": [
+   {
+    "fromGameS": 2440,
+    "toGameS": 2780,
+    "fromLatLon": [
+     -37.8414812,
+     144.9718069
+    ],
+    "toLatLon": [
+     -37.8443426,
+     144.9706324
+    ],
+    "replaceWithOsmVertices": [
+     [
+      -37.8414811,
+      144.9717653
+     ],
+     [
+      -37.8415544,
+      144.9717607
+     ],
+     [
+      -37.8416443,
+      144.9717519
+     ],
+     [
+      -37.8417462,
+      144.9717326
+     ],
+     [
+      -37.841826,
+      144.9717105
+     ],
+     [
+      -37.8419452,
+      144.9716741
+     ],
+     [
+      -37.8420564,
+      144.9716318
+     ],
+     [
+      -37.8421636,
+      144.9715871
+     ],
+     [
+      -37.8423052,
+      144.9715266
+     ],
+     [
+      -37.8424139,
+      144.9714758
+     ],
+     [
+      -37.8424935,
+      144.9714357
+     ],
+     [
+      -37.8425748,
+      144.9713944
+     ],
+     [
+      -37.8426533,
+      144.9713542
+     ],
+     [
+      -37.842739,
+      144.9713129
+     ],
+     [
+      -37.8427969,
+      144.9712826
+     ],
+     [
+      -37.8429002,
+      144.971226
+     ],
+     [
+      -37.8430401,
+      144.9711535
+     ],
+     [
+      -37.8433352,
+      144.9710078
+     ],
+     [
+      -37.84365,
+      144.970854
+     ],
+     [
+      -37.8438488,
+      144.9707746
+     ],
+     [
+      -37.8441607,
+      144.9706708
+     ],
+     [
+      -37.844292,
+      144.970644
+     ]
+    ]
+   },
+   {
+    "fromGameS": 4030,
+    "toGameS": 4300,
+    "fromLatLon": [
+     -37.8525793,
+     144.9784521
+    ],
+    "toLatLon": [
+     -37.8538387,
+     144.9764091
+    ],
+    "replaceWithOsmVertices": [
+     [
+      -37.8526204,
+      144.978468
+     ],
+     [
+      -37.8527697,
+      144.9785149
+     ],
+     [
+      -37.8529031,
+      144.9785564
+     ],
+     [
+      -37.8531462,
+      144.9786056
+     ],
+     [
+      -37.8533681,
+      144.9786557
+     ],
+     [
+      -37.8535501,
+      144.9776749
+     ],
+     [
+      -37.8536137,
+      144.9773215
+     ],
+     [
+      -37.8536761,
+      144.9770152
+     ],
+     [
+      -37.8537084,
+      144.9768607
+     ],
+     [
+      -37.853739,
+      144.976725
+     ],
+     [
+      -37.8537787,
+      144.9765678
+     ],
+     [
+      -37.8538081,
+      144.976451
+     ]
+    ]
+   }
+  ],
+  "START_AT": [
+   -37.8500562,
+   144.9689843
+  ],
+  "flatMaxRangeM": 2.6,
+  "alternative": "centreline from OSM relation 280443 (devtests/track-audit/apac/out/osm-au-1953-relation.json llLine, clockwise from near the line)"
+ },
+ "layout": {
+  "dataset": "2021+ layout by length (5.278 km; T9/T10 chicane removed, T11 rebuilt) — geometry partly wrong, see findings. Seasons 2010-2019 used the 5.303 km layout with the chicane (not modelled)",
+  "officialLengthKm": 5.278,
+  "officialLengthSource": "en.wikipedia.org/wiki/Albert_Park_Circuit infobox (2021-present)",
+  "gameLengthKm": 5.278,
+  "osm": {
+   "method": "OSM circuit relation 280443 chained in member order (apac/au-chain.mjs; includes the race-only disused:highway=raceway ways)",
+   "osmLengthM": 5293,
+   "gameTrueLengthM": 5258,
+   "devMeanM": 1.57,
+   "devP95M": 8.5,
+   "stretchesOver5m": [
+    {
+     "fromS": 1856,
+     "toS": 1861,
+     "max": 5.6,
+     "atS": 1856
+    },
+    {
+     "fromS": 2519,
+     "toS": 2699,
+     "max": 22.5,
+     "atS": 2589
+    },
+    {
+     "fromS": 3276,
+     "toS": 3311,
+     "max": 8.5,
+     "atS": 3291
+    },
+    {
+     "fromS": 3397,
+     "toS": 3422,
+     "max": 8.6,
+     "atS": 3412
+    },
+    {
+     "fromS": 4099,
+     "toS": 4224,
+     "max": 21.5,
+     "atS": 4119
+    }
+   ]
+  },
+  "imagery": "Esri World Imagery 2025-11-25 (Vantor Vivid Advanced, 0.34 m): img/au-t9.png, img/au-t13.png, img/au-t910.png, img/au-1953-ov.png — the OSM relation lies on the asphalt, the game line crosses grass at both stretches"
+ },
+ "direction": {
+  "ok": true,
+  "evidence": "clockwise (\"the current circuit which runs clockwise\", en.wikipedia.org/wiki/Albert_Park_Circuit); relation members ordered \"forward\" in the game's direction"
+ },
+ "startFinish": {
+  "gameLatLon": [
+   -37.849757,
+   144.968644
+  ],
+  "osmNode": {
+   "id": 9123374386,
+   "latLon": [
+    -37.8500562,
+    144.9689843
+   ],
+   "tag": "raceway=start-finish",
+   "gameS": -45
+  },
+  "note": "a line across the road is visible at the OSM node on the 2025 imagery (img/sf-au-a.png)"
+ },
+ "pit": {
+  "real": {
+   "side": "right (-1)",
+   "osmWays": [
+    28119448
+   ],
+   "entryGameS": -605,
+   "entryLatLon": [
+    -37.8523986,
+    144.9736519
+   ],
+   "exitGameS": 125,
+   "exitLatLon": [
+    -37.8489709,
+    144.9676309
+   ],
+   "besideTrackGameS": {
+    "from": -543,
+    "to": 53
+   },
+   "laneLengthM": 712
+  },
+  "game": {
+   "side": "right (-1)",
+   "limitKmh": 80,
+   "from": -253,
+   "entry": -167,
+   "exit": 164,
+   "to": 250,
+   "length": 500
+  },
+  "sideConvention": "gameS < 0 = before the line; side as in tracks-data pitSide (-1 = driver's right)",
+  "limit": {
+   "game": 80,
+   "real": 80,
+   "source": "en.wikipedia.org/wiki/2022_Australian_Grand_Prix: organisers applied to raise the pit lane limit from 60 to 80 km/h after the 2021-22 works (ref. speedcafe.com 2022-04-06)"
+  }
+ },
+ "elevation": {
+  "demSource": "Copernicus DEM GLO-30 (AWS open data COG https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S38_00_E144_00_DEM/Copernicus_DSM_COG_10_S38_00_E144_00_DEM.tif)",
+  "filter": "dsmflat",
+  "game": {
+   "range": 4.01,
+   "highAtS": 1649,
+   "lowAtS": 2689,
+   "climb50": {
+    "pct": 0.5,
+    "fromS": 3089
+   },
+   "descent50": {
+    "pct": -0.65,
+    "fromS": 1969
+   },
+   "climb100": {
+    "pct": 0.47,
+    "fromS": 3059
+   },
+   "descent100": {
+    "pct": -0.6,
+    "fromS": 1969
+   }
+  },
+  "dem": {
+   "range": 4.35,
+   "highAtS": 1639,
+   "lowAtS": 270,
+   "climb50": {
+    "pct": 1.36,
+    "fromS": 580
+   },
+   "descent50": {
+    "pct": -1.17,
+    "fromS": 1729
+   },
+   "climb100": {
+    "pct": 1.31,
+    "fromS": 550
+   },
+   "descent100": {
+    "pct": -1.12,
+    "fromS": 1709
+   }
+  },
+  "demRawRange": 8.84,
+  "shapeCorrelation": 0.53,
+  "shapeRmsDiffM": 0.94,
+  "gradeDiffOver2pp_100mWindow": [],
+  "demNote": "GLO-30 along the OSM relation, \"dsmflat\" filter; park roads lined with trees: the surface model is inconclusive for a 2.6 m range (no open Australian lidar endpoint reachable: services.ga.gov.au refused / 404).",
+  "published": {
+   "rangeM": [
+    2.6,
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+   ],
+   "highPoint": [
+    "approaching Turn 13 (2016 numbering = T11 since 2022)",
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+   ],
+   "lowPoint": [
+    "on the start-finish straight",
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+   ]
+  },
+  "famousFeatures": [
+   {
+    "feature": "range",
+    "game": 4.01,
+    "published": 2.6,
+    "verdict": "game 1.4 m too much (flat-track cap 4 m)"
+   },
+   {
+    "feature": "high / low points",
+    "gameHighS": 1649,
+    "gameLowS": 2689,
+    "publishedHigh": "approach to T11 (game s ~3900-4100)",
+    "publishedLow": "start-finish straight (game s ~4900-5278 / 0-200)",
+    "verdict": "both misplaced: game high on Albert Road Drive (T6-T7), low on Lakeside Drive after T8"
+   }
+  ],
+  "profile50m": {
+   "columns": [
+    "gameS_m",
+    "game_m",
+    "dem_m (filtered, relative to its lowest point)"
+   ],
+   "rows": [
+    [
+     0,
+     1.4,
+     0.87
+    ],
+    [
+     50,
+     1.28,
+     0.53
+    ],
+    [
+     100,
+     1.2,
+     0.29
+    ],
+    [
+     150,
+     1.15,
+     0.13
+    ],
+    [
+     200,
+     1.04,
+     0.04
+    ],
+    [
+     250,
+     0.99,
+     0
+    ],
+    [
+     300,
+     1.07,
+     0.01
+    ],
+    [
+     350,
+     1.11,
+     0.05
+    ],
+    [
+     400,
+     1.25,
+     0.13
+    ],
+    [
+     450,
+     1.37,
+     0.29
+    ],
+    [
+     500,
+     1.5,
+     0.6
+    ],
+    [
+     550,
+     1.65,
+     1.09
+    ],
+    [
+     600,
+     1.85,
+     1.74
+    ],
+    [
+     650,
+     1.94,
+     2.4
+    ],
+    [
+     700,
+     2.09,
+     2.88
+    ],
+    [
+     750,
+     2.25,
+     3.09
+    ],
+    [
+     800,
+     2.37,
+     3.06
+    ],
+    [
+     850,
+     2.48,
+     2.85
+    ],
+    [
+     900,
+     2.59,
+     2.47
+    ],
+    [
+     950,
+     2.69,
+     2
+    ],
+    [
+     1000,
+     2.78,
+     1.55
+    ],
+    [
+     1050,
+     2.9,
+     1.2
+    ],
+    [
+     1100,
+     3,
+     0.99
+    ],
+    [
+     1150,
+     3.08,
+     0.91
+    ],
+    [
+     1200,
+     3.2,
+     0.91
+    ],
+    [
+     1250,
+     3.32,
+     1.01
+    ],
+    [
+     1300,
+     3.43,
+     1.22
+    ],
+    [
+     1350,
+     3.55,
+     1.59
+    ],
+    [
+     1400,
+     3.66,
+     2.1
+    ],
+    [
+     1450,
+     3.79,
+     2.68
+    ],
+    [
+     1500,
+     3.89,
+     3.26
+    ],
+    [
+     1550,
+     4,
+     3.79
+    ],
+    [
+     1600,
+     4,
+     4.21
+    ],
+    [
+     1650,
+     4.01,
+     4.35
+    ],
+    [
+     1700,
+     3.95,
+     4.11
+    ],
+    [
+     1750,
+     3.84,
+     3.59
+    ],
+    [
+     1800,
+     3.73,
+     3.01
+    ],
+    [
+     1850,
+     3.5,
+     2.57
+    ],
+    [
+     1900,
+     3.25,
+     2.28
+    ],
+    [
+     1950,
+     3.04,
+     2.12
+    ],
+    [
+     2000,
+     2.74,
+     2.05
+    ],
+    [
+     2050,
+     2.47,
+     2.06
+    ],
+    [
+     2100,
+     2.2,
+     2.09
+    ],
+    [
+     2150,
+     1.94,
+     2.12
+    ],
+    [
+     2200,
+     1.63,
+     2.15
+    ],
+    [
+     2250,
+     1.41,
+     2.14
+    ],
+    [
+     2300,
+     1.18,
+     2.03
+    ],
+    [
+     2350,
+     0.96,
+     1.8
+    ],
+    [
+     2400,
+     0.74,
+     1.54
+    ],
+    [
+     2450,
+     0.51,
+     1.35
+    ],
+    [
+     2500,
+     0.34,
+     1.26
+    ],
+    [
+     2550,
+     0.22,
+     1.26
+    ],
+    [
+     2600,
+     0.1,
+     1.35
+    ],
+    [
+     2650,
+     0.04,
+     1.53
+    ],
+    [
+     2700,
+     -0.01,
+     1.78
+    ],
+    [
+     2750,
+     0,
+     2.03
+    ],
+    [
+     2800,
+     0.05,
+     2.21
+    ],
+    [
+     2850,
+     0.16,
+     2.29
+    ],
+    [
+     2900,
+     0.22,
+     2.25
+    ],
+    [
+     2950,
+     0.38,
+     2.13
+    ],
+    [
+     3000,
+     0.56,
+     1.97
+    ],
+    [
+     3050,
+     0.7,
+     1.81
+    ],
+    [
+     3100,
+     0.92,
+     1.69
+    ],
+    [
+     3150,
+     1.17,
+     1.58
+    ],
+    [
+     3200,
+     1.31,
+     1.5
+    ],
+    [
+     3250,
+     1.56,
+     1.49
+    ],
+    [
+     3300,
+     1.77,
+     1.55
+    ],
+    [
+     3350,
+     1.92,
+     1.65
+    ],
+    [
+     3400,
+     2.11,
+     1.76
+    ],
+    [
+     3450,
+     2.32,
+     1.89
+    ],
+    [
+     3500,
+     2.47,
+     2.09
+    ],
+    [
+     3550,
+     2.58,
+     2.34
+    ],
+    [
+     3600,
+     2.69,
+     2.61
+    ],
+    [
+     3650,
+     2.79,
+     2.83
+    ],
+    [
+     3700,
+     2.8,
+     2.93
+    ],
+    [
+     3750,
+     2.8,
+     2.87
+    ],
+    [
+     3800,
+     2.81,
+     2.74
+    ],
+    [
+     3850,
+     2.73,
+     2.6
+    ],
+    [
+     3900,
+     2.62,
+     2.5
+    ],
+    [
+     3950,
+     2.52,
+     2.38
+    ],
+    [
+     4000,
+     2.41,
+     2.24
+    ],
+    [
+     4050,
+     2.29,
+     2.1
+    ],
+    [
+     4100,
+     2.12,
+     1.99
+    ],
+    [
+     4150,
+     2.05,
+     1.91
+    ],
+    [
+     4200,
+     1.87,
+     1.84
+    ],
+    [
+     4250,
+     1.73,
+     1.75
+    ],
+    [
+     4300,
+     1.63,
+     1.65
+    ],
+    [
+     4350,
+     1.6,
+     1.56
+    ],
+    [
+     4400,
+     1.5,
+     1.47
+    ],
+    [
+     4450,
+     1.51,
+     1.39
+    ],
+    [
+     4500,
+     1.45,
+     1.29
+    ],
+    [
+     4550,
+     1.4,
+     1.15
+    ],
+    [
+     4600,
+     1.4,
+     0.96
+    ],
+    [
+     4650,
+     1.46,
+     0.77
+    ],
+    [
+     4700,
+     1.5,
+     0.64
+    ],
+    [
+     4750,
+     1.6,
+     0.59
+    ],
+    [
+     4800,
+     1.63,
+     0.62
+    ],
+    [
+     4850,
+     1.69,
+     0.73
+    ],
+    [
+     4900,
+     1.74,
+     0.93
+    ],
+    [
+     4950,
+     1.81,
+     1.18
+    ],
+    [
+     5000,
+     1.8,
+     1.42
+    ],
+    [
+     5050,
+     1.8,
+     1.62
+    ],
+    [
+     5100,
+     1.8,
+     1.72
+    ],
+    [
+     5150,
+     1.72,
+     1.68
+    ],
+    [
+     5200,
+     1.64,
+     1.45
+    ],
+    [
+     5250,
+     1.5,
+     1.09
+    ]
+   ]
+  }
+ },
+ "banking": {
+  "publishedBankedCorners": "none (public park roads)"
+ },
+ "covered": {
+  "note": "nothing permanent over the track (OSM); one service tunnel under the main straight (way 28119449)"
+ },
+ "sourcesUsed": [
+  "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)",
+  "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+  "Esri World Imagery (Vantor / Maxar), checked by eye with devtests/track-audit/apac/imagery.mjs; tiles cached in devtests/track-audit/cache/imagery/",
+  "Copernicus DEM GLO-30 (30 m surface model, TanDEM-X 2011-2015), AWS open data COG https://copernicus-dem-30m.s3.amazonaws.com (cache/glo30/<id>-apac.json)",
+  "SRTM GL1 30 m (surface model, Feb 2000) via https://api.opentopodata.org/v1/srtm30m (cache/otd-srtm30m/<id>.json)",
+  "GSI DEM 5 m laser (DEM5A, 国土地理院) via https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php (cache/gsi5m/jp-1962-osm.json)",
+  "game data: tracks-data.js built with lib/three.min.js + js/track.js + scenery-data.js (devtests/track-audit/apac/dump-game.js -> apac/out/game-<id>.json)"
+ ],
+ "files": {
+  "scripts": "devtests/track-audit/apac/*.mjs",
+  "images": "devtests/track-audit/apac/img/*.png (git-ignored output of imagery.mjs)",
+  "data": "devtests/track-audit/apac/out/"
+ }
+}

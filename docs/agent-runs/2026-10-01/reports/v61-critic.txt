@@ -1,0 +1,59 @@
+
+################ v6.1 critic + re-run
+
+== summary
+I played v6.1 in muted offscreen Electron windows using real keys, mouse clicks and a fake pad, and looked at the screenshots. I found and fixed two real problems, plus one doc/code mismatch in js/hudmirrors.js. Every suite on the list passes on the final tree.
+
+**Fixed**
+1. **Light curtains filled the mirrors.** Right after driving through a pit-lane light curtain, it covered both HUD mirrors (and the in-car left mirror) for about a second: amber at the entry, green at the exit. At the exit 51–64 % of the mirror area was green, exactly when the car rejoins the traffic. js/main.js now marks the track's `pitCurtains` mesh `userData.mirror = false`, so both the HUD mirrors and the in-car mirrors leave the curtains out. Measured after the fix: 0 % at the entry and at the exit (pit-d-after-exit-0s.png).
+2. **A battery note described behaviour the game does not have.** The note on the 2014 Red Bull, Toro Rosso, Lotus and Caterham cards said "按加速鈕常常沒反應" (the boost button often does nothing). In the game E / A always works; these cars only deploy less (0.88×). It now reads "ERS 軟體與可靠度問題多，電能部署偏弱". I edited tools/ers-data.json and regenerated js/seasons-data.js with `node tools/build-cars.mjs`; only those 4 notes changed.
+3. **Mirror minimum width mismatch.** `F1.hudMirrorsLayout` in js/hudmirrors.js used a 224 px minimum glass width; index.html uses 176 px. The module now uses 176 px too, which also shrinks the mirrors at 443 px wide or less, matching the CSS.
+
+**Checked and working as asked**
+- **First boot:** opens on 2026 with the 2026 standard car; the key map has the 後照鏡 / V column and the pad row.
+- **Mirror switch and V:**
+  - V toggles the mirrors with the toast 後照鏡：開／關（V）, and the boxes move back up when they are off.
+  - Holding V down toggles only once. V does nothing in the menu or while typing a name.
+  - The 設定 switch is remembered after a restart.
+- **Overtaking in a real two-window room:** the overtaking car shows in the correct mirror. A car passing on your right shows in your right mirror, and once it is ahead you show in its left mirror. Name tags are not drawn in the mirrors.
+- **Layout:** with the start lights plus a toast, and with the results overlay plus a toast, nothing covers the mirrors at 1280×720, 1920×1080, 1100, 1000, 800 and 700 px wide.
+- **Pad:**
+  - A (and RB) held with RT while steering deploys the battery every frame (+57 km/h after 6 s), and the stick still steers. A deploys nothing while braking.
+  - B and LB toggle the limiter once, even when both are pressed together. X cycles the compound with a toast; Y resets onto the centreline; View toggles the racing line; Start opens and closes the menu.
+  - In the pit lane the prompts say 請開啟限速器（B） and 按 B 關閉限速器.
+- **Battery per car** (Monza straight, same frames with and without the battery):
+  - 2014 Mercedes gains +26.3 km/h; the 2015 McLaren-Honda gains +21.0 km/h.
+  - 2011 HRT: no battery bar, a 無 KERS chip, and E or A changes nothing.
+  - 2026 Aston Martin gains the least after 2–3 s of E (+32.7 / +46.6 km/h against +35.5–36.7 / +50.4–52.3 for the others). By the end of the straight every 2026 car is about +29–30 km/h, because the 290–345 km/h deploy fade (the 2026 regulation, built into car.js) caps them all, so the weakest battery only shows earlier in the straight.
+
+**Re-run on the final tree** (exact numbers in testsRun): all 11 node suites, build-cars --check, the 4 gamepad tests, ui-gp, ui-v6, solo, solo-v6, hudmirrors-test, v6-smoke, gp-smoke, mp-e2e, v6-critic, online, online-v6, and the new v61-critic (98/98). Nothing committed, pushed or packaged.
+
+== bugsFound
+ - js/main.js (fixed): a pit-lane light curtain just driven through filled the HUD mirrors and the in-car left mirror with amber (at the entry) or green (at the exit) for about 1 s. At the exit it covered 51–64 % of the mirror area right as the car rejoins traffic. Screenshot devtests/v61-critic/out/pit-d-after-exit-0s.png before the fix; now 0 %.
+ - tools/ers-data.json / js/seasons-data.js (fixed): the 2014 Renault-powered cars' battery note '按加速鈕常常沒反應' told players the button often does nothing, which never happens in the game (deploy is just 0.88×).
+ - js/hudmirrors.js (fixed): the built-in fallback layout used a 224 px minimum glass width while index.html uses 176 px.
+
+== openIssues
+ - Blind spot, not changed: a car 6 m to the side (the other grid column) is visible in the HUD mirror until about 10 m behind, and in the main view only from about 5 m ahead. In the room test it disappeared for roughly 1.5 s while alongside (room-04-A-pass-05..12). With 3 m lateral offset the gap is about 7 m. This is like real mirrors. Widening the mirrors (hfov / yaw in js/hudmirrors.js) or adding a 'car alongside' indicator would be a design decision for the user.
+ - 2026 battery: the Aston Martin's weaker deploy shows in the first 2–3 s of E and in lap time (+0.16 % in ers-effect.json). At the end of a long straight every 2026 car gains about the same (+29–30 km/h) because of the 290–345 km/h fade (FIA rule, in js/car.js). Nothing changed.
+ - Pre-existing, cosmetic, not changed: a toast that wraps to two lines overlaps the top 10 px of the start-lights box from 721 to 1000 px wide (with or without mirrors). The lamps themselves are not covered.
+ - Docs still to update (orchestrator / stage K): devtests/README.md row for v61-critic (text in apiNotes); hudmirrors-test is now 41 checks / about 70 s; v6-smoke is 144 checks; js/README-interfaces.md v6.1 controls / mirrors notes as listed by the glue stage, plus 'pit curtains carry userData.mirror = false'.
+ - Defaults to record in docs/v6-plan.md: curtains left out of all mirrors; the 2014 Renault battery note reworded; mirror field of view unchanged.
+
+== testsRun
+ - {"cmd":"for f in test/*.test.js; do node $f; done","result":"11/11 pass: car 26, cars 33 (76 s), collide 15, gp 20, laps 30, main 35/35, pit 23, server 44, session 31, track 5, tyres 15 ok-lines (run after the main.js and seasons-data.js changes)"}
+ - {"cmd":"node tools/build-cars.mjs --check","result":"exit 0: up to date js/seasons-data.js, devtests/seasons-calib/entries.json, docs/seasons-data.md (48 s)"}
+ - {"cmd":"node devtests/gamepad-test/gamepad.test.js; car.test.js; cockpit.test.js","result":"25 tests passed; 12 tests passed; cockpit checks ok (all exit 0)"}
+ - {"cmd":"npx electron devtests/gamepad-test/game-map.js","result":"ALL PASS 11 checks (23 s)"}
+ - {"cmd":"npx electron devtests/v61-critic/critic.js","result":"98 / 98 checks passed in 108 s (boot 16, pad 14, ers 39, room 7, pit 4 incl. the curtain-tint check, gp 18)"}
+ - {"cmd":"npx electron devtests/ui-gp/shots.js","result":"117 / 117 checks passed (38 s)"}
+ - {"cmd":"npx electron devtests/ui-v6/shots.js","result":"138 / 138 checks passed (36 s)"}
+ - {"cmd":"npx electron devtests/gp-e2e/solo.js","result":"588 / 588 checks passed (58 s)"}
+ - {"cmd":"npx electron devtests/gp-e2e/solo-v6.js","result":"295 / 295 checks passed (52 s)"}
+ - {"cmd":"npx electron devtests/hudmirrors-test/run.js","result":"ALL PASS (41 checks), 70 s, run alone"}
+ - {"cmd":"npx electron devtests/v6-smoke/smoke.js","result":"144 / 144 checks passed (101 s)"}
+ - {"cmd":"npx electron devtests/gp-smoke/smoke.js","result":"197 / 197 checks passed (217 s)"}
+ - {"cmd":"npx electron devtests/integration/mp-e2e.js","result":"30/30 checks passed (28 s)"}
+ - {"cmd":"npx electron devtests/v6-critic/critic.js","result":"85 / 85 checks passed (304 s)"}
+ - {"cmd":"npx electron devtests/gp-e2e/online.js","result":"141 / 141 checks passed (775 s, run alone)"}
+ - {"cmd":"npx electron devtests/gp-e2e/online-v6.js","result":"65 / 65 checks passed (468 s, run alone)"}

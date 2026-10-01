@@ -1,0 +1,49 @@
+diff --git a/js/cockpit.js b/devtests/handling-test/variants/cockpit.proposed.js
+index 95b18a8..f769d48 100644
+--- a/js/cockpit.js
++++ b/devtests/handling-test/variants/cockpit.proposed.js
+@@ -16,6 +16,15 @@
+   var HANDWHEEL_VIS = 1.0;         // rad of steering-wheel rotation at steer = 1
+   var DISPLAY_DT = 1 / 15;         // the wheel display is redrawn at most this often (and only when it changes)
+   var BLUR_SPEED = 7;              // m/s: above this the sidewall lettering is drawn motion-blurred
++  // road shape cues (v6.2): the camera used to roll 1:1 with the car, so a banked road stayed level on screen and only
++  // the scenery leaned (Zandvoort / Madring "not felt"). The driver's head keeps part of the roll out (the banking
++  // then reads as the road and the cockpit tilting) and sinks / nods under the road's compression (car.state.compress:
++  // banking, dips; it rises over crests).
++  var HEAD_ROLL_KEEP = 0.45;       // share of the car's roll the head takes out (0 = the v6.1 camera)
++  var HEAD_ROLL_TAU = 0.25;        // s: the neck follows the car's roll this much later
++  var COMPRESS_EYE = 0.012;        // m the eye sinks per g of compression
++  var COMPRESS_NOD = 0.004;        // rad the head nods down per g
++  var COMPRESS_MIN = -1, COMPRESS_MAX = 2.5, COMPRESS_TAU = 0.08;   // g, g, s
+ 
+   // ---- driver head look (right stick) ---------------------------------------
+   // Limits follow what a real F1 driver can do. The helmet is boxed in by the headrest surround and
+@@ -1326,6 +1335,7 @@
+ 
+     // ---- animation state ----
+     var lastHeading = null, latG = 0, shake = 0, time = 0, fov = FOV_MIN, wheelAngle = 0, vibPhase = 0;
++    var headRoll = 0, comp = 0;     // v6.2: the roll the head follows (smoothed), the compression (g, smoothed)
+     // head look: target (from setLook) and the smoothed value + its rate, in radians
+     var lookYawT = 0, lookPitchT = 0, lookYaw = 0, lookPitch = 0, lookYawV = 0, lookPitchV = 0;
+     // display
+@@ -1542,9 +1552,18 @@
+       var headYaw = lookYaw * (LOOK_HEAD_YAW / LOOK_MAX_YAW);
+       var hx = LOOK_NECK * Math.sin(headYaw), hz = LOOK_NECK * (Math.cos(headYaw) - 1);
+ 
++      // road shape: the head keeps HEAD_ROLL_KEEP of the roll out, about the car's forward axis whatever the look (in the
++      // YXZ look angles: x -= a sin(yaw), z += a cos(yaw); rotation.y stays PI + yaw, which main.js reads for the
++      // listener), and sinks / nods with the compression
++      headRoll += ((state.roll || 0) - headRoll) * (dt > 0 ? Math.min(1, dt / HEAD_ROLL_TAU) : 1);
++      var cmp = num(state.compress) ? Math.max(COMPRESS_MIN, Math.min(COMPRESS_MAX, state.compress)) : 0;
++      comp += (cmp - comp) * (dt > 0 ? Math.min(1, dt / COMPRESS_TAU) : 1);
++      var hr = HEAD_ROLL_KEEP * headRoll;
++
+       // head leans slightly into the corner
+-      camera.position.set(latG * 0.006 + ox + hx, EYE_Y + oy, EYE_Z + hz);
+-      camera.rotation.set(rx + lookPitch, Math.PI + lookYaw, latG * 0.005 + rz);
++      camera.position.set(latG * 0.006 + ox + hx, EYE_Y + oy - COMPRESS_EYE * comp, EYE_Z + hz);
++      camera.rotation.set(rx + lookPitch - COMPRESS_NOD * comp - hr * Math.sin(lookYaw), Math.PI + lookYaw,
++        latG * 0.005 + rz + hr * Math.cos(lookYaw));
+     }
+ 
+     // Everything the cockpit created (call when the cockpit is thrown away; the camera is left alone).

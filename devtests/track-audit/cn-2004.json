@@ -1,0 +1,838 @@
+{
+ "id": "cn-2004",
+ "name": "Shanghai International Circuit",
+ "auditedAt": "2026-10-01",
+ "auditor": "track-audit APAC (devtests/track-audit/apac/)",
+ "verdict": "major issues",
+ "summary": "Layout (one OSM way, mean 2.2 m off), length, direction, pit side and the published height range (7.4 m, high at T2) are fine. The start line is ~210 m too far down the straight: the game's line is ~60 m before T1, while the painted grid under the grandstand wings starts ~219 m before it. The two \"wing\" viewing bridges over the start straight are missing.",
+ "findings": [
+  {
+   "aspect": "start",
+   "severity": "major",
+   "game": "line ~60-130 m before T1 (beside the west wing)",
+   "real": "grid markings start ~219 m before the game line (2025 imagery): line ~210 m further back (no OSM node)",
+   "proposedFix": "START_AT['cn-2004'] = [31.3372693, 121.2205226] (the centreline 10 m ahead of the first painted grid slot, s -209; +-15 m, check on an official map). Moves the game's pit lane too (real lane: entry before T16 at s -683, exit at T1 s +94 relative to the current line)",
+   "sources": [
+    "Esri World Imagery (Vantor / Maxar), checked by eye with devtests/track-audit/apac/imagery.mjs; tiles cached in devtests/track-audit/cache/imagery/"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "severity": "minor",
+   "game": "no structure over the start straight",
+   "real": "two wing bridges (underside 24.5 m) over the straight at s 5019-5050 and 5380-5411",
+   "proposedFix": "scenery: allow OSM building:part with min_height >= 6 m that spans the corridor as an overhead slab (like the start gantry), or add the two wings by hand",
+   "sources": [
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+    "en.wikipedia.org/wiki/Shanghai_International_Circuit"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "minor",
+   "game": "low point s 2510 (T12-T13 run), 3 % drop on the start straight 150 m before the line",
+   "real": "low point on the long back straight, \"a fairly flat track with only minor elevation changes\" (formula1.com); the GLO-30 lower envelope shows about -1.5 % (2.8 -> 0.5 m) over the same 150 m of the start straight",
+   "proposedFix": "optional: GLO-30 lower-envelope profile scaled to the published 7.4 m; not worth a dedicated override",
+   "sources": [
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)",
+    "Copernicus DEM GLO-30 (30 m surface model, TanDEM-X 2011-2015), AWS open data COG https://copernicus-dem-30m.s3.amazonaws.com (cache/glo30/<id>-apac.json)"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "right side (ok); lane 344 m, exit only 8 m after the line",
+   "real": "right side, entry before T16 (683 m before the game line), exit at T1 (94 m after), 841 m (OSM ways 107371147 + 107371138)",
+   "proposedFix": "follows from the START_AT move",
+   "sources": [
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "START_AT": [
+   31.3372693,
+   121.2205226
+  ],
+  "START_AT_confidence": "approximate (+-15 m) from imagery",
+  "overheadStructures": [
+   {
+    "name": "west wing",
+    "gameS": [
+     5380,
+     5411
+    ],
+    "undersideM": 24.5,
+    "osm": 1371942060
+   },
+   {
+    "name": "east wing",
+    "gameS": [
+     5019,
+     5050
+    ],
+    "undersideM": 24.5,
+    "osm": 1371942059
+   }
+  ]
+ },
+ "layout": {
+  "dataset": "Grand Prix circuit 2004-present (seasons 2010-2019, 2024-2026)",
+  "officialLengthKm": 5.451,
+  "officialLengthSource": "en.wikipedia.org/wiki/Shanghai_International_Circuit infobox",
+  "gameLengthKm": 5.451,
+  "osm": {
+   "method": "OSM way 156328670 (the whole lap, 5462 m)",
+   "osmLengthM": 5445,
+   "gameTrueLengthM": 5434,
+   "devMeanM": 2.16,
+   "devP95M": 4.3,
+   "devMaxM": 7.3,
+   "devMaxAtGameS": 4779
+  }
+ },
+ "direction": {
+  "ok": true,
+  "evidence": "the game's first corner is the long tightening right-hander (\"The first two bends make a 185 km/h right-hand curve\", en.wikipedia.org/wiki/Shanghai_International_Circuit); OSM way 156328670 has no oneway tag"
+ },
+ "startFinish": {
+  "gameLatLon": [
+   31.336835,
+   121.21838
+  ],
+  "estimatedRealGameS": -210,
+  "firstGridMarkLatLon": [
+   31.337348,
+   121.2206
+  ],
+  "firstGridMarkGameS": -219,
+  "evidence": [
+   "no OSM start-finish node",
+   "Esri imagery z19 (img/sf-cn-a.png, img/sf-cn-b.png): staggered grid-slot markings on the straight from ~219 m before the game's line back past the east wing; none between them and the game line, which is beside the west wing ~60 m before the T1 turn-in (game T1 apex s 132)"
+  ],
+  "effect": "game: line -> T1 ~60-130 m; real ~270-340 m"
+ },
+ "pit": {
+  "real": {
+   "side": "right (-1)",
+   "osmWays": [
+    107371147,
+    107371138
+   ],
+   "entryGameS": -1490,
+   "entryLatLon": [
+    31.3388479,
+    121.2246894
+   ],
+   "exitGameS": 94,
+   "exitLatLon": [
+    31.3366786,
+    121.2174078
+   ],
+   "besideTrackGameS": {
+    "from": -1490,
+    "to": 50
+   },
+   "laneLengthM": 841
+  },
+  "game": {
+   "side": "right (-1)",
+   "limitKmh": 80,
+   "from": -251,
+   "entry": -165,
+   "exit": 8,
+   "to": 94,
+   "length": 344
+  },
+  "sideConvention": "gameS < 0 = before the line; side as in tracks-data pitSide (-1 = driver's right)",
+  "limit": {
+   "game": 80,
+   "real": 80,
+   "note": "no source found for a non-standard limit"
+  }
+ },
+ "elevation": {
+  "demSource": "Copernicus DEM GLO-30 (AWS open data COG https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N31_00_E121_00_DEM/Copernicus_DSM_COG_10_N31_00_E121_00_DEM.tif)",
+  "filter": "dsm",
+  "game": {
+   "range": 8.01,
+   "highAtS": 320,
+   "lowAtS": 2510,
+   "climb50": {
+    "pct": 2.57,
+    "fromS": 170
+   },
+   "descent50": {
+    "pct": -3.29,
+    "fromS": 5331
+   },
+   "climb100": {
+    "pct": 2.53,
+    "fromS": 120
+   },
+   "descent100": {
+    "pct": -3.01,
+    "fromS": 5291
+   }
+  },
+  "dem": {
+   "range": 5.05,
+   "highAtS": 340,
+   "lowAtS": 0,
+   "climb50": {
+    "pct": 2.16,
+    "fromS": 2801
+   },
+   "descent50": {
+    "pct": -3.57,
+    "fromS": 400
+   },
+   "climb100": {
+    "pct": 2.01,
+    "fromS": 130
+   },
+   "descent100": {
+    "pct": -3.22,
+    "fromS": 380
+   }
+  },
+  "demRawRange": 12.21,
+  "shapeCorrelation": 0.85,
+  "shapeRmsDiffM": 1.04,
+  "gradeDiffOver2pp_100mWindow": [
+   {
+    "fromS": 3161,
+    "toS": 3201,
+    "atS": 3181,
+    "game100": -2.57,
+    "dem100": -0.39,
+    "diffPP": -2.18
+   }
+  ],
+  "demNote": "GLO-30 along the OSM way, lower-envelope filter. SRTM (Feb 2000) predates the circuit (built 2003-04 on marshland) and is not used. The grandstands / wings are inside the surface model on the start straight.",
+  "published": {
+   "rangeM": [
+    7.4,
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+   ],
+   "highPoint": [
+    "Turn 2",
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+   ],
+   "lowPoint": [
+    "the long back straight",
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+   ]
+  },
+  "famousFeatures": [
+   {
+    "feature": "high point at T2",
+    "gameHighS": 320,
+    "demHighS": 340,
+    "verdict": "ok"
+   },
+   {
+    "feature": "low point on the back straight (T13-T14, s ~3200-4400)",
+    "gameLowS": 2510,
+    "gameBackStraightMinM": 0.6,
+    "verdict": "minor: the game's low (0 m) is between T12 and T13; its back straight reads 0.6-1.9 m"
+   },
+   {
+    "feature": "range",
+    "game": 8.01,
+    "published": 7.4,
+    "demLowerEnvelope": 5.05,
+    "verdict": "ok (the 30 m lower envelope under-reads a 7 m range; the game is within 0.6 m of the published figure)"
+   },
+   {
+    "feature": "start straight hump (s 5100-5400)",
+    "gameM": [
+     3.5,
+     5.3,
+     1.6
+    ],
+    "demM": [
+     2.8,
+     2.8,
+     0.5
+    ],
+    "verdict": "game -3 % over 100 m before the line where the lower envelope shows about half of it; probably the grandstand / wing structures in GLO-90"
+   }
+  ],
+  "profile50m": {
+   "columns": [
+    "gameS_m",
+    "game_m",
+    "dem_m (filtered, relative to its lowest point)"
+   ],
+   "rows": [
+    [
+     0,
+     1.23,
+     0
+    ],
+    [
+     50,
+     2.06,
+     0.27
+    ],
+    [
+     100,
+     3.3,
+     1.04
+    ],
+    [
+     150,
+     4.55,
+     1.94
+    ],
+    [
+     200,
+     5.79,
+     2.98
+    ],
+    [
+     250,
+     7.01,
+     3.92
+    ],
+    [
+     300,
+     7.9,
+     4.66
+    ],
+    [
+     350,
+     7.86,
+     5.03
+    ],
+    [
+     400,
+     7.01,
+     3.98
+    ],
+    [
+     450,
+     5.74,
+     2.19
+    ],
+    [
+     500,
+     4.45,
+     0.98
+    ],
+    [
+     550,
+     3.51,
+     0.49
+    ],
+    [
+     600,
+     3.01,
+     0.47
+    ],
+    [
+     650,
+     2.45,
+     0.67
+    ],
+    [
+     700,
+     1.85,
+     0.83
+    ],
+    [
+     750,
+     1.47,
+     0.87
+    ],
+    [
+     800,
+     1.8,
+     0.89
+    ],
+    [
+     850,
+     2.42,
+     0.99
+    ],
+    [
+     900,
+     2.81,
+     1.38
+    ],
+    [
+     950,
+     2.85,
+     1.96
+    ],
+    [
+     1000,
+     2.71,
+     2.17
+    ],
+    [
+     1050,
+     2.38,
+     1.87
+    ],
+    [
+     1100,
+     2.12,
+     1.38
+    ],
+    [
+     1150,
+     1.98,
+     1.1
+    ],
+    [
+     1200,
+     1.89,
+     0.93
+    ],
+    [
+     1250,
+     1.65,
+     0.86
+    ],
+    [
+     1300,
+     1.14,
+     0.88
+    ],
+    [
+     1350,
+     0.72,
+     1.02
+    ],
+    [
+     1400,
+     0.93,
+     1.38
+    ],
+    [
+     1450,
+     1.41,
+     1.58
+    ],
+    [
+     1500,
+     1.59,
+     1.11
+    ],
+    [
+     1550,
+     1.34,
+     0.61
+    ],
+    [
+     1600,
+     1.08,
+     0.54
+    ],
+    [
+     1650,
+     1,
+     0.65
+    ],
+    [
+     1700,
+     1.07,
+     0.7
+    ],
+    [
+     1750,
+     1.37,
+     0.7
+    ],
+    [
+     1800,
+     1.78,
+     0.82
+    ],
+    [
+     1850,
+     2.18,
+     1.24
+    ],
+    [
+     1900,
+     2.67,
+     1.99
+    ],
+    [
+     1950,
+     3.18,
+     2.35
+    ],
+    [
+     2000,
+     3.12,
+     1.73
+    ],
+    [
+     2050,
+     2.64,
+     1.24
+    ],
+    [
+     2100,
+     2.22,
+     1.17
+    ],
+    [
+     2150,
+     1.97,
+     1.14
+    ],
+    [
+     2200,
+     1.73,
+     1.04
+    ],
+    [
+     2250,
+     1.34,
+     0.88
+    ],
+    [
+     2300,
+     1.02,
+     0.69
+    ],
+    [
+     2350,
+     0.7,
+     0.5
+    ],
+    [
+     2400,
+     0.32,
+     0.29
+    ],
+    [
+     2450,
+     0.06,
+     0.19
+    ],
+    [
+     2500,
+     -0.01,
+     0.27
+    ],
+    [
+     2550,
+     0.1,
+     0.4
+    ],
+    [
+     2600,
+     0.43,
+     0.44
+    ],
+    [
+     2650,
+     0.87,
+     0.53
+    ],
+    [
+     2700,
+     1.44,
+     0.83
+    ],
+    [
+     2750,
+     2.29,
+     1.14
+    ],
+    [
+     2800,
+     3.33,
+     1.71
+    ],
+    [
+     2850,
+     4.46,
+     2.79
+    ],
+    [
+     2900,
+     5.36,
+     3.35
+    ],
+    [
+     2950,
+     5.8,
+     3.31
+    ],
+    [
+     3000,
+     5.87,
+     3
+    ],
+    [
+     3050,
+     5.64,
+     2.41
+    ],
+    [
+     3100,
+     5.1,
+     1.88
+    ],
+    [
+     3150,
+     4.04,
+     1.49
+    ],
+    [
+     3200,
+     2.62,
+     1.3
+    ],
+    [
+     3250,
+     1.69,
+     1.18
+    ],
+    [
+     3300,
+     1.51,
+     1.04
+    ],
+    [
+     3350,
+     1.69,
+     0.89
+    ],
+    [
+     3400,
+     1.86,
+     0.83
+    ],
+    [
+     3450,
+     1.83,
+     0.82
+    ],
+    [
+     3500,
+     1.41,
+     0.87
+    ],
+    [
+     3550,
+     0.88,
+     0.99
+    ],
+    [
+     3600,
+     0.62,
+     1.17
+    ],
+    [
+     3650,
+     0.7,
+     1.32
+    ],
+    [
+     3700,
+     0.89,
+     1.38
+    ],
+    [
+     3750,
+     0.9,
+     1.27
+    ],
+    [
+     3800,
+     0.9,
+     1.04
+    ],
+    [
+     3850,
+     0.9,
+     0.94
+    ],
+    [
+     3900,
+     0.9,
+     1.09
+    ],
+    [
+     3950,
+     0.9,
+     1.38
+    ],
+    [
+     4000,
+     0.96,
+     1.5
+    ],
+    [
+     4050,
+     1,
+     1.52
+    ],
+    [
+     4100,
+     1.02,
+     1.54
+    ],
+    [
+     4150,
+     1.21,
+     1.47
+    ],
+    [
+     4200,
+     1.57,
+     1.42
+    ],
+    [
+     4250,
+     1.98,
+     1.39
+    ],
+    [
+     4300,
+     2.43,
+     1.18
+    ],
+    [
+     4350,
+     2.85,
+     0.87
+    ],
+    [
+     4400,
+     2.9,
+     0.68
+    ],
+    [
+     4450,
+     2.1,
+     0.72
+    ],
+    [
+     4500,
+     1.52,
+     0.97
+    ],
+    [
+     4550,
+     1.43,
+     1.22
+    ],
+    [
+     4600,
+     1.7,
+     1.29
+    ],
+    [
+     4650,
+     1.89,
+     1.28
+    ],
+    [
+     4700,
+     1.98,
+     1.3
+    ],
+    [
+     4750,
+     2.15,
+     1.42
+    ],
+    [
+     4800,
+     2.37,
+     1.64
+    ],
+    [
+     4850,
+     2.66,
+     1.87
+    ],
+    [
+     4900,
+     2.9,
+     2
+    ],
+    [
+     4950,
+     2.91,
+     2.12
+    ],
+    [
+     5000,
+     3,
+     2.37
+    ],
+    [
+     5050,
+     3.08,
+     2.64
+    ],
+    [
+     5100,
+     3.54,
+     2.76
+    ],
+    [
+     5150,
+     4.31,
+     2.78
+    ],
+    [
+     5200,
+     5.06,
+     2.8
+    ],
+    [
+     5250,
+     5.28,
+     2.83
+    ],
+    [
+     5300,
+     4.56,
+     2.72
+    ],
+    [
+     5350,
+     3.05,
+     1.91
+    ],
+    [
+     5400,
+     1.58,
+     0.54
+    ]
+   ]
+  }
+ },
+ "banking": {
+  "publishedBankedCorners": "none found"
+ },
+ "covered": {
+  "real": "main grandstand (OSM way 107371135 \"A看台\", height 35 m) linked to the pit / team building by two wing bridges over the start straight: OSM building:part 1371942059 (min_height 24.5 m) at game s 5019-5050 and 1371942060 (min_height 24.5 m) at s 5380-5411; en.wikipedia: \"wing-like viewing platforms crossing the circuit at either end\"",
+  "game": "missing: scenery.js fits every footprint out of the road corridor (\"start/finish gantry (the only thing over the road)\"); no element of scenery-data within 70 m of either wing"
+ },
+ "sourcesUsed": [
+  "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)",
+  "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+  "Esri World Imagery (Vantor / Maxar), checked by eye with devtests/track-audit/apac/imagery.mjs; tiles cached in devtests/track-audit/cache/imagery/",
+  "Copernicus DEM GLO-30 (30 m surface model, TanDEM-X 2011-2015), AWS open data COG https://copernicus-dem-30m.s3.amazonaws.com (cache/glo30/<id>-apac.json)",
+  "SRTM GL1 30 m (surface model, Feb 2000) via https://api.opentopodata.org/v1/srtm30m (cache/otd-srtm30m/<id>.json)",
+  "GSI DEM 5 m laser (DEM5A, 国土地理院) via https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php (cache/gsi5m/jp-1962-osm.json)",
+  "game data: tracks-data.js built with lib/three.min.js + js/track.js + scenery-data.js (devtests/track-audit/apac/dump-game.js -> apac/out/game-<id>.json)"
+ ],
+ "files": {
+  "scripts": "devtests/track-audit/apac/*.mjs",
+  "images": "devtests/track-audit/apac/img/*.png (git-ignored output of imagery.mjs)",
+  "data": "devtests/track-audit/apac/out/"
+ }
+}

@@ -3,7 +3,8 @@
 // covered=yes, or a raceway on a negative layer, plus bridges / buildings that pass OVER the circuit (man_made=bridge,
 // building with a layer / min_height, highway bridges). Raw responses are cached in devtests/tunnel-test/cache/<id>.json
 // (re-runs do not refetch). The bbox of each track comes from tracks-data.js's geo projection (inverse of
-// x = (lon - lon0) * kx, z = (lat - lat0) * kz) grown by 60 m.
+// x = (lon - lon0) * kx, z = (lat - lat0) * kz) grown by 60 m. All 40 fetched 2026-10-01 (~10 min with the retries).
+// Next: node devtests/tunnel-test/make-data.js (-> tools/tunnels.json + the F1.TUNNEL_DATA literal for js/tunnels.js).
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -12,8 +13,9 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..', '..');
 const CACHE = join(HERE, 'cache');
 const UA = 'F1Drive-tunnel-test/1 (offline game data check; cached, one-off requests)';
-const ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.private.coffee/api/interpreter'];
+// (2026-10-01: overpass-api.de / kumi / private.coffee kept timing out from here; maps.mail.ru answered)
+const ENDPOINTS = ['https://maps.mail.ru/osm/tools/overpass/api/interpreter', 'https://overpass-api.de/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const w = {};

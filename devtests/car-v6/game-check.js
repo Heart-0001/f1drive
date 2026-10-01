@@ -3,14 +3,16 @@
 // The v6 car (js/car.js) and pad (js/gamepad.js) in the REAL game, before main.js is wired to the new features: the
 // real index.html (minus the <script> tags whose files do not exist yet, see smoke-wrap.js), real key events, a fake
 // standard-mapping controller behind navigator.getGamepads (as devtests/gp-smoke). What main.js already passes to the
-// car is the input of F1.gamepad.mergeInput, so RB / B boost works through the real input path; the limiter needs
-// main.js (keys.limiter) and is covered by test/car.test.js.
+// car is the input of F1.gamepad.mergeInput, so RB / A boost works through the real input path; the limiter needs
+// main.js (keys.limiter) and is covered by test/car.test.js. Pad layout of v6.1 (js/gamepad.js): A / RB battery (held),
+// B / LB limiter, X next compound, Y reset, View racing line. The window drives the reference car (2025-standard),
+// picked before the game boots (devtests/ref-car.js): since v6.1 a fresh install would drive the 2026 standard car.
 //   boot     no error overlay / console errors; F1.REF_SPEC, F1.carPerf, F1.sanitizeSpec; the game's car = REF_SPEC with
 //            a fresh medium set (car.tyres), battery full
 //   drive    W: gears up by the formula, rpm = perf.rpmFor(speed, gear), shiftT restarts at each change, throttle 1,
 //            the tyres wear
 //   battery  RT + RB held (fake pad): deploy > 0, the battery drains, faster than RT alone; S: harvest, it refills
-//   pad      LB / Back: F1.gamepad.state.pressed.limiter / .compound for one frame; B held: boost
+//   pad      LB / X: F1.gamepad.state.pressed.limiter / .compound for one frame; A held: boost
 //   pit      the car put in the middle of the pit lane: asphalt (not grass), state.inPit; W then steering into the
 //            pit wall: impact, never on the other side
 // Screenshots devtests/car-v6/out/game-*.png. Exit code 1 when a check fails.
@@ -19,6 +21,7 @@ const { app, BrowserWindow } = require('electron');
 const fs = require('fs'), path = require('path'), url = require('url');
 const ROOT = path.resolve(__dirname, '..', '..');
 require('../electron-userdata')(app, 'car-v6');
+const refCar = require('../ref-car');
 const OUT = path.join(__dirname, 'out');
 const TRACK = (process.env.TRACK || 'monza').toLowerCase();
 const SHOTS = process.env.SHOTS !== '0';
@@ -72,6 +75,7 @@ app.whenReady().then(async () => {
   const shot = async n => { if (!SHOTS) return; await sleep(150); fs.writeFileSync(path.join(OUT, 'game-' + n + '.png'), (await w.webContents.capturePage()).toPNG()); };
   const rows = async () => js(`(function () { var r = window.__rows; window.__rows = []; return r; })()`);
   try {
+    await refCar.seed(w);                     // the reference car (2025-standard) picked before the game boots
     await w.loadFile(pageCopy());
     await sleep(1200);
     await js(PAGE);
@@ -111,22 +115,25 @@ app.whenReady().then(async () => {
     const batB = r[r.length - 1].bat, depB = Math.max(...r.map(x => x.dep)), boostSeen = r.some(x => x.boost);
     await js(`__btn(7, 0); __btn(5, 0)`);
     check('RT alone: no deploy, battery full', depA === 0 && batA === 1, { depA, batA });
-    check('RT + RB held: deploy, the battery drains (mergeInput passes boost)', boostSeen && depB > 0.5 && batB < 0.97, { depB, batB });
+    // (state.deploy = the share of the battery's power used: since the final review of 2026-10-01 the deploy adds to the
+    //  engine's drive only up to what the tyres transmit, so from this low speed it peaks near 0.49 in 2.5 s and drains
+    //  about 2.4 % - as in devtests/v6-smoke part pad; this check asked for > 0.5 and < 0.97 before that change)
+    check('RT + RB held: deploy, the battery drains (mergeInput passes boost)', boostSeen && depB > 0.25 && batB < batA - 0.01, { depB, batA, batB });
     await rows();
     key('S', true); await sleep(1500); key('S', false);
     r = await rows();
     const har = Math.max(...r.map(x => x.har)), batC = r[r.length - 1].bat;
     check('S: harvest under braking, the battery refills; brake 1', har > 0.5 && batC > batB && r.some(x => x.brk === 1), { har, batB, batC });
-    // B held is a boost too
-    await js(`__btn(1, 1)`); await sleep(200);
-    r = await rows(); await js(`__btn(1, 0)`);
-    check('B held: F1.gamepad.state.boost', r.some(x => x.boost), r.length);
-    // LB / Back: one-frame edges
+    // A held is a boost too (v6.1: the battery button)
+    await js(`__btn(0, 1)`); await sleep(200);
+    r = await rows(); await js(`__btn(0, 0)`);
+    check('A held: F1.gamepad.state.boost', r.some(x => x.boost), r.length);
+    // LB / X: one-frame edges
     await rows();
     await js(`__btn(4, 1)`); await sleep(300); await js(`__btn(4, 0)`); await sleep(150);
-    await js(`__btn(8, 1)`); await sleep(300); await js(`__btn(8, 0)`); await sleep(150);
+    await js(`__btn(2, 1)`); await sleep(300); await js(`__btn(2, 0)`); await sleep(150);
     r = await rows();
-    check('LB -> pressed.limiter, Back -> pressed.compound, one frame each', r.filter(x => x.lim).length === 1 && r.filter(x => x.comp).length === 1,
+    check('LB -> pressed.limiter, X -> pressed.compound, one frame each', r.filter(x => x.lim).length === 1 && r.filter(x => x.comp).length === 1,
       { lim: r.filter(x => x.lim).length, comp: r.filter(x => x.comp).length });
 
     // --- pit lane: the car in the middle of the lane, then into the pit wall

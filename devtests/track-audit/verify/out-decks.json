@@ -1,0 +1,306 @@
+[
+ {
+  "key": "be-1925-6",
+  "id": "be-1925",
+  "s": [
+   688,
+   688
+  ],
+  "centre": [
+   50.443972,
+   5.968381
+  ],
+  "osmBridgeOutline": {
+   "id": 1353164215,
+   "tags": {
+    "layer": "1",
+    "man_made": "bridge"
+   },
+   "matchedVertices": "4/4"
+  },
+  "over": [],
+  "under": [
+   "1353164214 layer=-1"
+  ],
+  "lapOnDeck": [],
+  "verdict": "PHANTOM (the lap's own deck)"
+ },
+ {
+  "key": "nl-1948-2",
+  "id": "nl-1948",
+  "s": [
+   4097,
+   4105
+  ],
+  "centre": [
+   52.387094,
+   4.539548
+  ],
+  "osmBridgeOutline": {
+   "id": 765476850,
+   "tags": {
+    "layer": "1",
+    "man_made": "bridge"
+   },
+   "matchedVertices": "4/4"
+  },
+  "over": [],
+  "under": [
+   "186321842 highway=service layer=-1 tunnel=yes"
+  ],
+  "lapOnDeck": [],
+  "verdict": "PHANTOM (the lap's own deck)"
+ },
+ {
+  "key": "de-1932-5",
+  "id": "de-1932",
+  "s": [
+   3232,
+   3240
+  ],
+  "centre": [
+   49.32772,
+   8.573642
+  ],
+  "osmBridgeOutline": {
+   "id": 1302600378,
+   "tags": {
+    "layer": "1",
+    "man_made": "bridge"
+   },
+   "matchedVertices": "4/4"
+  },
+  "over": [],
+  "under": [
+   "192994934 highway=service layer=-2 tunnel=yes"
+  ],
+  "lapOnDeck": [],
+  "verdict": "PHANTOM (the lap's own deck)"
+ },
+ {
+  "key": "de-1932-7",
+  "id": "de-1932",
+  "s": [
+   552,
+   558
+  ],
+  "centre": [
+   49.332038,
+   8.566381
+  ],
+  "osmBridgeOutline": {
+   "id": 1302356195,
+   "tags": {
+    "layer": "1",
+    "man_made": "bridge"
+   },
+   "matchedVertices": "4/4"
+  },
+  "over": [],
+  "under": [
+   "31320990 highway=service layer=-2 tunnel=yes"
+  ],
+  "lapOnDeck": [],
+  "verdict": "PHANTOM (the lap's own deck)"
+ },
+ {
+  "key": "de-1932-8",
+  "id": "de-1932",
+  "s": [
+   3378,
+   3388
+  ],
+  "centre": [
+   49.327036,
+   8.571949
+  ],
+  "osmBridgeOutline": {
+   "id": 1302600377,
+   "tags": {
+    "layer": "1",
+    "man_made": "bridge"
+   },
+   "matchedVertices": "4/4"
+  },
+  "over": [],
+  "under": [
+   "26336602 highway=service layer=-2 tunnel=yes",
+   "534265659 highway=footway layer=-2 tunnel=yes"
+  ],
+  "lapOnDeck": [],
+  "verdict": "PHANTOM (the lap's own deck)"
+ },
+ {
+  "key": "us-2023-9",
+  "id": "us-2023",
+  "s": [
+   4264,
+   4272
+  ],
+  "centre": [
+   36.115297,
+   -115.172882
+  ],
+  "osmBridgeOutline": {
+   "id": 1419057401,
+   "tags": {
+    "bridge": "viaduct",
+    "layer": "1",
+    "man_made": "bridge"
+   },
+   "matchedVertices": "4/4"
+  },
+  "over": [
+   "25724074 bridge=yes highway=footway layer=1 name=Las Vegas Boulevard Overpass",
+   "1436581612 bridge=yes highway=footway layer=1 name=Las Vegas Boulevard Overpass",
+   "1436726272 bridge=yes highway=footway layer=1 name=Las Vegas Boulevard Overpass"
+  ],
+  "under": [],
+  "lapOnDeck": [],
+  "verdict": "real overpass"
+ },
+ {
+  "key": "de-1927-4",
+  "id": "de-1927",
+  "s": [
+   1442,
+   1482
+  ],
+  "centre": [
+   50.330336,
+   6.939514
+  ],
+  "osmBridgeOutline": {
+   "id": 790945811,
+   "tags": {
+    "bridge:structure": "beam",
+    "layer": "1",
+    "man_made": "bridge"
+   },
+   "matchedVertices": "5/5"
+  },
+  "over": [
+   "74171524 bridge=yes highway=footway layer=1",
+   "223251412 bridge=yes highway=service layer=1",
+   "368949216 bridge=yes layer=1",
+   "368949217 bridge=yes layer=1",
+   "849684573 bridge=yes highway=service layer=1 name=Zugang GP Strecke Rad/Lauftreff",
+   "1443047848 layer=1",
+   "1443047849 layer=1"
+  ],
+  "under": [],
+  "lapOnDeck": [
+   "1443047846 bridge=yes highway=raceway layer=1 name=Nürburgring Sprintstrecke sport=motor"
+  ],
+  "verdict": "real overpass"
+ },
+ {
+  "key": "de-1927-10",
+  "id": "de-1927",
+  "s": [
+   46,
+   52
+  ],
+  "centre": [
+   50.335177,
+   6.947221
+  ],
+  "osmBridgeOutline": {
+   "id": 34444288,
+   "tags": {
+    "bridge": "covered",
+    "bridge:structure": "cable-stayed",
+    "layer": "1",
+    "man_made": "bridge",
+    "name": "BMW-Brücke"
+   },
+   "matchedVertices": "4/4"
+  },
+  "over": [],
+  "under": [],
+  "lapOnDeck": [],
+  "verdict": "unclear"
+ },
+ {
+  "key": "gb-1948-9",
+  "id": "gb-1948",
+  "s": [
+   1668,
+   1672
+  ],
+  "centre": [
+   52.067474,
+   -1.013238
+  ],
+  "osmBridgeOutline": {
+   "id": 605922107,
+   "tags": {
+    "area": "yes",
+    "layer": "1",
+    "man_made": "bridge"
+   },
+   "matchedVertices": "4/4"
+  },
+  "over": [
+   "4851856 bridge=yes highway=service layer=1"
+  ],
+  "under": [],
+  "lapOnDeck": [],
+  "verdict": "real overpass"
+ },
+ {
+  "key": "ae-2009-6",
+  "id": "ae-2009",
+  "s": [
+   2758,
+   2768
+  ],
+  "centre": [
+   24.466987,
+   54.602824
+  ],
+  "osmBridgeOutline": {
+   "id": 1473728620,
+   "tags": {
+    "image": "https://photos.app.goo.gl/eVYA5Z3oZbAFRWxZA",
+    "layer": "1",
+    "man_made": "bridge"
+   },
+   "matchedVertices": "7/7"
+  },
+  "over": [
+   "133904804 bridge=yes highway=unclassified layer=1",
+   "520933543 bridge=yes footway=sidewalk highway=footway layer=1"
+  ],
+  "under": [],
+  "lapOnDeck": [],
+  "verdict": "real overpass"
+ },
+ {
+  "key": "ae-2009-7",
+  "id": "ae-2009",
+  "s": [
+   4634,
+   4638
+  ],
+  "centre": [
+   24.467879,
+   54.604757
+  ],
+  "osmBridgeOutline": {
+   "id": 1473750056,
+   "tags": {
+    "image": "https://photos.app.goo.gl/fyQQ6J5tVhf4FSuJA",
+    "layer": "1",
+    "man_made": "bridge"
+   },
+   "matchedVertices": "7/7"
+  },
+  "over": [
+   "188732722 bridge=yes highway=footway layer=1 name=Marina Walk Bridge"
+  ],
+  "under": [],
+  "lapOnDeck": [],
+  "verdict": "real overpass"
+ }
+]

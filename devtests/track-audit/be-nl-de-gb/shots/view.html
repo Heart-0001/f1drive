@@ -1,0 +1,38 @@
+<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas>
+<script src="../../../../lib/three.min.js"></script>
+<script src="../../../../tracks-data.js"></script>
+<script src="../../../../scenery-data.js" onerror="void 0"></script>
+<script src="../../../../js/track.js"></script>
+<script src="../../../../js/scenery.js"></script>
+<script>
+const q=new URLSearchParams(location.search);
+const W=1280,H=720;
+try{
+const r=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true,preserveDrawingBuffer:true});
+r.setSize(W,H);
+const FOGC=F1.SKY_HORIZON_COLOR;
+const scene=new THREE.Scene(); scene.background=new THREE.Color(FOGC); scene.fog=new THREE.Fog(FOGC,300,2500);
+scene.add(new THREE.HemisphereLight(0xdcebff,0x556644,0.85));
+const sun=new THREE.DirectionalLight(0xffffff,0.9); sun.position.set(300,600,200); scene.add(sun);
+const td=F1_TRACKS.find(t=>t.id===q.get('t'))||F1_TRACKS[0];
+const track=F1.buildTrack(td); scene.add(track.group);
+const t0=performance.now();
+const data=(q.get('data')==='0')?undefined:(window.F1_SCENERY&&F1_SCENERY[td.id]);
+const sc=F1.buildScenery(track,td,data); scene.add(sc.group);
+const ms=performance.now()-t0;
+scene.add(F1.createSky());
+const cam=new THREE.PerspectiveCamera(+(q.get('fov')||70),W/H,0.1,4000);
+const N=track.samples.length;
+let i=q.get('s')!==null? Math.round(+q.get('s')/ (track.length/N)) : Math.round(+(q.get('f')||0)*N);
+i=((i%N)+N)%N; const s=track.samples[i];
+const eh=+(q.get('h')||0.8), d=+(q.get('d')||0), yaw=+(q.get('yaw')||0)*Math.PI/180, pitch=+(q.get('pitch')||0)*Math.PI/180;
+const back=+(q.get('back')||0);
+const y=(track.surfaceY?track.surfaceY(i,d):(s.y||0))+eh;
+cam.position.set(s.x+s.nx*d-s.tx*back,y,s.z+s.nz*d-s.tz*back);
+const g=s.grade||0; const c=Math.cos(yaw),sn=Math.sin(yaw);
+const fx=s.tx*c+s.nx*sn, fz=s.tz*c+s.nz*sn;
+cam.lookAt(cam.position.x+fx*10,y+g*10+Math.tan(pitch)*10,cam.position.z+fz*10);
+r.render(scene,cam);
+document.title='done '+ms.toFixed(0)+'ms tris='+sc.stats.triangles+' calls='+r.info.render.calls+' rtris='+r.info.render.triangles;
+}catch(e){document.title='ERR '+e.message; document.body.innerHTML='<pre style="color:#fff">'+e.stack+'</pre>';}
+</script></body></html>

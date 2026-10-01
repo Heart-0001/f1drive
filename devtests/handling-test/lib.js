@@ -1,9 +1,10 @@
 // Shared loader for devtests/handling-test: the real game modules in node, optionally with COPIES of js/car.js /
 // js/raceline.js (nothing in the project is edited). Every load is a fresh global F1 (vm-free: modules are evaluated
 // with `new Function` on a sandbox object) so two variants can be compared in one process.
-//   load({car: <file>, raceline: <file>, hook: {low, bank, lock, ref, old}}) -> F1 (F1.TRACKS = window.F1_TRACKS)
-//   variant(name) -> the load options of a named variant: 'v5' (the project files), 'x' (variants/*-x.js, hook
-//   given separately), 'proposed' (variants/*.proposed.js)
+//   load({car: <file>, raceline: <file>, hook: {lockMax, low, bankFrom, bankTo, bank, old, cliff}}) -> F1 (F1.TRACKS = window.F1_TRACKS)
+//   (the hook fields: make-variants.js)
+//   variant(name, hook) -> the load options of a named variant: 'today' / 'v5' (the project files), 'x' (variants/*-x.js
+//   with the hook), 'proposed' (variants/*.proposed.js). Scripts take variants as name[:hookJSON], e.g. 'x:{"lockMax":0.35}'.
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const THREE = require(path.join(ROOT, 'lib', 'three.min.js'));

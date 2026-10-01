@@ -1,0 +1,1 @@
+{"out":"devtests/track-audit/apac/img/au-1953-ov.png","center":[-37.846,144.9705],"zoom":16,"w":1100,"h":1300,"lines":[{"file":"devtests/track-audit/apac/out/osm-au-1953-relation.json","color":"#00e5ff","width":2,"label":"OSM"},{"file":"devtests/track-audit/apac/out/gameline-au-1953.json","key":"samplesLL","color":"#ff3030","width":2,"label":"game"}]}

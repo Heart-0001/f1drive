@@ -19,3 +19,8 @@ devtests/review-final/seasons/seasons-repro/
 devtests/handling-test/ref/
 devtests/track-audit/cache/
 .claude/scheduled_tasks.lock
+# deeper harness outputs, API caches and file snapshots of the analyses
+devtests/**/out/
+devtests/**/cache/
+devtests/track-audit/perception/snap/
+devtests/track-audit/perception/patched/

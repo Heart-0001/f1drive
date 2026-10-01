@@ -12,9 +12,23 @@ export const LAYOUT = {
   'bh-2002': { rel: 284538, pitWays: [187123422] },
 };
 
+// Overpass elements of the circuit plus ways fetched one by one from the OSM API (cfg.extraFrom: cache/osmapi/*.json,
+// for member ways a lagging Overpass instance did not return), converted to the Overpass 'out geom' shape.
+export function loadOsm(id, cfg) {
+  const els = JSON.parse(readFileSync(resolve(HERE, '..', 'cache', 'overpass', id + '.json'), 'utf8')).elements.slice();
+  for (const f of (cfg && cfg.extraFrom) || []) {
+    const j = JSON.parse(readFileSync(resolve(HERE, '..', 'cache', f), 'utf8'));
+    const nodes = Object.fromEntries(j.elements.filter((e) => e.type === 'node').map((n) => [n.id, n]));
+    for (const w of j.elements.filter((e) => e.type === 'way')) {
+      if (els.some((e) => e.type === 'way' && e.id === w.id)) continue;
+      els.push({ type: 'way', id: w.id, nodes: w.nodes, tags: w.tags, geometry: w.nodes.map((n) => ({ lat: nodes[n].lat, lon: nodes[n].lon })) });
+    }
+  }
+  return els;
+}
+
 export function layoutAudit(id, cfg) {
-  const osm = JSON.parse(readFileSync(resolve(HERE, '..', 'cache', 'overpass', id + '.json'), 'utf8'));
-  const els = osm.elements;
+  const els = loadOsm(id, cfg);
   let wayIds = cfg.ways;
   if (!wayIds) { const rel = els.find((e) => e.type === 'relation' && e.id === cfg.rel); wayIds = rel.members.filter((m) => m.type === 'way').map((m) => m.ref); }
   const chain = chainWays(els, wayIds);

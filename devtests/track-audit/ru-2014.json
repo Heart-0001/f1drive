@@ -1,0 +1,1691 @@
+{
+ "id": "ru-2014",
+ "name": "Sochi Autodrom",
+ "auditor": "track-audit east (2026-10-01)",
+ "method": "devtests/track-audit/east/*.mjs (README in report.mjs header); game side = out/game-<id>.json (dump-game.js, the game's own js/track.js build)",
+ "layout": {
+  "gameLengthKm": 5.848,
+  "gameBuiltLengthM": 5848,
+  "gameTrueLengthM": 5823,
+  "buildRescale": 1.0043,
+  "osmLoopLengthM": 5832,
+  "osmLoopGaps": [],
+  "osmBase": "2026-06-01T08:52:28Z",
+  "osmRelations": [],
+  "lateralDeviationGameToOsm": {
+   "meanM": 4.2,
+   "p95M": 8.3,
+   "maxM": 9.3,
+   "over8m": [
+    {
+     "fromGameS": 0,
+     "toGameS": 134,
+     "maxM": 8.2,
+     "at": [
+      43.4096839,
+      39.9680524
+     ]
+    },
+    {
+     "fromGameS": 4582,
+     "toGameS": 4610,
+     "maxM": 9,
+     "at": [
+      43.4080735,
+      39.9641554
+     ]
+    },
+    {
+     "fromGameS": 5534,
+     "toGameS": 5846,
+     "maxM": 9.3,
+     "at": [
+      43.4120271,
+      39.9701257
+     ]
+    }
+   ]
+  },
+  "osmWaysUsed": [
+   {
+    "id": 234329382,
+    "name": "Сочи Автодром",
+    "lengthM": 5832,
+    "coverage": 1
+   }
+  ],
+  "osmWaysNotOnGameLine": [
+   {
+    "id": 307147481,
+    "name": null,
+    "lengthM": 285,
+    "coverage": 0.18,
+    "nearGameS": 4353
+   }
+  ],
+  "official": {
+   "GP circuit 2014-2023": 5.848,
+   "source": "en.wikipedia.org/wiki/Sochi_Autodrom (dismantled after 6 Nov 2023; only the 2.313 km Sirius layout remains); de.wikipedia: FIA length 5.853 km"
+  },
+  "f1Use": "Russian GP 2014-2021",
+  "osmSnapshot": "Current OSM only has the 2.313 km Sirius layout (way 1235494683), so the GP layout was compared with the OSM history snapshot of 2021-09-20 (Overpass attic query, cache east-ru-2014-attic-2021.json): way 234329382 \"Сочи Автодром\", 5832 m",
+  "identification": "Game line within 9.3 m (mean 4.2 m) of the 2021 OSM GP loop; 5823 m true vs 5832 m OSM vs 5.848 official. Correct layout."
+ },
+ "direction": {
+  "game": "clockwise",
+  "real": "clockwise",
+  "ok": true,
+  "source": "de.wikipedia.org/wiki/Sochi_Autodrom: \"Die im Uhrzeigersinn zu durchfahrende Strecke\"; 2021 OSM oneway way"
+ },
+ "startFinish": {
+  "game": [
+   43.409699,
+   39.9680659
+  ],
+  "osmNode": null,
+  "note": "No start/finish node in the 2021 OSM snapshot (the current raceway=start-finish node 8164671075 belongs to the short Sirius layout, 356 m off the GP line). FIA 2020 pit map: control line at the pit-entry end of the garages, pole further down. Not verified."
+ },
+ "pit": {
+  "game": {
+   "side": "right",
+   "limitKmh": 80,
+   "entryS": 5684,
+   "entryLL": [
+    43.4109373,
+    39.9691666
+   ],
+   "exitS": 164,
+   "exitLL": [
+    43.4084601,
+    39.9669665
+   ],
+   "laneFromS": 5598,
+   "laneToS": 250,
+   "lengthM": 500
+  },
+  "osmPitWays": [
+   {
+    "id": 306234479,
+    "name": null,
+    "lengthM": 1069,
+    "side": "right",
+    "leavesTrackAt": {
+     "gameS": 5205,
+     "trueS": 5183,
+     "ll": [
+      43.411489,
+      39.967301
+     ],
+     "offTrackM": 5.3
+    },
+    "rejoinsAt": {
+     "gameS": 485,
+     "trueS": 482,
+     "ll": [
+      43.407119,
+      39.963608
+     ],
+     "offTrackM": 4.1
+    },
+    "maxspeed": null
+   }
+  ],
+  "real": {
+   "side": "right",
+   "limitKmh": 60,
+   "limitSource": "FIA 2020 Russian GP Race Directors' Event Notes art. 18.1 and 2021 Russian GP Race Directors' Event Notes v2 art. 18.1: \"The Pit lane Speed limit ... is hereby amended to 60km/h for the duration of the Event\" (cache/web/fia-2020-russian-gp-event-notes.pdf, fia-2021-russian-gp-event-notes.pdf)",
+   "entry": "on the inside before the last corners (FIA 2020 pit map; 2021 OSM way 306234479 leaves at gameS 5205)",
+   "exit": "on the straight after the Turn 1 kink (OSM gameS 485)"
+  }
+ },
+ "elevation": {
+  "along": "OSM centreline loop, s = true metres from the foot of the game start line (gameS = the game's own s at the same place)",
+  "game": {
+   "rangeM": 2.9,
+   "lowest": {
+    "s": 4201,
+    "m": 0,
+    "ll": [
+     43.408691,
+     39.960245
+    ]
+   },
+   "highest": {
+    "s": 5582,
+    "m": 2.9,
+    "ll": [
+     43.411553,
+     39.969845
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 0.5,
+    "climbAtS": 5212,
+    "descentPct": -0.4,
+    "descentAtS": 30
+   },
+   "steepest100m": {
+    "climbPct": 0.5,
+    "climbAtS": 5212,
+    "climbAt": [
+     43.412067,
+     39.96781
+    ],
+    "descentPct": -0.4,
+    "descentAtS": 0,
+    "descentAt": [
+     43.409282,
+     39.967814
+    ]
+   }
+  },
+  "glo30": {
+   "rangeM": 4.2,
+   "lowest": {
+    "s": 3781,
+    "m": 0.2,
+    "ll": [
+     43.409975,
+     39.955375
+    ]
+   },
+   "highest": {
+    "s": 2381,
+    "m": 4.4,
+    "ll": [
+     43.402977,
+     39.948113
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 3.1,
+    "climbAtS": 2321,
+    "descentPct": -3.7,
+    "descentAtS": 2391
+   },
+   "steepest100m": {
+    "climbPct": 1.9,
+    "climbAtS": 5242,
+    "climbAt": [
+     43.412296,
+     39.968011
+    ],
+    "descentPct": -2.4,
+    "descentAtS": 2381,
+    "descentAt": [
+     43.403392,
+     39.947868
+    ]
+   },
+   "absMinM": 0.2,
+   "absMaxM": 4.4
+  },
+  "glo30LowerEnvelope": {
+   "rangeM": 3.5,
+   "lowest": {
+    "s": 1180,
+    "m": -0.1,
+    "ll": [
+     43.407445,
+     39.95617
+    ]
+   },
+   "highest": {
+    "s": 5462,
+    "m": 3.4,
+    "ll": [
+     43.412321,
+     39.96972
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 2,
+    "climbAtS": 1210,
+    "descentPct": -2.1,
+    "descentAtS": 2971
+   },
+   "steepest100m": {
+    "climbPct": 1.6,
+    "climbAtS": 5272,
+    "climbAt": [
+     43.412524,
+     39.968211
+    ],
+    "descentPct": -1.5,
+    "descentAtS": 2951,
+    "descentAt": [
+     43.406195,
+     39.951344
+    ]
+   }
+  },
+  "alongGameCentreline": {
+   "srtm30": {
+    "rangeM": 7,
+    "lowest": {
+     "s": 4640,
+     "m": -5,
+     "ll": [
+      43.407844,
+      39.9645
+     ]
+    },
+    "highest": {
+     "s": 5510,
+     "m": 2,
+     "ll": [
+      43.412239,
+      39.969975
+     ]
+    },
+    "steepest50m": {
+     "climbPct": 6.1,
+     "climbAtS": 1650,
+     "descentPct": -4.3,
+     "descentAtS": 530
+    },
+    "steepest100m": {
+     "climbPct": 4.6,
+     "climbAtS": 1620,
+     "climbAt": [
+      43.405591,
+      39.952491
+     ],
+     "descentPct": -3.1,
+     "descentAtS": 520,
+     "descentAt": [
+      43.406956,
+      39.962578
+     ]
+    },
+    "absMinM": -5,
+    "absMaxM": 2
+   },
+   "glo90raw": {
+    "rangeM": 7,
+    "lowest": {
+     "s": 4270,
+     "m": 0,
+     "ll": [
+      43.408559,
+      39.960802
+     ]
+    },
+    "highest": {
+     "s": 800,
+     "m": 7,
+     "ll": [
+      43.406423,
+      39.959841
+     ]
+    },
+    "steepest50m": {
+     "climbPct": 10,
+     "climbAtS": 2800,
+     "descentPct": -10,
+     "descentAtS": 900
+    },
+    "steepest100m": {
+     "climbPct": 6,
+     "climbAtS": 700,
+     "climbAt": [
+      43.406538,
+      39.960437
+     ],
+     "descentPct": -6,
+     "descentAtS": 2900,
+     "descentAt": [
+      43.406121,
+      39.950514
+     ]
+    }
+   },
+   "note": "the same sources along the game's own points (elev-game.mjs); glo90raw = the unsmoothed input of the game profile"
+  },
+  "shapeAgreement": {
+   "glo30": {
+    "corr": 0.62,
+    "rmsM": 0.7,
+    "worstGameMinusDem": {
+     "dM": -2.1,
+     "s": 2381,
+     "ll": [
+      43.402977,
+      39.948113
+     ]
+    }
+   },
+   "glo30floor": {
+    "corr": 0.7,
+    "rmsM": 0.6,
+    "worstGameMinusDem": {
+     "dM": 1.3,
+     "s": 5762,
+     "ll": [
+      43.41019,
+      39.968626
+     ]
+    }
+   }
+  },
+  "published": {
+   "rangeM": 1.9,
+   "source": "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), cached devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html: \"Sochi Autodrom, Russia Elevation change: 1.9m\"; de.wikipedia infobox Höhenunterschied 1.9"
+  },
+  "note": "Build: FLAT_TRACKS (median 325 m, Gauss 250 m, scaled to <= 4 m). GLO-30 along OSM 4.2 m / lower envelope 3.5 m is surface-model noise at this scale."
+ },
+ "banking": {
+  "source": "js/track.js: derived from curvature (BANK_MAX 6 deg, inside lower); no bankOverrides for this circuit",
+  "maxDeg": 5.7,
+  "shareOver3DegPct": 9.5,
+  "cornersFound": 17,
+  "corners": [
+   {
+    "hand": "R",
+    "gameS": [
+     264,
+     330
+    ],
+    "apexS": 316,
+    "angleDeg": -17,
+    "minRadiusM": 178,
+    "gameBankDeg": 1.4,
+    "gameGradePct": -0.1,
+    "apex": [
+     43.4075671,
+     39.9655895
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     946,
+     996
+    ],
+    "apexS": 982,
+    "angleDeg": -92,
+    "minRadiusM": 15,
+    "gameBankDeg": 5.4,
+    "gameGradePct": 0,
+    "apex": [
+     43.4060796,
+     39.9576775
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     1002,
+     1048
+    ],
+    "apexS": 1020,
+    "angleDeg": 32,
+    "minRadiusM": 57,
+    "gameBankDeg": -3.6,
+    "gameGradePct": -0.2,
+    "apex": [
+     43.4063993,
+     39.9575258
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     1166,
+     1692
+    ],
+    "apexS": 1552,
+    "angleDeg": 158,
+    "minRadiusM": 130,
+    "gameBankDeg": -2,
+    "gameGradePct": 0,
+    "apex": [
+     43.4066367,
+     39.9524475
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     1808,
+     1868
+    ],
+    "apexS": 1844,
+    "angleDeg": -84,
+    "minRadiusM": 24,
+    "gameBankDeg": 5.6,
+    "gameGradePct": 0.2,
+    "apex": [
+     43.4041632,
+     39.95332
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     2248,
+     2322
+    ],
+    "apexS": 2286,
+    "angleDeg": -95,
+    "minRadiusM": 26,
+    "gameBankDeg": 5.5,
+    "gameGradePct": 0,
+    "apex": [
+     43.402189,
+     39.9486572
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     2496,
+     2586
+    ],
+    "apexS": 2554,
+    "angleDeg": -31,
+    "minRadiusM": 144,
+    "gameBankDeg": 1.8,
+    "gameGradePct": 0,
+    "apex": [
+     43.4043583,
+     39.9473157
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     2692,
+     2740
+    ],
+    "apexS": 2712,
+    "angleDeg": -69,
+    "minRadiusM": 19,
+    "gameBankDeg": 5.1,
+    "gameGradePct": 0,
+    "apex": [
+     43.4057538,
+     39.947642
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     2994,
+     3044
+    ],
+    "apexS": 3018,
+    "angleDeg": 68,
+    "minRadiusM": 28,
+    "gameBankDeg": -5.4,
+    "gameGradePct": 0,
+    "apex": [
+     43.4062427,
+     39.9513273
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     3092,
+     3144
+    ],
+    "apexS": 3126,
+    "angleDeg": 33,
+    "minRadiusM": 55,
+    "gameBankDeg": -3.6,
+    "gameGradePct": -0.4,
+    "apex": [
+     43.4071678,
+     39.9516597
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     3366,
+     3434
+    ],
+    "apexS": 3390,
+    "angleDeg": -88,
+    "minRadiusM": 27,
+    "gameBankDeg": 5.3,
+    "gameGradePct": 0,
+    "apex": [
+     43.4094133,
+     39.9506123
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     4492,
+     4546
+    ],
+    "apexS": 4522,
+    "angleDeg": -92,
+    "minRadiusM": 17,
+    "gameBankDeg": 5.6,
+    "gameGradePct": 0.1,
+    "apex": [
+     43.4087286,
+     39.9638452
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     4592,
+     4774
+    ],
+    "apexS": 4616,
+    "angleDeg": 131,
+    "minRadiusM": 31,
+    "gameBankDeg": -5.2,
+    "gameGradePct": 0.4,
+    "apex": [
+     43.4079467,
+     39.9642458
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     4868,
+     4912
+    ],
+    "apexS": 4894,
+    "angleDeg": 90,
+    "minRadiusM": 14,
+    "gameBankDeg": -5.5,
+    "gameGradePct": 0.3,
+    "apex": [
+     43.4092602,
+     39.9667051
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     4948,
+     5024
+    ],
+    "apexS": 4994,
+    "angleDeg": -87,
+    "minRadiusM": 30,
+    "gameBankDeg": 5.3,
+    "gameGradePct": 0.3,
+    "apex": [
+     43.4098948,
+     39.965903
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     5338,
+     5386
+    ],
+    "apexS": 5368,
+    "angleDeg": -80,
+    "minRadiusM": 17,
+    "gameBankDeg": 5.4,
+    "gameGradePct": 0.3,
+    "apex": [
+     43.4127192,
+     39.9683659
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     5504,
+     5556
+    ],
+    "apexS": 5526,
+    "angleDeg": -98,
+    "minRadiusM": 15,
+    "gameBankDeg": 5.6,
+    "gameGradePct": 0,
+    "apex": [
+     43.4121494,
+     39.9701247
+    ]
+   }
+  ],
+  "real": "No banking published; the circuit runs on Olympic Park roads (F1.com: \"extremely flat\").",
+  "verdict": "synthetic only: 12 of its 90-degree corners get 5.1-5.6 deg, unverified"
+ },
+ "coveredAndBridges": {
+  "gameCrossings": [],
+  "osmCrossingsOfTheGameLine": [],
+  "note": "No tunnel on the lap. Current OSM has a private service-road bridge (way 259568728, layer 1) and footbridges (765654800, 306234499) crossing the GP line at gameS ~4590 and ~5480; the 2021 snapshot query did not include bridges, so their presence during the GP years is not verified. The game has no overhead structure there."
+ },
+ "verdict": "minor issues",
+ "findings": [
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "pitLimitKmh 80 (default).",
+   "real": "Sochi ran a 60 km/h pit lane limit (FIA Race Director's event notes 2020 and 2021, art. 18.1).",
+   "proposedFix": "PIT_FACTS 'ru-2014': { limitKmh: 60 }",
+   "sources": [
+    "fia.com 2020 Russian Grand Prix - Race Directors' Event Notes Version 3",
+    "fia.com 2021 Russian Grand Prix - Race Directors' Event Notes Version 2"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "Lane 500 m: entry gameS 5684, exit gameS 164.",
+   "real": "2021 OSM pit lane (way 306234479, 1069 m, right) leaves at gameS 5205 (479 m earlier, before T18, running inside T18-T19) and rejoins at gameS 485 (321 m later).",
+   "proposedFix": "pitEntryLL [43.411489,39.967301], pitExitLL [43.407119,39.963608] (new optional fields).",
+   "sources": [
+    "OpenStreetMap contributors (ODbL), Overpass API; raw answers cached in devtests/track-audit/cache/overpass/east-*.json 2021 snapshot way 306234479",
+    "FIA 2020 Russian GP pit lane map (cache/web/fia-2020-rus-p10.png)"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "cosmetic",
+   "game": "Range 2.9 m, grades <= 0.5 %.",
+   "real": "Published 1.9 m (F1.com 2016; de.wikipedia).",
+   "proposedFix": "build-tracks: PUBLISHED 'ru-2014' 1.9 and scale FLAT tracks to their published range (ru-2014 -> 1.9 m)",
+   "sources": [
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), cached devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html",
+    "de.wikipedia.org/wiki/Sochi_Autodrom"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "severity": "cosmetic",
+   "game": "12 corners banked 5.1-5.6 deg inward (curvature-derived).",
+   "real": "No banking reported for any corner (en/de.wikipedia, F1.com); the venue is described as extremely flat. Not measurable from the available 30 m DEMs.",
+   "proposedFix": "Optional: a per-track bank scale (e.g. 0.4) for street / plaza circuits, or bankOverrides deg 0 on the 90-degree corners.",
+   "sources": [
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), cached devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "severity": "cosmetic",
+   "game": "No bridge over the track.",
+   "real": "OSM (current data): service bridge 259568728 + footbridge 765654800 over the GP line near T14-T15 (gameS ~4590), footbridge 306234499 before the last corners (gameS ~5480).",
+   "proposedFix": "If confirmed for 2014-2021 imagery, add them as bridge decks in the scenery (build-scenery man_made=bridge path).",
+   "sources": [
+    "OpenStreetMap contributors (ODbL), Overpass API; raw answers cached in devtests/track-audit/cache/overpass/east-*.json"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "PIT_FACTS": {
+   "limitKmh": 60
+  },
+  "pit": {
+   "side": -1,
+   "limitKmh": 60,
+   "entryLL": [
+    43.411489,
+    39.967301
+   ],
+   "exitLL": [
+    43.407119,
+    39.963608
+   ]
+  },
+  "elevation": {
+   "kind": "scaleToRange",
+   "targetRangeM": 1.9,
+   "factor": 0.655
+  }
+ },
+ "profile50": {
+  "along": "OSM loop, s true metres from the game start",
+  "columns": [
+   "s",
+   "lat",
+   "lon",
+   "game",
+   "glo30",
+   "glo30floor"
+  ],
+  "rows": [
+   [
+    0,
+    43.40966,
+    39.968153,
+    2.4,
+    1.6,
+    1
+   ],
+   [
+    50,
+    43.409282,
+    39.967814,
+    2.2,
+    1.4,
+    0.8
+   ],
+   [
+    100,
+    43.408903,
+    39.967476,
+    2,
+    1.1,
+    0.7
+   ],
+   [
+    150,
+    43.408524,
+    39.967138,
+    1.9,
+    1.8,
+    0.8
+   ],
+   [
+    200,
+    43.408152,
+    39.966786,
+    1.7,
+    1.5,
+    1
+   ],
+   [
+    250,
+    43.407846,
+    39.966334,
+    1.7,
+    1.8,
+    1.4
+   ],
+   [
+    300,
+    43.407611,
+    39.965806,
+    1.5,
+    1.8,
+    1.5
+   ],
+   [
+    350,
+    43.407448,
+    39.965231,
+    1.5,
+    1.4,
+    0.8
+   ],
+   [
+    400,
+    43.407323,
+    39.964636,
+    1.5,
+    0.8,
+    0.7
+   ],
+   [
+    450,
+    43.407205,
+    39.964039,
+    1.5,
+    1,
+    0.8
+   ],
+   [
+    500,
+    43.407087,
+    39.963442,
+    1.5,
+    1.1,
+    0.9
+   ],
+   [
+    550,
+    43.406971,
+    39.962844,
+    1.5,
+    1.3,
+    1
+   ],
+   [
+    600,
+    43.406857,
+    39.962246,
+    1.5,
+    1.3,
+    1.1
+   ],
+   [
+    650,
+    43.406743,
+    39.961647,
+    1.5,
+    1.4,
+    1.1
+   ],
+   [
+    700,
+    43.406629,
+    39.961049,
+    1.6,
+    1.4,
+    1.2
+   ],
+   [
+    750,
+    43.406515,
+    39.96045,
+    1.6,
+    1.9,
+    1.3
+   ],
+   [
+    800,
+    43.406401,
+    39.959852,
+    1.6,
+    2.5,
+    1.4
+   ],
+   [
+    850,
+    43.406285,
+    39.959254,
+    1.6,
+    1.3,
+    0.5
+   ],
+   [
+    900,
+    43.406165,
+    39.958658,
+    1.6,
+    0.5,
+    0.3
+   ],
+   [
+    950,
+    43.40605,
+    39.95806,
+    1.6,
+    0.4,
+    0.3
+   ],
+   [
+    1000,
+    43.406266,
+    39.957666,
+    1.6,
+    0.5,
+    0.4
+   ],
+   [
+    1050,
+    43.406627,
+    39.957323,
+    1.5,
+    1,
+    0.5
+   ],
+   [
+    1100,
+    43.406947,
+    39.956886,
+    1.5,
+    0.7,
+    0.4
+   ],
+   [
+    1150,
+    43.407265,
+    39.956447,
+    1.5,
+    0.4,
+    0
+   ],
+   [
+    1200,
+    43.407558,
+    39.955976,
+    1.4,
+    0.8,
+    0
+   ],
+   [
+    1250,
+    43.407738,
+    39.955413,
+    1.4,
+    1.5,
+    0.9
+   ],
+   [
+    1300,
+    43.407808,
+    39.954805,
+    1.3,
+    1.8,
+    1.3
+   ],
+   [
+    1350,
+    43.407761,
+    39.954192,
+    1.3,
+    1.9,
+    1.1
+   ],
+   [
+    1400,
+    43.407602,
+    39.953615,
+    1.3,
+    1.3,
+    1
+   ],
+   [
+    1450,
+    43.407337,
+    39.953117,
+    1.3,
+    2.2,
+    1.3
+   ],
+   [
+    1501,
+    43.406981,
+    39.95274,
+    1.4,
+    2.9,
+    1.9
+   ],
+   [
+    1551,
+    43.406566,
+    39.952499,
+    1.4,
+    2,
+    1.5
+   ],
+   [
+    1601,
+    43.40612,
+    39.95242,
+    1.4,
+    1.9,
+    1.5
+   ],
+   [
+    1651,
+    43.405674,
+    39.952512,
+    1.5,
+    2.9,
+    2
+   ],
+   [
+    1701,
+    43.405255,
+    39.952741,
+    1.6,
+    2.6,
+    1.7
+   ],
+   [
+    1751,
+    43.404846,
+    39.953005,
+    1.7,
+    2.2,
+    1.6
+   ],
+   [
+    1801,
+    43.404434,
+    39.95326,
+    1.8,
+    2.8,
+    2
+   ],
+   [
+    1851,
+    43.404034,
+    39.95329,
+    1.9,
+    2.3,
+    1.5
+   ],
+   [
+    1901,
+    43.403796,
+    39.952765,
+    2,
+    1.8,
+    1.4
+   ],
+   [
+    1951,
+    43.403565,
+    39.952232,
+    2.1,
+    1.8,
+    1.5
+   ],
+   [
+    2001,
+    43.403335,
+    39.9517,
+    2.2,
+    2,
+    1.7
+   ],
+   [
+    2051,
+    43.403106,
+    39.951167,
+    2.2,
+    1.8,
+    1.5
+   ],
+   [
+    2101,
+    43.402877,
+    39.950634,
+    2.3,
+    1.8,
+    1.5
+   ],
+   [
+    2151,
+    43.40265,
+    39.950098,
+    2.3,
+    1.8,
+    1.5
+   ],
+   [
+    2201,
+    43.402424,
+    39.949563,
+    2.3,
+    2,
+    1.6
+   ],
+   [
+    2251,
+    43.402199,
+    39.949026,
+    2.3,
+    2.6,
+    2.1
+   ],
+   [
+    2301,
+    43.402314,
+    39.948509,
+    2.2,
+    2.5,
+    2.4
+   ],
+   [
+    2351,
+    43.402727,
+    39.948259,
+    2.1,
+    3.8,
+    2.4
+   ],
+   [
+    2401,
+    43.403143,
+    39.948015,
+    2,
+    3.9,
+    2.3
+   ],
+   [
+    2451,
+    43.403558,
+    39.94777,
+    1.9,
+    2.3,
+    1.9
+   ],
+   [
+    2501,
+    43.403972,
+    39.947522,
+    1.8,
+    1.8,
+    1.6
+   ],
+   [
+    2551,
+    43.404409,
+    39.947371,
+    1.7,
+    1.6,
+    1.5
+   ],
+   [
+    2601,
+    43.404857,
+    39.94743,
+    1.6,
+    1.9,
+    1.6
+   ],
+   [
+    2651,
+    43.405299,
+    39.947563,
+    1.5,
+    2.1,
+    1.9
+   ],
+   [
+    2701,
+    43.405737,
+    39.947711,
+    1.4,
+    2.1,
+    1.9
+   ],
+   [
+    2751,
+    43.405855,
+    39.948287,
+    1.4,
+    2.1,
+    1.9
+   ],
+   [
+    2801,
+    43.405921,
+    39.948899,
+    1.3,
+    2.1,
+    1.9
+   ],
+   [
+    2851,
+    43.405987,
+    39.949511,
+    1.3,
+    2.1,
+    1.6
+   ],
+   [
+    2901,
+    43.406053,
+    39.950123,
+    1.3,
+    2.1,
+    1.4
+   ],
+   [
+    2951,
+    43.406119,
+    39.950734,
+    1.3,
+    2.3,
+    1.6
+   ],
+   [
+    3001,
+    43.406195,
+    39.951344,
+    1.2,
+    1.7,
+    0.8
+   ],
+   [
+    3051,
+    43.406586,
+    39.951605,
+    1.2,
+    0.9,
+    0.2
+   ],
+   [
+    3101,
+    43.407026,
+    39.951741,
+    1.2,
+    1.5,
+    0.4
+   ],
+   [
+    3151,
+    43.407463,
+    39.951602,
+    1.1,
+    1.3,
+    0.8
+   ],
+   [
+    3201,
+    43.407889,
+    39.951397,
+    1.1,
+    2.2,
+    1
+   ],
+   [
+    3251,
+    43.408316,
+    39.951192,
+    1,
+    2.3,
+    1.5
+   ],
+   [
+    3301,
+    43.408743,
+    39.950988,
+    1,
+    1.8,
+    1.3
+   ],
+   [
+    3351,
+    43.40917,
+    39.950783,
+    0.8,
+    1.2,
+    1.1
+   ],
+   [
+    3401,
+    43.409579,
+    39.950803,
+    0.8,
+    1.1,
+    0.6
+   ],
+   [
+    3451,
+    43.409752,
+    39.951373,
+    0.7,
+    0.5,
+    0.2
+   ],
+   [
+    3501,
+    43.409908,
+    39.951954,
+    0.6,
+    0.3,
+    0
+   ],
+   [
+    3551,
+    43.410028,
+    39.952549,
+    0.6,
+    0.5,
+    0
+   ],
+   [
+    3601,
+    43.410088,
+    39.953161,
+    0.5,
+    0.6,
+    0.3
+   ],
+   [
+    3651,
+    43.410104,
+    39.953779,
+    0.4,
+    0.8,
+    0.5
+   ],
+   [
+    3701,
+    43.410082,
+    39.954397,
+    0.4,
+    1.3,
+    0.5
+   ],
+   [
+    3751,
+    43.410018,
+    39.955009,
+    0.3,
+    0.5,
+    0
+   ],
+   [
+    3801,
+    43.409946,
+    39.95562,
+    0.3,
+    0.3,
+    0
+   ],
+   [
+    3851,
+    43.40985,
+    39.956224,
+    0.3,
+    0.9,
+    0.4
+   ],
+   [
+    3901,
+    43.409729,
+    39.95682,
+    0.2,
+    1.2,
+    0.9
+   ],
+   [
+    3951,
+    43.409582,
+    39.957405,
+    0.2,
+    1.2,
+    0.9
+   ],
+   [
+    4001,
+    43.409418,
+    39.957981,
+    0.2,
+    1,
+    0.6
+   ],
+   [
+    4051,
+    43.409235,
+    39.958546,
+    0.1,
+    0.7,
+    0.4
+   ],
+   [
+    4101,
+    43.409066,
+    39.95912,
+    0.1,
+    1,
+    0.5
+   ],
+   [
+    4151,
+    43.408874,
+    39.95968,
+    0.1,
+    0.9,
+    0.6
+   ],
+   [
+    4201,
+    43.408691,
+    39.960245,
+    0,
+    1.4,
+    0.6
+   ],
+   [
+    4251,
+    43.408564,
+    39.960838,
+    0,
+    1.1,
+    0.6
+   ],
+   [
+    4301,
+    43.408489,
+    39.961447,
+    0,
+    0.8,
+    0.6
+   ],
+   [
+    4351,
+    43.408464,
+    39.962064,
+    0,
+    1.3,
+    0.7
+   ],
+   [
+    4401,
+    43.408514,
+    39.962678,
+    0.1,
+    1.1,
+    0.2
+   ],
+   [
+    4451,
+    43.408625,
+    39.963278,
+    0.1,
+    0.9,
+    0
+   ],
+   [
+    4502,
+    43.408737,
+    39.963873,
+    0.2,
+    1.5,
+    0.5
+   ],
+   [
+    4552,
+    43.408352,
+    39.96415,
+    0.3,
+    0.8,
+    0
+   ],
+   [
+    4602,
+    43.407927,
+    39.964358,
+    0.4,
+    0.6,
+    0
+   ],
+   [
+    4652,
+    43.407844,
+    39.964923,
+    0.4,
+    0.9,
+    0.6
+   ],
+   [
+    4702,
+    43.407988,
+    39.965506,
+    0.5,
+    1.5,
+    0.9
+   ],
+   [
+    4752,
+    43.408299,
+    39.96595,
+    0.6,
+    1.5,
+    0.6
+   ],
+   [
+    4802,
+    43.408673,
+    39.966299,
+    0.7,
+    1,
+    0.5
+   ],
+   [
+    4852,
+    43.409047,
+    39.966647,
+    0.8,
+    1.7,
+    0.9
+   ],
+   [
+    4902,
+    43.409418,
+    39.966571,
+    0.9,
+    1.4,
+    0.9
+   ],
+   [
+    4952,
+    43.40967,
+    39.96606,
+    1,
+    1,
+    0.9
+   ],
+   [
+    5002,
+    43.410085,
+    39.966079,
+    1.1,
+    1.2,
+    0.9
+   ],
+   [
+    5052,
+    43.410466,
+    39.966412,
+    1.2,
+    1.4,
+    1.2
+   ],
+   [
+    5102,
+    43.410848,
+    39.966744,
+    1.3,
+    1.5,
+    1.2
+   ],
+   [
+    5152,
+    43.41123,
+    39.967076,
+    1.5,
+    1.3,
+    1.1
+   ],
+   [
+    5202,
+    43.411611,
+    39.967409,
+    1.7,
+    1.6,
+    1.3
+   ],
+   [
+    5252,
+    43.411991,
+    39.967743,
+    1.9,
+    1.8,
+    1.4
+   ],
+   [
+    5302,
+    43.412372,
+    39.968077,
+    2.2,
+    2.8,
+    1.9
+   ],
+   [
+    5352,
+    43.412702,
+    39.968467,
+    2.3,
+    3.6,
+    2.8
+   ],
+   [
+    5402,
+    43.412538,
+    39.96904,
+    2.5,
+    3.6,
+    3.2
+   ],
+   [
+    5452,
+    43.412357,
+    39.969607,
+    2.7,
+    3.8,
+    3.4
+   ],
+   [
+    5502,
+    43.412171,
+    39.970169,
+    2.8,
+    3.5,
+    3.2
+   ],
+   [
+    5552,
+    43.41178,
+    39.970048,
+    2.9,
+    3.4,
+    2.9
+   ],
+   [
+    5602,
+    43.411402,
+    39.969709,
+    2.9,
+    3.1,
+    2
+   ],
+   [
+    5652,
+    43.411023,
+    39.969371,
+    2.8,
+    2.2,
+    1.8
+   ],
+   [
+    5702,
+    43.410645,
+    39.969033,
+    2.8,
+    2,
+    1.7
+   ],
+   [
+    5752,
+    43.410266,
+    39.968694,
+    2.6,
+    1.6,
+    1.1
+   ],
+   [
+    5802,
+    43.409887,
+    39.968356,
+    2.5,
+    1.3,
+    1
+   ]
+  ]
+ }
+}

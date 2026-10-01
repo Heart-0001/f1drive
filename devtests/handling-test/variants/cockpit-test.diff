@@ -1,0 +1,39 @@
+diff --git a/devtests/cockpit-test/api.test.js b/devtests/handling-test/variants/api.test.proposed.js
+index a5d8147..da04cb2 100644
+--- a/devtests/cockpit-test/api.test.js
++++ b/devtests/handling-test/variants/api.test.proposed.js
+@@ -237,7 +237,7 @@ else {
+   const oa = OLD.createCockpit(ca), nb = F1.createCockpit(cb);
+   let seed = 1; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, realRandom = Math.random;
+   let maxd = 0;
+-  const s = { x: 3, y: 1, z: -7, heading: 0.4, speed: 0, steer: 0, pitch: 0.02, roll: -0.03, onGrass: false, hit: 0 };
++  const s = { x: 3, y: 1, z: -7, heading: 0.4, speed: 0, steer: 0, pitch: 0.02, roll: 0, onGrass: false, hit: 0 };   // (level: v6.2 cues off)
+   for (let i = 0; i < 600; i++) {
+     s.speed = 60 * Math.sin(i / 100) ** 2; s.heading += 0.004 * Math.sin(i / 30); s.steer = Math.sin(i / 25); s.hit = i % 97 === 0 ? 0.8 : 0; s.onGrass = i > 300 && i < 360;
+     const look = i > 400 ? [Math.sin(i / 20), Math.cos(i / 33)] : [0, 0];
+@@ -251,6 +251,25 @@ else {
+   Math.random = realRandom;
+   check('camera (pose, FOV, shake, look) identical to the v5 cockpit over 600 frames', maxd === 0, { maxDiff: maxd });
+ 
++  // v6.2 road-shape cues: on a 19 deg bank the view tilts by 55 % of the roll (the head keeps 45 % out, about the car's
++  // forward axis also while looking aside), and the eye sinks 1.2 cm per g of compression
++  {
++    const cc = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), nc = F1.createCockpit(cc);
++    const st = { x: 0, y: 0, z: 0, heading: 0, speed: 50, steer: 0, pitch: 0, roll: -0.33, compress: 1.5, onGrass: false, hit: 0 };
++    for (let i = 0; i < 240; i++) nc.update(st, 1 / 60);
++    nc.group.updateMatrixWorld(true);
++    const e = cc.matrixWorld.elements, tilt = Math.atan2(Math.hypot(e[4], e[6]), e[5]);
++    check('road-shape cues: the view tilts 55 % of a 19 deg bank, the eye sinks 1.8 cm at 1.5 g of compression',
++      Math.abs(tilt - 0.55 * 0.33) < 0.005 && Math.abs(cc.position.y - (0.80 - 0.018)) < 0.002, { tilt: tilt, eyeY: cc.position.y });
++    nc.setLook(1, 0);
++    for (let i = 0; i < 240; i++) nc.update(st, 1 / 60);
++    nc.group.updateMatrixWorld(true);
++    const f = cc.matrixWorld.elements, tilt2 = Math.atan2(Math.hypot(f[4], f[6]), f[5]);
++    check('road-shape cues: looking aside, the counter-roll stays about the car\'s forward axis (the view tilts no more)',
++      Math.abs(tilt2 - 0.55 * 0.33) < 0.01, { tilt: tilt2 });
++    nc.dispose();
++  }
++
+   // ---- remote car: setColour exactly as before, setLivery slots ----
+   const a = OLD.createCarModel('#3366ff', 'A'), b = F1.createCarModel('#3366ff', 'A');
+   const ga = a.group.children[0].geometry, gb = b.group.children[0].geometry;

@@ -78,7 +78,7 @@ export function readTiff(buf) {
   }
   for (const [x0, y0, bw, bh, o, c] of blocks) {
     let b = decode(buf.subarray(o, o + c));
-    if (pred === 2 && fmt !== 3) {         // horizontal differencing (integers)
+    if (pred === 2) {         // horizontal differencing (on the integer words; LAStools also writes it for float32)
       b = new Uint8Array(b);
       const d = new DataView(b.buffer);
       for (let r = 0; r < bh; r++) for (let col = 1; col < bw; col++) {

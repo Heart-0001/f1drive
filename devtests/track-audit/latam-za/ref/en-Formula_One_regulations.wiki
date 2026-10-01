@@ -1,0 +1,358 @@
+{{short description|International motorsport rules}}
+{{Update|date=April 2017}}
+{{Use dmy dates|date=January 2020}}
+The '''Formula One regulations,''' made and enforced by the [[Fédération Internationale de l'Automobile|FIA]], are rules that govern car specifications, racing procedures, scoring, and penalties in [[Formula One]]. The primary goals of the Formula One regulations are to ensure driver safety and fairness in competition. As of 2026, the regulations are designed with an additional goal of promoting [[environmental sustainability]] in the sport.<ref>{{Cite web |title=Formula 1 announces plan to be Net Zero Carbon by 2030 {{!}} Formula 1® |url=https://www.formula1.com/en/latest/article/formula-1-announces-plan-to-be-net-zero-carbon-by-2030.5IaX2AZHyy7jqxl6wra6CZ |access-date=2026-05-06 |website=www.formula1.com |language=en}}</ref>
+
+There are two main types of regulations; technical and sporting. Technical regulations are related to car specifications, such as the [[chassis]] or the engine. Meanwhile, sporting regulations involve race procedures and set rules that pertain to the sport as a whole. There are also financial regulations that place restrictions on the budgets of teams and power unit manufacturers, and operational regulations that dictate factory testing procedures.<ref>{{Cite web |title=Regulations: FIA Formula One World Championship |url=https://www.fia.com/regulation/category/110 |url-status=live |access-date=6 May 2026 |website=Federation Internationale de l'Automobile}}</ref>
+
+The regulations in Formula One are updated by the FIA on a yearly basis. Typically, only minor changes are made, such as in order to close loopholes, improve safety, or adjust the scoring system. However, major regulation changes have also occurred, such as in [[2014 Formula One World Championship|2014]], with the introduction of 1.6-litre [[V6 engine|V6]] [[Turbocharger|turbo]]-[[Hybrid vehicle drivetrain|hybrid]] engines, and in [[2026 Formula One World Championship|2026]], with the significantly increased electrification of the engine and the introduction of new [[Formula One engines|power unit]] and [[Aerodynamics|aerodynamic]] modes.<ref>{{Cite web |title=Key regulation changes in F1 history – and who nailed them |url=https://www.formula1.com/en/latest/article/the-key-regulation-changes-in-f1-history-and-the-teams-that-nailed-them.2iq8c5E6S1HOffT5PBLl6i |access-date=2026-05-06 |website=www.formula1.com |language=en}}</ref> Such major regulation changes are announced years in advance, to give teams and manufacturers time to plan and design the new cars.
+
+{{Formula One|related}}
+
+== Current rules and regulations ==
+
+=== Technical ===
+
+==== Chassis ====
+An [[Formula One|F1]] car can be no more than 190&nbsp;cm wide and 95&nbsp;cm tall.<ref>{{cite web |url=https://www.formula1.com/en/championship/inside-f1/rules-regs/Bodywork_and_dimensions_and_Cockpit.html |title=Bodywork, dimensions and cockpit |work=formula1.com |access-date=20 June 2017}}</ref> Though there is no maximum length, other rules set indirect limits on these dimensions, and nearly every aspect of the car carries size regulations; consequently the various cars tend to be very close to the same size. The car and driver must together weigh at least 724&nbsp;kg as of 2026.<ref name=":0" />
+
+The car must only have four wheels mounted externally of the body work with only the front 2 steered and only the back 2 driven. The maximum distance allowed between the front and rear wheels (the [[wheelbase]]) is 340&nbsp;cm.
+
+The main [[chassis]] contains a "safety cell" which includes the cockpit, a structure designed to reduce impact directly in front of the cockpit, and the [[Fuel tank#Racing fuel cell|fuel cell]] directly behind the cockpit. Additionally, the car must contain roll structures behind and ahead of the driver. The driver must be able to enter and exit the cockpit without any adjustments other than removing the steering wheel. Since {{f1|2018}}, the car must include the [[Halo (safety device)|halo]], which is a curved titanium bar placed above the driver's head that prevents them from sustaining any injuries.
+
+There are also mandatory [[crash test]] standards. There is a {{convert|30|mph|km/h|abbr=on}} head-on impact into a steel barrier; "average deceleration must not exceed 25g", with a maximum 60g for a minimum 3 milliseconds, with no damage to the chassis beyond the nose section.<ref name=NH50>Noble and Hughes, p.50</ref> The same chassis must then sustain a rear impact from a sled travelling at {{convert|30|mph|km/h|abbr=on}}, with no damage in front of the rear axle.<ref name=NH50/> The [[Roll cage|roll hoop]] is not permitted to crush beyond {{convert|50|mm|in|abbr=on}}, and structural failure is only permitted in the top {{convert|100|mm|in|abbr=on}} of the body.<ref name=NH51>Noble and Hughes, p.51</ref> Side impacts by a {{convert|780|kg|lb|abbr=on}} object at {{convert|10|m/s|mph|abbr=on}} must be decelerated at less than 20g, and absorb no less than 15% and no more than 35% of the total energy; {{convert|80|kN|abbr=on}} can not be exceeded more than 3 milliseconds.<ref name=NH51/> The steering wheel must survive the impact of an {{convert|8|kg|lb|abbr=on}} {{convert|165|mm|in|abbr=on}}-diameter object at {{convert|7|m/s|mph|abbr=on}} with no deformation of the wheel or damage to the quick-release mechanism.<ref name=NH51/>
+
+In addition, there are "squeeze tests" on the cockpit sides, fuel tank, and nosebox. The cockpit must survive a {{convert|25|kN|abbr=on}} force with no failure; for the fuel tank, {{convert|12.5|kN|abbr=on}} is applied. A maximum {{convert|3|mm|in|abbr=on}} deformation is allowed.<ref name=NH51/> For the cockpit rim, the figures are {{convert|10|kN|abbr=on}} and {{convert|20|mm|in|abbr=on}}.<ref name=NH51/> The nosebox must withstand {{convert|40|kN|abbr=on}} for 30 seconds without failing.<ref name=NH51/>
+
+==== Electrical systems ====
+Onboard electrical and computer systems, once inspected at the start of the season, may not be changed without prior approval. Electronic starters and [[Launch control (automotive)|launch control]] are forbidden.{{Citation needed|date=May 2017|reason=While dedicated systems are banned, hybrid-powered (ERS) cars can start or restart on their own from the 2015-2016 season.}} The computers must contain a [[telemetry|telemetric]] accident [[data reporting]] system.
+
+==== Transmission ====
+[[Continuously variable transmission]]s (CVTs) have been banned since 1994, two weeks after very successful tests in the [[Williams FW15C]] in 1993 that proved CVTs had the potential to keep other teams at a competitive disadvantage for a long time due to the difficulties of designing sufficiently strong belts for use in CVTs. It was speculated that the use of a CVT alone led to an advantage of several seconds per lap. CVTs have never been used in Formula 1 races. A rule was added in 1994 that stated that gearboxes must have anywhere from 2 to 7 discrete gear ratios, alongside a clause that explicitly bans CVTs.<ref>{{Cite web | url=https://www.racefans.net/2007/05/03/banned-continuously-variable-transmission-cvt/ | title=Banned! Continuously Variable Transmission (CVT) · RaceFans | date=3 May 2007 }}</ref><ref>{{Cite web | url=https://www.auto123.com/en/news/f1-technique-williams-tested-a-cvt-transmission-back-in-1993-video/34642/ | title=F1 Technique: Williams tested a CVT transmission back in 1993 (+video) &#124; Car News &#124; Auto123 | date=2 January 2014 }}</ref><ref>{{Cite web | url=https://www.highpowermedia.com/Archive/formula-one-cvt-part-2 | title=Formula One CVT (Part 2) | work=High Power Media }}</ref><ref>{{Cite web | url=https://www.highpowermedia.com/Archive/ArtMID/380/ArticleID/4145/Transmission | title=Transmission | work=High Power Media }}</ref> Active suspensions were also banned in 1994 due to [[Safety in Formula One|safety concerns]] by the FIA over ever-higher speeds,<ref>{{Cite web | url=https://www.racefans.net/2007/05/17/banned-active-suspension/ | title=Banned: Active suspension · RaceFans | date=17 May 2007 }}</ref> and other "driver aids" were also banned that same year, including 4-wheel steering, which was tested and found to provide negligible if any reduction in lap times.<ref>{{Cite web | url=https://www.racefans.net/2007/03/22/banned-four-wheel-steering/ | title=Banned: Four-wheel-steering · RaceFans | date=22 March 2007 }}</ref>
+
+Since 2014, transmissions with 8 gear ratios and 1 reverse gear ratio are required in Formula 1 cars.
+
+==== Engine ====
+{{main|Formula One engines}}
+{{see also|List of Formula One engines}}
+{| class="wikitable"
+|+ Engine specifications
+|-
+! Year
+! 2000–2005
+! 2006–2013
+! 2014–2025<ref>{{Cite web | url=https://www.mercedesamgf1.com/en/heritage/silver-arrows/pu106c-hybrid/ | title=PU106C Hybrid | access-date=10 November 2020 | archive-date=28 November 2021 | archive-url=https://web.archive.org/web/20211128061849/https://www.mercedesamgf1.com/en/heritage/silver-arrows/pu106c-hybrid/ | url-status=dead }}</ref>
+!2026–present<ref>{{Cite web |title=F1 W17: 2026 Technical Specifications |url=https://www.mercedesamgf1.com/f1-w17-2026-technical-specifications |url-status=live |archive-url=https://web.archive.org/web/20260407150049/https://www.mercedesamgf1.com/f1-w17-2026-technical-specifications |archive-date=7 Apr 2026 |access-date=5 May 2026 |website=Mercedes-AMG PETRONAS F1 Team |language=en}}</ref><ref name=":0">{{Cite web |title=FIA 2026 Formula One World Championship Regulations |url=https://www.fia.com/regulation/category/110 |access-date=5 May 2026 |website=Federation Internationale de l'Automobile}}</ref>
+|-
+| Size
+| 3.0-litre
+| 2.4-litre
+| 1.6-litre
+|1.6-litre
+|-
+| Type of engine
+| [[V10]]
+| [[V8]]
+| [[V6]] ([[turbocharged|turbo]]-[[Hybrid vehicle drivetrain|hybrid]])
+|[[V6]] ([[turbocharged|turbo]]-[[Hybrid vehicle drivetrain|hybrid]])
+|-
+| Fuel-limit per race
+| No limit (approx. 180 – 200&nbsp;kg / 250 – 290 L)
+| No limit (approx. 130 – 160&nbsp;kg / 190 – 230 L)
+| 100 – 110&nbsp;kg (130 – 145 L)
+|No limit
+|-
+| Fuel-flow rate limit
+| No limit
+| No limit
+| 100&nbsp;kg/h above 10,500 RPM
+|3000&nbsp;MJ/h above 10,500 RPM
+|-
+| Fuel-injection pressure limit
+| No limit
+| No limit
+| 500 [[Bar (unit)|bar]]
+|350 bar
+|-
+| Engine RPM limit
+| No limit
+| 18,000 – 20,500
+| 15,000
+|15,000
+|-
+| Power Output
+| 770 – 1000&nbsp;hp
+| 730 – 840&nbsp;hp
+| 750 – 1000&nbsp;hp
+|approx. 1000&nbsp;hp
+|}
+
+The engines, now commonly referred to as ''power units'', are divided into 6 components: the internal combustion engine (ICE); [[turbocharger]] (TC); Motor Generator Unit-Kinetic (MGU-K), which harvests energy that would normally be wasted under braking; Energy Store (ES), which functions as a battery, storing the energy gathered by the MGU-K; Control Electronics (CE), which includes the Electronic Control Unit and software used to manage the entire power unit; and Exhaust (EX). From 2014 to 2025, there was a seventh component called the [[MGU-H]] (Motor Generator Unit-Heat), which collected energy in the form of heat as it was expelled through the exhaust, but it was removed from the 2026 regulations due to being overly costly and complex for new teams to develop.<ref name=":1">{{Cite web |last=Benson |first=Andrew |date=4 Mar 2026 |title=All you need to know about new F1 cars |url=https://www.bbc.com/sport/formula1/articles/c3dzrjyvmm8o |url-status=live |archive-url=https://web.archive.org/web/20260310124405/https://www.bbc.com/sport/formula1/articles/c3dzrjyvmm8o |archive-date=10 Mar 2026 |access-date=5 May 2026 |website=BBC Sport}}</ref>
+
+In 2026, each driver may use up to four ICEs, Turbochargers, and Exhaust sets, and up to three MGU-Ks, Energy Stores, and Control Electronics throughout the season; however, from 2027 onward, this allocation will decrease to only three and two respectively, unless it is the manufacturer's first year supplying power units since the onset of the 2026 regulations. A grid place penalty will be enforced upon drivers who exceed these allocation limits, once for each additional component at the first event where the replacement element is used.<ref>{{Cite web |title=The beginner’s guide to F1 power unit penalties |url=https://www.formula1.com/en/latest/article/the-beginners-guide-to-formula-1-engine-and-gearbox-penalties.2TSy7BFgEvdNLojGLWS3F1 |archive-url=https://web.archive.org/web/20260210041100/https://www.formula1.com/en/latest/article/the-beginners-guide-to-formula-1-engine-and-gearbox-penalties.2TSy7BFgEvdNLojGLWS3F1 |archive-date=10 Feb 2026 |access-date=5 May 2026 |website=formula1.com |language=en}}</ref>
+
+Devices designed to [[fuel injection|inject]] any substance into the cylinders other than air and [[fuel]] (petrol) are forbidden, as are variable-length [[intake]] and [[exhaust system]]s. The [[crankshaft]] and [[camshaft]]s must be made from an iron-based [[alloy]]. The use of [[Graphite-reinforced plastic|carbon]] [[composite material]]s for the cylinder block, [[cylinder head]] and [[piston]]s is not allowed. Separate [[starter motor|starting devices]] may be used to start engines in the pits and on the grid. If the engine is fitted with an [[Anti-stall (engine)|anti-stall device]], this must be set to cut the engine within ten seconds in the event of an accident.<ref name=":0" />
+
+Formula One engine technology was greatly changed from the [[2014 Formula One World Championship|2014 season]] with the introduction of the 1.6-litre [[Turbocharger|turbocharged]] [[V6]]-[[Hybrid electric vehicle|hybrid]] engine. Along with this came the introduction of the ERS (Energy Recovery System). This system works similarly to [[Kinetic energy recovery system|KERS]]. With the 2014–2025 era power units, drivers got a full-time boost of about 160&nbsp;bhp (120&nbsp;kW) from electric motors used in conjunction with the internal combustion engine (generating around 1,000&nbsp;bhp in total) instead of a 6-second bank of extra power per lap. With the 2026 regulation change, the amount of electrical power has been greatly increased to about 470&nbsp;bhp (350&nbsp;kW) for an approximately 50-50 split between combustion and electrical power.<ref name=":1" /> The fuel flow rate, formerly measured in kg/h, is now measured more precisely as a fuel energy flow rate in terms of MJ/h.
+
+==== Refuelling ====
+From 2010, refuelling is no longer permitted during the race and now every car starts with a full fuel load. The 2010 season cars were about 22&nbsp;cm longer than 2009 cars to accommodate the enlarged fuel tank this necessitated.
+
+==== Tyres ====
+{{main|Formula One tyres}}
+Formula 1 has contracted a single supplier of tyres since the 2007 season. The supplier ([[Pirelli]] since {{F1|2011}}) supplies 6 specifications of slick dry-weather tyres (C1, C2, C3, C4, C5, C6), of which 3 compounds are provided at each race (described at that race as "soft", "medium" and "hard"). [[Pirelli]] introduced a softer C6 compound for the [[2025 Formula One World Championship|2025]] season.<ref>{{Cite web |last=Sport |first=Motor |date=2025-02-25 |title=2025 F1 testing — new tyre compounds but only 2 teams choose wets for Bahrain |url=https://www.motorsportmagazine.com/articles/single-seaters/f1/2021-f1-testing-tyres-why-pirelli-has-brought-a-prototype-to-bahrain/ |access-date=2025-03-24 |website=Motor Sport Magazine |language=en-GB}}</ref> 
+
+From {{F1|2011}} to {{F1|2015}}, 2 types of dry tyres were provided at each race weekend, known as the Prime and the Option. Teams are supplied with more sets of Prime tyres than Option tyres for use throughout the weekend. The Prime tyre is usually harder and therefore more durable than the Option tyre, while the Option tyre provides more grip and therefore allows faster lap times when the tyres are fresh. At some events the selection is reversed, with the Option tyre being harder than the Prime. The combination of longer lasting and faster tyres adds an element to each car's race strategy. Additionally, 2 wet-weather compounds are provided by the supplier: intermediate and full wet. 
+
+From {{F1|2016}} onward, 3 dry tyre compounds are brought to a race weekend. Since 2019, regardless of tyre compound, one tyre is designated as soft, one as medium, and one as hard. One set of the softest tyres is set aside for Q3 and two sets of the middle and the hardest tyres are kept for the race. Each compound is differentiated by a colour-coded band painted around the tyre's sidewall including the supplier's logo: red for soft, yellow for medium, white for hard, green for intermediate, and blue for full wet.
+
+Competitors are allowed only a limited number of tyre sets during a race weekend: 13 dry, 4 intermediate, 3 wet. However, if the race weekend includes a [[Sprint race (Formula One)|sprint race]], only 12 sets of dry tyres are allocated.<ref>{{Cite web |last=Szabo |first=Balazs |date=2024-11-01 |title=REMINDER: How do the new sprint rules work? |url=https://www.f1technical.net/news/25746 |access-date=2026-05-06 |website=www.f1technical.net |language=en-gb}}</ref> Each tyre must be marked with a unique identifier for tracking and scrutinising during a race event. During the practice sessions drivers are limited to the use of 3 sets of dry tyres, and certain sets must be returned to the supplier before the second and third sessions. From 2014 to 2021, if qualifying and starting the race on dry tyres, drivers who completed a lap during the third period of qualifying (the top ten) were required to start the race on the tyre set with which they recorded their fastest time during the second period.<ref>{{Cite web|url = https://www.formula1.com/content/fom-website/en/championship/inside-f1/rules-regs/Tyres_and_Wheels.html|title = Tyres|access-date = 13 April 2015|website = Formula1.com}}</ref> Any cars that qualified outside the top ten may have started the race on any remaining set of tyres. This rule was removed prior to the 2022 season.<ref>{{cite web|last=Smith|first=Luke|url=https://us.motorsport.com/f1/news/f1-rules-update-confirms-removal-of-q2-tyre-rule/8313004/#:~:text=In%20the%20latest%20edition%20of,Q2%E2%80%9D%20had%20been%20struck%20through.|title=F1 regulations update confirms removal of Q2 tyre rule|website=Motorsport.com|date=February 19, 2022}}</ref> Cars must race on any 2 dry compounds during a race unless intermediate or wet tyres have been used by that car in that race.
+
+Prior to qualifying, wet and intermediate tyres may only be used if the track is judged wet by the race director. Starting the race behind the safety car due to heavy rain requires cars to be fitted with wet tyres until they make a pit stop.
+
+Heaters may be applied only to the outside of tyres.
+
+==== Aerodynamics ==== 
+Historically, constructors were able to build Formula One cars around the concept of [[ground effect (cars)|ground effect]]. Following the deaths of [[Roland Ratzenberger]] and [[Ayrton Senna]] in the {{F1|1994}} season, skid blocks were mandated to increase the ride height, reduce the impact of ground effect, and slow the cars down. However, from 2022 to 2025, ground effect was re-introduced to the Formula One regulations. The 2026 regulations have once again reduced the impact of ground effect, with flatter floors and an increased ride height.
+
+From {{f1|2011}} to {{f1|2025}}, the [[drag reduction system]], which was a piece of movable aerodynamics on the car's rear wing, was mandated. In [[2026 Formula One World Championship|2026]], it was replaced by a system called Active Aerodynamics in which both the car's front and rear wings may rotate between two positions. In their upright closed position, called 'corner mode', they increase [[downforce]] on the car in order to improve tyre grip, allowing the car to make turns at higher speeds. Their flat open position, called 'straight-line mode' or more simply 'straight mode', trades reduced downforce and grip for a reduction in [[Drag (aerodynamics)|drag]], allowing the car to achieve a faster top speed in a straight line.<ref>{{Cite web |last=Baretto |first=Lawrence |date=17 Dec 2025 |title=EXPLAINED: The key terms for F1’s new-for-2026 rules |url=https://www.formula1.com/en/latest/article/explained-the-new-key-terms-for-formula-1s-new-for-2026-rules.3T5BU6TC9quGcIpGzoWkY0 |access-date=2026-05-06 |website=www.formula1.com |language=en}}</ref>
+
+=== Sporting ===
+
+==== Parc fermé ====
+After weighing during each qualifying session, teams are required to take their cars to a place in the paddock, sectioned off by the FIA, known as ''[[parc fermé]]''; they may not do work on the cars, other than routine maintenance, until they are released from ''parc fermé'' for the race the next morning.
+
+If a team must do other significant work, body work or [[suspension (vehicle)|suspension]] adjustments, including switching to another chassis or setup, the car will start from the [[pit lane]].
+
+==== Race procedure ====
+[[Image:F1StartLights.svg|150px|right|thumb|F1 start lights as seen by television viewers (camera facing drivers)]]
+[[File:F1 start lights as seen by driver.gif|150px|right|thumb|F1 start lights as seen by drivers. Not all lights are on at any time]]
+[[File:F1 start light sequence animation.gif|150px|right|thumb|Animation of an F1 race start sequence as seen by a driver (this animation assumes a minimum four-second delay between all red lights coming on and then going out to start the race)]]
+{{hatnote|See [[Formula One racing]] for a detailed schedule of a complete race weekend and further race information.}}
+The pit lane opens forty minutes before the start of a race (t−40:00; t−30:00 during sprint weekends). Drivers may do as many reconnaissance laps as they wish, driving through the pit lane each time around in order to avoid the grid. Drivers must be in their cars and in place on the grid by time the pit lane closes at t−30:00 (t−25:00 during sprint weekends); otherwise they must start the race from the pits. Meanwhile, teams may work on their cars on the grid.
+
+At t−10:00 the grid is cleared of everyone except team mechanics, race marshals, and drivers. A team will generally want to keep its tyres off their cars and heated in their tyre-warmers for as long as possible, but they must be attached to the cars by t−5:00; otherwise a stop-go penalty will be imposed on the offending driver.
+
+Engines must be running by t−1:00; at fifteen seconds to the start all personnel must be clear of the track. Green lights signify the start of the [[Parade lap|formation lap]], also known as the parade lap, during which drivers must remain in the same order (no passing) except if a car ahead has stopped due to a technical problem, or has had an accident. The cars circle the track once, usually weaving from side to side to warm up their tyres, and form up again in their starting positions on the grid. A series of short, controlled [[Burnout (vehicle)|burnouts]] is usually performed as each driver approaches their grid box in order to maximize rear tyre temperature and clean off any debris from the parade lap.
+
+If, for some reason, a car cannot start the race (engine failure during qualifying or practice, suspension fails, etc.), the car can still join the race, but will take a 10-position penalty at the start. For example, if the car qualifies in 3rd, but has to change an engine at any point during the race weekend prior to the actual race, the car will start from 13th position. For strategy's sake, teams will sometimes opt to start a car affected in this way from the pit lane. This means they start at the tail end of the grid; however, they can not only change an engine, but also start the race with fresh tyres.
+
+Gearboxes must be used for five consecutive events (counted as P3, the qualifying practice session and the race). A 5-place grid penalty will be incurred if a replacement gearbox is used (Pole position becomes 6th). Due to the reliability of modern gearboxes, in 2025 the grid penalties incurred for replacement gearboxes was removed.
+
+The race is started by ten red lights in two rows of five (i.e. 5 columns of 2).<ref>This describes the lights seen by the drivers, which is very different to what TV viewers see from the other side of the start line</ref> The red lights in each column operate as a pair i.e. both go on and off together. The lights illuminate one pair at a time, left to right, in one-second intervals, and then go out simultaneously after a random interval (i.e. 4–7 seconds).<ref>{{cite web|url=https://www.fia.com/sites/default/files/2021_formula_1_sporting_regulations_-_iss_11-_2021-07-12.pdf|title=2021 Formula 1 Sporting Regulations|publisher=FIA|date=12 July 2021|archive-url=https://web.archive.org/web/20210713182453/https://www.fia.com/sites/default/files/2021_formula_1_sporting_regulations_-_iss_11-_2021-07-12.pdf|archive-date=13 July 2021|url-status=live}}</ref> When the lights go out, the race officially begins. Should the start need to be aborted for any reason, all 5 pairs of red lights will come on as normal, but instead of going out, the orange lights will flash. All engines are stopped and the start resumes from the 5-minute point. If a single driver raises their hand to indicate that they can't start, the marshal for that row will wave a yellow flag, then after a few seconds, both the red and orange lights will extinguish and the green lights will come on to indicate another formation lap.(No overtaking in formation laps)<ref>{{cite web |url=http://www.formula1.com/inside_f1/rules_and_regulations/sporting_regulations/6843/fia.html |title=FIA Sporting Regulations – Race start procedure |publisher=Formula1.com |access-date=4 October 2010 |archive-date=10 July 2010 |archive-url=https://web.archive.org/web/20100710154032/http://www.formula1.com/inside_f1/rules_and_regulations/sporting_regulations/6843/fia.html |url-status=dead }}</ref>
+
+==== Scoring ====
+The Drivers' and Constructors' Championships are decided by points, which are awarded according to the place in which a driver classifies at each Grand Prix. To receive points a racer need not finish the race, but at least 90% of the winner's race distance must be completed. Therefore, it is possible for a driver to receive some points even though they retired before the end of the race. In that case the scoring is based on the distance completed in comparison to other drivers. It is also possible for the lower points not to be awarded (as at the [[2005 United States Grand Prix]]) because insufficient drivers completed 90% of the winner's distance. The system was revised in 2003 and later amended for the 2010 season because of two new teams entering the sport. From 2019 to 2024, a point was awarded for fastest lap, but this was discontinued for 2025. The scoring system from 2025 on is:
+
+{| class="wikitable"
+|+ Driver completed 90% of winner's race distance
+|-
+| 1st place || 25 points
+|-
+| 2nd place || 18 points
+|-
+| 3rd place || 15 points
+|-
+| 4th place || 12 points
+|-
+| 5th place || 10 points
+|-
+| 6th place || 8 points
+|-
+| 7th place || 6 points
+|-
+| 8th place || 4 points
+|-
+| 9th place || 2 points
+|-
+| 10th place || 1 point
+|-
+| 11th place onwards || No points
+
+|}
+
+For scoring systems prior to 2025, refer to the [[List of Formula One World Championship points scoring systems]]. Drivers finishing lower than tenth place receive no points.
+
+From [[2010 Formula One World Championship|2010]] until the end of [[2021 Formula One World Championship|2021 championship]], if the race had to be abandoned for any reason before 75% of the planned distance (but after a minimum of two completed laps), then the points awarded were halved: 12.5, 9, 7.5, 6, 5, 4, 3, 2, 1, 0.5. The rules regarding the awarding of points were reviewed by FIA, teams and Formula One following criticism after the [[2021 Belgian Grand Prix]], during which the race was red flagged on lap 3 after two laps behind the [[safety car]], with no laps having been completed under green flag conditions at racing speed, before the race was abandoned prematurely, with the race result—a win for [[Max Verstappen]]—being taken after the first lap.<ref>{{cite web |last1=Noble |first1=Jonathan |title=F1 to discuss rule changes over Belgian GP "farce" in October |url=https://www.motorsport.com/f1/news/todt-confirms-talks-over-f1-rule-changes-for-october/6657926/ |website=www.motorsport.com |date=31 August 2021 |publisher=Motorsport Network}}</ref><ref>{{cite news |last1=Benson |first1=Andrew |title=Max Verstappen declared winner of aborted rain-hit Belgian Grand Prix |url=https://www.bbc.co.uk/sport/formula1/58377097 |website=BBC Online |publisher=BBC Sport |access-date=29 August 2021}}</ref> More than two laps were considered by the FIA to have been completed by the leader because the leader Verstappen had crossed the control line three times before the race was abandoned.<ref>{{cite web |last1=Jonathan Noble |first1=Adam Cooper |title=Why one-lap Belgian Grand Prix counted for F1 points |url=https://www.motorsport.com/f1/news/why-one-lap-belgian-grand-prix-counted-for-f1-points/6656970/?nrt=54 |website=www.motorsport.com |date=29 August 2021 |publisher=Motorsport Network |access-date=29 August 2021}}</ref>
+
+Following this, the point allocation for suspended races was changed for the 2022 season. The points awarded follow a gradual scale system as follows:
+*No points will be awarded unless a minimum of two laps had been completed under [[Green flag (motorsport)|green flag]] conditions.
+*If more than two laps are completed, but less than 25% of the scheduled race distance, points will be awarded to the top 5 on a 6–4–3–2–1 basis.
+*If 25%–50% of the scheduled race distance is completed, points will be awarded on a 13–10–8–6–5–4–3–2–1 basis to the top 9.
+*If 50%–75% of the scheduled race distance is completed, points will be awarded on a 19–14–12–9–8–6–5–3–2–1 to the top 10.
+If more than 75% of the scheduled race distance is completed, full points will be awarded.<ref>{{cite news|url=https://www.formula1.com/en/latest/article.f1-commission-approves-changes-to-sporting-regulations-regarding-points-for.10aFBCNICC0dajLVnOAzia.html|title=F1 Commission approves changes to Sporting Regulations regarding points for shortened races|website=formula1|date=14 February 2022|access-date=14 February 2022}}</ref>
+However, these rules do not apply and full points will be awarded when a race is suspended and then resumed, even if the whole race distance cannot be completed in the 3 hour race window.<ref>{{cite web |last1=Noble |first1=Jonathan |title=Why Verstappen was crowned champion despite shortened Japanese GP |url=https://www.autosport.com/f1/news/why-verstappen-was-crowned-champion-despite-shortened-japanese-gp/10382058/ |website=Autosport |date=9 October 2022 |publisher=Motorsport Network |access-date=13 October 2022}}</ref> However, this was changed for 2023 thereby satisfying the original intent of the gradual scale system.<ref>{{cite web |last1=Noble |first1=Jonathan |title=F1 teams admit they overlooked points "loophole" after Suzuka confusion |url=https://www.motorsport.com/f1/news/f1-teams-admit-they-overlooked-points-loophole-after-suzuka-confusion/10382558/ |website=Motorsport |date=10 October 2022 |publisher=Motorsport Network |access-date=13 October 2022}}</ref>
+
+Points are awarded equally to the driver and their constructor; for example, if a driver for one team comes second, eighteen points are added to their season total; if their teammate finished third in the same race, they add fifteen to their total and the team adds 33 (the sum of the drivers' points) to its total. The championships are awarded to whichever driver and constructor have the most points at the end of the season. In case of a tie, the FIA compares the number of times each driver has finished in each position. The championship goes to whichever had the greater number of wins; if they have the same number of wins, it goes to the driver with the greater number of second places, and so on. For example, if drivers A and B were tied at the end of a season, and B had six wins and 3 second-place finishes, but A had six wins and four second-place finishes (even if they had fewer third places than B, etc.), then A would be champion.
+
+On 10 December 2013, it was confirmed that drivers and constructors would score double points in the final Grand Prix from 2014 onwards,<ref>{{cite web |url=http://www.formula1.com/news/headlines/2013/12/15339.html |title=Double points for season finale among 2014 changes |date=9 December 2013 |work=formula1.com |url-status=dead |archive-url=https://web.archive.org/web/20140320025106/http://www.formula1.com/news/headlines/2013/12/15339.html |archive-date=20 March 2014 |access-date=20 June 2017}}</ref> but this was abandoned in the weeks following the 2014 season.
+
+==== Flags ====
+{{main|Racing flags}}
+Many venues make use of electronic displays to indicate flags to give various messages to drivers. However, race marshals continue to use physical flags as a redundancy mechanism in the event of electronic display failure. Marshals are positioned at numerous points around the track during every race. Flags have different meanings depending on their colour; the colours (with [[Pantone]] values as specified by the [[FIA]]) signify as follows:
+
+{| class="wikitable" style="width:100%; margin:auto;"
+|- "
+! Flag !! Pantone value !! Description !! Meaning
+|-
+| [[Image:F1 yellow flag.svg|70px]]
+| Yellow
+| Caution
+|
+* A single yellow indicates danger ahead, such as debris from a crash. Drivers must slow down as they pass; [[overtaking]] is forbidden, unless it is unavoidable such as a driver retiring in the section, or a driver is lapped.<ref name="Flags">{{cite web|url= http://www.formula1.com/inside_f1/understanding_f1_racing/5282.html|title= Flags|publisher=Formula1.com|access-date=26 January 2015}}</ref>
+* 2 waved yellows at the same post indicates great danger ahead. Drivers must slow down and be prepared to stop; no overtaking is permitted unless a driver is lapped.<ref name="Flags"/>
+* Yellow flags and the SC board (a large white board with "SC" in large black lettering) indicate that the [[Safety car]] has been deployed.  Drivers must slow down, not overtake and be prepared to leave the normal racing line or even stop as a threat obstructs all or part of the track.
+|-
+| [[Image:F1 green flag.svg|70px]]
+| Green
+| Track is clear
+| A green flag indicates that any previous danger has been attended to. The track is now clear, and drivers may proceed at racing speed and may again overtake. When the race director so directs, this may be displayed during the parade lap or at the beginning of a practice session; in this case all marshals positions will signal green flags.
+|-
+| [[Image:F1 red flag.svg|70px]]
+| Red
+| Race stopped
+| {{main|List of red-flagged Formula One races}}
+A red flag indicates that the race, practice session, or qualifying session has been suspended. All marshal stations will signal this. Drivers may not leave the pits. All drivers on the track must proceed cautiously to the pit lane and stop. There they will be reordered in their correct racing order. Sessions may be resumed or abandoned as the race director indicates. If the safety car is deployed, the racing cars should follow it and provisions allow for the safety car to divert the field into the pit lane and wait there.
+|-
+| [[Image:F1 light blue flag.svg|70px]]
+| Blue
+| A faster car is approaching
+|
+* At any time, a stationary light blue flag may be shown to a driver at the pit lane exit to warn them that cars are approaching on the track.
+* During practice, a light blue flag waved on the track notifies a driver that a faster car is approaching and that they must move aside.
+* During a race, a light blue flag waved on the track warns the driver that they are about to be lapped by a faster car and must not intentionally impede their progress, such as blocking a passing manoeuver. A driver may incur [[#Penalties|penalties]] if they ignore 3 successive blue flags.
+|-
+| [[Image:F1 white flag.svg|68px|border]]
+| White
+| A slow moving vehicle on the track
+|A white flag indicates a slow-moving vehicle such as a retiring car, an ambulance or tow truck ahead on the track, and instructs drivers to slow down.
+|-
+| [[Image:Auto Racing Black.svg|70px]]
+| Black
+| Driver is disqualified 
+| A black flag orders a particular driver to return to their pit within the next lap and report immediately to the Clerk of the Course, usually because they have been disqualified from the race. The flag is accompanied by a board with the car number of the driver on it so no mistake is made. Being black-flagged is one of the most severe punishments in F1.
+|-
+| [[Image:F1 chequered flag.svg|68px|border]]
+| BlackC/White
+| Chequered
+| A black and white chequered flag signals the end of the race, practice session, or qualifying session. During the race it is shown first to the winner and then to the rest of the field as they finish; otherwise it is shown at a predetermined time.
+|-
+| [[Image:F1 black and white diagonal flag.svg|68px|border]]
+| BlackC/White
+| Half black
+| A half black and half white flag informs a driver that their behaviour has been deemed unsporting. A sign with the car number accompanies the flag.
+|-
+| [[Image:F1 black flag with orange circle.svg|70px]]
+| BlackC/151C
+| Black with orange circle
+| A black flag with an orange circle (40&nbsp;cm in diameter) in the centre informs a driver that their car has a mechanical problem that has the potential to harm them or other drivers and that they must return to their pit. Shown with car number.
+|-
+| [[Image:F1 yellow flag with red stripes.svg|70px]]
+| YellowC/186C
+| Yellow and red stripes
+| A yellow flag with red stripes warns drivers that the track surface ahead is slippery, or there is debris present. This could be as a result of a car spilling oil (or some other engine fluid), or because rain is starting to fall. Slippery runway in an area, either by water or oil. Drivers must slow down at that point.
+|}
+
+Flags, whose specifications and usage are prescribed by [https://web.archive.org/web/20050526070504/http://www.fia.com/resources/documents/1653003624__Appendix_H_a.pdf Appendix H] of the [[FIA]]'s International Sporting Code, must measure at least 60&nbsp;cm by 80&nbsp;cm, excepting the red and chequered flags, which must measure at least 80&nbsp;cm by 100&nbsp;cm.
+
+==== Penalties ====
+Penalties may be imposed on drivers for numerous offences, including jumping the start, speeding in the pit lane, causing an avoidable accident, unsportsmanlike conduct, or ignoring flags of any color. Sometimes, penalty points would be issued to the offending driver's superlicense. There are four types of penalty which a driver may incur for violation of on-track rules:
+
+A '''time penalty''' is the most common type of penalty, and can last either five or ten seconds. It may be served during the next pit stop. After the driver stops in their pit box, mechanics must wait for 5 or 10 seconds before touching the car. Touching the car while the penalty is still in effect will result in another being added for serving the penalty incorrectly. If the driver did not serve their penalty in the pit lane, the time penalty will be added to their time at the end of the race.<ref>{{cite web|url=http://www.formula1.com/inside_f1/rules_and_regulations/sporting_regulations/8683/|title=Inside F1|website=formula1.com|access-date=20 June 2017|archive-date=14 February 2015|archive-url=https://web.archive.org/web/20150214000828/http://www.formula1.com/inside_f1/rules_and_regulations/sporting_regulations/8683/|url-status=dead}}</ref>
+
+A '''drive-through penalty''' requires the driver to enter the pit lane, drive through it while obeying its speed limit, and exit without stopping. As a drive-through penalty does not require the driver to stop, it is less costly than a stop-go penalty.
+
+A '''ten-second stop-go penalty''' requires the driver to enter the pit lane, stop at their pit for ten seconds, and exit again. As the stop is designed to punish the driver for an offence, team mechanics are forbidden to work on the offending car at any time while the driver is serving the penalty. Stop-go penalty is the harshest penalty short of disqualification and is given for serious offences such as endangering other drivers. This occurred at the [[2024 Qatar Grand Prix]], where [[Lando Norris]] was penalized for failing to slow down under double-waved yellow flags, caused by debris on the main straight, costing him around 35 seconds in race time.<ref>{{Cite web |last=Smith |first=Luke |title=For this reason, Norris was given a stop-and-go penalty by the FIA |url=https://www.nytimes.com/athletic/5962528/2024/12/02/lando-norris-penalty-qatar-grand-prix/ |access-date=2024-12-01 |website=[[The New York Times]] |language=en}}</ref>
+
+For drive-through and stop-go penalties, a driver has 2 laps from the time their team hears of the penalty to enter the pits; if the driver does not pit within 2 laps, the driver will be black-flagged. The exception to this rule is if the Safety Car is deployed before a driver serves their penalty, in which case the driver is not allowed to serve the penalty until after the Safety Car comes back in. If the driver incurs a penalty within the last 5 laps of the race, the driver need not pit at all; instead, twenty seconds will be added to their total race time in case of a drive-through penalty, and thirty seconds in case of stop-go penalty.
+
+The most severe penalty in common use is a '''black flag''', which may be imposed for ignoring penalties or for technical irregularities of any sort; it signifies that the driver has been disqualified from the race and their results for that race will not count toward the championship. If the black flag is not considered sufficient for the offence that the driver has committed, the driver may be banned for a number of races after the event. For example, [[Romain Grosjean]]'s crash at the [[2012 Belgian Grand Prix]] earned him a one-race ban at the [[2012 Italian Grand Prix|next race]]. In modern Formula One, most disqualifications have occurred due to infringements found during post-race scrutineering; for example, [[Sebastian Vettel]] was disqualified from the [[2021 Hungarian Grand Prix]] due to insufficient fuel sample,<ref>{{Cite news|url= https://www.reuters.com/article/motor-f1-hungary/update-3-motor-racing-ocon-races-to-maiden-win-vettel-disqualified-idUKXXN2P800I?edition-redirect=uk |title= UPDATE 3-Motor racing-Ocon races to maiden win, Vettel disqualified |work= [[Reuters]] |date= 1 August 2021 |access-date= 1 August 2021 |last1= Takle |first1= Abhishek |last2= Davis |first2= Toby}}</ref> and [[Lewis Hamilton]] and [[Charles Leclerc]] were both disqualified during the [[2023 United States Grand Prix]] due to excessive plank wear.<ref>{{cite web |url=https://www.formula1.com/en/latest/article.breaking-hamilton-and-leclerc-disqualified-from-united-states-grand-prix-for.10nvuyvEPfMgoeWxWOhw0a.html|title=Hamilton and Leclerc disqualified from United States Grand Prix for technical breach|website=Formula1.com|date=October 23, 2023|access-date=4 January 2024}}</ref>
+
+A '''grid penalty''' may be given for the next race, which may increase depending on the severity of a penalty. Grid penalties have also been given due to exceeding the quota of an engine component, but from {{f1|2025}} gearboxes are exempt. For example, a 5-place grid penalty means if the driver qualified first, they would start the race from sixth position.<ref>{{Cite news|title=Schumacher fastest for Monaco GP|language=en-GB|work=BBC Sport|url=https://www.bbc.co.uk/sport/formula1/18217660|access-date=2021-06-10}}</ref>
+
+Should a driver accumulate twelve unexpired{{efn|Penalty points expire after a year.}} penalty points at the same time, they will be '''banned''' from participating in the following race and would have to be replaced by another driver.<ref>{{cite web|url=https://www.formula1.com/en/latest/article/bearman-to-replace-banned-magnussen-at-haas-for-azerbaijan-grand.AkCoDVRDHBHPpNdlyqMzv|title=Bearman to replace banned Magnussen at Haas for Azerbaijan Grand Prix|website=Formula 1.com|date=6 September 2024|access-date=6 September 2024}}</ref>
+
+The most extreme punishment of all (used for seriously endangering the life of another driver or trying to gain an unfair advantage in the championship) is to be excluded from the drivers' world championship that year. Such cases may be taken to judicial court. The only time that this has happened was in [[1997 Formula One World Championship|1997]], where [[Michael Schumacher]], at the [[1997 European Grand Prix|final race]], deliberately<ref>{{cite news |title=Schumacher loses championship runner-up crown |url=https://news.bbc.co.uk/2/hi/europe/29895.stm |work=BBC News |date=11 November 1997 |access-date=28 October 2006 |archive-url=https://web.archive.org/web/20021001080032/http://news.bbc.co.uk/1/hi/world/europe/29895.stm |archive-date=1 October 2002 |url-status=live }}</ref> turned in on [[Jacques Villeneuve]], damaging both cars and taking himself out of the race, though inflicting enough damage to Villeneuve's car to slow him down.<ref>{{Cite magazine|last=Hinton|first=Ed|date=3 November 1997|title=Villeneuve Wins F/1 Title – Too Fast in Atlanta? – The End For Emmo|url=https://vault.si.com/vault/1997/11/03/villeneuve-wins-f1-titletoo-fast-in-atlantathe-end-for-emmo|magazine=Sports Illustrated|access-date=20 January 2021}}</ref> Teams may also be excluded from the Constructors' Championship; some examples include the [[Tyrrell Racing|Tyrrell]] team in {{f1|1984}} due to [[Tyrrell Racing#1984 controversy|a technical infringement]], and [[McLaren]] due to the "[[2007 Formula One espionage controversy|Spygate]]" scandal in {{f1|2007}}.
+
+==== Pit to car messages ====
+{{See also|Team orders}}
+There is no restriction on what information can be given to the driver, except during the formation lap.<ref>{{cite web|title=Formula 1's radio restrictions to be lifted from German GP|date=28 July 2016 |url=http://www.autosport.com/news/report.php/id/125502|access-date=29 July 2016|publisher=Autosport.com}}</ref><ref>{{Cite web|title=Haas hit with double penalty for formation lap Hungarian GP guidance|url=https://www.autosport.com/f1/news/haas-hit-with-double-penalty-for-formation-lap-hungarian-gp-guidance-4980972/4980972/|access-date=2021-06-10|website=www.autosport.com|date=19 July 2020 |language=en}}</ref>
+
+Previously, to ensure that drivers drive the car 'alone and unaided' and are not being 'coached' from the pit wall, stricter rules were in place to govern what information could and could not be given to a driver over team radio. For example, it was not allowed for a driver to be given information about driving lines or how to adjust their car to make it faster whilst out on the track. These restrictions were removed at the [[2016 German Grand Prix]].<ref>{{cite web|url=https://www.formula1.com/en/championship/inside-f1/rules-regs/2016_season_changes.html|title=2016 season changes  |publisher=Formula1.com|access-date=11 July 2016}}</ref>
+
+== History ==
+{{Main|History of Formula One regulations}}
+The primary reasons behind rule changes have traditionally been to ensure [[Safety in Formula One|safety]]<ref>{{cite web |url=http://www.formula1.com/inside_f1/safety/a_history_of_safety_in_formula_one |title=A History of Safety in Formula One |work=formulaone.com |publisher=Formula One Management |access-date=11 July 2011 |url-status=dead |archive-url=https://web.archive.org/web/20100927014224/http://www.formula1.com/inside_f1/safety/a_history_of_safety_in_formula_one/ |archive-date=27 September 2010 |df=dmy }}</ref> and, in more recent years, to limit the cost of the sport.<ref>{{cite web |url=http://www.autosport.com/news/report.php/id/72456 |title=FIA reveals radical cost-cutting measures |author=Noble, Jonathan |date=12 December 2008 |publisher=Autosport |access-date=11 July 2011}}</ref>
+
+=== Regulation disputes ===
+Formula One teams have often sought to exploit [[Loophole|loopholes]] in the regulations in order to gain a competitive advantage. When they do so, other teams typically take notice and report them to the [[Fédération Internationale de l'Automobile|FIA]] for review. In such situations, the FIA may determine the team to have breached the regulations, and enact a financial or sporting penalty. Alternatively, the FIA may determine the loophole to be a fair and acceptable interpretation of the regulations, but still choose to close the loophole for the future.
+
+Examples of notable Formula One regulation disputes include:
+
+* [[2009 Formula One World Championship|2009]]: [[Brawn BGP 001]] double [[Diffuser (automotive)|diffuser]]<ref>{{Cite web |date=15 Apr 2009 |title=Court rules Button's car is legal |url=http://news.bbc.co.uk/sport2/hi/motorsport/formula_one/7996698.stm |url-status=live |archive-url=https://web.archive.org/web/20260420062136/http://news.bbc.co.uk/sport2/hi/motorsport/formula_one/7996698.stm |archive-date=20 Apr 2026 |access-date=7 May 2026 |website=BBC Sport}}</ref>
+* [[2019 Formula One World Championship|2019]]: [[Ferrari power unit 2019 investigation|Ferrari Tipo 064]] power unit [[Fuel flow|fuel-flow]]<ref>{{Cite web |last=Noble |first=Jonathan |date=28 Feb 2020 |title=FIA reaches Ferrari "settlement" after 2019 F1 engine investigation |url=https://www.autosport.com/f1/news/fia-reaches-ferrari-settlement-after-2019-f1-engine-investigation-4983815/4983815/ |url-status=live |archive-url=https://web.archive.org/web/20240521203736/https://www.autosport.com/f1/news/fia-reaches-ferrari-settlement-after-2019-f1-engine-investigation-4983815/4983815/ |archive-date=21 May 2024 |access-date=7 May 2026 |website=Autosport}}</ref>
+* [[2026 Formula One World Championship|2026]]: [[Mercedes-Benz in Formula One|Mercedes]] and [[Red Bull Racing|Red Bull]] power unit [[compression ratio]]<ref>{{Cite web |last=Vording |first=Ronald |date=27 Jan 2026 |title=F1 manufacturers to discuss 2026 engine loophole in FIA meeting |url=https://www.autosport.com/f1/news/f1-engine-trick-to-be-debated-in-special-fia-meeting/10789026/ |url-status=live |access-date=7 May 2026 |website=Autosport}}</ref>
+
+== Notes ==
+{{notelist}}
+
+== References ==
+{{reflist}}
+
+== Works cited ==
+{{refbegin}}
+* {{cite book
+ | last1 = Noble
+ | first1 = Jonathon
+ | last2 = Hughes
+ | first2 = Mark
+ | title = Formula One Racing for Dummies
+ | publisher = John Wiley & Sons
+ | year = 2004
+ | isbn = 978-0-76457-049-0
+ }}
+* {{cite web
+ |url         = http://www.fia.com/sport/Regulations/sportcoderegs.html
+ |title       = FIA International Sporting Code & Appendices, 2006
+ |publisher   = Fédération Internationale de l'Automobile
+ |access-date  = 20 December 2005
+ |url-status     = dead
+ |archive-url  = https://web.archive.org/web/20051227044729/http://www.fia.com/sport/Regulations/sportcoderegs.html
+ |archive-date = 27 December 2005
+ |df          = dmy-all
+}}
+* {{cite web
+ |url=http://www.fia.com/sport/Regulations/f1regs.html 
+ |title=FIA Formula One World Championship Regulations, 2006 
+ |publisher=Fédération Internationale de l'Automobile 
+ |access-date=20 December 2005 
+ |url-status=dead 
+ |archive-url=https://web.archive.org/web/20081118023504/http://www.fia.com/sport/Regulations/f1regs.html 
+ |archive-date=18 November 2008 
+ |df=dmy 
+}}
+* {{cite web
+ |url         = http://www.fia.com/mediacentre/Press_Releases/FIA_Sport/2005/December/211205-02.html
+ |title       = 2008 Formula One Technical Regulations
+ |publisher   = Fédération Internationale de l'Automobile
+ |access-date  = 21 December 2005
+ |url-status     = dead
+ |archive-url  = https://web.archive.org/web/20051231044846/http://www.fia.com/mediacentre/Press_Releases/FIA_Sport/2005/December/211205-02.html
+ |archive-date = 31 December 2005
+ |df          = dmy-all
+}}
+{{Refend}}
+
+== External links ==
+*Current Formula One General Provisions Regulations – [https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_a_general_provisions_-_iss_02_-_2026-02-27.pdf 2026]. Published by the FIA on 27 February 2026.
+*Current Formula One Sporting Regulations – [https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_b_sporting_-_iss_06_-_2026-04-28.pdf 2026]. Published by the FIA on 28 April 2026.
+*Current Formula One Technical Regulations – [https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_c_technical_-_iss_17_-_2026-04-28.pdf 2026]. Published by the FIA on 28 April 2026.
+*Current Formula One Financial Regulations for teams – [https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_d_financial_-_f1_teams_-_iss_06_-_2026-04-28.pdf 2026]. Published by the FIA on 28 April 2026.
+*Current Formula One Financial Regulations for power unit manufacturers – [https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_e_financial_-_pu_manufacturers_-_iss_04_-_2026-04-28.pdf 2026]. Published by the FIA on 28 April 2026.
+*Current Formula One Operational Regulations – [https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_f_operational_-_iss_07_-_2026-04-28.pdf 2026]. Published by the FIA on 28 April 2026.
+*[https://www.fia.com/regulation/category/110 FIA Formula One regulation archives]
+
+{{DEFAULTSORT:Formula One Regulations}}
+[[Category:Formula One|Regulations]]
+
+[[sv:Regler i Formel 1]]

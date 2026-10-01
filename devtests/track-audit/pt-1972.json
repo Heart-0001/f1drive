@@ -1,0 +1,2345 @@
+{
+ "id": "pt-1972",
+ "name": "Autódromo do Estoril",
+ "auditor": "track-audit east (2026-10-01)",
+ "method": "devtests/track-audit/east/*.mjs (README in report.mjs header); game side = out/game-<id>.json (dump-game.js, the game's own js/track.js build)",
+ "layout": {
+  "gameLengthKm": 4.349,
+  "gameBuiltLengthM": 4350,
+  "gameTrueLengthM": 4153,
+  "buildRescale": 1.04742,
+  "osmLoopLengthM": 4151,
+  "osmLoopGaps": [
+   {
+    "before": 38160804,
+    "name": "Curva do Tanque",
+    "m": 27.6,
+    "trimmedBackM": 27.6
+   }
+  ],
+  "osmBase": "2026-07-24T11:04:51Z",
+  "osmRelations": [
+   {
+    "id": 11266675,
+    "name": "Circuito do Estoril",
+    "members": 19
+   }
+  ],
+  "lateralDeviationGameToOsm": {
+   "meanM": 2.2,
+   "p95M": 3.7,
+   "maxM": 6.4,
+   "over8m": []
+  },
+  "osmWaysUsed": [
+   {
+    "id": 1301620085,
+    "name": "Curva 1",
+    "lengthM": 98,
+    "coverage": 1
+   },
+   {
+    "id": 1301627161,
+    "name": null,
+    "lengthM": 176,
+    "coverage": 1
+   },
+   {
+    "id": 1301627162,
+    "name": "Curva 2",
+    "lengthM": 64,
+    "coverage": 1
+   },
+   {
+    "id": 1301627163,
+    "name": "Descida para a Curva 3",
+    "lengthM": 169,
+    "coverage": 1
+   },
+   {
+    "id": 38160756,
+    "name": "Curva 3",
+    "lengthM": 132,
+    "coverage": 1
+   },
+   {
+    "id": 1301627164,
+    "name": "Subida para a VIP",
+    "lengthM": 99,
+    "coverage": 1
+   },
+   {
+    "id": 363138874,
+    "name": "Curva VIP",
+    "lengthM": 142,
+    "coverage": 1
+   },
+   {
+    "id": 363050358,
+    "name": "Recta Interior",
+    "lengthM": 703,
+    "coverage": 1
+   },
+   {
+    "id": 363138871,
+    "name": "Parabólica Interior",
+    "lengthM": 183,
+    "coverage": 1
+   },
+   {
+    "id": 363138873,
+    "name": "Descida para o Triângulo",
+    "lengthM": 303,
+    "coverage": 1
+   },
+   {
+    "id": 638617010,
+    "name": "Orelha",
+    "lengthM": 146,
+    "coverage": 1
+   },
+   {
+    "id": 638617009,
+    "name": "Circuito Estoril",
+    "lengthM": 122,
+    "coverage": 1
+   },
+   {
+    "id": 38160804,
+    "name": "Curva do Tanque",
+    "lengthM": 280,
+    "coverage": 1
+   },
+   {
+    "id": 822373472,
+    "name": "Esses",
+    "lengthM": 232,
+    "coverage": 1
+   },
+   {
+    "id": 363138869,
+    "name": "Parabólica Ayrton Senna",
+    "lengthM": 364,
+    "coverage": 1
+   },
+   {
+    "id": 363138868,
+    "name": "Recta da Meta",
+    "lengthM": 967,
+    "coverage": 1
+   }
+  ],
+  "osmWaysNotOnGameLine": [
+   {
+    "id": 363138867,
+    "name": "Variante",
+    "lengthM": 120,
+    "coverage": 0.58,
+    "nearGameS": 3049
+   },
+   {
+    "id": 363138870,
+    "name": "Variante (Gancho)",
+    "lengthM": 59,
+    "coverage": 0,
+    "nearGameS": 3048
+   },
+   {
+    "id": 638617011,
+    "name": "Triângulo",
+    "lengthM": 237,
+    "coverage": 0.31,
+    "nearGameS": 2596
+   },
+   {
+    "id": 1301620084,
+    "name": "Long Lap",
+    "lengthM": 223,
+    "coverage": 0.29,
+    "nearGameS": 2077
+   },
+   {
+    "id": 1301627165,
+    "name": "Subida para a Variante",
+    "lengthM": 99,
+    "coverage": 0.07,
+    "nearGameS": 2859
+   }
+  ],
+  "official": {
+   "GP circuit 1972-1993": 4.349,
+   "GP circuit 1994-1999 (chicane added after Imola 1994)": 4.36,
+   "GP circuit 2000-present (parabolica redesigned for FIM homologation)": 4.182,
+   "Tanque circuit 2018-present": 4.163,
+   "source": "en.wikipedia.org/wiki/Circuito_do_Estoril infobox + History (\"A new redesign of the parabolica turn which saw its length reduced to 4.182 km was implemented in 2000\"); circuito-estoril.pt TRACK DATA (archived 2010-04-02): \"Track Lenght (central line) 4.182,720 m\""
+  },
+  "f1Use": "Portuguese GP 1984-1996 (en.wikipedia); not on the 2010-2026 calendar",
+  "osmCurrentGpLayoutM": 4177,
+  "osmCurrentGpLayoutNote": "OSM relation 11266675 \"Circuito do Estoril\" (19 members, pit lane excluded) = 2000-present GP circuit incl. the Gancho chicane: 4177 m",
+  "identification": "The game line follows OSM within 6.4 m everywhere, using Curva do Tanque (way 38160804) instead of the Gancho chicane (ways 1301627165 + 363138870) and the post-2000 Parabolica Ayrton Senna (way 363138869): that is the \"Tanque circuit (2018-present)\", 4.163 km official, 4151 m along OSM, 4153 m along the game points. The dataset labels it 1972 / 4.349 km and the build stretched it x1.0474 to 4350 m. Commons maps File:Circuito_de_Estoril_1972-1993.png and File:Autódromo_de_Estoril_1994-1999.png (cache/wikipedia/east-img/) show the F1-era final Parabolica as a larger sweep further north-east; no OSM way of it survives (all ways in 38.7515..38.758 N, -9.394..-9.388 E checked, cache east-pt-1972-parabolica-area.json)."
+ },
+ "direction": {
+  "game": "clockwise",
+  "real": "clockwise",
+  "ok": true,
+  "source": "OSM oneway raceway ways (4179 m agree, 0 against); Commons layout maps (arrow)"
+ },
+ "startFinish": {
+  "game": [
+   38.7490167,
+   -9.3930729
+  ],
+  "osmNode": null,
+  "note": "No start/finish node in OSM. circuito-estoril.pt: start-finish straight 985.686 m. The game line lies 496 m into the 999 m OSM pit lane (beside the pit building): plausible, not verified."
+ },
+ "pit": {
+  "game": {
+   "side": "right",
+   "limitKmh": 80,
+   "entryS": 4186,
+   "entryLL": [
+    38.7503053,
+    -9.3923244
+   ],
+   "exitS": 164,
+   "exitLL": [
+    38.7477284,
+    -9.3938224
+   ],
+   "laneFromS": 4100,
+   "laneToS": 250,
+   "lengthM": 500
+  },
+  "osmPitWays": [
+   {
+    "id": 363050271,
+    "name": "Pit Lane",
+    "lengthM": 999,
+    "side": "right",
+    "leavesTrackAt": {
+     "gameS": 3829,
+     "trueS": 3655,
+     "ll": [
+      38.753124,
+      -9.390716
+     ],
+     "offTrackM": 2.3
+    },
+    "rejoinsAt": {
+     "gameS": 591,
+     "trueS": 564,
+     "ll": [
+      38.746388,
+      -9.396228
+     ],
+     "offTrackM": 2.5
+    },
+    "maxspeed": null
+   }
+  ],
+  "real": {
+   "side": "right",
+   "limitKmh": null,
+   "limitNote": "1994-96 F1 pit speed limits not verified"
+  }
+ },
+ "elevation": {
+  "along": "OSM centreline loop, s = true metres from the foot of the game start line (gameS = the game's own s at the same place)",
+  "game": {
+   "rangeM": 30.6,
+   "lowest": {
+    "s": 860,
+    "m": 0,
+    "ll": [
+     38.748645,
+     -9.396871
+    ]
+   },
+   "highest": {
+    "s": 3321,
+    "m": 30.6,
+    "ll": [
+     38.755327,
+     -9.391704
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 7.1,
+    "climbAtS": 2751,
+    "descentPct": -7.7,
+    "descentAtS": 2381
+   },
+   "steepest100m": {
+    "climbPct": 6.8,
+    "climbAtS": 2751,
+    "climbAt": [
+     38.753297,
+     -9.396266
+    ],
+    "descentPct": -7.3,
+    "descentAtS": 2361,
+    "descentAt": [
+     38.751535,
+     -9.394545
+    ]
+   }
+  },
+  "glo30": {
+   "rangeM": 22.6,
+   "lowest": {
+    "s": 900,
+    "m": 115.6,
+    "ll": [
+     38.748985,
+     -9.396714
+    ]
+   },
+   "highest": {
+    "s": 3431,
+    "m": 138.2,
+    "ll": [
+     38.754981,
+     -9.39057
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 8.2,
+    "climbAtS": 2751,
+    "descentPct": -5.7,
+    "descentAtS": 270
+   },
+   "steepest100m": {
+    "climbPct": 8,
+    "climbAtS": 2751,
+    "climbAt": [
+     38.753297,
+     -9.396266
+    ],
+    "descentPct": -5.2,
+    "descentAtS": 220,
+    "descentAt": [
+     38.746802,
+     -9.394382
+    ]
+   },
+   "absMinM": 115.6,
+   "absMaxM": 138.2
+  },
+  "glo30LowerEnvelope": {
+   "rangeM": 22.4,
+   "lowest": {
+    "s": 910,
+    "m": 115.2,
+    "ll": [
+     38.749065,
+     -9.396662
+    ]
+   },
+   "highest": {
+    "s": 3431,
+    "m": 137.6,
+    "ll": [
+     38.754981,
+     -9.39057
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 8.2,
+    "climbAtS": 2791,
+    "descentPct": -5.5,
+    "descentAtS": 230
+   },
+   "steepest100m": {
+    "climbPct": 8,
+    "climbAtS": 2791,
+    "climbAt": [
+     38.753645,
+     -9.396178
+    ],
+    "descentPct": -4.6,
+    "descentAtS": 2291,
+    "descentAt": [
+     38.752029,
+     -9.39404
+    ]
+   }
+  },
+  "eudem25m": {
+   "rangeM": 25.3,
+   "lowest": {
+    "s": 2601,
+    "m": 116.2,
+    "ll": [
+     38.751499,
+     -9.396006
+    ]
+   },
+   "highest": {
+    "s": 3291,
+    "m": 141.5,
+    "ll": [
+     38.755245,
+     -9.392032
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 11.2,
+    "climbAtS": 2801,
+    "descentPct": -8.4,
+    "descentAtS": 2491
+   },
+   "steepest100m": {
+    "climbPct": 9.7,
+    "climbAtS": 2781,
+    "climbAt": [
+     38.753564,
+     -9.39623
+    ],
+    "descentPct": -8,
+    "descentAtS": 2441,
+    "descentAt": [
+     38.750998,
+     -9.395157
+    ]
+   },
+   "absMinM": 116.2,
+   "absMaxM": 141.5
+  },
+  "alongGameCentreline": {
+   "srtm30": {
+    "rangeM": 22.2,
+    "lowest": {
+     "s": 2730,
+     "m": 118.7,
+     "ll": [
+      38.751502,
+      -9.395998
+     ]
+    },
+    "highest": {
+     "s": 3450,
+     "m": 140.9,
+     "ll": [
+      38.755212,
+      -9.392036
+     ]
+    },
+    "steepest50m": {
+     "climbPct": 8.7,
+     "climbAtS": 2880,
+     "descentPct": -6.7,
+     "descentAtS": 2520
+    },
+    "steepest100m": {
+     "climbPct": 8.1,
+     "climbAtS": 2870,
+     "climbAt": [
+      38.753132,
+      -9.396245
+     ],
+     "descentPct": -5.7,
+     "descentAtS": 2490,
+     "descentAt": [
+      38.751422,
+      -9.394627
+     ]
+    },
+    "absMinM": 118.7,
+    "absMaxM": 140.9
+   },
+   "glo90raw": {
+    "rangeM": 34,
+    "lowest": {
+     "s": 870,
+     "m": 110,
+     "ll": [
+      38.748342,
+      -9.396985
+     ]
+    },
+    "highest": {
+     "s": 3420,
+     "m": 144,
+     "ll": [
+      38.755062,
+      -9.392305
+     ]
+    },
+    "steepest50m": {
+     "climbPct": 14,
+     "climbAtS": 1450,
+     "descentPct": -15.3,
+     "descentAtS": 2470
+    },
+    "steepest100m": {
+     "climbPct": 11,
+     "climbAtS": 2920,
+     "climbAt": [
+      38.753558,
+      -9.396215
+     ],
+     "descentPct": -12,
+     "descentAtS": 2500,
+     "descentAt": [
+      38.751355,
+      -9.394695
+     ]
+    }
+   },
+   "note": "the same sources along the game's own points (elev-game.mjs); glo90raw = the unsmoothed input of the game profile"
+  },
+  "shapeAgreement": {
+   "glo30": {
+    "corr": 0.95,
+    "rmsM": 2.3,
+    "worstGameMinusDem": {
+     "dM": 5.3,
+     "s": 3341,
+     "ll": [
+      38.755336,
+      -9.391474
+     ]
+    }
+   },
+   "glo30floor": {
+    "corr": 0.94,
+    "rmsM": 2.4,
+    "worstGameMinusDem": {
+     "dM": -5.5,
+     "s": 3771,
+     "ll": [
+      38.752154,
+      -9.391281
+     ]
+    }
+   },
+   "eudem25m": {
+    "corr": 0.92,
+    "rmsM": 2.8,
+    "worstGameMinusDem": {
+     "dM": -9.2,
+     "s": 810,
+     "ll": [
+      38.748217,
+      -9.39706
+     ]
+    }
+   }
+  },
+  "published": {
+   "maxRisePct": 6.75,
+   "maxFallPct": 5.56,
+   "source": "circuito-estoril.pt TRACK DATA (web.archive.org 2010-04-02, cached devtests/track-audit/cache/web/estoril-trackdata-2010.html): \"GRADIENT MAX. of rise: 6,75% MAX. of fall: 5,56%\"; en.wikipedia: \"the maximum gradient is nearly 7%\"",
+   "rangeM": null
+  },
+  "steepStretchesGlo30VsGame": [
+   {
+    "fromS": 220,
+    "toS": 340,
+    "at": [
+     38.747213,
+     -9.394143
+    ],
+    "demPct": -5.2,
+    "gamePct": -1.8,
+    "gameMaxPctInStretch": -1.8
+   },
+   {
+    "fromS": 2681,
+    "toS": 2921,
+    "at": [
+     38.752847,
+     -9.396202
+    ],
+    "demPct": 8,
+    "gamePct": 6.8,
+    "gameMaxPctInStretch": 6.8
+   }
+  ]
+ },
+ "banking": {
+  "source": "js/track.js: derived from curvature (BANK_MAX 6 deg, inside lower); no bankOverrides for this circuit",
+  "maxDeg": 5.7,
+  "shareOver3DegPct": 17.1,
+  "cornersFound": 12,
+  "corners": [
+   {
+    "hand": "R",
+    "gameS": [
+     414,
+     496
+    ],
+    "apexS": 442,
+    "angleDeg": -126,
+    "minRadiusM": 22,
+    "gameBankDeg": 5.6,
+    "gameGradePct": -1.8,
+    "apex": [
+     38.7455655,
+     -9.3951279
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     530,
+     568
+    ],
+    "apexS": 548,
+    "angleDeg": 21,
+    "minRadiusM": 76,
+    "gameBankDeg": -2.9,
+    "gameGradePct": -1.8,
+    "apex": [
+     38.7461271,
+     -9.395899
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     690,
+     766
+    ],
+    "apexS": 730,
+    "angleDeg": -69,
+    "minRadiusM": 33,
+    "gameBankDeg": 5,
+    "gameGradePct": -2.9,
+    "apex": [
+     38.7471795,
+     -9.3973665
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     932,
+     1070
+    ],
+    "apexS": 970,
+    "angleDeg": -169,
+    "minRadiusM": 27,
+    "gameBankDeg": 5.5,
+    "gameGradePct": 3.6,
+    "apex": [
+     38.7491108,
+     -9.3965349
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     1178,
+     1334
+    ],
+    "apexS": 1236,
+    "angleDeg": 180,
+    "minRadiusM": 32,
+    "gameBankDeg": -5.2,
+    "gameGradePct": 1.9,
+    "apex": [
+     38.7472031,
+     -9.3961478
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     1562,
+     1596
+    ],
+    "apexS": 1582,
+    "angleDeg": -27,
+    "minRadiusM": 47,
+    "gameBankDeg": 3.7,
+    "gameGradePct": 0.9,
+    "apex": [
+     38.7495599,
+     -9.3947812
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     2064,
+     2266
+    ],
+    "apexS": 2094,
+    "angleDeg": 179,
+    "minRadiusM": 33,
+    "gameBankDeg": -4.9,
+    "gameGradePct": 3.4,
+    "apex": [
+     38.7530441,
+     -9.3913275
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     2584,
+     2728
+    ],
+    "apexS": 2654,
+    "angleDeg": -134,
+    "minRadiusM": 37,
+    "gameBankDeg": 4.5,
+    "gameGradePct": -2.4,
+    "apex": [
+     38.7509582,
+     -9.3955983
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     2928,
+     3038
+    ],
+    "apexS": 2978,
+    "angleDeg": -76,
+    "minRadiusM": 38,
+    "gameBankDeg": 4.4,
+    "gameGradePct": 6.6,
+    "apex": [
+     38.753622,
+     -9.3961809
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     3146,
+     3212
+    ],
+    "apexS": 3162,
+    "angleDeg": -35,
+    "minRadiusM": 84,
+    "gameBankDeg": 2.6,
+    "gameGradePct": 1.1,
+    "apex": [
+     38.7542439,
+     -9.3943583
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     3248,
+     3332
+    ],
+    "apexS": 3292,
+    "angleDeg": 89,
+    "minRadiusM": 29,
+    "gameBankDeg": -5.3,
+    "gameGradePct": 2.6,
+    "apex": [
+     38.7541111,
+     -9.3929693
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     3370,
+     3738
+    ],
+    "apexS": 3460,
+    "angleDeg": -184,
+    "minRadiusM": 70,
+    "gameBankDeg": 3.1,
+    "gameGradePct": 1.3,
+    "apex": [
+     38.7552502,
+     -9.3919375
+    ]
+   }
+  ],
+  "real": "No banked corner reported (en.wikipedia, circuito-estoril.pt track data list none).",
+  "verdict": "synthetic only (7 corners at 4.5-5.6 deg, unverified)"
+ },
+ "coveredAndBridges": {
+  "gameCrossings": [],
+  "osmCrossingsOfTheGameLine": [
+   {
+    "id": 150787236,
+    "kind": "tunnel=yes service",
+    "name": null,
+    "layer": "-1",
+    "gameS": 292,
+    "ll": [
+     38.7467229,
+     -9.3944071
+    ]
+   },
+   {
+    "id": 363047439,
+    "kind": "tunnel=yes service",
+    "name": null,
+    "layer": "-1",
+    "gameS": 3212,
+    "ll": [
+     38.7542121,
+     -9.3938148
+    ]
+   },
+   {
+    "id": 363050593,
+    "kind": "bridge=yes footway",
+    "name": null,
+    "layer": "1",
+    "gameS": 704,
+    "ll": [
+     38.7469963,
+     -9.3972076
+    ]
+   },
+   {
+    "id": 363113294,
+    "kind": "bridge=yes footway",
+    "name": null,
+    "layer": null,
+    "gameS": 1510,
+    "ll": [
+     38.7489537,
+     -9.3949528
+    ]
+   },
+   {
+    "id": 1188894430,
+    "kind": "tunnel=yes footway",
+    "name": null,
+    "layer": "-3",
+    "gameS": 4158,
+    "ll": [
+     38.7505253,
+     -9.3921966
+    ]
+   }
+  ],
+  "note": "No tunnel or covered section on the lap. OSM: footbridges over the track at gameS ~704 (Curva 1-2, way 363050593) and ~1510 (Recta Interior, way 363113294, 167 m); service / footway tunnels under it (not visible). scenery-data has 3 man_made=bridge decks for this circuit."
+ },
+ "verdict": "major issues",
+ "findings": [
+  {
+   "aspect": "layout",
+   "severity": "major",
+   "game": "Dataset geometry = the modern \"Tanque\" layout (2018-present, 4.163 km): post-2000 Parabolica Ayrton Senna + Curva do Tanque, 4153 m true; labelled pt-1972 / 4.349 km.",
+   "real": "F1 raced Estoril 1984-1996 on the pre-2000 layout: 1984-93 4.349/4.350 km (Curva do Tanque + the old, larger final Parabolica), 1994-96 4.360 km (old Parabolica + the post-Imola chicane). The 2000 redesign shortened the final Parabolica (~180 m); the Parabolica where Villeneuve passed Schumacher in 1996 is not the corner in the game.",
+   "proposedFix": "Either (a) declare it the current layout: no 4.7 % stretch (official 4.182 with the Gancho, OSM relation 11266675 = 4177 m; or 4.163 Tanque) and name it \"Estoril (2000- layout)\"; or (b) redraw the pre-2000 Parabolica from historical imagery (DGT ORTOS-1995 orthophotos exist but need a DGT account; no OSM trace) for the 1994-96 F1 layout with the Gancho chicane.",
+   "sources": [
+    "en.wikipedia.org/wiki/Circuito_do_Estoril",
+    "OpenStreetMap contributors (ODbL), Overpass API; raw answers cached in devtests/track-audit/cache/overpass/east-*.json ways 38160804, 1301627165, 363138870, 363138867, 363138869, relation 11266675",
+    "commons.wikimedia.org File:Circuito_de_Estoril_1972-1993.png, File:Autódromo_de_Estoril_1994-1999.png, File:Estoril track map.svg"
+   ]
+  },
+  {
+   "aspect": "length",
+   "severity": "minor",
+   "game": "Built lap 4350 m: the 4153 m geometry stretched x1.0474 (every corner radius and straight +4.7 %) to the 1972-93 length.",
+   "real": "The drawn layout measures 4151 m on OSM (official Tanque 4.163 km); the stretch makes it 187 m longer than the real road it depicts.",
+   "proposedFix": "build-tracks: per-track official-length override pt-1972 -> 4.163 (or 4.182 if the Gancho is added); the MAX_LENGTH_MISMATCH 15 % rule let a wrong-layout length through.",
+   "sources": [
+    "en.wikipedia.org/wiki/Circuito_do_Estoril (Tanque circuit 4.163 km)",
+    "OpenStreetMap contributors (ODbL), Overpass API; raw answers cached in devtests/track-audit/cache/overpass/east-*.json"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "Pit lane 500 m beside the straight: entry gameS 4186, exit gameS 164.",
+   "real": "OSM \"Pit Lane\" (way 363050271, 999 m, right side) leaves the track at gameS 3829 (357 m earlier, just after the Parabolica) and rejoins at gameS 591 (427 m later, after Curva 1).",
+   "proposedFix": "pit entry/exit from OSM (new optional track fields, e.g. pitEntryLL [38.753124,-9.390716], pitExitLL [38.746388,-9.396228]); side -1 already right.",
+   "sources": [
+    "OpenStreetMap contributors (ODbL), Overpass API; raw answers cached in devtests/track-audit/cache/overpass/east-*.json way 363050271"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "minor",
+   "game": "Range 30.6 m; steepest fall -7.3 %/100 m (-7.7 %/50 m) on the Descida para o Triângulo; high point on the Parabolica Ayrton Senna.",
+   "real": "GLO-30 22.6 m, SRTM 22.2 m, EU-DEM 25.3 m (three models agree within 3 m); official max fall 5.56 %, max rise 6.75 %. The game's GLO-90 input (raw range 34 m) sees trees / structures at the Parabolica (+5 m) and makes the main straight dip 5 m too deep; its steepest fall exceeds the official maximum by ~2 pp (GLO-30: -5.2 %/100 m). Climb 6.8 %/100 m matches the official 6.75 %.",
+   "proposedFix": "Replace the profile with the GLO-30 one (median 50 m + Gauss 20 m, range 22.6 m; stations in proposedCorrections.elevation) or add a GLO-30 source to build-tracks; DGT LiDAR MDT 2 m (2024) would be best but its download needs a DGT account.",
+   "sources": [
+    "Copernicus DEM GLO-30 (c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the EU and ESA; AWS Open Data COG s3://copernicus-dem-30m (cache/glo30/east-<id>.json)",
+    "SRTM 30 m (NASA, 2000) via OpenTopoData srtm30m (devtests/track-fix/cache/otd-srtm30m.json; cache/opentopodata/srtm30m/)",
+    "EU-DEM v1.1 25 m (Copernicus Land Monitoring Service) via OpenTopoData eudem25m (cache/opentopodata/eudem25m/)",
+    "circuito-estoril.pt TRACK DATA 2010 (archived)"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "layout": {
+   "lengthOverrideKm": 4.163,
+   "alternative": {
+    "addChicane": {
+     "osmWays": [
+      1301627165,
+      363138870,
+      363138867
+     ],
+     "replaces": [
+      38160804
+     ],
+     "resultingLengthM": 4177,
+     "officialKm": 4.182
+    }
+   }
+  },
+  "pit": {
+   "side": -1,
+   "entryLL": [
+    38.753124,
+    -9.390716
+   ],
+   "exitLL": [
+    38.746388,
+    -9.396228
+   ],
+   "note": "entry/exit LL need a new track.js input (today the lane is synthesised beside the straight)"
+  },
+  "elevation": {
+   "kind": "profileOverride",
+   "source": "GLO-30 cleaned along OSM",
+   "targetRangeM": 22.6,
+   "stations": {
+    "columns": [
+     "sTrueM",
+     "gameS",
+     "lat",
+     "lon",
+     "hRelM",
+     "gameYM"
+    ],
+    "rows": [
+     [
+      0,
+      0,
+      38.749024,
+      -9.393093,
+      15.7,
+      19
+     ],
+     [
+      50,
+      52,
+      38.748613,
+      -9.393331,
+      14.8,
+      18.3
+     ],
+     [
+      100,
+      104,
+      38.748201,
+      -9.39357,
+      14.1,
+      17.9
+     ],
+     [
+      150,
+      158,
+      38.747789,
+      -9.393808,
+      14.3,
+      17.4
+     ],
+     [
+      200,
+      210,
+      38.747378,
+      -9.394047,
+      15.8,
+      16.7
+     ],
+     [
+      250,
+      262,
+      38.746966,
+      -9.394287,
+      14,
+      15.7
+     ],
+     [
+      300,
+      314,
+      38.746555,
+      -9.394525,
+      11.2,
+      14.8
+     ],
+     [
+      350,
+      366,
+      38.746142,
+      -9.394762,
+      9.2,
+      14.1
+     ],
+     [
+      400,
+      418,
+      38.745731,
+      -9.395002,
+      8.3,
+      13
+     ],
+     [
+      450,
+      476,
+      38.745619,
+      -9.395466,
+      7.7,
+      11.9
+     ],
+     [
+      500,
+      530,
+      38.745999,
+      -9.395776,
+      7.9,
+      11.2
+     ],
+     [
+      550,
+      582,
+      38.746337,
+      -9.396159,
+      7.1,
+      10.2
+     ],
+     [
+      600,
+      634,
+      38.746633,
+      -9.396594,
+      6.5,
+      8.8
+     ],
+     [
+      650,
+      686,
+      38.746917,
+      -9.397042,
+      6,
+      7.2
+     ],
+     [
+      700,
+      740,
+      38.747259,
+      -9.397389,
+      4.5,
+      5.7
+     ],
+     [
+      750,
+      792,
+      38.747698,
+      -9.397262,
+      3.2,
+      4
+     ],
+     [
+      800,
+      844,
+      38.748131,
+      -9.397096,
+      2.1,
+      1.8
+     ],
+     [
+      850,
+      896,
+      38.748559,
+      -9.39691,
+      0.5,
+      0.1
+     ],
+     [
+      900,
+      948,
+      38.748985,
+      -9.396714,
+      0,
+      0.5
+     ],
+     [
+      950,
+      996,
+      38.749139,
+      -9.396244,
+      1.2,
+      2.2
+     ],
+     [
+      1000,
+      1048,
+      38.748775,
+      -9.395963,
+      3.2,
+      4.1
+     ],
+     [
+      1050,
+      1100,
+      38.748331,
+      -9.396056,
+      5.6,
+      6.3
+     ],
+     [
+      1100,
+      1152,
+      38.747891,
+      -9.396191,
+      8.1,
+      9
+     ],
+     [
+      1150,
+      1204,
+      38.747447,
+      -9.396283,
+      9.4,
+      11.3
+     ],
+     [
+      1200,
+      1258,
+      38.747142,
+      -9.395922,
+      10.2,
+      12.5
+     ],
+     [
+      1250,
+      1316,
+      38.747325,
+      -9.395438,
+      10.9,
+      12.4
+     ],
+     [
+      1300,
+      1368,
+      38.747761,
+      -9.395294,
+      11,
+      11.6
+     ],
+     [
+      1350,
+      1420,
+      38.748204,
+      -9.395178,
+      10.9,
+      11.4
+     ],
+     [
+      1400,
+      1474,
+      38.748647,
+      -9.395059,
+      11.4,
+      12.3
+     ],
+     [
+      1450,
+      1526,
+      38.74909,
+      -9.394944,
+      11.8,
+      13.7
+     ],
+     [
+      1500,
+      1578,
+      38.749532,
+      -9.394824,
+      11.8,
+      14.4
+     ],
+     [
+      1550,
+      1630,
+      38.749903,
+      -9.394501,
+      11.9,
+      14.7
+     ],
+     [
+      1600,
+      1682,
+      38.750256,
+      -9.39414,
+      12.3,
+      14.7
+     ],
+     [
+      1650,
+      1734,
+      38.750609,
+      -9.39378,
+      12.4,
+      14.7
+     ],
+     [
+      1700,
+      1786,
+      38.750962,
+      -9.393421,
+      12.6,
+      14.7
+     ],
+     [
+      1750,
+      1838,
+      38.751316,
+      -9.393061,
+      12.9,
+      14.9
+     ],
+     [
+      1800,
+      1890,
+      38.751669,
+      -9.392702,
+      13,
+      15.2
+     ],
+     [
+      1851,
+      1944,
+      38.752023,
+      -9.392342,
+      13.1,
+      15.7
+     ],
+     [
+      1901,
+      1996,
+      38.752375,
+      -9.391981,
+      13,
+      16.5
+     ],
+     [
+      1951,
+      2048,
+      38.752727,
+      -9.39162,
+      13.8,
+      17.5
+     ],
+     [
+      2001,
+      2102,
+      38.753108,
+      -9.391327,
+      14.6,
+      19.1
+     ],
+     [
+      2051,
+      2152,
+      38.75348,
+      -9.391603,
+      15,
+      21
+     ],
+     [
+      2101,
+      2204,
+      38.753564,
+      -9.39216,
+      15.7,
+      22.4
+     ],
+     [
+      2151,
+      2254,
+      38.753367,
+      -9.392666,
+      16.3,
+      22.5
+     ],
+     [
+      2201,
+      2306,
+      38.753016,
+      -9.393029,
+      15.5,
+      22
+     ],
+     [
+      2251,
+      2358,
+      38.752663,
+      -9.39339,
+      14.4,
+      21.4
+     ],
+     [
+      2301,
+      2410,
+      38.752311,
+      -9.393751,
+      13.3,
+      20.4
+     ],
+     [
+      2351,
+      2462,
+      38.751958,
+      -9.394112,
+      11.5,
+      18.3
+     ],
+     [
+      2401,
+      2514,
+      38.751605,
+      -9.394473,
+      9.2,
+      14.9
+     ],
+     [
+      2451,
+      2568,
+      38.751253,
+      -9.394834,
+      7,
+      11.1
+     ],
+     [
+      2501,
+      2622,
+      38.750966,
+      -9.395264,
+      4.8,
+      8.1
+     ],
+     [
+      2551,
+      2678,
+      38.751088,
+      -9.395786,
+      2.7,
+      6.5
+     ],
+     [
+      2601,
+      2730,
+      38.751499,
+      -9.396006,
+      2.1,
+      6.1
+     ],
+     [
+      2651,
+      2782,
+      38.751948,
+      -9.396072,
+      3.1,
+      6.6
+     ],
+     [
+      2701,
+      2834,
+      38.752398,
+      -9.396138,
+      3.9,
+      8.3
+     ],
+     [
+      2751,
+      2886,
+      38.752847,
+      -9.396202,
+      6.5,
+      11
+     ],
+     [
+      2801,
+      2940,
+      38.753297,
+      -9.396266,
+      10.6,
+      14.6
+     ],
+     [
+      2851,
+      2990,
+      38.75372,
+      -9.396114,
+      14.5,
+      17.9
+     ],
+     [
+      2901,
+      3042,
+      38.753962,
+      -9.395634,
+      17.1,
+      20.6
+     ],
+     [
+      2951,
+      3094,
+      38.754131,
+      -9.3951,
+      18.1,
+      22.5
+     ],
+     [
+      3001,
+      3146,
+      38.754258,
+      -9.394548,
+      17.9,
+      23.6
+     ],
+     [
+      3051,
+      3196,
+      38.754259,
+      -9.393975,
+      18,
+      24.1
+     ],
+     [
+      3101,
+      3248,
+      38.754138,
+      -9.393421,
+      18.6,
+      24.2
+     ],
+     [
+      3151,
+      3306,
+      38.754217,
+      -9.39289,
+      19.1,
+      25.3
+     ],
+     [
+      3201,
+      3360,
+      38.75463,
+      -9.392662,
+      20.4,
+      27.4
+     ],
+     [
+      3251,
+      3412,
+      38.755027,
+      -9.392396,
+      21.4,
+      29.3
+     ],
+     [
+      3301,
+      3462,
+      38.755282,
+      -9.391927,
+      22.1,
+      30.5
+     ],
+     [
+      3351,
+      3512,
+      38.755327,
+      -9.39136,
+      22,
+      30.4
+     ],
+     [
+      3401,
+      3564,
+      38.755159,
+      -9.39083,
+      22.4,
+      29
+     ],
+     [
+      3451,
+      3616,
+      38.754839,
+      -9.390429,
+      22.6,
+      27
+     ],
+     [
+      3501,
+      3668,
+      38.75442,
+      -9.390223,
+      21.6,
+      25.3
+     ],
+     [
+      3551,
+      3720,
+      38.753971,
+      -9.390251,
+      21.3,
+      24.2
+     ],
+     [
+      3601,
+      3774,
+      38.753553,
+      -9.390468,
+      20.4,
+      23
+     ],
+     [
+      3651,
+      3826,
+      38.753141,
+      -9.390706,
+      20,
+      21.4
+     ],
+     [
+      3701,
+      3878,
+      38.75273,
+      -9.390946,
+      19.9,
+      19.5
+     ],
+     [
+      3751,
+      3930,
+      38.752318,
+      -9.391185,
+      19.6,
+      18.2
+     ],
+     [
+      3801,
+      3984,
+      38.751907,
+      -9.391425,
+      19.4,
+      17.8
+     ],
+     [
+      3851,
+      4036,
+      38.751496,
+      -9.391665,
+      19,
+      18
+     ],
+     [
+      3901,
+      4088,
+      38.751084,
+      -9.391903,
+      18.4,
+      19
+     ],
+     [
+      3951,
+      4140,
+      38.750672,
+      -9.392141,
+      17.9,
+      20.3
+     ],
+     [
+      4001,
+      4192,
+      38.75026,
+      -9.392379,
+      17.9,
+      20.9
+     ],
+     [
+      4051,
+      4246,
+      38.749848,
+      -9.392617,
+      19.3,
+      20.5
+     ],
+     [
+      4101,
+      4298,
+      38.749436,
+      -9.392855,
+      18,
+      19.7
+     ]
+    ]
+   }
+  }
+ },
+ "profile50": {
+  "along": "OSM loop, s true metres from the game start",
+  "columns": [
+   "s",
+   "lat",
+   "lon",
+   "game",
+   "glo30",
+   "glo30floor",
+   "eudem25m"
+  ],
+  "rows": [
+   [
+    0,
+    38.749024,
+    -9.393093,
+    19,
+    131.3,
+    130.6,
+    132.9
+   ],
+   [
+    50,
+    38.748613,
+    -9.393331,
+    18.3,
+    130.4,
+    129.8,
+    132.7
+   ],
+   [
+    100,
+    38.748201,
+    -9.39357,
+    17.9,
+    129.6,
+    129.1,
+    133
+   ],
+   [
+    150,
+    38.747789,
+    -9.393808,
+    17.4,
+    129.9,
+    129.1,
+    132.5
+   ],
+   [
+    200,
+    38.747378,
+    -9.394047,
+    16.7,
+    131.4,
+    129.2,
+    131.9
+   ],
+   [
+    250,
+    38.746966,
+    -9.394287,
+    15.7,
+    129.5,
+    127.4,
+    132.4
+   ],
+   [
+    300,
+    38.746555,
+    -9.394525,
+    14.8,
+    126.8,
+    125,
+    131.8
+   ],
+   [
+    350,
+    38.746142,
+    -9.394762,
+    14.1,
+    124.8,
+    124,
+    128.5
+   ],
+   [
+    400,
+    38.745731,
+    -9.395002,
+    13,
+    123.8,
+    123.2,
+    125.9
+   ],
+   [
+    450,
+    38.745619,
+    -9.395466,
+    11.9,
+    123.3,
+    123,
+    124.4
+   ],
+   [
+    500,
+    38.745999,
+    -9.395776,
+    11.2,
+    123.5,
+    122.6,
+    123.5
+   ],
+   [
+    550,
+    38.746337,
+    -9.396159,
+    10.2,
+    122.7,
+    122,
+    122.8
+   ],
+   [
+    600,
+    38.746633,
+    -9.396594,
+    8.8,
+    122.1,
+    121.4,
+    121.7
+   ],
+   [
+    650,
+    38.746917,
+    -9.397042,
+    7.2,
+    121.6,
+    120.4,
+    119.7
+   ],
+   [
+    700,
+    38.747259,
+    -9.397389,
+    5.7,
+    120.1,
+    119,
+    119.2
+   ],
+   [
+    750,
+    38.747698,
+    -9.397262,
+    4,
+    118.8,
+    118,
+    123.1
+   ],
+   [
+    800,
+    38.748131,
+    -9.397096,
+    1.8,
+    117.7,
+    116.2,
+    124.7
+   ],
+   [
+    850,
+    38.748559,
+    -9.39691,
+    0.1,
+    116,
+    115.5,
+    121.6
+   ],
+   [
+    900,
+    38.748985,
+    -9.396714,
+    0.5,
+    115.6,
+    115.2,
+    118
+   ],
+   [
+    950,
+    38.749139,
+    -9.396244,
+    2.2,
+    116.7,
+    115.4,
+    117.3
+   ],
+   [
+    1000,
+    38.748775,
+    -9.395963,
+    4.1,
+    118.8,
+    117.2,
+    118.2
+   ],
+   [
+    1050,
+    38.748331,
+    -9.396056,
+    6.3,
+    121.1,
+    119.2,
+    120.5
+   ],
+   [
+    1100,
+    38.747891,
+    -9.396191,
+    9,
+    123.7,
+    121.6,
+    123.2
+   ],
+   [
+    1150,
+    38.747447,
+    -9.396283,
+    11.3,
+    124.9,
+    124.1,
+    125
+   ],
+   [
+    1200,
+    38.747142,
+    -9.395922,
+    12.5,
+    125.8,
+    125.1,
+    125.5
+   ],
+   [
+    1250,
+    38.747325,
+    -9.395438,
+    12.4,
+    126.5,
+    125.9,
+    126.1
+   ],
+   [
+    1300,
+    38.747761,
+    -9.395294,
+    11.6,
+    126.6,
+    126.3,
+    126.2
+   ],
+   [
+    1350,
+    38.748204,
+    -9.395178,
+    11.4,
+    126.4,
+    126.3,
+    125.1
+   ],
+   [
+    1400,
+    38.748647,
+    -9.395059,
+    12.3,
+    127,
+    126.4,
+    124.2
+   ],
+   [
+    1450,
+    38.74909,
+    -9.394944,
+    13.7,
+    127.4,
+    127.1,
+    124.8
+   ],
+   [
+    1500,
+    38.749532,
+    -9.394824,
+    14.4,
+    127.4,
+    127.2,
+    126.4
+   ],
+   [
+    1550,
+    38.749903,
+    -9.394501,
+    14.7,
+    127.4,
+    127.2,
+    128.9
+   ],
+   [
+    1600,
+    38.750256,
+    -9.39414,
+    14.7,
+    127.8,
+    127.4,
+    131.3
+   ],
+   [
+    1650,
+    38.750609,
+    -9.39378,
+    14.7,
+    128,
+    127.8,
+    132
+   ],
+   [
+    1700,
+    38.750962,
+    -9.393421,
+    14.7,
+    128.2,
+    127.8,
+    131.3
+   ],
+   [
+    1750,
+    38.751316,
+    -9.393061,
+    14.9,
+    128.5,
+    128.2,
+    130.4
+   ],
+   [
+    1800,
+    38.751669,
+    -9.392702,
+    15.2,
+    128.6,
+    128.3,
+    130.2
+   ],
+   [
+    1851,
+    38.752023,
+    -9.392342,
+    15.7,
+    128.7,
+    128.4,
+    130.7
+   ],
+   [
+    1901,
+    38.752375,
+    -9.391981,
+    16.5,
+    128.6,
+    128.4,
+    132
+   ],
+   [
+    1951,
+    38.752727,
+    -9.39162,
+    17.5,
+    129.4,
+    128.6,
+    132.7
+   ],
+   [
+    2001,
+    38.753108,
+    -9.391327,
+    19.1,
+    130.1,
+    129.6,
+    132.5
+   ],
+   [
+    2051,
+    38.75348,
+    -9.391603,
+    21,
+    130.6,
+    130.2,
+    131.8
+   ],
+   [
+    2101,
+    38.753564,
+    -9.39216,
+    22.4,
+    131.3,
+    130.6,
+    132.4
+   ],
+   [
+    2151,
+    38.753367,
+    -9.392666,
+    22.5,
+    131.9,
+    131.1,
+    133.8
+   ],
+   [
+    2201,
+    38.753016,
+    -9.393029,
+    22,
+    131.1,
+    130.2,
+    134.2
+   ],
+   [
+    2251,
+    38.752663,
+    -9.39339,
+    21.4,
+    129.9,
+    129.1,
+    133.6
+   ],
+   [
+    2301,
+    38.752311,
+    -9.393751,
+    20.4,
+    128.9,
+    127.6,
+    132.9
+   ],
+   [
+    2351,
+    38.751958,
+    -9.394112,
+    18.3,
+    127.1,
+    125.2,
+    131.6
+   ],
+   [
+    2401,
+    38.751605,
+    -9.394473,
+    14.9,
+    124.7,
+    123,
+    129.3
+   ],
+   [
+    2451,
+    38.751253,
+    -9.394834,
+    11.1,
+    122.6,
+    120.8,
+    125.8
+   ],
+   [
+    2501,
+    38.750966,
+    -9.395264,
+    8.1,
+    120.4,
+    118.6,
+    121.9
+   ],
+   [
+    2551,
+    38.751088,
+    -9.395786,
+    6.5,
+    118.3,
+    117.5,
+    117.8
+   ],
+   [
+    2601,
+    38.751499,
+    -9.396006,
+    6.1,
+    117.7,
+    117.5,
+    116.2
+   ],
+   [
+    2651,
+    38.751948,
+    -9.396072,
+    6.6,
+    118.6,
+    117.8,
+    117.8
+   ],
+   [
+    2701,
+    38.752398,
+    -9.396138,
+    8.3,
+    119.4,
+    118.8,
+    119.9
+   ],
+   [
+    2751,
+    38.752847,
+    -9.396202,
+    11,
+    122.1,
+    119.7,
+    121.1
+   ],
+   [
+    2801,
+    38.753297,
+    -9.396266,
+    14.6,
+    126.2,
+    122.9,
+    124.3
+   ],
+   [
+    2851,
+    38.75372,
+    -9.396114,
+    17.9,
+    130,
+    126.9,
+    129.9
+   ],
+   [
+    2901,
+    38.753962,
+    -9.395634,
+    20.6,
+    132.7,
+    130.7,
+    133.6
+   ],
+   [
+    2951,
+    38.754131,
+    -9.3951,
+    22.5,
+    133.7,
+    132.8,
+    134.9
+   ],
+   [
+    3001,
+    38.754258,
+    -9.394548,
+    23.6,
+    133.5,
+    132.8,
+    134.4
+   ],
+   [
+    3051,
+    38.754259,
+    -9.393975,
+    24.1,
+    133.5,
+    132.9,
+    134
+   ],
+   [
+    3101,
+    38.754138,
+    -9.393421,
+    24.2,
+    134.2,
+    133.6,
+    135.4
+   ],
+   [
+    3151,
+    38.754217,
+    -9.39289,
+    25.3,
+    134.7,
+    133.9,
+    137.3
+   ],
+   [
+    3201,
+    38.75463,
+    -9.392662,
+    27.4,
+    135.9,
+    134.8,
+    139.2
+   ],
+   [
+    3251,
+    38.755027,
+    -9.392396,
+    29.3,
+    137,
+    136.2,
+    141
+   ],
+   [
+    3301,
+    38.755282,
+    -9.391927,
+    30.5,
+    137.6,
+    136.8,
+    141.5
+   ],
+   [
+    3351,
+    38.755327,
+    -9.39136,
+    30.4,
+    137.5,
+    136.7,
+    140
+   ],
+   [
+    3401,
+    38.755159,
+    -9.39083,
+    29,
+    138,
+    137.2,
+    137.3
+   ],
+   [
+    3451,
+    38.754839,
+    -9.390429,
+    27,
+    138.1,
+    137.4,
+    136.3
+   ],
+   [
+    3501,
+    38.75442,
+    -9.390223,
+    25.3,
+    137.2,
+    136.4,
+    136.7
+   ],
+   [
+    3551,
+    38.753971,
+    -9.390251,
+    24.2,
+    136.9,
+    136,
+    137.4
+   ],
+   [
+    3601,
+    38.753553,
+    -9.390468,
+    23,
+    136,
+    135.5,
+    137.9
+   ],
+   [
+    3651,
+    38.753141,
+    -9.390706,
+    21.4,
+    135.6,
+    135.3,
+    137.9
+   ],
+   [
+    3701,
+    38.75273,
+    -9.390946,
+    19.5,
+    135.4,
+    135.2,
+    139.1
+   ],
+   [
+    3751,
+    38.752318,
+    -9.391185,
+    18.2,
+    135.2,
+    135,
+    140.1
+   ],
+   [
+    3801,
+    38.751907,
+    -9.391425,
+    17.8,
+    135,
+    134.7,
+    138.1
+   ],
+   [
+    3851,
+    38.751496,
+    -9.391665,
+    18,
+    134.6,
+    134.1,
+    135.1
+   ],
+   [
+    3901,
+    38.751084,
+    -9.391903,
+    19,
+    133.9,
+    133.5,
+    134.2
+   ],
+   [
+    3951,
+    38.750672,
+    -9.392141,
+    20.3,
+    133.5,
+    132.5,
+    135
+   ],
+   [
+    4001,
+    38.75026,
+    -9.392379,
+    20.9,
+    133.4,
+    131.7,
+    135.5
+   ],
+   [
+    4051,
+    38.749848,
+    -9.392617,
+    20.5,
+    134.8,
+    132.6,
+    135.7
+   ],
+   [
+    4101,
+    38.749436,
+    -9.392855,
+    19.7,
+    133.6,
+    131.4,
+    134.9
+   ]
+  ]
+ }
+}

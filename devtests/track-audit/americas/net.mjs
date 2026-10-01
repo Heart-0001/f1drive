@@ -28,14 +28,15 @@ const key6 = (lat, lon) => `${(+lat).toFixed(6)},${(+lon).toFixed(6)}`;
 export async function overpass(name, query) {
   const file = resolve(dirOf('overpass'), name.replace(/[^A-Za-z0-9_.-]/g, '_') + '.json');
   if (existsSync(file)) return JSON.parse(readFileSync(file, 'utf8'));
-  const hosts = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
-    'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+  // OVERPASS_HOSTS (comma-separated) overrides the order (2026-10-01 resume: only maps.mail.ru answered; the others timed out)
+  const hosts = process.env.OVERPASS_HOSTS ? process.env.OVERPASS_HOSTS.split(',') : ['https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+    'https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter'];
   for (let a = 0; a < 10; a++) {
     await spaced('overpass', 3000);
     const host = hosts[a % hosts.length];
     try {
       const r = await fetch(host, { method: 'POST', headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'data=' + encodeURIComponent(query) });
+        body: 'data=' + encodeURIComponent(query), signal: AbortSignal.timeout(150000) });
       if (r.ok) {
         const j = await r.json();
         j._query = query; j._host = host; j._fetched = new Date().toISOString();

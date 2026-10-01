@@ -1,0 +1,516 @@
+{
+ "id": "mc-1929",
+ "name": "Circuit de Monaco",
+ "audited": "2026-10-01",
+ "verdict": "major issues",
+ "layoutNote": "Current Grand Prix layout (2015-present, Tabac re-profiled, 3.337 km); the 2010-2014 seasons used the 3.340 km version (3 m longer at Tabac).",
+ "measurements": {
+  "layout": {
+   "osmRelation": "148194",
+   "osmLength": 3331.6,
+   "gameBuiltLength": 3326.4,
+   "gameLengthKm": 3.337,
+   "gameToOsm": {
+    "meanM": 0.92,
+    "p50M": 0.37,
+    "p95M": 5.06,
+    "maxM": 7.9,
+    "maxAtGameS": 1794,
+    "runsOver8m": []
+   },
+   "osmToGame": {
+    "meanM": 0.93,
+    "p95M": 4.98,
+    "maxM": 7.9,
+    "runsOver8mOsmS": []
+   }
+  },
+  "datasetGeodesicLengthM": 3324.3,
+  "buildScale": 1.00644,
+  "direction": "clockwise; OSM oneway members of relation 148194 run with the game direction (746 m with, 108 m against = the U-shaped pit lane)",
+  "start": "game points[0] is 0.1 m from OSM node 4937755860 \"Monaco Grand Prix Start/Finish Line\"",
+  "pit": {
+   "game": {
+    "side": "right (-1)",
+    "limitKmh": 60,
+    "entryS": 3202.3,
+    "exitS": 94,
+    "laneLengthM": 390
+   },
+   "osm": {
+    "way": 850261588,
+    "exitWay": 1388331347,
+    "side": "right",
+    "entryS": 2972,
+    "entryLatLon": [
+     43.7323832,
+     7.4229757
+    ],
+    "laneEndS": 26,
+    "exitMergeS": 268,
+    "exitMergeLatLon": [
+     43.7370216,
+     7.4221175
+    ],
+    "note": "enters between La Rascasse and Anthony Noghes, runs along the harbour, its exit lane follows the yellow line through Sainte Devote and merges on Avenue d'Ostende"
+   }
+  },
+  "elevation": {
+   "source": "IGN RGE ALTI 1-5 m bare-earth DEM via https://data.geopf.fr/altimetrie (resource ign_rge_alti_wld), sampled every 5 m on the OSM centreline; cache devtests/track-audit/cache/ignalti/",
+   "osmLine": {
+    "id": "mc-1929",
+    "source": "ignalti",
+    "step": 5.002,
+    "samples": 666,
+    "osmLength": 3331.6,
+    "covered": [
+     {
+      "way": 4230891,
+      "name": "Boulevard Louis II",
+      "tunnel": "yes",
+      "samples": 74,
+      "osmS": [
+       1521,
+       1886
+      ]
+     },
+     {
+      "way": 1230247123,
+      "name": "Boulevard Louis II",
+      "tunnel": "yes",
+      "samples": 3,
+      "osmS": [
+       1881,
+       1891
+      ]
+     },
+     {
+      "way": 1470365907,
+      "name": "Circuit de Monaco",
+      "tunnel": "yes",
+      "samples": 6,
+      "osmS": [
+       1421,
+       1446
+      ]
+     }
+    ],
+    "rawMinASL": 1,
+    "rawMaxASL": 43.1,
+    "realRange": 41.8,
+    "realMinAtOsmS": 2811,
+    "realMaxAtOsmS": 925,
+    "realMinAtGameS": 2795,
+    "realMaxAtGameS": 917,
+    "gameRange": 41.3,
+    "gameRangeOnOsm": 41.3,
+    "residualRms": 0.23,
+    "residualMax": 0.8,
+    "residualMaxAtGameS": 489,
+    "real": {
+     "g20": {
+      "win": 20,
+      "maxClimb": {
+       "pct": 10.4,
+       "fromS": 395,
+       "toS": 415,
+       "at": [
+        43.737283761415206,
+        7.423701359181864
+       ],
+       "rise": 2.1
+      },
+      "maxDescent": {
+       "pct": -9.4,
+       "fromS": 1366,
+       "toS": 1386,
+       "at": [
+        43.740896680529765,
+        7.429364629170979
+       ],
+       "rise": -1.9
+      }
+     },
+     "g50": {
+      "win": 50,
+      "maxClimb": {
+       "pct": 10,
+       "fromS": 385,
+       "toS": 435,
+       "at": [
+        43.73725807104872,
+        7.4235820158254855
+       ],
+       "rise": 5
+      },
+      "maxDescent": {
+       "pct": -8.4,
+       "fromS": 1351,
+       "toS": 1401,
+       "at": [
+        43.74077688019627,
+        7.429296347052767
+       ],
+       "rise": -4.2
+      }
+     },
+     "g100": {
+      "win": 100,
+      "maxClimb": {
+       "pct": 9.5,
+       "fromS": 385,
+       "toS": 485,
+       "at": [
+        43.73725807104872,
+        7.4235820158254855
+       ],
+       "rise": 9.5
+      },
+      "maxDescent": {
+       "pct": -7.9,
+       "fromS": 1296,
+       "toS": 1396,
+       "at": [
+        43.74038267079566,
+        7.429698129483128
+       ],
+       "rise": -7.9
+      }
+     },
+     "runs100_4pct": [
+      {
+       "fromS": 175,
+       "toS": 675,
+       "peakPct": 9.5
+      },
+      {
+       "fromS": 905,
+       "toS": 1476,
+       "peakPct": -7.9
+      },
+      {
+       "fromS": 1981,
+       "toS": 2111,
+       "peakPct": -4.2
+      }
+     ]
+    },
+    "gameOnOsm": {
+     "g50": {
+      "win": 50,
+      "maxClimb": {
+       "pct": 9.2,
+       "fromS": 475,
+       "toS": 525,
+       "at": [
+        43.7374272729865,
+        7.424674908582194
+       ],
+       "rise": 4.6
+      },
+      "maxDescent": {
+       "pct": -7.7,
+       "fromS": 1146,
+       "toS": 1196,
+       "at": [
+        43.741105352616245,
+        7.428870231670662
+       ],
+       "rise": -3.8
+      }
+     },
+     "g100": {
+      "win": 100,
+      "maxClimb": {
+       "pct": 9,
+       "fromS": 335,
+       "toS": 435,
+       "at": [
+        43.7371320487177,
+        7.422984358157225
+       ],
+       "rise": 9
+      },
+      "maxDescent": {
+       "pct": -7.5,
+       "fromS": 1106,
+       "toS": 1206,
+       "at": [
+        43.740899220282564,
+        7.428509915526844
+       ],
+       "rise": -7.5
+      }
+     }
+    },
+    "gradeDiffRuns100": []
+   },
+   "game": {
+    "range": 41.26,
+    "g50": {
+     "win": 50,
+     "maxClimb": {
+      "pct": 9.2,
+      "fromS": 478,
+      "toS": 528,
+      "at": [
+       43.7374249,
+       7.4246395
+      ],
+      "rise": 4.6
+     },
+     "maxDescent": {
+      "pct": -7.7,
+      "fromS": 1136,
+      "toS": 1186,
+      "at": [
+       43.7411093,
+       7.4288035
+      ],
+      "rise": -3.8
+     }
+    },
+    "g100": {
+     "win": 100,
+     "maxClimb": {
+      "pct": 9,
+      "fromS": 340,
+      "toS": 440,
+      "at": [
+       43.7371263,
+       7.4229876
+      ],
+      "rise": 9
+     },
+     "maxDescent": {
+      "pct": -7.5,
+      "fromS": 1094,
+      "toS": 1194,
+      "at": [
+       43.7408453,
+       7.428456
+      ],
+      "rise": -7.5
+     }
+    }
+   },
+   "beauRivage": {
+    "rawMaxPct": {
+     "10m": 20.4,
+     "20m": 15.6,
+     "50m": 11.5,
+     "100m": 10.6
+    },
+    "cleanMaxPct": {
+     "20m": 10.4,
+     "50m": 10,
+     "100m": 9.5
+    },
+    "gameMaxPct": {
+     "20m": 9.6,
+     "50m": 9.2,
+     "100m": 9
+    },
+    "published": "around 12% (Wikipedia)"
+   },
+   "published": {
+    "rangeM": 44,
+    "source": "https://en.wikipedia.org/wiki/Circuit_de_Monaco (wikitext fetched 2026-10-01: length 3.337 km; Avenue d'Ostende \"maximum gradient ... around 12%\"; Casino Square \"44 m higher than the lowest part\"; tunnel)"
+   },
+   "measuredRangeM": 41.8,
+   "tunnelNote": "IGN reads the hotel ground above the tunnel (up to 24 m); taken straight between the portals (7.6 -> 7.3 m ASL), as the game does (build-tracks COVERED)"
+  },
+  "hairpin": {
+   "gameMinRadiusM": 9.6,
+   "gameRadiusAt12mChordM": [
+    9.8,
+    11.3,
+    10.3
+   ],
+   "osmCentrelineMinRadiusM": 8.9,
+   "gameHalfWidthM": 6.9,
+   "gameBankDeg": -5.95,
+   "gameGradePct": -5.8,
+   "note": "centreline geometry agrees with OSM within 0.7 m of radius; the car cannot take it because of js/car.js steering lock (v6-plan: 10 m minimum turning radius at 10 km/h), not because of the track data"
+  },
+  "banking": {
+   "gameMaxAbsDeg": 5.95,
+   "gameSectionsOver3deg": 24,
+   "real": "no banked corners published (street circuit)"
+  },
+  "covered": [
+   {
+    "name": "Tunnel (Boulevard Louis II under the Fairmont hotel)",
+    "osmWays": [
+     4230891,
+     1230247123
+    ],
+    "gameS": [
+     1514,
+     1888
+    ],
+    "lengthM": 362,
+    "from": [
+     43.740362,
+     7.430326
+    ],
+    "to": [
+     43.737778,
+     7.427973
+    ],
+    "inGame": "elevation bridged (COVERED) but no tunnel geometry: open sky; js/tunnels.js (v6.2 prep, not wired) has this stretch"
+   },
+   {
+    "name": "Portier covered roundabout (OSM raceway way 1470365907, tunnel=yes, layer -1) with Boulevard du Larvotto on a bridge over the circuit (way 92627405)",
+    "gameS": [
+     1412,
+     1430
+    ],
+    "lengthM": 18,
+    "from": [
+     43.741073,
+     7.430032
+    ],
+    "to": [
+     43.741089,
+     7.430253
+    ],
+    "inGame": "nothing; js/tunnels.js (prep) lists a \"Portier underpass\""
+   },
+   {
+    "name": "footpath bridge over the track near Anthony Noghes (OSM way 167625745)",
+    "gameS": [
+     3048,
+     3048
+    ],
+    "inGame": "no"
+   }
+  ]
+ },
+ "findings": [
+  {
+   "aspect": "tunnel",
+   "game": "No tunnel: the 362 m stretch under the Fairmont hotel (game s 1514-1888) is open road under the sky; only its elevation is bridged (flat 7.6 -> 7.4 m).",
+   "real": "Covered from the Portier exit to the Nouvelle Chicane approach: OSM way 4230891 \"Boulevard Louis II\" tunnel=yes layer -1 (356 m) + way 1230247123 (6 m), portals [43.740362, 7.430326] -> [43.737778, 7.427973]; partly open to the sea on the left (Wikipedia: the tunnel is \"a unique feature\").",
+   "severity": "major",
+   "proposedFix": "Wire js/tunnels.js (already holds this stretch: from [43.740362, 7.430326] to [43.737778, 7.427973], open side +1) into main.js / audio (lighting + reverb), as planned for v6.2.",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01): ways 4230891, 1230247123, 450334964 (footway in the tunnel)",
+    "https://en.wikipedia.org/wiki/Circuit_de_Monaco (wikitext fetched 2026-10-01: length 3.337 km; Avenue d'Ostende \"maximum gradient ... around 12%\"; Casino Square \"44 m higher than the lowest part\"; tunnel)"
+   ]
+  },
+  {
+   "aspect": "tunnel",
+   "game": "Nothing at Portier.",
+   "real": "OSM (2026) maps the circuit through an 18 m covered section at the Portier roundabout (raceway way 1470365907 tunnel=yes layer -1, game s 1412-1430) with Boulevard du Larvotto passing over it on a bridge (way 92627405, crosses at game s 1406).",
+   "severity": "minor",
+   "proposedFix": "Keep the \"Portier underpass\" entry of js/tunnels.js (from [43.741060, 7.429974] to [43.741084, 7.430250]).",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01): ways 1470365907, 92627405, 353889280"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "game": "Generic 390 m lane beside the start straight: entry line at s 3202 (124 m before the line, after Anthony Noghes), exit at s 94; side right; 60 km/h.",
+   "real": "Right side and 60 km/h are correct (FIA 2026). Real lane (OSM way 850261588) leaves the track at s 2972, between La Rascasse and Anthony Noghes ([43.7323832, 7.4229757]), and the exit lane (way 1388331347) rejoins after Sainte Devote at s 268 ([43.7370216, 7.4221175]).",
+   "severity": "minor",
+   "proposedFix": "Optional: trackData.pitEntry / pitExit points (new fields) so js/track.js can start the lane before Anthony Noghes and end it after Sainte Devote; until then keep side -1, 60 km/h.",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01): ways 850261588, 1388331347",
+    "FIA, 2026 Monaco Grand Prix, Infringement - Car 12 - Pit lane speeding: \"the pit lane speed limit which is set at 60 km/h for the event\" (https://www.fia.com/system/files/decision-document/2026_monaco_grand_prix_-_infringement_-_car_12_-_pit_lane_speeding.pdf, via web search 2026-10-01)"
+   ]
+  },
+  {
+   "aspect": "gradient",
+   "game": "Beau Rivage (Avenue d'Ostende) climb: max 9.2 % over 50 m, 9.0 % over 100 m (s 335-529).",
+   "real": "IGN lidar on the OSM line: 10.0 % over 50 m and 9.5 % over 100 m after cleaning, 11.5 % over 50 m raw; published \"around 12%\". The rest of the profile matches within 0.8 m (RMS 0.23 m), range 41.8 m (game 41.3, published 44).",
+   "severity": "minor",
+   "proposedFix": "Optional: use the DTM median of 30 m instead of 50 m (DTM_MEDIAN_HALF 1 for mc-1929) to keep ~1 pp more of the Beau Rivage grade; no other elevation change needed.",
+   "sources": [
+    "IGN RGE ALTI 1-5 m bare-earth DEM via https://data.geopf.fr/altimetrie (resource ign_rge_alti_wld), sampled every 5 m on the OSM centreline; cache devtests/track-audit/cache/ignalti/",
+    "https://en.wikipedia.org/wiki/Circuit_de_Monaco (wikitext fetched 2026-10-01: length 3.337 km; Avenue d'Ostende \"maximum gradient ... around 12%\"; Casino Square \"44 m higher than the lowest part\"; tunnel)"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "game": "Curvature-derived banking 4-6 deg (inside low) at every slow corner: Sainte Devote 5.3, Mirabeau 5.8, Fairmont hairpin 5.95, Portier 5.7, Nouvelle Chicane 5.5, Rascasse 5.9, Anthony Noghes 5.5 deg (24 sections above 3 deg).",
+   "real": "No banking published for any Monaco corner (city streets with ordinary road crossfall).",
+   "severity": "minor",
+   "proposedFix": "Cap the derived banking on street circuits (e.g. trackData.bankMax = 2 deg for mc-1929) or lower BANK_MAX globally; the hairpin would then also lose its 6 deg inward roll.",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Circuit_de_Monaco (wikitext fetched 2026-10-01: length 3.337 km; Avenue d'Ostende \"maximum gradient ... around 12%\"; Casino Square \"44 m higher than the lowest part\"; tunnel)"
+   ]
+  },
+  {
+   "aspect": "other",
+   "game": "Fairmont hairpin: centreline radius 9.6-9.8 m (12 m chord), half width 6.9 m, grade -5.8 %, bank -5.95 deg.",
+   "real": "OSM centreline radius 8.9 m at the same place; the data is correct. The \"cannot take the hairpin at 20 km/h\" complaint comes from js/car.js (minimum turning radius 10 m at 10 km/h).",
+   "severity": "minor",
+   "proposedFix": "No track-data change; fix the steering lock law (v6.2). Lowering the derived 6 deg bank there (above) also helps.",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01): relation 148194 ways 4230007 / 568187257"
+   ]
+  },
+  {
+   "aspect": "length",
+   "game": "lengthKm 3.337; the dataset line measures 3324 m (geodesic) and is scaled by 1.0064.",
+   "real": "3.337 km since 2015 (3.340 km 2010-2014); OSM centreline 3331.6 m.",
+   "severity": "cosmetic",
+   "proposedFix": "None.",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Circuit_de_Monaco (wikitext fetched 2026-10-01: length 3.337 km; Avenue d'Ostende \"maximum gradient ... around 12%\"; Casino Square \"44 m higher than the lowest part\"; tunnel)",
+    "bacinger/f1-circuits @432a253 (copy devtests/track-audit/latam-za/ref/f1-circuits-432a253.geojson): properties.length per circuit"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "tunnels": [
+   {
+    "name": "Tunnel",
+    "kind": "tunnel",
+    "from": [
+     43.740362,
+     7.430326
+    ],
+    "to": [
+     43.737778,
+     7.427973
+    ],
+    "openSide": 1,
+    "source": "OSM ways 4230891 + 1230247123 (already in js/tunnels.js prep data)"
+   },
+   {
+    "name": "Portier",
+    "kind": "underpass",
+    "from": [
+     43.741073,
+     7.430032
+    ],
+    "to": [
+     43.741089,
+     7.430253
+    ],
+    "source": "OSM raceway way 1470365907 (tunnel=yes) + bridge way 92627405 over it"
+   }
+  ],
+  "pitFacts": {
+   "side": -1,
+   "limitKmh": 60,
+   "realEntry": [
+    43.7323832,
+    7.4229757
+   ],
+   "realExitMerge": [
+    43.7370216,
+    7.4221175
+   ]
+  },
+  "banking": {
+   "bankMaxDeg": 2,
+   "why": "no banked corners; derived 6 deg is invented"
+  },
+  "elevation": "keep ignalti (matches lidar on the OSM line within 0.8 m); optional DTM_MEDIAN_HALF 1 for Beau Rivage"
+ },
+ "method": "devtests/track-audit/west/: dump-game.js (game build), ovp.mjs / osm-fetch2.mjs (Overpass), osm-loop.mjs + pr-chicane-loop.mjs (OSM reference loops), layout.mjs, profile.mjs (DEM on the OSM line vs game), raw-vs-game.mjs, crossings.mjs, way-on-track.mjs, direction.mjs, corners.mjs, madring-bank.mjs; results in west/res/",
+ "globalNote": "tools/build-tracks.mjs projects with kz = 110540 m/deg and kx = 111320 cos(lat) m/deg: at these latitudes north-south distances come out 0.31-0.39 % shorter than east-west ones before the official-length rescale (WGS84: 111044-111168 m/deg of latitude). Cosmetic (<= 4 m per km)."
+}

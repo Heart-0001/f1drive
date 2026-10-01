@@ -1,0 +1,38 @@
+
+################ v6.1 glue
+
+== summary
+The v6.1 glue is finished and every suite it lists is green on the final tree. The earlier glue agent's partial work (in WIP commit 27cea48) was reviewed and is almost all correct. I kept it, finished the hudmirrors harness, and fixed four defects.
+
+What is in place:
+1. **Default season 2026:** START_YEAR = 2026 in js/main.js, so a fresh install opens on 2026 with its standard car. The harnesses that were written for the reference car now pick '2025-standard' before the game boots. The shared helper devtests/ref-car.js (+ ref-car.html, a blank page of the same file:// origin) writes the menu's stored choice, localStorage 'f1drive.car', into the window. Harnesses that test a fresh install open their windows with `fresh: true` and now expect 2026: v6-smoke part boot, v6-critic newbie and the window sizes, online-v6, solo-v6's fresh-profile check.
+2. **HUD rear-view mirrors:**
+   - index.html: script tag after js/cockpit.js; the two frames are the first children of #hud; layout-A CSS based on --mir-* variables, with `#hud.no-mirrors { --mir-oh: -4px }` putting every box back exactly where it was without mirrors (checked at 1280 and 700).
+   - main.js: creates the mirrors once with the cockpit (exclude [cockpit.group], elements = the frames) and draws them right after the main render. V toggles them with a toast 後照鏡：開／關（V）.
+   - 設定 tab: switch 畫面 → 後照鏡 開／關, remembered in localStorage 'f1drive.hud'. The in-car glass mirrors are unchanged.
+   - I read the screenshots at 1280x720 and 1920x1080 (qualifying with start lights and a toast, and the 16-driver results overlay), plus 700, 960 and 1000. Nothing collides with the mirrors.
+3. **Battery per car on the car cards:** each card shows a line 電池 + F1.cars.ersNote(id) when there is a note. Cars with spec.ers === null get no 電池 bar and a dashed 無 KERS chip where it would be (2010, 2011 HRT, Virgin and Lotus Racing, 2012 HRT and Marussia). In game, the 2011 HRT shows no battery in the telemetry and E deploys nothing (v6-smoke check plus screenshot).
+4. **Hints:** the menu key map has a 後照鏡 column (V) and the pad row Y / View / B/LB / A/RB / X / Start; the column header is 電池（按住）. #hud-hint lists the keys (incl. V 後照鏡, E 電池（按住）) and the pad layout (A/RB 電池（按住）, B/LB 限速器, X 換胎配方, Y 重置, View 行車線, Start 選單, plus V 後照鏡). With a pad connected, the pit-lane prompts say B.
+
+Defects I fixed in this session:
+- **js/main.js:** the mirror render ran inside the frame's try block, so a mirror failure would have stopped the game with the error overlay. It is now isolated in renderMirrors / mirrorsFailed: the mirrors switch off for good, the 設定 switch shows 無法顯示, and driving continues.
+- **devtests/hudmirrors-test/run.js:** it had no window-all-closed handler. Electron quit with exit 0 when the first window closed, so the restart checks never ran and a failing run reported success.
+- **devtests/hudmirrors-test/run.js:** one check hard-coded x = 1018 for a 1280-wide window. The offscreen window now comes out 1281 px wide at DPR 1, so the check now uses W - 262.
+- **devtests/car-v6/game-check.js:** it pressed the old pad buttons and assumed the reference car was the default. It also had a battery threshold that already failed on e02cf43 (I verified on a temporary worktree, since removed): the final review made battery deploy traction-limited. I aligned it the same way v6-smoke already was.
+
+Results: every listed suite passes — 11 node suites, build-cars --check, the gamepad tests and all Electron harnesses; exact results per command are in testsRun. ui-v6, ui-gp, solo, solo-v6, v6-smoke and gp-smoke were re-run after the last main.js change.
+
+== apiNotes
+ - F1.game.hudMirrors (null until the first track, or after a failure) and F1.game.mirrors (bool: the setting) are new read-only getters. main.js calls F1.createHudMirrors(renderer, scene, {exclude: [cockpit.group], elements: [#hud-mirror-l, #hud-mirror-r]}) once, together with the cockpit, and draws them every frame after renderer.render. If createHudMirrors is missing or throws, or render() throws, they are switched off for the session: hudMirrors becomes null and ui.setMirrors({available: false}) is called.
+ - ui API: getMirrors() -> bool (default true); setMirrors({on?, available?}) shows and stores the change without calling onMirrors; callback onMirrors(on) fires when the 設定 switch flips. The setting is stored in localStorage 'f1drive.hud' as {mirrors: bool}; junk values fall back to on. #hud.no-mirrors hides the frames and moves the boxes back up.
+ - Keys: V toggles the HUD mirrors while driving (toast 後照鏡：開／關（V）) and is ignored while typing or in the menu. The pad has no mirror button; the pad hint shows V 後照鏡 as a keyboard key.
+ - CSS in index.html: on :root, --mir-gw = clamp(176px, 18.75vw, 400px) (the module author proposed 224 px as the minimum; 176 keeps the start lights between the mirrors from 721 to 1000 px); --mir-oh is the frame's outer height and -4px in #hud.no-mirrors; --gp-bottom is 12px with mirrors and 48px without, so 16 drivers still fit at 720 px height. At 443 px and narrower the glass shrinks.
+ - Harness helper devtests/ref-car.js: `await require('../ref-car').seed(win[, {year, car}])` BEFORE win.loadFile(index.html) stores the 車輛 pick (default 2025 / '2025-standard') through a blank page of the same file:// origin. gp-e2e lib.makeWin, v6-critic lib w.open and v6-smoke w.open seed it unless opts.fresh / o.fresh is set.
+ - Car cards: the battery line comes from c.ersNote if the row carries one, otherwise from F1.cars.ersNote(c.id). The 無 KERS chip shows only when c.ers === null, and the 電池 bar is then left out.
+
+== openIssues
+ - Docs not edited (not my files): devtests/README.md rows need updating. v6-smoke: boot now = fresh 2026 + a reference-car window, 144 checks. hudmirrors-test: about 70 s, 41 checks. gamepad-test: 25 tests, plus a row for game-map.js. car-v6/game-check: the v6.1 pad. New shared helper devtests/ref-car.js. Pad-wording rows: v6-critic 'pad A' -> Y, online-v6 'Back compound' -> X. js/README-interfaces.md needs the controls line (A/RB battery, B/LB limiter, X compound, Y reset, View line, V mirrors), the hudmirrors integration, ui getMirrors / setMirrors / onMirrors, F1.game.hudMirrors / mirrors, localStorage 'f1drive.hud', and ersNote / 無 KERS on the cards.
+ - js/hudmirrors.js (critic stage's file): its comment and F1.hudMirrorsLayout still use a 224 px minimum glass while index.html uses 176 px. This only matters when the module runs without frame elements, which the game never does.
+ - Between 1000 and 1119 px wide the session box sits about 68 px lower under the mirrors, so with 16 drivers fewer rows are visible before the clip. That clip already existed and the player's own row stays visible in the screenshots.
+ - Defaults I chose (for docs/v6-plan.md): mirrors on for a fresh install. A mirror failure switches them off for the session (無法顯示). The pad hint shows 'View' rather than 'Back', and also lists V 後照鏡 (keyboard; no pad button). 無 KERS is a dashed chip where the 電池 bar would be. Pit-lane prompts say B with a pad.
+ - For the critic: the HUD mirrors show the pit-lane light curtains strongly (yellow) and ghost cars only faintly (v6-07-race-lane-together-B.png). Overtaking was not judged visually.

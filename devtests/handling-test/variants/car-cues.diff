@@ -1,0 +1,48 @@
+diff --git a/devtests/handling-test/variants/car.proposed.js b/devtests/handling-test/variants/car.cues.js
+index 7a275a9..3e2d7be 100644
+--- a/devtests/handling-test/variants/car.proposed.js
++++ b/devtests/handling-test/variants/car.cues.js
+@@ -368,7 +368,9 @@
+       slip: 0,                        // 0..1 past the lateral grip limit
+       limiter: false, limitKmh: LIMITER_KMH,   // pit limiter engaged, its speed
+       inPit: false,                   // in the pit lane between the entry and exit lines
+-      vib: 0                          // 0..1 flat spots / puncture (js/tyres.js)
++      vib: 0,                         // 0..1 flat spots / puncture (js/tyres.js)
++      load: 1,                        // (v6.2) g: the tyres' normal load (1 standing on a flat road; downforce, banking, dips)
++      compress: 0                     // (v6.2) g: its share from the road's shape: banking, dips (> 0), crests (< 0)
+     };
+     // unsmoothed slope of the surface under the car, along / across the heading (tan of the angle)
+     var slopeFwd = 0, slopeLeft = 0;
+@@ -384,7 +386,7 @@
+       (typeof F1.createTyres === 'function' ? F1.createTyres({ random: opts.random }) : null);
+     // this step: pedals, boost / limiter, energy in and out of the battery (J/kg), slip, puncture drag (0..1)
+     var thr = 0, brk = 0, boost = false, limiterOn = false, limitV = LIMITER_KMH / 3.6;
+-    var eDep = 0, eHar = 0, stepSlip = 0, punct = 0;
++    var eDep = 0, eHar = 0, stepSlip = 0, punct = 0, stepLoad = GRAVITY, stepComp = 0;
+     var load = { speed: 0, lat: 0, brake: 0, drive: 0, slip: 0, onGrass: false, hit: 0 };   // js/tyres.js, every step
+     var bumpHit = 0;                  // strongest car.bump since the last update, fed to the next one (then 0)
+     // pit wall: its runs of the current track.pit (cache), and where the car was against it after the last step
+@@ -447,6 +449,7 @@
+       state.throttle = state.brake = 0;
+       state.gear = 0; state.rpm = K.rpmFor(0, 0); state.shiftT = SHIFT_T_NONE;
+       state.deploy = state.harvest = state.slip = 0;
++      state.load = 1; state.compress = 0;
+       state.inPit = !!(track.pit && track.pit.inLane(state.sampleIndex, state.d));
+       state.vib = tyres ? tyres.state.vib : 0;
+       pwOk = false; lastX = state.x; lastZ = state.z;
+@@ -522,6 +525,7 @@
+       }
+       var an = A0 - aLeft * sr;               // tyre load incl. the centripetal part
+       if (an < AN_MIN) an = AN_MIN;
++      stepLoad = an; stepComp = an - GRAVITY - K.downforce * v * v;
+ 
+       // --- longitudinal (traction and braking scale with the tyre load) ---
+       var drive = 0;      // signed acceleration
+@@ -818,6 +822,7 @@
+       state.harvest = ers ? Math.min(1, eHar / (ers.harvest * dt)) : 0;
+       if (!ers) state.battery = 0;
+       state.slip = stepSlip;
++      state.load = stepLoad / GRAVITY; state.compress = stepComp / GRAVITY;
+       state.limiter = limiterOn; state.limitKmh = lk;
+       if (!track) state.inPit = false;
+       state.vib = tyres ? tyres.state.vib : 0;

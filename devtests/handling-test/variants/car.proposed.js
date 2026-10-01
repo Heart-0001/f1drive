@@ -40,11 +40,16 @@
   var GRASS_DRAG_BASE = 0.8;        // extra decel on grass = base + lin * |v|
   var GRASS_DRAG_LIN = 0.16;        //   -> full throttle settles at ~80 km/h
   var WHEELBASE = 3.6;
-  var STEER_LOCK = 0.35;            // rad: full lock at the road wheels (20 deg: a Monaco-spec rack; F1 cars run ~14 deg
-                                    //   elsewhere, ~20-22 at Monaco: formula1.com, Ferrari SF15-T / Smedley 2019)
-  var STEER_SPEED_REF = 22;         // m/s; the v5 law at speed: lock = STEER_LOCK / (1 + (v/ref)^2) (keyboard stability)
-  var STEER_LOW_GRIP = 1.25;        // ... but never less lock than asks STEER_LOW_GRIP x the mechanical grip: full lock up
-                                    //   to ~57 km/h (Monaco's hairpin at ~47 km/h), the v5 law from ~85 km/h on
+  var STEER_LOCK = 0.35;            // rad: the v5 lock law at speed, lock = STEER_LOCK / (1 + (v/ref)^2), where full
+  var STEER_SPEED_REF = 22;         //   lock asks about the grip (1.0..1.3 x from ~85 km/h on): the keys stay tame
+  var STEER_LOCK_MAX = 0.40;        // rad (23 deg) at the road wheels at low speed, a Monaco rack. Real: ~14-17 deg,
+                                    //   ~20-22 at Monaco on 3.1-3.3 m wheelbases (kinematic radius 8.1-8.6 m); 23 deg
+                                    //   on this car's 3.6 m gives the same 8.5 m (formula1.com 2015, 2019; Autosport)
+  var STEER_LOW_GRIP = 1.25;        // full lock never asks less than this x the car's mechanical grip (latBase): full
+                                    //   lock up to ~52 km/h, the v5 law from ~85 km/h on
+  var STEER_BANK_FROM = 6 * Math.PI / 180;   // a road banked into the turn by more than js/track.js's derived
+  var STEER_BANK_TO = 9 * Math.PI / 180;     //   banking (<= 6 deg): the lock grows with the extra grip, in full from
+                                             //   9 deg (the real banked corners, 9.2..19 deg), faded in between
   var LAT_BASE = 20.0;              // m/s^2 mechanical grip
   var LAT_AERO = 0.0045;            // + k * v^2
   var LAT_MAX = 44.0;               // ~4.5 g cap
@@ -236,24 +241,27 @@
       return muBrake * an + brakeDrag * v * v + ROLL + dragK * v * v + GRAVITY * Math.sin(pitch || 0);
     }
 
-    // Steering lock (rad at the road wheels) at speed v on a road banked `bank` (rad, left higher > 0), turning towards
-    // turnSign (+1 left): the v5 law (STEER_LOCK / (1 + (v / STEER_SPEED_REF)^2): at speed, full lock asks for about
-    // the grip, so a keyboard's bang-bang steering stays tame), but never less than the lock that asks STEER_LOW_GRIP x
-    // the mechanical grip (low speed: full lock up to ~57 km/h, the v5 law from ~85 km/h on); a road banked into the
-    // turn, which holds more (maxLatAccel), gets that much more lock (never less than on the flat); at most STEER_LOCK.
-    // On the flat above ~85 km/h this is exactly the v5 lock.
+    // Steering lock (rad at the road wheels, state.steer = +-1) at speed v on a road banked `bank` (rad, left higher
+    // > 0) turning towards turnSign (+1 left): the v5 law STEER_LOCK / (1 + (v / STEER_SPEED_REF)^2), where full lock
+    // asks about the grip, but never less lock than asks STEER_LOW_GRIP x the mechanical grip (low speed) and, on a real
+    // banked corner turning into the bank, that much more as the bank holds more (maxLatAccel banked / flat); at most
+    // STEER_LOCK_MAX. Exactly the v5 lock above ~85 km/h except on the real banked corners; STEER_LOCK_MAX to ~52 km/h.
     function steerLockAt(v, bank, turnSign) {
       var av = v < 0 ? -v : v, r = av / STEER_SPEED_REF, lock = STEER_LOCK / (1 + r * r);
-      if (!(av > 0.5)) return STEER_LOCK;
+      if (!(av > 0.5)) return STEER_LOCK_MAX;
       var t = Math.tan(lock), tl = STEER_LOW_GRIP * s.latBase * WHEELBASE / (av * av), up = false;
       if (tl > t) { t = tl; up = true; }
-      if (bank) {
+      var ab = bank < 0 ? -bank : (bank || 0);
+      if (ab > STEER_BANK_FROM) {
         var gb = maxLatAccel(av, bank, 0, 0, turnSign), gf = maxLatAccel(av, 0, 0, 0, turnSign);
-        if (gb > gf && gf > 0) { t *= gb / gf; up = true; }
+        if (gb > gf && gf > 0) {
+          var w = ab < STEER_BANK_TO ? (ab - STEER_BANK_FROM) / (STEER_BANK_TO - STEER_BANK_FROM) : 1;
+          t *= 1 + (gb / gf - 1) * w; up = true;
+        }
       }
       if (!up) return lock;
       t = Math.atan(t);
-      return t < STEER_LOCK ? t : STEER_LOCK;
+      return t < STEER_LOCK_MAX ? t : STEER_LOCK_MAX;
     }
 
     // Drivetrain (shared by car.js for the own car and by audio.js for remote cars): the gear by speed against
@@ -318,8 +326,9 @@
       topSpeed: topFor(power), dragK: dragK, roll: ROLL, traction: traction, power: power,
       brakeBase: s.brakeBase, brakeAero: brakeAero, latBase: s.latBase, latAero: latAero, latMax: latMax,
       gravity: GRAVITY, carHalfWidth: CAR_HALF_WIDTH,
-      wheelbase: WHEELBASE, steerLock: STEER_LOCK, steerSpeedRef: STEER_SPEED_REF, steerLowGrip: STEER_LOW_GRIP,
-      steerLockAt: steerLockAt,        // (v, bank, turnSign) -> rad: the steering lock (state.steer = +-1) at that speed
+      wheelbase: WHEELBASE, steerLock: STEER_LOCK, steerSpeedRef: STEER_SPEED_REF,
+      steerLockMax: STEER_LOCK_MAX, steerLowGrip: STEER_LOW_GRIP,
+      steerLockAt: steerLockAt,        // (v, bank, turnSign) -> rad: the steering lock (state.steer = +-1) there
       muLat: muLat, muTraction: muTraction, muBrake: muBrake, downforce: downforce, brakeDrag: brakeDrag,
       minNormalAccel: AN_MIN,
       bankGrip: 1 + muLat * muLat,     // legacy linearisation: d(maxLat) ~ bankGrip * g * sin(bank into the turn)

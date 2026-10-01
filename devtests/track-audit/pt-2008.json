@@ -1,0 +1,2715 @@
+{
+ "id": "pt-2008",
+ "name": "Autódromo Internacional do Algarve",
+ "auditor": "track-audit east (2026-10-01)",
+ "method": "devtests/track-audit/east/*.mjs (README in report.mjs header); game side = out/game-<id>.json (dump-game.js, the game's own js/track.js build)",
+ "layout": {
+  "gameLengthKm": 4.653,
+  "gameBuiltLengthM": 4652,
+  "gameTrueLengthM": 4635,
+  "buildRescale": 1.0038,
+  "osmLoopLengthM": 4631,
+  "osmLoopGaps": [],
+  "osmBase": "2026-06-01T08:52:28Z",
+  "osmRelations": [
+   {
+    "id": 7509968,
+    "name": "Algarve International Circuit",
+    "members": 36
+   }
+  ],
+  "lateralDeviationGameToOsm": {
+   "meanM": 0.4,
+   "p95M": 1.1,
+   "maxM": 1.7,
+   "over8m": []
+  },
+  "osmWaysUsed": [
+   {
+    "id": 511858148,
+    "name": null,
+    "lengthM": 71,
+    "coverage": 1
+   },
+   {
+    "id": 363133200,
+    "name": null,
+    "lengthM": 38,
+    "coverage": 1
+   },
+   {
+    "id": 157736307,
+    "name": null,
+    "lengthM": 110,
+    "coverage": 1
+   },
+   {
+    "id": 511858151,
+    "name": null,
+    "lengthM": 48,
+    "coverage": 1
+   },
+   {
+    "id": 511858149,
+    "name": null,
+    "lengthM": 120,
+    "coverage": 1
+   },
+   {
+    "id": 511858150,
+    "name": "Curva Lagos",
+    "lengthM": 59,
+    "coverage": 1
+   },
+   {
+    "id": 511858549,
+    "name": null,
+    "lengthM": 78,
+    "coverage": 1
+   },
+   {
+    "id": 363133201,
+    "name": null,
+    "lengthM": 75,
+    "coverage": 1
+   },
+   {
+    "id": 511858548,
+    "name": null,
+    "lengthM": 428,
+    "coverage": 1
+   },
+   {
+    "id": 511858547,
+    "name": null,
+    "lengthM": 85,
+    "coverage": 1
+   },
+   {
+    "id": 363133187,
+    "name": "Curva da Torre Vip",
+    "lengthM": 56,
+    "coverage": 1
+   },
+   {
+    "id": 511858546,
+    "name": null,
+    "lengthM": 80,
+    "coverage": 1
+   },
+   {
+    "id": 511859284,
+    "name": null,
+    "lengthM": 90,
+    "coverage": 1
+   },
+   {
+    "id": 363133194,
+    "name": null,
+    "lengthM": 95,
+    "coverage": 1
+   },
+   {
+    "id": 511858536,
+    "name": null,
+    "lengthM": 132,
+    "coverage": 1
+   },
+   {
+    "id": 363133190,
+    "name": null,
+    "lengthM": 69,
+    "coverage": 1
+   },
+   {
+    "id": 511858533,
+    "name": null,
+    "lengthM": 91,
+    "coverage": 1
+   },
+   {
+    "id": 511858543,
+    "name": "Curva Samsung",
+    "lengthM": 64,
+    "coverage": 1
+   },
+   {
+    "id": 511858539,
+    "name": null,
+    "lengthM": 208,
+    "coverage": 1
+   },
+   {
+    "id": 511859291,
+    "name": null,
+    "lengthM": 83,
+    "coverage": 1
+   },
+   {
+    "id": 511859290,
+    "name": "Curva Craig Jones",
+    "lengthM": 100,
+    "coverage": 1
+   },
+   {
+    "id": 511859289,
+    "name": null,
+    "lengthM": 135,
+    "coverage": 1
+   },
+   {
+    "id": 363133193,
+    "name": "Curva Portimão",
+    "lengthM": 145,
+    "coverage": 1
+   },
+   {
+    "id": 511859287,
+    "name": null,
+    "lengthM": 149,
+    "coverage": 1
+   },
+   {
+    "id": 511859288,
+    "name": null,
+    "lengthM": 125,
+    "coverage": 1
+   },
+   {
+    "id": 511859286,
+    "name": null,
+    "lengthM": 96,
+    "coverage": 1
+   },
+   {
+    "id": 363133197,
+    "name": null,
+    "lengthM": 82,
+    "coverage": 1
+   },
+   {
+    "id": 511859285,
+    "name": null,
+    "lengthM": 83,
+    "coverage": 1
+   },
+   {
+    "id": 511859282,
+    "name": null,
+    "lengthM": 55,
+    "coverage": 1
+   },
+   {
+    "id": 363133196,
+    "name": "Curva Sagres",
+    "lengthM": 195,
+    "coverage": 1
+   },
+   {
+    "id": 511859283,
+    "name": null,
+    "lengthM": 105,
+    "coverage": 1
+   },
+   {
+    "id": 363133198,
+    "name": null,
+    "lengthM": 63,
+    "coverage": 1
+   },
+   {
+    "id": 363133195,
+    "name": "Curva Galp",
+    "lengthM": 238,
+    "coverage": 1
+   },
+   {
+    "id": 363133199,
+    "name": "Autódromo Internacional do Algarve",
+    "lengthM": 982,
+    "coverage": 1
+   }
+  ],
+  "osmWaysNotOnGameLine": [
+   {
+    "id": 39218663,
+    "name": null,
+    "lengthM": 118,
+    "coverage": 0.35,
+    "nearGameS": 1756
+   },
+   {
+    "id": 39218671,
+    "name": null,
+    "lengthM": 88,
+    "coverage": 0.53,
+    "nearGameS": 1347
+   },
+   {
+    "id": 39218672,
+    "name": null,
+    "lengthM": 114,
+    "coverage": 0.29,
+    "nearGameS": 3063
+   },
+   {
+    "id": 39218673,
+    "name": null,
+    "lengthM": 218,
+    "coverage": 0.23,
+    "nearGameS": 3744
+   },
+   {
+    "id": 511858146,
+    "name": null,
+    "lengthM": 65,
+    "coverage": 0.33,
+    "nearGameS": 482
+   },
+   {
+    "id": 511858147,
+    "name": null,
+    "lengthM": 28,
+    "coverage": 0.53,
+    "nearGameS": 426
+   }
+  ],
+  "official": {
+   "GP circuit 2008-present": 4.653,
+   "Motorcycling circuit (other Turn 5 variant)": 4.592,
+   "GP circuit with chicane 2008-2019": 4.684,
+   "source": "en.wikipedia.org/wiki/Algarve_International_Circuit; de.wikipedia: MotoGP uses the other Turn 5 variant, 43 m shorter"
+  },
+  "f1Use": "Portuguese GP 2020, 2021",
+  "identification": "Game line = OSM GP loop (Curva da Torre VIP variant way 511858547), deviation max 1.7 m; 4635 m true vs OSM 4631 m vs official 4.653 km. Correct F1 layout."
+ },
+ "direction": {
+  "game": "clockwise",
+  "real": "clockwise",
+  "ok": true,
+  "source": "OSM oneway raceway ways (4631 m agree)"
+ },
+ "startFinish": {
+  "game": [
+   37.2321132,
+   -8.63081
+  ],
+  "osmStart": {
+   "id": 5006082198,
+   "tag": "raceway=start",
+   "ll": [
+    37.2321164,
+    -8.6308098
+   ],
+   "offGameLineM": 0.1,
+   "gameS": 0
+  },
+  "osmFinish": {
+   "id": 5006070798,
+   "tag": "raceway=finish",
+   "ll": [
+    37.2298018,
+    -8.6299791
+   ],
+   "gameS": 4385,
+   "beforeGameLineM": 266
+  },
+  "fia": "FIA 2020 Portuguese GP Race Director's Event Notes, pit lane map (cache/web/fia-2020-por-p7.png): Control Line at the pit-entry end of the pit straight, pole position further down = OSM finish / start nodes.",
+  "ok": true
+ },
+ "pit": {
+  "game": {
+   "side": "right",
+   "limitKmh": 80,
+   "entryS": 4488,
+   "entryLL": [
+    37.230694,
+    -8.6302963
+   ],
+   "exitS": 164,
+   "exitLL": [
+    37.2335313,
+    -8.631329
+   ],
+   "laneFromS": 4402,
+   "laneToS": 250,
+   "lengthM": 500
+  },
+  "osmPitWays": [
+   {
+    "id": 157790380,
+    "name": "Pit Lane",
+    "lengthM": 1219,
+    "side": "right",
+    "leavesTrackAt": {
+     "gameS": 3681,
+     "trueS": 3667,
+     "ll": [
+      37.226908,
+      -8.625565
+     ],
+     "offTrackM": 0.4
+    },
+    "rejoinsAt": {
+     "gameS": 318,
+     "trueS": 317,
+     "ll": [
+      37.234861,
+      -8.631817
+     ],
+     "offTrackM": 0.2
+    },
+    "maxspeed": "80"
+   },
+   {
+    "id": 511859459,
+    "name": "Enter Pit Line",
+    "lengthM": 136,
+    "side": "right",
+    "leavesTrackAt": {
+     "gameS": 4105,
+     "trueS": 4089,
+     "ll": [
+      37.227374,
+      -8.629111
+     ],
+     "offTrackM": 1.6
+    },
+    "rejoinsAt": {
+     "gameS": 4240,
+     "trueS": 4224,
+     "ll": [
+      37.228585,
+      -8.629357
+     ],
+     "offTrackM": 14.8
+    },
+    "maxspeed": "80"
+   }
+  ],
+  "real": {
+   "side": "right",
+   "limitKmh": 80,
+   "limitSource": "OSM pit lane maxspeed=80; FIA 2020 event notes make no change to Sporting Regulations art. 22.10 (80 km/h)",
+   "entry": "from the pit straight after the last corner (FIA 2020 pit lane map; OSM way 511859459 \"Enter Pit Line\" from gameS 4105)",
+   "exit": "just before Turn 1 (OSM way 157790380 end, gameS 318)"
+  }
+ },
+ "elevation": {
+  "along": "OSM centreline loop, s = true metres from the foot of the game start line (gameS = the game's own s at the same place)",
+  "game": {
+   "rangeM": 24.1,
+   "lowest": {
+    "s": 4001,
+    "m": 0,
+    "ll": [
+     37.226672,
+     -8.628745
+    ]
+   },
+   "highest": {
+    "s": 2681,
+    "m": 24.1,
+    "ll": [
+     37.230835,
+     -8.624595
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 6.8,
+    "climbAtS": 2101,
+    "descentPct": -8.4,
+    "descentAtS": 2781
+   },
+   "steepest100m": {
+    "climbPct": 6.1,
+    "climbAtS": 2081,
+    "climbAt": [
+     37.234738,
+     -8.627474
+    ],
+    "descentPct": -7.9,
+    "descentAtS": 2761,
+    "descentAt": [
+     37.229996,
+     -8.624974
+    ]
+   }
+  },
+  "glo30": {
+   "rangeM": 27.4,
+   "lowest": {
+    "s": 4051,
+    "m": 95.3,
+    "ll": [
+     37.227073,
+     -8.628999
+    ]
+   },
+   "highest": {
+    "s": 2651,
+    "m": 122.7,
+    "ll": [
+     37.231031,
+     -8.624827
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 8.4,
+    "climbAtS": 2511,
+    "descentPct": -10.7,
+    "descentAtS": 2821
+   },
+   "steepest100m": {
+    "climbPct": 7.4,
+    "climbAtS": 2481,
+    "climbAt": [
+     37.231535,
+     -8.626025
+    ],
+    "descentPct": -9.7,
+    "descentAtS": 2791,
+    "descentAt": [
+     37.229918,
+     -8.625299
+    ]
+   },
+   "absMinM": 95.3,
+   "absMaxM": 122.7
+  },
+  "glo30LowerEnvelope": {
+   "rangeM": 27.2,
+   "lowest": {
+    "s": 330,
+    "m": 95,
+    "ll": [
+     37.23498,
+     -8.63186
+    ]
+   },
+   "highest": {
+    "s": 2681,
+    "m": 122.2,
+    "ll": [
+     37.230835,
+     -8.624595
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 8.4,
+    "climbAtS": 2551,
+    "descentPct": -10.7,
+    "descentAtS": 2781
+   },
+   "steepest100m": {
+    "climbPct": 7.4,
+    "climbAtS": 2521,
+    "climbAt": [
+     37.231372,
+     -8.625621
+    ],
+    "descentPct": -9.7,
+    "descentAtS": 2751,
+    "descentAt": [
+     37.230022,
+     -8.624866
+    ]
+   }
+  },
+  "eudem25m": {
+   "rangeM": 31.4,
+   "lowest": {
+    "s": 4031,
+    "m": 94.3,
+    "ll": [
+     37.226904,
+     -8.628919
+    ]
+   },
+   "highest": {
+    "s": 2711,
+    "m": 125.7,
+    "ll": [
+     37.23059,
+     -8.624454
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 11.7,
+    "climbAtS": 3191,
+    "descentPct": -10.9,
+    "descentAtS": 2791
+   },
+   "steepest100m": {
+    "climbPct": 8.6,
+    "climbAtS": 1520,
+    "climbAt": [
+     37.231266,
+     -8.627934
+    ],
+    "descentPct": -10.1,
+    "descentAtS": 2761,
+    "descentAt": [
+     37.229996,
+     -8.624974
+    ]
+   },
+   "absMinM": 94.3,
+   "absMaxM": 125.7
+  },
+  "alongGameCentreline": {
+   "srtm30": {
+    "rangeM": 35.1,
+    "lowest": {
+     "s": 4120,
+     "m": 92.1,
+     "ll": [
+      37.22751,
+      -8.629141
+     ]
+    },
+    "highest": {
+     "s": 2630,
+     "m": 127.2,
+     "ll": [
+      37.231173,
+      -8.625129
+     ]
+    },
+    "steepest50m": {
+     "climbPct": 16,
+     "climbAtS": 2520,
+     "descentPct": -11.9,
+     "descentAtS": 3890
+    },
+    "steepest100m": {
+     "climbPct": 13.6,
+     "climbAtS": 2500,
+     "climbAt": [
+      37.231496,
+      -8.625933
+     ],
+     "descentPct": -11.4,
+     "descentAtS": 3860,
+     "descentAt": [
+      37.226124,
+      -8.627751
+     ]
+    },
+    "absMinM": 92.1,
+    "absMaxM": 127.2
+   },
+   "glo90raw": {
+    "rangeM": 30,
+    "lowest": {
+     "s": 250,
+     "m": 96,
+     "ll": [
+      37.234275,
+      -8.631601
+     ]
+    },
+    "highest": {
+     "s": 2650,
+     "m": 126,
+     "ll": [
+      37.231092,
+      -8.624929
+     ]
+    },
+    "steepest50m": {
+     "climbPct": 22,
+     "climbAtS": 2070,
+     "descentPct": -24,
+     "descentAtS": 2780
+    },
+    "steepest100m": {
+     "climbPct": 12,
+     "climbAtS": 2550,
+     "climbAt": [
+      37.231291,
+      -8.625432
+     ],
+     "descentPct": -12,
+     "descentAtS": 2730,
+     "descentAt": [
+      37.230114,
+      -8.624536
+     ]
+    }
+   },
+   "note": "the same sources along the game's own points (elev-game.mjs); glo90raw = the unsmoothed input of the game profile"
+  },
+  "shapeAgreement": {
+   "glo30": {
+    "corr": 0.94,
+    "rmsM": 2.7,
+    "worstGameMinusDem": {
+     "dM": 6.5,
+     "s": 3611,
+     "ll": [
+      37.227288,
+      -8.625172
+     ]
+    }
+   },
+   "glo30floor": {
+    "corr": 0.94,
+    "rmsM": 2.6,
+    "worstGameMinusDem": {
+     "dM": 5.7,
+     "s": 3611,
+     "ll": [
+      37.227288,
+      -8.625172
+     ]
+    }
+   },
+   "eudem25m": {
+    "corr": 0.96,
+    "rmsM": 2.4,
+    "worstGameMinusDem": {
+     "dM": -5.5,
+     "s": 3051,
+     "ll": [
+      37.228807,
+      -8.626953
+     ]
+    }
+   }
+  },
+  "published": {
+   "maxFallPct": 12,
+   "maxRisePct": 6.2,
+   "source": "de.wikipedia.org/wiki/Autódromo_Internacional_do_Algarve: \"Die steilste Abfahrt hat 12 % im Maximum, während es bis zu 6,2 % bergauf geht\""
+  },
+  "t9t10t11Dip": {
+   "where": "Curva Samsung (T9) -> Curva Craig Jones (T10) -> Curva Portimão (T11), OSM s 2190 / 2410 / 2650",
+   "glo30DropRiseM": [
+    11.2,
+    12
+   ],
+   "gameDropRiseM": [
+    4,
+    5.9
+   ],
+   "note": "GLO-30, SRTM 2000 and the raw GLO-90 all show the ~11 m dip (elev-game profile50); the game's smoothing (125 m median + 50 m Gauss) keeps half of it"
+  },
+  "steepStretchesGlo30VsGame": [
+   {
+    "fromS": 1480,
+    "toS": 1711,
+    "at": [
+     37.231086,
+     -8.627956
+    ],
+    "demPct": 6.4,
+    "gamePct": 5.4,
+    "gameMaxPctInStretch": 5.7
+   },
+   {
+    "fromS": 2021,
+    "toS": 2181,
+    "at": [
+     37.235157,
+     -8.627996
+    ],
+    "demPct": 6.3,
+    "gamePct": 5.5,
+    "gameMaxPctInStretch": 6.1
+   },
+   {
+    "fromS": 2191,
+    "toS": 2391,
+    "at": [
+     37.233753,
+     -8.627297
+    ],
+    "demPct": -8.6,
+    "gamePct": -2.6,
+    "gameMaxPctInStretch": -3.4
+   },
+   {
+    "fromS": 2431,
+    "toS": 2641,
+    "at": [
+     37.231748,
+     -8.626522
+    ],
+    "demPct": 7.4,
+    "gamePct": 3.7,
+    "gameMaxPctInStretch": 4.2
+   },
+   {
+    "fromS": 2731,
+    "toS": 2951,
+    "at": [
+     37.230048,
+     -8.624758
+    ],
+    "demPct": -9.7,
+    "gamePct": -7.2,
+    "gameMaxPctInStretch": -7.9
+   },
+   {
+    "fromS": 3011,
+    "toS": 3131,
+    "at": [
+     37.229074,
+     -8.626895
+    ],
+    "demPct": 5.1,
+    "gamePct": 3.2,
+    "gameMaxPctInStretch": 3.3
+   },
+   {
+    "fromS": 3371,
+    "toS": 3531,
+    "at": [
+     37.228774,
+     -8.625192
+    ],
+    "demPct": -5.6,
+    "gamePct": -0.6,
+    "gameMaxPctInStretch": -0.6
+   },
+   {
+    "fromS": 3771,
+    "toS": 3981,
+    "at": [
+     37.226107,
+     -8.626953
+    ],
+    "demPct": -7.8,
+    "gamePct": -6.2,
+    "gameMaxPctInStretch": -6.9
+   }
+  ]
+ },
+ "banking": {
+  "source": "js/track.js: derived from curvature (BANK_MAX 6 deg, inside lower); no bankOverrides for this circuit",
+  "maxDeg": 5.9,
+  "shareOver3DegPct": 15.7,
+  "cornersFound": 14,
+  "corners": [
+   {
+    "hand": "R",
+    "gameS": [
+     382,
+     430
+    ],
+    "apexS": 402,
+    "angleDeg": -74,
+    "minRadiusM": 21,
+    "gameBankDeg": 5.2,
+    "gameGradePct": 1.6,
+    "apex": [
+     37.2355949,
+     -8.6320423
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     538,
+     590
+    ],
+    "apexS": 566,
+    "angleDeg": -49,
+    "minRadiusM": 37,
+    "gameBankDeg": 4.7,
+    "gameGradePct": 0.3,
+    "apex": [
+     37.2364726,
+     -8.6305841
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     694,
+     768
+    ],
+    "apexS": 740,
+    "angleDeg": -138,
+    "minRadiusM": 19,
+    "gameBankDeg": 5.8,
+    "gameGradePct": 0,
+    "apex": [
+     37.2359843,
+     -8.6288695
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     828,
+     924
+    ],
+    "apexS": 892,
+    "angleDeg": 75,
+    "minRadiusM": 49,
+    "gameBankDeg": -3.9,
+    "gameGradePct": 3.3,
+    "apex": [
+     37.235099,
+     -8.6300809
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     1424,
+     1492
+    ],
+    "apexS": 1450,
+    "angleDeg": 162,
+    "minRadiusM": 17,
+    "gameBankDeg": -5.9,
+    "gameGradePct": 0.8,
+    "apex": [
+     37.2302985,
+     -8.6283232
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     1658,
+     1738
+    ],
+    "apexS": 1666,
+    "angleDeg": 29,
+    "minRadiusM": 132,
+    "gameBankDeg": -1.7,
+    "gameGradePct": 3,
+    "apex": [
+     37.2320713,
+     -8.6278288
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     1886,
+     1962
+    ],
+    "apexS": 1914,
+    "angleDeg": -66,
+    "minRadiusM": 44,
+    "gameBankDeg": 4.4,
+    "gameGradePct": -2.2,
+    "apex": [
+     37.2341152,
+     -8.6288763
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     2034,
+     2124
+    ],
+    "apexS": 2098,
+    "angleDeg": -133,
+    "minRadiusM": 28,
+    "gameBankDeg": 5.4,
+    "gameGradePct": 5.6,
+    "apex": [
+     37.2350857,
+     -8.6275888
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     2404,
+     2502
+    ],
+    "apexS": 2448,
+    "angleDeg": 52,
+    "minRadiusM": 62,
+    "gameBankDeg": -3.2,
+    "gameGradePct": -0.8,
+    "apex": [
+     37.2320023,
+     -8.6268733
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     2642,
+     2798
+    ],
+    "apexS": 2758,
+    "angleDeg": -137,
+    "minRadiusM": 30,
+    "gameBankDeg": 5.3,
+    "gameGradePct": -5.2,
+    "apex": [
+     37.2302716,
+     -8.624393
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     2932,
+     3034
+    ],
+    "apexS": 2950,
+    "angleDeg": 62,
+    "minRadiusM": 62,
+    "gameBankDeg": -3.3,
+    "gameGradePct": -1.6,
+    "apex": [
+     37.229652,
+     -8.6263537
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     3152,
+     3248
+    ],
+    "apexS": 3204,
+    "angleDeg": 149,
+    "minRadiusM": 23,
+    "gameBankDeg": -5.4,
+    "gameGradePct": 3.5,
+    "apex": [
+     37.2276074,
+     -8.6269154
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     3368,
+     3566
+    ],
+    "apexS": 3434,
+    "angleDeg": -177,
+    "minRadiusM": 36,
+    "gameBankDeg": 4.9,
+    "gameGradePct": -0.4,
+    "apex": [
+     37.2287454,
+     -8.6249852
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     3726,
+     4064
+    ],
+    "apexS": 4040,
+    "angleDeg": -123,
+    "minRadiusM": 76,
+    "gameBankDeg": 2.9,
+    "gameGradePct": 0.7,
+    "apex": [
+     37.2268223,
+     -8.6288778
+    ]
+   }
+  ],
+  "real": "No banking figures published (de.wikipedia infobox \"Kurvenüberhöhung\" empty).",
+  "verdict": "synthetic only"
+ },
+ "coveredAndBridges": {
+  "gameCrossings": [],
+  "osmCrossingsOfTheGameLine": [
+   {
+    "id": 157736334,
+    "kind": "tunnel=yes service",
+    "name": null,
+    "layer": "-1",
+    "gameS": 2848,
+    "ll": [
+     37.2299281,
+     -8.6252614
+    ]
+   },
+   {
+    "id": 157736366,
+    "kind": "tunnel=yes service",
+    "name": null,
+    "layer": "-1",
+    "gameS": 4312,
+    "ll": [
+     37.229171,
+     -8.6297444
+    ]
+   }
+  ],
+  "note": "No tunnel, bridge or covered section the car drives through or under; two service tunnels pass under the track (gameS ~2848, ~4312)."
+ },
+ "verdict": "major issues",
+ "findings": [
+  {
+   "aspect": "start",
+   "severity": "cosmetic",
+   "game": "One line for start and lap timing at the OSM raceway=start node (pole / start line).",
+   "real": "The control (timing) line is a separate line 266 m earlier (OSM raceway=finish node 5006070798; FIA 2020 pit lane map).",
+   "proposedFix": "none needed for the grid; a separate timing line would need a new field.",
+   "sources": [
+    "OpenStreetMap contributors (ODbL), Overpass API; raw answers cached in devtests/track-audit/cache/overpass/east-*.json",
+    "fia.com 2020 Portuguese Grand Prix - Race Directors' Event Notes (cache/web/fia-2020-portuguese-gp-event-notes.pdf)"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "Lane 500 m: entry gameS 4488, exit gameS 164.",
+   "real": "F1 entry from the straight at gameS ~4105 (OSM 511859459 start, 383 m earlier), exit at gameS 318 just before T1 (154 m later); ~860 m of lane. Side right and 80 km/h correct.",
+   "proposedFix": "pitEntryLL [37.227374,-8.629111], pitExitLL [37.234861,-8.631817] (new optional fields).",
+   "sources": [
+    "OpenStreetMap contributors (ODbL), Overpass API; raw answers cached in devtests/track-audit/cache/overpass/east-*.json ways 511859459, 157790380",
+    "FIA 2020 Portuguese GP event notes pit lane map"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "major",
+   "game": "Range 24.1 m; steepest fall -7.9 %/100 m (-8.4 %/50 m); T9-T10-T11 dip 4 / 5.9 m (down / up).",
+   "real": "Published max fall 12 % (game ~4 pp less). GLO-30 27.4 m range, fall -10.7 %/50 m, T9-T10-T11 dip 11.2 / 12 m; the descent after T9 is -8.6 %/100 m in GLO-30 vs -3.4 % in the game, the climb to T11 +7.4 % vs +4.2 %, the drop through Sagres (T14) -5.6 % vs -0.6 %. The \"roller-coaster\" crests the circuit is known for are halved.",
+   "proposedFix": "Profile override from GLO-30 (light DTM-style smoothing; stations below) or a GLO-30 source in build-tracks; best: DGT LiDAR MDT 2 m (needs a DGT account). Keep the 18 % slope cap.",
+   "sources": [
+    "Copernicus DEM GLO-30 (c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the EU and ESA; AWS Open Data COG s3://copernicus-dem-30m (cache/glo30/east-<id>.json)",
+    "SRTM 30 m (NASA, 2000) via OpenTopoData srtm30m (devtests/track-fix/cache/otd-srtm30m.json; cache/opentopodata/srtm30m/)",
+    "EU-DEM v1.1 25 m (Copernicus Land Monitoring Service) via OpenTopoData eudem25m (cache/opentopodata/eudem25m/)",
+    "de.wikipedia.org/wiki/Autódromo_Internacional_do_Algarve"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "pit": {
+   "side": -1,
+   "limitKmh": 80,
+   "entryLL": [
+    37.227374,
+    -8.629111
+   ],
+   "exitLL": [
+    37.234861,
+    -8.631817
+   ]
+  },
+  "elevation": {
+   "kind": "profileOverride",
+   "source": "GLO-30 cleaned along OSM (note: a surface model; its climbs reach 8.4 %/50 m vs the published 6.2 % max, so a light extra smoothing of climbs or a lidar source is preferable)",
+   "targetRangeM": 27.4,
+   "stations": {
+    "columns": [
+     "sTrueM",
+     "gameS",
+     "lat",
+     "lon",
+     "hRelM",
+     "gameYM"
+    ],
+    "rows": [
+     [
+      0,
+      0,
+      37.232116,
+      -8.63081,
+      6.7,
+      4.8
+     ],
+     [
+      50,
+      50,
+      37.23255,
+      -8.630969,
+      6.9,
+      3.7
+     ],
+     [
+      100,
+      100,
+      37.232983,
+      -8.631128,
+      5.8,
+      2.9
+     ],
+     [
+      150,
+      150,
+      37.233417,
+      -8.631287,
+      5.1,
+      2.6
+     ],
+     [
+      200,
+      202,
+      37.233851,
+      -8.631447,
+      4.6,
+      2.6
+     ],
+     [
+      250,
+      252,
+      37.234285,
+      -8.631606,
+      2.8,
+      2.6
+     ],
+     [
+      300,
+      302,
+      37.234719,
+      -8.631765,
+      0.3,
+      2.7
+     ],
+     [
+      350,
+      352,
+      37.235154,
+      -8.631922,
+      0.2,
+      2.8
+     ],
+     [
+      400,
+      402,
+      37.235592,
+      -8.632051,
+      1.6,
+      3.4
+     ],
+     [
+      450,
+      452,
+      37.235893,
+      -8.631648,
+      3,
+      4.3
+     ],
+     [
+      500,
+      502,
+      37.236162,
+      -8.631194,
+      3.7,
+      5
+     ],
+     [
+      550,
+      552,
+      37.236424,
+      -8.630735,
+      4.9,
+      5.1
+     ],
+     [
+      600,
+      602,
+      37.236437,
+      -8.630191,
+      5.4,
+      5.3
+     ],
+     [
+      650,
+      652,
+      37.23633,
+      -8.629643,
+      6,
+      5.6
+     ],
+     [
+      700,
+      702,
+      37.236223,
+      -8.629095,
+      6.3,
+      6
+     ],
+     [
+      750,
+      752,
+      37.235895,
+      -8.62895,
+      6.6,
+      6.1
+     ],
+     [
+      800,
+      802,
+      37.235657,
+      -8.629429,
+      7.1,
+      5.9
+     ],
+     [
+      850,
+      854,
+      37.235406,
+      -8.629896,
+      9.7,
+      6.2
+     ],
+     [
+      900,
+      904,
+      37.234994,
+      -8.630082,
+      11.9,
+      7.5
+     ],
+     [
+      950,
+      954,
+      37.234556,
+      -8.629945,
+      13.1,
+      9.6
+     ],
+     [
+      1000,
+      1004,
+      37.234122,
+      -8.629788,
+      13.9,
+      11.1
+     ],
+     [
+      1050,
+      1054,
+      37.233687,
+      -8.62963,
+      14.3,
+      11.2
+     ],
+     [
+      1100,
+      1104,
+      37.233253,
+      -8.629473,
+      14,
+      10.7
+     ],
+     [
+      1150,
+      1154,
+      37.232819,
+      -8.629315,
+      13.9,
+      11.1
+     ],
+     [
+      1200,
+      1204,
+      37.232384,
+      -8.629158,
+      15.9,
+      12.5
+     ],
+     [
+      1250,
+      1256,
+      37.23195,
+      -8.629001,
+      14.8,
+      13.1
+     ],
+     [
+      1300,
+      1306,
+      37.231516,
+      -8.628843,
+      12.4,
+      11.6
+     ],
+     [
+      1350,
+      1356,
+      37.231081,
+      -8.628687,
+      11.2,
+      10
+     ],
+     [
+      1400,
+      1406,
+      37.230645,
+      -8.628535,
+      9.1,
+      9.2
+     ],
+     [
+      1450,
+      1456,
+      37.23029,
+      -8.628261,
+      6.6,
+      9.2
+     ],
+     [
+      1500,
+      1506,
+      37.230636,
+      -8.628012,
+      7.2,
+      10.3
+     ],
+     [
+      1550,
+      1556,
+      37.231086,
+      -8.627956,
+      9.8,
+      12.8
+     ],
+     [
+      1600,
+      1606,
+      37.231536,
+      -8.627898,
+      13.1,
+      15.8
+     ],
+     [
+      1651,
+      1656,
+      37.231985,
+      -8.627838,
+      16.3,
+      18.2
+     ],
+     [
+      1701,
+      1706,
+      37.232434,
+      -8.627875,
+      18.7,
+      19.3
+     ],
+     [
+      1751,
+      1756,
+      37.232854,
+      -8.628083,
+      19.9,
+      19.2
+     ],
+     [
+      1801,
+      1808,
+      37.233253,
+      -8.628348,
+      20.3,
+      18.6
+     ],
+     [
+      1851,
+      1858,
+      37.233653,
+      -8.628613,
+      20,
+      17.7
+     ],
+     [
+      1901,
+      1908,
+      37.234059,
+      -8.628857,
+      19.5,
+      16.8
+     ],
+     [
+      1951,
+      1958,
+      37.234489,
+      -8.628751,
+      18.8,
+      15.7
+     ],
+     [
+      2001,
+      2008,
+      37.234831,
+      -8.628383,
+      18.7,
+      14.6
+     ],
+     [
+      2051,
+      2058,
+      37.235157,
+      -8.627996,
+      19.4,
+      14.3
+     ],
+     [
+      2101,
+      2108,
+      37.235005,
+      -8.627532,
+      22.4,
+      16.4
+     ],
+     [
+      2151,
+      2158,
+      37.234558,
+      -8.627442,
+      25.7,
+      19.8
+     ],
+     [
+      2201,
+      2208,
+      37.234111,
+      -8.627361,
+      26.5,
+      22.2
+     ],
+     [
+      2251,
+      2260,
+      37.233663,
+      -8.627281,
+      24.8,
+      22.6
+     ],
+     [
+      2301,
+      2310,
+      37.233215,
+      -8.6272,
+      20.1,
+      21.5
+     ],
+     [
+      2351,
+      2360,
+      37.232768,
+      -8.627119,
+      16.3,
+      19.8
+     ],
+     [
+      2401,
+      2410,
+      37.232321,
+      -8.627034,
+      15.3,
+      18.1
+     ],
+     [
+      2451,
+      2460,
+      37.231923,
+      -8.626779,
+      16.5,
+      17.4
+     ],
+     [
+      2501,
+      2510,
+      37.231657,
+      -8.626327,
+      19.1,
+      18.1
+     ],
+     [
+      2551,
+      2560,
+      37.231454,
+      -8.625823,
+      23.1,
+      20
+     ],
+     [
+      2601,
+      2612,
+      37.23125,
+      -8.625319,
+      26.4,
+      22.2
+     ],
+     [
+      2651,
+      2662,
+      37.231031,
+      -8.624827,
+      27.4,
+      23.7
+     ],
+     [
+      2701,
+      2712,
+      37.230676,
+      -8.624489,
+      27.1,
+      23.9
+     ],
+     [
+      2751,
+      2762,
+      37.230239,
+      -8.624396,
+      26.7,
+      22.4
+     ],
+     [
+      2801,
+      2812,
+      37.230022,
+      -8.624866,
+      24.3,
+      18.5
+     ],
+     [
+      2851,
+      2862,
+      37.229892,
+      -8.625407,
+      19.1,
+      14.5
+     ],
+     [
+      2901,
+      2912,
+      37.229763,
+      -8.625947,
+      14.6,
+      11.8
+     ],
+     [
+      2951,
+      2962,
+      37.229587,
+      -8.626463,
+      13.3,
+      10.7
+     ],
+     [
+      3001,
+      3012,
+      37.229245,
+      -8.62682,
+      14.2,
+      10.9
+     ],
+     [
+      3051,
+      3062,
+      37.228807,
+      -8.626953,
+      16.4,
+      12
+     ],
+     [
+      3101,
+      3112,
+      37.228359,
+      -8.627035,
+      19.1,
+      13.7
+     ],
+     [
+      3151,
+      3164,
+      37.227912,
+      -8.627113,
+      21.3,
+      15.7
+     ],
+     [
+      3201,
+      3214,
+      37.227591,
+      -8.626807,
+      23.1,
+      17.5
+     ],
+     [
+      3251,
+      3264,
+      37.227837,
+      -8.626364,
+      24.2,
+      18.8
+     ],
+     [
+      3301,
+      3314,
+      37.228184,
+      -8.626003,
+      24.3,
+      19.5
+     ],
+     [
+      3351,
+      3364,
+      37.228534,
+      -8.625645,
+      23.6,
+      19.6
+     ],
+     [
+      3401,
+      3416,
+      37.228774,
+      -8.625192,
+      21.9,
+      19.5
+     ],
+     [
+      3451,
+      3466,
+      37.228555,
+      -8.624727,
+      19,
+      19.3
+     ],
+     [
+      3501,
+      3516,
+      37.22813,
+      -8.624565,
+      16.3,
+      19
+     ],
+     [
+      3551,
+      3566,
+      37.22771,
+      -8.624747,
+      14.7,
+      18.9
+     ],
+     [
+      3601,
+      3616,
+      37.227358,
+      -8.6251,
+      13.8,
+      18.9
+     ],
+     [
+      3651,
+      3666,
+      37.227009,
+      -8.62546,
+      13.4,
+      18
+     ],
+     [
+      3701,
+      3716,
+      37.226664,
+      -8.625824,
+      13.3,
+      15.7
+     ],
+     [
+      3751,
+      3768,
+      37.226354,
+      -8.626233,
+      12.5,
+      12.4
+     ],
+     [
+      3801,
+      3818,
+      37.226151,
+      -8.626734,
+      11.5,
+      9
+     ],
+     [
+      3851,
+      3868,
+      37.226084,
+      -8.627289,
+      8.4,
+      5.5
+     ],
+     [
+      3901,
+      3918,
+      37.226154,
+      -8.627843,
+      4,
+      2.5
+     ],
+     [
+      3951,
+      3970,
+      37.226352,
+      -8.628349,
+      1.2,
+      0.5
+     ],
+     [
+      4001,
+      4020,
+      37.226672,
+      -8.628745,
+      0.4,
+      0
+     ],
+     [
+      4051,
+      4070,
+      37.227073,
+      -8.628999,
+      0,
+      0.4
+     ],
+     [
+      4101,
+      4120,
+      37.227507,
+      -8.629159,
+      0.4,
+      1.3
+     ],
+     [
+      4151,
+      4170,
+      37.227942,
+      -8.629314,
+      1.4,
+      2.4
+     ],
+     [
+      4201,
+      4220,
+      37.228377,
+      -8.62947,
+      3.3,
+      3.1
+     ],
+     [
+      4251,
+      4270,
+      37.228812,
+      -8.629625,
+      4.9,
+      3.8
+     ],
+     [
+      4301,
+      4320,
+      37.229246,
+      -8.629781,
+      5.8,
+      4.4
+     ],
+     [
+      4351,
+      4372,
+      37.229681,
+      -8.629936,
+      6.9,
+      4.6
+     ],
+     [
+      4401,
+      4422,
+      37.230116,
+      -8.630092,
+      6.4,
+      4.3
+     ],
+     [
+      4451,
+      4472,
+      37.230551,
+      -8.630248,
+      6.3,
+      4.3
+     ],
+     [
+      4501,
+      4522,
+      37.230985,
+      -8.630404,
+      6.4,
+      4.9
+     ],
+     [
+      4551,
+      4572,
+      37.23142,
+      -8.63056,
+      6.6,
+      5.5
+     ],
+     [
+      4601,
+      4622,
+      37.231855,
+      -8.630716,
+      6.4,
+      5.4
+     ]
+    ]
+   }
+  }
+ },
+ "profile50": {
+  "along": "OSM loop, s true metres from the game start",
+  "columns": [
+   "s",
+   "lat",
+   "lon",
+   "game",
+   "glo30",
+   "glo30floor",
+   "eudem25m"
+  ],
+  "rows": [
+   [
+    0,
+    37.232116,
+    -8.63081,
+    4.8,
+    102,
+    101,
+    97.8
+   ],
+   [
+    50,
+    37.23255,
+    -8.630969,
+    3.7,
+    102.2,
+    101.1,
+    97.5
+   ],
+   [
+    100,
+    37.232983,
+    -8.631128,
+    2.9,
+    101,
+    100.5,
+    97.3
+   ],
+   [
+    150,
+    37.233417,
+    -8.631287,
+    2.6,
+    100.4,
+    100,
+    97.1
+   ],
+   [
+    200,
+    37.233851,
+    -8.631447,
+    2.6,
+    99.9,
+    98.7,
+    96.8
+   ],
+   [
+    250,
+    37.234285,
+    -8.631606,
+    2.6,
+    98.1,
+    95.9,
+    96.2
+   ],
+   [
+    300,
+    37.234719,
+    -8.631765,
+    2.7,
+    95.6,
+    95.1,
+    96.4
+   ],
+   [
+    350,
+    37.235154,
+    -8.631922,
+    2.8,
+    95.5,
+    95,
+    97.5
+   ],
+   [
+    400,
+    37.235592,
+    -8.632051,
+    3.4,
+    96.9,
+    95.7,
+    99.6
+   ],
+   [
+    450,
+    37.235893,
+    -8.631648,
+    4.3,
+    98.3,
+    97.1,
+    102.7
+   ],
+   [
+    500,
+    37.236162,
+    -8.631194,
+    5,
+    99,
+    98.4,
+    103.4
+   ],
+   [
+    550,
+    37.236424,
+    -8.630735,
+    5.1,
+    100.2,
+    99.1,
+    102.5
+   ],
+   [
+    600,
+    37.236437,
+    -8.630191,
+    5.3,
+    100.7,
+    100.3,
+    102
+   ],
+   [
+    650,
+    37.23633,
+    -8.629643,
+    5.6,
+    101.2,
+    100.8,
+    103
+   ],
+   [
+    700,
+    37.236223,
+    -8.629095,
+    6,
+    101.6,
+    101.3,
+    104.2
+   ],
+   [
+    750,
+    37.235895,
+    -8.62895,
+    6.1,
+    101.9,
+    101.6,
+    103.7
+   ],
+   [
+    800,
+    37.235657,
+    -8.629429,
+    5.9,
+    102.4,
+    101.7,
+    101.8
+   ],
+   [
+    850,
+    37.235406,
+    -8.629896,
+    6.2,
+    105,
+    102.9,
+    100.8
+   ],
+   [
+    900,
+    37.234994,
+    -8.630082,
+    7.5,
+    107.2,
+    105.5,
+    102.3
+   ],
+   [
+    950,
+    37.234556,
+    -8.629945,
+    9.6,
+    108.4,
+    107.5,
+    105.5
+   ],
+   [
+    1000,
+    37.234122,
+    -8.629788,
+    11.1,
+    109.2,
+    108.6,
+    107.8
+   ],
+   [
+    1050,
+    37.233687,
+    -8.62963,
+    11.2,
+    109.6,
+    109.2,
+    108.6
+   ],
+   [
+    1100,
+    37.233253,
+    -8.629473,
+    10.7,
+    109.3,
+    108.9,
+    109.5
+   ],
+   [
+    1150,
+    37.232819,
+    -8.629315,
+    11.1,
+    109.2,
+    108.7,
+    111.9
+   ],
+   [
+    1200,
+    37.232384,
+    -8.629158,
+    12.5,
+    111.2,
+    108.9,
+    114.6
+   ],
+   [
+    1250,
+    37.23195,
+    -8.629001,
+    13.1,
+    110.1,
+    108,
+    115.1
+   ],
+   [
+    1300,
+    37.231516,
+    -8.628843,
+    11.6,
+    107.7,
+    106.6,
+    113.1
+   ],
+   [
+    1350,
+    37.231081,
+    -8.628687,
+    10,
+    106.5,
+    105.1,
+    109.8
+   ],
+   [
+    1400,
+    37.230645,
+    -8.628535,
+    9.2,
+    104.4,
+    101.8,
+    106.1
+   ],
+   [
+    1450,
+    37.23029,
+    -8.628261,
+    9.2,
+    101.9,
+    101.1,
+    104.1
+   ],
+   [
+    1500,
+    37.230636,
+    -8.628012,
+    10.3,
+    102.5,
+    101.5,
+    104.9
+   ],
+   [
+    1550,
+    37.231086,
+    -8.627956,
+    12.8,
+    105.1,
+    102.9,
+    108.6
+   ],
+   [
+    1600,
+    37.231536,
+    -8.627898,
+    15.8,
+    108.4,
+    105.8,
+    113.1
+   ],
+   [
+    1651,
+    37.231985,
+    -8.627838,
+    18.2,
+    111.5,
+    109,
+    116.5
+   ],
+   [
+    1701,
+    37.232434,
+    -8.627875,
+    19.3,
+    114,
+    112.2,
+    116.9
+   ],
+   [
+    1751,
+    37.232854,
+    -8.628083,
+    19.2,
+    115.2,
+    114.3,
+    116.4
+   ],
+   [
+    1801,
+    37.233253,
+    -8.628348,
+    18.6,
+    115.6,
+    115.2,
+    116.6
+   ],
+   [
+    1851,
+    37.233653,
+    -8.628613,
+    17.7,
+    115.3,
+    114.9,
+    116.2
+   ],
+   [
+    1901,
+    37.234059,
+    -8.628857,
+    16.8,
+    114.7,
+    114.2,
+    114.6
+   ],
+   [
+    1951,
+    37.234489,
+    -8.628751,
+    15.7,
+    114.1,
+    114,
+    113.4
+   ],
+   [
+    2001,
+    37.234831,
+    -8.628383,
+    14.6,
+    114,
+    113.9,
+    111.8
+   ],
+   [
+    2051,
+    37.235157,
+    -8.627996,
+    14.3,
+    114.7,
+    114,
+    110.3
+   ],
+   [
+    2101,
+    37.235005,
+    -8.627532,
+    16.4,
+    117.7,
+    115.1,
+    112.5
+   ],
+   [
+    2151,
+    37.234558,
+    -8.627442,
+    19.8,
+    121,
+    118.5,
+    116.8
+   ],
+   [
+    2201,
+    37.234111,
+    -8.627361,
+    22.2,
+    121.8,
+    120.3,
+    119.8
+   ],
+   [
+    2251,
+    37.233663,
+    -8.627281,
+    22.6,
+    120.1,
+    116.4,
+    119
+   ],
+   [
+    2301,
+    37.233215,
+    -8.6272,
+    21.5,
+    115.4,
+    112.1,
+    117
+   ],
+   [
+    2351,
+    37.232768,
+    -8.627119,
+    19.8,
+    111.6,
+    110.4,
+    115.8
+   ],
+   [
+    2401,
+    37.232321,
+    -8.627034,
+    18.1,
+    110.5,
+    110.3,
+    114
+   ],
+   [
+    2451,
+    37.231923,
+    -8.626779,
+    17.4,
+    111.8,
+    110.6,
+    112.1
+   ],
+   [
+    2501,
+    37.231657,
+    -8.626327,
+    18.1,
+    114.4,
+    112.3,
+    113.5
+   ],
+   [
+    2551,
+    37.231454,
+    -8.625823,
+    20,
+    118.4,
+    115.1,
+    117.7
+   ],
+   [
+    2601,
+    37.23125,
+    -8.625319,
+    22.2,
+    121.7,
+    119.3,
+    121.1
+   ],
+   [
+    2651,
+    37.231031,
+    -8.624827,
+    23.7,
+    122.7,
+    121.9,
+    123.9
+   ],
+   [
+    2701,
+    37.230676,
+    -8.624489,
+    23.9,
+    122.4,
+    122.1,
+    125.6
+   ],
+   [
+    2751,
+    37.230239,
+    -8.624396,
+    22.4,
+    122,
+    120.3,
+    124.5
+   ],
+   [
+    2801,
+    37.230022,
+    -8.624866,
+    18.5,
+    119.5,
+    115.5,
+    119.9
+   ],
+   [
+    2851,
+    37.229892,
+    -8.625407,
+    14.5,
+    114.4,
+    110.6,
+    114.6
+   ],
+   [
+    2901,
+    37.229763,
+    -8.625947,
+    11.8,
+    109.9,
+    108.6,
+    110.9
+   ],
+   [
+    2951,
+    37.229587,
+    -8.626463,
+    10.7,
+    108.6,
+    107.9,
+    109.7
+   ],
+   [
+    3001,
+    37.229245,
+    -8.62682,
+    10.9,
+    109.5,
+    108.1,
+    111.7
+   ],
+   [
+    3051,
+    37.228807,
+    -8.626953,
+    12,
+    111.7,
+    109.8,
+    114.5
+   ],
+   [
+    3101,
+    37.228359,
+    -8.627035,
+    13.7,
+    114.4,
+    112.3,
+    114.4
+   ],
+   [
+    3151,
+    37.227912,
+    -8.627113,
+    15.7,
+    116.6,
+    114.9,
+    112.1
+   ],
+   [
+    3201,
+    37.227591,
+    -8.626807,
+    17.5,
+    118.4,
+    117,
+    113.4
+   ],
+   [
+    3251,
+    37.227837,
+    -8.626364,
+    18.8,
+    119.5,
+    118.7,
+    119
+   ],
+   [
+    3301,
+    37.228184,
+    -8.626003,
+    19.5,
+    119.6,
+    119,
+    119.6
+   ],
+   [
+    3351,
+    37.228534,
+    -8.625645,
+    19.6,
+    118.9,
+    117.6,
+    118.1
+   ],
+   [
+    3401,
+    37.228774,
+    -8.625192,
+    19.5,
+    117.2,
+    114.9,
+    116.8
+   ],
+   [
+    3451,
+    37.228555,
+    -8.624727,
+    19.3,
+    114.3,
+    112,
+    114.9
+   ],
+   [
+    3501,
+    37.22813,
+    -8.624565,
+    19,
+    111.6,
+    110.2,
+    112.7
+   ],
+   [
+    3551,
+    37.22771,
+    -8.624747,
+    18.9,
+    110,
+    109.2,
+    112
+   ],
+   [
+    3601,
+    37.227358,
+    -8.6251,
+    18.9,
+    109.1,
+    108.5,
+    111.8
+   ],
+   [
+    3651,
+    37.227009,
+    -8.62546,
+    18,
+    108.7,
+    108.3,
+    111.1
+   ],
+   [
+    3701,
+    37.226664,
+    -8.625824,
+    15.7,
+    108.6,
+    107.6,
+    110.3
+   ],
+   [
+    3751,
+    37.226354,
+    -8.626233,
+    12.4,
+    107.8,
+    106.9,
+    110.3
+   ],
+   [
+    3801,
+    37.226151,
+    -8.626734,
+    9,
+    106.7,
+    104.4,
+    108.5
+   ],
+   [
+    3851,
+    37.226084,
+    -8.627289,
+    5.5,
+    103.6,
+    100.2,
+    104.2
+   ],
+   [
+    3901,
+    37.226154,
+    -8.627843,
+    2.5,
+    99.3,
+    96.9,
+    100.6
+   ],
+   [
+    3951,
+    37.226352,
+    -8.628349,
+    0.5,
+    96.5,
+    95.8,
+    97.3
+   ],
+   [
+    4001,
+    37.226672,
+    -8.628745,
+    0,
+    95.7,
+    95.2,
+    94.8
+   ],
+   [
+    4051,
+    37.227073,
+    -8.628999,
+    0.4,
+    95.3,
+    95.1,
+    94.4
+   ],
+   [
+    4101,
+    37.227507,
+    -8.629159,
+    1.3,
+    95.6,
+    95.3,
+    95.8
+   ],
+   [
+    4151,
+    37.227942,
+    -8.629314,
+    2.4,
+    96.6,
+    95.7,
+    97.5
+   ],
+   [
+    4201,
+    37.228377,
+    -8.62947,
+    3.1,
+    98.6,
+    97,
+    98.6
+   ],
+   [
+    4251,
+    37.228812,
+    -8.629625,
+    3.8,
+    100.2,
+    99,
+    99.2
+   ],
+   [
+    4301,
+    37.229246,
+    -8.629781,
+    4.4,
+    101.1,
+    100.3,
+    99.9
+   ],
+   [
+    4351,
+    37.229681,
+    -8.629936,
+    4.6,
+    102.2,
+    101.2,
+    101.6
+   ],
+   [
+    4401,
+    37.230116,
+    -8.630092,
+    4.3,
+    101.7,
+    101.5,
+    102.8
+   ],
+   [
+    4451,
+    37.230551,
+    -8.630248,
+    4.3,
+    101.6,
+    101.4,
+    103.3
+   ],
+   [
+    4501,
+    37.230985,
+    -8.630404,
+    4.9,
+    101.7,
+    101.5,
+    103.2
+   ],
+   [
+    4551,
+    37.23142,
+    -8.63056,
+    5.5,
+    101.9,
+    101.4,
+    100.6
+   ],
+   [
+    4601,
+    37.231855,
+    -8.630716,
+    5.4,
+    101.7,
+    101,
+    98.1
+   ]
+  ]
+ }
+}

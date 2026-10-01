@@ -1,0 +1,476 @@
+{
+ "id": "fr-1969",
+ "name": "Circuit Paul Ricard",
+ "audited": "2026-10-01",
+ "verdict": "minor issues",
+ "layoutNote": "F1 layout 1C-V2 with the Mistral chicane (5.842 km), French GP 2018, 2019, 2021, 2022.",
+ "measurements": {
+  "layout": {
+   "osmRelation": "13545643 + way 229454180 (Chicane Nord) = 1C-V2",
+   "osmLength": 5846.3,
+   "gameBuiltLength": 5838.7,
+   "gameLengthKm": 5.842,
+   "gameToOsm": {
+    "meanM": 1.72,
+    "p50M": 1.29,
+    "p95M": 3.62,
+    "maxM": 35.8,
+    "maxAtGameS": 2768,
+    "runsOver8m": [
+     {
+      "fromS": 2724,
+      "toS": 2810,
+      "maxM": 35.8
+     }
+    ]
+   },
+   "osmToGame": {
+    "meanM": 1.86,
+    "p95M": 3.89,
+    "maxM": 35.8,
+    "runsOver8mOsmS": [
+     {
+      "fromS": 2712,
+      "toS": 2824,
+      "maxM": 35.8
+     }
+    ]
+   },
+   "reference": "OSM relation 13545643 \"Grand Prix automobile de France\" is the 1A-V2 (no chicane) loop: 5764.5 m vs 5.770 km published; with OSM way 229454180 \"Chicane Nord\" spliced in: 5846.3 m vs 5.842 km published",
+   "withoutChicane": {
+    "gameToOsmMaxM": 72,
+    "at": [
+     {
+      "fromS": 2830,
+      "toS": 3100,
+      "maxM": 72
+     }
+    ]
+   }
+  },
+  "datasetGeodesicLengthM": 5818,
+  "buildScale": 1.00551,
+  "direction": "clockwise; all oneway members of relation 13545643 (6511 m) run with the game direction (REVERSED_IN_DATASET is right)",
+  "start": {
+   "game": [
+    43.2520204,
+    5.7915716
+   ],
+   "osmNode": 2255501646,
+   "osmNodeLatLon": [
+    43.251187,
+    5.7930593
+   ],
+   "osmNodeGameS": 5687,
+   "note": "the OSM raceway=start-finish node lies 152 m before the game line, mid main grandstand; not verified against an FIA map"
+  },
+  "pit": {
+   "game": {
+    "side": "right (-1)",
+    "limitKmh": 80,
+    "entryS": 5674.7,
+    "exitS": 164,
+    "laneLengthM": 500
+   },
+   "osm": {
+    "way": 799477739,
+    "note": "tagged \"Modified for the 2019 F1 Grand Prix.\"",
+    "side": "right",
+    "entryS": 5211,
+    "entryLatLon": [
+     43.2506981,
+     5.7968856
+    ],
+    "exitMergeS": 340,
+    "exitMergeLatLon": [
+     43.25385,
+     5.788233
+    ]
+   }
+  },
+  "elevation": {
+   "source": "IGN RGE ALTI 1-5 m bare-earth DEM via https://data.geopf.fr/altimetrie (resource ign_rge_alti_wld), sampled every 5 m on the OSM centreline; cache devtests/track-audit/cache/ignalti/",
+   "osmLine": {
+    "id": "fr-1969-1cv2",
+    "source": "ignalti",
+    "step": 5.001,
+    "samples": 1169,
+    "osmLength": 5846.3,
+    "covered": [],
+    "rawMinASL": 412.1,
+    "rawMaxASL": 442,
+    "realRange": 29.7,
+    "realMinAtOsmS": 1560,
+    "realMaxAtOsmS": 3796,
+    "realMinAtGameS": 1560,
+    "realMaxAtGameS": 3765,
+    "gameRange": 29.7,
+    "gameRangeOnOsm": 29.7,
+    "residualRms": 0.4,
+    "residualMax": -3.4,
+    "residualMaxAtGameS": 5495,
+    "real": {
+     "g20": {
+      "win": 20,
+      "maxClimb": {
+       "pct": 17.2,
+       "fromS": 5531,
+       "toS": 5551,
+       "at": [
+        43.25029125253187,
+        5.79465370020594
+       ],
+       "rise": 3.4
+      },
+      "maxDescent": {
+       "pct": -17.6,
+       "fromS": 5501,
+       "toS": 5521,
+       "at": [
+        43.25012643258184,
+        5.79494707414406
+       ],
+       "rise": -3.5
+      }
+     },
+     "g50": {
+      "win": 50,
+      "maxClimb": {
+       "pct": 8.8,
+       "fromS": 5526,
+       "toS": 5576,
+       "at": [
+        43.2502637825402,
+        5.794702595862294
+       ],
+       "rise": 4.4
+      },
+      "maxDescent": {
+       "pct": -9.8,
+       "fromS": 5476,
+       "toS": 5526,
+       "at": [
+        43.24998940386661,
+        5.795191886874288
+       ],
+       "rise": -4.9
+      }
+     },
+     "g100": {
+      "win": 100,
+      "maxClimb": {
+       "pct": 4.5,
+       "fromS": 5526,
+       "toS": 5626,
+       "at": [
+        43.2502637825402,
+        5.794702595862294
+       ],
+       "rise": 4.5
+      },
+      "maxDescent": {
+       "pct": -5.5,
+       "fromS": 5426,
+       "toS": 5526,
+       "at": [
+        43.24972061956528,
+        5.795687002226144
+       ],
+       "rise": -5.5
+      }
+     },
+     "runs100_4pct": [
+      {
+       "fromS": 4096,
+       "toS": 4251,
+       "peakPct": -4.2
+      },
+      {
+       "fromS": 5416,
+       "toS": 5536,
+       "peakPct": -5.5
+      },
+      {
+       "fromS": 5521,
+       "toS": 5631,
+       "peakPct": 4.5
+      }
+     ]
+    },
+    "gameOnOsm": {
+     "g50": {
+      "win": 50,
+      "maxClimb": {
+       "pct": 3.6,
+       "fromS": 4596,
+       "toS": 4646,
+       "at": [
+        43.24922387069602,
+        5.802696471350001
+       ],
+       "rise": 1.8
+      },
+      "maxDescent": {
+       "pct": -4.5,
+       "fromS": 4166,
+       "toS": 4216,
+       "at": [
+        43.247457992704625,
+        5.803522011462036
+       ],
+       "rise": -2.3
+      }
+     },
+     "g100": {
+      "win": 100,
+      "maxClimb": {
+       "pct": 3.5,
+       "fromS": 4446,
+       "toS": 4546,
+       "at": [
+        43.248125287053725,
+        5.801623940481508
+       ],
+       "rise": 3.5
+      },
+      "maxDescent": {
+       "pct": -4.2,
+       "fromS": 4146,
+       "toS": 4246,
+       "at": [
+        43.24761790739985,
+        5.80363435470269
+       ],
+       "rise": -4.2
+      }
+     }
+    },
+    "gradeDiffRuns100": [
+     {
+      "fromGameS": 5385,
+      "toGameS": 5500,
+      "worstGamePct": -2.4,
+      "worstRealPct": -5.5,
+      "at": [
+       43.249721,
+       5.795687
+      ]
+     },
+     {
+      "fromGameS": 5480,
+      "toGameS": 5600,
+      "worstGamePct": 1.1,
+      "worstRealPct": 4.5,
+      "at": [
+       43.250264,
+       5.794703
+      ]
+     }
+    ]
+   },
+   "game": {
+    "range": 29.69,
+    "g50": {
+     "win": 50,
+     "maxClimb": {
+      "pct": 3.5,
+      "fromS": 4429,
+      "toS": 4479,
+      "at": [
+       43.2480738,
+       5.8016231
+      ],
+      "rise": 1.8
+     },
+     "maxDescent": {
+      "pct": -4.4,
+      "fromS": 4138,
+      "toS": 4189,
+      "at": [
+       43.2475809,
+       5.8036364
+      ],
+      "rise": -2.2
+     }
+    },
+    "g100": {
+     "win": 100,
+     "maxClimb": {
+      "pct": 3.5,
+      "fromS": 4417,
+      "toS": 4517,
+      "at": [
+       43.2479778,
+       5.8015556
+      ],
+      "rise": 3.5
+     },
+     "maxDescent": {
+      "pct": -4.1,
+      "fromS": 4114,
+      "toS": 4215,
+      "at": [
+       43.2477878,
+       5.8037156
+      ],
+      "rise": -4.1
+     }
+    }
+   },
+   "underpass": "the track crosses over service tunnels (OSM ways 284183359 / 284183360, layer -1) at game s ~5490-5520: the DTM has the deck removed (raw 421.3 m vs 426.8 m around, a 5.5 m notch); the game keeps a 1.9 m dip (min 424.95 at s 5535) with -2.4 % / +1.1 % grades where the road is level"
+  },
+  "banking": {
+   "gameMaxAbsDeg": 5.88,
+   "gameSectionsOver3deg": 19,
+   "real": "no banking published; \"very flat\" plateau circuit"
+  },
+  "covered": [
+   {
+    "name": "Passerelle Sud (footbridge)",
+    "osmWay": 242947741,
+    "gameS": 143
+   },
+   {
+    "name": "Passerelle Pinede (footbridge)",
+    "osmWay": 1107731474,
+    "gameS": 284
+   },
+   {
+    "name": "Passerelle Nord (footbridge)",
+    "osmWay": 686698872,
+    "gameS": 2639
+   },
+   {
+    "name": "service underpass below the track",
+    "osmWays": [
+     284183359,
+     284183360
+    ],
+    "gameS": [
+     5491,
+     5523
+    ]
+   }
+  ]
+ },
+ "findings": [
+  {
+   "aspect": "layout",
+   "game": "Mistral chicane: the game stays on the straight until s 2810 and then turns left (R 21 m) and right (R 24 m).",
+   "real": "OSM \"Chicane Nord\" (way 229454180) leaves the Mistral 110 m earlier with a right-hand bulge 36 m off the straight (s 2702-2818) before the same left-right; with it the OSM loop is 5846 m = the published 5.842 km, while the dataset line is 5818 m and the build stretches the whole circuit by 0.55 % to reach 5.842.",
+   "severity": "minor",
+   "proposedFix": "Replace the dataset points between [43.254156, 5.791693] (game s 2700) and [43.253813, 5.792959] (s 2810) with OSM way 229454180's first part; then the length rescale drops to ~1.000.",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01): relation 13545643, way 229454180",
+    "https://en.wikipedia.org/wiki/Circuit_Paul_Ricard (fetched 2026-10-01: layout 1C-V2 with Mistral chicane 5.842 km; 1A-V2 without 5.770 km; \"In 2019 the pitlane entry was moved ... now situated between the final two corners (turns 14 and 15)\"; \"very flat\")"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "game": "Entry line on the main straight (s 5675, 164 m before the line), exit s 164; right side; 80 km/h.",
+   "real": "Since 2019 the pit entry is \"between the final two corners (turns 14 and 15)\" (Wikipedia); OSM way 799477739 (\"Modified for the 2019 F1 Grand Prix\") leaves the track at s 5211 ([43.2506981, 5.7968856]) and rejoins at s 340 ([43.25385, 5.788233]). Right side and 80 km/h are correct.",
+   "severity": "minor",
+   "proposedFix": "Optional pitEntry / pitExit points; keep side -1, 80.",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01): way 799477739",
+    "https://en.wikipedia.org/wiki/Circuit_Paul_Ricard (fetched 2026-10-01: layout 1C-V2 with Mistral chicane 5.842 km; 1A-V2 without 5.770 km; \"In 2019 the pitlane entry was moved ... now situated between the final two corners (turns 14 and 15)\"; \"very flat\")",
+    "Autosport, 2 May 2025, \"FIA to raise pit lane speed limit at select F1 grands prix\": standard limit 80 km/h; 60 km/h only at Melbourne, Monaco, Zandvoort and Singapore (https://www.autosport.com/f1/news/fia-to-raise-pit-lane-speed-limit-at-select-f1-grands-prix/10718694/)"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "game": "A 1.9 m dip with -2.4 % / +1.1 % grades at s 5470-5600 (Virage du Pont).",
+   "real": "The road is level there (426.8-427 m ASL); the dip comes from the DTM notch where the track bridges a service underpass (OSM ways 284183359 / 284183360, layer -1).",
+   "severity": "minor",
+   "proposedFix": "COVERED[\"fr-1969\"] = [{ name: \"bridge over the service underpass (Virage du Pont)\", from: [43.2500184, 5.7951677], to: [43.2503472, 5.7945838], pad: 10 }]",
+   "sources": [
+    "IGN RGE ALTI 1-5 m bare-earth DEM via https://data.geopf.fr/altimetrie (resource ign_rge_alti_wld), sampled every 5 m on the OSM centreline; cache devtests/track-audit/cache/ignalti/",
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01): ways 284183359, 284183360"
+   ]
+  },
+  {
+   "aspect": "start",
+   "game": "Start / finish at the dataset's first vertex [43.2520204, 5.7915716].",
+   "real": "OSM node 2255501646 raceway=start-finish is at [43.251187, 5.7930593], 152 m earlier (game s 5687). Not confirmed by an FIA document.",
+   "severity": "minor",
+   "proposedFix": "Check against the FIA event map before moving; if confirmed START_AT[\"fr-1969\"] = [43.251187, 5.7930593].",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01): node 2255501646"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "game": "Derived banking up to 5.88 deg (e.g. Virage du Pont 5.9, Virage du Camp 5.8 deg).",
+   "real": "No banking published (\"very flat\").",
+   "severity": "minor",
+   "proposedFix": "Global cap 2-3 deg for unbanked circuits.",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Circuit_Paul_Ricard (fetched 2026-10-01: layout 1C-V2 with Mistral chicane 5.842 km; 1A-V2 without 5.770 km; \"In 2019 the pitlane entry was moved ... now situated between the final two corners (turns 14 and 15)\"; \"very flat\")"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "game": "No footbridges.",
+   "real": "Three footbridges cross over the track: Passerelle Sud (s 143), Passerelle Pinede (s 284), Passerelle Nord (s 2639) (OSM ways 242947741, 1107731474, 686698872).",
+   "severity": "cosmetic",
+   "proposedFix": "Optional gantry-like footbridges.",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01)"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "covered": [
+   {
+    "name": "bridge over the service underpass (Virage du Pont)",
+    "from": [
+     43.2500184,
+     5.7951677
+    ],
+    "to": [
+     43.2503472,
+     5.7945838
+    ],
+    "pad": 10
+   }
+  ],
+  "layout": {
+   "replaceBetween": [
+    [
+     43.254156,
+     5.791693
+    ],
+    [
+     43.253813,
+     5.792959
+    ]
+   ],
+   "withOsmWay": 229454180,
+   "note": "Mistral chicane entry bulge"
+  },
+  "startAt": {
+   "candidate": [
+    43.251187,
+    5.7930593
+   ],
+   "status": "unverified (OSM only)"
+  },
+  "pitFacts": {
+   "side": -1,
+   "limitKmh": 80,
+   "realEntry": [
+    43.2506981,
+    5.7968856
+   ],
+   "realExitMerge": [
+    43.25385,
+    5.788233
+   ]
+  },
+  "banking": {
+   "bankMaxDeg": 3
+  }
+ },
+ "method": "devtests/track-audit/west/: dump-game.js (game build), ovp.mjs / osm-fetch2.mjs (Overpass), osm-loop.mjs + pr-chicane-loop.mjs (OSM reference loops), layout.mjs, profile.mjs (DEM on the OSM line vs game), raw-vs-game.mjs, crossings.mjs, way-on-track.mjs, direction.mjs, corners.mjs, madring-bank.mjs; results in west/res/",
+ "globalNote": "tools/build-tracks.mjs projects with kz = 110540 m/deg and kx = 111320 cos(lat) m/deg: at these latitudes north-south distances come out 0.31-0.39 % shorter than east-west ones before the official-length rescale (WGS84: 111044-111168 m/deg of latitude). Cosmetic (<= 4 m per km)."
+}

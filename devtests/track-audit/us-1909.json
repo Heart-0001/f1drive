@@ -1,0 +1,5882 @@
+{
+ "id": "us-1909",
+ "name": "Indianapolis Motor Speedway",
+ "audited": "2026-10-01",
+ "auditor": "devtests/track-audit/americas (audit.mjs + report.mjs)",
+ "verdict": "minor issues",
+ "summary": "the 2000-2007 F1 road course, length, direction, elevation and the 9.2 deg oval banking all check out",
+ "layout": {
+  "gameLayout": "Grand Prix Road Course 2000-2007 (13 turns, clockwise), the F1 United States GP layout of 2000-2007; not raced by F1 in 2010-2026",
+  "officialLengthKm": 4.192,
+  "sources": [
+   "https://en.wikipedia.org/wiki/Indianapolis_Motor_Speedway (infobox layout7: Grand Prix Road Course 2000-2007, 4.192 km, 13 turns)",
+   "OpenStreetMap (ODbL) via Overpass API (maps.mail.ru mirror), cached in devtests/track-audit/cache/overpass/"
+  ],
+  "note": "the line stays within 2.8 m of OSM raceway ways everywhere (incl. OSM way 588780310 \"IMS Grand Prix Circuit\"), i.e. the 2000-2007 course is still paved; the OSM ways not followed are the oval's other turns, the 2008+ / 2014+ road-course variants, pit roads",
+  "gameBuiltLengthM": 4191.4,
+  "lengthDiffPct": -0.01,
+  "osmCenterlineDeviationM": {
+   "mean": 0.3,
+   "median": 0.2,
+   "p95": 1.1,
+   "max": 2.8,
+   "maxAt": {
+    "s": 3331,
+    "at": [
+     39.788168,
+     -86.23427
+    ],
+    "way": "588780271 IMS Road Course"
+   }
+  },
+  "offStretchesOver12m": [],
+  "osmRacewayWaysNotFollowed": [
+   {
+    "way": 588780271,
+    "name": "IMS Road Course",
+    "lengthM": 2392,
+    "offM": 511,
+    "maxDev": 163,
+    "at": [
+     39.789594,
+     -86.235645
+    ]
+   },
+   {
+    "way": 588780277,
+    "name": "IMS Road Course Corner 1 Escape Road",
+    "lengthM": 122,
+    "offM": 89,
+    "maxDev": 84.3,
+    "at": [
+     39.800047,
+     -86.238687
+    ]
+   },
+   {
+    "way": 588780290,
+    "name": "IMS Road Course = Alternate Corner 2",
+    "lengthM": 54,
+    "offM": 24,
+    "maxDev": 34.8,
+    "at": [
+     39.79985,
+     -86.238099
+    ]
+   },
+   {
+    "way": 588780307,
+    "name": "IMS Road Course - Corner 6",
+    "lengthM": 63,
+    "offM": 63,
+    "maxDev": 69.1,
+    "at": [
+     39.798925,
+     -86.235011
+    ]
+   },
+   {
+    "way": 588780332,
+    "name": "Indianapolis Motor Speedway - Backstretch",
+    "lengthM": 159,
+    "offM": 159,
+    "maxDev": 427.2,
+    "at": [
+     39.799235,
+     -86.230477
+    ]
+   },
+   {
+    "way": 588780334,
+    "name": "Indianapolis Motor Speedway - Turn 2",
+    "lengthM": 407,
+    "offM": 324,
+    "maxDev": 62.1,
+    "at": [
+     39.790072,
+     -86.230359
+    ]
+   },
+   {
+    "way": 588780335,
+    "name": "Indianapolis Motor Speedway - Backstretch",
+    "lengthM": 832,
+    "offM": 832,
+    "maxDev": 393,
+    "at": [
+     39.798084,
+     -86.230458
+    ]
+   },
+   {
+    "way": 588780336,
+    "name": "IMS Road Course - Alternate Corners 12 & 12A",
+    "lengthM": 203,
+    "offM": 164,
+    "maxDev": 118,
+    "at": [
+     39.789197,
+     -86.235289
+    ]
+   },
+   {
+    "way": 588780343,
+    "name": "Indianapolis Motor Speedway - Turn 3",
+    "lengthM": 415,
+    "offM": 415,
+    "maxDev": 424.1,
+    "at": [
+     39.799559,
+     -86.230483
+    ]
+   },
+   {
+    "way": 588780345,
+    "name": "Indianapolis Motor Speedway - North Straight",
+    "lengthM": 198,
+    "offM": 198,
+    "maxDev": 202.2,
+    "at": [
+     39.801918,
+     -86.233562
+    ]
+   },
+   {
+    "way": 588780347,
+    "name": "Indianapolis Motor Speedway - Turn 4",
+    "lengthM": 441,
+    "offM": 441,
+    "maxDev": 102,
+    "at": [
+     39.800035,
+     -86.238894
+    ]
+   },
+   {
+    "way": 588780370,
+    "name": "IMS Road Course - Alternate Corner 1",
+    "lengthM": 95,
+    "offM": 95,
+    "maxDev": 69,
+    "at": [
+     39.799763,
+     -86.238491
+    ]
+   },
+   {
+    "way": 992135043,
+    "name": "IMS Road Course - Hulman Straight",
+    "lengthM": 163,
+    "offM": 117,
+    "maxDev": 86.6,
+    "at": [
+     39.798706,
+     -86.235007
+    ]
+   },
+   {
+    "way": 1195824412,
+    "name": null,
+    "lengthM": 91,
+    "offM": 91,
+    "maxDev": 283.3,
+    "at": [
+     39.799093,
+     -86.232207
+    ]
+   }
+  ],
+  "onewayDirectionCheck": {
+   "sameM": 3885,
+   "oppositeM": 1572
+  }
+ },
+ "direction": {
+  "game": "clockwise",
+  "real": "clockwise",
+  "ok": true,
+  "source": "https://en.wikipedia.org/wiki/Indianapolis_Motor_Speedway: \"The 2000 United States Grand Prix was the first event at IMS to be held clockwise\"; OSM: the road-course ways agree (3885 m), the oval ways are digitised anti-clockwise (1572 m against), as expected"
+ },
+ "startFinish": {
+  "gameStart": [
+   39.7931548,
+   -86.2388506
+  ],
+  "osm": [
+   {
+    "way": 1213055867,
+    "tags": {
+     "highway": "raceway",
+     "name": "IMS Start-Finish Line",
+     "sport": "motor",
+     "surface": "painted"
+    },
+    "lat": 39.7931571,
+    "lon": -86.2388506,
+    "gameS": 0.3,
+    "lateral": 0
+   }
+  ]
+ },
+ "pit": {
+  "game": {
+   "side": "right",
+   "limitKmh": 80,
+   "laneFromS": -249.9,
+   "laneToS": 250,
+   "entryLineS": -163.9,
+   "exitLineS": 164,
+   "lengthM": 500
+  },
+  "osm": [
+   {
+    "way": 317832611,
+    "name": "IMS Oval - Warmup Lane/Pit Entry",
+    "lengthM": 1199,
+    "fromS": 664.3,
+    "toS": 1815.7,
+    "side": "left",
+    "first": [
+     39.7981062,
+     -86.2304581
+    ],
+    "last": [
+     39.7989717,
+     -86.2388215
+    ]
+   },
+   {
+    "way": 317832622,
+    "name": "IMS Road Course - Pit Entry",
+    "lengthM": 295,
+    "fromS": -761.3,
+    "toS": -348.2,
+    "side": "right",
+    "first": [
+     39.789524,
+     -86.2354446
+    ],
+    "last": [
+     39.7901388,
+     -86.2384063
+    ]
+   },
+   {
+    "way": 588780264,
+    "name": "IMS Pit Lane",
+    "lengthM": 301,
+    "fromS": -276,
+    "toS": 33.2,
+    "side": "right",
+    "first": [
+     39.7934472,
+     -86.238717
+    ],
+    "last": [
+     39.7907321,
+     -86.2386666
+    ]
+   },
+   {
+    "way": 588780266,
+    "name": "IMS Oval - Pit Entry",
+    "lengthM": 230,
+    "fromS": 421.1,
+    "toS": 656.9,
+    "side": "right",
+    "first": [
+     39.7989239,
+     -86.2389528
+    ],
+    "last": [
+     39.796853,
+     -86.2387655
+    ]
+   },
+   {
+    "way": 588780268,
+    "name": "IMS Road Course - Alternate Pit Exit",
+    "lengthM": 37,
+    "fromS": 658.5,
+    "toS": 691,
+    "side": "?",
+    "first": [
+     39.7989238,
+     -86.2387239
+    ],
+    "last": [
+     39.7992588,
+     -86.2387311
+    ]
+   },
+   {
+    "way": 588780283,
+    "name": "IMS Road Course - Pit Exit",
+    "lengthM": 230,
+    "fromS": 421.1,
+    "toS": 658.5,
+    "side": "right",
+    "first": [
+     39.796853,
+     -86.2387655
+    ],
+    "last": [
+     39.7989238,
+     -86.2387239
+    ]
+   },
+   {
+    "way": 588780287,
+    "name": "IMS Oval - Warmup Lane to Pit Entry",
+    "lengthM": 182,
+    "fromS": 475.7,
+    "toS": 664.3,
+    "side": "right",
+    "first": [
+     39.7989717,
+     -86.2388215
+    ],
+    "last": [
+     39.7973325,
+     -86.2388201
+    ]
+   },
+   {
+    "way": 588780327,
+    "name": "IMS Oval - Warmup Lane & Pit Exit",
+    "lengthM": 352,
+    "fromS": -740.7,
+    "toS": -354.2,
+    "side": "right",
+    "first": [
+     39.7900667,
+     -86.2385962
+    ],
+    "last": [
+     39.7882576,
+     -86.23563
+    ]
+   },
+   {
+    "way": 588780328,
+    "name": "IMS Oval - PIt Exit",
+    "lengthM": 74,
+    "fromS": -354.2,
+    "toS": -276,
+    "side": "right",
+    "first": [
+     39.7907321,
+     -86.2386666
+    ],
+    "last": [
+     39.7900667,
+     -86.2385962
+    ]
+   },
+   {
+    "way": 588780329,
+    "name": "IMS Formula One Pit Lane",
+    "lengthM": 373,
+    "fromS": -348.2,
+    "toS": 33.2,
+    "side": "right",
+    "first": [
+     39.7901388,
+     -86.2384063
+    ],
+    "last": [
+     39.7934472,
+     -86.238717
+    ]
+   },
+   {
+    "way": 588780337,
+    "name": "IMS Oval - Pit Exit & Warmup Lane",
+    "lengthM": 619,
+    "fromS": -1439.9,
+    "toS": -956.7,
+    "side": "left",
+    "first": [
+     39.7882801,
+     -86.2331871
+    ],
+    "last": [
+     39.7927418,
+     -86.2303579
+    ]
+   },
+   {
+    "way": 588780338,
+    "name": "IMS Oval - Pit Exit & Warmup Lane",
+    "lengthM": 209,
+    "fromS": -956.7,
+    "toS": -740.7,
+    "side": "right",
+    "first": [
+     39.7882576,
+     -86.23563
+    ],
+    "last": [
+     39.7882801,
+     -86.2331871
+    ]
+   },
+   {
+    "way": 588800193,
+    "name": "Pit Road Terrace Stands (south sections)",
+    "lengthM": 137,
+    "fromS": -313.5,
+    "toS": -246,
+    "side": "right",
+    "first": [
+     39.7904369,
+     -86.2382963
+    ],
+    "last": [
+     39.7904369,
+     -86.2382963
+    ]
+   },
+   {
+    "way": 588800194,
+    "name": "Pit Road Terrace Stands (center sections)",
+    "lengthM": 141,
+    "fromS": -204.3,
+    "toS": -138.8,
+    "side": "right",
+    "first": [
+     39.7913647,
+     -86.2382326
+    ],
+    "last": [
+     39.7913647,
+     -86.2382326
+    ]
+   },
+   {
+    "way": 588800195,
+    "name": "Pit Road Terrace Stands (north sections)",
+    "lengthM": 142,
+    "fromS": -100.6,
+    "toS": -34.7,
+    "side": "right",
+    "first": [
+     39.7922751,
+     -86.2383252
+    ],
+    "last": [
+     39.7922751,
+     -86.2383252
+    ]
+   },
+   {
+    "way": 589357972,
+    "name": "Pit Lane Outside Wall",
+    "lengthM": 645,
+    "fromS": -250.4,
+    "toS": 410,
+    "side": "right",
+    "first": [
+     39.790956,
+     -86.2387382
+    ],
+    "last": [
+     39.7967552,
+     -86.2388045
+    ]
+   },
+   {
+    "way": 1176980819,
+    "name": "IMS Road Course - Pit Exit",
+    "lengthM": 96,
+    "fromS": 658.5,
+    "toS": 777.9,
+    "side": "right",
+    "first": [
+     39.7989238,
+     -86.2387239
+    ],
+    "last": [
+     39.7992705,
+     -86.2377818
+    ]
+   },
+   {
+    "way": 1176980820,
+    "name": "IMS Pit Lane",
+    "lengthM": 378,
+    "fromS": 33.2,
+    "toS": 421.1,
+    "side": "right",
+    "first": [
+     39.796853,
+     -86.2387655
+    ],
+    "last": [
+     39.7934472,
+     -86.238717
+    ]
+   }
+  ],
+  "realLimitKmh": null,
+  "limitSource": "not found for the 2000-2007 United States GPs (the 80 km/h default of the current regulations is not a source for then)"
+ },
+ "elevation": {
+  "demUsedForReference": "USGS 3DEP bare-earth DEM (1 m lidar; ImageServer getSamples)",
+  "gameSource": "USGS 3DEP via EPQS along the dataset centreline, DTM filters",
+  "real": {
+   "range": 3.7,
+   "min": 220.5,
+   "max": 224.2,
+   "sMin": 3021,
+   "sMax": 800
+  },
+  "game": {
+   "range": 3.6,
+   "min": 0,
+   "max": 3.6,
+   "sMin": 3021,
+   "sMax": 800
+  },
+  "buildRawAlongDatasetLine": {
+   "coverage": 1,
+   "range": 3.7,
+   "min": 220.5,
+   "max": 224.2,
+   "sMin": 3021,
+   "sMax": 810,
+   "maxClimb50": 2,
+   "maxDescent50": -2.7,
+   "rmsVsOsmLine": 0.03
+  },
+  "rmsDiffM": 0.05,
+  "correlation": 0.998,
+  "maxAbsDiff": {
+   "m": 0.3,
+   "s": 700,
+   "at": [
+    39.799126,
+    -86.238609
+   ]
+  },
+  "grades": {
+   "w50": {
+    "real": {
+     "maxClimb": {
+      "pct": 1.9,
+      "s": 740,
+      "at": [
+       39.79913,
+       -86.238155
+      ]
+     },
+     "maxDescent": {
+      "pct": -2.6,
+      "s": 680,
+      "at": [
+       39.799101,
+       -86.238831
+      ]
+     }
+    },
+    "game": {
+     "maxClimb": {
+      "pct": 1.1,
+      "s": 750,
+      "at": [
+       39.799144,
+       -86.238043
+      ]
+     },
+     "maxDescent": {
+      "pct": -1.2,
+      "s": 680,
+      "at": [
+       39.799101,
+       -86.238831
+      ]
+     }
+    },
+    "rmsDiffPct": 0.19,
+    "mismatches": []
+   },
+   "w100": {
+    "real": {
+     "maxClimb": {
+      "pct": 1.1,
+      "s": 750,
+      "at": [
+       39.799144,
+       -86.238043
+      ]
+     },
+     "maxDescent": {
+      "pct": -0.9,
+      "s": 670,
+      "at": [
+       39.799037,
+       -86.238903
+      ]
+     }
+    },
+    "game": {
+     "maxClimb": {
+      "pct": 0.8,
+      "s": 3481,
+      "at": [
+       39.78812,
+       -86.235972
+      ]
+     },
+     "maxDescent": {
+      "pct": -0.7,
+      "s": 2961,
+      "at": [
+       39.789772,
+       -86.23115
+      ]
+     }
+    },
+    "rmsDiffPct": 0.08,
+    "mismatches": []
+   }
+  },
+  "published": [
+   {
+    "what": "oval turn banking",
+    "value": "9 deg 12' (9.2 deg)",
+    "source": "https://en.wikipedia.org/wiki/Indianapolis_Motor_Speedway (infobox banking \"Turns: 9.2 deg\"); OSM way 51308226 banking=9 deg 12'"
+   }
+  ],
+  "famousFeatures": [
+   {
+    "feature": "banked oval Turn 1 (F1 Turn 13)",
+    "real": "lidar cross-slope 6.5-8.8 deg (medians of its sections; ramps at the ends), published 9.2 deg",
+    "game": "bankOverrides 9.2 deg",
+    "verdict": "ok"
+   },
+   {
+    "feature": "flat infield",
+    "real": "lidar range 3.7 m, 50 m grades +1.9 / -2.6 %",
+    "game": "3.6 m, +1.1 / -1.2 %, rms 0.05 m",
+    "verdict": "ok"
+   }
+  ]
+ },
+ "banking": {
+  "method": "lidar heights at +-4 m across the OSM centreline every 10 m; tilt = atan((hLeft - hRight) / 8 m)",
+  "straightsAbsTiltMedianDeg": 0.7,
+  "gameOverrides": [
+   {
+    "name": "T13 (oval turn 1)",
+    "from": 0.82326,
+    "to": 0.9341,
+    "deg": 9.2
+   }
+  ],
+  "gameMaxAbsBankDeg": 9.2,
+  "corners": [
+   {
+    "s0": 650,
+    "s1": 700,
+    "dir": "R",
+    "minRadius": 17,
+    "at": [
+     39.799101,
+     -86.238831
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 1.9,
+     "max": 2.7,
+     "min": -0.2
+    },
+    "gameInsideLowerDeg": {
+     "median": 4.1,
+     "max": 5.5
+    }
+   },
+   {
+    "s0": 730,
+    "s1": 820,
+    "dir": "L",
+    "minRadius": 37,
+    "at": [
+     39.799286,
+     -86.237764
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 0.9,
+     "max": 1.2,
+     "min": 0.6
+    },
+    "gameInsideLowerDeg": {
+     "median": 4.3,
+     "max": 4.8
+    }
+   },
+   {
+    "s0": 860,
+    "s1": 1000,
+    "dir": "R",
+    "minRadius": 99,
+    "at": [
+     39.800554,
+     -86.237502
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 1.1,
+     "max": 1.2,
+     "min": -0.4
+    },
+    "gameInsideLowerDeg": {
+     "median": 2.1,
+     "max": 2.4
+    }
+   },
+   {
+    "s0": 1060,
+    "s1": 1170,
+    "dir": "R",
+    "minRadius": 35,
+    "at": [
+     39.80108,
+     -86.235701
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 1.1,
+     "max": 1.3,
+     "min": 0.9
+    },
+    "gameInsideLowerDeg": {
+     "median": 3.5,
+     "max": 5
+    }
+   },
+   {
+    "s0": 1280,
+    "s1": 1340,
+    "dir": "R",
+    "minRadius": 54,
+    "at": [
+     39.799471,
+     -86.235505
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 0.9,
+     "max": 1,
+     "min": 0.7
+    },
+    "gameInsideLowerDeg": {
+     "median": 3.5,
+     "max": 4
+    }
+   },
+   {
+    "s0": 1481,
+    "s1": 1681,
+    "dir": "L",
+    "minRadius": 41,
+    "at": [
+     39.797802,
+     -86.237153
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 1,
+     "max": 1.3,
+     "min": 0.6
+    },
+    "gameInsideLowerDeg": {
+     "median": 3.7,
+     "max": 4.4
+    }
+   },
+   {
+    "s0": 1711,
+    "s1": 1831,
+    "dir": "R",
+    "minRadius": 32,
+    "at": [
+     39.797861,
+     -86.23523
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 0.6,
+     "max": 1.1,
+     "min": 0.4
+    },
+    "gameInsideLowerDeg": {
+     "median": 3.5,
+     "max": 5.2
+    }
+   },
+   {
+    "s0": 2361,
+    "s1": 2471,
+    "dir": "L",
+    "minRadius": 47,
+    "at": [
+     39.792313,
+     -86.234538
+    ],
+    "way": "IMS Grand Prix Circuit",
+    "realInsideLowerDeg": {
+     "median": 0.8,
+     "max": 1.2,
+     "min": -0.1
+    },
+    "gameInsideLowerDeg": {
+     "median": 3.5,
+     "max": 4
+    }
+   },
+   {
+    "s0": 2511,
+    "s1": 2581,
+    "dir": "R",
+    "minRadius": 45,
+    "at": [
+     39.792127,
+     -86.23312
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 0.9,
+     "max": 1,
+     "min": 0.8
+    },
+    "gameInsideLowerDeg": {
+     "median": 4.1,
+     "max": 4.5
+    }
+   },
+   {
+    "s0": 2591,
+    "s1": 2661,
+    "dir": "L",
+    "minRadius": 36,
+    "at": [
+     39.791573,
+     -86.232614
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": -0.1,
+     "max": 0.1,
+     "min": -0.6
+    },
+    "gameInsideLowerDeg": {
+     "median": 4.1,
+     "max": 4.8
+    }
+   },
+   {
+    "s0": 2731,
+    "s1": 2851,
+    "dir": "R",
+    "minRadius": 30,
+    "at": [
+     39.791249,
+     -86.231043
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 0.8,
+     "max": 1.3,
+     "min": 0.2
+    },
+    "gameInsideLowerDeg": {
+     "median": 2.1,
+     "max": 5.4
+    }
+   },
+   {
+    "s0": 2991,
+    "s1": 3041,
+    "dir": "R",
+    "minRadius": 76,
+    "at": [
+     39.78926,
+     -86.231298
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 0.9,
+     "max": 1.3,
+     "min": 0.6
+    },
+    "gameInsideLowerDeg": {
+     "median": 1.7,
+     "max": 2.6
+    }
+   },
+   {
+    "s0": 3081,
+    "s1": 3211,
+    "dir": "R",
+    "minRadius": 133,
+    "at": [
+     39.78843,
+     -86.232269
+    ],
+    "way": "IMS Road Course",
+    "realInsideLowerDeg": {
+     "median": 2.1,
+     "max": 2.5,
+     "min": 1.3
+    },
+    "gameInsideLowerDeg": {
+     "median": 1.5,
+     "max": 2
+    }
+   },
+   {
+    "s0": 3481,
+    "s1": 3501,
+    "dir": "R",
+    "minRadius": 152,
+    "at": [
+     39.788125,
+     -86.236085
+    ],
+    "way": "Indianapolis Motor Speedway - Turn 1",
+    "realInsideLowerDeg": {
+     "median": 6.5,
+     "max": 7.1,
+     "min": 5.9
+    },
+    "gameInsideLowerDeg": {
+     "median": 9.2,
+     "max": 9.2
+    }
+   },
+   {
+    "s0": 3541,
+    "s1": 3561,
+    "dir": "R",
+    "minRadius": 165,
+    "at": [
+     39.788229,
+     -86.236751
+    ],
+    "way": "Indianapolis Motor Speedway - Turn 1",
+    "realInsideLowerDeg": {
+     "median": 8.4,
+     "max": 8.4,
+     "min": 7.9
+    },
+    "gameInsideLowerDeg": {
+     "median": 9.2,
+     "max": 9.2
+    }
+   },
+   {
+    "s0": 3601,
+    "s1": 3611,
+    "dir": "R",
+    "minRadius": 197,
+    "at": [
+     39.788458,
+     -86.237363
+    ],
+    "way": "Indianapolis Motor Speedway - Turn 1",
+    "realInsideLowerDeg": {
+     "median": 8.6,
+     "max": 8.6,
+     "min": 8.5
+    },
+    "gameInsideLowerDeg": {
+     "median": 9.2,
+     "max": 9.2
+    }
+   },
+   {
+    "s0": 3651,
+    "s1": 3711,
+    "dir": "R",
+    "minRadius": 116,
+    "at": [
+     39.788849,
+     -86.237971
+    ],
+    "way": "Indianapolis Motor Speedway - Turn 1",
+    "realInsideLowerDeg": {
+     "median": 8.6,
+     "max": 9.1,
+     "min": 8.1
+    },
+    "gameInsideLowerDeg": {
+     "median": 9.2,
+     "max": 9.2
+    }
+   },
+   {
+    "s0": 3761,
+    "s1": 3811,
+    "dir": "R",
+    "minRadius": 184,
+    "at": [
+     39.789656,
+     -86.238637
+    ],
+    "way": "Indianapolis Motor Speedway - Turn 1",
+    "realInsideLowerDeg": {
+     "median": 8.8,
+     "max": 9.2,
+     "min": 8.5
+    },
+    "gameInsideLowerDeg": {
+     "median": 9.2,
+     "max": 9.2
+    }
+   }
+  ]
+ },
+ "tunnelsAndBridges": {
+  "crossings": [
+   {
+    "kind": "crosses",
+    "osmWay": 51315963,
+    "s": 3165.8,
+    "at": [
+     39.78838,
+     -86.232424
+    ],
+    "what": "service",
+    "bridge": null,
+    "tunnel": "yes",
+    "layer": null,
+    "name": "Tunnel 3"
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 117559732,
+    "s": 3276.5,
+    "at": [
+     39.788203,
+     -86.233653
+    ],
+    "what": "unclassified",
+    "bridge": null,
+    "tunnel": "yes",
+    "layer": null,
+    "name": null
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 152842141,
+    "s": 2117.1,
+    "at": [
+     39.79487,
+     -86.234945
+    ],
+    "what": "footway",
+    "bridge": "yes",
+    "tunnel": null,
+    "layer": "1",
+    "name": "Hulman Boulevard Pedestrian Bridge"
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 286468932,
+    "s": 448.3,
+    "at": [
+     39.797091,
+     -86.238905
+    ],
+    "what": "footway",
+    "bridge": null,
+    "tunnel": "yes",
+    "layer": null,
+    "name": "Tunnel 7 (South Pedestrian Walkway)"
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 525773452,
+    "s": 455.7,
+    "at": [
+     39.797156,
+     -86.238905
+    ],
+    "what": "service",
+    "bridge": null,
+    "tunnel": "yes",
+    "layer": null,
+    "name": "Tunnel 7 (7th Street)"
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 588795247,
+    "s": 463,
+    "at": [
+     39.797221,
+     -86.238906
+    ],
+    "what": "footway",
+    "bridge": null,
+    "tunnel": "yes",
+    "layer": "-1",
+    "name": "Tunnel 7 (North Pedestrian Wallkway)"
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 588795270,
+    "s": 43.7,
+    "at": [
+     39.793539,
+     -86.238856
+    ],
+    "what": "service",
+    "bridge": null,
+    "tunnel": "yes",
+    "layer": "-1",
+    "name": "Tunnel 6 (6th Street)"
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 588795276,
+    "s": 37.7,
+    "at": [
+     39.793486,
+     -86.238855
+    ],
+    "what": "footway",
+    "bridge": null,
+    "tunnel": "yes",
+    "layer": "-1",
+    "name": "Tunnel 6 (Pedestrian Walkway)"
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 589030400,
+    "s": 3892.5,
+    "at": [
+     39.79053,
+     -86.238819
+    ],
+    "what": "stream",
+    "bridge": null,
+    "tunnel": "culvert",
+    "layer": "-1",
+    "name": "Dry Run"
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 589090793,
+    "s": 3379.1,
+    "at": [
+     39.78815,
+     -86.234814
+    ],
+    "what": "stream",
+    "bridge": null,
+    "tunnel": "culvert",
+    "layer": "-1",
+    "name": "Dry Run"
+   }
+  ],
+  "gameSceneryBridges": []
+ },
+ "findings": [
+  {
+   "aspect": "banking",
+   "severity": "minor",
+   "game": "curvature-derived banking on the infield corners: s 2591-2661 L R36 m (IMS Road Course): real -0.1 deg, game 4.1 (max 4.8); s 730-820 L R37 m (IMS Road Course): real 0.9 deg, game 4.3 (max 4.8); s 2511-2581 R R45 m (IMS Road Course): real 0.9 deg, game 4.1 (max 4.5); s 1711-1831 R R32 m (IMS Road Course): real 0.6 deg, game 3.5 (max 5.2)",
+   "real": "lidar: infield corners 13 of 13 within +-2.2 deg (straights 0.7 deg). The oval turn override is confirmed by the same method (6.5-8.8 deg vs 9.2 published), which validates the measurement",
+   "proposedFix": "keep the 9.2 deg override; scale the derived banking of the infield down (or use the measured cross-slope profile)",
+   "sources": [
+    "USGS 3DEP bare-earth DEM, 1 m lidar (public domain): https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer (getSamples), acquisition dates from https://epqs.nationalmap.gov/v1/json?...&includeDate=true",
+    "game data: tracks-data.js + js/track.js built in node (devtests/track-audit/americas/game.js -> out/game-<id>.json)"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "severity": "minor",
+   "game": "no structure over the track",
+   "real": "the Hulman Boulevard Pedestrian Bridge (OSM way 152842141, layer 1) spans the track at s 2117.1 m (Hulman straight); 9 tunnels / culverts pass under it (Tunnel 6 at s ~40 m, Tunnel 7 at s ~450-460 m, Tunnel 3 at s 3166, ...), invisible from the car",
+   "proposedFix": "add the footbridge deck at s 2117.1 m",
+   "sources": [
+    "https://www.openstreetmap.org/way/152842141",
+    "OpenStreetMap (ODbL) via Overpass API (maps.mail.ru mirror), cached in devtests/track-audit/cache/overpass/"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "pit lane {\"side\":\"right\",\"limitKmh\":80,\"laneFromS\":-249.9,\"laneToS\":250,\"entryLineS\":-163.9,\"exitLineS\":164,\"lengthM\":500}",
+   "real": "OSM: \"IMS Road Course - Pit Entry\" (way 317832622) leaves on the inside before oval Turn 1 at s -761 m, \"IMS Formula One Pit Lane\" (way 588780329) and \"IMS Pit Lane\" (ways 588780264, 1176980820) run along the main straight on the right (inside) to s +421 m, \"IMS Road Course - Pit Exit\" (588780283) rejoins at s ~+658 m (road-course Turn 1). Pit limit for 2000-2007 not found",
+   "proposedFix": "side right; length is the game-wide 500 m simplification",
+   "sources": [
+    "https://www.openstreetmap.org/way/317832622",
+    "https://www.openstreetmap.org/way/588780329",
+    "https://www.openstreetmap.org/way/588780283"
+   ]
+  },
+  {
+   "aspect": "start",
+   "severity": "cosmetic",
+   "game": "start at the yard of bricks",
+   "real": "OSM way 1213055867 \"IMS Start-Finish Line\" crosses the game line 0.3 m from s = 0",
+   "proposedFix": "none",
+   "sources": [
+    "https://www.openstreetmap.org/way/1213055867"
+   ]
+  }
+ ],
+ "proposedCorrection": {
+  "elevation": "keep usgs3dep",
+  "bankOverrides": "keep T13 (oval turn 1) 9.2 deg",
+  "derivedBankScale": 0.3,
+  "bridgesOverTrack": [
+   {
+    "osmWay": 152842141,
+    "kind": "footbridge (Hulman Boulevard Pedestrian Bridge)",
+    "s": 2117.1,
+    "at": [
+     39.79487,
+     -86.234945
+    ]
+   }
+  ]
+ },
+ "profile": {
+  "step": 10,
+  "note": "s from the game line; real = lidar on the OSM foot point (30 m median); game = js/track.js sample y; tilt = lidar cross-slope (deg, + = left higher); gBank = game bank (deg, same sign)",
+  "rows": [
+   [
+    0,
+    39.793155,
+    -86.238847,
+    222.44,
+    222.44,
+    0.3,
+    0.7,
+    0,
+    222.46
+   ],
+   [
+    10,
+    39.793243,
+    -86.238848,
+    222.46,
+    222.46,
+    0.3,
+    0.7,
+    0,
+    222.46
+   ],
+   [
+    20,
+    39.793331,
+    -86.23885,
+    222.48,
+    222.48,
+    0.3,
+    0.5,
+    0,
+    222.47
+   ],
+   [
+    30,
+    39.793418,
+    -86.238851,
+    222.51,
+    222.5,
+    0.3,
+    0.6,
+    0,
+    222.51
+   ],
+   [
+    40,
+    39.793506,
+    -86.238852,
+    222.54,
+    222.51,
+    0.3,
+    0.4,
+    0,
+    222.54
+   ],
+   [
+    50,
+    39.793594,
+    -86.238854,
+    222.54,
+    222.53,
+    0.3,
+    0.5,
+    0,
+    222.56
+   ],
+   [
+    60,
+    39.793682,
+    -86.238855,
+    222.54,
+    222.55,
+    0.2,
+    0.5,
+    0,
+    222.52
+   ],
+   [
+    70,
+    39.79377,
+    -86.238856,
+    222.54,
+    222.56,
+    0.3,
+    0.7,
+    0,
+    222.54
+   ],
+   [
+    80,
+    39.793858,
+    -86.238857,
+    222.56,
+    222.58,
+    0.3,
+    0.7,
+    0,
+    222.57
+   ],
+   [
+    90,
+    39.793945,
+    -86.238858,
+    222.59,
+    222.6,
+    0.3,
+    0.7,
+    0,
+    222.6
+   ],
+   [
+    100,
+    39.794033,
+    -86.238859,
+    222.62,
+    222.62,
+    0.3,
+    0.7,
+    0,
+    222.61
+   ],
+   [
+    110,
+    39.794121,
+    -86.238861,
+    222.63,
+    222.64,
+    0.3,
+    0.6,
+    0,
+    222.63
+   ],
+   [
+    120,
+    39.794209,
+    -86.238862,
+    222.69,
+    222.67,
+    0.3,
+    0.8,
+    0,
+    222.7
+   ],
+   [
+    130,
+    39.794297,
+    -86.238863,
+    222.69,
+    222.71,
+    0.3,
+    0.7,
+    0,
+    222.69
+   ],
+   [
+    140,
+    39.794385,
+    -86.238864,
+    222.74,
+    222.75,
+    0.3,
+    0.8,
+    0,
+    222.76
+   ],
+   [
+    150,
+    39.794472,
+    -86.238865,
+    222.77,
+    222.78,
+    0.3,
+    0.8,
+    0,
+    222.77
+   ],
+   [
+    160,
+    39.79456,
+    -86.238866,
+    222.78,
+    222.82,
+    0.3,
+    0.6,
+    0,
+    222.79
+   ],
+   [
+    170,
+    39.794648,
+    -86.238867,
+    222.82,
+    222.85,
+    0.3,
+    0.5,
+    0,
+    222.82
+   ],
+   [
+    180,
+    39.794736,
+    -86.238868,
+    222.84,
+    222.87,
+    0.3,
+    0.8,
+    0,
+    222.84
+   ],
+   [
+    190,
+    39.794824,
+    -86.238869,
+    222.89,
+    222.88,
+    0.3,
+    0.5,
+    0,
+    222.88
+   ],
+   [
+    200,
+    39.794912,
+    -86.23887,
+    222.91,
+    222.9,
+    0.4,
+    0.5,
+    0,
+    222.89
+   ],
+   [
+    210,
+    39.795,
+    -86.238871,
+    222.95,
+    222.92,
+    0.4,
+    0.7,
+    0,
+    222.95
+   ],
+   [
+    220,
+    39.795087,
+    -86.238872,
+    222.98,
+    222.94,
+    0.4,
+    0.7,
+    0,
+    222.99
+   ],
+   [
+    230,
+    39.795175,
+    -86.238873,
+    223.02,
+    222.97,
+    0.4,
+    0.8,
+    0,
+    223.04
+   ],
+   [
+    240,
+    39.795263,
+    -86.238874,
+    223.04,
+    223,
+    0.4,
+    0.7,
+    0,
+    223.03
+   ],
+   [
+    250,
+    39.795351,
+    -86.238875,
+    223.07,
+    223.04,
+    0.4,
+    0.7,
+    0,
+    223.08
+   ],
+   [
+    260,
+    39.795439,
+    -86.238876,
+    223.1,
+    223.08,
+    0.5,
+    0.6,
+    0,
+    223.1
+   ],
+   [
+    270,
+    39.795527,
+    -86.238878,
+    223.13,
+    223.12,
+    0.5,
+    0.5,
+    0,
+    223.13
+   ],
+   [
+    280,
+    39.795614,
+    -86.238879,
+    223.15,
+    223.15,
+    0.4,
+    0.6,
+    0,
+    223.16
+   ],
+   [
+    290,
+    39.795702,
+    -86.23888,
+    223.18,
+    223.19,
+    0.4,
+    0.7,
+    0,
+    223.18
+   ],
+   [
+    300,
+    39.79579,
+    -86.238881,
+    223.18,
+    223.23,
+    0.4,
+    0.9,
+    0,
+    223.17
+   ],
+   [
+    310,
+    39.795878,
+    -86.238883,
+    223.2,
+    223.27,
+    0.4,
+    0.7,
+    0,
+    223.22
+   ],
+   [
+    320,
+    39.795966,
+    -86.238884,
+    223.24,
+    223.3,
+    0.4,
+    0.6,
+    0,
+    223.26
+   ],
+   [
+    330,
+    39.796054,
+    -86.238885,
+    223.27,
+    223.33,
+    0.4,
+    0.7,
+    0,
+    223.28
+   ],
+   [
+    340,
+    39.796141,
+    -86.238887,
+    223.31,
+    223.36,
+    0.4,
+    0.5,
+    0,
+    223.31
+   ],
+   [
+    350,
+    39.796229,
+    -86.238888,
+    223.37,
+    223.37,
+    0.4,
+    0.5,
+    0,
+    223.38
+   ],
+   [
+    360,
+    39.796317,
+    -86.238889,
+    223.38,
+    223.39,
+    0.4,
+    0.6,
+    0,
+    223.39
+   ],
+   [
+    370,
+    39.796405,
+    -86.23889,
+    223.4,
+    223.41,
+    0.4,
+    0.6,
+    0,
+    223.4
+   ],
+   [
+    380,
+    39.796493,
+    -86.238892,
+    223.42,
+    223.43,
+    0.4,
+    0.8,
+    0,
+    223.42
+   ],
+   [
+    390,
+    39.796581,
+    -86.238893,
+    223.46,
+    223.45,
+    0.4,
+    0.8,
+    0,
+    223.48
+   ],
+   [
+    400,
+    39.796669,
+    -86.238894,
+    223.47,
+    223.49,
+    0.4,
+    0.7,
+    0,
+    223.48
+   ],
+   [
+    410,
+    39.796756,
+    -86.238896,
+    223.52,
+    223.52,
+    0.4,
+    0.9,
+    0,
+    223.51
+   ],
+   [
+    420,
+    39.796844,
+    -86.238897,
+    223.57,
+    223.56,
+    0.4,
+    0.8,
+    0,
+    223.56
+   ],
+   [
+    430,
+    39.796932,
+    -86.238898,
+    223.58,
+    223.6,
+    0.4,
+    0.9,
+    0,
+    223.58
+   ],
+   [
+    440,
+    39.79702,
+    -86.238899,
+    223.59,
+    223.63,
+    0.4,
+    1.1,
+    0,
+    223.58
+   ],
+   [
+    450,
+    39.797108,
+    -86.238901,
+    223.62,
+    223.66,
+    0.4,
+    0.8,
+    0,
+    223.62
+   ],
+   [
+    460,
+    39.797196,
+    -86.238902,
+    223.65,
+    223.67,
+    0.3,
+    0.8,
+    0,
+    223.67
+   ],
+   [
+    470,
+    39.797283,
+    -86.238903,
+    223.67,
+    223.69,
+    0.3,
+    1,
+    0,
+    223.66
+   ],
+   [
+    480,
+    39.797371,
+    -86.238905,
+    223.72,
+    223.71,
+    0.3,
+    1.1,
+    0,
+    223.72
+   ],
+   [
+    490,
+    39.797459,
+    -86.238906,
+    223.75,
+    223.73,
+    0.3,
+    1,
+    0,
+    223.75
+   ],
+   [
+    500,
+    39.797547,
+    -86.238911,
+    223.8,
+    223.75,
+    0.1,
+    0.8,
+    0,
+    223.8
+   ],
+   [
+    510,
+    39.797635,
+    -86.238908,
+    223.82,
+    223.79,
+    0.2,
+    0.9,
+    0,
+    223.82
+   ],
+   [
+    520,
+    39.797723,
+    -86.23891,
+    223.84,
+    223.82,
+    0.2,
+    1.1,
+    0,
+    223.85
+   ],
+   [
+    530,
+    39.79781,
+    -86.238911,
+    223.87,
+    223.86,
+    0.2,
+    1.1,
+    0,
+    223.87
+   ],
+   [
+    540,
+    39.797898,
+    -86.238912,
+    223.9,
+    223.9,
+    0.2,
+    1.3,
+    0,
+    223.93
+   ],
+   [
+    550,
+    39.797986,
+    -86.238913,
+    223.93,
+    223.93,
+    0.2,
+    1.1,
+    0,
+    223.93
+   ],
+   [
+    560,
+    39.798074,
+    -86.238915,
+    223.94,
+    223.96,
+    0.2,
+    1.3,
+    0,
+    223.97
+   ],
+   [
+    570,
+    39.798162,
+    -86.238916,
+    223.96,
+    223.98,
+    0.2,
+    1.1,
+    0,
+    223.95
+   ],
+   [
+    580,
+    39.79825,
+    -86.238917,
+    223.95,
+    224.01,
+    0.2,
+    1.4,
+    0,
+    223.97
+   ],
+   [
+    590,
+    39.798337,
+    -86.238919,
+    223.97,
+    224.02,
+    0.2,
+    1.3,
+    0,
+    223.95
+   ],
+   [
+    600,
+    39.798425,
+    -86.23892,
+    223.99,
+    224.03,
+    0.2,
+    1.5,
+    -0.1,
+    224.01
+   ],
+   [
+    610,
+    39.798513,
+    -86.238921,
+    224.01,
+    224.03,
+    0.2,
+    1.2,
+    -0.3,
+    224.02
+   ],
+   [
+    620,
+    39.798601,
+    -86.238922,
+    224.05,
+    224.03,
+    0.4,
+    1.5,
+    -0.2,
+    224.08
+   ],
+   [
+    630,
+    39.798689,
+    -86.238924,
+    224.05,
+    224.02,
+    0.6,
+    1.6,
+    0.1,
+    224.08
+   ],
+   [
+    640,
+    39.798777,
+    -86.238925,
+    224.07,
+    224,
+    0.8,
+    1.9,
+    0.7,
+    224.08
+   ],
+   [
+    650,
+    39.798864,
+    -86.238926,
+    224.1,
+    223.98,
+    0.8,
+    1.9,
+    1.9,
+    224.15
+   ],
+   [
+    660,
+    39.798952,
+    -86.238927,
+    224.15,
+    223.93,
+    0.3,
+    2.6,
+    3.8,
+    224.2
+   ],
+   [
+    670,
+    39.799037,
+    -86.238903,
+    224.15,
+    223.84,
+    0.2,
+    2.7,
+    5.4,
+    224.17
+   ],
+   [
+    680,
+    39.799101,
+    -86.238831,
+    223.84,
+    223.73,
+    0,
+    1.7,
+    5.5,
+    223.84
+   ],
+   [
+    690,
+    39.79912,
+    -86.238722,
+    223.42,
+    223.59,
+    0.5,
+    0,
+    4.1,
+    223.44
+   ],
+   [
+    700,
+    39.799126,
+    -86.238609,
+    223.12,
+    223.46,
+    0.2,
+    -0.2,
+    1.7,
+    223.11
+   ],
+   [
+    710,
+    39.799126,
+    -86.238496,
+    223.12,
+    223.39,
+    0.2,
+    -0.3,
+    0.4,
+    223.04
+   ],
+   [
+    720,
+    39.799125,
+    -86.238382,
+    223.12,
+    223.41,
+    0.1,
+    -0.5,
+    -0.4,
+    223.12
+   ],
+   [
+    730,
+    39.799127,
+    -86.238269,
+    223.27,
+    223.48,
+    0.1,
+    -0.7,
+    -1.7,
+    223.26
+   ],
+   [
+    740,
+    39.79913,
+    -86.238155,
+    223.49,
+    223.57,
+    0,
+    -1.2,
+    -3.1,
+    223.48
+   ],
+   [
+    750,
+    39.799144,
+    -86.238043,
+    223.73,
+    223.68,
+    0.2,
+    -1.1,
+    -3.9,
+    223.73
+   ],
+   [
+    760,
+    39.799176,
+    -86.237937,
+    223.89,
+    223.81,
+    0.1,
+    -0.9,
+    -4.3,
+    223.9
+   ],
+   [
+    770,
+    39.799225,
+    -86.237844,
+    224.03,
+    223.92,
+    0.6,
+    -0.9,
+    -4.8,
+    224.04
+   ],
+   [
+    780,
+    39.799286,
+    -86.237764,
+    224.11,
+    224.01,
+    0.3,
+    -0.9,
+    -4.8,
+    224.14
+   ],
+   [
+    790,
+    39.799359,
+    -86.237703,
+    224.19,
+    224.08,
+    0,
+    -0.8,
+    -4.7,
+    224.17
+   ],
+   [
+    800,
+    39.799442,
+    -86.237667,
+    224.2,
+    224.12,
+    0,
+    -1,
+    -4.4,
+    224.19
+   ],
+   [
+    810,
+    39.799529,
+    -86.237659,
+    224.2,
+    224.11,
+    0.3,
+    -0.6,
+    -3.2,
+    224.21
+   ],
+   [
+    820,
+    39.799617,
+    -86.237662,
+    224.18,
+    224.06,
+    0,
+    -0.7,
+    -1.5,
+    224.17
+   ],
+   [
+    830,
+    39.799705,
+    -86.237672,
+    224.09,
+    224,
+    0,
+    -0.3,
+    -0.4,
+    224.09
+   ],
+   [
+    840,
+    39.799792,
+    -86.237682,
+    223.99,
+    223.94,
+    0.1,
+    -0.2,
+    0.2,
+    223.98
+   ],
+   [
+    850,
+    39.799879,
+    -86.237692,
+    223.94,
+    223.88,
+    0.2,
+    -0.5,
+    0.9,
+    223.94
+   ],
+   [
+    860,
+    39.799967,
+    -86.2377,
+    223.83,
+    223.82,
+    0.1,
+    -0.3,
+    1.7,
+    223.83
+   ],
+   [
+    870,
+    39.800055,
+    -86.237699,
+    223.73,
+    223.77,
+    0.2,
+    -0.4,
+    2.3,
+    223.73
+   ],
+   [
+    880,
+    39.800143,
+    -86.237691,
+    223.69,
+    223.73,
+    0.1,
+    -0.2,
+    2.4,
+    223.68
+   ],
+   [
+    890,
+    39.800228,
+    -86.237666,
+    223.64,
+    223.7,
+    0.2,
+    0.4,
+    2.2,
+    223.65
+   ],
+   [
+    900,
+    39.800313,
+    -86.237636,
+    223.64,
+    223.67,
+    0.3,
+    0.8,
+    2.2,
+    223.65
+   ],
+   [
+    910,
+    39.800396,
+    -86.237599,
+    223.65,
+    223.64,
+    0.1,
+    0.8,
+    2.1,
+    223.65
+   ],
+   [
+    920,
+    39.800476,
+    -86.237555,
+    223.65,
+    223.64,
+    0,
+    1.1,
+    2,
+    223.64
+   ],
+   [
+    930,
+    39.800554,
+    -86.237502,
+    223.65,
+    223.64,
+    0.1,
+    1.1,
+    2.1,
+    223.65
+   ],
+   [
+    940,
+    39.800628,
+    -86.237441,
+    223.65,
+    223.64,
+    0.1,
+    1.1,
+    2.2,
+    223.64
+   ],
+   [
+    950,
+    39.800698,
+    -86.237372,
+    223.66,
+    223.64,
+    0,
+    1.1,
+    2.3,
+    223.65
+   ],
+   [
+    960,
+    39.800762,
+    -86.237294,
+    223.67,
+    223.64,
+    0.3,
+    1.1,
+    2.4,
+    223.68
+   ],
+   [
+    970,
+    39.800823,
+    -86.237213,
+    223.67,
+    223.64,
+    0,
+    1.1,
+    2.1,
+    223.66
+   ],
+   [
+    980,
+    39.800878,
+    -86.237125,
+    223.67,
+    223.64,
+    0.1,
+    1.2,
+    2.1,
+    223.66
+   ],
+   [
+    990,
+    39.800927,
+    -86.237031,
+    223.67,
+    223.64,
+    0,
+    1,
+    2.1,
+    223.67
+   ],
+   [
+    1000,
+    39.800969,
+    -86.236931,
+    223.68,
+    223.64,
+    0.1,
+    1.2,
+    1.4,
+    223.69
+   ],
+   [
+    1010,
+    39.801008,
+    -86.236829,
+    223.68,
+    223.64,
+    0.1,
+    1,
+    0.6,
+    223.69
+   ],
+   [
+    1020,
+    39.801045,
+    -86.236726,
+    223.65,
+    223.64,
+    0.1,
+    1.1,
+    0.1,
+    223.63
+   ],
+   [
+    1030,
+    39.801082,
+    -86.236623,
+    223.65,
+    223.64,
+    0.2,
+    1.1,
+    0,
+    223.65
+   ],
+   [
+    1040,
+    39.80112,
+    -86.236521,
+    223.65,
+    223.64,
+    0.3,
+    1.3,
+    0.3,
+    223.64
+   ],
+   [
+    1050,
+    39.801156,
+    -86.236417,
+    223.65,
+    223.64,
+    0.3,
+    1.3,
+    0.9,
+    223.67
+   ],
+   [
+    1060,
+    39.801192,
+    -86.236314,
+    223.65,
+    223.64,
+    0.3,
+    1.3,
+    2.3,
+    223.66
+   ],
+   [
+    1070,
+    39.801224,
+    -86.236208,
+    223.67,
+    223.64,
+    0,
+    1.2,
+    4.1,
+    223.67
+   ],
+   [
+    1080,
+    39.801235,
+    -86.236096,
+    223.67,
+    223.64,
+    0,
+    1.1,
+    5,
+    223.66
+   ],
+   [
+    1090,
+    39.801221,
+    -86.235984,
+    223.67,
+    223.64,
+    0,
+    1.3,
+    4.7,
+    223.68
+   ],
+   [
+    1100,
+    39.801185,
+    -86.235881,
+    223.63,
+    223.64,
+    0.1,
+    1.3,
+    3.9,
+    223.64
+   ],
+   [
+    1110,
+    39.801135,
+    -86.235788,
+    223.63,
+    223.64,
+    0.4,
+    0.9,
+    3.5,
+    223.63
+   ],
+   [
+    1120,
+    39.80108,
+    -86.235701,
+    223.63,
+    223.64,
+    0.2,
+    1,
+    3.5,
+    223.63
+   ],
+   [
+    1130,
+    39.801015,
+    -86.235625,
+    223.63,
+    223.64,
+    0.1,
+    1.1,
+    3.3,
+    223.63
+   ],
+   [
+    1140,
+    39.800942,
+    -86.235561,
+    223.66,
+    223.64,
+    0.1,
+    1,
+    3.5,
+    223.66
+   ],
+   [
+    1150,
+    39.800864,
+    -86.23551,
+    223.66,
+    223.64,
+    0,
+    1,
+    3.7,
+    223.66
+   ],
+   [
+    1160,
+    39.80078,
+    -86.235476,
+    223.64,
+    223.64,
+    0,
+    1,
+    3.5,
+    223.63
+   ],
+   [
+    1170,
+    39.800693,
+    -86.235461,
+    223.6,
+    223.63,
+    0,
+    1,
+    2.2,
+    223.6
+   ],
+   [
+    1180,
+    39.800606,
+    -86.235456,
+    223.59,
+    223.6,
+    0.1,
+    1,
+    0.9,
+    223.59
+   ],
+   [
+    1190,
+    39.800518,
+    -86.235455,
+    223.56,
+    223.57,
+    0.2,
+    1,
+    0.4,
+    223.58
+   ],
+   [
+    1200,
+    39.80043,
+    -86.235454,
+    223.55,
+    223.55,
+    0.2,
+    1.1,
+    0.2,
+    223.57
+   ],
+   [
+    1210,
+    39.800342,
+    -86.235453,
+    223.54,
+    223.53,
+    0.3,
+    1.1,
+    0.2,
+    223.55
+   ],
+   [
+    1220,
+    39.800254,
+    -86.235453,
+    223.53,
+    223.53,
+    0.3,
+    1.2,
+    0.1,
+    223.52
+   ],
+   [
+    1230,
+    39.800166,
+    -86.235451,
+    223.52,
+    223.53,
+    0.1,
+    1.3,
+    -0.1,
+    223.52
+   ],
+   [
+    1240,
+    39.800079,
+    -86.235449,
+    223.51,
+    223.54,
+    0.1,
+    1.2,
+    -0.3,
+    223.5
+   ],
+   [
+    1250,
+    39.799991,
+    -86.235448,
+    223.5,
+    223.54,
+    0.1,
+    1.2,
+    -0.4,
+    223.5
+   ],
+   [
+    1260,
+    39.799903,
+    -86.235446,
+    223.49,
+    223.54,
+    0,
+    1.1,
+    -0.2,
+    223.49
+   ],
+   [
+    1270,
+    39.799815,
+    -86.235444,
+    223.49,
+    223.54,
+    0.3,
+    1.1,
+    0.7,
+    223.48
+   ],
+   [
+    1280,
+    39.799727,
+    -86.235438,
+    223.51,
+    223.54,
+    0,
+    0.9,
+    2.1,
+    223.52
+   ],
+   [
+    1290,
+    39.79964,
+    -86.235447,
+    223.51,
+    223.54,
+    0.2,
+    1,
+    3.3,
+    223.52
+   ],
+   [
+    1300,
+    39.799554,
+    -86.235466,
+    223.51,
+    223.54,
+    0.1,
+    0.7,
+    3.6,
+    223.51
+   ],
+   [
+    1310,
+    39.799471,
+    -86.235505,
+    223.52,
+    223.54,
+    0.1,
+    0.9,
+    3.7,
+    223.47
+   ],
+   [
+    1320,
+    39.799394,
+    -86.23556,
+    223.51,
+    223.54,
+    0.1,
+    0.8,
+    4,
+    223.5
+   ],
+   [
+    1330,
+    39.799326,
+    -86.235631,
+    223.51,
+    223.54,
+    0,
+    0.9,
+    3.5,
+    223.5
+   ],
+   [
+    1340,
+    39.799267,
+    -86.235716,
+    223.49,
+    223.53,
+    0.1,
+    1,
+    2.4,
+    223.48
+   ],
+   [
+    1350,
+    39.799214,
+    -86.235806,
+    223.49,
+    223.51,
+    0.2,
+    0.9,
+    1.2,
+    223.46
+   ],
+   [
+    1360,
+    39.799163,
+    -86.235898,
+    223.5,
+    223.49,
+    0.1,
+    0.7,
+    0.4,
+    223.5
+   ],
+   [
+    1370,
+    39.799112,
+    -86.235991,
+    223.5,
+    223.47,
+    0.1,
+    0.4,
+    0,
+    223.48
+   ],
+   [
+    1380,
+    39.799061,
+    -86.236083,
+    223.5,
+    223.45,
+    0.2,
+    0.2,
+    -0.2,
+    223.49
+   ],
+   [
+    1390,
+    39.79901,
+    -86.236175,
+    223.49,
+    223.44,
+    0.3,
+    0.2,
+    -0.2,
+    223.51
+   ],
+   [
+    1400,
+    39.798959,
+    -86.236268,
+    223.49,
+    223.43,
+    0.3,
+    0,
+    -0.1,
+    223.49
+   ],
+   [
+    1410,
+    39.798908,
+    -86.23636,
+    223.48,
+    223.43,
+    0.3,
+    -0.2,
+    0,
+    223.48
+   ],
+   [
+    1420,
+    39.798857,
+    -86.236453,
+    223.47,
+    223.43,
+    0.3,
+    -0.4,
+    0,
+    223.48
+   ],
+   [
+    1430,
+    39.798806,
+    -86.236545,
+    223.47,
+    223.43,
+    0.2,
+    -0.1,
+    0.1,
+    223.49
+   ],
+   [
+    1440,
+    39.798755,
+    -86.236637,
+    223.48,
+    223.44,
+    0.3,
+    -0.3,
+    0.2,
+    223.5
+   ],
+   [
+    1450,
+    39.798704,
+    -86.23673,
+    223.48,
+    223.46,
+    0.4,
+    -0.4,
+    0.2,
+    223.48
+   ],
+   [
+    1461,
+    39.798653,
+    -86.236822,
+    223.48,
+    223.48,
+    0.6,
+    -0.5,
+    -0.2,
+    223.49
+   ],
+   [
+    1471,
+    39.798604,
+    -86.236916,
+    223.48,
+    223.5,
+    0.5,
+    -0.8,
+    -0.7,
+    223.47
+   ],
+   [
+    1481,
+    39.798555,
+    -86.23701,
+    223.5,
+    223.52,
+    0.2,
+    -1.1,
+    -1.5,
+    223.5
+   ],
+   [
+    1491,
+    39.798501,
+    -86.2371,
+    223.5,
+    223.53,
+    0.1,
+    -0.7,
+    -2.5,
+    223.5
+   ],
+   [
+    1501,
+    39.79844,
+    -86.237181,
+    223.5,
+    223.54,
+    0.1,
+    -1,
+    -3.7,
+    223.51
+   ],
+   [
+    1511,
+    39.798369,
+    -86.237248,
+    223.5,
+    223.52,
+    0.2,
+    -1.1,
+    -4.3,
+    223.51
+   ],
+   [
+    1521,
+    39.79829,
+    -86.237295,
+    223.49,
+    223.48,
+    0.2,
+    -0.9,
+    -4.4,
+    223.5
+   ],
+   [
+    1531,
+    39.798206,
+    -86.237325,
+    223.49,
+    223.45,
+    0.1,
+    -1,
+    -4.4,
+    223.49
+   ],
+   [
+    1541,
+    39.798118,
+    -86.237328,
+    223.49,
+    223.44,
+    0,
+    -1.1,
+    -3.9,
+    223.5
+   ],
+   [
+    1551,
+    39.798031,
+    -86.23731,
+    223.46,
+    223.44,
+    0.1,
+    -1.3,
+    -3.8,
+    223.46
+   ],
+   [
+    1561,
+    39.797948,
+    -86.237276,
+    223.46,
+    223.44,
+    0.4,
+    -1.1,
+    -4.3,
+    223.47
+   ],
+   [
+    1571,
+    39.797872,
+    -86.237223,
+    223.45,
+    223.44,
+    0.2,
+    -1,
+    -3.9,
+    223.42
+   ],
+   [
+    1581,
+    39.797802,
+    -86.237153,
+    223.43,
+    223.44,
+    0.1,
+    -1,
+    -3.2,
+    223.44
+   ],
+   [
+    1591,
+    39.797743,
+    -86.237069,
+    223.41,
+    223.44,
+    0.3,
+    -1.1,
+    -3.4,
+    223.41
+   ],
+   [
+    1601,
+    39.797691,
+    -86.236979,
+    223.4,
+    223.44,
+    0.2,
+    -1,
+    -3.7,
+    223.41
+   ],
+   [
+    1611,
+    39.79765,
+    -86.236879,
+    223.38,
+    223.44,
+    0.3,
+    -1,
+    -3.7,
+    223.38
+   ],
+   [
+    1621,
+    39.79762,
+    -86.236773,
+    223.38,
+    223.42,
+    0.1,
+    -1.1,
+    -3.8,
+    223.39
+   ],
+   [
+    1631,
+    39.797605,
+    -86.236661,
+    223.38,
+    223.38,
+    0,
+    -1.1,
+    -3.5,
+    223.36
+   ],
+   [
+    1641,
+    39.797601,
+    -86.236548,
+    223.37,
+    223.35,
+    0.1,
+    -1,
+    -3.3,
+    223.38
+   ],
+   [
+    1651,
+    39.797611,
+    -86.236435,
+    223.38,
+    223.34,
+    0.2,
+    -0.8,
+    -3.5,
+    223.37
+   ],
+   [
+    1661,
+    39.797633,
+    -86.236326,
+    223.37,
+    223.34,
+    0.4,
+    -1,
+    -3.8,
+    223.39
+   ],
+   [
+    1671,
+    39.797666,
+    -86.236222,
+    223.36,
+    223.34,
+    0.3,
+    -0.9,
+    -3.2,
+    223.38
+   ],
+   [
+    1681,
+    39.797714,
+    -86.236127,
+    223.35,
+    223.34,
+    0.6,
+    -0.6,
+    -1.9,
+    223.35
+   ],
+   [
+    1691,
+    39.797764,
+    -86.236034,
+    223.34,
+    223.34,
+    0.5,
+    -0.2,
+    -0.7,
+    223.34
+   ],
+   [
+    1701,
+    39.797814,
+    -86.235941,
+    223.32,
+    223.34,
+    0.3,
+    0.1,
+    0.3,
+    223.31
+   ],
+   [
+    1711,
+    39.797864,
+    -86.235848,
+    223.32,
+    223.34,
+    0.1,
+    0.6,
+    1.6,
+    223.32
+   ],
+   [
+    1721,
+    39.797911,
+    -86.235751,
+    223.34,
+    223.34,
+    0.1,
+    0.6,
+    3.4,
+    223.34
+   ],
+   [
+    1731,
+    39.797948,
+    -86.235649,
+    223.34,
+    223.34,
+    0.1,
+    1,
+    4.8,
+    223.34
+   ],
+   [
+    1741,
+    39.797962,
+    -86.235537,
+    223.34,
+    223.34,
+    0.1,
+    1.1,
+    5.2,
+    223.33
+   ],
+   [
+    1751,
+    39.79795,
+    -86.235425,
+    223.32,
+    223.34,
+    0.1,
+    1.1,
+    5.1,
+    223.31
+   ],
+   [
+    1761,
+    39.797914,
+    -86.235322,
+    223.32,
+    223.32,
+    0.1,
+    0.9,
+    4.7,
+    223.29
+   ],
+   [
+    1771,
+    39.797861,
+    -86.23523,
+    223.31,
+    223.29,
+    0.2,
+    1,
+    4.3,
+    223.31
+   ],
+   [
+    1781,
+    39.797795,
+    -86.235155,
+    223.28,
+    223.25,
+    0.2,
+    0.6,
+    3.7,
+    223.28
+   ],
+   [
+    1791,
+    39.797721,
+    -86.235092,
+    223.27,
+    223.24,
+    0.4,
+    0.7,
+    3,
+    223.27
+   ],
+   [
+    1801,
+    39.797642,
+    -86.235045,
+    223.25,
+    223.24,
+    0.1,
+    0.4,
+    3,
+    223.26
+   ],
+   [
+    1811,
+    39.797558,
+    -86.235011,
+    223.25,
+    223.24,
+    0.4,
+    0.6,
+    3.5,
+    223.26
+   ],
+   [
+    1821,
+    39.797473,
+    -86.234984,
+    223.23,
+    223.24,
+    0.1,
+    0.6,
+    2.9,
+    223.22
+   ],
+   [
+    1831,
+    39.797385,
+    -86.234982,
+    223.18,
+    223.23,
+    0.3,
+    0.4,
+    1.4,
+    223.18
+   ],
+   [
+    1841,
+    39.797298,
+    -86.23498,
+    223.17,
+    223.21,
+    0.4,
+    0.5,
+    0.5,
+    223.17
+   ],
+   [
+    1851,
+    39.79721,
+    -86.234979,
+    223.15,
+    223.2,
+    0.3,
+    0.5,
+    0.2,
+    223.14
+   ],
+   [
+    1861,
+    39.797122,
+    -86.234977,
+    223.13,
+    223.18,
+    0.2,
+    0.6,
+    0,
+    223.12
+   ],
+   [
+    1871,
+    39.797034,
+    -86.234976,
+    223.12,
+    223.16,
+    0.1,
+    0.7,
+    -0.1,
+    223.12
+   ],
+   [
+    1881,
+    39.796946,
+    -86.234974,
+    223.08,
+    223.14,
+    0,
+    0.5,
+    -0.1,
+    223.09
+   ],
+   [
+    1891,
+    39.796858,
+    -86.234973,
+    223.08,
+    223.13,
+    0,
+    0.6,
+    -0.1,
+    223.09
+   ],
+   [
+    1901,
+    39.796771,
+    -86.234972,
+    223.08,
+    223.11,
+    0,
+    0.7,
+    0,
+    223.09
+   ],
+   [
+    1911,
+    39.796683,
+    -86.23497,
+    223.06,
+    223.09,
+    0,
+    0.5,
+    0,
+    223.06
+   ],
+   [
+    1921,
+    39.796595,
+    -86.234969,
+    223.04,
+    223.07,
+    0,
+    0.5,
+    0,
+    223.03
+   ],
+   [
+    1931,
+    39.796507,
+    -86.234968,
+    223.04,
+    223.05,
+    0,
+    0.7,
+    0,
+    223.03
+   ],
+   [
+    1941,
+    39.796419,
+    -86.234966,
+    223.03,
+    223.04,
+    0,
+    0.6,
+    0,
+    223.03
+   ],
+   [
+    1951,
+    39.796331,
+    -86.234965,
+    223.03,
+    223.04,
+    0,
+    0.4,
+    0,
+    223.03
+   ],
+   [
+    1961,
+    39.796243,
+    -86.234964,
+    223.03,
+    223.04,
+    0,
+    0.6,
+    0,
+    223.04
+   ],
+   [
+    1971,
+    39.796156,
+    -86.234962,
+    223.03,
+    223.04,
+    0,
+    0.5,
+    0,
+    223.03
+   ],
+   [
+    1981,
+    39.796068,
+    -86.234961,
+    223.03,
+    223.04,
+    0.1,
+    0.4,
+    0,
+    223.02
+   ],
+   [
+    1991,
+    39.79598,
+    -86.23496,
+    223.03,
+    223.04,
+    0.1,
+    0.3,
+    0,
+    223.03
+   ],
+   [
+    2001,
+    39.795892,
+    -86.234958,
+    223.03,
+    223.04,
+    0.1,
+    0.4,
+    0,
+    223.04
+   ],
+   [
+    2011,
+    39.795804,
+    -86.234957,
+    223.03,
+    223.03,
+    0.1,
+    0.4,
+    0,
+    223.03
+   ],
+   [
+    2021,
+    39.795716,
+    -86.234956,
+    223,
+    223.01,
+    0.1,
+    0.6,
+    0,
+    223.01
+   ],
+   [
+    2031,
+    39.795629,
+    -86.234954,
+    222.97,
+    223,
+    0.1,
+    0.7,
+    0,
+    222.99
+   ],
+   [
+    2041,
+    39.795541,
+    -86.234953,
+    222.97,
+    222.98,
+    0.1,
+    0.2,
+    0,
+    222.97
+   ],
+   [
+    2051,
+    39.795453,
+    -86.234952,
+    222.96,
+    222.96,
+    0.1,
+    0.7,
+    0,
+    222.98
+   ],
+   [
+    2061,
+    39.795365,
+    -86.23495,
+    222.95,
+    222.94,
+    0.1,
+    0.5,
+    0,
+    222.96
+   ],
+   [
+    2071,
+    39.795277,
+    -86.234949,
+    222.94,
+    222.92,
+    0.1,
+    0.7,
+    0,
+    222.94
+   ],
+   [
+    2081,
+    39.795189,
+    -86.234948,
+    222.92,
+    222.91,
+    0.1,
+    0.4,
+    0,
+    222.91
+   ],
+   [
+    2091,
+    39.795102,
+    -86.234946,
+    222.89,
+    222.89,
+    0.1,
+    0.5,
+    0,
+    222.89
+   ],
+   [
+    2101,
+    39.795014,
+    -86.234945,
+    222.87,
+    222.87,
+    0.1,
+    0.4,
+    0,
+    222.86
+   ],
+   [
+    2111,
+    39.794926,
+    -86.234944,
+    222.85,
+    222.86,
+    0.2,
+    0.4,
+    0,
+    222.85
+   ],
+   [
+    2121,
+    39.794838,
+    -86.234942,
+    222.82,
+    222.84,
+    0.2,
+    0.4,
+    0,
+    222.83
+   ],
+   [
+    2131,
+    39.79475,
+    -86.234941,
+    222.82,
+    222.82,
+    0.2,
+    0.4,
+    0,
+    222.81
+   ],
+   [
+    2141,
+    39.794662,
+    -86.23494,
+    222.79,
+    222.81,
+    0.2,
+    0.3,
+    0,
+    222.79
+   ],
+   [
+    2151,
+    39.794574,
+    -86.234939,
+    222.78,
+    222.79,
+    0.2,
+    0.3,
+    0,
+    222.79
+   ],
+   [
+    2161,
+    39.794487,
+    -86.234937,
+    222.74,
+    222.77,
+    0.1,
+    0.4,
+    0,
+    222.76
+   ],
+   [
+    2171,
+    39.794399,
+    -86.234936,
+    222.71,
+    222.75,
+    0.1,
+    0.5,
+    0,
+    222.71
+   ],
+   [
+    2181,
+    39.794311,
+    -86.234935,
+    222.71,
+    222.74,
+    0.1,
+    0.3,
+    0,
+    222.72
+   ],
+   [
+    2191,
+    39.794223,
+    -86.234934,
+    222.7,
+    222.72,
+    0.1,
+    0.4,
+    0,
+    222.68
+   ],
+   [
+    2201,
+    39.794135,
+    -86.234932,
+    222.67,
+    222.71,
+    0.1,
+    0.5,
+    0,
+    222.68
+   ],
+   [
+    2211,
+    39.794047,
+    -86.234931,
+    222.64,
+    222.69,
+    0.2,
+    0.5,
+    0,
+    222.64
+   ],
+   [
+    2221,
+    39.79396,
+    -86.23493,
+    222.62,
+    222.68,
+    0.2,
+    0.5,
+    0,
+    222.61
+   ],
+   [
+    2231,
+    39.793872,
+    -86.234928,
+    222.61,
+    222.66,
+    0.2,
+    0.5,
+    0,
+    222.61
+   ],
+   [
+    2241,
+    39.793784,
+    -86.234927,
+    222.6,
+    222.63,
+    0.2,
+    0.7,
+    0,
+    222.6
+   ],
+   [
+    2251,
+    39.793696,
+    -86.234926,
+    222.59,
+    222.6,
+    0.2,
+    0.8,
+    0,
+    222.59
+   ],
+   [
+    2261,
+    39.793608,
+    -86.234925,
+    222.57,
+    222.57,
+    0.2,
+    0.6,
+    0,
+    222.59
+   ],
+   [
+    2271,
+    39.79352,
+    -86.234923,
+    222.53,
+    222.53,
+    0.2,
+    0.6,
+    0,
+    222.53
+   ],
+   [
+    2281,
+    39.793433,
+    -86.234922,
+    222.53,
+    222.5,
+    0.2,
+    0.7,
+    0,
+    222.51
+   ],
+   [
+    2291,
+    39.793345,
+    -86.234921,
+    222.48,
+    222.46,
+    0.2,
+    0.4,
+    0.1,
+    222.48
+   ],
+   [
+    2301,
+    39.793257,
+    -86.23492,
+    222.47,
+    222.44,
+    0.2,
+    0.3,
+    0.1,
+    222.47
+   ],
+   [
+    2311,
+    39.793169,
+    -86.234918,
+    222.45,
+    222.41,
+    0.2,
+    0.4,
+    0.1,
+    222.44
+   ],
+   [
+    2321,
+    39.793081,
+    -86.234917,
+    222.45,
+    222.39,
+    0.3,
+    0.2,
+    0,
+    222.45
+   ],
+   [
+    2331,
+    39.792993,
+    -86.234916,
+    222.44,
+    222.37,
+    0.5,
+    0.2,
+    -0.2,
+    222.44
+   ],
+   [
+    2341,
+    39.792906,
+    -86.234915,
+    222.4,
+    222.36,
+    0.5,
+    0.1,
+    -0.6,
+    222.41
+   ],
+   [
+    2351,
+    39.792818,
+    -86.234913,
+    222.4,
+    222.35,
+    0.4,
+    -0.1,
+    -1.4,
+    222.4
+   ],
+   [
+    2361,
+    39.79273,
+    -86.234915,
+    222.37,
+    222.34,
+    0.3,
+    -0.2,
+    -2.9,
+    222.37
+   ],
+   [
+    2371,
+    39.792644,
+    -86.234892,
+    222.35,
+    222.34,
+    0.1,
+    -0.5,
+    -3.9,
+    222.36
+   ],
+   [
+    2381,
+    39.792561,
+    -86.234852,
+    222.35,
+    222.34,
+    0.3,
+    -0.8,
+    -4,
+    222.35
+   ],
+   [
+    2391,
+    39.792486,
+    -86.234793,
+    222.37,
+    222.34,
+    0.2,
+    -1,
+    -3.8,
+    222.35
+   ],
+   [
+    2401,
+    39.792421,
+    -86.234717,
+    222.37,
+    222.34,
+    0.1,
+    -0.8,
+    -3.5,
+    222.37
+   ],
+   [
+    2411,
+    39.792362,
+    -86.234632,
+    222.37,
+    222.34,
+    0.1,
+    -1,
+    -3.6,
+    222.38
+   ],
+   [
+    2421,
+    39.792313,
+    -86.234538,
+    222.35,
+    222.32,
+    0.1,
+    -1.2,
+    -3.6,
+    222.36
+   ],
+   [
+    2431,
+    39.792278,
+    -86.234435,
+    222.31,
+    222.29,
+    0.3,
+    -1.2,
+    -3.2,
+    222.29
+   ],
+   [
+    2441,
+    39.792248,
+    -86.234328,
+    222.29,
+    222.25,
+    0.1,
+    -0.8,
+    -3,
+    222.29
+   ],
+   [
+    2451,
+    39.792234,
+    -86.234216,
+    222.21,
+    222.2,
+    0.1,
+    -0.6,
+    -2.8,
+    222.21
+   ],
+   [
+    2461,
+    39.792231,
+    -86.234104,
+    222.16,
+    222.15,
+    0.8,
+    -0.4,
+    -2.5,
+    222.19
+   ],
+   [
+    2471,
+    39.792235,
+    -86.23399,
+    222.1,
+    222.1,
+    1,
+    0.1,
+    -1.4,
+    222.11
+   ],
+   [
+    2481,
+    39.792238,
+    -86.233877,
+    222.06,
+    222.07,
+    0.7,
+    0,
+    -0.3,
+    222.06
+   ],
+   [
+    2491,
+    39.792242,
+    -86.233764,
+    222.03,
+    222.05,
+    0.4,
+    0.4,
+    0.3,
+    222.05
+   ],
+   [
+    2501,
+    39.792245,
+    -86.23365,
+    222.03,
+    222.04,
+    0.1,
+    0.7,
+    1.2,
+    222.03
+   ],
+   [
+    2511,
+    39.792248,
+    -86.233537,
+    222.05,
+    222.06,
+    0.2,
+    0.9,
+    2.7,
+    222.05
+   ],
+   [
+    2521,
+    39.792239,
+    -86.233424,
+    222.09,
+    222.09,
+    0,
+    0.9,
+    3.9,
+    222.08
+   ],
+   [
+    2531,
+    39.792215,
+    -86.233315,
+    222.11,
+    222.13,
+    0.1,
+    0.9,
+    4.1,
+    222.1
+   ],
+   [
+    2541,
+    39.792178,
+    -86.233212,
+    222.15,
+    222.14,
+    0,
+    0.9,
+    4.1,
+    222.13
+   ],
+   [
+    2551,
+    39.792127,
+    -86.23312,
+    222.15,
+    222.14,
+    0,
+    1,
+    4.3,
+    222.18
+   ],
+   [
+    2561,
+    39.792064,
+    -86.233041,
+    222.14,
+    222.13,
+    0,
+    0.9,
+    4.5,
+    222.15
+   ],
+   [
+    2571,
+    39.791988,
+    -86.232984,
+    222.12,
+    222.1,
+    0.1,
+    1,
+    3.7,
+    222.13
+   ],
+   [
+    2581,
+    39.791906,
+    -86.232946,
+    222.09,
+    222.06,
+    0.2,
+    0.8,
+    1.2,
+    222.1
+   ],
+   [
+    2591,
+    39.791821,
+    -86.232914,
+    222.04,
+    222.01,
+    0.3,
+    0.6,
+    -2.2,
+    222.04
+   ],
+   [
+    2601,
+    39.791742,
+    -86.232866,
+    221.99,
+    221.97,
+    0.1,
+    0.1,
+    -4.1,
+    221.99
+   ],
+   [
+    2611,
+    39.791669,
+    -86.232802,
+    221.96,
+    221.91,
+    0.1,
+    0.2,
+    -4.8,
+    221.96
+   ],
+   [
+    2621,
+    39.791615,
+    -86.232713,
+    221.9,
+    221.86,
+    0.2,
+    -0.1,
+    -4.7,
+    221.9
+   ],
+   [
+    2631,
+    39.791573,
+    -86.232614,
+    221.84,
+    221.81,
+    0.2,
+    -0.1,
+    -4.2,
+    221.82
+   ],
+   [
+    2641,
+    39.791549,
+    -86.232504,
+    221.73,
+    221.76,
+    0,
+    0,
+    -3.8,
+    221.73
+   ],
+   [
+    2651,
+    39.791541,
+    -86.232392,
+    221.64,
+    221.71,
+    0.2,
+    0.1,
+    -2.7,
+    221.63
+   ],
+   [
+    2661,
+    39.79154,
+    -86.232278,
+    221.6,
+    221.65,
+    0.1,
+    0.2,
+    -1.6,
+    221.62
+   ],
+   [
+    2671,
+    39.791546,
+    -86.232165,
+    221.6,
+    221.61,
+    0.4,
+    0.4,
+    -0.8,
+    221.59
+   ],
+   [
+    2681,
+    39.791552,
+    -86.232052,
+    221.59,
+    221.58,
+    0.4,
+    0.4,
+    -0.3,
+    221.58
+   ],
+   [
+    2691,
+    39.791558,
+    -86.231939,
+    221.55,
+    221.56,
+    0.4,
+    0.5,
+    -0.2,
+    221.53
+   ],
+   [
+    2701,
+    39.791564,
+    -86.231825,
+    221.54,
+    221.54,
+    0.3,
+    0.6,
+    -0.3,
+    221.54
+   ],
+   [
+    2711,
+    39.79157,
+    -86.231712,
+    221.51,
+    221.53,
+    0.1,
+    0.7,
+    0,
+    221.54
+   ],
+   [
+    2721,
+    39.791575,
+    -86.231599,
+    221.5,
+    221.53,
+    0.2,
+    1,
+    1.3,
+    221.5
+   ],
+   [
+    2731,
+    39.791581,
+    -86.231486,
+    221.5,
+    221.54,
+    0.3,
+    1,
+    3.2,
+    221.49
+   ],
+   [
+    2741,
+    39.791576,
+    -86.231373,
+    221.5,
+    221.54,
+    0,
+    1.2,
+    4.9,
+    221.52
+   ],
+   [
+    2751,
+    39.791545,
+    -86.231267,
+    221.5,
+    221.54,
+    0.1,
+    0.8,
+    5.4,
+    221.51
+   ],
+   [
+    2761,
+    39.791487,
+    -86.231183,
+    221.5,
+    221.54,
+    0.1,
+    1.3,
+    5,
+    221.49
+   ],
+   [
+    2771,
+    39.791412,
+    -86.231124,
+    221.57,
+    221.54,
+    0.3,
+    0.6,
+    3.9,
+    221.57
+   ],
+   [
+    2781,
+    39.791332,
+    -86.23108,
+    221.57,
+    221.54,
+    0.2,
+    1.2,
+    2.5,
+    221.59
+   ],
+   [
+    2791,
+    39.791249,
+    -86.231043,
+    221.57,
+    221.54,
+    0.1,
+    0.9,
+    1.6,
+    221.57
+   ],
+   [
+    2801,
+    39.791164,
+    -86.231013,
+    221.56,
+    221.54,
+    0,
+    0.9,
+    1.4,
+    221.57
+   ],
+   [
+    2811,
+    39.791078,
+    -86.230989,
+    221.54,
+    221.54,
+    0.1,
+    0.5,
+    1.5,
+    221.52
+   ],
+   [
+    2821,
+    39.790991,
+    -86.230969,
+    221.54,
+    221.54,
+    0.2,
+    0.2,
+    1.9,
+    221.53
+   ],
+   [
+    2831,
+    39.790904,
+    -86.230963,
+    221.54,
+    221.54,
+    0.1,
+    0.4,
+    2.1,
+    221.55
+   ],
+   [
+    2841,
+    39.790816,
+    -86.230961,
+    221.54,
+    221.52,
+    0,
+    0.5,
+    1.8,
+    221.54
+   ],
+   [
+    2851,
+    39.790728,
+    -86.230969,
+    221.49,
+    221.48,
+    0,
+    0.4,
+    1.3,
+    221.5
+   ],
+   [
+    2861,
+    39.790641,
+    -86.230981,
+    221.48,
+    221.43,
+    0,
+    0,
+    0.9,
+    221.48
+   ],
+   [
+    2871,
+    39.790554,
+    -86.230998,
+    221.41,
+    221.39,
+    0.1,
+    0.3,
+    0.4,
+    221.4
+   ],
+   [
+    2881,
+    39.790467,
+    -86.231015,
+    221.39,
+    221.36,
+    0.1,
+    0.3,
+    0.2,
+    221.39
+   ],
+   [
+    2891,
+    39.790381,
+    -86.231032,
+    221.37,
+    221.33,
+    0.1,
+    0.3,
+    0,
+    221.36
+   ],
+   [
+    2901,
+    39.790294,
+    -86.231049,
+    221.34,
+    221.3,
+    0,
+    0.6,
+    0,
+    221.34
+   ],
+   [
+    2911,
+    39.790207,
+    -86.231066,
+    221.31,
+    221.26,
+    0,
+    0.4,
+    -0.1,
+    221.3
+   ],
+   [
+    2921,
+    39.79012,
+    -86.231083,
+    221.26,
+    221.21,
+    0.1,
+    0.4,
+    -0.1,
+    221.24
+   ],
+   [
+    2931,
+    39.790033,
+    -86.2311,
+    221.19,
+    221.14,
+    0.1,
+    0.5,
+    0,
+    221.19
+   ],
+   [
+    2941,
+    39.789946,
+    -86.231117,
+    221.1,
+    221.06,
+    0.1,
+    0.5,
+    0,
+    221.13
+   ],
+   [
+    2951,
+    39.789859,
+    -86.231133,
+    221.03,
+    220.98,
+    0,
+    0.9,
+    -0.1,
+    221.06
+   ],
+   [
+    2961,
+    39.789772,
+    -86.23115,
+    220.93,
+    220.9,
+    0,
+    0.7,
+    -0.1,
+    220.93
+   ],
+   [
+    2971,
+    39.789686,
+    -86.231168,
+    220.85,
+    220.82,
+    0.2,
+    0.9,
+    0.2,
+    220.86
+   ],
+   [
+    2981,
+    39.789599,
+    -86.231185,
+    220.76,
+    220.74,
+    0.4,
+    0.8,
+    0.9,
+    220.78
+   ],
+   [
+    2991,
+    39.789512,
+    -86.231204,
+    220.64,
+    220.67,
+    0.4,
+    0.7,
+    1.7,
+    220.67
+   ],
+   [
+    3001,
+    39.789427,
+    -86.231229,
+    220.57,
+    220.6,
+    0.2,
+    0.6,
+    1.5,
+    220.55
+   ],
+   [
+    3011,
+    39.789343,
+    -86.231261,
+    220.51,
+    220.56,
+    0.1,
+    0.7,
+    0.8,
+    220.51
+   ],
+   [
+    3021,
+    39.78926,
+    -86.231298,
+    220.5,
+    220.54,
+    0.1,
+    0.9,
+    1.6,
+    220.49
+   ],
+   [
+    3031,
+    39.789178,
+    -86.231338,
+    220.5,
+    220.54,
+    0.1,
+    1.1,
+    2.6,
+    220.5
+   ],
+   [
+    3041,
+    39.789099,
+    -86.231387,
+    220.53,
+    220.57,
+    0.4,
+    1.3,
+    2.1,
+    220.53
+   ],
+   [
+    3051,
+    39.789022,
+    -86.231442,
+    220.55,
+    220.6,
+    1.1,
+    1.2,
+    1.1,
+    220.52
+   ],
+   [
+    3061,
+    39.788949,
+    -86.231508,
+    220.59,
+    220.64,
+    1.1,
+    1.4,
+    0.6,
+    220.55
+   ],
+   [
+    3071,
+    39.788879,
+    -86.231578,
+    220.64,
+    220.67,
+    0.7,
+    1.4,
+    0.9,
+    220.62
+   ],
+   [
+    3081,
+    39.788813,
+    -86.231652,
+    220.72,
+    220.71,
+    0.1,
+    1.3,
+    1.5,
+    220.69
+   ],
+   [
+    3091,
+    39.788748,
+    -86.231729,
+    220.79,
+    220.77,
+    0.1,
+    1.6,
+    1.8,
+    220.8
+   ],
+   [
+    3101,
+    39.788682,
+    -86.231804,
+    220.89,
+    220.84,
+    0.4,
+    2,
+    2,
+    220.85
+   ],
+   [
+    3111,
+    39.788624,
+    -86.23189,
+    220.98,
+    220.92,
+    0.4,
+    2.1,
+    1.8,
+    220.97
+   ],
+   [
+    3121,
+    39.788568,
+    -86.231978,
+    221.04,
+    220.99,
+    0.7,
+    2.3,
+    1.5,
+    220.99
+   ],
+   [
+    3131,
+    39.788515,
+    -86.23207,
+    221.09,
+    221.05,
+    1.1,
+    2.1,
+    1.4,
+    221.05
+   ],
+   [
+    3141,
+    39.78847,
+    -86.232168,
+    221.16,
+    221.11,
+    0.9,
+    2,
+    1.4,
+    221.11
+   ],
+   [
+    3151,
+    39.78843,
+    -86.232269,
+    221.21,
+    221.15,
+    0.6,
+    1.8,
+    1.5,
+    221.19
+   ],
+   [
+    3161,
+    39.788393,
+    -86.232372,
+    221.23,
+    221.19,
+    0.5,
+    1.6,
+    1.3,
+    221.22
+   ],
+   [
+    3171,
+    39.788359,
+    -86.232478,
+    221.26,
+    221.21,
+    0.4,
+    2.1,
+    1.2,
+    221.21
+   ],
+   [
+    3181,
+    39.788332,
+    -86.232586,
+    221.26,
+    221.23,
+    0.1,
+    2.2,
+    1.3,
+    221.24
+   ],
+   [
+    3191,
+    39.788307,
+    -86.232694,
+    221.24,
+    221.24,
+    0.4,
+    2.1,
+    1.5,
+    221.25
+   ],
+   [
+    3201,
+    39.788286,
+    -86.232804,
+    221.2,
+    221.24,
+    0.5,
+    2.5,
+    1.4,
+    221.23
+   ],
+   [
+    3211,
+    39.788267,
+    -86.232915,
+    221.19,
+    221.24,
+    0.5,
+    2.4,
+    1.2,
+    221.22
+   ],
+   [
+    3221,
+    39.788254,
+    -86.233027,
+    221.19,
+    221.24,
+    0.6,
+    2.7,
+    0.9,
+    221.21
+   ],
+   [
+    3231,
+    39.788241,
+    -86.233139,
+    221.18,
+    221.24,
+    0.4,
+    2.9,
+    0.7,
+    221.2
+   ],
+   [
+    3241,
+    39.788233,
+    -86.233252,
+    221.18,
+    221.24,
+    0.6,
+    3,
+    0.6,
+    221.21
+   ],
+   [
+    3251,
+    39.788229,
+    -86.233365,
+    221.16,
+    221.24,
+    1,
+    3,
+    0.4,
+    221.21
+   ],
+   [
+    3261,
+    39.788224,
+    -86.233478,
+    221.12,
+    221.24,
+    1.2,
+    2.9,
+    0.1,
+    221.18
+   ],
+   [
+    3271,
+    39.78822,
+    -86.233592,
+    221.12,
+    221.24,
+    1.4,
+    2.7,
+    -0.1,
+    221.13
+   ],
+   [
+    3281,
+    39.788215,
+    -86.233705,
+    221.11,
+    221.24,
+    1.7,
+    2.5,
+    -0.1,
+    221.23
+   ],
+   [
+    3291,
+    39.788211,
+    -86.233818,
+    221.13,
+    221.24,
+    2,
+    2.3,
+    0,
+    221.24
+   ],
+   [
+    3301,
+    39.788207,
+    -86.233932,
+    221.13,
+    221.24,
+    2.3,
+    1.9,
+    0.2,
+    221.2
+   ],
+   [
+    3311,
+    39.788202,
+    -86.234045,
+    221.13,
+    221.24,
+    2.6,
+    2,
+    0.3,
+    221.22
+   ],
+   [
+    3321,
+    39.788198,
+    -86.234158,
+    221.13,
+    221.24,
+    2.7,
+    1.7,
+    0.3,
+    221.2
+   ],
+   [
+    3331,
+    39.788193,
+    -86.234272,
+    221.12,
+    221.23,
+    2.8,
+    1.5,
+    0.2,
+    221.19
+   ],
+   [
+    3341,
+    39.788189,
+    -86.234385,
+    221.13,
+    221.22,
+    2.7,
+    1.5,
+    0.1,
+    221.19
+   ],
+   [
+    3351,
+    39.788184,
+    -86.234499,
+    221.14,
+    221.22,
+    2.6,
+    1.4,
+    0,
+    221.22
+   ],
+   [
+    3361,
+    39.78818,
+    -86.234612,
+    221.15,
+    221.23,
+    2.6,
+    1.3,
+    0,
+    221.24
+   ],
+   [
+    3371,
+    39.788176,
+    -86.234725,
+    221.19,
+    221.25,
+    2.5,
+    1.5,
+    -0.1,
+    221.27
+   ],
+   [
+    3381,
+    39.788171,
+    -86.234839,
+    221.2,
+    221.28,
+    2.4,
+    1.8,
+    0,
+    221.27
+   ],
+   [
+    3391,
+    39.788124,
+    -86.23495,
+    221.4,
+    221.33,
+    2.4,
+    2.1,
+    0,
+    221.27
+   ],
+   [
+    3401,
+    39.788123,
+    -86.235064,
+    221.46,
+    221.39,
+    2,
+    2.7,
+    0.1,
+    221.33
+   ],
+   [
+    3411,
+    39.788123,
+    -86.235177,
+    221.54,
+    221.45,
+    1.7,
+    2.8,
+    0.1,
+    221.43
+   ],
+   [
+    3421,
+    39.788122,
+    -86.235291,
+    221.55,
+    221.52,
+    1.3,
+    3.3,
+    0.6,
+    221.53
+   ],
+   [
+    3431,
+    39.788121,
+    -86.235404,
+    221.65,
+    221.58,
+    1.1,
+    4,
+    4.3,
+    221.58
+   ],
+   [
+    3441,
+    39.788121,
+    -86.235518,
+    221.72,
+    221.64,
+    0.9,
+    4.3,
+    8.3,
+    221.66
+   ],
+   [
+    3451,
+    39.78812,
+    -86.235631,
+    221.74,
+    221.72,
+    0.7,
+    4.8,
+    9.2,
+    221.68
+   ],
+   [
+    3461,
+    39.78812,
+    -86.235745,
+    221.8,
+    221.8,
+    0.4,
+    5.2,
+    9.2,
+    221.72
+   ],
+   [
+    3471,
+    39.78812,
+    -86.235858,
+    221.91,
+    221.89,
+    0,
+    5.8,
+    9.2,
+    221.9
+   ],
+   [
+    3481,
+    39.78812,
+    -86.235972,
+    222.02,
+    221.99,
+    0.1,
+    5.9,
+    9.2,
+    222
+   ],
+   [
+    3491,
+    39.788125,
+    -86.236085,
+    222.11,
+    222.08,
+    0.2,
+    6.5,
+    9.2,
+    222.03
+   ],
+   [
+    3501,
+    39.788135,
+    -86.236198,
+    222.19,
+    222.17,
+    0.2,
+    7.1,
+    9.2,
+    222.2
+   ],
+   [
+    3511,
+    39.788145,
+    -86.23631,
+    222.28,
+    222.25,
+    0.1,
+    7.4,
+    9.2,
+    222.19
+   ],
+   [
+    3521,
+    39.788162,
+    -86.236422,
+    222.31,
+    222.33,
+    0,
+    7.9,
+    9.2,
+    222.36
+   ],
+   [
+    3531,
+    39.788178,
+    -86.236533,
+    222.43,
+    222.4,
+    0.3,
+    7.9,
+    9.2,
+    222.41
+   ],
+   [
+    3541,
+    39.788204,
+    -86.236642,
+    222.45,
+    222.43,
+    0.1,
+    7.9,
+    9.2,
+    222.54
+   ],
+   [
+    3551,
+    39.788229,
+    -86.236751,
+    222.55,
+    222.46,
+    0,
+    8.4,
+    9.2,
+    222.58
+   ],
+   [
+    3561,
+    39.788262,
+    -86.236856,
+    222.55,
+    222.5,
+    0.1,
+    8.4,
+    9.2,
+    222.5
+   ],
+   [
+    3571,
+    39.788297,
+    -86.236961,
+    222.55,
+    222.53,
+    0,
+    8.2,
+    9.2,
+    222.48
+   ],
+   [
+    3581,
+    39.788333,
+    -86.237064,
+    222.55,
+    222.55,
+    0,
+    8.4,
+    9.2,
+    222.62
+   ],
+   [
+    3591,
+    39.788372,
+    -86.237166,
+    222.56,
+    222.54,
+    0,
+    9.2,
+    9.2,
+    222.48
+   ],
+   [
+    3601,
+    39.788412,
+    -86.237266,
+    222.56,
+    222.54,
+    0,
+    8.5,
+    9.2,
+    222.59
+   ],
+   [
+    3611,
+    39.788458,
+    -86.237363,
+    222.58,
+    222.54,
+    0.3,
+    8.6,
+    9.2,
+    222.46
+   ],
+   [
+    3621,
+    39.788505,
+    -86.237459,
+    222.54,
+    222.54,
+    0.1,
+    8.4,
+    9.2,
+    222.61
+   ],
+   [
+    3631,
+    39.788559,
+    -86.237549,
+    222.49,
+    222.54,
+    0.6,
+    9,
+    9.2,
+    222.42
+   ],
+   [
+    3641,
+    39.788612,
+    -86.237639,
+    222.48,
+    222.54,
+    0.8,
+    8.3,
+    9.2,
+    222.53
+   ],
+   [
+    3651,
+    39.788666,
+    -86.237729,
+    222.48,
+    222.54,
+    0.7,
+    8.6,
+    9.2,
+    222.6
+   ],
+   [
+    3661,
+    39.788722,
+    -86.237815,
+    222.48,
+    222.54,
+    0.5,
+    8.8,
+    9.2,
+    222.59
+   ],
+   [
+    3671,
+    39.788785,
+    -86.237893,
+    222.43,
+    222.54,
+    0.5,
+    8.6,
+    9.2,
+    222.43
+   ],
+   [
+    3681,
+    39.788849,
+    -86.237971,
+    222.43,
+    222.54,
+    0.1,
+    9.1,
+    9.2,
+    222.42
+   ],
+   [
+    3691,
+    39.788912,
+    -86.23805,
+    222.51,
+    222.54,
+    0,
+    8.4,
+    9.2,
+    222.51
+   ],
+   [
+    3701,
+    39.788977,
+    -86.238127,
+    222.55,
+    222.54,
+    0,
+    8.7,
+    9.2,
+    222.51
+   ],
+   [
+    3711,
+    39.789046,
+    -86.238196,
+    222.55,
+    222.54,
+    0.3,
+    8.1,
+    9.2,
+    222.67
+   ],
+   [
+    3721,
+    39.789116,
+    -86.238265,
+    222.57,
+    222.54,
+    0.1,
+    8.9,
+    9.2,
+    222.64
+   ],
+   [
+    3731,
+    39.789189,
+    -86.238327,
+    222.57,
+    222.56,
+    0.3,
+    8.4,
+    9.2,
+    222.53
+   ],
+   [
+    3741,
+    39.789263,
+    -86.238389,
+    222.58,
+    222.59,
+    0.4,
+    8.9,
+    9.2,
+    222.52
+   ],
+   [
+    3751,
+    39.789338,
+    -86.238448,
+    222.66,
+    222.61,
+    0.4,
+    8.3,
+    9.2,
+    222.7
+   ],
+   [
+    3761,
+    39.789414,
+    -86.238506,
+    222.67,
+    222.63,
+    0.1,
+    9.2,
+    9.2,
+    222.65
+   ],
+   [
+    3771,
+    39.789492,
+    -86.238555,
+    222.7,
+    222.63,
+    0.1,
+    8.8,
+    9.2,
+    222.59
+   ],
+   [
+    3781,
+    39.789574,
+    -86.238599,
+    222.72,
+    222.61,
+    0.3,
+    8.8,
+    9.2,
+    222.63
+   ],
+   [
+    3791,
+    39.789656,
+    -86.238637,
+    222.72,
+    222.58,
+    0.4,
+    8.6,
+    9.2,
+    222.51
+   ],
+   [
+    3801,
+    39.789739,
+    -86.238674,
+    222.65,
+    222.54,
+    0.3,
+    8.8,
+    9.2,
+    222.75
+   ],
+   [
+    3811,
+    39.789824,
+    -86.238701,
+    222.58,
+    222.5,
+    0.5,
+    8.5,
+    9.2,
+    222.6
+   ],
+   [
+    3821,
+    39.78991,
+    -86.238726,
+    222.48,
+    222.45,
+    0.4,
+    8.1,
+    9.2,
+    222.35
+   ],
+   [
+    3831,
+    39.789995,
+    -86.238751,
+    222.45,
+    222.4,
+    0,
+    7.8,
+    9.2,
+    222.44
+   ],
+   [
+    3841,
+    39.790082,
+    -86.238769,
+    222.35,
+    222.34,
+    0,
+    7.6,
+    9.2,
+    222.41
+   ],
+   [
+    3851,
+    39.790169,
+    -86.238783,
+    222.27,
+    222.29,
+    0.1,
+    7.1,
+    9.2,
+    222.31
+   ],
+   [
+    3861,
+    39.790257,
+    -86.238795,
+    222.22,
+    222.24,
+    0.2,
+    6.5,
+    9.2,
+    222.18
+   ],
+   [
+    3871,
+    39.790344,
+    -86.238802,
+    222.17,
+    222.18,
+    0,
+    5.9,
+    9.2,
+    222.21
+   ],
+   [
+    3881,
+    39.790432,
+    -86.238809,
+    222.09,
+    222.12,
+    0.2,
+    5.6,
+    9.2,
+    222.17
+   ],
+   [
+    3891,
+    39.79052,
+    -86.238815,
+    222.07,
+    222.06,
+    0.3,
+    5.2,
+    9.2,
+    222.05
+   ],
+   [
+    3901,
+    39.790607,
+    -86.238819,
+    222.03,
+    222.01,
+    0.3,
+    4.4,
+    9.2,
+    222.07
+   ],
+   [
+    3911,
+    39.790695,
+    -86.238822,
+    222,
+    221.97,
+    0.2,
+    3.7,
+    9.2,
+    222.02
+   ],
+   [
+    3921,
+    39.790783,
+    -86.238823,
+    221.97,
+    221.93,
+    0.1,
+    3.7,
+    8.9,
+    221.96
+   ],
+   [
+    3931,
+    39.790871,
+    -86.238824,
+    221.89,
+    221.9,
+    0.1,
+    2.6,
+    5.4,
+    221.88
+   ],
+   [
+    3941,
+    39.790959,
+    -86.238825,
+    221.84,
+    221.87,
+    0,
+    2.3,
+    1,
+    221.82
+   ],
+   [
+    3951,
+    39.791047,
+    -86.238826,
+    221.83,
+    221.84,
+    0.1,
+    2,
+    -0.1,
+    221.85
+   ],
+   [
+    3961,
+    39.791134,
+    -86.238827,
+    221.8,
+    221.82,
+    0.1,
+    1.7,
+    -0.1,
+    221.81
+   ],
+   [
+    3971,
+    39.791222,
+    -86.238828,
+    221.76,
+    221.79,
+    0,
+    1.2,
+    0,
+    221.77
+   ],
+   [
+    3981,
+    39.79131,
+    -86.238829,
+    221.71,
+    221.77,
+    0.1,
+    1,
+    0,
+    221.71
+   ],
+   [
+    3991,
+    39.791398,
+    -86.238831,
+    221.71,
+    221.75,
+    0.1,
+    0.4,
+    0,
+    221.7
+   ],
+   [
+    4001,
+    39.791486,
+    -86.238832,
+    221.72,
+    221.74,
+    0.1,
+    0.5,
+    0,
+    221.71
+   ],
+   [
+    4011,
+    39.791574,
+    -86.238833,
+    221.74,
+    221.74,
+    0.1,
+    0.4,
+    0,
+    221.74
+   ],
+   [
+    4021,
+    39.791661,
+    -86.238835,
+    221.77,
+    221.76,
+    0.1,
+    0.7,
+    0,
+    221.77
+   ],
+   [
+    4031,
+    39.791749,
+    -86.238836,
+    221.83,
+    221.78,
+    0.1,
+    0.8,
+    0,
+    221.83
+   ],
+   [
+    4041,
+    39.791837,
+    -86.238837,
+    221.88,
+    221.81,
+    0.2,
+    0.8,
+    0,
+    221.87
+   ],
+   [
+    4051,
+    39.791925,
+    -86.238839,
+    221.91,
+    221.85,
+    0.2,
+    0.9,
+    0,
+    221.92
+   ],
+   [
+    4061,
+    39.792013,
+    -86.23884,
+    221.96,
+    221.89,
+    0.2,
+    0.8,
+    0,
+    221.98
+   ],
+   [
+    4071,
+    39.792101,
+    -86.238841,
+    221.98,
+    221.93,
+    0.3,
+    0.7,
+    0,
+    221.99
+   ],
+   [
+    4081,
+    39.792189,
+    -86.238843,
+    222,
+    221.98,
+    0.3,
+    0.5,
+    0,
+    221.99
+   ],
+   [
+    4091,
+    39.792276,
+    -86.238844,
+    222.05,
+    222.03,
+    0.3,
+    0.5,
+    0,
+    222.05
+   ],
+   [
+    4101,
+    39.792364,
+    -86.238845,
+    222.1,
+    222.08,
+    0.3,
+    0.8,
+    0,
+    222.1
+   ],
+   [
+    4111,
+    39.792452,
+    -86.238846,
+    222.12,
+    222.14,
+    0.3,
+    0.8,
+    0,
+    222.11
+   ],
+   [
+    4121,
+    39.79254,
+    -86.238848,
+    222.16,
+    222.19,
+    0.3,
+    0.6,
+    0,
+    222.15
+   ],
+   [
+    4131,
+    39.792628,
+    -86.238849,
+    222.2,
+    222.23,
+    0.4,
+    0.4,
+    0,
+    222.19
+   ],
+   [
+    4141,
+    39.792716,
+    -86.23885,
+    222.24,
+    222.28,
+    0.4,
+    0.5,
+    0,
+    222.24
+   ],
+   [
+    4151,
+    39.792803,
+    -86.238852,
+    222.3,
+    222.31,
+    0.4,
+    0.7,
+    0,
+    222.28
+   ],
+   [
+    4161,
+    39.792891,
+    -86.238853,
+    222.33,
+    222.35,
+    0.5,
+    0.9,
+    0,
+    222.31
+   ],
+   [
+    4171,
+    39.792979,
+    -86.238843,
+    222.35,
+    222.38,
+    0.4,
+    0.6,
+    0,
+    222.35
+   ],
+   [
+    4181,
+    39.793067,
+    -86.238845,
+    222.41,
+    222.41,
+    0.4,
+    0.8,
+    0,
+    222.41
+   ]
+  ],
+  "columns": [
+   "s",
+   "lat",
+   "lon",
+   "realH",
+   "gameH(offset to real mean)",
+   "osmDev",
+   "realTiltDeg",
+   "gameBankDeg",
+   "buildRawH"
+  ]
+ },
+ "sources": [
+  "game data: tracks-data.js + js/track.js built in node (devtests/track-audit/americas/game.js -> out/game-<id>.json)",
+  "OpenStreetMap (ODbL) via Overpass API (maps.mail.ru mirror), cached in devtests/track-audit/cache/overpass/",
+  "USGS 3DEP bare-earth DEM, 1 m lidar (public domain): https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer (getSamples), acquisition dates from https://epqs.nationalmap.gov/v1/json?...&includeDate=true",
+  "FIA 2025 Formula 1 Sporting Regulations, Issue 5 (2025-04-30), art. 34.7: \"A speed limit of 80km/h will be imposed in the pit lane during the whole Competition. However, this limit may be amended by the Race Director\" (cache/fia/fia_2025_formula_1_sporting_regulations_-_issue_5_-_2025-04-30.txt)",
+  "https://en.wikipedia.org/wiki/Indianapolis_Motor_Speedway (infobox layout7: Grand Prix Road Course 2000-2007, 4.192 km, 13 turns)",
+  "OpenStreetMap (ODbL) via Overpass API (maps.mail.ru mirror), cached in devtests/track-audit/cache/overpass/"
+ ]
+}

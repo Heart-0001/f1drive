@@ -58,11 +58,13 @@
   var AUTO_SLOW = 1.0, AUTO_FAST = 0.35, AUTO_N = 90;
 
   // Built-in placement (CSS px of the canvas, from its top-left), used without `elements`: the glass of each mirror,
-  // i.e. the INSIDE of its frame. It is the layout index.html's frames use (devtests/hudmirrors-test/layouts.css, A):
-  //   glass width  gw = clamp(224, 18.75 % of the width, 400), height gh = round(gw / 3)
-  //   frame: 4 px border all round, outer box at top 12, left 18 / right 18
+  // i.e. the INSIDE of its frame. It is the layout index.html's frames use (its .hud-mirror / --mir-* rules; layout A of
+  // devtests/hudmirrors-test/layouts.css, there with a 224 px minimum):
+  //   glass width  gw = clamp(176, 18.75 % of the width, 400), height gh = round(gw / 3) (176: the start lights still
+  //                fit between the two from 721 to 1000 px)
+  //   frame: 4 px border all round, outer box at top 12, left 18 / right 18; narrower than 444 px the glass shrinks
   F1.hudMirrorsLayout = function (w, h) {
-    var gw = Math.round(Math.max(224, Math.min(400, w * 0.1875))), gh = Math.round(gw / 3), b = 4, top = 12, side = 18;
+    var gw = Math.round(Math.max(176, Math.min(400, w * 0.1875))), gh = Math.round(gw / 3), b = 4, top = 12, side = 18;
     if (w < 2 * (gw + 2 * b + side) + 40) {                // very narrow window: shrink to fit side by side
       gw = Math.max(60, Math.floor((w - 2 * side - 4 * b - 40) / 2)); gh = Math.round(gw / 3);
     }

@@ -1,0 +1,14 @@
+diff --git a/devtests/seasons-calib/driver.mjs b/devtests/handling-test/variants/driver.proposed.mjs
+index 65af86b..6c4d698 100644
+--- a/devtests/seasons-calib/driver.mjs
++++ b/devtests/handling-test/variants/driver.proposed.mjs
+@@ -47,7 +47,8 @@ export function driveLap(t, spec, opts) {
+     const tp = P[(st.sampleIndex + Math.round(Ld / ds)) % N];
+     const dx = tp.x - st.x, dz = tp.z - st.z, ch = Math.cos(st.heading), sh = Math.sin(st.heading);
+     const kap = 2 * (dx * ch - dz * sh) / (dx * dx + dz * dz);
+-    const lock = 0.35 / (1 + (v / 22) * (v / 22));
++    const lock = typeof car.perf.steerLockAt === 'function' ? car.perf.steerLockAt(v, S[st.sampleIndex].bank || 0, kap >= 0 ? 1 : -1) :
++      0.35 / (1 + (v / 22) * (v / 22));
+     const want = Math.max(-1, Math.min(1, Math.atan(kap * 3.6) / lock));
+     input.left = want > st.steer + 0.03; input.right = want < st.steer - 0.03;
+     if (probe) car.setBattery(0);

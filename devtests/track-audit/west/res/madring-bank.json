@@ -1,0 +1,452 @@
+[
+ {
+  "name": "T1",
+  "deg": 1.72,
+  "officialPct": 3,
+  "from": [
+   40.464926,
+   -3.618821
+  ],
+  "to": [
+   40.464636,
+   -3.619247
+  ],
+  "gameS": [
+   168,
+   226
+  ],
+  "gameBankDeg": 5.4,
+  "officialAngle": 77.54,
+  "officialLengthM": 16.92,
+  "gameAngle": 79
+ },
+ {
+  "name": "T2",
+  "deg": 0.57,
+  "officialPct": 1,
+  "from": [
+   40.4646,
+   -3.619244
+  ],
+  "to": [
+   40.464336,
+   -3.619582
+  ],
+  "gameS": [
+   230,
+   280
+  ],
+  "gameBankDeg": 5.5,
+  "officialAngle": 77.58,
+  "officialLengthM": 20.99,
+  "gameAngle": 78
+ },
+ {
+  "name": "T3 Hortaleza",
+  "deg": -1.72,
+  "officialPct": -3,
+  "from": [
+   40.464298,
+   -3.619881
+  ],
+  "to": [
+   40.464855,
+   -3.621387
+  ],
+  "gameS": [
+   306,
+   460
+  ],
+  "gameBankDeg": 2.8,
+  "officialAngle": 67.2,
+  "officialLengthM": 139.73,
+  "gameAngle": 67,
+  "note": "official \"Banking -3%\""
+ },
+ {
+  "name": "T4",
+  "deg": 1.15,
+  "officialPct": 2,
+  "from": [
+   40.469731,
+   -3.624626
+  ],
+  "to": [
+   40.471389,
+   -3.624198
+  ],
+  "gameS": [
+   1078,
+   1270
+  ],
+  "gameBankDeg": 1.6,
+  "officialAngle": 70.9,
+  "officialLengthM": 432.55,
+  "gameAngle": 34,
+  "note": "game / OSM curve only ~34 deg over 192 m (official 70.9 deg, 432.55 m)"
+ },
+ {
+  "name": "T5",
+  "deg": 1.72,
+  "officialPct": 3,
+  "from": [
+   40.471464,
+   -3.624134
+  ],
+  "to": [
+   40.471725,
+   -3.6241
+  ],
+  "gameS": [
+   1280,
+   1316
+  ],
+  "gameBankDeg": 4.8,
+  "officialAngle": 116.89,
+  "officialLengthM": 22.95,
+  "gameAngle": 68,
+  "note": "T5 / 5A / T6 matching uncertain (game L68-R58-L38, OSM L48-R65-L62)"
+ },
+ {
+  "name": "T6 Subida de las Carcavas",
+  "deg": 1.72,
+  "officialPct": 3,
+  "from": [
+   40.472002,
+   -3.624135
+  ],
+  "to": [
+   40.472506,
+   -3.624165
+  ],
+  "gameS": [
+   1354,
+   1412
+  ],
+  "gameBankDeg": 4.7,
+  "officialAngle": 47.55,
+  "officialLengthM": 31.53,
+  "gameAngle": 38
+ },
+ {
+  "name": "T7 Subida de las Carcavas",
+  "deg": 1.72,
+  "officialPct": 3,
+  "from": [
+   40.474603,
+   -3.625226
+  ],
+  "to": [
+   40.474884,
+   -3.625159
+  ],
+  "gameS": [
+   1666,
+   1708
+  ],
+  "gameBankDeg": 5.3,
+  "officialAngle": 90,
+  "officialLengthM": 17.28,
+  "gameAngle": 84
+ },
+ {
+  "name": "T8 El Bunker",
+  "deg": 2.86,
+  "officialPct": 5,
+  "from": [
+   40.474915,
+   -3.625102
+  ],
+  "to": [
+   40.475635,
+   -3.625031
+  ],
+  "gameS": [
+   1714,
+   1806
+  ],
+  "gameBankDeg": 5.1,
+  "officialAngle": 84.39,
+  "officialLengthM": 72.79,
+  "gameAngle": 80
+ },
+ {
+  "name": "T9",
+  "deg": 4,
+  "officialPct": 7,
+  "from": [
+   40.475836,
+   -3.625184
+  ],
+  "to": [
+   40.476278,
+   -3.625332
+  ],
+  "gameS": [
+   1832,
+   1884
+  ],
+  "gameBankDeg": 3.8,
+  "officialAngle": 27.89,
+  "officialLengthM": 21.42,
+  "gameAngle": 28
+ },
+ {
+  "name": "T10 La Chicane",
+  "deg": 1.15,
+  "officialPct": 2,
+  "from": [
+   40.477226,
+   -3.625338
+  ],
+  "to": [
+   40.477748,
+   -3.624981
+  ],
+  "gameS": [
+   1990,
+   2060
+  ],
+  "gameBankDeg": 4.7,
+  "officialAngle": 57.6,
+  "officialLengthM": 92.94,
+  "gameAngle": 52
+ },
+ {
+  "name": "T11 La Chicane",
+  "deg": -1.15,
+  "officialPct": -2,
+  "from": [
+   40.477897,
+   -3.624718
+  ],
+  "to": [
+   40.478826,
+   -3.624472
+  ],
+  "gameS": [
+   2088,
+   2206
+  ],
+  "gameBankDeg": 4.4,
+  "officialAngle": 78.82,
+  "officialLengthM": 94.5,
+  "gameAngle": 75
+ },
+ {
+  "name": "T12 La Monumental",
+  "deg": 13.5,
+  "officialPct": 24,
+  "keep": "existing BANKED entry (from [40.479284, -3.624737] to [40.478759, -3.622536]) is right: 24 % = 13.5 deg; game section above 3 deg = 548 m vs official 547.82 m"
+ },
+ {
+  "name": "T13",
+  "deg": 2.29,
+  "officialPct": 4,
+  "from": [
+   40.47676,
+   -3.62446
+  ],
+  "to": [
+   40.476054,
+   -3.624221
+  ],
+  "gameS": [
+   3042,
+   3140
+  ],
+  "gameBankDeg": 5.3,
+  "officialAngle": 83.93,
+  "officialLengthM": 45.41,
+  "gameAngle": 88
+ },
+ {
+  "name": "T14 Las Enlazadas de Valdebebas",
+  "deg": -1.72,
+  "officialPct": -3,
+  "from": [
+   40.47567,
+   -3.623489
+  ],
+  "to": [
+   40.474834,
+   -3.622898
+  ],
+  "gameS": [
+   3216,
+   3328
+  ],
+  "gameBankDeg": 3.1,
+  "officialAngle": 53.8,
+  "officialLengthM": 76.06,
+  "gameAngle": 53
+ },
+ {
+  "name": "T15 Las Enlazadas de Valdebebas",
+  "deg": 1.72,
+  "officialPct": 3,
+  "from": [
+   40.474208,
+   -3.622913
+  ],
+  "to": [
+   40.472977,
+   -3.621381
+  ],
+  "gameS": [
+   3398,
+   3610
+  ],
+  "gameBankDeg": 3,
+  "officialAngle": 90,
+  "officialLengthM": 209.7,
+  "gameAngle": 90
+ },
+ {
+  "name": "T16 Las Enlazadas de Valdebebas",
+  "deg": -1.15,
+  "officialPct": -2,
+  "from": [
+   40.472976,
+   -3.620331
+  ],
+  "to": [
+   40.473084,
+   -3.619753
+  ],
+  "gameS": [
+   3700,
+   3752
+  ],
+  "gameBankDeg": 3.8,
+  "officialAngle": 29.03,
+  "officialLengthM": 40.54,
+  "gameAngle": 30
+ },
+ {
+  "name": "T17",
+  "deg": 2.29,
+  "officialPct": 4,
+  "from": [
+   40.473129,
+   -3.619651
+  ],
+  "to": [
+   40.473001,
+   -3.619092
+  ],
+  "gameS": [
+   3762,
+   3824
+  ],
+  "gameBankDeg": 5.4,
+  "officialAngle": 84.19,
+  "officialLengthM": 14.69,
+  "gameAngle": 85
+ },
+ {
+  "name": "T18 Norte",
+  "deg": 1.15,
+  "officialPct": 2,
+  "from": [
+   40.471799,
+   -3.618169
+  ],
+  "to": [
+   40.471444,
+   -3.617238
+  ],
+  "gameS": [
+   3980,
+   4078
+  ],
+  "gameBankDeg": 4.1,
+  "officialAngle": 77.44,
+  "officialLengthM": 95.34,
+  "gameAngle": 72
+ },
+ {
+  "name": "T19",
+  "deg": 0.57,
+  "officialPct": 1,
+  "from": [
+   40.471505,
+   -3.616706
+  ],
+  "to": [
+   40.470744,
+   -3.61512
+  ],
+  "gameS": [
+   4124,
+   4306
+  ],
+  "gameBankDeg": 3.3,
+  "officialAngle": 89.97,
+  "officialLengthM": 169.79,
+  "gameAngle": 87
+ },
+ {
+  "name": "T20",
+  "deg": 1.15,
+  "officialPct": 2,
+  "from": [
+   40.468576,
+   -3.61463
+  ],
+  "to": [
+   40.468372,
+   -3.614203
+  ],
+  "gameS": [
+   4552,
+   4614
+  ],
+  "gameBankDeg": 5.8,
+  "officialAngle": 117.5,
+  "officialLengthM": 32.4,
+  "gameAngle": 114
+ },
+ {
+  "name": "T21",
+  "deg": -0.57,
+  "officialPct": -1,
+  "from": [
+   40.468569,
+   -3.613107
+  ],
+  "to": [
+   40.468325,
+   -3.612604
+  ],
+  "gameS": [
+   4712,
+   4774
+  ],
+  "gameBankDeg": 5.6,
+  "officialAngle": 71.02,
+  "officialLengthM": 11.16,
+  "gameAngle": 83
+ },
+ {
+  "name": "T22 El Parque",
+  "deg": -0.57,
+  "officialPct": -1,
+  "from": [
+   40.466229,
+   -3.612009
+  ],
+  "to": [
+   40.465772,
+   -3.612445
+  ],
+  "gameS": [
+   5014,
+   5090
+  ],
+  "gameBankDeg": 5.4,
+  "officialAngle": 90.81,
+  "officialLengthM": 119.14,
+  "gameAngle": 87
+ }
+]

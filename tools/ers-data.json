@@ -513,7 +513,7 @@
    "deploy": 0.88,
    "harvest": 0.92,
    "store": 1,
-   "note": "ERS 軟體與可靠度問題：按加速鈕常常沒反應",
+   "note": "ERS 軟體與可靠度問題多，電能部署偏弱",
    "confidence": "medium",
    "reason": "Renault Energy F1-2014: turbo / ERS software problems, ran with ERS disabled on Renault's advice in testing (up to 150 hp); Horner: \"push the button, the car stops\"; very unreliable and down on power -> deploy -3, harvest -2",
    "sources": [
@@ -586,7 +586,7 @@
    "deploy": 0.88,
    "harvest": 0.92,
    "store": 1,
-   "note": "ERS 軟體與可靠度問題：按加速鈕常常沒反應",
+   "note": "ERS 軟體與可靠度問題多，電能部署偏弱",
    "confidence": "medium",
    "reason": "Renault Energy F1-2014: turbo / ERS software problems, ran with ERS disabled on Renault's advice in testing (up to 150 hp); Horner: \"push the button, the car stops\"; very unreliable and down on power -> deploy -3, harvest -2",
    "sources": [
@@ -600,7 +600,7 @@
    "deploy": 0.88,
    "harvest": 0.92,
    "store": 1,
-   "note": "ERS 軟體與可靠度問題：按加速鈕常常沒反應",
+   "note": "ERS 軟體與可靠度問題多，電能部署偏弱",
    "confidence": "medium",
    "reason": "Renault Energy F1-2014: turbo / ERS software problems, ran with ERS disabled on Renault's advice in testing (up to 150 hp); Horner: \"push the button, the car stops\"; very unreliable and down on power -> deploy -3, harvest -2",
    "sources": [
@@ -642,7 +642,7 @@
    "deploy": 0.88,
    "harvest": 0.92,
    "store": 1,
-   "note": "ERS 軟體與可靠度問題：按加速鈕常常沒反應",
+   "note": "ERS 軟體與可靠度問題多，電能部署偏弱",
    "confidence": "medium",
    "reason": "Renault Energy F1-2014: turbo / ERS software problems, ran with ERS disabled on Renault's advice in testing (up to 150 hp); Horner: \"push the button, the car stops\"; very unreliable and down on power -> deploy -3, harvest -2",
    "sources": [

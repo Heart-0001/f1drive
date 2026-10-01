@@ -1,0 +1,7486 @@
+{
+ "id": "be-1925",
+ "name": "Circuit de Spa-Francorchamps",
+ "auditedBy": "track audit, region be-nl-de-gb (2026-10-01)",
+ "verdict": "major issues",
+ "summary": "Layout, length, direction, start line and pit side are right. The height profile is badly wrong: the game uses the Copernicus GLO-90 SURFACE model (90 m pixels, trees included) smoothed over ~125 m, which flattens the Eau Rouge / Raidillon climb from 15 % to 3.9 % where it really is, moves the climb 150-900 m up the Kemmel straight (11.6-12.4 % there instead of 4.6 %), and puts a 20-30 m high forest-canopy hump between Paul Frere, Blanchimont and the Bus Stop (invented grades of +11 % / -9 % where the road climbs gently at 1-4 %). This is why the climb \"cannot be felt\". The Wallonia 0.5 m lidar DTM, run through the build's existing terrain-model pipeline, keeps Raidillon at 14.3-14.5 %. Scenery: a phantom concrete deck floats over the road on the descent to Eau Rouge.",
+ "findings": [
+  {
+   "aspect": "gradient",
+   "severity": "major",
+   "game": "Eau Rouge / Raidillon (OSM ways 126835639 + 126835637, 1.0-1.2 km after the game line): 3.9 % over 50 m (4.2 % over 100 m) at the real steepest point; the Raidillon way rises 14.6 m in the game. The game's steepest climbs are instead on the Kemmel straight: 12.4 % (50 m) at 1.93 km and 11.6-11.8 % at 1.18 km, where the real road climbs 4.6 %.",
+   "real": "Lidar along the OSM centreline: max 15.0 % over 50 m (14.3 % over 100 m, 15.1 % over 10-20 m) at 1.03 km after the line (Raidillon), rising 24.1 m over the 220 m Raidillon way and 24.5 m from the Eau Rouge dip (389.6 m ASL) to the top; the Kemmel straight then climbs a steady 4.3-4.8 % (47.9 m over 1055 m). Published: fr.wikipedia \"Raidillon de l'Eau Rouge\": \"cote tres raide a 17 %\" (citing spa-francorchamps.be), \"denivele d'environ 40 metres\"; en.wikipedia photo caption: \"maximum gradient in excess of 18%\". (The lidar figure is along the centreline; with the measured 3.3 deg cross slope the fall line is ~16 %, the inside line steeper.)",
+   "proposedFix": "Switch be-1925 to the Wallonia lidar DTM (new SOURCES entry in tools/build-tracks.mjs, see proposedCorrection.elevationSource) with the existing terrain-model settings (10 m step, 50 m median, 20 m Gauss, 18 % slope limit). Simulated on the lidar (sim.mjs, incl. js/track.js's ~9.8 m height smoothing): Raidillon 14.3 % over 50 m / 14.5 % over 20 m (game now 3.9 %), Kemmel 4.3-4.8 %, rise 24.4 m.",
+   "sources": [
+    "SPW \"Relief de la Wallonie - Modele Numerique de Terrain (MNT) 2021-2022\", 0.5 m lidar DTM, (c) SPW, https://geoservices.wallonie.be/arcgis/rest/services/RELIEF/WALLONIE_MNT_2021_2022/MapServer (identify; catalogue https://geoportail.wallonie.be/catalogue/e257f5df-6c96-4118-b4d2-1e63e955df53.html); samples cached in devtests/track-audit/cache/wallonia-mnt2021/points.json",
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/be-1925.json; circuit relation 284560",
+    "fr.wikipedia.org/wiki/Raidillon_de_l'Eau_Rouge (cached devtests/track-audit/cache/wikipedia/fr-Raidillon_de_l'Eau_Rouge.wiki)",
+    "en.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps (image caption \"Eau Rouge and Raidillon in 1997, with a maximum gradient in excess of 18%\")"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "major",
+   "game": "Heights from Copernicus GLO-90 (a surface model: forest canopy, grandstands). Relative to the lidar (mean-aligned) the game is up to 29.9 m too HIGH between Paul Frere and the Bus Stop (+25 m at Blanchimont, +29 m 700 m before the line) and 13-15 m too LOW at Raidillon / Kemmel and Malmedy / Bruxelles; RMS error 9.7 m. Invented grades: +9.7 % in Courbe Paul Frere (real 3.2 %), +11.9 % / -7.0 % in Blanchimont (real +1.7..2.9 %), -8.8 % on the run to the Bus Stop (real +3.6 %, i.e. the wrong sign), -10.7 % at Malmedy (real -2.1 %). 25 stretches of >= 30 m differ from the lidar by more than 2 percentage points over 100 m. Cause, checked on the build own cached GLO-90 samples (tools/elevation-cache.json, 271 of 280 keys) against the lidar at the same points: the raw GLO-90 is 11-23 m (max 43.5 m) ABOVE the ground from Paul Frere through Blanchimont to the Bus Stop (wooded: a surface model sees the canopy), +4 m (max +18) around Eau Rouge, and 2-9 m below it on the open Kemmel - Bruxelles slopes (90 m pixels averaging the hillside); the 125 m median + 50 m Gauss then smear what is left.",
+   "real": "Lidar: 366.6 m ASL at Courbe Paul Frere (Stavelot, the lowest point) to 468.8 m near Malmedy (the highest), range 102.2 m (game 99.0 m); Paul Frere -> Blanchimont -> Bus Stop is a gentle climb (-1.2..+3.8 % over 20 m, +40 m in 1.6 km); the descent Bruxelles -> Pouhon reaches -7.2 % (the game has its steepest 50 m there at -7.4..-9.5 %). Published range: en.wikipedia \"102.2 m (335 ft) above the lowest part\" (stated in the old-circuit paragraph; the lidar gives the same figure for the current lap).",
+   "proposedFix": "Same source switch as above. Pipeline simulation on the lidar (sim.mjs): 0.08 m RMS / 0.60 m max from the lidar, range 102.0 m, every section within 0.7 pp of the lidar grades. Alternatively use the 5 m lidar profile in out/profile-be-1925.json directly as a profile override.",
+   "sources": [
+    "SPW \"Relief de la Wallonie - Modele Numerique de Terrain (MNT) 2021-2022\", 0.5 m lidar DTM, (c) SPW, https://geoservices.wallonie.be/arcgis/rest/services/RELIEF/WALLONIE_MNT_2021_2022/MapServer (identify; catalogue https://geoportail.wallonie.be/catalogue/e257f5df-6c96-4118-b4d2-1e63e955df53.html); samples cached in devtests/track-audit/cache/wallonia-mnt2021/points.json",
+    "Copernicus GLO-90 via Open-Meteo = the game's current source (tools/build-tracks.mjs SOURCES.glo90)",
+    "en.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "Pit lane on the driver's right (correct), lane from 234 m before to 220 m after the line, entry line 148 m before, exit 134 m after the line (i.e. before La Source), limit 80 km/h. The game's pit lane (js/track.js) is generated beside the start / finish straight from up to 250 m before to 250 m after the line; it cannot follow a real lane that leaves at a chicane or rejoins after the first corner.",
+   "real": "OSM way 323851541 \"Pit Lane\" (719 m) leaves the track 375 m before the line, at the exit of the Bus Stop chicane, runs on the right and rejoins 398 m after the line, after La Source on the descent to Eau Rouge. No source found for a limit other than the usual 80 km/h.",
+   "proposedFix": "None required (generic lane, right side). If the pit model ever supports a longer lane: entry [50.4415508, 5.9667947] (first node of OSM way 323851541, Bus Stop exit), exit [50.4456821, 5.9654089] (its last node, after La Source).",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/be-1925.json; way 323851541 \"Pit Lane\", relation 284560 member role pit_lane"
+   ]
+  },
+  {
+   "aspect": "start",
+   "severity": "cosmetic",
+   "game": "Line = the dataset's first vertex, on the straight between the Bus Stop and La Source.",
+   "real": "OSM circuit relation 284560, role \"start\": node 258602622 is 23 m before the game's line (1.5 m from the centreline). (OSM node 1404684961 raceway=start-finish lies 28 m off the current lap, 1.56 km away: not the F1 line.)",
+   "proposedFix": "Optional START_AT 'be-1925': [50.4440643, 5.9651626] (OSM node 258602622); 23 m only.",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/be-1925.json; relation 284560 node member 258602622 role start"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "severity": "minor",
+   "game": "Curvature-derived bank up to 5.9 deg: 5.1-5.6 deg through the Bus Stop chicane, 4-4.7 deg at Les Combes / Bruxelles / Campus, ~1 deg in Blanchimont.",
+   "real": "Lidar cross slope (+-4 m): no corner beyond 4.3 deg; Bus Stop 0.1-1.4 deg, Les Combes 1.9-2.1, Bruxelles 2.5, Blanchimont -3.8 deg (inside-lower camber the game lacks), Raidillon 3.3, La Source 3.7. No real banked corner at Spa (none published).",
+   "proposedFix": "Optional: bankOverrides from the lidar (proposedCorrection.bankOverridesFromLidar) or a general cap of the derived bank in chicanes; not needed for the \"feel\" complaint.",
+   "sources": [
+    "SPW \"Relief de la Wallonie - Modele Numerique de Terrain (MNT) 2021-2022\", 0.5 m lidar DTM, (c) SPW, https://geoservices.wallonie.be/arcgis/rest/services/RELIEF/WALLONIE_MNT_2021_2022/MapServer (identify; catalogue https://geoportail.wallonie.be/catalogue/e257f5df-6c96-4118-b4d2-1e63e955df53.html); samples cached in devtests/track-audit/cache/wallonia-mnt2021/points.json"
+   ]
+  },
+  {
+   "aspect": "layout",
+   "severity": "cosmetic",
+   "game": "Current Grand Prix layout (2007-present, with the Bus Stop chicane of 2007), 7.004 km; centreline within 2.1 m (95 %) / 0.84 m mean of OSM, max 8.2 m at the La Source apex. Racing direction correct (100 %).",
+   "real": "en.wikipedia infobox \"Grand Prix Circuit (2007-present)\", 7.004 km; FIA Media Kit 2025 Belgian GP: \"Circuit length 7.004 km\"; OSM lap 7004.3 m. All 2010-2026 seasons used this layout.",
+   "proposedFix": "None.",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/be-1925.json; relation 284560",
+    "FIA Media Kit 2025 Belgian Grand Prix, https://www.fia.com/sites/default/files/media_kit_-_2025_belgian_grand_prix.pdf (cached devtests/track-audit/cache/refs/)",
+    "en.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "severity": "major",
+   "game": "js/scenery.js builds a concrete bridge deck OVER the road 686 m after the line (on the descent to Eau Rouge), underside 10.6 m above the road (scenery-data.js item kind \"bridge\" at 50.443965, 5.968340; screenshot devtests/track-audit/be-nl-de-gb/shots/shot-spa-phantom.png). It is a phantom.",
+   "real": "That item is OSM way 1353164215 (man_made=bridge, layer 1, 97 m2): the outline of the track's OWN short deck over the pedestrian tunnel OSM way 1353164961 (footway, tunnel, layer -1) that passes UNDER the lap there. Nothing crosses over the lap at Spa in OSM (no highway / footway with bridge=yes over it). The lap also passes over the Eau Rouge stream (culverts 77352254 / 175175594) and service roads; the Wallonia DTM keeps the road surface over them (checked: no dip).",
+   "proposedFix": "Do not build man_made=bridge outlines that carry the lap (outline contains the centreline and a tunnel / layer<0 way or a bridge=yes raceway lies inside it): drop OSM way 1353164215 from scenery-data.js (tools/build-scenery.mjs) or add that test to js/scenery.js addBridge. See proposedCorrection.sceneryBridgesToDrop.",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/be-1925.json; ways 1353164215 (man_made=bridge) and 1353164961 (footway tunnel)",
+    "game: node devtests/track-audit/be-nl-de-gb/bridges.js be-1925 (js/scenery.js debug footprints, over = true)"
+   ]
+  }
+ ],
+ "proposedCorrection": {
+  "elevationSource": {
+   "id": "walmnt",
+   "apply": "ELEV_SOURCE['be-1925'] = 'walmnt'",
+   "label": "SPW Relief de la Wallonie MNT 2021-2022 (0.5 m lidar DTM), (c) SPW 2021-2022",
+   "service": "https://geoservices.wallonie.be/arcgis/rest/services/RELIEF/WALLONIE_MNT_2021_2022/MapServer/identify",
+   "query": "geometry={\"x\":<lon>,\"y\":<lat>,\"spatialReference\":{\"wkid\":4326}}&geometryType=esriGeometryPoint&sr=4326&layers=all&tolerance=0&mapExtent=<lon-0.001>,<lat-0.001>,<lon+0.001>,<lat+0.001>&imageDisplay=400,400,96&returnGeometry=false&f=json -> results[0].attributes[\"Stretch.Pixel Value\"] (string, metres)",
+   "perRequest": 1,
+   "concurrency": 3,
+   "delayMs": 150,
+   "approxPoints": 700,
+   "settings": "dtm: true (DTM_STEP 10 m, DTM_MEDIAN_HALF 2, DTM_GAUSS_SIGMA 20 m, MAX_SLOPE 0.18)",
+   "licenceNote": "Usage under the SPW conditions for its geographic web services (catalogue page); attribution \"(c) SPW\". Check the reuse licence before shipping; fallback = the 5 m profile in out/profile-be-1925.json.",
+   "expected": {
+    "rangeM": 102,
+    "raidillonMax50mPct": 14.3,
+    "raidillonMax20mPct": 14.5,
+    "kemmelPct": "4.3-4.8",
+    "paulFrereToBlanchimontPct": "-1.0..+3.3",
+    "rmsVsLidarM": 0.08,
+    "note": "sim.mjs be-1925 (pipeline + js/track.js smoothing)"
+   },
+   "rejectedAlternative": "EU-DEM 25 m (OpenTopoData eudem25m) checked at 25 m: Raidillon peak shifted 100-150 m late (13.9 % at OSM s 750 vs lidar 14.4 % at 600), RMS 4.4 m vs the lidar, -19.9 % artefact: not usable."
+  },
+  "published": {
+   "be-1925": [
+    102.2,
+    "lidar range of the current lap (SPW MNT 2021-2022) = en.wikipedia \"102.2 m\""
+   ]
+  },
+  "startAt": {
+   "be-1925": [
+    50.4440643,
+    5.9651626
+   ],
+   "optional": true
+  },
+  "sceneryBridgesToDrop": {
+   "osmWays": [
+    1353164215
+   ],
+   "rule": "a man_made=bridge outline that contains the lap centreline and has a tunnel / layer<0 way crossing the lap inside it, or a bridge=yes raceway inside it, is the lap own deck: do not build it over the road (tools/build-scenery.mjs or js/scenery.js addBridge)"
+  },
+  "bankOverridesFromLidar": {
+   "note": "optional, minor: replaces the curvature-derived bank where the 0.5-1 m lidar DTM measures a different cross slope (+-4 m about the OSM centreline, median of 3 samples 10 m apart); the full measured series is under measurements.crossSlope.series",
+   "list": [
+    {
+     "side": "inside-lower (radius 475 m)",
+     "name": "Kemmel (OSM s 1020-1120 m, 1432 m from the line)",
+     "deg": 4,
+     "from": [
+      50.4387159,
+      5.9742126
+     ],
+     "to": [
+      50.4378817,
+      5.9747185
+     ],
+     "measured": {
+      "lidarMeanDeg": 3.8,
+      "lidarMaxDeg": 4.3,
+      "gameMeanDeg": 0.7,
+      "gameMaxDeg": 1.1
+     },
+     "kind": "real camber missing / too small in the game"
+    },
+    {
+     "side": "inside-lower (radius 274 m)",
+     "name": "Blanchimont (OSM s 5499-5719 m, -1093 m from the line)",
+     "deg": 4,
+     "from": [
+      50.4355115,
+      5.9673803
+     ],
+     "to": [
+      50.4373789,
+      5.9678398
+     ],
+     "measured": {
+      "lidarMeanDeg": -3.8,
+      "lidarMaxDeg": -4.2,
+      "gameMeanDeg": -1,
+      "gameMaxDeg": -2.4
+     },
+     "kind": "real camber missing / too small in the game"
+    },
+    {
+     "side": "nearly straight (radius 4213 m): bankOverrides take the side from the corner direction, check it",
+     "name": "67 m from Chicane (OSM s 6089-6139 m, -503 m from the line)",
+     "deg": 3,
+     "from": [
+      50.4405718,
+      5.9665132
+     ],
+     "to": [
+      50.4410197,
+      5.9664549
+     ],
+     "measured": {
+      "lidarMeanDeg": 3.2,
+      "lidarMaxDeg": 3.3,
+      "gameMeanDeg": 0,
+      "gameMaxDeg": -0.1
+     },
+     "kind": "real camber missing / too small in the game"
+    }
+   ]
+  }
+ },
+ "measurements": {
+  "method": "devtests/track-audit/be-nl-de-gb/audit.mjs: game = tracks-data.js + js/track.js built in node (out/game-<id>.json from dump-game.js); OSM = Overpass (cache/overpass/<id>.json), the F1 lap chained from its raceway ways in their oneway direction; DEM sampled every 5 m along the OSM centreline, 25 m median + 5 m Gauss; game heights mapped to the OSM centreline by nearest point and aligned by the mean difference",
+  "osmLapWays": [
+   {
+    "id": 126807110,
+    "name": "",
+    "osmS": 0
+   },
+   {
+    "id": 126835639,
+    "name": "Eau Rouge",
+    "osmS": 460
+   },
+   {
+    "id": 126835637,
+    "name": "Raidillon",
+    "osmS": 553
+   },
+   {
+    "id": 126835638,
+    "name": "Kemmel",
+    "osmS": 776
+   },
+   {
+    "id": 1430527230,
+    "name": "Les Combes",
+    "osmS": 1829
+   },
+   {
+    "id": 24449918,
+    "name": "Les Combes",
+    "osmS": 1886
+   },
+   {
+    "id": 126807113,
+    "name": "",
+    "osmS": 1995
+   },
+   {
+    "id": 175195997,
+    "name": "Malmedy",
+    "osmS": 2069
+   },
+   {
+    "id": 126807111,
+    "name": "",
+    "osmS": 2153
+   },
+   {
+    "id": 126807112,
+    "name": "Bruxelles",
+    "osmS": 2430
+   },
+   {
+    "id": 1359025268,
+    "name": "",
+    "osmS": 2606
+   },
+   {
+    "id": 126807106,
+    "name": "Speaker's Corner",
+    "osmS": 2703
+   },
+   {
+    "id": 1359025267,
+    "name": "",
+    "osmS": 2958
+   },
+   {
+    "id": 126807103,
+    "name": "Double Gauche",
+    "osmS": 3216
+   },
+   {
+    "id": 126807101,
+    "name": "",
+    "osmS": 3591
+   },
+   {
+    "id": 126807109,
+    "name": "Fagnes",
+    "osmS": 3881
+   },
+   {
+    "id": 126807116,
+    "name": "",
+    "osmS": 4176
+   },
+   {
+    "id": 175371353,
+    "name": "Campus",
+    "osmS": 4355
+   },
+   {
+    "id": 175371365,
+    "name": "",
+    "osmS": 4452
+   },
+   {
+    "id": 126807100,
+    "name": "Courbe Paul Frère",
+    "osmS": 4558
+   },
+   {
+    "id": 176133746,
+    "name": "",
+    "osmS": 4750
+   },
+   {
+    "id": 126807114,
+    "name": "",
+    "osmS": 4816
+   },
+   {
+    "id": 176133745,
+    "name": "Blanchimont",
+    "osmS": 5151
+   },
+   {
+    "id": 178964809,
+    "name": "",
+    "osmS": 5704
+   },
+   {
+    "id": 126807105,
+    "name": "",
+    "osmS": 6058
+   },
+   {
+    "id": 637268672,
+    "name": "Chicane",
+    "osmS": 6182
+   },
+   {
+    "id": 613486590,
+    "name": "",
+    "osmS": 6221
+   },
+   {
+    "id": 126807099,
+    "name": "",
+    "osmS": 6763
+   },
+   {
+    "id": 175178443,
+    "name": "La Source",
+    "osmS": 6816
+   },
+   {
+    "id": 175178448,
+    "name": "",
+    "osmS": 6873
+   }
+  ],
+  "osmRelation": {
+   "id": 284560,
+   "tags": {
+    "name": "Circuit de Spa Francorchamps",
+    "name:en": "Spa-Francorchamps Circuit",
+    "type": "circuit",
+    "wikidata": "Q172851",
+    "wikipedia": "en:Circuit de Spa-Francorchamps"
+   }
+  },
+  "lengths": {
+   "osmCentrelineM": 7004.3,
+   "gameBuiltM": 7003.7,
+   "gameLengthKm": 7.004
+  },
+  "layoutDeviationM": {
+   "gameToOsm": {
+    "max": 8.2,
+    "mean": 0.84,
+    "p95": 2.1
+   },
+   "osmToGame": {
+    "max": 8.2,
+    "mean": 0.86,
+    "p95": 2.1
+   },
+   "worstGameSamples": [
+    {
+     "d": 8.2,
+     "at": {
+      "gameS": 248,
+      "osmS": 6849,
+      "near": "La Source"
+     }
+    },
+    {
+     "d": 3.9,
+     "at": {
+      "gameS": 6708,
+      "osmS": 6297,
+      "near": "76 m from Chicane"
+     }
+    }
+   ],
+   "worstOsmPoints": [
+    {
+     "d": 8.2,
+     "at": {
+      "osmS": 6849,
+      "gameS": 248,
+      "near": "La Source",
+      "lat": 50.446253,
+      "lon": 5.963441
+     }
+    },
+    {
+     "d": 3.9,
+     "at": {
+      "osmS": 6294,
+      "gameS": 6690,
+      "near": "74 m from Chicane",
+      "lat": 50.441923,
+      "lon": 5.967085
+     }
+    }
+   ]
+  },
+  "direction": {
+   "agreeFraction": 1,
+   "note": "fraction of game samples whose direction agrees with the OSM oneway raceway direction"
+  },
+  "startFinish": [
+   {
+    "node": 1404684961,
+    "tags": {
+     "raceway": "start-finish"
+    },
+    "lat": 50.4326896,
+    "lon": 5.96272,
+    "offTrackM": 28.1,
+    "gameS": -1563.1,
+    "osmS": 5032,
+    "note": "1563 m before the game's line (game s = 0)"
+   },
+   {
+    "node": 258602622,
+    "tags": {
+     "relationRole": "start"
+    },
+    "lat": 50.4440643,
+    "lon": 5.9651626,
+    "offTrackM": 1.5,
+    "gameS": -23,
+    "osmS": 6568.9,
+    "note": "23 m before the game's line (game s = 0)"
+   }
+  ],
+  "pitOsm": [
+   {
+    "way": 126807525,
+    "tags": {
+     "highway": "raceway",
+     "name": "Support Pit Lane",
+     "oneway": "yes",
+     "sport": "motor"
+    },
+    "lengthM": 1203,
+    "startGameS": 303,
+    "startOffM": 14,
+    "endGameS": 1511,
+    "endOffM": 0.5,
+    "midSide": "right",
+    "midOffM": 16.8,
+    "midGameS": 944
+   },
+   {
+    "way": 323851541,
+    "tags": {
+     "highway": "raceway",
+     "name": "Pit Lane",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 719,
+    "startGameS": -375,
+    "startOffM": 0.4,
+    "endGameS": 398,
+    "endOffM": 0.5,
+    "midSide": "right",
+    "midOffM": 20.9,
+    "midGameS": -203
+   }
+  ],
+  "pitGame": {
+   "side": "right",
+   "limitKmh": 80,
+   "laneFromS": -234,
+   "laneToS": 220,
+   "entryS": -148,
+   "exitS": 134,
+   "boxes": 16
+  },
+  "structures": [
+   {
+    "way": 34403425,
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "maxheight": "4.0 m",
+     "name": "Tunnel de Blanchimont",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 4592,
+    "near": "Courbe Paul Frère",
+    "gameS": -2000
+   },
+   {
+    "way": 74783502,
+    "tags": {
+     "highway": "footway",
+     "layer": "-1",
+     "tunnel": "yes",
+     "wheelchair": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 6765,
+    "near": "51 m from La Source",
+    "gameS": 173
+   },
+   {
+    "way": 77352252,
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "maxheight": "2.3",
+     "name": "Tunnel de Ster",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 285,
+    "near": "",
+    "gameS": 697
+   },
+   {
+    "way": 77352254,
+    "tags": {
+     "boat": "no",
+     "layer": "-1",
+     "name": "l'Eau Rouge",
+     "tunnel": "yes",
+     "waterway": "stream"
+    },
+    "kind": "passes under the lap",
+    "osmS": 524,
+    "near": "Eau Rouge",
+    "gameS": 937
+   },
+   {
+    "way": 174892443,
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 6400,
+    "near": "",
+    "gameS": -192
+   },
+   {
+    "way": 175175594,
+    "tags": {
+     "boat": "no",
+     "layer": "-1",
+     "name": "l'Eau Rouge",
+     "tunnel": "yes",
+     "waterway": "stream"
+    },
+    "kind": "passes under the lap",
+    "osmS": 4603,
+    "near": "Courbe Paul Frère",
+    "gameS": -1989
+   },
+   {
+    "way": 175198398,
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "maxheight": "3.90",
+     "name": "Tunnel",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 518,
+    "near": "Eau Rouge",
+    "gameS": 930
+   },
+   {
+    "way": 175209512,
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "name": "Tunnel",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 2237,
+    "near": "84 m from Malmedy",
+    "gameS": 2650
+   },
+   {
+    "way": 175536268,
+    "tags": {
+     "highway": "service",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 5207,
+    "near": "Blanchimont",
+    "gameS": -1385
+   },
+   {
+    "way": 1244885490,
+    "tags": {
+     "layer": "-1",
+     "tunnel": "culvert",
+     "waterway": "stream"
+    },
+    "kind": "passes under the lap",
+    "osmS": 3763,
+    "near": "118 m from Fagnes",
+    "gameS": -2829
+   },
+   {
+    "way": 1353164215,
+    "tags": {
+     "layer": "1",
+     "man_made": "bridge"
+    },
+    "kind": "crosses over the lap",
+    "osmS": 289,
+    "near": "",
+    "gameS": 701
+   },
+   {
+    "way": 1353164961,
+    "tags": {
+     "highway": "footway",
+     "layer": "-1",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 282,
+    "near": "",
+    "gameS": 694
+   }
+  ],
+  "elevation": {
+   "dem": "SPW Relief de la Wallonie MNT 2021-2022, 0.5 m lidar DTM (geoservices.wallonie.be RELIEF/WALLONIE_MNT_2021_2022 MapServer identify)",
+   "stepM": 4.999474965088057,
+   "holesFilled": 0,
+   "covered": [],
+   "realRangeM": 102.2,
+   "realMinASL": 366.6,
+   "realMinAt": {
+    "osmS": 4595,
+    "near": "Courbe Paul Frère"
+   },
+   "realMaxASL": 468.8,
+   "realMaxAt": {
+    "osmS": 2085,
+    "near": "Malmedy"
+   },
+   "gameRangeM": 99,
+   "rmsDiffM": 9.67,
+   "maxDiffM": 29.9,
+   "maxDiffAt": {
+    "osmS": 5879,
+    "fromLine": -713,
+    "near": "",
+    "gameMinusReal": 29.9
+   },
+   "grades50m": {
+    "realMaxPct": 15,
+    "realMinPct": -7.2,
+    "gameMaxPct": 12.4,
+    "gameMinPct": -10.7,
+    "steepestClimbsReal": [
+     {
+      "osmS": 620,
+      "fromLine": 1032,
+      "near": "Raidillon",
+      "realPct": 15,
+      "gamePct": 3.9
+     },
+     {
+      "osmS": 985,
+      "fromLine": 1397,
+      "near": "Kemmel",
+      "realPct": 4.7,
+      "gamePct": 7.7
+     },
+     {
+      "osmS": 1440,
+      "fromLine": 1852,
+      "near": "Kemmel",
+      "realPct": 4.7,
+      "gamePct": 7.5
+     },
+     {
+      "osmS": 1645,
+      "fromLine": 2057,
+      "near": "Kemmel",
+      "realPct": 4.7,
+      "gamePct": 2.6
+     }
+    ],
+    "steepestDescentsReal": [
+     {
+      "osmS": 2535,
+      "fromLine": 2947,
+      "near": "Bruxelles",
+      "realPct": -7.2,
+      "gamePct": -7
+     },
+     {
+      "osmS": 3000,
+      "fromLine": 3412,
+      "near": "42 m from Speaker's Corner",
+      "realPct": -7.1,
+      "gamePct": -4.1
+     },
+     {
+      "osmS": 3360,
+      "fromLine": -3232,
+      "near": "Double Gauche",
+      "realPct": -7.1,
+      "gamePct": -7.2
+     },
+     {
+      "osmS": 2795,
+      "fromLine": 3207,
+      "near": "Speaker's Corner",
+      "realPct": -7.1,
+      "gamePct": -6.7
+     }
+    ],
+    "steepestClimbsGame": [
+     {
+      "osmS": 1515,
+      "fromLine": 1927,
+      "near": "Kemmel",
+      "realPct": 4.6,
+      "gamePct": 12.4
+     },
+     {
+      "osmS": 5794,
+      "fromLine": -798,
+      "near": "91 m from Blanchimont",
+      "realPct": 1.1,
+      "gamePct": 12.3
+     },
+     {
+      "osmS": 5399,
+      "fromLine": -1193,
+      "near": "Blanchimont",
+      "realPct": 2.4,
+      "gamePct": 11.9
+     },
+     {
+      "osmS": 770,
+      "fromLine": 1182,
+      "near": "Raidillon",
+      "realPct": 4.6,
+      "gamePct": 11.8
+     }
+    ],
+    "steepestDescentsGame": [
+     {
+      "osmS": 2185,
+      "fromLine": 2597,
+      "near": "31 m from Malmedy",
+      "realPct": -2.1,
+      "gamePct": -10.7
+     },
+     {
+      "osmS": 250,
+      "fromLine": 662,
+      "near": "",
+      "realPct": -5.1,
+      "gamePct": -10.3
+     },
+     {
+      "osmS": 3215,
+      "fromLine": -3377,
+      "near": "1 m from Double Gauche",
+      "realPct": -7,
+      "gamePct": -9.5
+     },
+     {
+      "osmS": 6034,
+      "fromLine": -558,
+      "near": "147 m from Chicane",
+      "realPct": 3.6,
+      "gamePct": -9
+     }
+    ]
+   },
+   "grades100m": {
+    "realMaxPct": 14.3,
+    "realMinPct": -7.2,
+    "gameMaxPct": 11.6,
+    "gameMinPct": -10.1,
+    "steepestClimbsReal": [
+     {
+      "osmS": 625,
+      "fromLine": 1037,
+      "near": "Raidillon",
+      "realPct": 14.3,
+      "gamePct": 4.2
+     },
+     {
+      "osmS": 995,
+      "fromLine": 1407,
+      "near": "Kemmel",
+      "realPct": 4.7,
+      "gamePct": 7.7
+     },
+     {
+      "osmS": 1675,
+      "fromLine": 2087,
+      "near": "Kemmel",
+      "realPct": 4.6,
+      "gamePct": 1
+     },
+     {
+      "osmS": 1465,
+      "fromLine": 1877,
+      "near": "Kemmel",
+      "realPct": 4.6,
+      "gamePct": 9.6
+     }
+    ],
+    "steepestDescentsReal": [
+     {
+      "osmS": 2515,
+      "fromLine": 2927,
+      "near": "Bruxelles",
+      "realPct": -7.2,
+      "gamePct": -7.1
+     },
+     {
+      "osmS": 3385,
+      "fromLine": -3207,
+      "near": "Double Gauche",
+      "realPct": -7.1,
+      "gamePct": -6.8
+     },
+     {
+      "osmS": 2825,
+      "fromLine": 3237,
+      "near": "Speaker's Corner",
+      "realPct": -7.1,
+      "gamePct": -6.2
+     },
+     {
+      "osmS": 3110,
+      "fromLine": -3482,
+      "near": "106 m from Double Gauche",
+      "realPct": -7,
+      "gamePct": -8
+     }
+    ],
+    "steepestClimbsGame": [
+     {
+      "osmS": 1510,
+      "fromLine": 1922,
+      "near": "Kemmel",
+      "realPct": 4.6,
+      "gamePct": 11.6
+     },
+     {
+      "osmS": 5394,
+      "fromLine": -1198,
+      "near": "Blanchimont",
+      "realPct": 2.5,
+      "gamePct": 11.4
+     },
+     {
+      "osmS": 770,
+      "fromLine": 1182,
+      "near": "Raidillon",
+      "realPct": 5.2,
+      "gamePct": 11.3
+     },
+     {
+      "osmS": 5789,
+      "fromLine": -803,
+      "near": "86 m from Blanchimont",
+      "realPct": 1.3,
+      "gamePct": 11.1
+     }
+    ],
+    "steepestDescentsGame": [
+     {
+      "osmS": 250,
+      "fromLine": 662,
+      "near": "",
+      "realPct": -5.1,
+      "gamePct": -10.1
+     },
+     {
+      "osmS": 3200,
+      "fromLine": -3392,
+      "near": "16 m from Double Gauche",
+      "realPct": -6.9,
+      "gamePct": -9.4
+     },
+     {
+      "osmS": 2195,
+      "fromLine": 2607,
+      "near": "41 m from Malmedy",
+      "realPct": -2.3,
+      "gamePct": -9.3
+     },
+     {
+      "osmS": 6039,
+      "fromLine": -553,
+      "near": "142 m from Chicane",
+      "realPct": 3.6,
+      "gamePct": -8.8
+     }
+    ]
+   },
+   "mismatchRuns100m": [
+    {
+     "osmFrom": 0,
+     "osmTo": 115,
+     "fromLine": 412,
+     "lengthM": 120,
+     "near": "",
+     "worstPP": 7.1,
+     "real": -6.4,
+     "game": 0.7,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 155,
+     "osmTo": 360,
+     "fromLine": 567,
+     "lengthM": 210,
+     "near": "",
+     "worstPP": -5,
+     "real": -5.1,
+     "game": -10,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 515,
+     "osmTo": 695,
+     "fromLine": 927,
+     "lengthM": 185,
+     "near": "Raidillon",
+     "worstPP": -10.5,
+     "real": 13.9,
+     "game": 3.4,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 725,
+     "osmTo": 1075,
+     "fromLine": 1137,
+     "lengthM": 355,
+     "near": "Kemmel",
+     "worstPP": 6.4,
+     "real": 4.7,
+     "game": 11.1,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 1135,
+     "osmTo": 1380,
+     "fromLine": 1547,
+     "lengthM": 250,
+     "near": "Kemmel",
+     "worstPP": -6.1,
+     "real": 4.5,
+     "game": -1.6,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 1435,
+     "osmTo": 1600,
+     "fromLine": 1847,
+     "lengthM": 170,
+     "near": "Kemmel",
+     "worstPP": 7,
+     "real": 4.5,
+     "game": 11.6,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 1650,
+     "osmTo": 1810,
+     "fromLine": 2062,
+     "lengthM": 165,
+     "near": "Kemmel",
+     "worstPP": -4.9,
+     "real": 4.6,
+     "game": -0.4,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 1985,
+     "osmTo": 2080,
+     "fromLine": 2397,
+     "lengthM": 100,
+     "near": "29 m from Malmedy",
+     "worstPP": 3.5,
+     "real": 0.8,
+     "game": 4.3,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 2125,
+     "osmTo": 2245,
+     "fromLine": 2537,
+     "lengthM": 125,
+     "near": "36 m from Malmedy",
+     "worstPP": -7.1,
+     "real": -2.2,
+     "game": -9.3,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 2285,
+     "osmTo": 2395,
+     "fromLine": 2697,
+     "lengthM": 115,
+     "near": "95 m from Bruxelles",
+     "worstPP": 5.2,
+     "real": -4.9,
+     "game": 0.3,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 2615,
+     "osmTo": 2670,
+     "fromLine": 3027,
+     "lengthM": 60,
+     "near": "34 m from Bruxelles",
+     "worstPP": 2.3,
+     "real": -7,
+     "game": -4.7,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 2930,
+     "osmTo": 3035,
+     "fromLine": 3342,
+     "lengthM": 110,
+     "near": "32 m from Speaker's Corner",
+     "worstPP": 2.6,
+     "real": -7,
+     "game": -4.4,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 3150,
+     "osmTo": 3240,
+     "fromLine": -3442,
+     "lengthM": 95,
+     "near": "11 m from Double Gauche",
+     "worstPP": -2.4,
+     "real": -6.9,
+     "game": -9.4,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 3530,
+     "osmTo": 3580,
+     "fromLine": -3062,
+     "lengthM": 55,
+     "near": "Double Gauche",
+     "worstPP": 2.2,
+     "real": -4.4,
+     "game": -2.2,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 3710,
+     "osmTo": 3760,
+     "fromLine": -2882,
+     "lengthM": 55,
+     "near": "144 m from Double Gauche",
+     "worstPP": -2.2,
+     "real": -0.6,
+     "game": -2.8,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 4350,
+     "osmTo": 4435,
+     "fromLine": -2242,
+     "lengthM": 90,
+     "near": "Campus",
+     "worstPP": 2.2,
+     "real": -3.6,
+     "game": -1.4,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 4520,
+     "osmTo": 4725,
+     "fromLine": -2072,
+     "lengthM": 210,
+     "near": "Courbe Paul Frère",
+     "worstPP": 7.7,
+     "real": 1,
+     "game": 8.7,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 4784,
+     "osmTo": 4919,
+     "fromLine": -1807,
+     "lengthM": 140,
+     "near": "109 m from Courbe Paul Frère",
+     "worstPP": 5,
+     "real": 3.2,
+     "game": 8.3,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 4964,
+     "osmTo": 5079,
+     "fromLine": -1627,
+     "lengthM": 120,
+     "near": "127 m from Blanchimont",
+     "worstPP": -6.6,
+     "real": 2.7,
+     "game": -3.9,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 5114,
+     "osmTo": 5214,
+     "fromLine": -1478,
+     "lengthM": 105,
+     "near": "Blanchimont",
+     "worstPP": 5,
+     "real": 2,
+     "game": 7,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 5279,
+     "osmTo": 5464,
+     "fromLine": -1313,
+     "lengthM": 190,
+     "near": "Blanchimont",
+     "worstPP": 8.9,
+     "real": 2.5,
+     "game": 11.4,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 5489,
+     "osmTo": 5624,
+     "fromLine": -1103,
+     "lengthM": 140,
+     "near": "Blanchimont",
+     "worstPP": -8.4,
+     "real": 2.7,
+     "game": -5.6,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 5679,
+     "osmTo": 5864,
+     "fromLine": -913,
+     "lengthM": 190,
+     "near": "81 m from Blanchimont",
+     "worstPP": 9.9,
+     "real": 1.3,
+     "game": 11.1,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 5894,
+     "osmTo": 6294,
+     "fromLine": -698,
+     "lengthM": 405,
+     "near": "142 m from Chicane",
+     "worstPP": -12.3,
+     "real": 3.6,
+     "game": -8.8,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 6959,
+     "osmTo": 6999,
+     "fromLine": 367,
+     "lengthM": 45,
+     "near": "126 m from La Source",
+     "worstPP": 5,
+     "real": -6.4,
+     "game": -1.4,
+     "kind": "flattened"
+    }
+   ],
+   "namedFeatures": [
+    {
+     "name": "Eau Rouge",
+     "way": 126835639,
+     "osmFrom": 460,
+     "lengthM": 95,
+     "realRise": 0.3,
+     "gameRise": -1.2,
+     "real50MaxPct": 7.6,
+     "real50MinPct": -3.8,
+     "game50MaxPct": 0.9,
+     "game50MinPct": -3.6
+    },
+    {
+     "name": "Raidillon",
+     "way": 126835637,
+     "osmFrom": 555,
+     "lengthM": 220,
+     "realRise": 24.1,
+     "gameRise": 14.6,
+     "real50MaxPct": 15,
+     "real50MinPct": 4.6,
+     "game50MaxPct": 11.8,
+     "game50MinPct": 0.9
+    },
+    {
+     "name": "Kemmel",
+     "way": 126835638,
+     "osmFrom": 775,
+     "lengthM": 1055,
+     "realRise": 47.9,
+     "gameRise": 49.2,
+     "real50MaxPct": 4.7,
+     "real50MinPct": 4.3,
+     "game50MaxPct": 12.4,
+     "game50MinPct": -1.8
+    },
+    {
+     "name": "Les Combes",
+     "way": 1430527230,
+     "osmFrom": 1830,
+     "lengthM": 55,
+     "realRise": 2.2,
+     "gameRise": 2.2,
+     "real50MaxPct": 4.5,
+     "real50MinPct": 3.3,
+     "game50MaxPct": 4,
+     "game50MinPct": 3.5
+    },
+    {
+     "name": "Les Combes",
+     "way": 24449918,
+     "osmFrom": 1885,
+     "lengthM": 110,
+     "realRise": 2.8,
+     "gameRise": 3.8,
+     "real50MaxPct": 3.3,
+     "real50MinPct": 1.6,
+     "game50MaxPct": 4.2,
+     "game50MinPct": 3.2
+    },
+    {
+     "name": "Malmedy",
+     "way": 175195997,
+     "osmFrom": 2070,
+     "lengthM": 85,
+     "realRise": -0.6,
+     "gameRise": -1.3,
+     "real50MaxPct": 0.3,
+     "real50MinPct": -1.6,
+     "game50MaxPct": 3.7,
+     "game50MinPct": -8.2
+    },
+    {
+     "name": "Bruxelles",
+     "way": 126807112,
+     "osmFrom": 2430,
+     "lengthM": 175,
+     "realRise": -12.3,
+     "gameRise": -12,
+     "real50MaxPct": -6.7,
+     "real50MinPct": -7.2,
+     "game50MaxPct": -5.1,
+     "game50MinPct": -7.5
+    },
+    {
+     "name": "Speaker's Corner",
+     "way": 126807106,
+     "osmFrom": 2705,
+     "lengthM": 255,
+     "realRise": -17.8,
+     "gameRise": -15.6,
+     "real50MaxPct": -6.7,
+     "real50MinPct": -7.1,
+     "game50MaxPct": -4.7,
+     "game50MinPct": -7.4
+    },
+    {
+     "name": "Double Gauche",
+     "way": 126807103,
+     "osmFrom": 3215,
+     "lengthM": 375,
+     "realRise": -23.3,
+     "gameRise": -22,
+     "real50MaxPct": -3.6,
+     "real50MinPct": -7.1,
+     "game50MaxPct": -1.4,
+     "game50MinPct": -9.5
+    },
+    {
+     "name": "Fagnes",
+     "way": 126807109,
+     "osmFrom": 3880,
+     "lengthM": 295,
+     "realRise": 0.5,
+     "gameRise": -3,
+     "real50MaxPct": 1,
+     "real50MinPct": -1,
+     "game50MaxPct": 0.5,
+     "game50MinPct": -2.7
+    },
+    {
+     "name": "Campus",
+     "way": 175371353,
+     "osmFrom": 4355,
+     "lengthM": 95,
+     "realRise": -3.5,
+     "gameRise": -1.4,
+     "real50MaxPct": -3.1,
+     "real50MinPct": -3.9,
+     "game50MaxPct": -0.9,
+     "game50MinPct": -1.8
+    },
+    {
+     "name": "Courbe Paul Frère",
+     "way": 126807100,
+     "osmFrom": 4560,
+     "lengthM": 190,
+     "realRise": 2.7,
+     "gameRise": 12.9,
+     "real50MaxPct": 3.2,
+     "real50MinPct": -1.2,
+     "game50MaxPct": 9.7,
+     "game50MinPct": 2.5
+    },
+    {
+     "name": "Blanchimont",
+     "way": 176133745,
+     "osmFrom": 5149,
+     "lengthM": 555,
+     "realRise": 13.3,
+     "gameRise": 21.3,
+     "real50MaxPct": 2.9,
+     "real50MinPct": 1.7,
+     "game50MaxPct": 11.9,
+     "game50MinPct": -7
+    },
+    {
+     "name": "Chicane",
+     "way": 637268672,
+     "osmFrom": 6179,
+     "lengthM": 40,
+     "realRise": 1.3,
+     "gameRise": -0.6,
+     "real50MaxPct": 3.4,
+     "real50MinPct": 3.2,
+     "game50MaxPct": -0.8,
+     "game50MinPct": -2.2
+    },
+    {
+     "name": "La Source",
+     "way": 175178443,
+     "osmFrom": 6814,
+     "lengthM": 60,
+     "realRise": -0.5,
+     "gameRise": -0.4,
+     "real50MaxPct": 3.1,
+     "real50MinPct": -5.2,
+     "game50MaxPct": 2,
+     "game50MinPct": -3.4
+    }
+   ],
+   "profile25m": {
+    "columns": [
+     "osmS",
+     "fromGameLine",
+     "lidarASL",
+     "gameAlignedASL"
+    ],
+    "rows": [
+     [
+      0,
+      412,
+      414.73,
+      416.31
+     ],
+     [
+      25,
+      437,
+      413.08,
+      416.31
+     ],
+     [
+      50,
+      462,
+      411.55,
+      416.86
+     ],
+     [
+      75,
+      487,
+      409.96,
+      417.17
+     ],
+     [
+      100,
+      512,
+      408.4,
+      417.06
+     ],
+     [
+      125,
+      537,
+      406.96,
+      416.33
+     ],
+     [
+      150,
+      562,
+      405.65,
+      414.69
+     ],
+     [
+      175,
+      587,
+      404.41,
+      412.55
+     ],
+     [
+      200,
+      612,
+      403.24,
+      410.27
+     ],
+     [
+      225,
+      637,
+      402.01,
+      407.84
+     ],
+     [
+      250,
+      662,
+      400.75,
+      405.26
+     ],
+     [
+      275,
+      687,
+      399.45,
+      402.67
+     ],
+     [
+      300,
+      712,
+      398.16,
+      400.22
+     ],
+     [
+      325,
+      737,
+      396.84,
+      397.96
+     ],
+     [
+      350,
+      762,
+      395.58,
+      396.06
+     ],
+     [
+      375,
+      787,
+      394.37,
+      394.49
+     ],
+     [
+      400,
+      812,
+      393.28,
+      393.05
+     ],
+     [
+      425,
+      837,
+      392.27,
+      391.73
+     ],
+     [
+      450,
+      862,
+      391.23,
+      390.63
+     ],
+     [
+      475,
+      887,
+      390.27,
+      389.75
+     ],
+     [
+      500,
+      912,
+      389.73,
+      389.13
+     ],
+     [
+      525,
+      937,
+      389.8,
+      388.9
+     ],
+     [
+      550,
+      962,
+      390.72,
+      388.97
+     ],
+     [
+      575,
+      987,
+      393.09,
+      389.27
+     ],
+     [
+      600,
+      1012,
+      396.53,
+      389.85
+     ],
+     [
+      625,
+      1037,
+      400.27,
+      390.75
+     ],
+     [
+      650,
+      1062,
+      404.02,
+      391.9
+     ],
+     [
+      675,
+      1087,
+      407.37,
+      393.5
+     ],
+     [
+      700,
+      1112,
+      410.09,
+      395.5
+     ],
+     [
+      725,
+      1137,
+      412.29,
+      397.84
+     ],
+     [
+      750,
+      1162,
+      413.95,
+      400.6
+     ],
+     [
+      775,
+      1187,
+      415.12,
+      403.59
+     ],
+     [
+      800,
+      1212,
+      416.23,
+      406.48
+     ],
+     [
+      825,
+      1237,
+      417.36,
+      409.12
+     ],
+     [
+      850,
+      1262,
+      418.49,
+      411.4
+     ],
+     [
+      875,
+      1287,
+      419.62,
+      413.44
+     ],
+     [
+      900,
+      1312,
+      420.76,
+      415.27
+     ],
+     [
+      925,
+      1337,
+      421.95,
+      416.98
+     ],
+     [
+      950,
+      1362,
+      423.08,
+      418.75
+     ],
+     [
+      975,
+      1387,
+      424.26,
+      420.56
+     ],
+     [
+      1000,
+      1412,
+      425.45,
+      422.49
+     ],
+     [
+      1025,
+      1437,
+      426.62,
+      424.49
+     ],
+     [
+      1050,
+      1462,
+      427.78,
+      426.5
+     ],
+     [
+      1075,
+      1487,
+      428.89,
+      428.44
+     ],
+     [
+      1100,
+      1512,
+      429.94,
+      430.01
+     ],
+     [
+      1125,
+      1537,
+      431.09,
+      431.05
+     ],
+     [
+      1150,
+      1562,
+      432.24,
+      431.52
+     ],
+     [
+      1175,
+      1587,
+      433.34,
+      431.52
+     ],
+     [
+      1200,
+      1612,
+      434.43,
+      431.27
+     ],
+     [
+      1225,
+      1637,
+      435.54,
+      430.84
+     ],
+     [
+      1250,
+      1662,
+      436.67,
+      430.4
+     ],
+     [
+      1275,
+      1687,
+      437.81,
+      430
+     ],
+     [
+      1300,
+      1712,
+      438.96,
+      429.75
+     ],
+     [
+      1325,
+      1737,
+      440.07,
+      429.67
+     ],
+     [
+      1350,
+      1762,
+      441.19,
+      429.73
+     ],
+     [
+      1375,
+      1787,
+      442.3,
+      430.01
+     ],
+     [
+      1400,
+      1812,
+      443.47,
+      430.69
+     ],
+     [
+      1425,
+      1837,
+      444.64,
+      431.81
+     ],
+     [
+      1450,
+      1862,
+      445.77,
+      433.62
+     ],
+     [
+      1475,
+      1887,
+      446.93,
+      436.12
+     ],
+     [
+      1500,
+      1912,
+      448.06,
+      438.99
+     ],
+     [
+      1525,
+      1937,
+      449.23,
+      442.15
+     ],
+     [
+      1550,
+      1962,
+      450.36,
+      445.1
+     ],
+     [
+      1575,
+      1987,
+      451.47,
+      447.58
+     ],
+     [
+      1600,
+      2012,
+      452.58,
+      449.54
+     ],
+     [
+      1625,
+      2037,
+      453.72,
+      450.86
+     ],
+     [
+      1650,
+      2062,
+      454.9,
+      451.65
+     ],
+     [
+      1675,
+      2087,
+      456.05,
+      451.99
+     ],
+     [
+      1700,
+      2112,
+      457.2,
+      451.99
+     ],
+     [
+      1725,
+      2137,
+      458.36,
+      451.84
+     ],
+     [
+      1750,
+      2162,
+      459.5,
+      451.62
+     ],
+     [
+      1775,
+      2187,
+      460.61,
+      451.64
+     ],
+     [
+      1800,
+      2212,
+      461.76,
+      451.96
+     ],
+     [
+      1825,
+      2237,
+      462.85,
+      452.64
+     ],
+     [
+      1850,
+      2262,
+      464.01,
+      453.59
+     ],
+     [
+      1875,
+      2287,
+      464.99,
+      454.61
+     ],
+     [
+      1900,
+      2312,
+      465.78,
+      455.59
+     ],
+     [
+      1925,
+      2337,
+      466.52,
+      456.42
+     ],
+     [
+      1950,
+      2362,
+      467.16,
+      457.25
+     ],
+     [
+      1975,
+      2387,
+      467.75,
+      458.02
+     ],
+     [
+      2000,
+      2412,
+      468.16,
+      459.03
+     ],
+     [
+      2025,
+      2437,
+      468.51,
+      460.23
+     ],
+     [
+      2050,
+      2462,
+      468.71,
+      461.37
+     ],
+     [
+      2075,
+      2487,
+      468.81,
+      462.42
+     ],
+     [
+      2100,
+      2512,
+      468.79,
+      463.06
+     ],
+     [
+      2125,
+      2537,
+      468.61,
+      462.67
+     ],
+     [
+      2150,
+      2562,
+      468.23,
+      461.35
+     ],
+     [
+      2175,
+      2587,
+      467.84,
+      458.93
+     ],
+     [
+      2200,
+      2612,
+      467.3,
+      456.15
+     ],
+     [
+      2225,
+      2637,
+      466.66,
+      453.84
+     ],
+     [
+      2250,
+      2662,
+      465.88,
+      452.04
+     ],
+     [
+      2275,
+      2687,
+      465,
+      450.99
+     ],
+     [
+      2300,
+      2712,
+      463.99,
+      450.95
+     ],
+     [
+      2325,
+      2737,
+      462.86,
+      451.3
+     ],
+     [
+      2350,
+      2762,
+      461.66,
+      451.46
+     ],
+     [
+      2375,
+      2787,
+      460.31,
+      451.4
+     ],
+     [
+      2400,
+      2812,
+      458.86,
+      450.64
+     ],
+     [
+      2425,
+      2837,
+      457.24,
+      449.15
+     ],
+     [
+      2450,
+      2862,
+      455.56,
+      447.35
+     ],
+     [
+      2475,
+      2887,
+      453.79,
+      445.46
+     ],
+     [
+      2500,
+      2912,
+      452,
+      443.62
+     ],
+     [
+      2525,
+      2937,
+      450.21,
+      441.88
+     ],
+     [
+      2550,
+      2962,
+      448.42,
+      440.09
+     ],
+     [
+      2575,
+      2987,
+      446.66,
+      438.47
+     ],
+     [
+      2600,
+      3012,
+      444.93,
+      437.07
+     ],
+     [
+      2625,
+      3037,
+      443.18,
+      435.87
+     ],
+     [
+      2650,
+      3062,
+      441.43,
+      434.79
+     ],
+     [
+      2675,
+      3087,
+      439.65,
+      433.67
+     ],
+     [
+      2700,
+      3112,
+      437.89,
+      432.34
+     ],
+     [
+      2725,
+      3137,
+      436.15,
+      430.72
+     ],
+     [
+      2750,
+      3162,
+      434.45,
+      428.88
+     ],
+     [
+      2775,
+      3187,
+      432.78,
+      427.01
+     ],
+     [
+      2800,
+      3212,
+      431.01,
+      425.28
+     ],
+     [
+      2825,
+      3237,
+      429.24,
+      423.72
+     ],
+     [
+      2850,
+      3262,
+      427.47,
+      422.22
+     ],
+     [
+      2875,
+      3287,
+      425.69,
+      420.79
+     ],
+     [
+      2900,
+      3312,
+      423.93,
+      419.46
+     ],
+     [
+      2925,
+      3337,
+      422.2,
+      418.2
+     ],
+     [
+      2950,
+      3362,
+      420.45,
+      416.96
+     ],
+     [
+      2975,
+      3387,
+      418.73,
+      415.79
+     ],
+     [
+      3000,
+      3412,
+      416.91,
+      414.76
+     ],
+     [
+      3025,
+      3437,
+      415.16,
+      413.76
+     ],
+     [
+      3050,
+      3462,
+      413.46,
+      412.56
+     ],
+     [
+      3075,
+      3487,
+      411.74,
+      411.16
+     ],
+     [
+      3100,
+      -3492,
+      409.97,
+      409.38
+     ],
+     [
+      3125,
+      -3467,
+      408.21,
+      407.24
+     ],
+     [
+      3150,
+      -3442,
+      406.47,
+      405
+     ],
+     [
+      3175,
+      -3417,
+      404.75,
+      402.69
+     ],
+     [
+      3200,
+      -3392,
+      403,
+      400.34
+     ],
+     [
+      3225,
+      -3367,
+      401.25,
+      397.97
+     ],
+     [
+      3250,
+      -3342,
+      399.53,
+      395.63
+     ],
+     [
+      3275,
+      -3317,
+      397.78,
+      393.47
+     ],
+     [
+      3300,
+      -3292,
+      396.04,
+      391.51
+     ],
+     [
+      3325,
+      -3267,
+      394.31,
+      389.67
+     ],
+     [
+      3350,
+      -3242,
+      392.56,
+      387.9
+     ],
+     [
+      3375,
+      -3217,
+      390.77,
+      386.11
+     ],
+     [
+      3400,
+      -3192,
+      389.01,
+      384.33
+     ],
+     [
+      3425,
+      -3167,
+      387.27,
+      382.73
+     ],
+     [
+      3450,
+      -3142,
+      385.59,
+      381.27
+     ],
+     [
+      3475,
+      -3117,
+      384.04,
+      379.96
+     ],
+     [
+      3500,
+      -3092,
+      382.66,
+      378.91
+     ],
+     [
+      3525,
+      -3067,
+      381.38,
+      378.12
+     ],
+     [
+      3550,
+      -3042,
+      380.22,
+      377.51
+     ],
+     [
+      3575,
+      -3017,
+      379.17,
+      377.08
+     ],
+     [
+      3600,
+      -2992,
+      378.28,
+      376.76
+     ],
+     [
+      3625,
+      -2967,
+      377.52,
+      376.34
+     ],
+     [
+      3650,
+      -2942,
+      376.84,
+      375.81
+     ],
+     [
+      3675,
+      -2917,
+      376.31,
+      375.12
+     ],
+     [
+      3700,
+      -2892,
+      375.93,
+      374.3
+     ],
+     [
+      3725,
+      -2867,
+      375.7,
+      373.49
+     ],
+     [
+      3750,
+      -2842,
+      375.54,
+      372.71
+     ],
+     [
+      3775,
+      -2817,
+      375.5,
+      372.14
+     ],
+     [
+      3800,
+      -2792,
+      375.6,
+      371.85
+     ],
+     [
+      3825,
+      -2767,
+      375.79,
+      371.76
+     ],
+     [
+      3850,
+      -2742,
+      376.04,
+      371.82
+     ],
+     [
+      3875,
+      -2717,
+      376.29,
+      371.92
+     ],
+     [
+      3900,
+      -2692,
+      376.53,
+      372.03
+     ],
+     [
+      3925,
+      -2667,
+      376.76,
+      372.14
+     ],
+     [
+      3950,
+      -2642,
+      376.96,
+      372.26
+     ],
+     [
+      3975,
+      -2617,
+      377.2,
+      372.36
+     ],
+     [
+      4000,
+      -2592,
+      377.38,
+      372.37
+     ],
+     [
+      4025,
+      -2567,
+      377.52,
+      372.28
+     ],
+     [
+      4050,
+      -2542,
+      377.6,
+      372.02
+     ],
+     [
+      4075,
+      -2517,
+      377.59,
+      371.49
+     ],
+     [
+      4100,
+      -2492,
+      377.49,
+      370.84
+     ],
+     [
+      4125,
+      -2467,
+      377.31,
+      370.16
+     ],
+     [
+      4150,
+      -2442,
+      377.02,
+      369.52
+     ],
+     [
+      4175,
+      -2417,
+      376.8,
+      368.95
+     ],
+     [
+      4200,
+      -2392,
+      376.54,
+      368.49
+     ],
+     [
+      4225,
+      -2367,
+      376.15,
+      368.05
+     ],
+     [
+      4250,
+      -2342,
+      375.69,
+      367.64
+     ],
+     [
+      4275,
+      -2317,
+      375.17,
+      367.34
+     ],
+     [
+      4300,
+      -2292,
+      374.58,
+      367.1
+     ],
+     [
+      4325,
+      -2267,
+      373.97,
+      366.88
+     ],
+     [
+      4350,
+      -2242,
+      373.27,
+      366.66
+     ],
+     [
+      4375,
+      -2217,
+      372.48,
+      366.44
+     ],
+     [
+      4400,
+      -2192,
+      371.57,
+      366.1
+     ],
+     [
+      4425,
+      -2167,
+      370.64,
+      365.72
+     ],
+     [
+      4450,
+      -2142,
+      369.65,
+      365.26
+     ],
+     [
+      4475,
+      -2117,
+      368.74,
+      364.8
+     ],
+     [
+      4500,
+      -2092,
+      367.99,
+      364.4
+     ],
+     [
+      4525,
+      -2067,
+      367.43,
+      364.11
+     ],
+     [
+      4550,
+      -2042,
+      366.98,
+      364.28
+     ],
+     [
+      4575,
+      -2017,
+      366.7,
+      364.94
+     ],
+     [
+      4600,
+      -1992,
+      366.61,
+      366.34
+     ],
+     [
+      4625,
+      -1967,
+      366.73,
+      368.44
+     ],
+     [
+      4650,
+      -1942,
+      367.01,
+      370.89
+     ],
+     [
+      4675,
+      -1917,
+      367.46,
+      373.29
+     ],
+     [
+      4700,
+      -1892,
+      368.04,
+      375.22
+     ],
+     [
+      4725,
+      -1867,
+      368.74,
+      376.54
+     ],
+     [
+      4750,
+      -1842,
+      369.54,
+      377.39
+     ],
+     [
+      4774,
+      -1817,
+      370.32,
+      378.23
+     ],
+     [
+      4799,
+      -1792,
+      371.1,
+      379.56
+     ],
+     [
+      4824,
+      -1767,
+      371.88,
+      381.33
+     ],
+     [
+      4849,
+      -1742,
+      372.65,
+      383.53
+     ],
+     [
+      4874,
+      -1717,
+      373.49,
+      385.74
+     ],
+     [
+      4899,
+      -1692,
+      374.31,
+      387.75
+     ],
+     [
+      4924,
+      -1667,
+      375.12,
+      389.37
+     ],
+     [
+      4949,
+      -1642,
+      375.88,
+      390.35
+     ],
+     [
+      4974,
+      -1617,
+      376.65,
+      390.61
+     ],
+     [
+      4999,
+      -1592,
+      377.41,
+      390.15
+     ],
+     [
+      5024,
+      -1567,
+      378.14,
+      389.09
+     ],
+     [
+      5049,
+      -1542,
+      378.81,
+      387.66
+     ],
+     [
+      5074,
+      -1518,
+      379.37,
+      386.73
+     ],
+     [
+      5099,
+      -1493,
+      379.93,
+      386.79
+     ],
+     [
+      5124,
+      -1468,
+      380.46,
+      388.07
+     ],
+     [
+      5149,
+      -1443,
+      381,
+      389.95
+     ],
+     [
+      5174,
+      -1418,
+      381.5,
+      392.13
+     ],
+     [
+      5199,
+      -1393,
+      381.97,
+      393.73
+     ],
+     [
+      5224,
+      -1368,
+      382.5,
+      394.61
+     ],
+     [
+      5249,
+      -1343,
+      383.07,
+      395.17
+     ],
+     [
+      5274,
+      -1318,
+      383.6,
+      395.68
+     ],
+     [
+      5299,
+      -1293,
+      384.16,
+      396.82
+     ],
+     [
+      5324,
+      -1268,
+      384.67,
+      398.65
+     ],
+     [
+      5349,
+      -1243,
+      385.22,
+      400.99
+     ],
+     [
+      5374,
+      -1218,
+      385.81,
+      403.72
+     ],
+     [
+      5399,
+      -1193,
+      386.39,
+      406.69
+     ],
+     [
+      5424,
+      -1168,
+      387.02,
+      409.65
+     ],
+     [
+      5449,
+      -1143,
+      387.72,
+      412.37
+     ],
+     [
+      5474,
+      -1118,
+      388.41,
+      414.02
+     ],
+     [
+      5499,
+      -1093,
+      389.09,
+      414.25
+     ],
+     [
+      5524,
+      -1068,
+      389.79,
+      413.1
+     ],
+     [
+      5549,
+      -1043,
+      390.44,
+      411.19
+     ],
+     [
+      5574,
+      -1018,
+      391.11,
+      409.68
+     ],
+     [
+      5599,
+      -993,
+      391.81,
+      408.61
+     ],
+     [
+      5624,
+      -968,
+      392.55,
+      408.46
+     ],
+     [
+      5649,
+      -943,
+      393.19,
+      408.96
+     ],
+     [
+      5674,
+      -918,
+      393.76,
+      409.84
+     ],
+     [
+      5699,
+      -893,
+      394.21,
+      411.02
+     ],
+     [
+      5724,
+      -868,
+      394.65,
+      412.52
+     ],
+     [
+      5749,
+      -843,
+      394.99,
+      414.56
+     ],
+     [
+      5774,
+      -818,
+      395.3,
+      417.26
+     ],
+     [
+      5799,
+      -793,
+      395.58,
+      420.39
+     ],
+     [
+      5824,
+      -768,
+      395.89,
+      423.38
+     ],
+     [
+      5849,
+      -743,
+      396.31,
+      425.55
+     ],
+     [
+      5874,
+      -718,
+      396.82,
+      426.74
+     ],
+     [
+      5899,
+      -693,
+      397.43,
+      426.88
+     ],
+     [
+      5924,
+      -668,
+      398.07,
+      426.18
+     ],
+     [
+      5949,
+      -643,
+      398.82,
+      424.91
+     ],
+     [
+      5974,
+      -618,
+      399.61,
+      423.2
+     ],
+     [
+      5999,
+      -593,
+      400.48,
+      421.19
+     ],
+     [
+      6024,
+      -568,
+      401.38,
+      418.99
+     ],
+     [
+      6049,
+      -543,
+      402.26,
+      416.71
+     ],
+     [
+      6074,
+      -518,
+      403.17,
+      414.5
+     ],
+     [
+      6099,
+      -493,
+      404.05,
+      412.49
+     ],
+     [
+      6124,
+      -468,
+      404.94,
+      410.89
+     ],
+     [
+      6149,
+      -443,
+      405.87,
+      409.7
+     ],
+     [
+      6174,
+      -418,
+      406.73,
+      408.93
+     ],
+     [
+      6199,
+      -393,
+      407.6,
+      408.49
+     ],
+     [
+      6224,
+      -368,
+      408.4,
+      408.22
+     ],
+     [
+      6249,
+      -343,
+      409.28,
+      408.17
+     ],
+     [
+      6274,
+      -318,
+      410.13,
+      408.21
+     ],
+     [
+      6299,
+      -293,
+      410.85,
+      408.37
+     ],
+     [
+      6324,
+      -268,
+      411.57,
+      408.73
+     ],
+     [
+      6349,
+      -243,
+      412.21,
+      409.29
+     ],
+     [
+      6374,
+      -218,
+      412.78,
+      410.08
+     ],
+     [
+      6399,
+      -193,
+      413.31,
+      410.98
+     ],
+     [
+      6424,
+      -168,
+      413.81,
+      411.97
+     ],
+     [
+      6449,
+      -143,
+      414.27,
+      412.89
+     ],
+     [
+      6474,
+      -118,
+      414.75,
+      413.67
+     ],
+     [
+      6499,
+      -93,
+      415.22,
+      414.34
+     ],
+     [
+      6524,
+      -68,
+      415.7,
+      414.88
+     ],
+     [
+      6549,
+      -43,
+      416.13,
+      415.38
+     ],
+     [
+      6574,
+      -18,
+      416.66,
+      416.02
+     ],
+     [
+      6599,
+      7,
+      417.14,
+      417.14
+     ],
+     [
+      6624,
+      32,
+      417.6,
+      417.7
+     ],
+     [
+      6649,
+      57,
+      418.09,
+      418.15
+     ],
+     [
+      6674,
+      82,
+      418.57,
+      418.4
+     ],
+     [
+      6699,
+      107,
+      419.05,
+      418.67
+     ],
+     [
+      6724,
+      132,
+      419.71,
+      419.31
+     ],
+     [
+      6749,
+      157,
+      420.65,
+      420.23
+     ],
+     [
+      6774,
+      182,
+      421.74,
+      421.16
+     ],
+     [
+      6799,
+      207,
+      422.71,
+      422.07
+     ],
+     [
+      6824,
+      232,
+      423.56,
+      422.7
+     ],
+     [
+      6849,
+      257,
+      423.86,
+      422.65
+     ],
+     [
+      6874,
+      282,
+      422.7,
+      422.1
+     ],
+     [
+      6899,
+      307,
+      421.27,
+      420.97
+     ],
+     [
+      6924,
+      332,
+      419.81,
+      419.63
+     ],
+     [
+      6949,
+      357,
+      418.28,
+      418.17
+     ],
+     [
+      6974,
+      382,
+      416.74,
+      417.02
+     ],
+     [
+      6999,
+      407,
+      415.07,
+      416.38
+     ]
+    ]
+   },
+   "fullProfile": "devtests/track-audit/be-nl-de-gb/out/profile-be-1925.json (5 m, with lat / lon)"
+  },
+  "crossSlope": {
+   "halfBaseM": 4,
+   "note": "lidar cross slope = atan((h(left) - h(right)) / (2 * halfBase)), negative = left side lower; game bank = samples[i].bank (same sign convention); median of 3 measurements",
+   "stretches": [
+    {
+     "osmFrom": 50,
+     "osmTo": 70,
+     "fromLine": 462,
+     "near": "",
+     "realMeanDeg": 3,
+     "realMaxDeg": 3,
+     "gameMeanDeg": 0.5,
+     "gameMaxDeg": 0.5
+    },
+    {
+     "osmFrom": 600,
+     "osmTo": 630,
+     "fromLine": 1012,
+     "near": "Raidillon",
+     "realMeanDeg": 3.3,
+     "realMaxDeg": 3.4,
+     "gameMeanDeg": 2.1,
+     "gameMaxDeg": 2.6
+    },
+    {
+     "osmFrom": 1020,
+     "osmTo": 1120,
+     "fromLine": 1432,
+     "near": "Kemmel",
+     "realMeanDeg": 3.8,
+     "realMaxDeg": 4.3,
+     "gameMeanDeg": 0.7,
+     "gameMaxDeg": 1.1
+    },
+    {
+     "osmFrom": 1860,
+     "osmTo": 1910,
+     "fromLine": 2272,
+     "near": "Les Combes",
+     "realMeanDeg": 1.9,
+     "realMaxDeg": 2.8,
+     "gameMeanDeg": 4.1,
+     "gameMaxDeg": 4.8
+    },
+    {
+     "osmFrom": 1930,
+     "osmTo": 1980,
+     "fromLine": 2342,
+     "near": "Les Combes",
+     "realMeanDeg": -2.1,
+     "realMaxDeg": -2.5,
+     "gameMeanDeg": -4.1,
+     "gameMaxDeg": -4.4
+    },
+    {
+     "osmFrom": 2090,
+     "osmTo": 2140,
+     "fromLine": 2502,
+     "near": "Malmedy",
+     "realMeanDeg": 2.9,
+     "realMaxDeg": 2.9,
+     "gameMeanDeg": 3.7,
+     "gameMaxDeg": 4.4
+    },
+    {
+     "osmFrom": 2460,
+     "osmTo": 2600,
+     "fromLine": 2872,
+     "near": "Bruxelles",
+     "realMeanDeg": 2.5,
+     "realMaxDeg": 2.7,
+     "gameMeanDeg": 4.3,
+     "gameMaxDeg": 4.7
+    },
+    {
+     "osmFrom": 2730,
+     "osmTo": 2780,
+     "fromLine": 3142,
+     "near": "Speaker's Corner",
+     "realMeanDeg": -3,
+     "realMaxDeg": -3.2,
+     "gameMeanDeg": -4,
+     "gameMaxDeg": -4.6
+    },
+    {
+     "osmFrom": 3930,
+     "osmTo": 4030,
+     "fromLine": -2662,
+     "near": "Fagnes",
+     "realMeanDeg": 2.1,
+     "realMaxDeg": 2.6,
+     "gameMeanDeg": 3.3,
+     "gameMaxDeg": 3.6
+    },
+    {
+     "osmFrom": 4080,
+     "osmTo": 4120,
+     "fromLine": -2512,
+     "near": "Fagnes",
+     "realMeanDeg": -2,
+     "realMaxDeg": -2.1,
+     "gameMeanDeg": -3.2,
+     "gameMaxDeg": -3.4
+    },
+    {
+     "osmFrom": 4140,
+     "osmTo": 4160,
+     "fromLine": -2452,
+     "near": "Fagnes",
+     "realMeanDeg": -1.9,
+     "realMaxDeg": -2.2,
+     "gameMeanDeg": -3.7,
+     "gameMaxDeg": -3.9
+    },
+    {
+     "osmFrom": 4380,
+     "osmTo": 4450,
+     "fromLine": -2212,
+     "near": "Campus",
+     "realMeanDeg": 2.7,
+     "realMaxDeg": 2.8,
+     "gameMeanDeg": 4.1,
+     "gameMaxDeg": 4.5
+    },
+    {
+     "osmFrom": 5499,
+     "osmTo": 5719,
+     "fromLine": -1093,
+     "near": "Blanchimont",
+     "realMeanDeg": -3.8,
+     "realMaxDeg": -4.2,
+     "gameMeanDeg": -1,
+     "gameMaxDeg": -2.4
+    },
+    {
+     "osmFrom": 6089,
+     "osmTo": 6139,
+     "fromLine": -503,
+     "near": "67 m from Chicane",
+     "realMeanDeg": 3.2,
+     "realMaxDeg": 3.3,
+     "gameMeanDeg": 0,
+     "gameMaxDeg": -0.1
+    },
+    {
+     "osmFrom": 6199,
+     "osmTo": 6219,
+     "fromLine": -393,
+     "near": "Chicane",
+     "realMeanDeg": 0.1,
+     "realMaxDeg": 1.4,
+     "gameMeanDeg": 5.1,
+     "gameMaxDeg": 5.6
+    },
+    {
+     "osmFrom": 6249,
+     "osmTo": 6289,
+     "fromLine": -343,
+     "near": "49 m from Chicane",
+     "realMeanDeg": -2.5,
+     "realMaxDeg": -2.7,
+     "gameMeanDeg": -4.8,
+     "gameMaxDeg": -5.8
+    },
+    {
+     "osmFrom": 6759,
+     "osmTo": 6869,
+     "fromLine": 167,
+     "near": "2 m from La Source",
+     "realMeanDeg": 3.7,
+     "realMaxDeg": 4.2,
+     "gameMeanDeg": 3,
+     "gameMaxDeg": 5.9
+    }
+   ],
+   "realAbsMaxDeg": 4.3,
+   "gameAbsMaxDeg": 5.9,
+   "series": {
+    "columns": [
+     "osmS",
+     "fromLine",
+     "lidarDeg",
+     "gameDeg"
+    ],
+    "rows": [
+     [
+      0,
+      412,
+      2.6,
+      0.6
+     ],
+     [
+      10,
+      422,
+      2.8,
+      0.8
+     ],
+     [
+      20,
+      432,
+      2.8,
+      0.7
+     ],
+     [
+      30,
+      442,
+      2.7,
+      0.6
+     ],
+     [
+      40,
+      452,
+      2.7,
+      0.5
+     ],
+     [
+      50,
+      462,
+      3,
+      0.5
+     ],
+     [
+      60,
+      472,
+      3,
+      0.5
+     ],
+     [
+      70,
+      482,
+      3,
+      0.5
+     ],
+     [
+      80,
+      492,
+      2.7,
+      0.5
+     ],
+     [
+      90,
+      502,
+      2.8,
+      0.4
+     ],
+     [
+      100,
+      512,
+      2.7,
+      0.3
+     ],
+     [
+      110,
+      522,
+      2.5,
+      0.3
+     ],
+     [
+      120,
+      532,
+      2.4,
+      0.2
+     ],
+     [
+      130,
+      542,
+      2.4,
+      0.2
+     ],
+     [
+      140,
+      552,
+      2.4,
+      0.3
+     ],
+     [
+      150,
+      562,
+      2.4,
+      0.5
+     ],
+     [
+      160,
+      572,
+      2.5,
+      0.7
+     ],
+     [
+      170,
+      582,
+      2.4,
+      0.9
+     ],
+     [
+      180,
+      592,
+      2.4,
+      1
+     ],
+     [
+      190,
+      602,
+      2.4,
+      0.9
+     ],
+     [
+      200,
+      612,
+      2.4,
+      0.6
+     ],
+     [
+      210,
+      622,
+      2.4,
+      0.3
+     ],
+     [
+      220,
+      632,
+      2.4,
+      0.1
+     ],
+     [
+      230,
+      642,
+      2.3,
+      0.2
+     ],
+     [
+      240,
+      652,
+      1.7,
+      0.2
+     ],
+     [
+      250,
+      662,
+      1.6,
+      0.1
+     ],
+     [
+      260,
+      672,
+      1.4,
+      0
+     ],
+     [
+      270,
+      682,
+      1.4,
+      -0.1
+     ],
+     [
+      280,
+      692,
+      1.1,
+      0
+     ],
+     [
+      290,
+      702,
+      1,
+      0
+     ],
+     [
+      300,
+      712,
+      1,
+      0
+     ],
+     [
+      310,
+      722,
+      0.7,
+      0
+     ],
+     [
+      320,
+      732,
+      0.5,
+      0
+     ],
+     [
+      330,
+      742,
+      0.2,
+      0
+     ],
+     [
+      340,
+      752,
+      0,
+      0
+     ],
+     [
+      350,
+      762,
+      -0.2,
+      0
+     ],
+     [
+      360,
+      772,
+      -0.3,
+      0
+     ],
+     [
+      370,
+      782,
+      -0.8,
+      0
+     ],
+     [
+      380,
+      792,
+      -0.8,
+      0
+     ],
+     [
+      390,
+      802,
+      -1.1,
+      0
+     ],
+     [
+      400,
+      812,
+      -1.1,
+      0
+     ],
+     [
+      410,
+      822,
+      -1.3,
+      0
+     ],
+     [
+      420,
+      832,
+      -1.3,
+      0
+     ],
+     [
+      430,
+      842,
+      -1.5,
+      0
+     ],
+     [
+      440,
+      852,
+      -1.8,
+      0.1
+     ],
+     [
+      450,
+      862,
+      -2,
+      0.1
+     ],
+     [
+      460,
+      872,
+      -2.2,
+      0
+     ],
+     [
+      470,
+      882,
+      -2.3,
+      -0.2
+     ],
+     [
+      480,
+      892,
+      -2.7,
+      -0.5
+     ],
+     [
+      490,
+      902,
+      -2.8,
+      -1.1
+     ],
+     [
+      500,
+      912,
+      -2.7,
+      -2
+     ],
+     [
+      510,
+      922,
+      -2.2,
+      -2.7
+     ],
+     [
+      520,
+      932,
+      -2.1,
+      -1.9
+     ],
+     [
+      530,
+      942,
+      -0.8,
+      -0.4
+     ],
+     [
+      540,
+      952,
+      0,
+      0.1
+     ],
+     [
+      550,
+      962,
+      0.9,
+      0.2
+     ],
+     [
+      560,
+      972,
+      1.5,
+      0.6
+     ],
+     [
+      570,
+      982,
+      1.5,
+      1.3
+     ],
+     [
+      580,
+      992,
+      1.8,
+      2
+     ],
+     [
+      590,
+      1002,
+      2.5,
+      2.5
+     ],
+     [
+      600,
+      1012,
+      3.2,
+      2.6
+     ],
+     [
+      610,
+      1022,
+      3.3,
+      2.4
+     ],
+     [
+      620,
+      1032,
+      3.3,
+      1.9
+     ],
+     [
+      630,
+      1042,
+      3.4,
+      1.6
+     ],
+     [
+      640,
+      1052,
+      2.9,
+      1.8
+     ],
+     [
+      650,
+      1062,
+      2.9,
+      2
+     ],
+     [
+      660,
+      1072,
+      2.6,
+      1.9
+     ],
+     [
+      670,
+      1082,
+      2.6,
+      1.7
+     ],
+     [
+      680,
+      1092,
+      1.9,
+      1.3
+     ],
+     [
+      690,
+      1102,
+      0.5,
+      0.6
+     ],
+     [
+      700,
+      1112,
+      -1.1,
+      -0.1
+     ],
+     [
+      710,
+      1122,
+      -2.1,
+      -0.9
+     ],
+     [
+      720,
+      1132,
+      -2.3,
+      -1.8
+     ],
+     [
+      730,
+      1142,
+      -2.5,
+      -2.6
+     ],
+     [
+      740,
+      1152,
+      -2.5,
+      -2.6
+     ],
+     [
+      750,
+      1162,
+      -2.2,
+      -2
+     ],
+     [
+      760,
+      1172,
+      -2.2,
+      -1.3
+     ],
+     [
+      770,
+      1182,
+      -2.3,
+      -0.7
+     ],
+     [
+      780,
+      1192,
+      -2.3,
+      -0.4
+     ],
+     [
+      790,
+      1202,
+      -2.3,
+      -0.2
+     ],
+     [
+      800,
+      1212,
+      -1.9,
+      0
+     ],
+     [
+      810,
+      1222,
+      -1.9,
+      0.1
+     ],
+     [
+      820,
+      1232,
+      -1.7,
+      0.1
+     ],
+     [
+      830,
+      1242,
+      -1.1,
+      0
+     ],
+     [
+      840,
+      1252,
+      -0.9,
+      0
+     ],
+     [
+      850,
+      1262,
+      -0.6,
+      0
+     ],
+     [
+      860,
+      1272,
+      -0.5,
+      0
+     ],
+     [
+      870,
+      1282,
+      0,
+      0
+     ],
+     [
+      880,
+      1292,
+      0.1,
+      0
+     ],
+     [
+      890,
+      1302,
+      0.2,
+      0
+     ],
+     [
+      900,
+      1312,
+      0.6,
+      0
+     ],
+     [
+      910,
+      1322,
+      0.6,
+      0
+     ],
+     [
+      920,
+      1332,
+      0.6,
+      0
+     ],
+     [
+      930,
+      1342,
+      1.1,
+      0
+     ],
+     [
+      940,
+      1352,
+      1.4,
+      0
+     ],
+     [
+      950,
+      1362,
+      1.4,
+      0
+     ],
+     [
+      960,
+      1372,
+      2,
+      0
+     ],
+     [
+      970,
+      1382,
+      2.1,
+      0
+     ],
+     [
+      980,
+      1392,
+      2.5,
+      -0.1
+     ],
+     [
+      990,
+      1402,
+      2.7,
+      -0.2
+     ],
+     [
+      1000,
+      1412,
+      2.7,
+      0.1
+     ],
+     [
+      1010,
+      1422,
+      2.9,
+      0.4
+     ],
+     [
+      1020,
+      1432,
+      3.2,
+      0.8
+     ],
+     [
+      1030,
+      1442,
+      3.4,
+      1.1
+     ],
+     [
+      1040,
+      1452,
+      3.5,
+      1.1
+     ],
+     [
+      1050,
+      1462,
+      3.9,
+      0.8
+     ],
+     [
+      1060,
+      1472,
+      4.2,
+      0.4
+     ],
+     [
+      1070,
+      1482,
+      4.3,
+      0.4
+     ],
+     [
+      1080,
+      1492,
+      4.3,
+      0.7
+     ],
+     [
+      1090,
+      1502,
+      4.1,
+      1.1
+     ],
+     [
+      1100,
+      1512,
+      4,
+      1
+     ],
+     [
+      1110,
+      1522,
+      3.5,
+      0.6
+     ],
+     [
+      1120,
+      1532,
+      3.3,
+      0.1
+     ],
+     [
+      1130,
+      1542,
+      2.8,
+      -0.1
+     ],
+     [
+      1140,
+      1552,
+      2.3,
+      -0.1
+     ],
+     [
+      1150,
+      1562,
+      2.1,
+      0
+     ],
+     [
+      1160,
+      1572,
+      2,
+      0
+     ],
+     [
+      1170,
+      1582,
+      1.8,
+      0
+     ],
+     [
+      1180,
+      1592,
+      1.6,
+      0
+     ],
+     [
+      1190,
+      1602,
+      1.1,
+      0
+     ],
+     [
+      1200,
+      1612,
+      1.1,
+      0
+     ],
+     [
+      1210,
+      1622,
+      0.8,
+      0
+     ],
+     [
+      1220,
+      1632,
+      0.8,
+      0
+     ],
+     [
+      1230,
+      1642,
+      0.7,
+      0
+     ],
+     [
+      1240,
+      1652,
+      0.6,
+      0
+     ],
+     [
+      1250,
+      1662,
+      0.6,
+      0
+     ],
+     [
+      1260,
+      1672,
+      0.6,
+      0
+     ],
+     [
+      1270,
+      1682,
+      0.5,
+      0
+     ],
+     [
+      1280,
+      1692,
+      0.7,
+      0
+     ],
+     [
+      1290,
+      1702,
+      0.7,
+      0
+     ],
+     [
+      1300,
+      1712,
+      0.7,
+      0
+     ],
+     [
+      1310,
+      1722,
+      0.8,
+      0
+     ],
+     [
+      1320,
+      1732,
+      0.7,
+      0
+     ],
+     [
+      1330,
+      1742,
+      0.6,
+      0
+     ],
+     [
+      1340,
+      1752,
+      0.6,
+      0
+     ],
+     [
+      1350,
+      1762,
+      0.7,
+      0
+     ],
+     [
+      1360,
+      1772,
+      0.7,
+      0
+     ],
+     [
+      1370,
+      1782,
+      0.7,
+      0
+     ],
+     [
+      1380,
+      1792,
+      0.7,
+      0
+     ],
+     [
+      1390,
+      1802,
+      0.7,
+      0
+     ],
+     [
+      1400,
+      1812,
+      0.9,
+      0
+     ],
+     [
+      1410,
+      1822,
+      0.9,
+      0
+     ],
+     [
+      1420,
+      1832,
+      0.9,
+      0
+     ],
+     [
+      1430,
+      1842,
+      0.9,
+      0
+     ],
+     [
+      1440,
+      1852,
+      0.9,
+      0
+     ],
+     [
+      1450,
+      1862,
+      0.9,
+      0
+     ],
+     [
+      1460,
+      1872,
+      0.8,
+      0
+     ],
+     [
+      1470,
+      1882,
+      0.8,
+      0
+     ],
+     [
+      1480,
+      1892,
+      0.8,
+      0
+     ],
+     [
+      1490,
+      1902,
+      0.9,
+      0
+     ],
+     [
+      1500,
+      1912,
+      0.8,
+      0
+     ],
+     [
+      1510,
+      1922,
+      0.9,
+      0
+     ],
+     [
+      1520,
+      1932,
+      0.9,
+      0
+     ],
+     [
+      1530,
+      1942,
+      0.9,
+      0
+     ],
+     [
+      1540,
+      1952,
+      0.7,
+      0
+     ],
+     [
+      1550,
+      1962,
+      0.7,
+      0
+     ],
+     [
+      1560,
+      1972,
+      0.9,
+      0
+     ],
+     [
+      1570,
+      1982,
+      0.9,
+      0
+     ],
+     [
+      1580,
+      1992,
+      0.9,
+      0
+     ],
+     [
+      1590,
+      2002,
+      0.9,
+      0
+     ],
+     [
+      1600,
+      2012,
+      0.9,
+      0
+     ],
+     [
+      1610,
+      2022,
+      0.9,
+      0
+     ],
+     [
+      1620,
+      2032,
+      0.9,
+      0
+     ],
+     [
+      1630,
+      2042,
+      0.9,
+      0
+     ],
+     [
+      1640,
+      2052,
+      0.9,
+      0
+     ],
+     [
+      1650,
+      2062,
+      0.7,
+      0
+     ],
+     [
+      1660,
+      2072,
+      0.9,
+      0
+     ],
+     [
+      1670,
+      2082,
+      0.9,
+      0
+     ],
+     [
+      1680,
+      2092,
+      1.1,
+      0
+     ],
+     [
+      1690,
+      2102,
+      1.4,
+      0
+     ],
+     [
+      1700,
+      2112,
+      1.4,
+      0
+     ],
+     [
+      1710,
+      2122,
+      1.4,
+      0
+     ],
+     [
+      1720,
+      2132,
+      1.4,
+      0
+     ],
+     [
+      1730,
+      2142,
+      1.5,
+      0
+     ],
+     [
+      1740,
+      2152,
+      1.7,
+      0
+     ],
+     [
+      1750,
+      2162,
+      1.8,
+      0.1
+     ],
+     [
+      1760,
+      2172,
+      1.9,
+      0.1
+     ],
+     [
+      1770,
+      2182,
+      2.3,
+      0.1
+     ],
+     [
+      1780,
+      2192,
+      2.3,
+      0
+     ],
+     [
+      1790,
+      2202,
+      2.4,
+      0
+     ],
+     [
+      1800,
+      2212,
+      2.6,
+      -0.1
+     ],
+     [
+      1810,
+      2222,
+      2.9,
+      -0.2
+     ],
+     [
+      1820,
+      2232,
+      2.9,
+      0
+     ],
+     [
+      1830,
+      2242,
+      2.9,
+      0.4
+     ],
+     [
+      1840,
+      2252,
+      2.9,
+      1.2
+     ],
+     [
+      1850,
+      2262,
+      2.8,
+      2.4
+     ],
+     [
+      1860,
+      2272,
+      2.8,
+      3.5
+     ],
+     [
+      1870,
+      2282,
+      2.5,
+      4.3
+     ],
+     [
+      1880,
+      2292,
+      2.5,
+      4.8
+     ],
+     [
+      1890,
+      2302,
+      1.9,
+      4.7
+     ],
+     [
+      1900,
+      2312,
+      1.1,
+      4.1
+     ],
+     [
+      1910,
+      2322,
+      0.3,
+      3.3
+     ],
+     [
+      1920,
+      2332,
+      0,
+      0.7
+     ],
+     [
+      1930,
+      2342,
+      -1.2,
+      -3
+     ],
+     [
+      1940,
+      2352,
+      -1.6,
+      -4.4
+     ],
+     [
+      1950,
+      2362,
+      -2.3,
+      -4.3
+     ],
+     [
+      1960,
+      2372,
+      -2.5,
+      -4.2
+     ],
+     [
+      1970,
+      2382,
+      -2.5,
+      -4.4
+     ],
+     [
+      1980,
+      2392,
+      -2.5,
+      -4
+     ],
+     [
+      1990,
+      2402,
+      -2.4,
+      -2.6
+     ],
+     [
+      2000,
+      2412,
+      -2,
+      -1.4
+     ],
+     [
+      2010,
+      2422,
+      -1.5,
+      -0.6
+     ],
+     [
+      2020,
+      2432,
+      -0.7,
+      -0.1
+     ],
+     [
+      2030,
+      2442,
+      0,
+      0
+     ],
+     [
+      2040,
+      2452,
+      0.7,
+      -0.1
+     ],
+     [
+      2050,
+      2462,
+      1.7,
+      -0.1
+     ],
+     [
+      2060,
+      2472,
+      2.2,
+      0.3
+     ],
+     [
+      2070,
+      2482,
+      2.4,
+      1.1
+     ],
+     [
+      2080,
+      2492,
+      2.5,
+      2.3
+     ],
+     [
+      2090,
+      2502,
+      2.8,
+      3.2
+     ],
+     [
+      2100,
+      2512,
+      2.8,
+      3.3
+     ],
+     [
+      2110,
+      2522,
+      2.8,
+      3.9
+     ],
+     [
+      2120,
+      2532,
+      2.9,
+      4.4
+     ],
+     [
+      2130,
+      2542,
+      2.9,
+      4
+     ],
+     [
+      2140,
+      2552,
+      2.9,
+      3.4
+     ],
+     [
+      2150,
+      2562,
+      2.9,
+      2
+     ],
+     [
+      2160,
+      2572,
+      2.9,
+      0.8
+     ],
+     [
+      2170,
+      2582,
+      2.9,
+      0.4
+     ],
+     [
+      2180,
+      2592,
+      2.7,
+      0.2
+     ],
+     [
+      2190,
+      2602,
+      2.3,
+      0.1
+     ],
+     [
+      2200,
+      2612,
+      2.3,
+      0
+     ],
+     [
+      2210,
+      2622,
+      2.3,
+      -0.1
+     ],
+     [
+      2220,
+      2632,
+      2.3,
+      0
+     ],
+     [
+      2230,
+      2642,
+      2,
+      0
+     ],
+     [
+      2240,
+      2652,
+      2,
+      0
+     ],
+     [
+      2250,
+      2662,
+      1.6,
+      0
+     ],
+     [
+      2260,
+      2672,
+      1.5,
+      0
+     ],
+     [
+      2270,
+      2682,
+      1.2,
+      0
+     ],
+     [
+      2280,
+      2692,
+      1.2,
+      0
+     ],
+     [
+      2290,
+      2702,
+      1.2,
+      0
+     ],
+     [
+      2300,
+      2712,
+      1.4,
+      0
+     ],
+     [
+      2310,
+      2722,
+      1.4,
+      0
+     ],
+     [
+      2320,
+      2732,
+      1.5,
+      0
+     ],
+     [
+      2330,
+      2742,
+      1.7,
+      0
+     ],
+     [
+      2340,
+      2752,
+      1.8,
+      0
+     ],
+     [
+      2350,
+      2762,
+      1.8,
+      0
+     ],
+     [
+      2360,
+      2772,
+      2,
+      0
+     ],
+     [
+      2370,
+      2782,
+      2.1,
+      0
+     ],
+     [
+      2380,
+      2792,
+      2.6,
+      -0.1
+     ],
+     [
+      2390,
+      2802,
+      2.6,
+      -0.2
+     ],
+     [
+      2400,
+      2812,
+      2.6,
+      -0.2
+     ],
+     [
+      2410,
+      2822,
+      2.7,
+      0
+     ],
+     [
+      2420,
+      2832,
+      2.8,
+      0.3
+     ],
+     [
+      2430,
+      2842,
+      3,
+      0.8
+     ],
+     [
+      2440,
+      2852,
+      3,
+      1.7
+     ],
+     [
+      2450,
+      2862,
+      2.8,
+      2.9
+     ],
+     [
+      2460,
+      2872,
+      2.6,
+      4.2
+     ],
+     [
+      2470,
+      2882,
+      2.6,
+      4.7
+     ],
+     [
+      2480,
+      2892,
+      2.6,
+      4.5
+     ],
+     [
+      2490,
+      2902,
+      2.6,
+      4.4
+     ],
+     [
+      2500,
+      2912,
+      2.6,
+      4.5
+     ],
+     [
+      2510,
+      2922,
+      2.6,
+      4.6
+     ],
+     [
+      2520,
+      2932,
+      2.3,
+      4.6
+     ],
+     [
+      2530,
+      2942,
+      2.3,
+      4.4
+     ],
+     [
+      2540,
+      2952,
+      2.3,
+      4.1
+     ],
+     [
+      2550,
+      2962,
+      2.2,
+      4.3
+     ],
+     [
+      2560,
+      2972,
+      2.2,
+      4.6
+     ],
+     [
+      2570,
+      2982,
+      2.4,
+      4.1
+     ],
+     [
+      2580,
+      2992,
+      2.4,
+      3.9
+     ],
+     [
+      2590,
+      3002,
+      2.7,
+      4.2
+     ],
+     [
+      2600,
+      3012,
+      2.7,
+      3.3
+     ],
+     [
+      2610,
+      3022,
+      2.4,
+      1.7
+     ],
+     [
+      2620,
+      3032,
+      1.8,
+      0.8
+     ],
+     [
+      2630,
+      3042,
+      1.2,
+      0.2
+     ],
+     [
+      2640,
+      3052,
+      1,
+      -0.1
+     ],
+     [
+      2650,
+      3062,
+      0.2,
+      -0.1
+     ],
+     [
+      2660,
+      3072,
+      -0.5,
+      0
+     ],
+     [
+      2670,
+      3082,
+      -0.8,
+      0
+     ],
+     [
+      2680,
+      3092,
+      -1.7,
+      0.1
+     ],
+     [
+      2690,
+      3102,
+      -2.1,
+      0.3
+     ],
+     [
+      2700,
+      3112,
+      -2.4,
+      0.1
+     ],
+     [
+      2710,
+      3122,
+      -2.7,
+      -0.7
+     ],
+     [
+      2720,
+      3132,
+      -2.6,
+      -1.8
+     ],
+     [
+      2730,
+      3142,
+      -2.7,
+      -3.1
+     ],
+     [
+      2740,
+      3152,
+      -2.8,
+      -3.9
+     ],
+     [
+      2750,
+      3162,
+      -3,
+      -4.4
+     ],
+     [
+      2760,
+      3172,
+      -3.2,
+      -4.6
+     ],
+     [
+      2770,
+      3182,
+      -3.2,
+      -4.3
+     ],
+     [
+      2780,
+      3192,
+      -2.9,
+      -3.8
+     ],
+     [
+      2790,
+      3202,
+      -2.9,
+      -3
+     ],
+     [
+      2800,
+      3212,
+      -2.6,
+      -1.8
+     ],
+     [
+      2810,
+      3222,
+      -2.2,
+      -0.7
+     ],
+     [
+      2820,
+      3232,
+      -2.1,
+      0
+     ],
+     [
+      2830,
+      3242,
+      -1.3,
+      0.3
+     ],
+     [
+      2840,
+      3252,
+      -0.6,
+      0.2
+     ],
+     [
+      2850,
+      3262,
+      0,
+      0
+     ],
+     [
+      2860,
+      3272,
+      0.3,
+      0
+     ],
+     [
+      2870,
+      3282,
+      0.8,
+      -0.1
+     ],
+     [
+      2880,
+      3292,
+      1.2,
+      -0.1
+     ],
+     [
+      2890,
+      3302,
+      1.3,
+      0
+     ],
+     [
+      2900,
+      3312,
+      1.5,
+      0.2
+     ],
+     [
+      2910,
+      3322,
+      1.5,
+      0.5
+     ],
+     [
+      2920,
+      3332,
+      1.5,
+      0.6
+     ],
+     [
+      2930,
+      3342,
+      1.5,
+      0.5
+     ],
+     [
+      2940,
+      3352,
+      1.5,
+      0.4
+     ],
+     [
+      2950,
+      3362,
+      1.8,
+      0.4
+     ],
+     [
+      2960,
+      3372,
+      1.8,
+      0.3
+     ],
+     [
+      2970,
+      3382,
+      1.6,
+      0.4
+     ],
+     [
+      2980,
+      3392,
+      1.6,
+      0.4
+     ],
+     [
+      2990,
+      3402,
+      1.7,
+      0.4
+     ],
+     [
+      3000,
+      3412,
+      1.8,
+      0.2
+     ],
+     [
+      3010,
+      3422,
+      1.7,
+      0.1
+     ],
+     [
+      3020,
+      3432,
+      1.3,
+      -0.1
+     ],
+     [
+      3030,
+      3442,
+      1,
+      -0.1
+     ],
+     [
+      3040,
+      3452,
+      0.4,
+      0
+     ],
+     [
+      3050,
+      3462,
+      -0.3,
+      0
+     ],
+     [
+      3060,
+      3472,
+      -0.4,
+      0
+     ],
+     [
+      3070,
+      3482,
+      -1.1,
+      0
+     ],
+     [
+      3080,
+      3492,
+      -1.2,
+      0
+     ],
+     [
+      3090,
+      3502,
+      -1.2,
+      -0.1
+     ],
+     [
+      3100,
+      -3492,
+      -1.2,
+      0
+     ],
+     [
+      3110,
+      -3482,
+      -1.5,
+      0
+     ],
+     [
+      3120,
+      -3472,
+      -1.5,
+      0.1
+     ],
+     [
+      3130,
+      -3462,
+      -1.6,
+      0.2
+     ],
+     [
+      3140,
+      -3452,
+      -1.6,
+      0.2
+     ],
+     [
+      3150,
+      -3442,
+      -1.7,
+      0.2
+     ],
+     [
+      3160,
+      -3432,
+      -2.1,
+      0.1
+     ],
+     [
+      3170,
+      -3422,
+      -2.2,
+      0
+     ],
+     [
+      3180,
+      -3412,
+      -2.3,
+      0
+     ],
+     [
+      3190,
+      -3402,
+      -2.4,
+      0
+     ],
+     [
+      3200,
+      -3392,
+      -2.6,
+      0
+     ],
+     [
+      3210,
+      -3382,
+      -2.6,
+      -0.1
+     ],
+     [
+      3220,
+      -3372,
+      -2.5,
+      -0.3
+     ],
+     [
+      3230,
+      -3362,
+      -2.3,
+      -0.7
+     ],
+     [
+      3240,
+      -3352,
+      -2.3,
+      -1.9
+     ],
+     [
+      3250,
+      -3342,
+      -2.3,
+      -2.9
+     ],
+     [
+      3260,
+      -3332,
+      -2.4,
+      -3.1
+     ],
+     [
+      3270,
+      -3322,
+      -2.4,
+      -3
+     ],
+     [
+      3280,
+      -3312,
+      -2.5,
+      -2.6
+     ],
+     [
+      3290,
+      -3302,
+      -2.6,
+      -2.3
+     ],
+     [
+      3300,
+      -3292,
+      -2.6,
+      -2.3
+     ],
+     [
+      3310,
+      -3282,
+      -2.5,
+      -2.5
+     ],
+     [
+      3320,
+      -3272,
+      -2.2,
+      -2.7
+     ],
+     [
+      3330,
+      -3262,
+      -2.2,
+      -2.8
+     ],
+     [
+      3340,
+      -3252,
+      -2,
+      -2.9
+     ],
+     [
+      3350,
+      -3242,
+      -2,
+      -2.6
+     ],
+     [
+      3360,
+      -3232,
+      -2.1,
+      -1.7
+     ],
+     [
+      3370,
+      -3222,
+      -2.3,
+      -1
+     ],
+     [
+      3380,
+      -3212,
+      -2.4,
+      -0.4
+     ],
+     [
+      3390,
+      -3202,
+      -2.4,
+      0.2
+     ],
+     [
+      3400,
+      -3192,
+      -2.4,
+      0.3
+     ],
+     [
+      3410,
+      -3182,
+      -2.4,
+      -0.4
+     ],
+     [
+      3420,
+      -3172,
+      -2.6,
+      -1.5
+     ],
+     [
+      3430,
+      -3162,
+      -2.6,
+      -2.1
+     ],
+     [
+      3440,
+      -3152,
+      -2.5,
+      -2.1
+     ],
+     [
+      3450,
+      -3142,
+      -2,
+      -2
+     ],
+     [
+      3460,
+      -3132,
+      -2.5,
+      -1.8
+     ],
+     [
+      3470,
+      -3122,
+      -2.4,
+      -1.5
+     ],
+     [
+      3480,
+      -3112,
+      -2.5,
+      -1.4
+     ],
+     [
+      3490,
+      -3102,
+      -2.4,
+      -1.9
+     ],
+     [
+      3500,
+      -3092,
+      -2.5,
+      -2.3
+     ],
+     [
+      3510,
+      -3082,
+      -2.5,
+      -2.1
+     ],
+     [
+      3520,
+      -3072,
+      -2.5,
+      -1.7
+     ],
+     [
+      3530,
+      -3062,
+      -2.5,
+      -1.6
+     ],
+     [
+      3540,
+      -3052,
+      -2.5,
+      -2
+     ],
+     [
+      3550,
+      -3042,
+      -2.4,
+      -2.4
+     ],
+     [
+      3560,
+      -3032,
+      -2.5,
+      -2.1
+     ],
+     [
+      3570,
+      -3022,
+      -2.4,
+      -1.5
+     ],
+     [
+      3580,
+      -3012,
+      -2.3,
+      -1.1
+     ],
+     [
+      3590,
+      -3002,
+      -2.1,
+      -1
+     ],
+     [
+      3600,
+      -2992,
+      -2.1,
+      -1
+     ],
+     [
+      3610,
+      -2982,
+      -2.1,
+      -0.9
+     ],
+     [
+      3620,
+      -2972,
+      -1.9,
+      -0.7
+     ],
+     [
+      3630,
+      -2962,
+      -1.9,
+      -0.4
+     ],
+     [
+      3640,
+      -2952,
+      -1.6,
+      -0.1
+     ],
+     [
+      3650,
+      -2942,
+      -1.4,
+      0.1
+     ],
+     [
+      3660,
+      -2932,
+      -1.2,
+      0.1
+     ],
+     [
+      3670,
+      -2922,
+      -1.1,
+      0
+     ],
+     [
+      3680,
+      -2912,
+      -0.7,
+      0
+     ],
+     [
+      3690,
+      -2902,
+      -0.6,
+      0
+     ],
+     [
+      3700,
+      -2892,
+      -0.3,
+      0
+     ],
+     [
+      3710,
+      -2882,
+      -0.1,
+      0
+     ],
+     [
+      3720,
+      -2872,
+      0.1,
+      0
+     ],
+     [
+      3730,
+      -2862,
+      0.5,
+      0
+     ],
+     [
+      3740,
+      -2852,
+      0.6,
+      0
+     ],
+     [
+      3750,
+      -2842,
+      0.9,
+      0
+     ],
+     [
+      3760,
+      -2832,
+      1.3,
+      0
+     ],
+     [
+      3770,
+      -2822,
+      1.3,
+      0
+     ],
+     [
+      3780,
+      -2812,
+      1.3,
+      0
+     ],
+     [
+      3790,
+      -2802,
+      1.3,
+      0
+     ],
+     [
+      3800,
+      -2792,
+      1.3,
+      0
+     ],
+     [
+      3810,
+      -2782,
+      1.3,
+      0
+     ],
+     [
+      3820,
+      -2772,
+      1.3,
+      0
+     ],
+     [
+      3830,
+      -2762,
+      1.5,
+      0
+     ],
+     [
+      3840,
+      -2752,
+      1.8,
+      0
+     ],
+     [
+      3850,
+      -2742,
+      2.1,
+      0
+     ],
+     [
+      3860,
+      -2732,
+      2.5,
+      -0.1
+     ],
+     [
+      3870,
+      -2722,
+      2.6,
+      -0.1
+     ],
+     [
+      3880,
+      -2712,
+      2.8,
+      0.1
+     ],
+     [
+      3890,
+      -2702,
+      2.8,
+      0.5
+     ],
+     [
+      3900,
+      -2692,
+      2.8,
+      0.9
+     ],
+     [
+      3910,
+      -2682,
+      2.8,
+      1.3
+     ],
+     [
+      3920,
+      -2672,
+      2.7,
+      2.3
+     ],
+     [
+      3930,
+      -2662,
+      2.6,
+      3.1
+     ],
+     [
+      3940,
+      -2652,
+      2.5,
+      3.5
+     ],
+     [
+      3950,
+      -2642,
+      2.4,
+      3.6
+     ],
+     [
+      3960,
+      -2632,
+      2.4,
+      3.3
+     ],
+     [
+      3970,
+      -2622,
+      2.3,
+      3.1
+     ],
+     [
+      3980,
+      -2612,
+      2.4,
+      3.1
+     ],
+     [
+      3990,
+      -2602,
+      2.4,
+      3.3
+     ],
+     [
+      4000,
+      -2592,
+      2.4,
+      3.4
+     ],
+     [
+      4010,
+      -2582,
+      1.7,
+      3.5
+     ],
+     [
+      4020,
+      -2572,
+      1.2,
+      3.4
+     ],
+     [
+      4030,
+      -2562,
+      1,
+      3.1
+     ],
+     [
+      4040,
+      -2552,
+      0.4,
+      2.5
+     ],
+     [
+      4050,
+      -2542,
+      0,
+      1.2
+     ],
+     [
+      4060,
+      -2532,
+      -0.7,
+      -0.7
+     ],
+     [
+      4070,
+      -2522,
+      -1.2,
+      -2.3
+     ],
+     [
+      4080,
+      -2512,
+      -1.7,
+      -3
+     ],
+     [
+      4090,
+      -2502,
+      -2,
+      -3.3
+     ],
+     [
+      4100,
+      -2492,
+      -2,
+      -3.4
+     ],
+     [
+      4110,
+      -2482,
+      -2.1,
+      -3.4
+     ],
+     [
+      4120,
+      -2472,
+      -2.1,
+      -3
+     ],
+     [
+      4130,
+      -2462,
+      -2.2,
+      -2.9
+     ],
+     [
+      4140,
+      -2452,
+      -2.2,
+      -3.5
+     ],
+     [
+      4150,
+      -2442,
+      -1.8,
+      -3.9
+     ],
+     [
+      4160,
+      -2432,
+      -1.7,
+      -3.9
+     ],
+     [
+      4170,
+      -2422,
+      -1.5,
+      -3
+     ],
+     [
+      4180,
+      -2412,
+      -1.5,
+      -1.4
+     ],
+     [
+      4190,
+      -2402,
+      -1.5,
+      -0.7
+     ],
+     [
+      4200,
+      -2392,
+      -1.4,
+      -0.7
+     ],
+     [
+      4210,
+      -2382,
+      -1,
+      -0.5
+     ],
+     [
+      4220,
+      -2372,
+      -0.9,
+      -0.2
+     ],
+     [
+      4230,
+      -2362,
+      -0.7,
+      0
+     ],
+     [
+      4240,
+      -2352,
+      -0.4,
+      0.1
+     ],
+     [
+      4250,
+      -2342,
+      0,
+      0.1
+     ],
+     [
+      4260,
+      -2332,
+      0.1,
+      0
+     ],
+     [
+      4270,
+      -2322,
+      0.3,
+      0
+     ],
+     [
+      4280,
+      -2312,
+      0.7,
+      0
+     ],
+     [
+      4290,
+      -2302,
+      0.7,
+      0
+     ],
+     [
+      4300,
+      -2292,
+      1.2,
+      0
+     ],
+     [
+      4310,
+      -2282,
+      1.5,
+      0
+     ],
+     [
+      4320,
+      -2272,
+      1.7,
+      0
+     ],
+     [
+      4330,
+      -2262,
+      2,
+      -0.1
+     ],
+     [
+      4340,
+      -2252,
+      2.8,
+      -0.3
+     ],
+     [
+      4350,
+      -2242,
+      2.8,
+      -0.1
+     ],
+     [
+      4360,
+      -2232,
+      2.7,
+      0.6
+     ],
+     [
+      4370,
+      -2222,
+      2.7,
+      1.7
+     ],
+     [
+      4380,
+      -2212,
+      2.7,
+      3.2
+     ],
+     [
+      4390,
+      -2202,
+      2.8,
+      4.1
+     ],
+     [
+      4400,
+      -2192,
+      2.8,
+      4.4
+     ],
+     [
+      4410,
+      -2182,
+      2.8,
+      4.3
+     ],
+     [
+      4420,
+      -2172,
+      2.8,
+      4.3
+     ],
+     [
+      4430,
+      -2162,
+      2.7,
+      4.4
+     ],
+     [
+      4440,
+      -2152,
+      2.6,
+      4.5
+     ],
+     [
+      4450,
+      -2142,
+      2.6,
+      3.6
+     ],
+     [
+      4460,
+      -2132,
+      2.2,
+      2.2
+     ],
+     [
+      4470,
+      -2122,
+      1.7,
+      1
+     ],
+     [
+      4480,
+      -2112,
+      1.4,
+      0.2
+     ],
+     [
+      4490,
+      -2102,
+      1.3,
+      -0.2
+     ],
+     [
+      4500,
+      -2092,
+      1.3,
+      -0.2
+     ],
+     [
+      4510,
+      -2082,
+      1.3,
+      0
+     ],
+     [
+      4520,
+      -2072,
+      1.4,
+      0
+     ],
+     [
+      4530,
+      -2062,
+      1.6,
+      -0.2
+     ],
+     [
+      4540,
+      -2052,
+      1.7,
+      -0.3
+     ],
+     [
+      4550,
+      -2042,
+      2,
+      -0.1
+     ],
+     [
+      4560,
+      -2032,
+      2.1,
+      0.5
+     ],
+     [
+      4570,
+      -2022,
+      2.1,
+      1.6
+     ],
+     [
+      4580,
+      -2012,
+      2.1,
+      2.8
+     ],
+     [
+      4590,
+      -2002,
+      2.1,
+      2.8
+     ],
+     [
+      4600,
+      -1992,
+      2.1,
+      1.7
+     ],
+     [
+      4610,
+      -1982,
+      2.2,
+      2
+     ],
+     [
+      4620,
+      -1972,
+      2.3,
+      2.8
+     ],
+     [
+      4630,
+      -1962,
+      2.3,
+      2.7
+     ],
+     [
+      4640,
+      -1952,
+      2.3,
+      2.4
+     ],
+     [
+      4650,
+      -1942,
+      2.2,
+      2.6
+     ],
+     [
+      4660,
+      -1932,
+      2.1,
+      2.7
+     ],
+     [
+      4670,
+      -1922,
+      2.1,
+      2.6
+     ],
+     [
+      4680,
+      -1912,
+      2.2,
+      2.6
+     ],
+     [
+      4690,
+      -1902,
+      2.2,
+      2.8
+     ],
+     [
+      4700,
+      -1892,
+      2.2,
+      2.1
+     ],
+     [
+      4710,
+      -1882,
+      2.2,
+      0.5
+     ],
+     [
+      4720,
+      -1872,
+      2.2,
+      -0.1
+     ],
+     [
+      4730,
+      -1862,
+      2.1,
+      -0.3
+     ],
+     [
+      4740,
+      -1852,
+      1.8,
+      -0.4
+     ],
+     [
+      4750,
+      -1842,
+      1.8,
+      0
+     ],
+     [
+      4760,
+      -1832,
+      1.8,
+      0.8
+     ],
+     [
+      4769,
+      -1822,
+      1.7,
+      1.4
+     ],
+     [
+      4779,
+      -1812,
+      1.7,
+      1.4
+     ],
+     [
+      4789,
+      -1802,
+      1.7,
+      1.1
+     ],
+     [
+      4799,
+      -1792,
+      1.8,
+      0.8
+     ],
+     [
+      4809,
+      -1782,
+      2,
+      0.6
+     ],
+     [
+      4819,
+      -1772,
+      2,
+      0.5
+     ],
+     [
+      4829,
+      -1762,
+      1.8,
+      0.6
+     ],
+     [
+      4839,
+      -1752,
+      1.4,
+      0.7
+     ],
+     [
+      4849,
+      -1742,
+      1.4,
+      0.8
+     ],
+     [
+      4859,
+      -1732,
+      1.3,
+      0.8
+     ],
+     [
+      4869,
+      -1722,
+      1.3,
+      0.7
+     ],
+     [
+      4879,
+      -1712,
+      1.3,
+      0.6
+     ],
+     [
+      4889,
+      -1702,
+      1.7,
+      0.5
+     ],
+     [
+      4899,
+      -1692,
+      1.7,
+      0.4
+     ],
+     [
+      4909,
+      -1682,
+      1.6,
+      0.3
+     ],
+     [
+      4919,
+      -1672,
+      1.6,
+      0.4
+     ],
+     [
+      4929,
+      -1662,
+      1.5,
+      0.5
+     ],
+     [
+      4939,
+      -1652,
+      1.6,
+      0.4
+     ],
+     [
+      4949,
+      -1642,
+      1.3,
+      0.1
+     ],
+     [
+      4959,
+      -1632,
+      1.4,
+      -0.2
+     ],
+     [
+      4969,
+      -1622,
+      1.4,
+      -0.3
+     ],
+     [
+      4979,
+      -1612,
+      1.4,
+      -0.1
+     ],
+     [
+      4989,
+      -1602,
+      1.4,
+      0.4
+     ],
+     [
+      4999,
+      -1592,
+      1.4,
+      0.8
+     ],
+     [
+      5009,
+      -1582,
+      1.4,
+      0.9
+     ],
+     [
+      5019,
+      -1572,
+      1.5,
+      0.8
+     ],
+     [
+      5029,
+      -1562,
+      1.6,
+      0.7
+     ],
+     [
+      5039,
+      -1552,
+      1.6,
+      0.8
+     ],
+     [
+      5049,
+      -1542,
+      1.6,
+      0.9
+     ],
+     [
+      5059,
+      -1532,
+      1.6,
+      1.1
+     ],
+     [
+      5069,
+      -1522,
+      1.9,
+      1
+     ],
+     [
+      5079,
+      -1513,
+      1.9,
+      0.6
+     ],
+     [
+      5089,
+      -1503,
+      1.4,
+      0.3
+     ],
+     [
+      5099,
+      -1493,
+      1.1,
+      0.3
+     ],
+     [
+      5109,
+      -1483,
+      1,
+      0.3
+     ],
+     [
+      5119,
+      -1473,
+      0.7,
+      0.1
+     ],
+     [
+      5129,
+      -1463,
+      0.3,
+      0
+     ],
+     [
+      5139,
+      -1453,
+      0.2,
+      -0.1
+     ],
+     [
+      5149,
+      -1443,
+      -0.1,
+      0
+     ],
+     [
+      5159,
+      -1433,
+      -0.7,
+      0
+     ],
+     [
+      5169,
+      -1423,
+      -0.7,
+      0
+     ],
+     [
+      5179,
+      -1413,
+      -1.1,
+      0
+     ],
+     [
+      5189,
+      -1403,
+      -1.7,
+      0
+     ],
+     [
+      5199,
+      -1393,
+      -1.7,
+      0
+     ],
+     [
+      5209,
+      -1383,
+      -1.8,
+      0
+     ],
+     [
+      5219,
+      -1373,
+      -1.9,
+      0
+     ],
+     [
+      5229,
+      -1363,
+      -2.3,
+      0.1
+     ],
+     [
+      5239,
+      -1353,
+      -2.3,
+      0.1
+     ],
+     [
+      5249,
+      -1343,
+      -2.6,
+      0
+     ],
+     [
+      5259,
+      -1333,
+      -2.6,
+      -0.3
+     ],
+     [
+      5269,
+      -1323,
+      -2.5,
+      -0.6
+     ],
+     [
+      5279,
+      -1313,
+      -2.4,
+      -0.8
+     ],
+     [
+      5289,
+      -1303,
+      -2.1,
+      -0.9
+     ],
+     [
+      5299,
+      -1293,
+      -2.1,
+      -1
+     ],
+     [
+      5309,
+      -1283,
+      -2.1,
+      -1
+     ],
+     [
+      5319,
+      -1273,
+      -2.1,
+      -1
+     ],
+     [
+      5329,
+      -1263,
+      -2.1,
+      -0.9
+     ],
+     [
+      5339,
+      -1253,
+      -1.9,
+      -0.9
+     ],
+     [
+      5349,
+      -1243,
+      -1.9,
+      -1.1
+     ],
+     [
+      5359,
+      -1233,
+      -1.9,
+      -1.3
+     ],
+     [
+      5369,
+      -1223,
+      -2.1,
+      -1.2
+     ],
+     [
+      5379,
+      -1213,
+      -2.1,
+      -0.8
+     ],
+     [
+      5389,
+      -1203,
+      -2.2,
+      -0.5
+     ],
+     [
+      5399,
+      -1193,
+      -2.1,
+      -0.8
+     ],
+     [
+      5409,
+      -1183,
+      -2,
+      -1.3
+     ],
+     [
+      5419,
+      -1173,
+      -2,
+      -1.4
+     ],
+     [
+      5429,
+      -1163,
+      -2,
+      -1
+     ],
+     [
+      5439,
+      -1153,
+      -2.2,
+      -0.6
+     ],
+     [
+      5449,
+      -1143,
+      -2.3,
+      -0.4
+     ],
+     [
+      5459,
+      -1133,
+      -2.4,
+      -0.4
+     ],
+     [
+      5469,
+      -1123,
+      -2.8,
+      -0.5
+     ],
+     [
+      5479,
+      -1113,
+      -2.8,
+      -0.4
+     ],
+     [
+      5489,
+      -1103,
+      -2.8,
+      -0.1
+     ],
+     [
+      5499,
+      -1093,
+      -3.1,
+      0
+     ],
+     [
+      5509,
+      -1083,
+      -3.1,
+      0
+     ],
+     [
+      5519,
+      -1073,
+      -3.5,
+      0
+     ],
+     [
+      5529,
+      -1063,
+      -3.5,
+      0
+     ],
+     [
+      5539,
+      -1053,
+      -3.6,
+      0
+     ],
+     [
+      5549,
+      -1043,
+      -4.1,
+      0.1
+     ],
+     [
+      5559,
+      -1033,
+      -4.1,
+      0.1
+     ],
+     [
+      5569,
+      -1023,
+      -4.1,
+      0
+     ],
+     [
+      5579,
+      -1013,
+      -4,
+      -0.1
+     ],
+     [
+      5589,
+      -1003,
+      -4,
+      -0.4
+     ],
+     [
+      5599,
+      -993,
+      -4,
+      -0.7
+     ],
+     [
+      5609,
+      -983,
+      -4,
+      -1.1
+     ],
+     [
+      5619,
+      -973,
+      -4.1,
+      -1.7
+     ],
+     [
+      5629,
+      -963,
+      -4,
+      -2
+     ],
+     [
+      5639,
+      -953,
+      -4.2,
+      -2
+     ],
+     [
+      5649,
+      -943,
+      -3.8,
+      -2
+     ],
+     [
+      5659,
+      -933,
+      -3.8,
+      -2
+     ],
+     [
+      5669,
+      -923,
+      -3.8,
+      -2.2
+     ],
+     [
+      5679,
+      -913,
+      -3.7,
+      -2.3
+     ],
+     [
+      5689,
+      -903,
+      -3.6,
+      -2.4
+     ],
+     [
+      5699,
+      -893,
+      -3.6,
+      -2.1
+     ],
+     [
+      5709,
+      -883,
+      -3.4,
+      -1.3
+     ],
+     [
+      5719,
+      -873,
+      -3.2,
+      -0.3
+     ],
+     [
+      5729,
+      -863,
+      -2.7,
+      0.2
+     ],
+     [
+      5739,
+      -853,
+      -2.4,
+      0.1
+     ],
+     [
+      5749,
+      -843,
+      -2.1,
+      0
+     ],
+     [
+      5759,
+      -833,
+      -1.9,
+      0.1
+     ],
+     [
+      5769,
+      -823,
+      -1.3,
+      0.1
+     ],
+     [
+      5779,
+      -813,
+      -1.1,
+      0
+     ],
+     [
+      5789,
+      -803,
+      -0.6,
+      0
+     ],
+     [
+      5799,
+      -793,
+      -0.1,
+      0
+     ],
+     [
+      5809,
+      -783,
+      0.1,
+      0
+     ],
+     [
+      5819,
+      -773,
+      0.8,
+      0.1
+     ],
+     [
+      5829,
+      -763,
+      0.9,
+      0.1
+     ],
+     [
+      5839,
+      -753,
+      1.5,
+      0.1
+     ],
+     [
+      5849,
+      -743,
+      1.6,
+      0.1
+     ],
+     [
+      5859,
+      -733,
+      2.3,
+      0
+     ],
+     [
+      5869,
+      -723,
+      2.3,
+      -0.1
+     ],
+     [
+      5879,
+      -713,
+      2.3,
+      -0.2
+     ],
+     [
+      5889,
+      -703,
+      2.6,
+      -0.1
+     ],
+     [
+      5899,
+      -693,
+      2.8,
+      0.1
+     ],
+     [
+      5909,
+      -683,
+      2.9,
+      0.5
+     ],
+     [
+      5919,
+      -673,
+      2.9,
+      0.9
+     ],
+     [
+      5929,
+      -663,
+      3,
+      1.1
+     ],
+     [
+      5939,
+      -653,
+      3,
+      0.9
+     ],
+     [
+      5949,
+      -643,
+      3,
+      0.5
+     ],
+     [
+      5959,
+      -633,
+      2.9,
+      0.3
+     ],
+     [
+      5969,
+      -623,
+      2.9,
+      0.4
+     ],
+     [
+      5979,
+      -613,
+      2.9,
+      0.4
+     ],
+     [
+      5989,
+      -603,
+      2.9,
+      0.5
+     ],
+     [
+      5999,
+      -593,
+      2.9,
+      0.6
+     ],
+     [
+      6009,
+      -583,
+      2.9,
+      0.5
+     ],
+     [
+      6019,
+      -573,
+      2.9,
+      0.3
+     ],
+     [
+      6029,
+      -563,
+      2.9,
+      0.2
+     ],
+     [
+      6039,
+      -553,
+      2.9,
+      0.3
+     ],
+     [
+      6049,
+      -543,
+      3,
+      0.3
+     ],
+     [
+      6059,
+      -533,
+      3,
+      0.3
+     ],
+     [
+      6069,
+      -523,
+      2.9,
+      0.3
+     ],
+     [
+      6079,
+      -513,
+      2.9,
+      0.2
+     ],
+     [
+      6089,
+      -503,
+      3.2,
+      0
+     ],
+     [
+      6099,
+      -493,
+      3.3,
+      0
+     ],
+     [
+      6109,
+      -483,
+      3.3,
+      0
+     ],
+     [
+      6119,
+      -473,
+      3.3,
+      0
+     ],
+     [
+      6129,
+      -463,
+      3.1,
+      0
+     ],
+     [
+      6139,
+      -453,
+      3.1,
+      -0.1
+     ],
+     [
+      6149,
+      -443,
+      2.9,
+      -0.2
+     ],
+     [
+      6159,
+      -433,
+      2.9,
+      -0.2
+     ],
+     [
+      6169,
+      -423,
+      2.9,
+      0.1
+     ],
+     [
+      6179,
+      -413,
+      2.5,
+      0.9
+     ],
+     [
+      6189,
+      -403,
+      2.4,
+      2.5
+     ],
+     [
+      6199,
+      -393,
+      1.4,
+      4.2
+     ],
+     [
+      6209,
+      -383,
+      0.2,
+      5.6
+     ],
+     [
+      6219,
+      -373,
+      -1.3,
+      5.5
+     ],
+     [
+      6229,
+      -363,
+      -2.1,
+      3
+     ],
+     [
+      6239,
+      -353,
+      -2.2,
+      -1.1
+     ],
+     [
+      6249,
+      -343,
+      -2.2,
+      -3.6
+     ],
+     [
+      6259,
+      -333,
+      -2.6,
+      -5
+     ],
+     [
+      6269,
+      -323,
+      -2.6,
+      -5.8
+     ],
+     [
+      6279,
+      -313,
+      -2.7,
+      -5.6
+     ],
+     [
+      6289,
+      -303,
+      -2.7,
+      -3.7
+     ],
+     [
+      6299,
+      -293,
+      -2.3,
+      -1.7
+     ],
+     [
+      6309,
+      -283,
+      -2.3,
+      -0.6
+     ],
+     [
+      6319,
+      -273,
+      -2,
+      -0.1
+     ],
+     [
+      6329,
+      -263,
+      -1.9,
+      0.1
+     ],
+     [
+      6339,
+      -253,
+      -1.9,
+      0.1
+     ],
+     [
+      6349,
+      -243,
+      -1.7,
+      0
+     ],
+     [
+      6359,
+      -233,
+      -1.6,
+      0
+     ],
+     [
+      6369,
+      -223,
+      -1.2,
+      0.1
+     ],
+     [
+      6379,
+      -213,
+      -1.2,
+      0.2
+     ],
+     [
+      6389,
+      -203,
+      -1.5,
+      0.3
+     ],
+     [
+      6399,
+      -193,
+      -1.6,
+      0.2
+     ],
+     [
+      6409,
+      -183,
+      -1.5,
+      0.1
+     ],
+     [
+      6419,
+      -173,
+      -1.3,
+      0.1
+     ],
+     [
+      6429,
+      -163,
+      -1.3,
+      0
+     ],
+     [
+      6439,
+      -153,
+      -1.3,
+      -0.1
+     ],
+     [
+      6449,
+      -143,
+      -1.1,
+      0
+     ],
+     [
+      6459,
+      -133,
+      -1,
+      0
+     ],
+     [
+      6469,
+      -123,
+      -0.9,
+      0
+     ],
+     [
+      6479,
+      -113,
+      -0.9,
+      0
+     ],
+     [
+      6489,
+      -103,
+      -0.7,
+      0
+     ],
+     [
+      6499,
+      -93,
+      -0.6,
+      0
+     ],
+     [
+      6509,
+      -83,
+      -0.6,
+      0
+     ],
+     [
+      6519,
+      -73,
+      -0.4,
+      0
+     ],
+     [
+      6529,
+      -63,
+      -0.3,
+      0
+     ],
+     [
+      6539,
+      -53,
+      -0.2,
+      0
+     ],
+     [
+      6549,
+      -43,
+      -0.2,
+      0
+     ],
+     [
+      6559,
+      -33,
+      -0.2,
+      0
+     ],
+     [
+      6569,
+      -23,
+      0.1,
+      0
+     ],
+     [
+      6579,
+      -13,
+      0.3,
+      0
+     ],
+     [
+      6589,
+      -3,
+      0.3,
+      0
+     ],
+     [
+      6599,
+      7,
+      0.4,
+      0
+     ],
+     [
+      6609,
+      17,
+      0.6,
+      0
+     ],
+     [
+      6619,
+      27,
+      0.7,
+      0
+     ],
+     [
+      6629,
+      37,
+      0.9,
+      0
+     ],
+     [
+      6639,
+      47,
+      1,
+      0
+     ],
+     [
+      6649,
+      57,
+      1.4,
+      0
+     ],
+     [
+      6659,
+      67,
+      1.5,
+      0
+     ],
+     [
+      6669,
+      77,
+      1.7,
+      0
+     ],
+     [
+      6679,
+      87,
+      1.7,
+      0
+     ],
+     [
+      6689,
+      97,
+      1.7,
+      0
+     ],
+     [
+      6699,
+      107,
+      1.7,
+      0
+     ],
+     [
+      6709,
+      117,
+      1.9,
+      0
+     ],
+     [
+      6719,
+      127,
+      2.3,
+      0
+     ],
+     [
+      6729,
+      137,
+      2.4,
+      0
+     ],
+     [
+      6739,
+      147,
+      2.4,
+      0
+     ],
+     [
+      6749,
+      157,
+      2.8,
+      -0.1
+     ],
+     [
+      6759,
+      167,
+      3,
+      -0.2
+     ],
+     [
+      6769,
+      177,
+      3.4,
+      -0.3
+     ],
+     [
+      6779,
+      187,
+      3.6,
+      -0.2
+     ],
+     [
+      6789,
+      197,
+      3.9,
+      0.2
+     ],
+     [
+      6799,
+      207,
+      3.9,
+      1
+     ],
+     [
+      6809,
+      217,
+      3.9,
+      2.6
+     ],
+     [
+      6819,
+      227,
+      3.9,
+      4.6
+     ],
+     [
+      6829,
+      237,
+      4.2,
+      5.6
+     ],
+     [
+      6839,
+      247,
+      4.2,
+      5.9
+     ],
+     [
+      6849,
+      257,
+      3.4,
+      5.9
+     ],
+     [
+      6859,
+      267,
+      3.3,
+      5.6
+     ],
+     [
+      6869,
+      277,
+      3.2,
+      4.7
+     ],
+     [
+      6879,
+      287,
+      2.8,
+      2.7
+     ],
+     [
+      6889,
+      297,
+      2.8,
+      1.4
+     ],
+     [
+      6899,
+      307,
+      2.8,
+      0.3
+     ],
+     [
+      6909,
+      317,
+      2.8,
+      -0.2
+     ],
+     [
+      6919,
+      327,
+      2.8,
+      -0.4
+     ],
+     [
+      6929,
+      337,
+      2.8,
+      -0.2
+     ],
+     [
+      6939,
+      347,
+      2.6,
+      -0.1
+     ],
+     [
+      6949,
+      357,
+      2.7,
+      0
+     ],
+     [
+      6959,
+      367,
+      2.6,
+      0
+     ],
+     [
+      6969,
+      377,
+      2.6,
+      -0.1
+     ],
+     [
+      6979,
+      387,
+      2.6,
+      -0.1
+     ],
+     [
+      6989,
+      397,
+      2.5,
+      0.1
+     ],
+     [
+      6999,
+      407,
+      2.6,
+      0.4
+     ]
+    ]
+   }
+  }
+ },
+ "sources": [
+  "SPW \"Relief de la Wallonie - Modele Numerique de Terrain (MNT) 2021-2022\", 0.5 m lidar DTM, (c) SPW, https://geoservices.wallonie.be/arcgis/rest/services/RELIEF/WALLONIE_MNT_2021_2022/MapServer (identify; catalogue https://geoportail.wallonie.be/catalogue/e257f5df-6c96-4118-b4d2-1e63e955df53.html); samples cached in devtests/track-audit/cache/wallonia-mnt2021/points.json",
+  "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/be-1925.json; relation 284560 \"Circuit de Spa Francorchamps\"",
+  "fr.wikipedia.org/wiki/Raidillon_de_l'Eau_Rouge",
+  "fr.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps",
+  "en.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps",
+  "FIA Media Kit 2025 Belgian Grand Prix"
+ ]
+}

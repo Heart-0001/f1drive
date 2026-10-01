@@ -1,0 +1,2295 @@
+{
+ "id": "az-2016",
+ "name": "Baku City Circuit",
+ "auditor": "track-audit east (2026-10-01)",
+ "method": "devtests/track-audit/east/*.mjs (README in report.mjs header); game side = out/game-<id>.json (dump-game.js, the game's own js/track.js build)",
+ "layout": {
+  "gameLengthKm": 6.003,
+  "gameBuiltLengthM": 6002,
+  "gameTrueLengthM": 5932,
+  "buildRescale": 1.0119,
+  "osmLoopLengthM": 5994,
+  "osmLoopGaps": [
+   {
+    "before": 1069034735,
+    "name": "Əziz Əliyev küçəsi",
+    "m": 9.8
+   }
+  ],
+  "osmBase": "2026-06-01T08:52:28Z",
+  "osmRelations": [
+   {
+    "id": 11266687,
+    "name": "Baku City Circuit",
+    "members": 45
+   }
+  ],
+  "lateralDeviationGameToOsm": {
+   "meanM": 2.8,
+   "p95M": 7.3,
+   "maxM": 9.3,
+   "over8m": [
+    {
+     "fromGameS": 290,
+     "toGameS": 300,
+     "maxM": 8.1,
+     "at": [
+      40.3743156,
+      49.8547996
+     ]
+    },
+    {
+     "fromGameS": 1402,
+     "toGameS": 1406,
+     "maxM": 9.3,
+     "at": [
+      40.3730225,
+      49.8442704
+     ]
+    },
+    {
+     "fromGameS": 4572,
+     "toGameS": 4600,
+     "maxM": 9.1,
+     "at": [
+      40.3669638,
+      49.8385644
+     ]
+    }
+   ]
+  },
+  "osmWaysUsed": [
+   {
+    "id": 1168829203,
+    "name": null,
+    "lengthM": 57,
+    "coverage": 1
+   },
+   {
+    "id": 1329392228,
+    "name": "Puşkin küçəsi",
+    "lengthM": 44,
+    "coverage": 1
+   },
+   {
+    "id": 1168829202,
+    "name": "Puşkin küçəsi",
+    "lengthM": 30,
+    "coverage": 1
+   },
+   {
+    "id": 25402777,
+    "name": "Puşkin küçəsi",
+    "lengthM": 118,
+    "coverage": 1
+   },
+   {
+    "id": 278666424,
+    "name": "Puşkin küçəsi",
+    "lengthM": 86,
+    "coverage": 1
+   },
+   {
+    "id": 1415063202,
+    "name": "Puşkin küçəsi",
+    "lengthM": 10,
+    "coverage": 1
+   },
+   {
+    "id": 1415063201,
+    "name": "Xaqani küçəsi",
+    "lengthM": 12,
+    "coverage": 1
+   },
+   {
+    "id": 165695131,
+    "name": "Xaqani küçəsi",
+    "lengthM": 331,
+    "coverage": 1
+   },
+   {
+    "id": 1415063177,
+    "name": "Xaqani küçəsi",
+    "lengthM": 18,
+    "coverage": 1
+   },
+   {
+    "id": 1415075088,
+    "name": "Xaqani küçəsi",
+    "lengthM": 243,
+    "coverage": 1
+   },
+   {
+    "id": 1415063178,
+    "name": "Xaqani küçəsi",
+    "lengthM": 10,
+    "coverage": 1
+   },
+   {
+    "id": 1415075090,
+    "name": "Xaqani küçəsi",
+    "lengthM": 11,
+    "coverage": 1
+   },
+   {
+    "id": 1329392226,
+    "name": "Xaqani küçəsi",
+    "lengthM": 235,
+    "coverage": 1
+   },
+   {
+    "id": 1415085020,
+    "name": null,
+    "lengthM": 12,
+    "coverage": 0.86
+   },
+   {
+    "id": 1415085017,
+    "name": null,
+    "lengthM": 8,
+    "coverage": 0.75
+   },
+   {
+    "id": 1415085016,
+    "name": "Bülbül prospekti",
+    "lengthM": 79,
+    "coverage": 1
+   },
+   {
+    "id": 182645384,
+    "name": "Bülbül prospekti",
+    "lengthM": 12,
+    "coverage": 1
+   },
+   {
+    "id": 177431273,
+    "name": "Bülbül prospekti",
+    "lengthM": 133,
+    "coverage": 1
+   },
+   {
+    "id": 414510525,
+    "name": "Zərifə Əliyeva küçəsi",
+    "lengthM": 166,
+    "coverage": 1
+   },
+   {
+    "id": 1415085013,
+    "name": "Zərifə Əliyeva küçəsi",
+    "lengthM": 9,
+    "coverage": 1
+   },
+   {
+    "id": 1415085014,
+    "name": "Zərifə Əliyeva küçəsi",
+    "lengthM": 113,
+    "coverage": 1
+   },
+   {
+    "id": 290633714,
+    "name": null,
+    "lengthM": 117,
+    "coverage": 1
+   },
+   {
+    "id": 167173315,
+    "name": "Neftçilər prospekti",
+    "lengthM": 65,
+    "coverage": 1
+   },
+   {
+    "id": 1413965638,
+    "name": "Neftçilər prospekti",
+    "lengthM": 310,
+    "coverage": 1
+   },
+   {
+    "id": 1069034735,
+    "name": "Əziz Əliyev küçəsi",
+    "lengthM": 292,
+    "coverage": 1
+   },
+   {
+    "id": 639403533,
+    "name": null,
+    "lengthM": 86,
+    "coverage": 1
+   },
+   {
+    "id": 1502989773,
+    "name": null,
+    "lengthM": 102,
+    "coverage": 1
+   },
+   {
+    "id": 476752809,
+    "name": "İstiqlaliyyət küçəsi",
+    "lengthM": 377,
+    "coverage": 1
+   },
+   {
+    "id": 1279858618,
+    "name": "İstiqlaliyyət küçəsi",
+    "lengthM": 71,
+    "coverage": 1
+   },
+   {
+    "id": 926192527,
+    "name": "İstiqlaliyyət küçəsi",
+    "lengthM": 49,
+    "coverage": 1
+   },
+   {
+    "id": 476752810,
+    "name": "İstiqlaliyyət küçəsi",
+    "lengthM": 236,
+    "coverage": 1
+   },
+   {
+    "id": 1050381554,
+    "name": "İstiqlaliyyət küçəsi",
+    "lengthM": 10,
+    "coverage": 1
+   },
+   {
+    "id": 167173308,
+    "name": "Niyazi küçəsi",
+    "lengthM": 4,
+    "coverage": 1
+   },
+   {
+    "id": 1050381555,
+    "name": "Niyazi küçəsi",
+    "lengthM": 75,
+    "coverage": 1
+   },
+   {
+    "id": 500527621,
+    "name": "Niyazi küçəsi",
+    "lengthM": 117,
+    "coverage": 1
+   },
+   {
+    "id": 822375070,
+    "name": null,
+    "lengthM": 249,
+    "coverage": 1
+   },
+   {
+    "id": 249018354,
+    "name": "Neftçilər prospekti",
+    "lengthM": 806,
+    "coverage": 1
+   },
+   {
+    "id": 131835265,
+    "name": "Neftçilər prospekti",
+    "lengthM": 405,
+    "coverage": 1
+   },
+   {
+    "id": 323377758,
+    "name": "Neftçilər prospekti",
+    "lengthM": 272,
+    "coverage": 1
+   },
+   {
+    "id": 179238852,
+    "name": "Neftçilər prospekti",
+    "lengthM": 258,
+    "coverage": 1
+   },
+   {
+    "id": 766787796,
+    "name": "Neftçilər prospekti",
+    "lengthM": 344,
+    "coverage": 1
+   }
+  ],
+  "osmWaysNotOnGameLine": [],
+  "official": {
+   "GP circuit 2016-present": 6.003,
+   "source": "en.wikipedia.org/wiki/Baku_City_Circuit"
+  },
+  "f1Use": "European GP 2016, Azerbaijan GP 2017-2026",
+  "identification": "Game line within 9.3 m (mean 2.8 m) of the street ways of OSM relation 11266687 (5994 m); game points 5932 m (1.0 % short), rescaled x1.012. Correct layout."
+ },
+ "width": {
+  "game": {
+   "halfWidthM": 7,
+   "note": "js/track.js HALF_WIDTH 7 m (narrowed only by nearby scenery walls): 14 m through the castle section (gameS 2560-2800)"
+  },
+  "real": {
+   "castleSectionM": 7.6,
+   "source": "en.wikipedia.org/wiki/Baku_City_Circuit: \"the track has a narrow 7.6 m uphill section and then runs around the Old City\""
+  }
+ },
+ "direction": {
+  "game": "anticlockwise",
+  "real": "anticlockwise",
+  "ok": true,
+  "source": "en.wikipedia.org/wiki/Baku_City_Circuit: \"anti-clockwise layout\""
+ },
+ "startFinish": {
+  "game": [
+   40.3726884,
+   49.8532475
+  ],
+  "osmStart": {
+   "id": 13826310746,
+   "name": "Start Line",
+   "ll": [
+    40.3725853,
+    49.8529141
+   ],
+   "beforeGameLineM": 31
+  },
+  "osmFinish": {
+   "id": 13826310747,
+   "name": "Finish Line",
+   "ll": [
+    40.3721915,
+    49.8517072
+   ],
+   "beforeGameLineM": 142
+  },
+  "fia": "FIA 2021 Azerbaijan GP event notes pit lane map (cache/web/fia-aze-p8.png): Control Line at the race-control end of the pit straight, pole further on - consistent with the two OSM nodes"
+ },
+ "pit": {
+  "game": {
+   "side": "left",
+   "limitKmh": 80,
+   "entryS": 5839,
+   "entryLL": [
+    40.3721259,
+    49.8514828
+   ],
+   "exitS": 74,
+   "exitLL": [
+    40.3729473,
+    49.854041
+   ],
+   "laneFromS": 5753,
+   "laneToS": 160,
+   "lengthM": 410
+  },
+  "osmPitWays": [
+   {
+    "id": 1513267145,
+    "name": "Pit Lane",
+    "lengthM": 569,
+    "side": "left",
+    "leavesTrackAt": {
+     "gameS": 5667,
+     "trueS": 5600,
+     "ll": [
+      40.371524,
+      49.849646
+     ],
+     "offTrackM": 0.6
+    },
+    "rejoinsAt": {
+     "gameS": 251,
+     "trueS": 248,
+     "ll": [
+      40.373934,
+      49.854913
+     ],
+     "offTrackM": 6.4
+    },
+    "maxspeed": null
+   }
+  ],
+  "real": {
+   "side": "left",
+   "limitKmh": 80,
+   "limitSource": "FIA 2021 Azerbaijan GP Race Directors' Event Notes v2: no change to art. 22.10 (80 km/h) (cache/web/fia-2021-azerbaijan-gp-event-notes.pdf)",
+   "entry": "from the main straight (FIA 2021 pit map; OSM way 1513267145 from gameS 5667)",
+   "exit": "after Turn 1, inside the corner (FIA map; OSM gameS 251)"
+  }
+ },
+ "elevation": {
+  "along": "OSM centreline loop, s = true metres from the foot of the game start line (gameS = the game's own s at the same place)",
+  "game": {
+   "rangeM": 34.4,
+   "lowest": {
+    "s": 140,
+    "m": 0,
+    "ll": [
+     40.373189,
+     49.854765
+    ]
+   },
+   "highest": {
+    "s": 3192,
+    "m": 34.4,
+    "ll": [
+     40.367841,
+     49.83164
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 8.4,
+    "climbAtS": 2832,
+    "descentPct": -11,
+    "descentAtS": 3742
+   },
+   "steepest100m": {
+    "climbPct": 7.8,
+    "climbAtS": 2812,
+    "climbAt": [
+     40.369214,
+     49.835055
+    ],
+    "descentPct": -10.5,
+    "descentAtS": 3712,
+    "descentAt": [
+     40.363396,
+     49.832425
+    ]
+   }
+  },
+  "srtm30m": {
+   "rangeM": 36.9,
+   "lowest": {
+    "s": 280,
+    "m": -24.4,
+    "ll": [
+     40.374197,
+     49.854765
+    ]
+   },
+   "highest": {
+    "s": 3412,
+    "m": 12.5,
+    "ll": [
+     40.365936,
+     49.830923
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 13.4,
+    "climbAtS": 2832,
+    "descentPct": -15.5,
+    "descentAtS": 3692
+   },
+   "steepest100m": {
+    "climbPct": 12,
+    "climbAtS": 2812,
+    "climbAt": [
+     40.369214,
+     49.835055
+    ],
+    "descentPct": -13.7,
+    "descentAtS": 3662,
+    "descentAt": [
+     40.363602,
+     49.8319
+    ]
+   },
+   "absMinM": -24.4,
+   "absMaxM": 12.5
+  },
+  "aster30m": {
+   "rangeM": 42.1,
+   "lowest": {
+    "s": 240,
+    "m": -22.1,
+    "ll": [
+     40.373866,
+     49.854954
+    ]
+   },
+   "highest": {
+    "s": 3362,
+    "m": 19.9,
+    "ll": [
+     40.366378,
+     49.831032
+    ]
+   },
+   "steepest50m": {
+    "climbPct": 23.6,
+    "climbAtS": 2822,
+    "descentPct": -23.4,
+    "descentAtS": 3652
+   },
+   "steepest100m": {
+    "climbPct": 19.9,
+    "climbAtS": 2802,
+    "climbAt": [
+     40.369243,
+     49.835167
+    ],
+    "descentPct": -19.3,
+    "descentAtS": 3632,
+    "descentAt": [
+     40.363726,
+     49.831585
+    ]
+   },
+   "absMinM": -22.1,
+   "absMaxM": 19.9
+  },
+  "alongGameCentreline": {
+   "srtm30": {
+    "rangeM": 34.9,
+    "lowest": {
+     "s": 270,
+     "m": -22.9,
+     "ll": [
+      40.374117,
+      49.854904
+     ]
+    },
+    "highest": {
+     "s": 3410,
+     "m": 11.9,
+     "ll": [
+      40.365907,
+      49.830928
+     ]
+    },
+    "steepest50m": {
+     "climbPct": 12.6,
+     "climbAtS": 2840,
+     "descentPct": -15.4,
+     "descentAtS": 3690
+    },
+    "steepest100m": {
+     "climbPct": 11.4,
+     "climbAtS": 2810,
+     "climbAt": [
+      40.369216,
+      49.834996
+     ],
+     "descentPct": -14,
+     "descentAtS": 3670,
+     "descentAt": [
+      40.363538,
+      49.832039
+     ]
+    },
+    "absMinM": -22.9,
+    "absMaxM": 11.9
+   },
+   "glo90raw": {
+    "rangeM": 38,
+    "lowest": {
+     "s": 100,
+     "m": -25,
+     "ll": [
+      40.373038,
+      49.85432
+     ]
+    },
+    "highest": {
+     "s": 3200,
+     "m": 13,
+     "ll": [
+      40.367703,
+      49.831612
+     ]
+    },
+    "steepest50m": {
+     "climbPct": 26,
+     "climbAtS": 4650,
+     "descentPct": -24,
+     "descentAtS": 3730
+    },
+    "steepest100m": {
+     "climbPct": 12,
+     "climbAtS": 2780,
+     "climbAt": [
+      40.369302,
+      49.835327
+     ],
+     "descentPct": -18,
+     "descentAtS": 3680,
+     "descentAt": [
+      40.363497,
+      49.832143
+     ]
+    }
+   },
+   "note": "the same sources along the game's own points (elev-game.mjs); glo90raw = the unsmoothed input of the game profile"
+  },
+  "shapeAgreement": {
+   "srtm30m": {
+    "corr": 0.89,
+    "rmsM": 4,
+    "worstGameMinusDem": {
+     "dM": -10,
+     "s": 5653,
+     "ll": [
+      40.371493,
+      49.849551
+     ]
+    }
+   },
+   "aster30m": {
+    "corr": 0.86,
+    "rmsM": 4.6,
+    "worstGameMinusDem": {
+     "dM": -15.5,
+     "s": 1931,
+     "ll": [
+      40.369864,
+      49.841933
+     ]
+    }
+   }
+  },
+  "published": {
+   "rangeM": 26.8,
+   "highPoint": "Turn 13",
+   "lowPoint": "the sea front, \"some 24 metres below sea level\"",
+   "note": "\"around Turn 8 - that the circuit narrows and takes the drivers uphill\"",
+   "source": "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), cached devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html"
+  },
+  "demNote": "Copernicus GLO-30 is not published for Azerbaijan (tile N40E049 404 on AWS). SRTM / ASTER are 30 m urban surface models (buildings of the old town): their ranges (36.9 / 42.1 m) and grades are not usable as truth here.",
+  "steepStretchesSrtmVsGame": [
+   {
+    "fromS": 150,
+    "toS": 290,
+    "at": [
+     40.373295,
+     49.85509
+    ],
+    "demPct": -6.2,
+    "gamePct": 1.6,
+    "gameMaxPctInStretch": 1.4
+   },
+   {
+    "fromS": 280,
+    "toS": 450,
+    "at": [
+     40.374444,
+     49.854617
+    ],
+    "demPct": 6.4,
+    "gamePct": 1.6,
+    "gameMaxPctInStretch": 2
+   },
+   {
+    "fromS": 670,
+    "toS": 830,
+    "at": [
+     40.375588,
+     49.851596
+    ],
+    "demPct": 6.6,
+    "gamePct": -2,
+    "gameMaxPctInStretch": -1.4
+   },
+   {
+    "fromS": 1531,
+    "toS": 1651,
+    "at": [
+     40.371816,
+     49.844757
+    ],
+    "demPct": 5.2,
+    "gamePct": -0.1,
+    "gameMaxPctInStretch": 0
+   },
+   {
+    "fromS": 2552,
+    "toS": 2662,
+    "at": [
+     40.368162,
+     49.837608
+    ],
+    "demPct": 5.1,
+    "gamePct": 1.7,
+    "gameMaxPctInStretch": 1.7
+   },
+   {
+    "fromS": 2762,
+    "toS": 3012,
+    "at": [
+     40.369356,
+     49.835615
+    ],
+    "demPct": 12,
+    "gamePct": 7.8,
+    "gameMaxPctInStretch": 7.8
+   },
+   {
+    "fromS": 3412,
+    "toS": 3582,
+    "at": [
+     40.365665,
+     49.830941
+    ],
+    "demPct": -5.7,
+    "gamePct": 2.2,
+    "gameMaxPctInStretch": 0.5
+   },
+   {
+    "fromS": 3592,
+    "toS": 3882,
+    "at": [
+     40.363808,
+     49.831375
+    ],
+    "demPct": -13.7,
+    "gamePct": -8.9,
+    "gameMaxPctInStretch": -10.5
+   },
+   {
+    "fromS": 5093,
+    "toS": 5233,
+    "at": [
+     40.369581,
+     49.843688
+    ],
+    "demPct": 5.8,
+    "gamePct": 0.1,
+    "gameMaxPctInStretch": 0.1
+   },
+   {
+    "fromS": 5513,
+    "toS": 5663,
+    "at": [
+     40.371105,
+     49.848356
+    ],
+    "demPct": 6.8,
+    "gamePct": -4,
+    "gameMaxPctInStretch": -3.8
+   },
+   {
+    "fromS": 5623,
+    "toS": 5803,
+    "at": [
+     40.371493,
+     49.849551
+    ],
+    "demPct": -9.9,
+    "gamePct": -3.2,
+    "gameMaxPctInStretch": -3.5
+   }
+  ]
+ },
+ "banking": {
+  "source": "js/track.js: derived from curvature (BANK_MAX 6 deg, inside lower); no bankOverrides for this circuit",
+  "maxDeg": 5.8,
+  "shareOver3DegPct": 9.8,
+  "cornersFound": 19,
+  "corners": [
+   {
+    "hand": "L",
+    "gameS": [
+     152,
+     220
+    ],
+    "apexS": 180,
+    "angleDeg": 88,
+    "minRadiusM": 26,
+    "gameBankDeg": -5.5,
+    "gameGradePct": 1.4,
+    "apex": [
+     40.3733566,
+     49.8551423
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     494,
+     550
+    ],
+    "apexS": 522,
+    "angleDeg": 90,
+    "minRadiusM": 19,
+    "gameBankDeg": -5.7,
+    "gameGradePct": 1.1,
+    "apex": [
+     40.3761277,
+     49.8536133
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     1358,
+     1434
+    ],
+    "apexS": 1396,
+    "angleDeg": 89,
+    "minRadiusM": 22,
+    "gameBankDeg": -5.5,
+    "gameGradePct": -0.5,
+    "apex": [
+     40.3730737,
+     49.8442906
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     1588,
+     1654
+    ],
+    "apexS": 1620,
+    "angleDeg": -89,
+    "minRadiusM": 19,
+    "gameBankDeg": 5.5,
+    "gameGradePct": 0.3,
+    "apex": [
+     40.3711913,
+     49.8450796
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     1936,
+     1982
+    ],
+    "apexS": 1960,
+    "angleDeg": 85,
+    "minRadiusM": 15,
+    "gameBankDeg": -5.4,
+    "gameGradePct": 0.9,
+    "apex": [
+     40.369682,
+     49.8416747
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     1992,
+     2030
+    ],
+    "apexS": 2014,
+    "angleDeg": -75,
+    "minRadiusM": 15,
+    "gameBankDeg": 5.3,
+    "gameGradePct": 3.3,
+    "apex": [
+     40.3692314,
+     49.8418586
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     2376,
+     2452
+    ],
+    "apexS": 2412,
+    "angleDeg": -113,
+    "minRadiusM": 19,
+    "gameBankDeg": 5.8,
+    "gameGradePct": 0.9,
+    "apex": [
+     40.3670584,
+     49.8382394
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     2584,
+     2624
+    ],
+    "apexS": 2610,
+    "angleDeg": 72,
+    "minRadiusM": 19,
+    "gameBankDeg": -5.3,
+    "gameGradePct": 1.8,
+    "apex": [
+     40.3686588,
+     49.8373604
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     2628,
+     2646
+    ],
+    "apexS": 2636,
+    "angleDeg": -35,
+    "minRadiusM": 27,
+    "gameBankDeg": 3.2,
+    "gameGradePct": 0.4,
+    "apex": [
+     40.3687005,
+     49.837068
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     2650,
+     2682
+    ],
+    "apexS": 2664,
+    "angleDeg": 40,
+    "minRadiusM": 37,
+    "gameBankDeg": -4.5,
+    "gameGradePct": -0.2,
+    "apex": [
+     40.368817,
+     49.8367812
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     2686,
+     2734
+    ],
+    "apexS": 2708,
+    "angleDeg": -81,
+    "minRadiusM": 22,
+    "gameBankDeg": 5.6,
+    "gameGradePct": 0,
+    "apex": [
+     40.3688533,
+     49.836279
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     2748,
+     2808
+    ],
+    "apexS": 2780,
+    "angleDeg": 95,
+    "minRadiusM": 22,
+    "gameBankDeg": -5.6,
+    "gameGradePct": 4.3,
+    "apex": [
+     40.3693963,
+     49.8358848
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     3140,
+     3236
+    ],
+    "apexS": 3170,
+    "angleDeg": 40,
+    "minRadiusM": 87,
+    "gameBankDeg": -2.8,
+    "gameGradePct": 1.1,
+    "apex": [
+     40.3679183,
+     49.8318176
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     3378,
+     3418
+    ],
+    "apexS": 3398,
+    "angleDeg": 18,
+    "minRadiusM": 92,
+    "gameBankDeg": -2.5,
+    "gameGradePct": 3.2,
+    "apex": [
+     40.3660145,
+     49.8309337
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     3598,
+     3666
+    ],
+    "apexS": 3628,
+    "angleDeg": 60,
+    "minRadiusM": 42,
+    "gameBankDeg": -4.6,
+    "gameGradePct": -3.6,
+    "apex": [
+     40.3639698,
+     49.8311465
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     3932,
+     4024
+    ],
+    "apexS": 3984,
+    "angleDeg": 82,
+    "minRadiusM": 39,
+    "gameBankDeg": -4.7,
+    "gameGradePct": 0.2,
+    "apex": [
+     40.3626719,
+     49.8348458
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     4146,
+     4192
+    ],
+    "apexS": 4162,
+    "angleDeg": -19,
+    "minRadiusM": 129,
+    "gameBankDeg": 2,
+    "gameGradePct": -1.9,
+    "apex": [
+     40.3640071,
+     49.8359331
+    ]
+   },
+   {
+    "hand": "L",
+    "gameS": [
+     4386,
+     4456
+    ],
+    "apexS": 4426,
+    "angleDeg": 39,
+    "minRadiusM": 72,
+    "gameBankDeg": -3.3,
+    "gameGradePct": 4,
+    "apex": [
+     40.3656432,
+     49.8381359
+    ]
+   },
+   {
+    "hand": "R",
+    "gameS": [
+     4530,
+     4596
+    ],
+    "apexS": 4558,
+    "angleDeg": -41,
+    "minRadiusM": 67,
+    "gameBankDeg": 3.3,
+    "gameGradePct": -2,
+    "apex": [
+     40.366797,
+     49.8384304
+    ]
+   }
+  ],
+  "real": "No banking published (city streets).",
+  "verdict": "synthetic only: 13 street corners banked 4.5-5.8 deg, unverified"
+ },
+ "coveredAndBridges": {
+  "gameCrossings": [],
+  "osmCrossingsOfTheGameLine": [
+   {
+    "id": 25405194,
+    "kind": "tunnel=yes footway",
+    "name": null,
+    "layer": "-1",
+    "gameS": 4658,
+    "ll": [
+     40.3674038,
+     49.8392678
+    ]
+   },
+   {
+    "id": 25405194,
+    "kind": "tunnel=yes footway",
+    "name": null,
+    "layer": "-1",
+    "gameS": 2318,
+    "ll": [
+     40.3675327,
+     49.8391112
+    ]
+   },
+   {
+    "id": 220426679,
+    "kind": "tunnel=yes footway",
+    "name": null,
+    "layer": "-1",
+    "gameS": 5806,
+    "ll": [
+     40.3720148,
+     49.8511392
+    ]
+   },
+   {
+    "id": 220915346,
+    "kind": "tunnel=yes footway",
+    "name": null,
+    "layer": "-1",
+    "gameS": 1602,
+    "ll": [
+     40.3713494,
+     49.8450653
+    ]
+   },
+   {
+    "id": 220915349,
+    "kind": "tunnel=yes footway",
+    "name": null,
+    "layer": "-1",
+    "gameS": 1606,
+    "ll": [
+     40.3713148,
+     49.845077
+    ]
+   },
+   {
+    "id": 220915351,
+    "kind": "tunnel=yes footway",
+    "name": null,
+    "layer": "-1",
+    "gameS": 5296,
+    "ll": [
+     40.3702164,
+     49.8456788
+    ]
+   },
+   {
+    "id": 224648429,
+    "kind": "tunnel=yes footway",
+    "name": null,
+    "layer": "-1",
+    "gameS": 4014,
+    "ll": [
+     40.3628469,
+     49.8351052
+    ]
+   },
+   {
+    "id": 626012957,
+    "kind": "tunnel=yes footway",
+    "name": null,
+    "layer": "-1",
+    "gameS": 3378,
+    "ll": [
+     40.3661898,
+     49.8309786
+    ]
+   },
+   {
+    "id": 686457580,
+    "kind": "tunnel=yes footway",
+    "name": null,
+    "layer": "-1",
+    "gameS": 3956,
+    "ll": [
+     40.3626466,
+     49.8345252
+    ]
+   },
+   {
+    "id": 715443013,
+    "kind": "bridge=yes footway",
+    "name": null,
+    "layer": "1",
+    "gameS": 5574,
+    "ll": [
+     40.3712063,
+     49.8486498
+    ]
+   },
+   {
+    "id": 1425935015,
+    "kind": "bridge=yes footway",
+    "name": null,
+    "layer": "1",
+    "gameS": 244,
+    "ll": [
+     40.3738995,
+     49.855012
+    ]
+   }
+  ],
+  "note": "No tunnel or covered section on the lap. OSM: permanent footbridges over the track at gameS ~244 (after T1, way 1425935015) and ~5574 (main straight, way 715443013); several pedestrian underpasses below it. The game has neither footbridge."
+ },
+ "verdict": "major issues",
+ "findings": [
+  {
+   "aspect": "other",
+   "severity": "major",
+   "game": "Road 14 m wide through the old-town castle section (half width 7 m at gameS 2500-2900).",
+   "real": "The castle section narrows to 7.6 m (en.wikipedia) - the defining feature of the lap.",
+   "proposedFix": "New optional per-track width overrides, e.g. widthOverrides: [{ name: \"castle T8-T12\", from: [40.368589,49.837431], to: [40.369393,49.835656], halfW: 3.8, ramp: 30 }] (HALF_WIDTH_MIN 3.5 allows it).",
+   "sources": [
+    "en.wikipedia.org/wiki/Baku_City_Circuit"
+   ]
+  },
+  {
+   "aspect": "start",
+   "severity": "cosmetic",
+   "game": "Line 31 m past the OSM \"Start Line\" node and 142 m past the \"Finish Line\" (control line) node.",
+   "real": "OSM relation 11266687 start / finish nodes; FIA 2021 pit lane map.",
+   "proposedFix": "START_AT 'az-2016': [40.3725853, 49.8529141] (start line; the control line is 111 m earlier)",
+   "sources": [
+    "OpenStreetMap contributors (ODbL), Overpass API; raw answers cached in devtests/track-audit/cache/overpass/east-*.json nodes 13826310746, 13826310747",
+    "FIA 2021 Azerbaijan GP Race Directors' Event Notes v2"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "Lane 410 m: entry gameS 5838, exit gameS 74 - before Turn 1.",
+   "real": "OSM \"Pit Lane\" (way 1513267145, 569 m, left): leaves at gameS 5667 (171 m earlier), runs inside Turn 1 and rejoins after it at gameS 251 (FIA 2021 pit lane map). Side left and 80 km/h correct.",
+   "proposedFix": "pitEntryLL [40.371524,49.849646], pitExitLL [40.373934,49.854913] (new optional fields; the exit is beyond a 90-degree corner).",
+   "sources": [
+    "OpenStreetMap contributors (ODbL), Overpass API; raw answers cached in devtests/track-audit/cache/overpass/east-*.json way 1513267145",
+    "FIA 2021 Azerbaijan GP event notes"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "minor",
+   "game": "Range 34.4 m (high at T13 gameS ~3190, low at T1); T12->T13 climb +20 m, steepest 7.8 %/100 m up, -10.5 %/100 m down (after T15 towards T16).",
+   "real": "Published 26.8 m, high point at Turn 13, low point at the sea front ~24 m below sea level (F1.com 2016): shape right (high / low in the right places), total 7.6 m (28 %) too big - GLO-90 buildings in the old town.",
+   "proposedFix": "Scale the profile to 26.8 m (factor 0.779) keeping its shape; no open lidar for Baku.",
+   "sources": [
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), cached devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html",
+    "SRTM 30 m (NASA, 2000) via OpenTopoData srtm30m (devtests/track-fix/cache/otd-srtm30m.json; cache/opentopodata/srtm30m/)",
+    "ASTER GDEM v3 30 m (NASA / METI) via OpenTopoData aster30m (cache/opentopodata/aster30m/)"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "severity": "cosmetic",
+   "game": "13 corners (90-degree street junctions incl. the castle section) banked 4.5-5.8 deg inward.",
+   "real": "Public city streets; no banking reported (en/de.wikipedia infobox empty). Not measurable from the available DEMs.",
+   "proposedFix": "Optional per-track bank scale (~0.3-0.4) for street circuits or bankOverrides deg 0 on the junction corners.",
+   "sources": [
+    "en.wikipedia.org/wiki/Baku_City_Circuit",
+    "de.wikipedia.org/wiki/Baku_City_Circuit"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "severity": "cosmetic",
+   "game": "No structure over the track except the start gantry.",
+   "real": "Two permanent footbridges cross the track (OSM ways 1425935015 at gameS ~244, 715443013 at gameS ~5574).",
+   "proposedFix": "Add as bridge decks in build-scenery (they are highway=footway bridge=yes, not man_made=bridge, so the current scenery query misses them).",
+   "sources": [
+    "OpenStreetMap contributors (ODbL), Overpass API; raw answers cached in devtests/track-audit/cache/overpass/east-*.json"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "widthOverrides": [
+   {
+    "name": "castle section T8-T12",
+    "from": [
+     40.368589,
+     49.837431
+    ],
+    "to": [
+     40.369393,
+     49.835656
+    ],
+    "halfW": 3.8,
+    "note": "narrowest 7.6 m (en.wikipedia); ends at game T8 apex / T12 exit; exact per-corner widths not published"
+   }
+  ],
+  "START_AT": [
+   40.3725853,
+   49.8529141
+  ],
+  "pit": {
+   "side": 1,
+   "limitKmh": 80,
+   "entryLL": [
+    40.371524,
+    49.849646
+   ],
+   "exitLL": [
+    40.373934,
+    49.854913
+   ]
+  },
+  "elevation": {
+   "kind": "scaleToRange",
+   "targetRangeM": 26.8,
+   "factor": 0.7791
+  }
+ },
+ "profile50": {
+  "along": "OSM loop, s true metres from the game start",
+  "columns": [
+   "s",
+   "lat",
+   "lon",
+   "game",
+   "srtm30m",
+   "aster30m"
+  ],
+  "rows": [
+   [
+    0,
+    40.372693,
+    49.853245,
+    2.9,
+    -19.8,
+    -16.2
+   ],
+   [
+    50,
+    40.37287,
+    49.853787,
+    1.7,
+    -20,
+    -15.2
+   ],
+   [
+    100,
+    40.373047,
+    49.85433,
+    0.3,
+    -20.2,
+    -14.5
+   ],
+   [
+    150,
+    40.373225,
+    49.854873,
+    0,
+    -17.9,
+    -16.5
+   ],
+   [
+    200,
+    40.373531,
+    49.855132,
+    0.5,
+    -19.5,
+    -20.6
+   ],
+   [
+    250,
+    40.373948,
+    49.854905,
+    1.4,
+    -23.4,
+    -22.1
+   ],
+   [
+    300,
+    40.374362,
+    49.854667,
+    2,
+    -24.2,
+    -19.4
+   ],
+   [
+    350,
+    40.374769,
+    49.854411,
+    2.5,
+    -21.1,
+    -17.3
+   ],
+   [
+    400,
+    40.375176,
+    49.854153,
+    3.4,
+    -18,
+    -12.1
+   ],
+   [
+    450,
+    40.375587,
+    49.853905,
+    4.5,
+    -15.9,
+    -6.3
+   ],
+   [
+    500,
+    40.376003,
+    49.853675,
+    5.2,
+    -18,
+    -12.4
+   ],
+   [
+    550,
+    40.376073,
+    49.853249,
+    5.7,
+    -20.2,
+    -13.8
+   ],
+   [
+    600,
+    40.375909,
+    49.852699,
+    6.2,
+    -19,
+    -13.6
+   ],
+   [
+    650,
+    40.375751,
+    49.852146,
+    6.8,
+    -17.1,
+    -14.4
+   ],
+   [
+    700,
+    40.375588,
+    49.851596,
+    6.9,
+    -15.8,
+    -8.7
+   ],
+   [
+    750,
+    40.375417,
+    49.85105,
+    6.1,
+    -13.3,
+    -2
+   ],
+   [
+    800,
+    40.375247,
+    49.850504,
+    5,
+    -9.2,
+    -1.2
+   ],
+   [
+    851,
+    40.375079,
+    49.849956,
+    5,
+    -9.5,
+    -5.8
+   ],
+   [
+    901,
+    40.374901,
+    49.849414,
+    6.2,
+    -9.7,
+    -9.8
+   ],
+   [
+    951,
+    40.374715,
+    49.848876,
+    7.4,
+    -11.6,
+    -11.4
+   ],
+   [
+    1001,
+    40.374529,
+    49.848338,
+    7.7,
+    -12.2,
+    -9.9
+   ],
+   [
+    1051,
+    40.374343,
+    49.8478,
+    7.4,
+    -13.2,
+    -8.5
+   ],
+   [
+    1101,
+    40.374157,
+    49.847263,
+    6.9,
+    -14.5,
+    -8.9
+   ],
+   [
+    1151,
+    40.373973,
+    49.846724,
+    6.7,
+    -13.6,
+    -9
+   ],
+   [
+    1201,
+    40.373785,
+    49.846187,
+    6.6,
+    -12.1,
+    -8.3
+   ],
+   [
+    1251,
+    40.373597,
+    49.845651,
+    6.3,
+    -14.8,
+    -5.7
+   ],
+   [
+    1301,
+    40.37341,
+    49.845114,
+    5.8,
+    -16.9,
+    -6.6
+   ],
+   [
+    1351,
+    40.373222,
+    49.844577,
+    5.4,
+    -17.7,
+    -9.6
+   ],
+   [
+    1401,
+    40.372996,
+    49.844159,
+    5.2,
+    -17.3,
+    -11
+   ],
+   [
+    1451,
+    40.372571,
+    49.844359,
+    5.1,
+    -18,
+    -10
+   ],
+   [
+    1501,
+    40.372148,
+    49.84457,
+    5,
+    -18.9,
+    -4.3
+   ],
+   [
+    1551,
+    40.371733,
+    49.844804,
+    4.9,
+    -18.3,
+    -7.3
+   ],
+   [
+    1601,
+    40.371318,
+    49.845038,
+    4.7,
+    -15.2,
+    -10.2
+   ],
+   [
+    1651,
+    40.371025,
+    49.844859,
+    4.9,
+    -13.1,
+    -6.4
+   ],
+   [
+    1701,
+    40.370841,
+    49.84432,
+    6.2,
+    -12.3,
+    -4.6
+   ],
+   [
+    1751,
+    40.370663,
+    49.843778,
+    7.8,
+    -13.4,
+    -5.5
+   ],
+   [
+    1801,
+    40.370483,
+    49.843237,
+    8.9,
+    -15.8,
+    -5.1
+   ],
+   [
+    1851,
+    40.370249,
+    49.842732,
+    8.6,
+    -16.5,
+    -3.3
+   ],
+   [
+    1901,
+    40.370016,
+    49.842226,
+    7.8,
+    -15.3,
+    3.8
+   ],
+   [
+    1951,
+    40.369737,
+    49.841766,
+    7.5,
+    -14.8,
+    5.2
+   ],
+   [
+    2001,
+    40.369307,
+    49.841819,
+    8.5,
+    -13.9,
+    -5.1
+   ],
+   [
+    2051,
+    40.368957,
+    49.84155,
+    10.3,
+    -13.3,
+    -7.5
+   ],
+   [
+    2101,
+    40.368684,
+    49.84108,
+    11.9,
+    -13.9,
+    -5.9
+   ],
+   [
+    2151,
+    40.368407,
+    49.840614,
+    13.2,
+    -14.2,
+    -2.7
+   ],
+   [
+    2201,
+    40.36813,
+    49.840147,
+    14.2,
+    -15.1,
+    2.6
+   ],
+   [
+    2251,
+    40.367856,
+    49.839677,
+    13.9,
+    -16.7,
+    1.2
+   ],
+   [
+    2301,
+    40.367582,
+    49.839208,
+    11.8,
+    -19.7,
+    -4.2
+   ],
+   [
+    2351,
+    40.367309,
+    49.838738,
+    9.5,
+    -20.5,
+    -10.5
+   ],
+   [
+    2401,
+    40.367004,
+    49.838309,
+    8.8,
+    -18.8,
+    -10.2
+   ],
+   [
+    2451,
+    40.367305,
+    49.837987,
+    9.4,
+    -16.6,
+    -9.6
+   ],
+   [
+    2501,
+    40.367734,
+    49.837797,
+    10.3,
+    -14.4,
+    -7.4
+   ],
+   [
+    2552,
+    40.368162,
+    49.837608,
+    11.5,
+    -13.6,
+    -4.7
+   ],
+   [
+    2602,
+    40.36859,
+    49.837418,
+    12.7,
+    -11.4,
+    -6.1
+   ],
+   [
+    2652,
+    40.368764,
+    49.836974,
+    13.2,
+    -8.5,
+    -10.3
+   ],
+   [
+    2702,
+    40.368846,
+    49.836415,
+    13,
+    -8.4,
+    -9.6
+   ],
+   [
+    2752,
+    40.369084,
+    49.836027,
+    13.2,
+    -10.6,
+    -6.9
+   ],
+   [
+    2802,
+    40.369385,
+    49.835727,
+    14.9,
+    -12,
+    -10.1
+   ],
+   [
+    2852,
+    40.369243,
+    49.835167,
+    18.6,
+    -6.3,
+    0
+   ],
+   [
+    2902,
+    40.369119,
+    49.834605,
+    22.6,
+    -0.2,
+    9.8
+   ],
+   [
+    2952,
+    40.368935,
+    49.834066,
+    25.6,
+    3.5,
+    11.7
+   ],
+   [
+    3002,
+    40.368742,
+    49.833533,
+    27.6,
+    6.3,
+    10.5
+   ],
+   [
+    3052,
+    40.368544,
+    49.833003,
+    29.8,
+    6.1,
+    9.4
+   ],
+   [
+    3102,
+    40.368311,
+    49.832497,
+    32.1,
+    6.9,
+    13.1
+   ],
+   [
+    3152,
+    40.368078,
+    49.831991,
+    33.9,
+    9.8,
+    15.9
+   ],
+   [
+    3202,
+    40.367762,
+    49.831584,
+    34.4,
+    10.2,
+    17.7
+   ],
+   [
+    3252,
+    40.367331,
+    49.831407,
+    33.2,
+    8.8,
+    19.2
+   ],
+   [
+    3302,
+    40.366897,
+    49.831238,
+    30.5,
+    9.8,
+    17
+   ],
+   [
+    3352,
+    40.366464,
+    49.831066,
+    28,
+    10.7,
+    19.9
+   ],
+   [
+    3402,
+    40.366026,
+    49.830924,
+    27.8,
+    12.4,
+    17.7
+   ],
+   [
+    3452,
+    40.365575,
+    49.830948,
+    30,
+    11.2,
+    11.9
+   ],
+   [
+    3502,
+    40.365123,
+    49.830982,
+    31.5,
+    8,
+    8.4
+   ],
+   [
+    3552,
+    40.364671,
+    49.831023,
+    31.8,
+    5.5,
+    9.3
+   ],
+   [
+    3602,
+    40.36422,
+    49.831059,
+    31.2,
+    3.5,
+    12.6
+   ],
+   [
+    3652,
+    40.363849,
+    49.83127,
+    29.7,
+    2.5,
+    7.9
+   ],
+   [
+    3702,
+    40.363643,
+    49.831795,
+    26.4,
+    -3.4,
+    -3.8
+   ],
+   [
+    3752,
+    40.363437,
+    49.83232,
+    21.3,
+    -11,
+    -10.3
+   ],
+   [
+    3802,
+    40.36323,
+    49.832845,
+    15.9,
+    -15,
+    -14
+   ],
+   [
+    3852,
+    40.363031,
+    49.833374,
+    11.9,
+    -17.5,
+    -13.2
+   ],
+   [
+    3902,
+    40.362843,
+    49.83391,
+    8.7,
+    -19.5,
+    -5.9
+   ],
+   [
+    3952,
+    40.362654,
+    49.834446,
+    6.4,
+    -19.6,
+    -6.4
+   ],
+   [
+    4002,
+    40.36268,
+    49.835,
+    6,
+    -20.8,
+    -13.9
+   ],
+   [
+    4052,
+    40.363069,
+    49.835283,
+    7.8,
+    -20.3,
+    -15.7
+   ],
+   [
+    4102,
+    40.36348,
+    49.835528,
+    9.4,
+    -18.1,
+    -10.8
+   ],
+   [
+    4152,
+    40.363883,
+    49.835798,
+    9.8,
+    -17.1,
+    -10.5
+   ],
+   [
+    4202,
+    40.364248,
+    49.836134,
+    9,
+    -18.2,
+    -11.8
+   ],
+   [
+    4253,
+    40.364553,
+    49.83657,
+    8.4,
+    -21,
+    -10.3
+   ],
+   [
+    4303,
+    40.364858,
+    49.837005,
+    7.9,
+    -20.2,
+    -6.7
+   ],
+   [
+    4353,
+    40.365163,
+    49.837441,
+    7.1,
+    -20.2,
+    -9.8
+   ],
+   [
+    4403,
+    40.365469,
+    49.837877,
+    7.5,
+    -20.7,
+    -13.3
+   ],
+   [
+    4453,
+    40.365856,
+    49.838142,
+    9.3,
+    -19.6,
+    -10.9
+   ],
+   [
+    4503,
+    40.366302,
+    49.838244,
+    9.9,
+    -18.2,
+    -6.1
+   ],
+   [
+    4553,
+    40.366747,
+    49.838349,
+    8.9,
+    -18.5,
+    -8.8
+   ],
+   [
+    4603,
+    40.367123,
+    49.83864,
+    9,
+    -20.3,
+    -9.9
+   ],
+   [
+    4653,
+    40.367394,
+    49.839112,
+    10.4,
+    -21.1,
+    -8
+   ],
+   [
+    4703,
+    40.367671,
+    49.839579,
+    12.7,
+    -18.8,
+    -1.5
+   ],
+   [
+    4753,
+    40.367947,
+    49.840046,
+    13.6,
+    -16.7,
+    1.8
+   ],
+   [
+    4803,
+    40.368224,
+    49.840513,
+    13,
+    -15.4,
+    -0.7
+   ],
+   [
+    4853,
+    40.3685,
+    49.84098,
+    11.5,
+    -15.4,
+    -4.6
+   ],
+   [
+    4903,
+    40.368771,
+    49.841452,
+    9.3,
+    -14.4,
+    -8.1
+   ],
+   [
+    4953,
+    40.368999,
+    49.84196,
+    7.1,
+    -15.4,
+    -10.3
+   ],
+   [
+    5003,
+    40.369186,
+    49.842498,
+    5.9,
+    -16.6,
+    -11.3
+   ],
+   [
+    5053,
+    40.36937,
+    49.843036,
+    5.6,
+    -17.1,
+    -10.9
+   ],
+   [
+    5103,
+    40.369546,
+    49.84358,
+    5.4,
+    -19.1,
+    -12.5
+   ],
+   [
+    5153,
+    40.369722,
+    49.844123,
+    5.4,
+    -16.9,
+    -11.1
+   ],
+   [
+    5203,
+    40.369899,
+    49.844666,
+    5.5,
+    -13.4,
+    -8.4
+   ],
+   [
+    5253,
+    40.370075,
+    49.84521,
+    5.4,
+    -13.5,
+    -9.3
+   ],
+   [
+    5303,
+    40.370252,
+    49.845752,
+    5.3,
+    -14.3,
+    -12.3
+   ],
+   [
+    5353,
+    40.370431,
+    49.846294,
+    5.5,
+    -13.4,
+    -11
+   ],
+   [
+    5403,
+    40.37061,
+    49.846836,
+    6.6,
+    -15,
+    -8.9
+   ],
+   [
+    5453,
+    40.370789,
+    49.847378,
+    8.5,
+    -17.4,
+    -11.4
+   ],
+   [
+    5503,
+    40.370965,
+    49.847921,
+    9.2,
+    -17.1,
+    -15.5
+   ],
+   [
+    5553,
+    40.371141,
+    49.848465,
+    7.8,
+    -16.2,
+    -13.1
+   ],
+   [
+    5603,
+    40.371316,
+    49.849008,
+    5.6,
+    -12.7,
+    -5.4
+   ],
+   [
+    5653,
+    40.371493,
+    49.849551,
+    3.9,
+    -9.8,
+    -6.4
+   ],
+   [
+    5703,
+    40.371669,
+    49.850095,
+    2.1,
+    -14.5,
+    -14.3
+   ],
+   [
+    5753,
+    40.371844,
+    49.850639,
+    0.7,
+    -19.7,
+    -15.9
+   ],
+   [
+    5803,
+    40.372021,
+    49.851182,
+    0.1,
+    -20.1,
+    -15.2
+   ],
+   [
+    5853,
+    40.372197,
+    49.851725,
+    0.2,
+    -19.6,
+    -12.7
+   ],
+   [
+    5904,
+    40.372374,
+    49.852268,
+    1.3,
+    -22.6,
+    -12
+   ],
+   [
+    5954,
+    40.372551,
+    49.85281,
+    2.7,
+    -21.9,
+    -14.6
+   ]
+  ]
+ }
+}

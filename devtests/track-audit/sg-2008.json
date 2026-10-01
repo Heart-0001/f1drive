@@ -1,0 +1,958 @@
+{
+ "id": "sg-2008",
+ "name": "Marina Bay Street Circuit",
+ "auditedAt": "2026-10-01",
+ "auditor": "track-audit APAC (devtests/track-audit/apac/)",
+ "verdict": "major issues",
+ "summary": "The dataset is the current 4.927 km layout (2023+ straight along Raffles Avenue instead of the Float section, remeasured 2025) and follows the roads; direction, start line (5 m) and pit side are right. Missing: the East Coast Parkway / Benjamin Sheares Bridge viaduct and its ramps that the cars pass under around T1-T5 and before the line, and the building link over Raffles Boulevard. The pit lane limit has been 80 km/h since 2025 (game 60). Height range capped at 4 m vs 5.3 m published.",
+ "findings": [
+  {
+   "aspect": "bridge",
+   "severity": "major",
+   "game": "nothing overhead anywhere on the lap",
+   "real": "the ECP / Benjamin Sheares Bridge viaduct and its ramps pass over the track at T1 (s ~200-260), around T3-T5 (s ~520-1020) and before the line (s ~4280-4340); a covered building link spans Raffles Boulevard (s 1236-1259, 4.5 m clearance)",
+   "proposedFix": "scenery: build road viaducts (OSM highway=* bridge=yes layer>=1 crossing the corridor) as decks on piers outside the corridor, deck underside from OSM / >= 6 m above the track; add building passages with min_height as slabs. Ways listed in covered.overTheTrack",
+   "sources": [
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+    "Esri World Imagery (Vantor / Maxar), checked by eye with devtests/track-audit/apac/imagery.mjs; tiles cached in devtests/track-audit/cache/imagery/",
+    "en.wikipedia.org/wiki/Marina_Bay_Street_Circuit"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "pitLimitKmh 60 for every season",
+   "real": "60 km/h until 2024, 80 km/h from 2025 (the game's 4.927 km layout is the 2025 one; default season 2026)",
+   "proposedFix": "PIT_FACTS sg-2008: limitKmh 80 for seasons >= 2025 (or drop the 60 if the limit is not per season); a 482 m lane at 60 vs 80 km/h is ~7 s of pit loss",
+   "sources": [
+    "en.wikipedia.org/wiki/Singapore_Grand_Prix",
+    "https://press.pirelli.com/managing-the-heat-under-the-lights-in-singapore/"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "minor",
+   "game": "range 4.0 m (FLAT_MAX_RANGE)",
+   "real": "5.3 m (formula1.com); GLO-30 lower envelope 5.1 m",
+   "proposedFix": "FLAT cap for sg-2008 = 5.3 m (per-track cap)",
+   "sources": [
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)",
+    "Copernicus DEM GLO-30 (30 m surface model, TanDEM-X 2011-2015), AWS open data COG https://copernicus-dem-30m.s3.amazonaws.com (cache/glo30/<id>-apac.json)"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "severity": "cosmetic",
+   "game": "Esplanade Bridge (s 2963-3254) and Anderson Bridge (s 2789) are plain road on terrain",
+   "real": "the track crosses the river mouth on a 261 m bridge and the river on the 1910 Anderson Bridge (granite portal arches)",
+   "proposedFix": "scenery: water + parapets under / beside those stretches (OSM bridge=yes on the racing road)",
+   "sources": [
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+    "en.wikipedia.org/wiki/Esplanade_Bridge"
+   ]
+  },
+  {
+   "aspect": "layout",
+   "severity": "cosmetic",
+   "game": "2023+ layout for every season 2010-2026",
+   "real": "2010-2012 Singapore Sling layout, 2013-2022 Float section (5.065 / 5.063 km), 2023+ straight",
+   "proposedFix": "note only (one layout per circuit is a game-wide choice)",
+   "sources": [
+    "en.wikipedia.org/wiki/Marina_Bay_Street_Circuit (layout history)"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "left side (ok), 482 m, entry 150 m before / exit 164 m after the line",
+   "real": "left side, entry 474 m before, exit 381 m after (round T3), 822 m (OSM way 100484287)",
+   "proposedFix": "optional entry / exit data",
+   "sources": [
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "pitLimitKmh": {
+   "until2024": 60,
+   "from2025": 80
+  },
+  "flatMaxRangeM": 5.3,
+  "overheadStructures": [
+   {
+    "what": "East Coast Parkway / Benjamin Sheares Bridge (motorway viaduct, layer 1-2) and its ramps",
+    "osmWays": [
+     74722808,
+     122067627,
+     122067629,
+     122067630,
+     99007260,
+     121906574,
+     21786033,
+     21697558,
+     39961203,
+     122067631,
+     635253783
+    ],
+    "gameS": [
+     [
+      196,
+      260
+     ],
+     [
+      520,
+      720
+     ],
+     [
+      644,
+      981
+     ],
+     [
+      1020
+     ],
+     [
+      4282,
+      4339
+     ]
+    ],
+    "source": "en.wikipedia lap description: \"The pit straight approaching just below the Benjamin Sheares Bridge\""
+   },
+   {
+    "what": "covered link building over Raffles Boulevard (min_height 4.5 m, height 6 m; Raffles Boulevard tunnel=building_passage, maxheight 4.5)",
+    "osmWays": [
+     393090492,
+     479745478,
+     545362402
+    ],
+    "gameS": [
+     [
+      1236,
+      1259
+     ]
+    ]
+   },
+   {
+    "what": "footbridges (layer 1-2)",
+    "osmWays": [
+     740112301,
+     740112303,
+     741164882,
+     1314036589
+    ],
+    "gameS": [
+     [
+      196,
+      715
+     ],
+     [
+      898
+     ],
+     [
+      1028
+     ],
+     [
+      4282,
+      4339
+     ]
+    ]
+   }
+  ]
+ },
+ "layout": {
+  "dataset": "2023+ layout (en.wikipedia: 2025-present 4.927 km, 19 turns; 2023-2024 4.940 km). Seasons 2010-2022 used the Float section (5.065-5.073 km), not modelled",
+  "officialLengthKm": 4.927,
+  "officialLengthSource": "en.wikipedia.org/wiki/Marina_Bay_Street_Circuit infobox",
+  "gameLengthKm": 4.928,
+  "osm": {
+   "method": "map-matched to the public roads ignoring oneway (raced against the traffic in places); dual carriageways -> metres of offset are expected",
+   "osmPathLengthM": 5279,
+   "gameTrueLengthM": 4930,
+   "devMeanM": 2.02,
+   "devP95M": 7.3,
+   "devMaxM": 14.8,
+   "devMaxAtGameS": 2944,
+   "visualCheck": "img/sg-2008-ov.png: the game line follows the circuit roads all the way"
+  }
+ },
+ "direction": {
+  "ok": true,
+  "evidence": "anti-clockwise (REVERSED_IN_DATASET in build-tracks); lap description on en.wikipedia (T1 left, Republic Boulevard, Raffles Boulevard, ...) matches"
+ },
+ "startFinish": {
+  "gameLatLon": [
+   1.291728,
+   103.864144
+  ],
+  "osmStartLine": {
+   "node": 4281759834,
+   "latLon": [
+    1.2916929,
+    103.8642117
+   ],
+   "gameS": -5
+  },
+  "osmFinishLine": {
+   "node": 13826310653,
+   "latLon": [
+    1.290463,
+    103.8643543
+   ],
+   "gameS": -141,
+   "note": "tagged 2026-05 by one mapper; not checked further"
+  },
+  "ok": true
+ },
+ "pit": {
+  "real": {
+   "side": "left (+1)",
+   "osmWays": [
+    100484287
+   ],
+   "entryGameS": -474,
+   "entryLatLon": [
+    1.2887014,
+    103.8628407
+   ],
+   "exitGameS": 381,
+   "exitLatLon": [
+    1.294522,
+    103.8630464
+   ],
+   "besideTrackGameS": {
+    "from": -254,
+    "to": 378
+   },
+   "laneLengthM": 822
+  },
+  "game": {
+   "side": "left (+1)",
+   "limitKmh": 60,
+   "from": -236,
+   "entry": -150,
+   "exit": 164,
+   "to": 250,
+   "length": 482
+  },
+  "sideConvention": "gameS < 0 = before the line; side as in tracks-data pitSide (-1 = driver's right)",
+  "limit": {
+   "game": 60,
+   "real": {
+    "until2024": 60,
+    "from2025": 80
+   },
+   "source": "en.wikipedia.org/wiki/Singapore_Grand_Prix (2025: \"increase in the pit lane speed limit from 60 km/h to 80 km/h\", ref. Pirelli press 2025-09-29 https://press.pirelli.com/managing-the-heat-under-the-lights-in-singapore/ — checked: \"The increase in the pit lane speed limit from 60 to 80 km/h ...\")"
+  }
+ },
+ "elevation": {
+  "demSource": "Copernicus DEM GLO-30 (AWS open data COG https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N01_00_E103_00_DEM/Copernicus_DSM_COG_10_N01_00_E103_00_DEM.tif)",
+  "filter": "dsmflat",
+  "game": {
+   "range": 4.02,
+   "highAtS": 2359,
+   "lowAtS": 190,
+   "climb50": {
+    "pct": 0.65,
+    "fromS": 2039
+   },
+   "descent50": {
+    "pct": -0.63,
+    "fromS": 2609
+   },
+   "climb100": {
+    "pct": 0.63,
+    "fromS": 1979
+   },
+   "descent100": {
+    "pct": -0.59,
+    "fromS": 2609
+   }
+  },
+  "dem": {
+   "range": 5.06,
+   "highAtS": 3978,
+   "lowAtS": 400,
+   "climb50": {
+    "pct": 1.68,
+    "fromS": 1839
+   },
+   "descent50": {
+    "pct": -2.53,
+    "fromS": 4068
+   },
+   "climb100": {
+    "pct": 1.61,
+    "fromS": 1819
+   },
+   "descent100": {
+    "pct": -2.38,
+    "fromS": 4048
+   }
+  },
+  "demRawRange": 24.31,
+  "shapeCorrelation": 0.75,
+  "shapeRmsDiffM": 0.93,
+  "gradeDiffOver2pp_100mWindow": [
+   {
+    "fromS": 4078,
+    "toS": 4098,
+    "atS": 4088,
+    "game100": -0.33,
+    "dem100": -2.37,
+    "diffPP": 2.04
+   }
+  ],
+  "demNote": "GLO-30 along the game centreline (the map-matched OSM path detours round dual carriageways), \"dsmflat\" filter = 20th percentile over 300 m + Gaussian 80 m: dense city, buildings and the ECP viaduct are in the surface model, only the broad shape survives. SRTM (2000) does not fit the present ground (range 50 m) and is not used.",
+  "published": {
+   "rangeM": [
+    5.3,
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+   ]
+  },
+  "famousFeatures": [
+   {
+    "feature": "range",
+    "game": 4.02,
+    "published": 5.3,
+    "demLowerEnvelope": 5.06,
+    "verdict": "minor: build-tracks caps flat tracks at 4 m"
+   },
+   {
+    "feature": "low at the start / T1, high on St Andrew's Road (Padang)",
+    "gameLowS": 190,
+    "gameHighS": 2359,
+    "demLowS": 400,
+    "demHighS": 3978,
+    "verdict": "low matches; the DEM high near s 3980 is the Raffles Avenue / Bayfront area where the viaducts stand (unreliable)"
+   }
+  ],
+  "profile50m": {
+   "columns": [
+    "gameS_m",
+    "game_m",
+    "dem_m (filtered, relative to its lowest point)"
+   ],
+   "rows": [
+    [
+     0,
+     0.2,
+     0.65
+    ],
+    [
+     50,
+     0.1,
+     0.61
+    ],
+    [
+     100,
+     0.01,
+     0.55
+    ],
+    [
+     150,
+     0,
+     0.47
+    ],
+    [
+     200,
+     0,
+     0.36
+    ],
+    [
+     250,
+     0.06,
+     0.24
+    ],
+    [
+     300,
+     0.1,
+     0.12
+    ],
+    [
+     350,
+     0.21,
+     0.04
+    ],
+    [
+     400,
+     0.32,
+     0
+    ],
+    [
+     450,
+     0.47,
+     0.04
+    ],
+    [
+     500,
+     0.64,
+     0.25
+    ],
+    [
+     550,
+     0.8,
+     0.69
+    ],
+    [
+     600,
+     0.91,
+     1.35
+    ],
+    [
+     650,
+     1.06,
+     2.02
+    ],
+    [
+     700,
+     1.16,
+     2.53
+    ],
+    [
+     750,
+     1.27,
+     2.82
+    ],
+    [
+     800,
+     1.3,
+     2.95
+    ],
+    [
+     850,
+     1.32,
+     2.98
+    ],
+    [
+     900,
+     1.4,
+     2.95
+    ],
+    [
+     950,
+     1.4,
+     2.91
+    ],
+    [
+     1000,
+     1.4,
+     2.89
+    ],
+    [
+     1050,
+     1.4,
+     2.9
+    ],
+    [
+     1100,
+     1.48,
+     2.97
+    ],
+    [
+     1150,
+     1.5,
+     3.11
+    ],
+    [
+     1200,
+     1.5,
+     3.32
+    ],
+    [
+     1250,
+     1.5,
+     3.5
+    ],
+    [
+     1300,
+     1.5,
+     3.54
+    ],
+    [
+     1350,
+     1.49,
+     3.4
+    ],
+    [
+     1400,
+     1.4,
+     3.07
+    ],
+    [
+     1450,
+     1.4,
+     2.54
+    ],
+    [
+     1500,
+     1.34,
+     1.85
+    ],
+    [
+     1550,
+     1.25,
+     1.18
+    ],
+    [
+     1600,
+     1.19,
+     0.73
+    ],
+    [
+     1650,
+     1.2,
+     0.56
+    ],
+    [
+     1700,
+     1.22,
+     0.62
+    ],
+    [
+     1750,
+     1.32,
+     0.88
+    ],
+    [
+     1800,
+     1.43,
+     1.38
+    ],
+    [
+     1850,
+     1.62,
+     2.13
+    ],
+    [
+     1900,
+     1.84,
+     2.97
+    ],
+    [
+     1950,
+     2.15,
+     3.63
+    ],
+    [
+     2000,
+     2.41,
+     3.92
+    ],
+    [
+     2050,
+     2.69,
+     3.85
+    ],
+    [
+     2100,
+     3.01,
+     3.61
+    ],
+    [
+     2150,
+     3.29,
+     3.43
+    ],
+    [
+     2200,
+     3.52,
+     3.37
+    ],
+    [
+     2250,
+     3.78,
+     3.43
+    ],
+    [
+     2300,
+     3.96,
+     3.55
+    ],
+    [
+     2350,
+     4.01,
+     3.7
+    ],
+    [
+     2400,
+     3.97,
+     3.81
+    ],
+    [
+     2450,
+     3.85,
+     3.87
+    ],
+    [
+     2500,
+     3.72,
+     3.87
+    ],
+    [
+     2550,
+     3.53,
+     3.82
+    ],
+    [
+     2600,
+     3.31,
+     3.7
+    ],
+    [
+     2650,
+     3,
+     3.55
+    ],
+    [
+     2700,
+     2.72,
+     3.4
+    ],
+    [
+     2750,
+     2.48,
+     3.28
+    ],
+    [
+     2800,
+     2.27,
+     3.18
+    ],
+    [
+     2850,
+     2.02,
+     3.06
+    ],
+    [
+     2900,
+     1.89,
+     2.87
+    ],
+    [
+     2950,
+     1.8,
+     2.61
+    ],
+    [
+     3000,
+     1.73,
+     2.34
+    ],
+    [
+     3050,
+     1.7,
+     2.11
+    ],
+    [
+     3100,
+     1.69,
+     1.93
+    ],
+    [
+     3150,
+     1.76,
+     1.81
+    ],
+    [
+     3200,
+     1.8,
+     1.73
+    ],
+    [
+     3250,
+     1.85,
+     1.77
+    ],
+    [
+     3300,
+     1.98,
+     1.98
+    ],
+    [
+     3350,
+     2.09,
+     2.31
+    ],
+    [
+     3400,
+     2.22,
+     2.69
+    ],
+    [
+     3450,
+     2.38,
+     3.07
+    ],
+    [
+     3500,
+     2.5,
+     3.45
+    ],
+    [
+     3550,
+     2.64,
+     3.75
+    ],
+    [
+     3600,
+     2.86,
+     3.86
+    ],
+    [
+     3650,
+     2.99,
+     3.71
+    ],
+    [
+     3700,
+     3.2,
+     3.45
+    ],
+    [
+     3750,
+     3.31,
+     3.27
+    ],
+    [
+     3800,
+     3.45,
+     3.3
+    ],
+    [
+     3850,
+     3.6,
+     3.63
+    ],
+    [
+     3900,
+     3.6,
+     4.25
+    ],
+    [
+     3950,
+     3.6,
+     4.89
+    ],
+    [
+     4000,
+     3.61,
+     5.03
+    ],
+    [
+     4050,
+     3.55,
+     4.35
+    ],
+    [
+     4100,
+     3.4,
+     3.13
+    ],
+    [
+     4150,
+     3.2,
+     1.96
+    ],
+    [
+     4200,
+     2.97,
+     1.17
+    ],
+    [
+     4250,
+     2.7,
+     0.72
+    ],
+    [
+     4300,
+     2.48,
+     0.45
+    ],
+    [
+     4350,
+     2.25,
+     0.3
+    ],
+    [
+     4400,
+     1.94,
+     0.22
+    ],
+    [
+     4450,
+     1.71,
+     0.19
+    ],
+    [
+     4500,
+     1.48,
+     0.19
+    ],
+    [
+     4550,
+     1.3,
+     0.22
+    ],
+    [
+     4600,
+     1.16,
+     0.27
+    ],
+    [
+     4650,
+     1,
+     0.34
+    ],
+    [
+     4700,
+     0.83,
+     0.41
+    ],
+    [
+     4750,
+     0.64,
+     0.5
+    ],
+    [
+     4800,
+     0.53,
+     0.57
+    ],
+    [
+     4850,
+     0.38,
+     0.63
+    ],
+    [
+     4900,
+     0.24,
+     0.65
+    ]
+   ]
+  }
+ },
+ "banking": {
+  "publishedBankedCorners": "none (public roads)",
+  "note": "the game banks the 90-degree street corners 5-6 deg (~10 % cross-slope) from curvature; public roads are crowned / drained, no source for any real banking"
+ },
+ "covered": {
+  "overTheTrack": [
+   {
+    "what": "East Coast Parkway / Benjamin Sheares Bridge (motorway viaduct, layer 1-2) and its ramps",
+    "osmWays": [
+     74722808,
+     122067627,
+     122067629,
+     122067630,
+     99007260,
+     121906574,
+     21786033,
+     21697558,
+     39961203,
+     122067631,
+     635253783
+    ],
+    "gameS": [
+     [
+      196,
+      260
+     ],
+     [
+      520,
+      720
+     ],
+     [
+      644,
+      981
+     ],
+     [
+      1020
+     ],
+     [
+      4282,
+      4339
+     ]
+    ],
+    "source": "en.wikipedia lap description: \"The pit straight approaching just below the Benjamin Sheares Bridge\""
+   },
+   {
+    "what": "covered link building over Raffles Boulevard (min_height 4.5 m, height 6 m; Raffles Boulevard tunnel=building_passage, maxheight 4.5)",
+    "osmWays": [
+     393090492,
+     479745478,
+     545362402
+    ],
+    "gameS": [
+     [
+      1236,
+      1259
+     ]
+    ]
+   },
+   {
+    "what": "footbridges (layer 1-2)",
+    "osmWays": [
+     740112301,
+     740112303,
+     741164882,
+     1314036589
+    ],
+    "gameS": [
+     [
+      196,
+      715
+     ],
+     [
+      898
+     ],
+     [
+      1028
+     ],
+     [
+      4282,
+      4339
+     ]
+    ]
+   }
+  ],
+  "trackOnBridges": [
+   {
+    "what": "Esplanade Bridge, 261 m low-level 7-span concrete arch bridge over the mouth of the Singapore River",
+    "osmWays": [
+     763010995,
+     35037536,
+     1313321640
+    ],
+    "gameS": [
+     2963,
+     3254
+    ],
+    "source": "en.wikipedia.org/wiki/Esplanade_Bridge"
+   },
+   {
+    "what": "Anderson Bridge (1910 steel bridge with granite portal arches)",
+    "osmWays": [
+     29377119
+    ],
+    "gameS": [
+     2789
+    ],
+    "source": "en.wikipedia.org/wiki/Anderson_Bridge_(Singapore)"
+   }
+  ],
+  "game": "none of these: scenery-data sg-2008 has 4 man_made=bridge decks but none over the track (devtests/track-audit/apac/out/overhead-sg-2008.json); the road on the bridges is plain terrain"
+ },
+ "sourcesUsed": [
+  "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)",
+  "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+  "Esri World Imagery (Vantor / Maxar), checked by eye with devtests/track-audit/apac/imagery.mjs; tiles cached in devtests/track-audit/cache/imagery/",
+  "Copernicus DEM GLO-30 (30 m surface model, TanDEM-X 2011-2015), AWS open data COG https://copernicus-dem-30m.s3.amazonaws.com (cache/glo30/<id>-apac.json)",
+  "SRTM GL1 30 m (surface model, Feb 2000) via https://api.opentopodata.org/v1/srtm30m (cache/otd-srtm30m/<id>.json)",
+  "GSI DEM 5 m laser (DEM5A, 国土地理院) via https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php (cache/gsi5m/jp-1962-osm.json)",
+  "game data: tracks-data.js built with lib/three.min.js + js/track.js + scenery-data.js (devtests/track-audit/apac/dump-game.js -> apac/out/game-<id>.json)"
+ ],
+ "files": {
+  "scripts": "devtests/track-audit/apac/*.mjs",
+  "images": "devtests/track-audit/apac/img/*.png (git-ignored output of imagery.mjs)",
+  "data": "devtests/track-audit/apac/out/"
+ }
+}

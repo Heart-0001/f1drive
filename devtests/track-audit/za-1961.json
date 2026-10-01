@@ -1,0 +1,7191 @@
+{
+ "id": "za-1961",
+ "name": "Kyalami Grand Prix Circuit",
+ "auditedAt": "2026-10-01",
+ "auditor": "devtests/track-audit/latam-za (scripts in that folder; caches in devtests/track-audit/cache/)",
+ "verdict": "minor issues",
+ "reproduce": [
+  "node devtests/track-audit/latam-za/game-dump.js za-1961",
+  "node devtests/track-audit/latam-za/osm-fetch2.mjs za-1961 && node devtests/track-audit/latam-za/osm-compare.mjs za-1961",
+  "node devtests/track-audit/latam-za/dem-profiles.mjs za-1961",
+  "node devtests/track-audit/latam-za/analyze.mjs za-1961",
+  "node devtests/track-audit/latam-za/radius.mjs za-1961",
+  "node devtests/track-audit/latam-za/report.mjs za-1961"
+ ],
+ "layout": {
+  "note": "Current circuit, rebuilt 2015-2016 (4.522 km official / 4.529 km Wikipedia, 16 turns, anticlockwise). F1 never raced it: the 1992-1993 South African GPs used the 4.261 km layout. Not an F1 venue 2010-2026.",
+  "official": {
+   "lengthKm": 4.522,
+   "src": "kyalamigrandprixcircuit.com/grand-prix-circuit/: \"4.522 km, 16-turn anti-clockwise Grand Prix circuit\", \"Pole Positions: Left side\", \"Number of pit garages: 40\"; en.wikipedia.org/wiki/Kyalami: \"Grand Prix Circuit (2015–present)\" 4.529 km, \"Grand Prix Circuit (1992–1993 and 2009–2015)\" 4.261 km (cache/web/latam-za/kyalami-grand-prix-circuit.html, latam-za/ref/en-Kyalami.wiki)"
+  },
+  "game": {
+   "lengthKmData": 4.529,
+   "lapM": 4531.4,
+   "trueGeometryM": 4512.5,
+   "samples": 2266
+  },
+  "osm": {
+   "snappedLoopM": 4509.3,
+   "deviation": {
+    "maxM": 4.6,
+    "meanM": 1.7,
+    "p95M": 3.5,
+    "runsOver10m": []
+   },
+   "unusedWays": [
+    {
+     "way": 532871433,
+     "name": "Kyalami Karting Circuit",
+     "sport": "motor",
+     "lengthM": 1109.7,
+     "maxDistM": 115.8
+    }
+   ]
+  },
+  "tightestCorners": [
+   {
+    "s": 672,
+    "ll": [
+     -25.9949399,
+     28.0749907
+    ],
+    "gameR": 24.3,
+    "osmR": 27.2
+   },
+   {
+    "s": 1044,
+    "ll": [
+     -25.9932344,
+     28.0721091
+    ],
+    "gameR": 30.6,
+    "osmR": 30.8
+   },
+   {
+    "s": 2868,
+    "ll": [
+     -26.0000379,
+     28.0602835
+    ],
+    "gameR": 29.7,
+    "osmR": 29.3
+   },
+   {
+    "s": 3708,
+    "ll": [
+     -25.9963209,
+     28.0657221
+    ],
+    "gameR": 30.2,
+    "osmR": 31.7
+   },
+   {
+    "s": 3990,
+    "ll": [
+     -25.9980706,
+     28.0676161
+    ],
+    "gameR": 33.4,
+    "osmR": 36.9
+   },
+   {
+    "s": 4253,
+    "ll": [
+     -26.0004133,
+     28.0679533
+    ],
+    "gameR": 21.4,
+    "osmR": 23.4
+   }
+  ]
+ },
+ "direction": {
+  "game": "anticlockwise",
+  "totalTurnDeg": 360,
+  "real": "anticlockwise",
+  "src": "kyalamigrandprixcircuit.com/grand-prix-circuit/: \"Track run/direction: Anticlockwise\"; all 2266 game samples run with the oneway OSM ways",
+  "osmOnewayAgree": {
+   "onewaySamplesAgree": 2266,
+   "onewaySamplesAgainst": 0
+  }
+ },
+ "startFinish": {
+  "gamePoints0": [
+   -25.9987792,
+   28.0699211
+  ],
+  "osmNodes": [
+   {
+    "node": 2331688961,
+    "tags": {
+     "raceway": "start-finish"
+    },
+    "lat": -25.998677,
+    "lon": 28.0700067,
+    "s": 14.1,
+    "sSigned": 14.1,
+    "lateral": 1.3
+   }
+  ]
+ },
+ "pit": {
+  "game": {
+   "side": 1,
+   "sideWords": "left of the driver (+n)",
+   "limitKmh": 80,
+   "from": {
+    "index": 2149,
+    "s": 4297.5,
+    "ll": [
+     -26.000337,
+     28.0683527
+    ]
+   },
+   "to": {
+    "index": 125,
+    "s": 250,
+    "ll": [
+     -25.997111,
+     28.0715919
+    ]
+   },
+   "entry": {
+    "index": 2192,
+    "s": 4383.5,
+    "ll": [
+     -25.9997666,
+     28.0689316
+    ]
+   },
+   "exit": {
+    "index": 82,
+    "s": 164,
+    "ll": [
+     -25.9976845,
+     28.071017
+    ]
+   },
+   "length": 483.9
+  },
+  "real": {
+   "side": "left",
+   "limitKmh": null,
+   "osmWays": [
+    793806972
+   ],
+   "lengthM": 569.2,
+   "entry": {
+    "s": 4079.1,
+    "sRelLine": -452.3,
+    "latlon": [
+     -25.9990236,
+     28.0677323
+    ],
+    "offTrackM": 0.5
+   },
+   "exit": {
+    "s": 179.9,
+    "sRelLine": 179.9,
+    "latlon": [
+     -25.9975449,
+     28.071094
+    ],
+    "offTrackM": 4.6
+   }
+  },
+  "src": [
+   "OpenStreetMap (ODbL), Overpass query cached in devtests/track-audit/cache/overpass/<id>.json (2026-10-01): way 793806972 \"Grand Prix Pit Lane\" (oneway, 569 m)",
+   "kyalamigrandprixcircuit.com: pole position on the left",
+   "en.wikipedia.org/wiki/Pit_stop: after the 1994 San Marino GP \"the pit lane speed limit was introduced in Formula One\" (ref/en-Pit_stop.wiki)"
+  ]
+ },
+ "elevation": {
+  "published": null,
+  "game": {
+   "rangeM": 50.21,
+   "elevSource": "GLO-90 (tracks-data.js header)",
+   "stats": {
+    "min": -0.02,
+    "max": 50.18,
+    "range": 50.21,
+    "lowest": {
+     "s": 540,
+     "ll": [
+      -25.9956545,
+      28.0739871
+     ]
+    },
+    "highest": {
+     "s": 2831.7,
+     "ll": [
+      -25.9998121,
+      28.0605342
+     ],
+     "near": "Leeukop"
+    },
+    "climbs50": [
+     {
+      "gradePct": 13.3,
+      "s": 2717.7,
+      "ll": [
+       -25.9995316,
+       28.0616262
+      ]
+     },
+     {
+      "gradePct": 7,
+      "s": 911.9,
+      "ll": [
+       -25.9937985,
+       28.0732092
+      ],
+      "near": "Juksei Sweep"
+     },
+     {
+      "gradePct": 6.3,
+      "s": 2561.7,
+      "ll": [
+       -25.9992277,
+       28.0631241
+      ]
+     },
+     {
+      "gradePct": 5.8,
+      "s": 3605.6,
+      "ll": [
+       -25.9970788,
+       28.0652096
+      ]
+     }
+    ],
+    "descents50": [
+     {
+      "gradePct": -10.5,
+      "s": 2921.7,
+      "ll": [
+       -26.0003921,
+       28.0605601
+      ],
+      "near": "Leeukop"
+     },
+     {
+      "gradePct": -8.2,
+      "s": 3227.6,
+      "ll": [
+       -25.9996977,
+       28.0633479
+      ]
+     },
+     {
+      "gradePct": -7.2,
+      "s": 3761.6,
+      "ll": [
+       -25.9965637,
+       28.0661416
+      ],
+      "near": "The Crocodiles"
+     },
+     {
+      "gradePct": -5.8,
+      "s": 2237.7,
+      "ll": [
+       -25.9970444,
+       28.0642433
+      ],
+      "near": "The Esses"
+     }
+    ],
+    "climbs100": [
+     {
+      "gradePct": 12.9,
+      "s": 2711.7,
+      "ll": [
+       -25.9995231,
+       28.0616852
+      ]
+     },
+     {
+      "gradePct": 6.8,
+      "s": 929.9,
+      "ll": [
+       -25.9936553,
+       28.0731177
+      ],
+      "near": "Juksei Sweep"
+     },
+     {
+      "gradePct": 6.3,
+      "s": 2555.7,
+      "ll": [
+       -25.9992073,
+       28.0631795
+      ]
+     },
+     {
+      "gradePct": 5.4,
+      "s": 1889.8,
+      "ll": [
+       -25.9955666,
+       28.0665253
+      ]
+     }
+    ],
+    "descents100": [
+     {
+      "gradePct": -10.1,
+      "s": 2927.7,
+      "ll": [
+       -26.0004146,
+       28.0606142
+      ]
+     },
+     {
+      "gradePct": -7.9,
+      "s": 3215.6,
+      "ll": [
+       -25.9997419,
+       28.0632388
+      ]
+     },
+     {
+      "gradePct": -6.6,
+      "s": 3767.6,
+      "ll": [
+       -25.9966107,
+       28.0661707
+      ],
+      "near": "The Crocodiles"
+     },
+     {
+      "gradePct": -5.6,
+      "s": 2237.7,
+      "ll": [
+       -25.9970444,
+       28.0642433
+      ],
+      "near": "The Esses"
+     }
+    ]
+   }
+  },
+  "references": {
+   "glo30": {
+    "source": "Copernicus DEM GLO-30 (DSM, TanDEM-X 2011-2015), AWS open data COG, bilinear",
+    "rawRangeM": 44.91,
+    "filtered": {
+     "min": 1454.16,
+     "max": 1498.23,
+     "range": 44.07,
+     "lowest": {
+      "s": 462,
+      "ll": [
+       -25.9960338,
+       28.0733338
+      ]
+     },
+     "highest": {
+      "s": 2861.7,
+      "ll": [
+       -25.9999838,
+       28.0603017
+      ],
+      "near": "Leeukop"
+     },
+     "climbs50": [
+      {
+       "gradePct": 11.4,
+       "s": 630,
+       "ll": [
+        -25.995218,
+        28.074742
+       ],
+       "near": "Crowthorne"
+      },
+      {
+       "gradePct": 10.3,
+       "s": 2687.7,
+       "ll": [
+        -25.999498,
+        28.0619228
+       ]
+      },
+      {
+       "gradePct": 10,
+       "s": 2519.7,
+       "ll": [
+        -25.999086,
+        28.0635117
+       ]
+      },
+      {
+       "gradePct": 8.5,
+       "s": 905.9,
+       "ll": [
+        -25.9938469,
+        28.0732357
+       ],
+       "near": "Juksei Sweep"
+      }
+     ],
+     "descents50": [
+      {
+       "gradePct": -9.7,
+       "s": 2993.7,
+       "ll": [
+        -26.0005451,
+        28.0612211
+       ]
+      },
+      {
+       "gradePct": -9.3,
+       "s": 3173.6,
+       "ll": [
+        -25.9998965,
+        28.0628573
+       ]
+      },
+      {
+       "gradePct": -6.4,
+       "s": 2345.7,
+       "ll": [
+        -25.9979612,
+        28.0644408
+       ],
+       "near": "The Esses"
+      },
+      {
+       "gradePct": -5.6,
+       "s": 725.9,
+       "ll": [
+        -25.9946305,
+        28.074622
+       ],
+       "near": "Crowthorne"
+      }
+     ],
+     "climbs100": [
+      {
+       "gradePct": 9.9,
+       "s": 2711.7,
+       "ll": [
+        -25.9995231,
+        28.0616852
+       ]
+      },
+      {
+       "gradePct": 9.7,
+       "s": 618,
+       "ll": [
+        -25.9952741,
+        28.0746401
+       ],
+       "near": "Crowthorne"
+      },
+      {
+       "gradePct": 9.4,
+       "s": 2555.7,
+       "ll": [
+        -25.9992073,
+        28.0631795
+       ]
+      },
+      {
+       "gradePct": 7.1,
+       "s": 899.9,
+       "ll": [
+        -25.9938954,
+        28.0732621
+       ],
+       "near": "Juksei Sweep"
+      }
+     ],
+     "descents100": [
+      {
+       "gradePct": -9.5,
+       "s": 2987.7,
+       "ll": [
+        -26.0005571,
+        28.0611629
+       ]
+      },
+      {
+       "gradePct": -8.9,
+       "s": 3155.6,
+       "ll": [
+        -25.9999627,
+        28.0626939
+       ]
+      },
+      {
+       "gradePct": -5.9,
+       "s": 2333.7,
+       "ll": [
+        -25.9978587,
+        28.0644093
+       ],
+       "near": "The Esses"
+      },
+      {
+       "gradePct": -4.5,
+       "s": 3311.6,
+       "ll": [
+        -25.9993802,
+        28.0641052
+       ],
+       "near": "Mineshaft"
+      }
+     ]
+    },
+    "vsGame": {
+     "offsetM": 1454.41,
+     "rmsM": 3.17,
+     "maxDiffM": 7.95,
+     "maxDiffAt": {
+      "s": 671.9,
+      "ll": [
+       -25.9949399,
+       28.0749907
+      ],
+      "near": "Crowthorne"
+     },
+     "correlation": 0.97,
+     "grade100DiffOver2pp": [
+      {
+       "from_s": 0,
+       "to_s": 18,
+       "length": 24,
+       "at": {
+        "s": 0,
+        "ll": [
+         -25.9987712,
+         28.0699114
+        ]
+       },
+       "refGradePct": -3,
+       "gameGradePct": 0.3,
+       "diffPp": -3.3,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 510,
+       "to_s": 659.9,
+       "length": 155.8,
+       "at": {
+        "s": 618,
+        "ll": [
+         -25.9952741,
+         28.0746401
+        ],
+        "near": "Crowthorne"
+       },
+       "refGradePct": 9.7,
+       "gameGradePct": 2.8,
+       "diffPp": 6.9,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 689.9,
+       "to_s": 827.9,
+       "length": 143.9,
+       "at": {
+        "s": 731.9,
+        "ll": [
+         -25.9946209,
+         28.0745632
+        ],
+        "near": "Crowthorne"
+       },
+       "refGradePct": -4.2,
+       "gameGradePct": 2.2,
+       "diffPp": -6.3,
+       "what": "game slope has the wrong sign"
+      },
+      {
+       "from_s": 1097.9,
+       "to_s": 1169.9,
+       "length": 77.9,
+       "at": {
+        "s": 1133.9,
+        "ll": [
+         -25.9938646,
+         28.0715513
+        ]
+       },
+       "refGradePct": 2.7,
+       "gameGradePct": -0.4,
+       "diffPp": 3.1,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 1793.8,
+       "to_s": 1871.8,
+       "length": 83.9,
+       "at": {
+        "s": 1835.8,
+        "ll": [
+         -25.9959668,
+         28.0668306
+        ]
+       },
+       "refGradePct": 1.6,
+       "gameGradePct": 4.4,
+       "diffPp": -2.8,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 1949.8,
+       "to_s": 2063.8,
+       "length": 119.9,
+       "at": {
+        "s": 2009.8,
+        "ll": [
+         -25.9953703,
+         28.0655562
+        ],
+        "near": "Clubhouse"
+       },
+       "refGradePct": -1.4,
+       "gameGradePct": 2.2,
+       "diffPp": -3.6,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 2129.8,
+       "to_s": 2255.7,
+       "length": 131.9,
+       "at": {
+        "s": 2177.7,
+        "ll": [
+         -25.9965915,
+         28.0645684
+        ]
+       },
+       "refGradePct": -0.5,
+       "gameGradePct": -4.4,
+       "diffPp": 3.9,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 2315.7,
+       "to_s": 2435.7,
+       "length": 125.9,
+       "at": {
+        "s": 2381.7,
+        "ll": [
+         -25.9982803,
+         28.0644453
+        ],
+        "near": "The Esses"
+       },
+       "refGradePct": -3.6,
+       "gameGradePct": 0.8,
+       "diffPp": -4.4,
+       "what": "game slope has the wrong sign"
+      },
+      {
+       "from_s": 2489.7,
+       "to_s": 2579.7,
+       "length": 95.9,
+       "at": {
+        "s": 2525.7,
+        "ll": [
+         -25.9991062,
+         28.0634563
+        ]
+       },
+       "refGradePct": 9.1,
+       "gameGradePct": 5.4,
+       "diffPp": 3.7,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 2651.7,
+       "to_s": 2795.7,
+       "length": 149.8,
+       "at": {
+        "s": 2753.7,
+        "ll": [
+         -25.999606,
+         28.0612758
+        ],
+        "near": "Leeukop"
+       },
+       "refGradePct": 6.8,
+       "gameGradePct": 10.8,
+       "diffPp": -4,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 2837.7,
+       "to_s": 2939.7,
+       "length": 107.9,
+       "at": {
+        "s": 2879.7,
+        "ll": [
+         -26.0001454,
+         28.0602862
+        ],
+        "near": "Leeukop"
+       },
+       "refGradePct": -2.1,
+       "gameGradePct": -7.6,
+       "diffPp": 5.5,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 3137.6,
+       "to_s": 3161.6,
+       "length": 30,
+       "at": {
+        "s": 3149.6,
+        "ll": [
+         -25.9999847,
+         28.0626394
+        ]
+       },
+       "refGradePct": -8.8,
+       "gameGradePct": -6.4,
+       "diffPp": -2.5,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 3245.6,
+       "to_s": 3263.6,
+       "length": 24,
+       "at": {
+        "s": 3251.6,
+        "ll": [
+         -25.9996094,
+         28.0635659
+        ]
+       },
+       "refGradePct": -5.2,
+       "gameGradePct": -7.5,
+       "diffPp": 2.2,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 3557.6,
+       "to_s": 3647.6,
+       "length": 95.9,
+       "at": {
+        "s": 3599.6,
+        "ll": [
+         -25.9971309,
+         28.065195
+        ]
+       },
+       "refGradePct": 0.3,
+       "gameGradePct": 5.1,
+       "diffPp": -4.8,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 3689.6,
+       "to_s": 3947.5,
+       "length": 263.7,
+       "at": {
+        "s": 3749.6,
+        "ll": [
+         -25.9964706,
+         28.0660816
+        ],
+        "near": "The Crocodiles"
+       },
+       "refGradePct": -2.2,
+       "gameGradePct": -6.4,
+       "diffPp": 4.1,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 4301.5,
+       "to_s": 4373.5,
+       "length": 77.9,
+       "at": {
+        "s": 4331.5,
+        "ll": [
+         -26.0000997,
+         28.0685673
+        ],
+        "near": "Ingwe"
+       },
+       "refGradePct": 1.5,
+       "gameGradePct": 4.5,
+       "diffPp": -3,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 4469.5,
+       "to_s": 4529.5,
+       "length": 65.9,
+       "at": {
+        "s": 4517.5,
+        "ll": [
+         -25.9988642,
+         28.0698173
+        ]
+       },
+       "refGradePct": -2.9,
+       "gameGradePct": 0.8,
+       "diffPp": -3.7,
+       "what": "game slope has the wrong sign"
+      }
+     ]
+    }
+   },
+   "srtm30m": {
+    "source": "NASA SRTM GL1 v3 30 m (C-band radar DSM, Feb 2000) via OpenTopoData api.opentopodata.org/v1/srtm30m, every 4th point (~24 m), bilinear",
+    "rawRangeM": 49,
+    "filtered": {
+     "min": 1455.81,
+     "max": 1503.46,
+     "range": 47.64,
+     "lowest": {
+      "s": 330,
+      "ll": [
+       -25.9966772,
+       28.072229
+      ],
+      "near": "The Kink"
+     },
+     "highest": {
+      "s": 2903.7,
+      "ll": [
+       -26.0003109,
+       28.0604102
+      ],
+      "near": "Leeukop"
+     },
+     "climbs50": [
+      {
+       "gradePct": 12.6,
+       "s": 1943.8,
+       "ll": [
+        -25.9952023,
+        28.0661618
+       ],
+       "near": "Clubhouse"
+      },
+      {
+       "gradePct": 11,
+       "s": 2537.7,
+       "ll": [
+        -25.9991466,
+        28.0633456
+       ]
+      },
+      {
+       "gradePct": 10.6,
+       "s": 2723.7,
+       "ll": [
+        -25.9995401,
+        28.0615673
+       ]
+      },
+      {
+       "gradePct": 9.9,
+       "s": 881.9,
+       "ll": [
+        -25.9940413,
+        28.0733399
+       ],
+       "near": "Juksei Sweep"
+      }
+     ],
+     "descents50": [
+      {
+       "gradePct": -18.9,
+       "s": 2969.7,
+       "ll": [
+        -26.0005485,
+        28.060994
+       ]
+      },
+      {
+       "gradePct": -13.1,
+       "s": 270,
+       "ll": [
+        -25.9969786,
+        28.0717326
+       ],
+       "near": "The Kink"
+      },
+      {
+       "gradePct": -10.6,
+       "s": 2315.7,
+       "ll": [
+        -25.9977124,
+        28.0643357
+       ],
+       "near": "The Esses"
+      },
+      {
+       "gradePct": -10.3,
+       "s": 3191.6,
+       "ll": [
+        -25.9998302,
+        28.0630208
+       ]
+      }
+     ],
+     "climbs100": [
+      {
+       "gradePct": 9.7,
+       "s": 2693.7,
+       "ll": [
+        -25.9995039,
+        28.0618635
+       ]
+      },
+      {
+       "gradePct": 9.2,
+       "s": 2537.7,
+       "ll": [
+        -25.9991466,
+        28.0633456
+       ]
+      },
+      {
+       "gradePct": 9.2,
+       "s": 905.9,
+       "ll": [
+        -25.9938469,
+        28.0732357
+       ],
+       "near": "Juksei Sweep"
+      },
+      {
+       "gradePct": 8.4,
+       "s": 1931.8,
+       "ll": [
+        -25.9952678,
+        28.0662669
+       ],
+       "near": "Clubhouse"
+      }
+     ],
+     "descents100": [
+      {
+       "gradePct": -15.8,
+       "s": 2975.7,
+       "ll": [
+        -26.0005572,
+        28.0610527
+       ]
+      },
+      {
+       "gradePct": -10.8,
+       "s": 264,
+       "ll": [
+        -25.9970168,
+        28.0716852
+       ],
+       "near": "The Kink"
+      },
+      {
+       "gradePct": -9.8,
+       "s": 3203.6,
+       "ll": [
+        -25.9997861,
+        28.0631299
+       ]
+      },
+      {
+       "gradePct": -9,
+       "s": 2303.7,
+       "ll": [
+        -25.9976169,
+        28.0642788
+       ],
+       "near": "The Esses"
+      }
+     ]
+    },
+    "vsGame": {
+     "offsetM": 1458.65,
+     "rmsM": 2.86,
+     "maxDiffM": -8.28,
+     "maxDiffAt": {
+      "s": 2801.7,
+      "ll": [
+       -25.9997337,
+       28.0608199
+      ],
+      "near": "Leeukop"
+     },
+     "correlation": 0.97,
+     "grade100DiffOver2pp": [
+      {
+       "from_s": 42,
+       "to_s": 126,
+       "length": 89.9,
+       "at": {
+        "s": 78,
+        "ll": [
+         -25.9982455,
+         28.0704259
+        ]
+       },
+       "refGradePct": 3.4,
+       "gameGradePct": -0.6,
+       "diffPp": 4,
+       "what": "game slope has the wrong sign"
+      },
+      {
+       "from_s": 192,
+       "to_s": 306,
+       "length": 119.9,
+       "at": {
+        "s": 258,
+        "ll": [
+         -25.9970532,
+         28.0716414
+        ],
+        "near": "The Kink"
+       },
+       "refGradePct": -10.8,
+       "gameGradePct": -4,
+       "diffPp": -6.8,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 336,
+       "to_s": 432,
+       "length": 101.9,
+       "at": {
+        "s": 378,
+        "ll": [
+         -25.9964427,
+         28.0726303
+        ]
+       },
+       "refGradePct": 3.8,
+       "gameGradePct": -2.5,
+       "diffPp": 6.3,
+       "what": "game slope has the wrong sign"
+      },
+      {
+       "from_s": 606,
+       "to_s": 665.9,
+       "length": 65.9,
+       "at": {
+        "s": 636,
+        "ll": [
+         -25.9951904,
+         28.0747928
+        ],
+        "near": "Crowthorne"
+       },
+       "refGradePct": 6.4,
+       "gameGradePct": 3.3,
+       "diffPp": 3.2,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 713.9,
+       "to_s": 809.9,
+       "length": 101.9,
+       "at": {
+        "s": 743.9,
+        "ll": [
+         -25.9946017,
+         28.0744457
+        ],
+        "near": "Crowthorne"
+       },
+       "refGradePct": -2,
+       "gameGradePct": 2,
+       "diffPp": -4,
+       "what": "game slope has the wrong sign"
+      },
+      {
+       "from_s": 881.9,
+       "to_s": 917.9,
+       "length": 42,
+       "at": {
+        "s": 899.9,
+        "ll": [
+         -25.9938954,
+         28.0732621
+        ],
+        "near": "Juksei Sweep"
+       },
+       "refGradePct": 9.2,
+       "gameGradePct": 6.7,
+       "diffPp": 2.4,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 1061.9,
+       "to_s": 1127.9,
+       "length": 71.9,
+       "at": {
+        "s": 1097.9,
+        "ll": [
+         -25.9936029,
+         28.0717628
+        ],
+        "near": "Barbeque"
+       },
+       "refGradePct": 4.2,
+       "gameGradePct": 0.8,
+       "diffPp": 3.4,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 1175.9,
+       "to_s": 1229.9,
+       "length": 59.9,
+       "at": {
+        "s": 1199.9,
+        "ll": [
+         -25.9943444,
+         28.0711635
+        ]
+       },
+       "refGradePct": -3.3,
+       "gameGradePct": 0,
+       "diffPp": -3.3,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 1397.8,
+       "to_s": 1451.8,
+       "length": 59.9,
+       "at": {
+        "s": 1421.8,
+        "ll": [
+         -25.995965,
+         28.0698689
+        ]
+       },
+       "refGradePct": 1.6,
+       "gameGradePct": -0.9,
+       "diffPp": 2.5,
+       "what": "game slope has the wrong sign"
+      },
+      {
+       "from_s": 1553.8,
+       "to_s": 1637.8,
+       "length": 89.9,
+       "at": {
+        "s": 1589.8,
+        "ll": [
+         -25.9970109,
+         28.0687213
+        ],
+        "near": "Sunset"
+       },
+       "refGradePct": -7.6,
+       "gameGradePct": -2.6,
+       "diffPp": -5.1,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 1667.8,
+       "to_s": 1745.8,
+       "length": 83.9,
+       "at": {
+        "s": 1709.8,
+        "ll": [
+         -25.996839,
+         28.0676103
+        ],
+        "near": "Sunset"
+       },
+       "refGradePct": 4.2,
+       "gameGradePct": -0.2,
+       "diffPp": 4.5,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 1805.8,
+       "to_s": 1871.8,
+       "length": 71.9,
+       "at": {
+        "s": 1847.8,
+        "ll": [
+         -25.9958779,
+         28.0667627
+        ]
+       },
+       "refGradePct": 1.9,
+       "gameGradePct": 4.7,
+       "diffPp": -2.8,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 1913.8,
+       "to_s": 1961.8,
+       "length": 53.9,
+       "at": {
+        "s": 1937.8,
+        "ll": [
+         -25.9952333,
+         28.0662224
+        ],
+        "near": "Clubhouse"
+       },
+       "refGradePct": 8.3,
+       "gameGradePct": 4.6,
+       "diffPp": 3.6,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 1991.8,
+       "to_s": 2099.8,
+       "length": 113.9,
+       "at": {
+        "s": 2027.8,
+        "ll": [
+         -25.9954997,
+         28.0654484
+        ],
+        "near": "Clubhouse"
+       },
+       "refGradePct": -4.8,
+       "gameGradePct": 1.6,
+       "diffPp": -6.3,
+       "what": "game slope has the wrong sign"
+      },
+      {
+       "from_s": 2153.8,
+       "to_s": 2243.7,
+       "length": 95.9,
+       "at": {
+        "s": 2201.7,
+        "ll": [
+         -25.9967663,
+         28.0644279
+        ],
+        "near": "The Esses"
+       },
+       "refGradePct": 0.7,
+       "gameGradePct": -5.1,
+       "diffPp": 5.8,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 2279.7,
+       "to_s": 2357.7,
+       "length": 83.9,
+       "at": {
+        "s": 2309.7,
+        "ll": [
+         -25.9976645,
+         28.0643072
+        ],
+        "near": "The Esses"
+       },
+       "refGradePct": -8.8,
+       "gameGradePct": -3.9,
+       "diffPp": -4.9,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 2429.7,
+       "to_s": 2471.7,
+       "length": 48,
+       "at": {
+        "s": 2447.7,
+        "ll": [
+         -25.9987839,
+         28.0641329
+        ],
+        "near": "The Esses"
+       },
+       "refGradePct": 1.4,
+       "gameGradePct": 4.1,
+       "diffPp": -2.7,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 2513.7,
+       "to_s": 2573.7,
+       "length": 65.9,
+       "at": {
+        "s": 2537.7,
+        "ll": [
+         -25.9991466,
+         28.0633456
+        ]
+       },
+       "refGradePct": 9.2,
+       "gameGradePct": 5.7,
+       "diffPp": 3.5,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 2651.7,
+       "to_s": 2789.7,
+       "length": 143.9,
+       "at": {
+        "s": 2735.7,
+        "ll": [
+         -25.999557,
+         28.0614497
+        ]
+       },
+       "refGradePct": 7.8,
+       "gameGradePct": 12.2,
+       "diffPp": -4.5,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 2819.7,
+       "to_s": 2921.7,
+       "length": 107.9,
+       "at": {
+        "s": 2873.7,
+        "ll": [
+         -26.0000915,
+         28.0602796
+        ],
+        "near": "Leeukop"
+       },
+       "refGradePct": 2.1,
+       "gameGradePct": -6.9,
+       "diffPp": 9,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 2945.7,
+       "to_s": 3017.7,
+       "length": 77.9,
+       "at": {
+        "s": 2981.7,
+        "ll": [
+         -26.000559,
+         28.0611081
+        ]
+       },
+       "refGradePct": -15.8,
+       "gameGradePct": -9.2,
+       "diffPp": -6.6,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 3053.6,
+       "to_s": 3131.6,
+       "length": 83.9,
+       "at": {
+        "s": 3089.6,
+        "ll": [
+         -26.0002055,
+         28.0620944
+        ]
+       },
+       "refGradePct": -1.3,
+       "gameGradePct": -6.4,
+       "diffPp": 5,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 3347.6,
+       "to_s": 3503.6,
+       "length": 161.8,
+       "at": {
+        "s": 3461.6,
+        "ll": [
+         -25.998358,
+         28.0649864
+        ],
+        "near": "Mineshaft"
+       },
+       "refGradePct": 3.3,
+       "gameGradePct": -1.4,
+       "diffPp": 4.7,
+       "what": "game slope has the wrong sign"
+      },
+      {
+       "from_s": 3539.6,
+       "to_s": 3635.6,
+       "length": 101.9,
+       "at": {
+        "s": 3587.6,
+        "ll": [
+         -25.9972357,
+         28.0651657
+        ]
+       },
+       "refGradePct": -3.1,
+       "gameGradePct": 5,
+       "diffPp": -8.1,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 3671.6,
+       "to_s": 3821.6,
+       "length": 155.8,
+       "at": {
+        "s": 3773.6,
+        "ll": [
+         -25.9966583,
+         28.0661987
+        ],
+        "near": "The Crocodiles"
+       },
+       "refGradePct": -1.3,
+       "gameGradePct": -6.5,
+       "diffPp": 5.2,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 3863.5,
+       "to_s": 3917.5,
+       "length": 59.9,
+       "at": {
+        "s": 3887.5,
+        "ll": [
+         -25.9974839,
+         28.0668466
+        ]
+       },
+       "refGradePct": -5.6,
+       "gameGradePct": -2.1,
+       "diffPp": -3.4,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 3971.5,
+       "to_s": 4001.5,
+       "length": 36,
+       "at": {
+        "s": 3983.5,
+        "ll": [
+         -25.9980238,
+         28.0675884
+        ],
+        "near": "Cheetah"
+       },
+       "refGradePct": 2.2,
+       "gameGradePct": -0.6,
+       "diffPp": 2.8,
+       "what": "game slope has the wrong sign"
+      },
+      {
+       "from_s": 4049.5,
+       "to_s": 4079.5,
+       "length": 36,
+       "at": {
+        "s": 4061.5,
+        "ll": [
+         -25.9987122,
+         28.0676999
+        ]
+       },
+       "refGradePct": -3.2,
+       "gameGradePct": -0.7,
+       "diffPp": -2.5,
+       "what": "game flatter"
+      },
+      {
+       "from_s": 4133.5,
+       "to_s": 4175.5,
+       "length": 48,
+       "at": {
+        "s": 4151.5,
+        "ll": [
+         -25.9995196,
+         28.0677804
+        ]
+       },
+       "refGradePct": 0.9,
+       "gameGradePct": -2.2,
+       "diffPp": 3.1,
+       "what": "game steeper / invented slope"
+      },
+      {
+       "from_s": 4397.5,
+       "to_s": 4529.5,
+       "length": 137.9,
+       "at": {
+        "s": 4475.5,
+        "ll": [
+         -25.9991432,
+         28.069535
+        ]
+       },
+       "refGradePct": -3.5,
+       "gameGradePct": 2.1,
+       "diffPp": -5.6,
+       "what": "game slope has the wrong sign"
+      }
+     ]
+    }
+   }
+  },
+  "consensus": {
+   "refs": [
+    "glo30",
+    "srtm30m"
+   ],
+   "note": "stretches where every independent reference differs from the game's 100 m grade by > 2 percentage points in the same direction",
+   "stretches": [
+    {
+     "from_s": 606,
+     "to_s": 659.9,
+     "length": 59.9,
+     "at": {
+      "s": 618,
+      "ll": [
+       -25.9952741,
+       28.0746401
+      ],
+      "near": "Crowthorne"
+     },
+     "gameGradePct": 2.8,
+     "refGradePct": {
+      "glo30": 9.7,
+      "srtm30m": 5.5
+     },
+     "what": "game lower grade than every reference (flatter climb / steeper descent)"
+    },
+    {
+     "from_s": 713.9,
+     "to_s": 809.9,
+     "length": 101.9,
+     "at": {
+      "s": 731.9,
+      "ll": [
+       -25.9946209,
+       28.0745632
+      ],
+      "near": "Crowthorne"
+     },
+     "gameGradePct": 2.2,
+     "refGradePct": {
+      "glo30": -4.2,
+      "srtm30m": -1.6
+     },
+     "what": "game higher grade than every reference (steeper climb / flatter descent)"
+    },
+    {
+     "from_s": 1097.9,
+     "to_s": 1127.9,
+     "length": 36,
+     "at": {
+      "s": 1127.9,
+      "ll": [
+       -25.993821,
+       28.0715865
+      ]
+     },
+     "gameGradePct": -0.3,
+     "refGradePct": {
+      "glo30": 2.8,
+      "srtm30m": 1.8
+     },
+     "what": "game lower grade than every reference (flatter climb / steeper descent)"
+    },
+    {
+     "from_s": 1805.8,
+     "to_s": 1871.8,
+     "length": 71.9,
+     "at": {
+      "s": 1835.8,
+      "ll": [
+       -25.9959668,
+       28.0668306
+      ]
+     },
+     "gameGradePct": 4.4,
+     "refGradePct": {
+      "glo30": 1.6,
+      "srtm30m": 1.6
+     },
+     "what": "game higher grade than every reference (steeper climb / flatter descent)"
+    },
+    {
+     "from_s": 1991.8,
+     "to_s": 2063.8,
+     "length": 77.9,
+     "at": {
+      "s": 2009.8,
+      "ll": [
+       -25.9953703,
+       28.0655562
+      ],
+      "near": "Clubhouse"
+     },
+     "gameGradePct": 2.2,
+     "refGradePct": {
+      "glo30": -1.4,
+      "srtm30m": -3.1
+     },
+     "what": "game higher grade than every reference (steeper climb / flatter descent)"
+    },
+    {
+     "from_s": 2153.8,
+     "to_s": 2243.7,
+     "length": 95.9,
+     "at": {
+      "s": 2177.7,
+      "ll": [
+       -25.9965915,
+       28.0645684
+      ]
+     },
+     "gameGradePct": -4.4,
+     "refGradePct": {
+      "glo30": -0.5,
+      "srtm30m": 0.2
+     },
+     "what": "game lower grade than every reference (flatter climb / steeper descent)"
+    },
+    {
+     "from_s": 2315.7,
+     "to_s": 2357.7,
+     "length": 48,
+     "at": {
+      "s": 2357.7,
+      "ll": [
+       -25.9980662,
+       28.0644578
+      ],
+      "near": "The Esses"
+     },
+     "gameGradePct": -0.9,
+     "refGradePct": {
+      "glo30": -5.1,
+      "srtm30m": -3
+     },
+     "what": "game higher grade than every reference (steeper climb / flatter descent)"
+    },
+    {
+     "from_s": 2513.7,
+     "to_s": 2573.7,
+     "length": 65.9,
+     "at": {
+      "s": 2525.7,
+      "ll": [
+       -25.9991062,
+       28.0634563
+      ]
+     },
+     "gameGradePct": 5.4,
+     "refGradePct": {
+      "glo30": 9.1,
+      "srtm30m": 8.8
+     },
+     "what": "game lower grade than every reference (flatter climb / steeper descent)"
+    },
+    {
+     "from_s": 2651.7,
+     "to_s": 2789.7,
+     "length": 143.9,
+     "at": {
+      "s": 2753.7,
+      "ll": [
+       -25.999606,
+       28.0612758
+      ],
+      "near": "Leeukop"
+     },
+     "gameGradePct": 10.8,
+     "refGradePct": {
+      "glo30": 6.8,
+      "srtm30m": 6.9
+     },
+     "what": "game higher grade than every reference (steeper climb / flatter descent)"
+    },
+    {
+     "from_s": 2837.7,
+     "to_s": 2921.7,
+     "length": 89.9,
+     "at": {
+      "s": 2879.7,
+      "ll": [
+       -26.0001454,
+       28.0602862
+      ],
+      "near": "Leeukop"
+     },
+     "gameGradePct": -7.6,
+     "refGradePct": {
+      "glo30": -2.1,
+      "srtm30m": 1.3
+     },
+     "what": "game lower grade than every reference (flatter climb / steeper descent)"
+    },
+    {
+     "from_s": 3557.6,
+     "to_s": 3635.6,
+     "length": 83.9,
+     "at": {
+      "s": 3599.6,
+      "ll": [
+       -25.9971309,
+       28.065195
+      ]
+     },
+     "gameGradePct": 5.1,
+     "refGradePct": {
+      "glo30": 0.3,
+      "srtm30m": -2.5
+     },
+     "what": "game higher grade than every reference (steeper climb / flatter descent)"
+    },
+    {
+     "from_s": 3689.6,
+     "to_s": 3821.6,
+     "length": 137.9,
+     "at": {
+      "s": 3749.6,
+      "ll": [
+       -25.9964706,
+       28.0660816
+      ],
+      "near": "The Crocodiles"
+     },
+     "gameGradePct": -6.4,
+     "refGradePct": {
+      "glo30": -2.2,
+      "srtm30m": -1.5
+     },
+     "what": "game lower grade than every reference (flatter climb / steeper descent)"
+    },
+    {
+     "from_s": 4469.5,
+     "to_s": 4529.5,
+     "length": 65.9,
+     "at": {
+      "s": 4517.5,
+      "ll": [
+       -25.9988642,
+       28.0698173
+      ]
+     },
+     "gameGradePct": 0.8,
+     "refGradePct": {
+      "glo30": -2.9,
+      "srtm30m": -2.8
+     },
+     "what": "game higher grade than every reference (steeper climb / flatter descent)"
+    }
+   ]
+  },
+  "filters": {
+   "game": "none (js/track.js samples)",
+   "geosampa": "Gaussian sigma 6 m",
+   "other": "5-point (~25 m) median, then Gaussian sigma 15 m"
+  },
+  "profileUsed": {
+   "line": "OpenStreetMap raceway ways (game samples snapped onto them), out/osm-za-1961.json",
+   "spacingM": 12,
+   "s": [
+    0,
+    12,
+    24,
+    36,
+    48,
+    60,
+    72,
+    84,
+    96,
+    108,
+    120,
+    132,
+    144,
+    156,
+    168,
+    180,
+    192,
+    204,
+    216,
+    228,
+    240,
+    252,
+    264,
+    276,
+    288,
+    300,
+    312,
+    324,
+    336,
+    348,
+    360,
+    372,
+    384,
+    396,
+    408,
+    420,
+    432,
+    444,
+    456,
+    468,
+    480,
+    492,
+    504,
+    516,
+    528,
+    540,
+    552,
+    564,
+    576,
+    588,
+    600,
+    612,
+    624,
+    636,
+    647.9,
+    659.9,
+    671.9,
+    683.9,
+    695.9,
+    707.9,
+    719.9,
+    731.9,
+    743.9,
+    755.9,
+    767.9,
+    779.9,
+    791.9,
+    803.9,
+    815.9,
+    827.9,
+    839.9,
+    851.9,
+    863.9,
+    875.9,
+    887.9,
+    899.9,
+    911.9,
+    923.9,
+    935.9,
+    947.9,
+    959.9,
+    971.9,
+    983.9,
+    995.9,
+    1007.9,
+    1019.9,
+    1031.9,
+    1043.9,
+    1055.9,
+    1067.9,
+    1079.9,
+    1091.9,
+    1103.9,
+    1115.9,
+    1127.9,
+    1139.9,
+    1151.9,
+    1163.9,
+    1175.9,
+    1187.9,
+    1199.9,
+    1211.9,
+    1223.9,
+    1235.9,
+    1247.9,
+    1259.8,
+    1271.8,
+    1283.8,
+    1295.8,
+    1307.8,
+    1319.8,
+    1331.8,
+    1343.8,
+    1355.8,
+    1367.8,
+    1379.8,
+    1391.8,
+    1403.8,
+    1415.8,
+    1427.8,
+    1439.8,
+    1451.8,
+    1463.8,
+    1475.8,
+    1487.8,
+    1499.8,
+    1511.8,
+    1523.8,
+    1535.8,
+    1547.8,
+    1559.8,
+    1571.8,
+    1583.8,
+    1595.8,
+    1607.8,
+    1619.8,
+    1631.8,
+    1643.8,
+    1655.8,
+    1667.8,
+    1679.8,
+    1691.8,
+    1703.8,
+    1715.8,
+    1727.8,
+    1739.8,
+    1751.8,
+    1763.8,
+    1775.8,
+    1787.8,
+    1799.8,
+    1811.8,
+    1823.8,
+    1835.8,
+    1847.8,
+    1859.8,
+    1871.8,
+    1883.8,
+    1895.8,
+    1907.8,
+    1919.8,
+    1931.8,
+    1943.8,
+    1955.8,
+    1967.8,
+    1979.8,
+    1991.8,
+    2003.8,
+    2015.8,
+    2027.8,
+    2039.8,
+    2051.8,
+    2063.8,
+    2075.8,
+    2087.8,
+    2099.8,
+    2111.8,
+    2123.8,
+    2135.8,
+    2147.8,
+    2159.7,
+    2171.7,
+    2183.7,
+    2195.7,
+    2207.7,
+    2219.7,
+    2231.7,
+    2243.7,
+    2255.7,
+    2267.7,
+    2279.7,
+    2291.7,
+    2303.7,
+    2315.7,
+    2327.7,
+    2339.7,
+    2351.7,
+    2363.7,
+    2375.7,
+    2387.7,
+    2399.7,
+    2411.7,
+    2423.7,
+    2435.7,
+    2447.7,
+    2459.7,
+    2471.7,
+    2483.7,
+    2495.7,
+    2507.7,
+    2519.7,
+    2531.7,
+    2543.7,
+    2555.7,
+    2567.7,
+    2579.7,
+    2591.7,
+    2603.7,
+    2615.7,
+    2627.7,
+    2639.7,
+    2651.7,
+    2663.7,
+    2675.7,
+    2687.7,
+    2699.7,
+    2711.7,
+    2723.7,
+    2735.7,
+    2747.7,
+    2759.7,
+    2771.7,
+    2783.7,
+    2795.7,
+    2807.7,
+    2819.7,
+    2831.7,
+    2843.7,
+    2855.7,
+    2867.7,
+    2879.7,
+    2891.7,
+    2903.7,
+    2915.7,
+    2927.7,
+    2939.7,
+    2951.7,
+    2963.7,
+    2975.7,
+    2987.7,
+    2999.7,
+    3011.7,
+    3023.7,
+    3035.7,
+    3047.6,
+    3059.6,
+    3071.6,
+    3083.6,
+    3095.6,
+    3107.6,
+    3119.6,
+    3131.6,
+    3143.6,
+    3155.6,
+    3167.6,
+    3179.6,
+    3191.6,
+    3203.6,
+    3215.6,
+    3227.6,
+    3239.6,
+    3251.6,
+    3263.6,
+    3275.6,
+    3287.6,
+    3299.6,
+    3311.6,
+    3323.6,
+    3335.6,
+    3347.6,
+    3359.6,
+    3371.6,
+    3383.6,
+    3395.6,
+    3407.6,
+    3419.6,
+    3431.6,
+    3443.6,
+    3455.6,
+    3467.6,
+    3479.6,
+    3491.6,
+    3503.6,
+    3515.6,
+    3527.6,
+    3539.6,
+    3551.6,
+    3563.6,
+    3575.6,
+    3587.6,
+    3599.6,
+    3611.6,
+    3623.6,
+    3635.6,
+    3647.6,
+    3659.6,
+    3671.6,
+    3683.6,
+    3695.6,
+    3707.6,
+    3719.6,
+    3731.6,
+    3743.6,
+    3755.6,
+    3767.6,
+    3779.6,
+    3791.6,
+    3803.6,
+    3815.6,
+    3827.6,
+    3839.5,
+    3851.5,
+    3863.5,
+    3875.5,
+    3887.5,
+    3899.5,
+    3911.5,
+    3923.5,
+    3935.5,
+    3947.5,
+    3959.5,
+    3971.5,
+    3983.5,
+    3995.5,
+    4007.5,
+    4019.5,
+    4031.5,
+    4043.5,
+    4055.5,
+    4067.5,
+    4079.5,
+    4091.5,
+    4103.5,
+    4115.5,
+    4127.5,
+    4139.5,
+    4151.5,
+    4163.5,
+    4175.5,
+    4187.5,
+    4199.5,
+    4211.5,
+    4223.5,
+    4235.5,
+    4247.5,
+    4259.5,
+    4271.5,
+    4283.5,
+    4295.5,
+    4307.5,
+    4319.5,
+    4331.5,
+    4343.5,
+    4355.5,
+    4367.5,
+    4379.5,
+    4391.5,
+    4403.5,
+    4415.5,
+    4427.5,
+    4439.5,
+    4451.5,
+    4463.5,
+    4475.5,
+    4487.5,
+    4499.5,
+    4511.5,
+    4523.5
+   ],
+   "latlon": [
+    [
+     -25.9987712,
+     28.0699114
+    ],
+    [
+     -25.9986915,
+     28.0699921
+    ],
+    [
+     -25.9986107,
+     28.0700711
+    ],
+    [
+     -25.9985296,
+     28.0701499
+    ],
+    [
+     -25.9984484,
+     28.0702288
+    ],
+    [
+     -25.9983672,
+     28.0703076
+    ],
+    [
+     -25.9982861,
+     28.0703865
+    ],
+    [
+     -25.9982049,
+     28.0704653
+    ],
+    [
+     -25.9981237,
+     28.0705442
+    ],
+    [
+     -25.9980426,
+     28.0706231
+    ],
+    [
+     -25.9979614,
+     28.0707019
+    ],
+    [
+     -25.9978804,
+     28.0707801
+    ],
+    [
+     -25.9977979,
+     28.0708572
+    ],
+    [
+     -25.9977155,
+     28.0709343
+    ],
+    [
+     -25.997633,
+     28.0710115
+    ],
+    [
+     -25.9975507,
+     28.0710886
+    ],
+    [
+     -25.9974707,
+     28.0711735
+    ],
+    [
+     -25.9973931,
+     28.0712565
+    ],
+    [
+     -25.9973157,
+     28.0713395
+    ],
+    [
+     -25.9972398,
+     28.0714251
+    ],
+    [
+     -25.9971642,
+     28.0715103
+    ],
+    [
+     -25.9970898,
+     28.0715975
+    ],
+    [
+     -25.9970168,
+     28.0716852
+    ],
+    [
+     -25.9969483,
+     28.071782
+    ],
+    [
+     -25.9968877,
+     28.0718809
+    ],
+    [
+     -25.9968272,
+     28.0719798
+    ],
+    [
+     -25.9967666,
+     28.0720786
+    ],
+    [
+     -25.9967066,
+     28.0721788
+    ],
+    [
+     -25.9966479,
+     28.0722791
+    ],
+    [
+     -25.9965893,
+     28.0723794
+    ],
+    [
+     -25.9965306,
+     28.0724798
+    ],
+    [
+     -25.996472,
+     28.0725801
+    ],
+    [
+     -25.9964134,
+     28.0726804
+    ],
+    [
+     -25.9963548,
+     28.0727809
+    ],
+    [
+     -25.9962965,
+     28.0728814
+    ],
+    [
+     -25.9962381,
+     28.0729819
+    ],
+    [
+     -25.9961797,
+     28.0730824
+    ],
+    [
+     -25.9961213,
+     28.073183
+    ],
+    [
+     -25.996063,
+     28.0732835
+    ],
+    [
+     -25.9960047,
+     28.073384
+    ],
+    [
+     -25.9959463,
+     28.0734846
+    ],
+    [
+     -25.9958879,
+     28.0735851
+    ],
+    [
+     -25.9958296,
+     28.0736856
+    ],
+    [
+     -25.9957712,
+     28.0737861
+    ],
+    [
+     -25.9957128,
+     28.0738866
+    ],
+    [
+     -25.9956545,
+     28.0739871
+    ],
+    [
+     -25.9955962,
+     28.0740876
+    ],
+    [
+     -25.9955368,
+     28.0741869
+    ],
+    [
+     -25.9954771,
+     28.0742865
+    ],
+    [
+     -25.9954175,
+     28.074386
+    ],
+    [
+     -25.995359,
+     28.0744879
+    ],
+    [
+     -25.9953024,
+     28.0745895
+    ],
+    [
+     -25.9952458,
+     28.0746908
+    ],
+    [
+     -25.9951904,
+     28.0747928
+    ],
+    [
+     -25.9951245,
+     28.0748852
+    ],
+    [
+     -25.9950411,
+     28.0749587
+    ],
+    [
+     -25.9949399,
+     28.0749907
+    ],
+    [
+     -25.9948346,
+     28.0749686
+    ],
+    [
+     -25.994741,
+     28.074905
+    ],
+    [
+     -25.994679,
+     28.0747972
+    ],
+    [
+     -25.9946454,
+     28.0746812
+    ],
+    [
+     -25.9946209,
+     28.0745632
+    ],
+    [
+     -25.9946017,
+     28.0744457
+    ],
+    [
+     -25.9945825,
+     28.0743283
+    ],
+    [
+     -25.9945632,
+     28.0742107
+    ],
+    [
+     -25.994544,
+     28.0740932
+    ],
+    [
+     -25.9945248,
+     28.0739758
+    ],
+    [
+     -25.9945056,
+     28.0738583
+    ],
+    [
+     -25.9944751,
+     28.0737477
+    ],
+    [
+     -25.9944245,
+     28.0736464
+    ],
+    [
+     -25.99436,
+     28.0735527
+    ],
+    [
+     -25.9942778,
+     28.0734811
+    ],
+    [
+     -25.9941855,
+     28.0734217
+    ],
+    [
+     -25.9940895,
+     28.0733671
+    ],
+    [
+     -25.9939927,
+     28.073314
+    ],
+    [
+     -25.9938954,
+     28.0732621
+    ],
+    [
+     -25.9937985,
+     28.0732092
+    ],
+    [
+     -25.9937026,
+     28.0731569
+    ],
+    [
+     -25.9936172,
+     28.0730754
+    ],
+    [
+     -25.9935527,
+     28.072974
+    ],
+    [
+     -25.9934951,
+     28.0728726
+    ],
+    [
+     -25.9934389,
+     28.0727707
+    ],
+    [
+     -25.9933826,
+     28.0726688
+    ],
+    [
+     -25.9933263,
+     28.0725668
+    ],
+    [
+     -25.9932706,
+     28.0724645
+    ],
+    [
+     -25.9932179,
+     28.0723551
+    ],
+    [
+     -25.9931975,
+     28.0722294
+    ],
+    [
+     -25.9932344,
+     28.0721091
+    ],
+    [
+     -25.9933007,
+     28.0720136
+    ],
+    [
+     -25.993386,
+     28.0719407
+    ],
+    [
+     -25.9934721,
+     28.0718685
+    ],
+    [
+     -25.9935593,
+     28.071798
+    ],
+    [
+     -25.9936465,
+     28.0717276
+    ],
+    [
+     -25.9937338,
+     28.071657
+    ],
+    [
+     -25.993821,
+     28.0715865
+    ],
+    [
+     -25.9939082,
+     28.0715161
+    ],
+    [
+     -25.9939954,
+     28.0714456
+    ],
+    [
+     -25.9940827,
+     28.071375
+    ],
+    [
+     -25.9941699,
+     28.0713045
+    ],
+    [
+     -25.9942571,
+     28.071234
+    ],
+    [
+     -25.9943444,
+     28.0711635
+    ],
+    [
+     -25.9944317,
+     28.071093
+    ],
+    [
+     -25.9945194,
+     28.071023
+    ],
+    [
+     -25.994607,
+     28.070953
+    ],
+    [
+     -25.9946945,
+     28.0708832
+    ],
+    [
+     -25.9947822,
+     28.0708132
+    ],
+    [
+     -25.9948698,
+     28.0707432
+    ],
+    [
+     -25.9949574,
+     28.0706733
+    ],
+    [
+     -25.9950451,
+     28.0706033
+    ],
+    [
+     -25.9951326,
+     28.0705334
+    ],
+    [
+     -25.9952202,
+     28.0704635
+    ],
+    [
+     -25.9953078,
+     28.0703935
+    ],
+    [
+     -25.9953955,
+     28.0703236
+    ],
+    [
+     -25.9954831,
+     28.0702536
+    ],
+    [
+     -25.9955707,
+     28.0701837
+    ],
+    [
+     -25.9956583,
+     28.0701138
+    ],
+    [
+     -25.9957459,
+     28.0700438
+    ],
+    [
+     -25.9958335,
+     28.0699739
+    ],
+    [
+     -25.9959212,
+     28.0699039
+    ],
+    [
+     -25.9960088,
+     28.069834
+    ],
+    [
+     -25.9960964,
+     28.0697641
+    ],
+    [
+     -25.996184,
+     28.0696941
+    ],
+    [
+     -25.9962716,
+     28.0696242
+    ],
+    [
+     -25.9963592,
+     28.0695543
+    ],
+    [
+     -25.9964468,
+     28.0694843
+    ],
+    [
+     -25.9965345,
+     28.0694144
+    ],
+    [
+     -25.9966205,
+     28.0693427
+    ],
+    [
+     -25.9967027,
+     28.0692682
+    ],
+    [
+     -25.996778,
+     28.0691825
+    ],
+    [
+     -25.9968446,
+     28.0690916
+    ],
+    [
+     -25.9969034,
+     28.0689933
+    ],
+    [
+     -25.9969521,
+     28.0688867
+    ],
+    [
+     -25.9969916,
+     28.0687771
+    ],
+    [
+     -25.9970249,
+     28.0686661
+    ],
+    [
+     -25.9970484,
+     28.0685496
+    ],
+    [
+     -25.9970572,
+     28.0684348
+    ],
+    [
+     -25.9970594,
+     28.068318
+    ],
+    [
+     -25.9970545,
+     28.0681988
+    ],
+    [
+     -25.9970338,
+     28.0680871
+    ],
+    [
+     -25.9970055,
+     28.0679748
+    ],
+    [
+     -25.9969688,
+     28.0678625
+    ],
+    [
+     -25.9969217,
+     28.0677607
+    ],
+    [
+     -25.9968688,
+     28.06766
+    ],
+    [
+     -25.9968093,
+     28.0675607
+    ],
+    [
+     -25.9967392,
+     28.0674747
+    ],
+    [
+     -25.9966601,
+     28.0673988
+    ],
+    [
+     -25.9965754,
+     28.0673259
+    ],
+    [
+     -25.9964894,
+     28.0672538
+    ],
+    [
+     -25.9964035,
+     28.0671819
+    ],
+    [
+     -25.9963164,
+     28.0671112
+    ],
+    [
+     -25.9962294,
+     28.0670405
+    ],
+    [
+     -25.9961423,
+     28.0669697
+    ],
+    [
+     -25.9960552,
+     28.066899
+    ],
+    [
+     -25.9959668,
+     28.0668306
+    ],
+    [
+     -25.9958779,
+     28.0667627
+    ],
+    [
+     -25.9957889,
+     28.0666949
+    ],
+    [
+     -25.9957001,
+     28.0666271
+    ],
+    [
+     -25.9956111,
+     28.0665592
+    ],
+    [
+     -25.9955223,
+     28.0664906
+    ],
+    [
+     -25.9954352,
+     28.0664202
+    ],
+    [
+     -25.9953479,
+     28.0663497
+    ],
+    [
+     -25.9952678,
+     28.0662669
+    ],
+    [
+     -25.9952023,
+     28.0661618
+    ],
+    [
+     -25.9951698,
+     28.0660433
+    ],
+    [
+     -25.9951737,
+     28.0659136
+    ],
+    [
+     -25.9952009,
+     28.0657952
+    ],
+    [
+     -25.9952575,
+     28.0656889
+    ],
+    [
+     -25.995329,
+     28.0655978
+    ],
+    [
+     -25.9954134,
+     28.0655203
+    ],
+    [
+     -25.9954997,
+     28.0654484
+    ],
+    [
+     -25.9955862,
+     28.0653763
+    ],
+    [
+     -25.9956736,
+     28.0653061
+    ],
+    [
+     -25.9957611,
+     28.0652358
+    ],
+    [
+     -25.9958485,
+     28.0651656
+    ],
+    [
+     -25.9959359,
+     28.0650953
+    ],
+    [
+     -25.9960233,
+     28.0650251
+    ],
+    [
+     -25.9961107,
+     28.0649548
+    ],
+    [
+     -25.9961981,
+     28.0648845
+    ],
+    [
+     -25.9962855,
+     28.0648143
+    ],
+    [
+     -25.996373,
+     28.064744
+    ],
+    [
+     -25.9964603,
+     28.0646738
+    ],
+    [
+     -25.9965478,
+     28.0646035
+    ],
+    [
+     -25.9966352,
+     28.0645333
+    ],
+    [
+     -25.9967226,
+     28.064463
+    ],
+    [
+     -25.9968099,
+     28.0643928
+    ],
+    [
+     -25.9969019,
+     28.0643288
+    ],
+    [
+     -25.9969945,
+     28.0642672
+    ],
+    [
+     -25.9970947,
+     28.0642214
+    ],
+    [
+     -25.9972004,
+     28.0641888
+    ],
+    [
+     -25.9973079,
+     28.0641783
+    ],
+    [
+     -25.9974181,
+     28.0641979
+    ],
+    [
+     -25.9975191,
+     28.0642331
+    ],
+    [
+     -25.9976169,
+     28.0642788
+    ],
+    [
+     -25.9977124,
+     28.0643357
+    ],
+    [
+     -25.9978089,
+     28.0643881
+    ],
+    [
+     -25.9979105,
+     28.0644255
+    ],
+    [
+     -25.9980146,
+     28.06445
+    ],
+    [
+     -25.9981202,
+     28.0644579
+    ],
+    [
+     -25.9982267,
+     28.0644522
+    ],
+    [
+     -25.9983312,
+     28.0644299
+    ],
+    [
+     -25.9984345,
+     28.0643961
+    ],
+    [
+     -25.9985348,
+     28.0643553
+    ],
+    [
+     -25.9986288,
+     28.0642968
+    ],
+    [
+     -25.99871,
+     28.0642178
+    ],
+    [
+     -25.9987839,
+     28.0641329
+    ],
+    [
+     -25.9988518,
+     28.0640437
+    ],
+    [
+     -25.9989082,
+     28.063942
+    ],
+    [
+     -25.9989588,
+     28.0638385
+    ],
+    [
+     -25.9990051,
+     28.0637331
+    ],
+    [
+     -25.9990456,
+     28.0636223
+    ],
+    [
+     -25.999086,
+     28.0635117
+    ],
+    [
+     -25.9991264,
+     28.0634009
+    ],
+    [
+     -25.9991669,
+     28.0632901
+    ],
+    [
+     -25.9992073,
+     28.0631795
+    ],
+    [
+     -25.9992479,
+     28.0630688
+    ],
+    [
+     -25.9992885,
+     28.0629581
+    ],
+    [
+     -25.9993291,
+     28.0628474
+    ],
+    [
+     -25.9993697,
+     28.0627367
+    ],
+    [
+     -25.9994095,
+     28.0626278
+    ],
+    [
+     -25.9994345,
+     28.0625123
+    ],
+    [
+     -25.9994589,
+     28.0623992
+    ],
+    [
+     -25.9994661,
+     28.0622802
+    ],
+    [
+     -25.9994746,
+     28.0621602
+    ],
+    [
+     -25.9994863,
+     28.0620415
+    ],
+    [
+     -25.999498,
+     28.0619228
+    ],
+    [
+     -25.9995097,
+     28.0618042
+    ],
+    [
+     -25.9995231,
+     28.0616852
+    ],
+    [
+     -25.9995401,
+     28.0615673
+    ],
+    [
+     -25.999557,
+     28.0614497
+    ],
+    [
+     -25.9995897,
+     28.0613328
+    ],
+    [
+     -25.9996222,
+     28.0612188
+    ],
+    [
+     -25.9996547,
+     28.0611049
+    ],
+    [
+     -25.9996867,
+     28.0609912
+    ],
+    [
+     -25.999718,
+     28.0608769
+    ],
+    [
+     -25.9997494,
+     28.0607628
+    ],
+    [
+     -25.9997807,
+     28.0606485
+    ],
+    [
+     -25.9998121,
+     28.0605342
+    ],
+    [
+     -25.9998572,
+     28.060421
+    ],
+    [
+     -25.9999337,
+     28.0603324
+    ],
+    [
+     -26.0000379,
+     28.0602835
+    ],
+    [
+     -26.0001454,
+     28.0602862
+    ],
+    [
+     -26.0002413,
+     28.0603293
+    ],
+    [
+     -26.0003109,
+     28.0604102
+    ],
+    [
+     -26.000367,
+     28.0605118
+    ],
+    [
+     -26.0004146,
+     28.0606142
+    ],
+    [
+     -26.0004597,
+     28.0607228
+    ],
+    [
+     -26.0005048,
+     28.0608312
+    ],
+    [
+     -26.0005397,
+     28.060935
+    ],
+    [
+     -26.0005572,
+     28.0610527
+    ],
+    [
+     -26.0005571,
+     28.0611629
+    ],
+    [
+     -26.0005305,
+     28.0612767
+    ],
+    [
+     -26.0004925,
+     28.061386
+    ],
+    [
+     -26.0004483,
+     28.0614949
+    ],
+    [
+     -26.0004042,
+     28.0616039
+    ],
+    [
+     -26.00036,
+     28.0617129
+    ],
+    [
+     -26.0003159,
+     28.0618218
+    ],
+    [
+     -26.0002717,
+     28.0619309
+    ],
+    [
+     -26.0002276,
+     28.0620399
+    ],
+    [
+     -26.0001834,
+     28.0621488
+    ],
+    [
+     -26.0001393,
+     28.0622578
+    ],
+    [
+     -26.0000951,
+     28.0623669
+    ],
+    [
+     -26.000051,
+     28.0624758
+    ],
+    [
+     -26.0000068,
+     28.0625848
+    ],
+    [
+     -25.9999627,
+     28.0626939
+    ],
+    [
+     -25.9999185,
+     28.0628029
+    ],
+    [
+     -25.9998744,
+     28.0629119
+    ],
+    [
+     -25.9998302,
+     28.0630208
+    ],
+    [
+     -25.9997861,
+     28.0631299
+    ],
+    [
+     -25.9997419,
+     28.0632388
+    ],
+    [
+     -25.9996977,
+     28.0633479
+    ],
+    [
+     -25.9996536,
+     28.0634569
+    ],
+    [
+     -25.9996094,
+     28.0635659
+    ],
+    [
+     -25.9995653,
+     28.0636749
+    ],
+    [
+     -25.9995211,
+     28.0637839
+    ],
+    [
+     -25.999477,
+     28.0638929
+    ],
+    [
+     -25.9994306,
+     28.0639997
+    ],
+    [
+     -25.9993802,
+     28.0641052
+    ],
+    [
+     -25.9993296,
+     28.0642108
+    ],
+    [
+     -25.9992726,
+     28.0643099
+    ],
+    [
+     -25.9992082,
+     28.0644038
+    ],
+    [
+     -25.9991383,
+     28.064492
+    ],
+    [
+     -25.9990602,
+     28.0645745
+    ],
+    [
+     -25.9989814,
+     28.0646557
+    ],
+    [
+     -25.9988982,
+     28.064729
+    ],
+    [
+     -25.9988101,
+     28.0647966
+    ],
+    [
+     -25.9987161,
+     28.0648544
+    ],
+    [
+     -25.9986169,
+     28.0649016
+    ],
+    [
+     -25.9985149,
+     28.0649413
+    ],
+    [
+     -25.9984107,
+     28.0649729
+    ],
+    [
+     -25.9983052,
+     28.0649991
+    ],
+    [
+     -25.9981978,
+     28.0650161
+    ],
+    [
+     -25.9980905,
+     28.0650304
+    ],
+    [
+     -25.9979834,
+     28.0650456
+    ],
+    [
+     -25.9978762,
+     28.0650611
+    ],
+    [
+     -25.997769,
+     28.0650765
+    ],
+    [
+     -25.997662,
+     28.0650924
+    ],
+    [
+     -25.997555,
+     28.0651091
+    ],
+    [
+     -25.9974481,
+     28.0651258
+    ],
+    [
+     -25.9973412,
+     28.0651425
+    ],
+    [
+     -25.9972357,
+     28.0651657
+    ],
+    [
+     -25.9971309,
+     28.065195
+    ],
+    [
+     -25.9970263,
+     28.0652268
+    ],
+    [
+     -25.9969239,
+     28.0652639
+    ],
+    [
+     -25.99682,
+     28.065308
+    ],
+    [
+     -25.996723,
+     28.0653606
+    ],
+    [
+     -25.9966263,
+     28.0654131
+    ],
+    [
+     -25.9965297,
+     28.0654655
+    ],
+    [
+     -25.9964345,
+     28.0655227
+    ],
+    [
+     -25.9963577,
+     28.0656102
+    ],
+    [
+     -25.9963209,
+     28.0657221
+    ],
+    [
+     -25.9963199,
+     28.0658409
+    ],
+    [
+     -25.9963527,
+     28.0659556
+    ],
+    [
+     -25.996427,
+     28.0660468
+    ],
+    [
+     -25.996517,
+     28.0661118
+    ],
+    [
+     -25.9966107,
+     28.0661707
+    ],
+    [
+     -25.9967058,
+     28.0662265
+    ],
+    [
+     -25.9967999,
+     28.0662828
+    ],
+    [
+     -25.9968938,
+     28.0663412
+    ],
+    [
+     -25.996988,
+     28.0663998
+    ],
+    [
+     -25.9970743,
+     28.0664654
+    ],
+    [
+     -25.9971616,
+     28.0665358
+    ],
+    [
+     -25.9972487,
+     28.0666062
+    ],
+    [
+     -25.9973293,
+     28.0666813
+    ],
+    [
+     -25.9974075,
+     28.0667637
+    ],
+    [
+     -25.9974839,
+     28.0668466
+    ],
+    [
+     -25.9975556,
+     28.066936
+    ],
+    [
+     -25.9976273,
+     28.0670253
+    ],
+    [
+     -25.997699,
+     28.0671146
+    ],
+    [
+     -25.9977643,
+     28.0672087
+    ],
+    [
+     -25.9978269,
+     28.0673061
+    ],
+    [
+     -25.9978893,
+     28.0674033
+    ],
+    [
+     -25.9979523,
+     28.0675003
+    ],
+    [
+     -25.9980238,
+     28.0675884
+    ],
+    [
+     -25.9981214,
+     28.0676322
+    ],
+    [
+     -25.9982279,
+     28.0676495
+    ],
+    [
+     -25.9983355,
+     28.0676607
+    ],
+    [
+     -25.9984431,
+     28.0676719
+    ],
+    [
+     -25.9985508,
+     28.0676831
+    ],
+    [
+     -25.9986584,
+     28.0676943
+    ],
+    [
+     -25.998766,
+     28.0677055
+    ],
+    [
+     -25.9988737,
+     28.0677167
+    ],
+    [
+     -25.9989813,
+     28.0677279
+    ],
+    [
+     -25.9990889,
+     28.0677391
+    ],
+    [
+     -25.9991965,
+     28.0677501
+    ],
+    [
+     -25.9993042,
+     28.0677602
+    ],
+    [
+     -25.9994119,
+     28.0677703
+    ],
+    [
+     -25.9995196,
+     28.0677804
+    ],
+    [
+     -25.9996273,
+     28.0677905
+    ],
+    [
+     -25.9997349,
+     28.0678005
+    ],
+    [
+     -25.9998426,
+     28.0678106
+    ],
+    [
+     -25.9999503,
+     28.0678207
+    ],
+    [
+     -26.000058,
+     28.0678308
+    ],
+    [
+     -26.0001657,
+     28.0678409
+    ],
+    [
+     -26.0002733,
+     28.0678537
+    ],
+    [
+     -26.0003788,
+     28.067906
+    ],
+    [
+     -26.0004359,
+     28.0680089
+    ],
+    [
+     -26.0004458,
+     28.0681302
+    ],
+    [
+     -26.0004069,
+     28.0682387
+    ],
+    [
+     -26.0003387,
+     28.0683254
+    ],
+    [
+     -26.0002591,
+     28.068406
+    ],
+    [
+     -26.0001794,
+     28.0684866
+    ],
+    [
+     -26.0000997,
+     28.0685673
+    ],
+    [
+     -26.00002,
+     28.0686479
+    ],
+    [
+     -25.9999403,
+     28.0687286
+    ],
+    [
+     -25.9998606,
+     28.0688092
+    ],
+    [
+     -25.9997809,
+     28.0688898
+    ],
+    [
+     -25.9997012,
+     28.0689705
+    ],
+    [
+     -25.9996214,
+     28.0690512
+    ],
+    [
+     -25.9995418,
+     28.0691318
+    ],
+    [
+     -25.999462,
+     28.0692124
+    ],
+    [
+     -25.9993823,
+     28.0692931
+    ],
+    [
+     -25.9993026,
+     28.0693738
+    ],
+    [
+     -25.9992229,
+     28.0694544
+    ],
+    [
+     -25.9991432,
+     28.069535
+    ],
+    [
+     -25.9990635,
+     28.0696157
+    ],
+    [
+     -25.9989837,
+     28.0696964
+    ],
+    [
+     -25.998904,
+     28.069777
+    ],
+    [
+     -25.9988243,
+     28.0698576
+    ]
+   ],
+   "game": [
+    10.37,
+    10.38,
+    10.31,
+    10.22,
+    10.12,
+    10.04,
+    9.96,
+    9.89,
+    9.82,
+    9.77,
+    9.74,
+    9.7,
+    9.63,
+    9.54,
+    9.41,
+    9.26,
+    9.05,
+    8.77,
+    8.43,
+    8.03,
+    7.58,
+    7.09,
+    6.56,
+    6.01,
+    5.49,
+    4.99,
+    4.51,
+    4.06,
+    3.65,
+    3.28,
+    2.95,
+    2.64,
+    2.35,
+    2.07,
+    1.82,
+    1.58,
+    1.36,
+    1.14,
+    0.92,
+    0.71,
+    0.51,
+    0.33,
+    0.19,
+    0.09,
+    0.01,
+    -0.02,
+    -0.01,
+    0.06,
+    0.19,
+    0.36,
+    0.59,
+    0.87,
+    1.22,
+    1.64,
+    2.09,
+    2.55,
+    3.02,
+    3.5,
+    3.92,
+    4.24,
+    4.49,
+    4.71,
+    4.92,
+    5.13,
+    5.35,
+    5.57,
+    5.8,
+    6.06,
+    6.4,
+    6.87,
+    7.49,
+    8.19,
+    8.93,
+    9.69,
+    10.48,
+    11.3,
+    12.15,
+    13,
+    13.83,
+    14.64,
+    15.44,
+    16.23,
+    17.01,
+    17.78,
+    18.53,
+    19.27,
+    19.95,
+    20.53,
+    21,
+    21.34,
+    21.59,
+    21.77,
+    21.86,
+    21.85,
+    21.75,
+    21.61,
+    21.49,
+    21.39,
+    21.3,
+    21.24,
+    21.22,
+    21.24,
+    21.3,
+    21.38,
+    21.49,
+    21.62,
+    21.78,
+    21.94,
+    22.1,
+    22.24,
+    22.35,
+    22.45,
+    22.53,
+    22.59,
+    22.63,
+    22.66,
+    22.66,
+    22.63,
+    22.56,
+    22.45,
+    22.3,
+    22.12,
+    21.91,
+    21.65,
+    21.36,
+    21.03,
+    20.7,
+    20.35,
+    20,
+    19.65,
+    19.31,
+    18.98,
+    18.66,
+    18.35,
+    18.06,
+    17.77,
+    17.5,
+    17.23,
+    16.98,
+    16.77,
+    16.6,
+    16.49,
+    16.43,
+    16.39,
+    16.39,
+    16.44,
+    16.56,
+    16.73,
+    16.94,
+    17.2,
+    17.52,
+    17.89,
+    18.32,
+    18.83,
+    19.42,
+    20.06,
+    20.73,
+    21.39,
+    22.06,
+    22.72,
+    23.37,
+    23.98,
+    24.54,
+    25.07,
+    25.56,
+    25.98,
+    26.34,
+    26.68,
+    26.95,
+    27.15,
+    27.31,
+    27.42,
+    27.48,
+    27.5,
+    27.45,
+    27.36,
+    27.19,
+    26.96,
+    26.65,
+    26.27,
+    25.84,
+    25.36,
+    24.82,
+    24.22,
+    23.58,
+    22.92,
+    22.23,
+    21.53,
+    20.82,
+    20.15,
+    19.51,
+    18.9,
+    18.34,
+    17.84,
+    17.41,
+    17.06,
+    16.83,
+    16.74,
+    16.77,
+    16.89,
+    17.11,
+    17.4,
+    17.77,
+    18.21,
+    18.71,
+    19.27,
+    19.85,
+    20.44,
+    21.03,
+    21.62,
+    22.23,
+    22.86,
+    23.53,
+    24.22,
+    24.96,
+    25.78,
+    26.67,
+    27.64,
+    28.67,
+    29.79,
+    31.03,
+    32.35,
+    33.72,
+    35.14,
+    36.64,
+    38.22,
+    39.83,
+    41.42,
+    43.01,
+    44.58,
+    46.07,
+    47.36,
+    48.38,
+    49.13,
+    49.65,
+    50,
+    50.18,
+    50.08,
+    49.59,
+    48.79,
+    47.8,
+    46.67,
+    45.43,
+    44.15,
+    42.88,
+    41.63,
+    40.42,
+    39.26,
+    38.14,
+    37.06,
+    36,
+    34.96,
+    33.95,
+    32.97,
+    32.03,
+    31.14,
+    30.29,
+    29.49,
+    28.72,
+    28.01,
+    27.35,
+    26.72,
+    26.06,
+    25.32,
+    24.5,
+    23.63,
+    22.72,
+    21.78,
+    20.82,
+    19.82,
+    18.83,
+    17.87,
+    16.98,
+    16.14,
+    15.36,
+    14.61,
+    13.92,
+    13.31,
+    12.77,
+    12.29,
+    11.85,
+    11.46,
+    11.13,
+    10.84,
+    10.58,
+    10.34,
+    10.1,
+    9.86,
+    9.64,
+    9.44,
+    9.28,
+    9.15,
+    9.1,
+    9.16,
+    9.34,
+    9.62,
+    10,
+    10.46,
+    11.01,
+    11.65,
+    12.34,
+    13.03,
+    13.73,
+    14.39,
+    14.92,
+    15.28,
+    15.48,
+    15.54,
+    15.43,
+    15.09,
+    14.55,
+    13.84,
+    13.02,
+    12.16,
+    11.27,
+    10.4,
+    9.58,
+    8.84,
+    8.21,
+    7.69,
+    7.24,
+    6.82,
+    6.46,
+    6.14,
+    5.89,
+    5.67,
+    5.49,
+    5.32,
+    5.18,
+    5.06,
+    4.95,
+    4.87,
+    4.82,
+    4.78,
+    4.73,
+    4.68,
+    4.64,
+    4.61,
+    4.56,
+    4.49,
+    4.39,
+    4.26,
+    4.11,
+    3.93,
+    3.7,
+    3.42,
+    3.11,
+    2.79,
+    2.5,
+    2.24,
+    2.01,
+    1.81,
+    1.64,
+    1.55,
+    1.59,
+    1.78,
+    2.09,
+    2.52,
+    3.03,
+    3.58,
+    4.16,
+    4.75,
+    5.34,
+    5.89,
+    6.39,
+    6.83,
+    7.25,
+    7.63,
+    8,
+    8.36,
+    8.7,
+    9.03,
+    9.33,
+    9.6,
+    9.83,
+    10.04,
+    10.21,
+    10.33
+   ],
+   "glo30": [
+    1465.68,
+    1464.85,
+    1464.13,
+    1464,
+    1463.8,
+    1463.73,
+    1464.22,
+    1464.42,
+    1464.18,
+    1463.98,
+    1463.82,
+    1463.18,
+    1462.15,
+    1462.12,
+    1462.16,
+    1461.96,
+    1461.74,
+    1461.58,
+    1461.35,
+    1461.19,
+    1461.17,
+    1460.78,
+    1460.09,
+    1459.57,
+    1459.47,
+    1459.14,
+    1458.69,
+    1458.01,
+    1457.71,
+    1457.78,
+    1457.51,
+    1456.81,
+    1456.15,
+    1455.67,
+    1455.52,
+    1455.18,
+    1454.69,
+    1454.3,
+    1454,
+    1453.88,
+    1454.23,
+    1454.67,
+    1454.7,
+    1454.77,
+    1454.9,
+    1455.03,
+    1455.08,
+    1455.21,
+    1455.93,
+    1456.68,
+    1457.84,
+    1459.23,
+    1460.5,
+    1461.8,
+    1463.35,
+    1465.2,
+    1466.08,
+    1465.74,
+    1465.34,
+    1465,
+    1464.32,
+    1463.29,
+    1462.3,
+    1462.04,
+    1461.86,
+    1461.58,
+    1461.17,
+    1460.9,
+    1461.21,
+    1461.59,
+    1461.87,
+    1462.28,
+    1462.83,
+    1463.57,
+    1464.44,
+    1465.48,
+    1466.68,
+    1467.81,
+    1468.9,
+    1469.31,
+    1469.64,
+    1470.03,
+    1470.8,
+    1471.44,
+    1472.43,
+    1473.45,
+    1474.27,
+    1474.19,
+    1473.73,
+    1473.46,
+    1474.09,
+    1474.6,
+    1475.2,
+    1475.93,
+    1476.49,
+    1476.7,
+    1476.78,
+    1476.73,
+    1476.8,
+    1477.16,
+    1477.3,
+    1477.35,
+    1477.89,
+    1478.09,
+    1477.86,
+    1477.38,
+    1477.29,
+    1477.16,
+    1477.3,
+    1477.7,
+    1478.11,
+    1478.21,
+    1477.81,
+    1477.44,
+    1477.89,
+    1478.74,
+    1479.17,
+    1479.14,
+    1478.69,
+    1478.38,
+    1478.22,
+    1478.06,
+    1477.99,
+    1478.12,
+    1478.19,
+    1477.84,
+    1477.33,
+    1477.12,
+    1477.11,
+    1477.09,
+    1477.09,
+    1477.14,
+    1476.76,
+    1476.49,
+    1476.39,
+    1476.36,
+    1476.25,
+    1475.71,
+    1475.25,
+    1475.03,
+    1474.85,
+    1474.72,
+    1474.82,
+    1474.92,
+    1474.96,
+    1474.73,
+    1474.65,
+    1474.51,
+    1474.61,
+    1475.18,
+    1475.44,
+    1475.3,
+    1475.32,
+    1475.4,
+    1475.29,
+    1475.27,
+    1475.93,
+    1476.6,
+    1477.18,
+    1477.84,
+    1478.39,
+    1478.92,
+    1479.58,
+    1479.82,
+    1479.81,
+    1479.74,
+    1479.63,
+    1479.49,
+    1479.32,
+    1479.16,
+    1478.85,
+    1478.54,
+    1478.29,
+    1477.82,
+    1477.39,
+    1477.46,
+    1477.59,
+    1477.18,
+    1477.18,
+    1477.59,
+    1477.54,
+    1477.36,
+    1477.32,
+    1477.46,
+    1477.4,
+    1477.04,
+    1476.62,
+    1476.27,
+    1475.94,
+    1475.69,
+    1475.27,
+    1474.66,
+    1473.88,
+    1473.19,
+    1472.54,
+    1471.73,
+    1470.96,
+    1470.1,
+    1469.31,
+    1468.5,
+    1468.58,
+    1468.66,
+    1468.64,
+    1468.5,
+    1468.6,
+    1468.87,
+    1469.27,
+    1470.02,
+    1471.06,
+    1472.19,
+    1473.71,
+    1474.99,
+    1476,
+    1477.05,
+    1478.12,
+    1479.08,
+    1480.02,
+    1481.15,
+    1482.71,
+    1484.53,
+    1484.67,
+    1484.78,
+    1485.72,
+    1487.35,
+    1488.86,
+    1489.95,
+    1491.04,
+    1492.14,
+    1493.29,
+    1494.51,
+    1495.79,
+    1496.89,
+    1497.07,
+    1497.19,
+    1496.84,
+    1497.5,
+    1497.5,
+    1497.5,
+    1498.64,
+    1498.45,
+    1497.95,
+    1497.3,
+    1496.84,
+    1496.41,
+    1495.76,
+    1494.74,
+    1493.43,
+    1492.32,
+    1491.24,
+    1490.13,
+    1488.85,
+    1487.59,
+    1486.53,
+    1485.45,
+    1484.37,
+    1483.34,
+    1482.38,
+    1481.79,
+    1481.1,
+    1480.31,
+    1479.43,
+    1478.42,
+    1477.46,
+    1475.66,
+    1475.66,
+    1475.66,
+    1471.74,
+    1471.74,
+    1469.67,
+    1470.45,
+    1470.25,
+    1469.62,
+    1468.73,
+    1467.92,
+    1467.13,
+    1466.6,
+    1466.25,
+    1465.77,
+    1465.14,
+    1464.33,
+    1464.13,
+    1464.44,
+    1464.24,
+    1463.71,
+    1464.08,
+    1464.29,
+    1464.33,
+    1464.01,
+    1463.57,
+    1463.23,
+    1463.8,
+    1464.35,
+    1464.63,
+    1464.79,
+    1465,
+    1465.65,
+    1466.23,
+    1466.55,
+    1466.64,
+    1466.69,
+    1466.42,
+    1466.04,
+    1465.7,
+    1465.95,
+    1466.29,
+    1466.74,
+    1467.13,
+    1467.34,
+    1467.45,
+    1467.46,
+    1467.27,
+    1467.53,
+    1467.33,
+    1466.84,
+    1466.44,
+    1465.88,
+    1465.42,
+    1464.96,
+    1464.73,
+    1464.86,
+    1464.66,
+    1464.2,
+    1464.11,
+    1464.55,
+    1464.86,
+    1465.26,
+    1465.28,
+    1465.17,
+    1465.04,
+    1464.77,
+    1465.11,
+    1466.12,
+    1466.78,
+    1466.49,
+    1465.86,
+    1465.3,
+    1465.05,
+    1464.77,
+    1464.54,
+    1464.37,
+    1464.18,
+    1464.1,
+    1463.99,
+    1463.96,
+    1464.26,
+    1464.65,
+    1463.82,
+    1462.45,
+    1462.71,
+    1462.71,
+    1462.71,
+    1462.76,
+    1463.02,
+    1463.26,
+    1462.73,
+    1462.53,
+    1462.29,
+    1462.35,
+    1463.28,
+    1463.98,
+    1464.11,
+    1464.6,
+    1465.11,
+    1465.53,
+    1463.75,
+    1463.75,
+    1464.96,
+    1465.37,
+    1465.94,
+    1466.44,
+    1466.75,
+    1466.93,
+    1467.03,
+    1467.2,
+    1467,
+    1466.57,
+    1466.07,
+    1465.96
+   ],
+   "srtm30m": [
+    1466,
+    1465.5,
+    1465,
+    1465.5,
+    1466,
+    1466.5,
+    1467,
+    1467.5,
+    1468,
+    1468.5,
+    1469,
+    1469,
+    1469,
+    1469,
+    1469,
+    1468.5,
+    1468,
+    1467.5,
+    1467,
+    1466,
+    1465,
+    1463.5,
+    1462,
+    1460,
+    1458,
+    1457,
+    1456,
+    1455.5,
+    1455,
+    1456,
+    1457,
+    1457.5,
+    1458,
+    1458.5,
+    1459,
+    1459.5,
+    1460,
+    1459.5,
+    1459,
+    1458.5,
+    1458,
+    1457.5,
+    1457,
+    1458,
+    1459,
+    1459,
+    1459,
+    1459,
+    1459,
+    1459,
+    1459,
+    1459.5,
+    1460,
+    1461.5,
+    1463,
+    1464,
+    1465,
+    1465.5,
+    1466,
+    1465.5,
+    1465,
+    1465.5,
+    1466,
+    1465,
+    1464,
+    1463.5,
+    1463,
+    1463.5,
+    1464,
+    1464,
+    1464,
+    1465,
+    1466,
+    1467.5,
+    1469,
+    1470,
+    1471,
+    1472,
+    1473,
+    1474,
+    1475,
+    1476,
+    1477,
+    1477.5,
+    1478,
+    1478.5,
+    1479,
+    1480,
+    1481,
+    1481.5,
+    1482,
+    1482.5,
+    1483,
+    1483.5,
+    1484,
+    1484.5,
+    1485,
+    1484.5,
+    1484,
+    1483,
+    1482,
+    1481.5,
+    1481,
+    1481,
+    1481,
+    1481.5,
+    1482,
+    1482,
+    1482,
+    1482,
+    1482,
+    1482,
+    1482,
+    1481.5,
+    1481,
+    1481,
+    1481,
+    1481.5,
+    1482,
+    1483,
+    1484,
+    1483.5,
+    1483,
+    1482.5,
+    1482,
+    1482,
+    1482,
+    1482,
+    1482,
+    1481.5,
+    1481,
+    1480,
+    1479,
+    1477.5,
+    1476,
+    1475,
+    1474,
+    1474,
+    1474,
+    1473.5,
+    1473,
+    1474,
+    1475,
+    1476,
+    1477,
+    1477.5,
+    1478,
+    1478,
+    1478,
+    1478,
+    1478,
+    1478,
+    1478,
+    1478.5,
+    1479,
+    1479,
+    1479,
+    1479.5,
+    1480,
+    1480,
+    1480,
+    1482,
+    1484,
+    1486,
+    1488,
+    1488,
+    1488,
+    1487,
+    1486,
+    1485,
+    1484,
+    1483.5,
+    1483,
+    1483,
+    1483,
+    1482.5,
+    1482,
+    1481.5,
+    1481,
+    1480.5,
+    1480,
+    1480,
+    1480,
+    1480.5,
+    1481,
+    1481.5,
+    1482,
+    1481.5,
+    1481,
+    1480,
+    1479,
+    1478,
+    1477,
+    1475.5,
+    1474,
+    1472.5,
+    1471,
+    1471.5,
+    1472,
+    1472.5,
+    1473,
+    1473.5,
+    1474,
+    1474,
+    1474,
+    1473.5,
+    1473,
+    1473.5,
+    1474,
+    1475,
+    1476,
+    1477.5,
+    1479,
+    1480.5,
+    1482,
+    1482.5,
+    1483,
+    1484,
+    1485,
+    1486,
+    1487,
+    1488.5,
+    1490,
+    1491,
+    1492,
+    1492.5,
+    1493,
+    1495,
+    1497,
+    1498,
+    1499,
+    1499,
+    1499,
+    1499.5,
+    1500,
+    1500.5,
+    1501,
+    1502,
+    1503,
+    1503,
+    1503,
+    1503.5,
+    1504,
+    1503.5,
+    1503,
+    1501.5,
+    1500,
+    1497,
+    1494,
+    1492,
+    1490,
+    1488.5,
+    1487,
+    1486,
+    1485,
+    1485,
+    1485,
+    1484.5,
+    1484,
+    1484.5,
+    1485,
+    1485,
+    1485,
+    1483.5,
+    1482,
+    1481,
+    1480,
+    1478.5,
+    1477,
+    1476,
+    1475,
+    1474,
+    1473,
+    1472,
+    1471,
+    1469.5,
+    1468,
+    1467.5,
+    1467,
+    1467,
+    1467,
+    1467.5,
+    1468,
+    1468,
+    1468,
+    1468.5,
+    1469,
+    1469,
+    1469,
+    1469.5,
+    1470,
+    1470.5,
+    1471,
+    1472,
+    1473,
+    1472.5,
+    1472,
+    1471.5,
+    1471,
+    1470.5,
+    1470,
+    1469.5,
+    1469,
+    1469,
+    1469,
+    1470,
+    1471,
+    1472,
+    1473,
+    1473,
+    1473,
+    1472,
+    1471,
+    1471,
+    1471,
+    1471,
+    1471,
+    1471.5,
+    1472,
+    1471,
+    1470,
+    1469.5,
+    1469,
+    1468.5,
+    1468,
+    1467,
+    1466,
+    1465,
+    1464,
+    1464.5,
+    1465,
+    1465.5,
+    1466,
+    1466.5,
+    1467,
+    1467,
+    1467,
+    1467,
+    1467,
+    1466,
+    1465,
+    1464,
+    1463,
+    1463.5,
+    1464,
+    1464.5,
+    1465,
+    1465,
+    1465,
+    1465,
+    1465,
+    1464.5,
+    1464,
+    1463.5,
+    1463,
+    1463,
+    1463,
+    1464,
+    1465,
+    1465.5,
+    1466,
+    1467,
+    1468,
+    1468.5,
+    1469,
+    1469.5,
+    1470,
+    1470,
+    1470,
+    1470,
+    1470,
+    1469,
+    1468,
+    1468,
+    1468,
+    1467.5,
+    1467,
+    1466.5
+   ]
+  }
+ },
+ "banking": {
+  "gameMaxDeg": 5.71,
+  "corners": [
+   {
+    "from_s": 246,
+    "to_s": 260,
+    "dir": "right",
+    "turnDeg": 7,
+    "minRadiusM": 123,
+    "at": [
+     -25.9970871,
+     28.0716218
+    ],
+    "near": "The Kink",
+    "gameBankDeg": 1.9
+   },
+   {
+    "from_s": 640,
+    "to_s": 721.9,
+    "dir": "left",
+    "turnDeg": 129,
+    "minRadiusM": 22.4,
+    "at": [
+     -25.994976,
+     28.07499
+    ],
+    "near": "Crowthorne",
+    "gameBankDeg": -5.7
+   },
+   {
+    "from_s": 799.9,
+    "to_s": 857.9,
+    "dir": "right",
+    "turnDeg": 50,
+    "minRadiusM": 47.5,
+    "at": [
+     -25.9943557,
+     28.0735312
+    ],
+    "gameBankDeg": 4
+   },
+   {
+    "from_s": 907.9,
+    "to_s": 941.9,
+    "dir": "left",
+    "turnDeg": 26,
+    "minRadiusM": 59.7,
+    "at": [
+     -25.9937227,
+     28.0731555
+    ],
+    "near": "Juksei Sweep",
+    "gameBankDeg": -3.5
+   },
+   {
+    "from_s": 1007.9,
+    "to_s": 1067.9,
+    "dir": "left",
+    "turnDeg": 84,
+    "minRadiusM": 26.7,
+    "at": [
+     -25.9932484,
+     28.0720954
+    ],
+    "near": "Barbeque",
+    "gameBankDeg": -5.4
+   },
+   {
+    "from_s": 1527.8,
+    "to_s": 1561.8,
+    "dir": "right",
+    "turnDeg": 18,
+    "minRadiusM": 100.3,
+    "at": [
+     -25.9968222,
+     28.0691469
+    ],
+    "near": "Sunset",
+    "gameBankDeg": 2.5
+   },
+   {
+    "from_s": 1591.8,
+    "to_s": 1655.8,
+    "dir": "right",
+    "turnDeg": 31,
+    "minRadiusM": 108.2,
+    "at": [
+     -25.9970703,
+     28.0685347
+    ],
+    "near": "Sunset",
+    "gameBankDeg": 2.4
+   },
+   {
+    "from_s": 1667.8,
+    "to_s": 1703.8,
+    "dir": "right",
+    "turnDeg": 19,
+    "minRadiusM": 93.7,
+    "at": [
+     -25.9969587,
+     28.0677612
+    ],
+    "near": "Sunset",
+    "gameBankDeg": 2.6
+   },
+   {
+    "from_s": 1719.8,
+    "to_s": 1741.8,
+    "dir": "right",
+    "turnDeg": 11,
+    "minRadiusM": 116.6,
+    "at": [
+     -25.9967292,
+     28.0674309
+    ],
+    "near": "Sunset",
+    "gameBankDeg": 2.2
+   },
+   {
+    "from_s": 1911.8,
+    "to_s": 2005.8,
+    "dir": "left",
+    "turnDeg": 104,
+    "minRadiusM": 39,
+    "at": [
+     -25.9952532,
+     28.0657102
+    ],
+    "near": "Clubhouse",
+    "gameBankDeg": -4.8
+   },
+   {
+    "from_s": 2221.7,
+    "to_s": 2267.7,
+    "dir": "left",
+    "turnDeg": 35,
+    "minRadiusM": 57.7,
+    "at": [
+     -25.9970955,
+     28.0642238
+    ],
+    "near": "The Esses",
+    "gameBankDeg": -3.8
+   },
+   {
+    "from_s": 2277.7,
+    "to_s": 2311.7,
+    "dir": "left",
+    "turnDeg": 28,
+    "minRadiusM": 58.8,
+    "at": [
+     -25.9975411,
+     28.0642263
+    ],
+    "near": "The Esses",
+    "gameBankDeg": -3.7
+   },
+   {
+    "from_s": 2323.7,
+    "to_s": 2429.7,
+    "dir": "right",
+    "turnDeg": 69,
+    "minRadiusM": 62.5,
+    "at": [
+     -25.997874,
+     28.0644221
+    ],
+    "near": "The Esses",
+    "gameBankDeg": 3.7
+   },
+   {
+    "from_s": 2435.7,
+    "to_s": 2459.7,
+    "dir": "right",
+    "turnDeg": 15,
+    "minRadiusM": 75.4,
+    "at": [
+     -25.9987949,
+     28.0641437
+    ],
+    "near": "The Esses",
+    "gameBankDeg": 2.8
+   },
+   {
+    "from_s": 2473.7,
+    "to_s": 2487.7,
+    "dir": "right",
+    "turnDeg": 8,
+    "minRadiusM": 102.9,
+    "at": [
+     -25.9989711,
+     28.063868
+    ],
+    "near": "The Esses",
+    "gameBankDeg": 2.1
+   },
+   {
+    "from_s": 2619.7,
+    "to_s": 2637.7,
+    "dir": "right",
+    "turnDeg": 13,
+    "minRadiusM": 65.7,
+    "at": [
+     -25.9994606,
+     28.0624987
+    ],
+    "gameBankDeg": 2.7
+   },
+   {
+    "from_s": 2715.7,
+    "to_s": 2725.7,
+    "dir": "left",
+    "turnDeg": 5,
+    "minRadiusM": 138.3,
+    "at": [
+     -25.9995431,
+     28.0616081
+    ],
+    "gameBankDeg": -1.8
+   },
+   {
+    "from_s": 2827.7,
+    "to_s": 2917.7,
+    "dir": "left",
+    "turnDeg": 131,
+    "minRadiusM": 26.2,
+    "at": [
+     -25.9999403,
+     28.0603405
+    ],
+    "near": "Leeukop",
+    "gameBankDeg": -5.4
+   },
+   {
+    "from_s": 2949.7,
+    "to_s": 3007.7,
+    "dir": "left",
+    "turnDeg": 45,
+    "minRadiusM": 58.4,
+    "at": [
+     -26.0005808,
+     28.0611081
+    ],
+    "gameBankDeg": -3.8
+   },
+   {
+    "from_s": 3325.6,
+    "to_s": 3335.6,
+    "dir": "left",
+    "turnDeg": 5,
+    "minRadiusM": 137.2,
+    "at": [
+     -25.9993061,
+     28.0642868
+    ],
+    "near": "Mineshaft",
+    "gameBankDeg": -1.8
+   },
+   {
+    "from_s": 3387.6,
+    "to_s": 3409.6,
+    "dir": "left",
+    "turnDeg": 10,
+    "minRadiusM": 123.6,
+    "at": [
+     -25.9988752,
+     28.0647615
+    ],
+    "near": "Mineshaft",
+    "gameBankDeg": -2.1
+   },
+   {
+    "from_s": 3669.6,
+    "to_s": 3765.6,
+    "dir": "right",
+    "turnDeg": 134,
+    "minRadiusM": 28.7,
+    "at": [
+     -25.9963249,
+     28.0657027
+    ],
+    "near": "The Crocodiles",
+    "gameBankDeg": 5.5
+   },
+   {
+    "from_s": 3797.6,
+    "to_s": 3807.6,
+    "dir": "left",
+    "turnDeg": 5,
+    "minRadiusM": 126.3,
+    "at": [
+     -25.9968927,
+     28.066303
+    ],
+    "near": "The Crocodiles",
+    "gameBankDeg": -1.8
+   },
+   {
+    "from_s": 3967.5,
+    "to_s": 4003.5,
+    "dir": "right",
+    "turnDeg": 50,
+    "minRadiusM": 26.2,
+    "at": [
+     -25.9980374,
+     28.0676015
+    ],
+    "near": "Cheetah",
+    "gameBankDeg": 5
+   },
+   {
+    "from_s": 4223.5,
+    "to_s": 4295.5,
+    "dir": "left",
+    "turnDeg": 127,
+    "minRadiusM": 16.9,
+    "at": [
+     -26.0003979,
+     28.0679405
+    ],
+    "near": "Ingwe",
+    "gameBankDeg": -5.6
+   }
+  ],
+  "bankOverrides": null
+ },
+ "crossings": {
+  "note": "OSM ways with bridge / tunnel / covered that cross the game centreline (layer > 0: over the track, the car passes under; layer < 0: under the track)",
+  "list": [
+   {
+    "way": 14051258,
+    "s": 3963.8,
+    "at": [
+     -25.9979095,
+     28.0674363
+    ],
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "tunnel": "yes"
+    }
+   },
+   {
+    "way": 532871441,
+    "s": 1374.5,
+    "at": [
+     -25.9956216,
+     28.0701596
+    ],
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "tunnel": "yes"
+    }
+   },
+   {
+    "way": 532871444,
+    "s": 576.1,
+    "at": [
+     -25.9955032,
+     28.0743056
+    ],
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "tunnel": "yes"
+    }
+   }
+  ],
+  "sceneryDataBridges": []
+ },
+ "findings": [
+  {
+   "aspect": "elevation",
+   "severity": "minor",
+   "game": "Range 50.2 m. Leeukop (T9, s 2830) is the top at 50.2 m, reached by a +10.8 % (100 m) / +12.9 % climb (s 2650-2790) and left by -7.6 % (s 2840-2920); The Crocodiles -6.4 % (s 3690-3820); the climb through Crowthorne (s 606-660) +2.8 %.",
+   "real": "No terrain model or published figure; two surface models agree on: Leeukop crest ~7 m lower (at s 2832, both aligned to the game by their median difference: GLO-30 43.1 m, SRTM 42.3 m against 50.2 m in the game), climb to it +6.8 / +6.9 % (100 m), nearly level after the crest (-2.1 / +1.3 %), Crocodiles -2.2 / -1.5 %, Crowthorne climb +9.7 / +5.5 %. Smoothed ranges 44.1 m (GLO-30) and 47.6 m (SRTM); RMS 3.2 / 2.9 m, max 8.0 / 8.3 m against the game.",
+   "proposedFix": "proposedCorrections.elevationProfileCandidate: the mean of the GLO-30 and SRTM profiles (aligned, median 42 m + Gaussian 20 m), relative heights every ~12 m along the OSM centreline. It removes the 7 m Leeukop overshoot; it is still a surface-model profile (no lidar for Gauteng found).",
+   "sources": [
+    "Copernicus DEM GLO-30 (DSM, 30 m), AWS open data COGs s3://copernicus-dem-30m (cache/glo30/)",
+    "NASA SRTM GL1 v3 30 m via api.opentopodata.org/v1/srtm30m (cache/opentopodata/srtm30m/)",
+    "OpenStreetMap (ODbL), Overpass query cached in devtests/track-audit/cache/overpass/<id>.json (2026-10-01)"
+   ]
+  },
+  {
+   "aspect": "layout",
+   "severity": "cosmetic",
+   "game": "The 2015+ layout (game lap 4.531 km): within 4.6 m of OSM (mean 1.7 m), OSM loop 4.509 km.",
+   "real": "The current circuit is 4.522 km (official). F1 raced the 4.261 km 1992-1993 layout (and 4.104 km 1968-1985, clockwise).",
+   "proposedFix": "None (layout note: label it as the current circuit, not an F1 GP layout).",
+   "sources": [
+    "kyalamigrandprixcircuit.com/grand-prix-circuit/",
+    "en.wikipedia.org/wiki/Kyalami",
+    "OpenStreetMap (ODbL), Overpass query cached in devtests/track-audit/cache/overpass/<id>.json (2026-10-01)"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "track.pit: left side (+1), 80 km/h, lane from s 4298 to s 250 (entry line s 4384, exit line s 164).",
+   "real": "Left side. The OSM \"Grand Prix Pit Lane\" leaves the track at s 4079 (452 m before points[0]) and rejoins at s 180. No published pit speed limit found (F1 had none in 1992-1993).",
+   "proposedFix": "proposedCorrections.pitLane entry / exit.",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass query cached in devtests/track-audit/cache/overpass/<id>.json (2026-10-01)",
+    "en.wikipedia.org/wiki/Pit_stop: after the 1994 San Marino GP \"the pit lane speed limit was introduced in Formula One\" (ref/en-Pit_stop.wiki)"
+   ]
+  },
+  {
+   "aspect": "start",
+   "severity": "cosmetic",
+   "game": "points[0] at -25.9987792, 28.0699211.",
+   "real": "OSM node 2331688961 raceway=start-finish is 14.1 m further on.",
+   "proposedFix": "Optional START_AT[\"za-1961\"] = that node.",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass query cached in devtests/track-audit/cache/overpass/<id>.json (2026-10-01)"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "severity": "cosmetic",
+   "proposedFix": "None in the data; if real-banking corners should stand out more (the Zandvoort / Madring complaint), consider lowering BANK_MAX for curvature-derived banking so that unbanked hairpins do not look banked.",
+   "sources": [
+    "js/track.js BANK_MAX / BANK_GAIN",
+    "OpenStreetMap (ODbL), Overpass query cached in devtests/track-audit/cache/overpass/<id>.json (2026-10-01)"
+   ],
+   "game": "Curvature-derived banking up to 5.71 deg; every corner tighter than ~35 m gets 4.5-5.9 deg (s 640 Crowthorne R 22.4 m: 5.7 deg; s 1008 Barbeque R 26.7 m: 5.4 deg; s 2828 Leeukop R 26.2 m: 5.4 deg; s 3670 The Crocodiles R 28.7 m: 5.5 deg; s 3968 Cheetah R 26.2 m: 5 deg; s 4224 Ingwe R 16.9 m: 5.6 deg). No bankOverrides.",
+   "real": "No banked corner is documented for this circuit (Wikipedia en / pt / es, official site); OSM ways carry no banking / incline tags."
+  }
+ ],
+ "proposedCorrections": {
+  "elevationProfileCandidate": {
+   "what": "candidate elev for za-1961 (surface models only)",
+   "source": "Copernicus DEM GLO-30 (DSM, 30 m), AWS open data COGs s3://copernicus-dem-30m (cache/glo30/) + NASA SRTM GL1 v3 30 m via api.opentopodata.org/v1/srtm30m (cache/opentopodata/srtm30m/)",
+   "method": "GLO-30 and SRTM aligned by their median difference, averaged, 7-point (~42 m) median, Gaussian sigma 20 m",
+   "rangeM": 44.19,
+   "maxClimb100Pct": 9.5,
+   "maxDescent100Pct": -12.3,
+   "vsGame": {
+    "rmsM": 2.78,
+    "correlation": 0.98
+   },
+   "points": [
+    [
+     -25.9987712,
+     28.0699114,
+     9.54
+    ],
+    [
+     -25.9986915,
+     28.0699921,
+     9.17
+    ],
+    [
+     -25.9986107,
+     28.0700711,
+     8.91
+    ],
+    [
+     -25.9985296,
+     28.0701499,
+     8.81
+    ],
+    [
+     -25.9984484,
+     28.0702288,
+     8.88
+    ],
+    [
+     -25.9983672,
+     28.0703076,
+     9.06
+    ],
+    [
+     -25.9982861,
+     28.0703865,
+     9.32
+    ],
+    [
+     -25.9982049,
+     28.0704653,
+     9.57
+    ],
+    [
+     -25.9981237,
+     28.0705442,
+     9.76
+    ],
+    [
+     -25.9980426,
+     28.0706231,
+     9.85
+    ],
+    [
+     -25.9979614,
+     28.0707019,
+     9.83
+    ],
+    [
+     -25.9978804,
+     28.0707801,
+     9.72
+    ],
+    [
+     -25.9977979,
+     28.0708572,
+     9.55
+    ],
+    [
+     -25.9977155,
+     28.0709343,
+     9.36
+    ],
+    [
+     -25.997633,
+     28.0710115,
+     9.15
+    ],
+    [
+     -25.9975507,
+     28.0710886,
+     8.91
+    ],
+    [
+     -25.9974707,
+     28.0711735,
+     8.6
+    ],
+    [
+     -25.9973931,
+     28.0712565,
+     8.23
+    ],
+    [
+     -25.9973157,
+     28.0713395,
+     7.78
+    ],
+    [
+     -25.9972398,
+     28.0714251,
+     7.22
+    ],
+    [
+     -25.9971642,
+     28.0715103,
+     6.53
+    ],
+    [
+     -25.9970898,
+     28.0715975,
+     5.69
+    ],
+    [
+     -25.9970168,
+     28.0716852,
+     4.73
+    ],
+    [
+     -25.9969483,
+     28.071782,
+     3.74
+    ],
+    [
+     -25.9968877,
+     28.0718809,
+     2.82
+    ],
+    [
+     -25.9968272,
+     28.0719798,
+     2.03
+    ],
+    [
+     -25.9967666,
+     28.0720786,
+     1.41
+    ],
+    [
+     -25.9967066,
+     28.0721788,
+     1.01
+    ],
+    [
+     -25.9966479,
+     28.0722791,
+     0.8
+    ],
+    [
+     -25.9965893,
+     28.0723794,
+     0.76
+    ],
+    [
+     -25.9965306,
+     28.0724798,
+     0.8
+    ],
+    [
+     -25.996472,
+     28.0725801,
+     0.85
+    ],
+    [
+     -25.9964134,
+     28.0726804,
+     0.9
+    ],
+    [
+     -25.9963548,
+     28.0727809,
+     0.94
+    ],
+    [
+     -25.9962965,
+     28.0728814,
+     0.97
+    ],
+    [
+     -25.9962381,
+     28.0729819,
+     0.94
+    ],
+    [
+     -25.9961797,
+     28.0730824,
+     0.82
+    ],
+    [
+     -25.9961213,
+     28.073183,
+     0.61
+    ],
+    [
+     -25.996063,
+     28.0732835,
+     0.36
+    ],
+    [
+     -25.9960047,
+     28.073384,
+     0.15
+    ],
+    [
+     -25.9959463,
+     28.0734846,
+     0.02
+    ],
+    [
+     -25.9958879,
+     28.0735851,
+     0
+    ],
+    [
+     -25.9958296,
+     28.0736856,
+     0.09
+    ],
+    [
+     -25.9957712,
+     28.0737861,
+     0.27
+    ],
+    [
+     -25.9957128,
+     28.0738866,
+     0.49
+    ],
+    [
+     -25.9956545,
+     28.0739871,
+     0.69
+    ],
+    [
+     -25.9955962,
+     28.0740876,
+     0.88
+    ],
+    [
+     -25.9955368,
+     28.0741869,
+     1.1
+    ],
+    [
+     -25.9954771,
+     28.0742865,
+     1.42
+    ],
+    [
+     -25.9954175,
+     28.074386,
+     1.88
+    ],
+    [
+     -25.995359,
+     28.0744879,
+     2.53
+    ],
+    [
+     -25.9953024,
+     28.0745895,
+     3.37
+    ],
+    [
+     -25.9952458,
+     28.0746908,
+     4.4
+    ],
+    [
+     -25.9951904,
+     28.0747928,
+     5.57
+    ],
+    [
+     -25.9951245,
+     28.0748852,
+     6.77
+    ],
+    [
+     -25.9950411,
+     28.0749587,
+     7.82
+    ],
+    [
+     -25.9949399,
+     28.0749907,
+     8.58
+    ],
+    [
+     -25.9948346,
+     28.0749686,
+     8.97
+    ],
+    [
+     -25.994741,
+     28.074905,
+     9.03
+    ],
+    [
+     -25.994679,
+     28.0747972,
+     8.85
+    ],
+    [
+     -25.9946454,
+     28.0746812,
+     8.53
+    ],
+    [
+     -25.9946209,
+     28.0745632,
+     8.15
+    ],
+    [
+     -25.9946017,
+     28.0744457,
+     7.74
+    ],
+    [
+     -25.9945825,
+     28.0743283,
+     7.3
+    ],
+    [
+     -25.9945632,
+     28.0742107,
+     6.88
+    ],
+    [
+     -25.994544,
+     28.0740932,
+     6.55
+    ],
+    [
+     -25.9945248,
+     28.0739758,
+     6.36
+    ],
+    [
+     -25.9945056,
+     28.0738583,
+     6.33
+    ],
+    [
+     -25.9944751,
+     28.0737477,
+     6.45
+    ],
+    [
+     -25.9944245,
+     28.0736464,
+     6.71
+    ],
+    [
+     -25.99436,
+     28.0735527,
+     7.12
+    ],
+    [
+     -25.9942778,
+     28.0734811,
+     7.71
+    ],
+    [
+     -25.9941855,
+     28.0734217,
+     8.49
+    ],
+    [
+     -25.9940895,
+     28.0733671,
+     9.43
+    ],
+    [
+     -25.9939927,
+     28.073314,
+     10.46
+    ],
+    [
+     -25.9938954,
+     28.0732621,
+     11.52
+    ],
+    [
+     -25.9937985,
+     28.0732092,
+     12.57
+    ],
+    [
+     -25.9937026,
+     28.0731569,
+     13.57
+    ],
+    [
+     -25.9936172,
+     28.0730754,
+     14.5
+    ],
+    [
+     -25.9935527,
+     28.072974,
+     15.33
+    ],
+    [
+     -25.9934951,
+     28.0728726,
+     16.11
+    ],
+    [
+     -25.9934389,
+     28.0727707,
+     16.85
+    ],
+    [
+     -25.9933826,
+     28.0726688,
+     17.57
+    ],
+    [
+     -25.9933263,
+     28.0725668,
+     18.28
+    ],
+    [
+     -25.9932706,
+     28.0724645,
+     18.98
+    ],
+    [
+     -25.9932179,
+     28.0723551,
+     19.63
+    ],
+    [
+     -25.9931975,
+     28.0722294,
+     20.2
+    ],
+    [
+     -25.9932344,
+     28.0721091,
+     20.68
+    ],
+    [
+     -25.9933007,
+     28.0720136,
+     21.09
+    ],
+    [
+     -25.993386,
+     28.0719407,
+     21.47
+    ],
+    [
+     -25.9934721,
+     28.0718685,
+     21.9
+    ],
+    [
+     -25.9935593,
+     28.071798,
+     22.38
+    ],
+    [
+     -25.9936465,
+     28.0717276,
+     22.89
+    ],
+    [
+     -25.9937338,
+     28.071657,
+     23.38
+    ],
+    [
+     -25.993821,
+     28.0715865,
+     23.79
+    ],
+    [
+     -25.9939082,
+     28.0715161,
+     24.08
+    ],
+    [
+     -25.9939954,
+     28.0714456,
+     24.21
+    ],
+    [
+     -25.9940827,
+     28.071375,
+     24.18
+    ],
+    [
+     -25.9941699,
+     28.0713045,
+     24.04
+    ],
+    [
+     -25.9942571,
+     28.071234,
+     23.83
+    ],
+    [
+     -25.9943444,
+     28.0711635,
+     23.61
+    ],
+    [
+     -25.9944317,
+     28.071093,
+     23.44
+    ],
+    [
+     -25.9945194,
+     28.071023,
+     23.33
+    ],
+    [
+     -25.994607,
+     28.070953,
+     23.29
+    ],
+    [
+     -25.9946945,
+     28.0708832,
+     23.29
+    ],
+    [
+     -25.9947822,
+     28.0708132,
+     23.32
+    ],
+    [
+     -25.9948698,
+     28.0707432,
+     23.36
+    ],
+    [
+     -25.9949574,
+     28.0706733,
+     23.42
+    ],
+    [
+     -25.9950451,
+     28.0706033,
+     23.51
+    ],
+    [
+     -25.9951326,
+     28.0705334,
+     23.6
+    ],
+    [
+     -25.9952202,
+     28.0704635,
+     23.66
+    ],
+    [
+     -25.9953078,
+     28.0703935,
+     23.66
+    ],
+    [
+     -25.9953955,
+     28.0703236,
+     23.62
+    ],
+    [
+     -25.9954831,
+     28.0702536,
+     23.59
+    ],
+    [
+     -25.9955707,
+     28.0701837,
+     23.61
+    ],
+    [
+     -25.9956583,
+     28.0701138,
+     23.71
+    ],
+    [
+     -25.9957459,
+     28.0700438,
+     23.86
+    ],
+    [
+     -25.9958335,
+     28.0699739,
+     24.04
+    ],
+    [
+     -25.9959212,
+     28.0699039,
+     24.2
+    ],
+    [
+     -25.9960088,
+     28.069834,
+     24.33
+    ],
+    [
+     -25.9960964,
+     28.0697641,
+     24.39
+    ],
+    [
+     -25.996184,
+     28.0696941,
+     24.36
+    ],
+    [
+     -25.9962716,
+     28.0696242,
+     24.25
+    ],
+    [
+     -25.9963592,
+     28.0695543,
+     24.08
+    ],
+    [
+     -25.9964468,
+     28.0694843,
+     23.89
+    ],
+    [
+     -25.9965345,
+     28.0694144,
+     23.7
+    ],
+    [
+     -25.9966205,
+     28.0693427,
+     23.53
+    ],
+    [
+     -25.9967027,
+     28.0692682,
+     23.36
+    ],
+    [
+     -25.996778,
+     28.0691825,
+     23.18
+    ],
+    [
+     -25.9968446,
+     28.0690916,
+     22.93
+    ],
+    [
+     -25.9969034,
+     28.0689933,
+     22.58
+    ],
+    [
+     -25.9969521,
+     28.0688867,
+     22.1
+    ],
+    [
+     -25.9969916,
+     28.0687771,
+     21.5
+    ],
+    [
+     -25.9970249,
+     28.0686661,
+     20.83
+    ],
+    [
+     -25.9970484,
+     28.0685496,
+     20.17
+    ],
+    [
+     -25.9970572,
+     28.0684348,
+     19.59
+    ],
+    [
+     -25.9970594,
+     28.068318,
+     19.11
+    ],
+    [
+     -25.9970545,
+     28.0681988,
+     18.74
+    ],
+    [
+     -25.9970338,
+     28.0680871,
+     18.47
+    ],
+    [
+     -25.9970055,
+     28.0679748,
+     18.32
+    ],
+    [
+     -25.9969688,
+     28.0678625,
+     18.31
+    ],
+    [
+     -25.9969217,
+     28.0677607,
+     18.48
+    ],
+    [
+     -25.9968688,
+     28.06766,
+     18.79
+    ],
+    [
+     -25.9968093,
+     28.0675607,
+     19.16
+    ],
+    [
+     -25.9967392,
+     28.0674747,
+     19.5
+    ],
+    [
+     -25.9966601,
+     28.0673988,
+     19.77
+    ],
+    [
+     -25.9965754,
+     28.0673259,
+     19.95
+    ],
+    [
+     -25.9964894,
+     28.0672538,
+     20.07
+    ],
+    [
+     -25.9964035,
+     28.0671819,
+     20.18
+    ],
+    [
+     -25.9963164,
+     28.0671112,
+     20.29
+    ],
+    [
+     -25.9962294,
+     28.0670405,
+     20.39
+    ],
+    [
+     -25.9961423,
+     28.0669697,
+     20.49
+    ],
+    [
+     -25.9960552,
+     28.066899,
+     20.6
+    ],
+    [
+     -25.9959668,
+     28.0668306,
+     20.73
+    ],
+    [
+     -25.9958779,
+     28.0667627,
+     20.9
+    ],
+    [
+     -25.9957889,
+     28.0666949,
+     21.13
+    ],
+    [
+     -25.9957001,
+     28.0666271,
+     21.45
+    ],
+    [
+     -25.9956111,
+     28.0665592,
+     21.85
+    ],
+    [
+     -25.9955223,
+     28.0664906,
+     22.32
+    ],
+    [
+     -25.9954352,
+     28.0664202,
+     22.88
+    ],
+    [
+     -25.9953479,
+     28.0663497,
+     23.58
+    ],
+    [
+     -25.9952678,
+     28.0662669,
+     24.45
+    ],
+    [
+     -25.9952023,
+     28.0661618,
+     25.4
+    ],
+    [
+     -25.9951698,
+     28.0660433,
+     26.27
+    ],
+    [
+     -25.9951737,
+     28.0659136,
+     26.9
+    ],
+    [
+     -25.9952009,
+     28.0657952,
+     27.18
+    ],
+    [
+     -25.9952575,
+     28.0656889,
+     27.14
+    ],
+    [
+     -25.995329,
+     28.0655978,
+     26.84
+    ],
+    [
+     -25.9954134,
+     28.0655203,
+     26.39
+    ],
+    [
+     -25.9954997,
+     28.0654484,
+     25.88
+    ],
+    [
+     -25.9955862,
+     28.0653763,
+     25.37
+    ],
+    [
+     -25.9956736,
+     28.0653061,
+     24.93
+    ],
+    [
+     -25.9957611,
+     28.0652358,
+     24.55
+    ],
+    [
+     -25.9958485,
+     28.0651656,
+     24.25
+    ],
+    [
+     -25.9959359,
+     28.0650953,
+     23.98
+    ],
+    [
+     -25.9960233,
+     28.0650251,
+     23.73
+    ],
+    [
+     -25.9961107,
+     28.0649548,
+     23.47
+    ],
+    [
+     -25.9961981,
+     28.0648845,
+     23.22
+    ],
+    [
+     -25.9962855,
+     28.0648143,
+     22.99
+    ],
+    [
+     -25.996373,
+     28.064744,
+     22.81
+    ],
+    [
+     -25.9964603,
+     28.0646738,
+     22.69
+    ],
+    [
+     -25.9965478,
+     28.0646035,
+     22.64
+    ],
+    [
+     -25.9966352,
+     28.0645333,
+     22.67
+    ],
+    [
+     -25.9967226,
+     28.064463,
+     22.75
+    ],
+    [
+     -25.9968099,
+     28.0643928,
+     22.84
+    ],
+    [
+     -25.9969019,
+     28.0643288,
+     22.85
+    ],
+    [
+     -25.9969945,
+     28.0642672,
+     22.73
+    ],
+    [
+     -25.9970947,
+     28.0642214,
+     22.46
+    ],
+    [
+     -25.9972004,
+     28.0641888,
+     22.03
+    ],
+    [
+     -25.9973079,
+     28.0641783,
+     21.46
+    ],
+    [
+     -25.9974181,
+     28.0641979,
+     20.77
+    ],
+    [
+     -25.9975191,
+     28.0642331,
+     19.96
+    ],
+    [
+     -25.9976169,
+     28.0642788,
+     19.05
+    ],
+    [
+     -25.9977124,
+     28.0643357,
+     18.07
+    ],
+    [
+     -25.9978089,
+     28.0643881,
+     17.08
+    ],
+    [
+     -25.9979105,
+     28.0644255,
+     16.15
+    ],
+    [
+     -25.9980146,
+     28.06445,
+     15.41
+    ],
+    [
+     -25.9981202,
+     28.0644579,
+     14.92
+    ],
+    [
+     -25.9982267,
+     28.0644522,
+     14.67
+    ],
+    [
+     -25.9983312,
+     28.0644299,
+     14.61
+    ],
+    [
+     -25.9984345,
+     28.0643961,
+     14.67
+    ],
+    [
+     -25.9985348,
+     28.0643553,
+     14.79
+    ],
+    [
+     -25.9986288,
+     28.0642968,
+     14.91
+    ],
+    [
+     -25.99871,
+     28.0642178,
+     14.99
+    ],
+    [
+     -25.9987839,
+     28.0641329,
+     15.06
+    ],
+    [
+     -25.9988518,
+     28.0640437,
+     15.18
+    ],
+    [
+     -25.9989082,
+     28.063942,
+     15.45
+    ],
+    [
+     -25.9989588,
+     28.0638385,
+     15.94
+    ],
+    [
+     -25.9990051,
+     28.0637331,
+     16.67
+    ],
+    [
+     -25.9990456,
+     28.0636223,
+     17.64
+    ],
+    [
+     -25.999086,
+     28.0635117,
+     18.77
+    ],
+    [
+     -25.9991264,
+     28.0634009,
+     19.99
+    ],
+    [
+     -25.9991669,
+     28.0632901,
+     21.23
+    ],
+    [
+     -25.9992073,
+     28.0631795,
+     22.41
+    ],
+    [
+     -25.9992479,
+     28.0630688,
+     23.51
+    ],
+    [
+     -25.9992885,
+     28.0629581,
+     24.52
+    ],
+    [
+     -25.9993291,
+     28.0628474,
+     25.51
+    ],
+    [
+     -25.9993697,
+     28.0627367,
+     26.54
+    ],
+    [
+     -25.9994095,
+     28.0626278,
+     27.6
+    ],
+    [
+     -25.9994345,
+     28.0625123,
+     28.65
+    ],
+    [
+     -25.9994589,
+     28.0623992,
+     29.67
+    ],
+    [
+     -25.9994661,
+     28.0622802,
+     30.68
+    ],
+    [
+     -25.9994746,
+     28.0621602,
+     31.75
+    ],
+    [
+     -25.9994863,
+     28.0620415,
+     32.86
+    ],
+    [
+     -25.999498,
+     28.0619228,
+     33.97
+    ],
+    [
+     -25.9995097,
+     28.0618042,
+     35.07
+    ],
+    [
+     -25.9995231,
+     28.0616852,
+     36.22
+    ],
+    [
+     -25.9995401,
+     28.0615673,
+     37.42
+    ],
+    [
+     -25.999557,
+     28.0614497,
+     38.63
+    ],
+    [
+     -25.9995897,
+     28.0613328,
+     39.74
+    ],
+    [
+     -25.9996222,
+     28.0612188,
+     40.64
+    ],
+    [
+     -25.9996547,
+     28.0611049,
+     41.3
+    ],
+    [
+     -25.9996867,
+     28.0609912,
+     41.74
+    ],
+    [
+     -25.999718,
+     28.0608769,
+     42.07
+    ],
+    [
+     -25.9997494,
+     28.0607628,
+     42.39
+    ],
+    [
+     -25.9997807,
+     28.0606485,
+     42.76
+    ],
+    [
+     -25.9998121,
+     28.0605342,
+     43.18
+    ],
+    [
+     -25.9998572,
+     28.060421,
+     43.61
+    ],
+    [
+     -25.9999337,
+     28.0603324,
+     43.95
+    ],
+    [
+     -26.0000379,
+     28.0602835,
+     44.15
+    ],
+    [
+     -26.0001454,
+     28.0602862,
+     44.19
+    ],
+    [
+     -26.0002413,
+     28.0603293,
+     44.08
+    ],
+    [
+     -26.0003109,
+     28.0604102,
+     43.81
+    ],
+    [
+     -26.000367,
+     28.0605118,
+     43.32
+    ],
+    [
+     -26.0004146,
+     28.0606142,
+     42.54
+    ],
+    [
+     -26.0004597,
+     28.0607228,
+     41.43
+    ],
+    [
+     -26.0005048,
+     28.0608312,
+     40.01
+    ],
+    [
+     -26.0005397,
+     28.060935,
+     38.37
+    ],
+    [
+     -26.0005572,
+     28.0610527,
+     36.66
+    ],
+    [
+     -26.0005571,
+     28.0611629,
+     35
+    ],
+    [
+     -26.0005305,
+     28.0612767,
+     33.45
+    ],
+    [
+     -26.0004925,
+     28.061386,
+     32.04
+    ],
+    [
+     -26.0004483,
+     28.0614949,
+     30.8
+    ],
+    [
+     -26.0004042,
+     28.0616039,
+     29.73
+    ],
+    [
+     -26.00036,
+     28.0617129,
+     28.84
+    ],
+    [
+     -26.0003159,
+     28.0618218,
+     28.11
+    ],
+    [
+     -26.0002717,
+     28.0619309,
+     27.51
+    ],
+    [
+     -26.0002276,
+     28.0620399,
+     27
+    ],
+    [
+     -26.0001834,
+     28.0621488,
+     26.56
+    ],
+    [
+     -26.0001393,
+     28.0622578,
+     26.16
+    ],
+    [
+     -26.0000951,
+     28.0623669,
+     25.72
+    ],
+    [
+     -26.000051,
+     28.0624758,
+     25.14
+    ],
+    [
+     -26.0000068,
+     28.0625848,
+     24.39
+    ],
+    [
+     -25.9999627,
+     28.0626939,
+     23.46
+    ],
+    [
+     -25.9999185,
+     28.0628029,
+     22.41
+    ],
+    [
+     -25.9998744,
+     28.0629119,
+     21.25
+    ],
+    [
+     -25.9998302,
+     28.0630208,
+     20.07
+    ],
+    [
+     -25.9997861,
+     28.0631299,
+     18.94
+    ],
+    [
+     -25.9997419,
+     28.0632388,
+     17.95
+    ],
+    [
+     -25.9996977,
+     28.0633479,
+     17.08
+    ],
+    [
+     -25.9996536,
+     28.0634569,
+     16.27
+    ],
+    [
+     -25.9996094,
+     28.0635659,
+     15.46
+    ],
+    [
+     -25.9995653,
+     28.0636749,
+     14.61
+    ],
+    [
+     -25.9995211,
+     28.0637839,
+     13.72
+    ],
+    [
+     -25.999477,
+     28.0638929,
+     12.83
+    ],
+    [
+     -25.9994306,
+     28.0639997,
+     11.98
+    ],
+    [
+     -25.9993802,
+     28.0641052,
+     11.22
+    ],
+    [
+     -25.9993296,
+     28.0642108,
+     10.6
+    ],
+    [
+     -25.9992726,
+     28.0643099,
+     10.14
+    ],
+    [
+     -25.9992082,
+     28.0644038,
+     9.86
+    ],
+    [
+     -25.9991383,
+     28.064492,
+     9.74
+    ],
+    [
+     -25.9990602,
+     28.0645745,
+     9.72
+    ],
+    [
+     -25.9989814,
+     28.0646557,
+     9.77
+    ],
+    [
+     -25.9988982,
+     28.064729,
+     9.85
+    ],
+    [
+     -25.9988101,
+     28.0647966,
+     9.96
+    ],
+    [
+     -25.9987161,
+     28.0648544,
+     10.07
+    ],
+    [
+     -25.9986169,
+     28.0649016,
+     10.17
+    ],
+    [
+     -25.9985149,
+     28.0649413,
+     10.24
+    ],
+    [
+     -25.9984107,
+     28.0649729,
+     10.34
+    ],
+    [
+     -25.9983052,
+     28.0649991,
+     10.52
+    ],
+    [
+     -25.9981978,
+     28.0650161,
+     10.82
+    ],
+    [
+     -25.9980905,
+     28.0650304,
+     11.21
+    ],
+    [
+     -25.9979834,
+     28.0650456,
+     11.65
+    ],
+    [
+     -25.9978762,
+     28.0650611,
+     12.08
+    ],
+    [
+     -25.997769,
+     28.0650765,
+     12.42
+    ],
+    [
+     -25.997662,
+     28.0650924,
+     12.64
+    ],
+    [
+     -25.997555,
+     28.0651091,
+     12.71
+    ],
+    [
+     -25.9974481,
+     28.0651258,
+     12.65
+    ],
+    [
+     -25.9973412,
+     28.0651425,
+     12.49
+    ],
+    [
+     -25.9972357,
+     28.0651657,
+     12.26
+    ],
+    [
+     -25.9971309,
+     28.065195,
+     11.98
+    ],
+    [
+     -25.9970263,
+     28.0652268,
+     11.73
+    ],
+    [
+     -25.9969239,
+     28.0652639,
+     11.58
+    ],
+    [
+     -25.99682,
+     28.065308,
+     11.62
+    ],
+    [
+     -25.996723,
+     28.0653606,
+     11.86
+    ],
+    [
+     -25.9966263,
+     28.0654131,
+     12.27
+    ],
+    [
+     -25.9965297,
+     28.0654655,
+     12.76
+    ],
+    [
+     -25.9964345,
+     28.0655227,
+     13.22
+    ],
+    [
+     -25.9963577,
+     28.0656102,
+     13.55
+    ],
+    [
+     -25.9963209,
+     28.0657221,
+     13.68
+    ],
+    [
+     -25.9963199,
+     28.0658409,
+     13.62
+    ],
+    [
+     -25.9963527,
+     28.0659556,
+     13.4
+    ],
+    [
+     -25.996427,
+     28.0660468,
+     13.1
+    ],
+    [
+     -25.996517,
+     28.0661118,
+     12.79
+    ],
+    [
+     -25.9966107,
+     28.0661707,
+     12.52
+    ],
+    [
+     -25.9967058,
+     28.0662265,
+     12.31
+    ],
+    [
+     -25.9967999,
+     28.0662828,
+     12.13
+    ],
+    [
+     -25.9968938,
+     28.0663412,
+     11.97
+    ],
+    [
+     -25.996988,
+     28.0663998,
+     11.77
+    ],
+    [
+     -25.9970743,
+     28.0664654,
+     11.5
+    ],
+    [
+     -25.9971616,
+     28.0665358,
+     11.16
+    ],
+    [
+     -25.9972487,
+     28.0666062,
+     10.81
+    ],
+    [
+     -25.9973293,
+     28.0666813,
+     10.52
+    ],
+    [
+     -25.9974075,
+     28.0667637,
+     10.28
+    ],
+    [
+     -25.9974839,
+     28.0668466,
+     10.03
+    ],
+    [
+     -25.9975556,
+     28.066936,
+     9.74
+    ],
+    [
+     -25.9976273,
+     28.0670253,
+     9.4
+    ],
+    [
+     -25.997699,
+     28.0671146,
+     9.09
+    ],
+    [
+     -25.9977643,
+     28.0672087,
+     8.91
+    ],
+    [
+     -25.9978269,
+     28.0673061,
+     8.93
+    ],
+    [
+     -25.9978893,
+     28.0674033,
+     9.14
+    ],
+    [
+     -25.9979523,
+     28.0675003,
+     9.47
+    ],
+    [
+     -25.9980238,
+     28.0675884,
+     9.78
+    ],
+    [
+     -25.9981214,
+     28.0676322,
+     9.97
+    ],
+    [
+     -25.9982279,
+     28.0676495,
+     10
+    ],
+    [
+     -25.9983355,
+     28.0676607,
+     9.93
+    ],
+    [
+     -25.9984431,
+     28.0676719,
+     9.77
+    ],
+    [
+     -25.9985508,
+     28.0676831,
+     9.55
+    ],
+    [
+     -25.9986584,
+     28.0676943,
+     9.25
+    ],
+    [
+     -25.998766,
+     28.0677055,
+     8.87
+    ],
+    [
+     -25.9988737,
+     28.0677167,
+     8.45
+    ],
+    [
+     -25.9989813,
+     28.0677279,
+     8.1
+    ],
+    [
+     -25.9990889,
+     28.0677391,
+     7.88
+    ],
+    [
+     -25.9991965,
+     28.0677501,
+     7.82
+    ],
+    [
+     -25.9993042,
+     28.0677602,
+     7.85
+    ],
+    [
+     -25.9994119,
+     28.0677703,
+     7.9
+    ],
+    [
+     -25.9995196,
+     28.0677804,
+     7.87
+    ],
+    [
+     -25.9996273,
+     28.0677905,
+     7.79
+    ],
+    [
+     -25.9997349,
+     28.0678005,
+     7.7
+    ],
+    [
+     -25.9998426,
+     28.0678106,
+     7.61
+    ],
+    [
+     -25.9999503,
+     28.0678207,
+     7.51
+    ],
+    [
+     -26.000058,
+     28.0678308,
+     7.38
+    ],
+    [
+     -26.0001657,
+     28.0678409,
+     7.22
+    ],
+    [
+     -26.0002733,
+     28.0678537,
+     7.04
+    ],
+    [
+     -26.0003788,
+     28.067906,
+     6.89
+    ],
+    [
+     -26.0004359,
+     28.0680089,
+     6.84
+    ],
+    [
+     -26.0004458,
+     28.0681302,
+     6.98
+    ],
+    [
+     -26.0004069,
+     28.0682387,
+     7.32
+    ],
+    [
+     -26.0003387,
+     28.0683254,
+     7.82
+    ],
+    [
+     -26.0002591,
+     28.068406,
+     8.38
+    ],
+    [
+     -26.0001794,
+     28.0684866,
+     8.93
+    ],
+    [
+     -26.0000997,
+     28.0685673,
+     9.43
+    ],
+    [
+     -26.00002,
+     28.0686479,
+     9.84
+    ],
+    [
+     -25.9999403,
+     28.0687286,
+     10.16
+    ],
+    [
+     -25.9998606,
+     28.0688092,
+     10.43
+    ],
+    [
+     -25.9997809,
+     28.0688898,
+     10.71
+    ],
+    [
+     -25.9997012,
+     28.0689705,
+     11.03
+    ],
+    [
+     -25.9996214,
+     28.0690512,
+     11.34
+    ],
+    [
+     -25.9995418,
+     28.0691318,
+     11.6
+    ],
+    [
+     -25.999462,
+     28.0692124,
+     11.73
+    ],
+    [
+     -25.9993823,
+     28.0692931,
+     11.75
+    ],
+    [
+     -25.9993026,
+     28.0693738,
+     11.65
+    ],
+    [
+     -25.9992229,
+     28.0694544,
+     11.49
+    ],
+    [
+     -25.9991432,
+     28.069535,
+     11.29
+    ],
+    [
+     -25.9990635,
+     28.0696157,
+     11.04
+    ],
+    [
+     -25.9989837,
+     28.0696964,
+     10.72
+    ],
+    [
+     -25.998904,
+     28.069777,
+     10.35
+    ],
+    [
+     -25.9988243,
+     28.0698576,
+     9.95
+    ]
+   ]
+  },
+  "START_AT": {
+   "latlon": [
+    -25.998677,
+    28.0700067
+   ],
+   "osmNode": 2331688961,
+   "sRelPoints0": 14.1,
+   "optional": true
+  },
+  "pitLane": {
+   "note": "real pit lane from OSM; js/track.js keeps the lane within PIT_REACH = 250 m of the line, so these ends need a per-track reach",
+   "side": "left",
+   "limitKmh": null,
+   "osmWays": [
+    793806972
+   ],
+   "lengthM": 569.2,
+   "entry": {
+    "s": 4079.1,
+    "sRelLine": -452.3,
+    "latlon": [
+     -25.9990236,
+     28.0677323
+    ],
+    "offTrackM": 0.5
+   },
+   "exit": {
+    "s": 179.9,
+    "sRelLine": 179.9,
+    "latlon": [
+     -25.9975449,
+     28.071094
+    ],
+    "offTrackM": 4.6
+   }
+  }
+ },
+ "sources": [
+  "OpenStreetMap (ODbL), Overpass query cached in devtests/track-audit/cache/overpass/<id>.json (2026-10-01)",
+  "Copernicus DEM GLO-30 (DSM, TanDEM-X 2011-2015), AWS open data COG, bilinear",
+  "NASA SRTM GL1 v3 30 m (C-band radar DSM, Feb 2000) via OpenTopoData api.opentopodata.org/v1/srtm30m, every 4th point (~24 m), bilinear",
+  "kyalamigrandprixcircuit.com/grand-prix-circuit/: \"4.522 km, 16-turn anti-clockwise Grand Prix circuit\", \"Pole Positions: Left side\", \"Number of pit garages: 40\"; en.wikipedia.org/wiki/Kyalami: \"Grand Prix Circuit (2015–present)\" 4.529 km, \"Grand Prix Circuit (1992–1993 and 2009–2015)\" 4.261 km (cache/web/latam-za/kyalami-grand-prix-circuit.html, latam-za/ref/en-Kyalami.wiki)",
+  "kyalamigrandprixcircuit.com/grand-prix-circuit/: \"Track run/direction: Anticlockwise\"; all 2266 game samples run with the oneway OSM ways"
+ ]
+}

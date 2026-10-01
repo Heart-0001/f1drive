@@ -1,0 +1,944 @@
+{
+ "id": "jp-1962",
+ "name": "Suzuka International Racing Course",
+ "auditedAt": "2026-10-01",
+ "auditor": "track-audit APAC (devtests/track-audit/apac/)",
+ "verdict": "major issues",
+ "summary": "Layout, length, direction, pit side and the whole height profile match the GSI laser DEM and the published figures (40.4 m, 2.8 % down the main straight, low between T1 and T2, high after Spoon). The one big error: the figure-of-eight crossover is an at-grade X in the game (js/track.js levels both roads to one height at 28.9 m), where the real west straight crosses the Degner-hairpin road on a bridge 6.2 m higher.",
+ "findings": [
+  {
+   "aspect": "bridge",
+   "severity": "major",
+   "game": "At-grade X crossing: both roads at y 28.94 m (lower road s 2320, upper road s 4690), no deck; heights levelled over +-266 m (lower road 2.7 m too high, upper road 3.5 m too low, i.e. a fake 3.5 m dip on the west straight into 130R) and banking faded out there",
+   "real": "Bridge: west straight 49.6 m ASL over the Degner-hairpin road 43.4 m ASL = 6.2 m road-to-road; 37 m deck (OSM way 175231434)",
+   "proposedFix": "js/track.js: when the two roads at a self-crossing differ by more than ~4 m in tracks-data elev (Suzuka: ~6 m after build-tracks COVERED), keep both heights (no levelling, no bank fade), mark the upper road as a bridge deck +-25 m and render deck slab / parapets / abutments over the lower road; collision / locate() must pick the road by height. Data needed is already in tracks-data (COVERED keeps the upper road straight across the deck).",
+   "sources": [
+    "GSI DEM 5 m laser (DEM5A, 国土地理院) via https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php (cache/gsi5m/jp-1962-osm.json)",
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+    "en.wikipedia.org/wiki/Suzuka_Circuit: \"the 1.2 km long back straight passing over the front section by means of an overpass\""
+   ]
+  },
+  {
+   "aspect": "banking",
+   "severity": "minor",
+   "game": "T6 逆バンク (Gyaku curve, s 1246-1405) banked 1.8-3.7 deg into the corner (curvature-derived)",
+   "real": "no cant at all (the corner is named for feeling tilted outwards)",
+   "proposedFix": "bankOverrides jp-1962: { name: \"T6 Gyaku Bank\", deg: 0, from: [34.8423083, 136.5379594], to: [34.8432867, 136.5370669] (ends of OSM way 183391631) } — js/track.js needs deg 0 to mean \"flat\" (today deg 0 is skipped)",
+   "sources": [
+    "ja.wikipedia.org/wiki/鈴鹿サーキット (S字コーナー、逆バンクコーナー)",
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "cosmetic",
+   "game": "tools/build-tracks.mjs PUBLISHED jp-1962 = 52 m citing ja.wikipedia \"最大高低差は52 m\"",
+   "real": "the current ja.wikipedia article has no such sentence; formula1.com gives 40.4 m, which the lidar (40.4 m filtered) and the game (40.1 m) match",
+   "proposedFix": "PUBLISHED jp-1962: [40.4, formula1.com \"Highs and lows\" 2016]",
+   "sources": [
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)",
+    "ja.wikipedia.org/wiki/鈴鹿サーキット (raw wikitext 2026-10-01, cache/wikipedia/ja-鈴鹿サーキット.wiki)"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "pit lane right side (ok), 500 m, entry 164 m before / exit 164 m after the line",
+   "real": "right side; entry after the chicane 515 m before the line, exit at T1 382 m after, 887 m long (OSM way 120917578)",
+   "proposedFix": "optional: pit entry / exit positions as data (pitEntryAt / pitExitAt lat-lon) if js/track.js ever supports them",
+   "sources": [
+    "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+    "Esri World Imagery (Vantor / Maxar), checked by eye with devtests/track-audit/apac/imagery.mjs; tiles cached in devtests/track-audit/cache/imagery/"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "crossover": {
+   "trackId": "jp-1962",
+   "type": "over-under bridge",
+   "upper": {
+    "gameS": 4690,
+    "latLon": [
+     34.843984,
+     136.530598
+    ],
+    "roadAslM": 49.6
+   },
+   "lower": {
+    "gameS": 2320,
+    "roadAslM": 43.4
+   },
+   "deckLengthM": 37,
+   "separationM": 6.2
+  },
+  "bankOverrides": [
+   {
+    "name": "T6 Gyaku Bank (no cant)",
+    "deg": 0,
+    "fromLatLon": [
+     34.8423083,
+     136.5379594
+    ],
+    "toLatLon": [
+     34.8432867,
+     136.5370669
+    ],
+    "note": "ends of OSM way 183391631 (逆バンク); needs deg 0 support"
+   }
+  ],
+  "published": {
+   "rangeM": 40.4,
+   "source": "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+  },
+  "elevationSource": "keep gsi5m (matches the lidar along the OSM centreline: correlation 1.00, RMS 0.86 m, all 100 m grades within 2 pp except at the crossover)"
+ },
+ "layout": {
+  "dataset": "Grand Prix circuit 2003-present (used by F1 2010-2019, 2022-2026)",
+  "officialLengthKm": 5.807,
+  "officialLengthSource": "en.wikipedia.org/wiki/Suzuka_Circuit infobox (Grand Prix Circuit 2003-present: 5.807 km)",
+  "gameLengthKm": 5.807,
+  "osm": {
+   "method": "map-matched to the OSM oneway raceway ways (apac/layout.mjs)",
+   "osmLengthM": 5795,
+   "gameTrueLengthM": 5800,
+   "devMeanM": 1.13,
+   "devP95M": 2.6,
+   "devMaxM": 4.3,
+   "devMaxAtGameS": 2057,
+   "gaps": 0
+  }
+ },
+ "direction": {
+  "ok": true,
+  "evidence": "all 37 OSM raceway ways used are oneway=yes in the racing direction; the matcher (direction within 50 deg) found no gaps"
+ },
+ "startFinish": {
+  "gameLatLon": [
+   34.843344,
+   136.540283
+  ],
+  "verified": false,
+  "note": "OSM has no start-finish node here and the Esri imagery is not sharp enough (z18) to read the line; the game line is mid-straight beside the main grandstand, plausible. Not changed."
+ },
+ "pit": {
+  "real": {
+   "side": "right (-1)",
+   "osmWays": [
+    120917578
+   ],
+   "entryGameS": -515,
+   "entryLatLon": [
+    34.8460198,
+    136.5360804
+   ],
+   "exitGameS": 382,
+   "exitLatLon": [
+    34.8406874,
+    136.5429413
+   ],
+   "besideTrackGameS": {
+    "from": -440,
+    "to": 196
+   },
+   "laneLengthM": 887
+  },
+  "game": {
+   "side": "right (-1)",
+   "limitKmh": 80,
+   "from": -251,
+   "entry": -164,
+   "exit": 164,
+   "to": 250,
+   "length": 500
+  },
+  "sideConvention": "gameS < 0 = before the line; side as in tracks-data pitSide (-1 = driver's right)",
+  "limit": {
+   "game": 80,
+   "real": 80,
+   "note": "no source found for a non-standard limit at Suzuka; the game uses the default 80 km/h"
+  }
+ },
+ "elevation": {
+  "demSource": "GSI DEM via cyberjapandata2.gsi.go.jp getelevation.php (DEM5A laser 5 m where hsrc says so)",
+  "filter": "dtm",
+  "game": {
+   "range": 40.1,
+   "highAtS": 3708,
+   "lowAtS": 540,
+   "climb50": {
+    "pct": 6.95,
+    "fromS": 1519
+   },
+   "descent50": {
+    "pct": -7.52,
+    "fromS": 3848
+   },
+   "climb100": {
+    "pct": 6.82,
+    "fromS": 1509
+   },
+   "descent100": {
+    "pct": -7.17,
+    "fromS": 3828
+   }
+  },
+  "dem": {
+   "range": 40.38,
+   "highAtS": 3708,
+   "lowAtS": 540,
+   "climb50": {
+    "pct": 7.36,
+    "fromS": 1539
+   },
+   "descent50": {
+    "pct": -7.53,
+    "fromS": 3858
+   },
+   "climb100": {
+    "pct": 7.16,
+    "fromS": 1499
+   },
+   "descent100": {
+    "pct": -7.13,
+    "fromS": 3828
+   }
+  },
+  "demRawRange": 40.7,
+  "shapeCorrelation": 1,
+  "shapeRmsDiffM": 0.86,
+  "gradeDiffOver2pp_100mWindow": [
+   {
+    "fromS": 2189,
+    "toS": 2209,
+    "atS": 2199,
+    "game100": 0.43,
+    "dem100": -1.64,
+    "diffPP": 2.07
+   },
+   {
+    "fromS": 2399,
+    "toS": 2479,
+    "atS": 2439,
+    "game100": 0.24,
+    "dem100": 3.15,
+    "diffPP": -2.91
+   }
+  ],
+  "demNote": "GSI laser DEM sampled every 10 m along the OSM centreline (580 points, all hsrc \"5m（レーザ）\"); deck of the crossover bridged (the DEM gives the lower road under it)",
+  "published": {
+   "rangeM": [
+    40.4,
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+   ],
+   "mainStraightGradePct": [
+    -2.8,
+    "ja.wikipedia.org/wiki/鈴鹿サーキット: メインストレート \"1コーナーに向けて2.8%の下り勾配\" (ref. 竹中工務店)"
+   ],
+   "steepestClimbPct": [
+    7.8,
+    "ja.wikipedia.org/wiki/鈴鹿サーキット: ターン7 \"コース中最もきつい7.8%の上り勾配\" (ref. Car Watch 2011-08-11)"
+   ],
+   "lowPoint": [
+    "between Turn 1 and Turn 2",
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+   ],
+   "highPoint": [
+    "just out of Spoon (T13/14)",
+    "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)"
+   ]
+  },
+  "famousFeatures": [
+   {
+    "feature": "main straight down to T1 (s 0-500)",
+    "publishedPct": -2.8,
+    "demPct": -2.81,
+    "gamePct": -2.78,
+    "verdict": "ok"
+   },
+   {
+    "feature": "Dunlop / T7 climb (s 1466-1594)",
+    "publishedPct": 7.8,
+    "demMax50mPct": 7.36,
+    "gameMax50mPct": 6.95,
+    "verdict": "ok (game within 0.4 pp of the lidar; the published 7.8 % is a local maximum over a shorter base)"
+   },
+   {
+    "feature": "low point between T1 and T2",
+    "gameS": 540,
+    "demS": 540,
+    "verdict": "ok"
+   },
+   {
+    "feature": "high point after Spoon",
+    "gameS": 3708,
+    "demS": 3708,
+    "verdict": "ok"
+   },
+   {
+    "feature": "final corner (T18) descent",
+    "gameMax100mPct": -7.17,
+    "demMax100mPct": -7.13,
+    "verdict": "ok"
+   }
+  ],
+  "profile50m": {
+   "columns": [
+    "gameS_m",
+    "game_m",
+    "dem_m (filtered, relative to its lowest point)"
+   ],
+   "rows": [
+    [
+     0,
+     14.2,
+     14.39
+    ],
+    [
+     50,
+     12.72,
+     12.96
+    ],
+    [
+     100,
+     11.25,
+     11.41
+    ],
+    [
+     150,
+     9.91,
+     10.14
+    ],
+    [
+     200,
+     8.72,
+     8.93
+    ],
+    [
+     250,
+     7.36,
+     7.55
+    ],
+    [
+     300,
+     5.93,
+     6.14
+    ],
+    [
+     350,
+     4.59,
+     4.75
+    ],
+    [
+     400,
+     3.1,
+     3.36
+    ],
+    [
+     450,
+     1.56,
+     1.8
+    ],
+    [
+     500,
+     0.3,
+     0.35
+    ],
+    [
+     549,
+     0.01,
+     0.04
+    ],
+    [
+     599,
+     0.75,
+     0.94
+    ],
+    [
+     649,
+     1.79,
+     2.25
+    ],
+    [
+     699,
+     2.79,
+     3.13
+    ],
+    [
+     749,
+     3.59,
+     3.86
+    ],
+    [
+     799,
+     4.46,
+     4.69
+    ],
+    [
+     849,
+     5.26,
+     5.48
+    ],
+    [
+     899,
+     6.34,
+     6.6
+    ],
+    [
+     949,
+     8.03,
+     8.27
+    ],
+    [
+     999,
+     10.14,
+     10.47
+    ],
+    [
+     1049,
+     12.17,
+     12.56
+    ],
+    [
+     1099,
+     14.47,
+     14.8
+    ],
+    [
+     1149,
+     16.79,
+     17.12
+    ],
+    [
+     1199,
+     19.13,
+     19.47
+    ],
+    [
+     1249,
+     20.95,
+     21.29
+    ],
+    [
+     1299,
+     21.69,
+     21.88
+    ],
+    [
+     1349,
+     21.2,
+     21.32
+    ],
+    [
+     1399,
+     20.17,
+     20.25
+    ],
+    [
+     1449,
+     20.09,
+     20.23
+    ],
+    [
+     1499,
+     22.11,
+     22.59
+    ],
+    [
+     1548,
+     25.48,
+     26.09
+    ],
+    [
+     1598,
+     28.9,
+     29.74
+    ],
+    [
+     1648,
+     31.9,
+     32.55
+    ],
+    [
+     1698,
+     33.61,
+     33.97
+    ],
+    [
+     1748,
+     32.93,
+     32.19
+    ],
+    [
+     1798,
+     31.96,
+     31.95
+    ],
+    [
+     1848,
+     32.63,
+     32.86
+    ],
+    [
+     1898,
+     32.02,
+     32.24
+    ],
+    [
+     1948,
+     31.49,
+     31.56
+    ],
+    [
+     1998,
+     30.88,
+     30.95
+    ],
+    [
+     2048,
+     30.25,
+     30.34
+    ],
+    [
+     2098,
+     29.18,
+     29.26
+    ],
+    [
+     2148,
+     28.23,
+     27.87
+    ],
+    [
+     2198,
+     28.14,
+     26.68
+    ],
+    [
+     2248,
+     28.66,
+     26.24
+    ],
+    [
+     2298,
+     28.93,
+     26.11
+    ],
+    [
+     2348,
+     28.93,
+     26.07
+    ],
+    [
+     2398,
+     28.59,
+     26.42
+    ],
+    [
+     2448,
+     28.29,
+     27.7
+    ],
+    [
+     2498,
+     29.25,
+     29.94
+    ],
+    [
+     2547,
+     31.66,
+     32.44
+    ],
+    [
+     2597,
+     34.22,
+     34.8
+    ],
+    [
+     2647,
+     36.32,
+     36.94
+    ],
+    [
+     2697,
+     37.69,
+     38.06
+    ],
+    [
+     2747,
+     38.15,
+     38.36
+    ],
+    [
+     2797,
+     38.42,
+     38.64
+    ],
+    [
+     2847,
+     38.76,
+     39.03
+    ],
+    [
+     2897,
+     39.13,
+     39.41
+    ],
+    [
+     2947,
+     39.5,
+     39.81
+    ],
+    [
+     2997,
+     39.7,
+     39.99
+    ],
+    [
+     3047,
+     39.19,
+     39.41
+    ],
+    [
+     3097,
+     37.65,
+     37.77
+    ],
+    [
+     3147,
+     35.67,
+     35.73
+    ],
+    [
+     3197,
+     34.67,
+     34.8
+    ],
+    [
+     3247,
+     35.08,
+     35.34
+    ],
+    [
+     3297,
+     36.52,
+     36.87
+    ],
+    [
+     3347,
+     37.91,
+     38.13
+    ],
+    [
+     3397,
+     38.86,
+     39.13
+    ],
+    [
+     3447,
+     39.54,
+     39.85
+    ],
+    [
+     3497,
+     39.88,
+     40.14
+    ],
+    [
+     3546,
+     40.09,
+     40.28
+    ],
+    [
+     3596,
+     40.1,
+     40.33
+    ],
+    [
+     3646,
+     40.1,
+     40.33
+    ],
+    [
+     3696,
+     40.1,
+     40.37
+    ],
+    [
+     3746,
+     39.94,
+     40.19
+    ],
+    [
+     3796,
+     38.75,
+     38.97
+    ],
+    [
+     3846,
+     35.94,
+     36.19
+    ],
+    [
+     3896,
+     32.18,
+     32.47
+    ],
+    [
+     3946,
+     28.95,
+     29.18
+    ],
+    [
+     3996,
+     27.18,
+     27.25
+    ],
+    [
+     4046,
+     26.75,
+     26.82
+    ],
+    [
+     4096,
+     27.27,
+     27.43
+    ],
+    [
+     4146,
+     28.4,
+     28.54
+    ],
+    [
+     4196,
+     29.56,
+     29.8
+    ],
+    [
+     4246,
+     30.67,
+     30.9
+    ],
+    [
+     4296,
+     31.61,
+     31.87
+    ],
+    [
+     4346,
+     32.07,
+     32.29
+    ],
+    [
+     4396,
+     32.11,
+     32.27
+    ],
+    [
+     4446,
+     31.96,
+     32.3
+    ],
+    [
+     4496,
+     31.31,
+     32.24
+    ],
+    [
+     4545,
+     30.4,
+     32.23
+    ],
+    [
+     4595,
+     29.51,
+     32.23
+    ],
+    [
+     4645,
+     28.98,
+     32.24
+    ],
+    [
+     4695,
+     28.93,
+     32.29
+    ],
+    [
+     4745,
+     29.08,
+     32.34
+    ],
+    [
+     4795,
+     29.84,
+     32.48
+    ],
+    [
+     4845,
+     31.18,
+     32.99
+    ],
+    [
+     4895,
+     32.86,
+     33.78
+    ],
+    [
+     4945,
+     34.31,
+     34.58
+    ],
+    [
+     4995,
+     35.11,
+     35.39
+    ],
+    [
+     5045,
+     35.92,
+     36.18
+    ],
+    [
+     5095,
+     36.58,
+     36.89
+    ],
+    [
+     5145,
+     37.17,
+     37.49
+    ],
+    [
+     5195,
+     36.64,
+     36.88
+    ],
+    [
+     5245,
+     35.65,
+     35.94
+    ],
+    [
+     5295,
+     33.85,
+     34.12
+    ],
+    [
+     5345,
+     30.65,
+     30.92
+    ],
+    [
+     5395,
+     27.52,
+     27.73
+    ],
+    [
+     5445,
+     25,
+     25.17
+    ],
+    [
+     5495,
+     23.09,
+     23.29
+    ],
+    [
+     5544,
+     21.59,
+     21.72
+    ],
+    [
+     5594,
+     20.12,
+     20.33
+    ],
+    [
+     5644,
+     18.72,
+     18.94
+    ],
+    [
+     5694,
+     17.25,
+     17.49
+    ],
+    [
+     5744,
+     15.85,
+     16.09
+    ],
+    [
+     5794,
+     14.47,
+     14.67
+    ]
+   ]
+  }
+ },
+ "crossover": {
+  "real": {
+   "upperRoad": "west straight, OSM way 175231434 (highway=raceway, bridge=yes, layer=1, 37 m deck)",
+   "lowerRoad": "Degner 2 -> hairpin, OSM way 183391655 (covered=yes)",
+   "upperRoadAslM": 49.6,
+   "lowerRoadAslM": 43.4,
+   "separationM": 6.2,
+   "upperRelativeToLapLowM": 32.4,
+   "lowerRelativeToLapLowM": 26.2,
+   "source": "GSI DEM 5 m laser (DEM5A, 国土地理院) via https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php (cache/gsi5m/jp-1962-osm.json): the deck approaches read 49.6 m ASL, the ground under the deck (= lower road) 43.4 m ASL"
+  },
+  "game": {
+   "crossingSamples": [
+    1160,
+    2345
+   ],
+   "lowerGameS": 2320,
+   "upperGameS": 4690,
+   "lowerY": 28.94,
+   "upperY": 28.94,
+   "mechanism": "js/track.js \"self-crossing\": both roads blended to their mean height (flat +-26 m, eased over 240 m) and the derived banking faded out over the same +-266 m (130R reads 0 to -0.8 deg), no deck, the car can drive straight across"
+  },
+  "profileError": {
+   "lowerRoadTooHighM": 2.7,
+   "upperRoadTooLowM": 3.5
+  }
+ },
+ "banking": {
+  "publishedBankedCorners": "none found",
+  "gyakuBank": {
+   "osmWay": 183391631,
+   "gameS": [
+    1246,
+    1405
+   ],
+   "gameBankDeg": [
+    1.8,
+    3.2,
+    3.7,
+    2.7,
+    3.3
+   ],
+   "real": "no cant: \"路面にカント（傾斜）が付いていない\" -> drivers feel tilted outwards, hence the name 逆バンク (ja.wikipedia.org/wiki/鈴鹿サーキット)"
+  }
+ },
+ "covered": {
+  "bridges": [
+   "crossover bridge (west straight over the Degner-hairpin road), see crossover"
+  ],
+  "tunnels": "only service / foot tunnels under the track (OSM ways 34096664, 411291884 = prefectural road 643 under the main straight end and T16; 467945733, 941604835, ...): not visible from the car"
+ },
+ "sourcesUsed": [
+  "formula1.com \"Highs and lows - which F1 track has the most elevation changes?\" (2016), https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)",
+  "OpenStreetMap (c) OpenStreetMap contributors, ODbL; Overpass / OSM API extracts cached in devtests/track-audit/cache/overpass/<id>-all.json and cache/osmapi/",
+  "Esri World Imagery (Vantor / Maxar), checked by eye with devtests/track-audit/apac/imagery.mjs; tiles cached in devtests/track-audit/cache/imagery/",
+  "Copernicus DEM GLO-30 (30 m surface model, TanDEM-X 2011-2015), AWS open data COG https://copernicus-dem-30m.s3.amazonaws.com (cache/glo30/<id>-apac.json)",
+  "SRTM GL1 30 m (surface model, Feb 2000) via https://api.opentopodata.org/v1/srtm30m (cache/otd-srtm30m/<id>.json)",
+  "GSI DEM 5 m laser (DEM5A, 国土地理院) via https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php (cache/gsi5m/jp-1962-osm.json)",
+  "game data: tracks-data.js built with lib/three.min.js + js/track.js + scenery-data.js (devtests/track-audit/apac/dump-game.js -> apac/out/game-<id>.json)"
+ ],
+ "files": {
+  "scripts": "devtests/track-audit/apac/*.mjs",
+  "images": "devtests/track-audit/apac/img/*.png (git-ignored output of imagery.mjs)",
+  "data": "devtests/track-audit/apac/out/"
+ }
+}

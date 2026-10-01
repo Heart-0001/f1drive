@@ -1,0 +1,61 @@
+diff --git a/devtests/car-v6/car-v5.js b/devtests/handling-test/variants/car-v5.proposed.js
+index 442826e..20a2ad1 100644
+--- a/devtests/car-v6/car-v5.js
++++ b/devtests/handling-test/variants/car-v5.proposed.js
+@@ -21,6 +21,9 @@
+   var WHEELBASE = 3.6;
+   var STEER_LOCK = 0.35;            // rad at standstill
+   var STEER_SPEED_REF = 22;         // m/s; lock = STEER_LOCK / (1 + (v/ref)^2)
++  // v6.2 (js/car.js steerLockAt, the reference car): full lock 0.40 rad at low speed, never less than asks 1.25 x the
++  // mechanical grip, more on a real banked corner (in full from 9 deg). The golden rule holds against this law.
++  var STEER_LOCK_MAX = 0.40, STEER_LOW_GRIP = 1.25, STEER_BANK_FROM = 6 * Math.PI / 180, STEER_BANK_TO = 9 * Math.PI / 180;
+   var LAT_BASE = 20.0;              // m/s^2 mechanical grip
+   var LAT_AERO = 0.0045;            // + k * v^2
+   var LAT_MAX = 44.0;               // ~4.5 g cap
+@@ -92,12 +95,36 @@
+     return MU_BRAKE * an + BRAKE_DRAG * v * v + ROLL + DRAG_K * v * v + GRAVITY * Math.sin(pitch || 0);
+   }
+ 
++  // Steering lock (rad at the road wheels, state.steer = +-1) at speed v on a road banked `bank` (rad, left higher
++  // > 0) turning towards turnSign (+1 left): the v5 law STEER_LOCK / (1 + (v / STEER_SPEED_REF)^2), where full lock
++  // asks about the grip, but never less lock than asks STEER_LOW_GRIP x the mechanical grip (low speed) and, on a real
++  // banked corner turning into the bank, that much more as the bank holds more (maxLatAccel banked / flat); at most
++  // STEER_LOCK_MAX. Exactly the v5 lock above ~85 km/h except on the real banked corners; STEER_LOCK_MAX to ~52 km/h.
++  function steerLockAt(v, bank, turnSign) {
++    var av = v < 0 ? -v : v, r = av / STEER_SPEED_REF, lock = STEER_LOCK / (1 + r * r);
++    if (!(av > 0.5)) return STEER_LOCK_MAX;
++    var t = Math.tan(lock), tl = STEER_LOW_GRIP * LAT_BASE * WHEELBASE / (av * av), up = false;
++    if (tl > t) { t = tl; up = true; }
++    var ab = bank < 0 ? -bank : (bank || 0);
++    if (ab > STEER_BANK_FROM) {
++      var gb = maxLatAccel(av, bank, 0, 0, turnSign), gf = maxLatAccel(av, 0, 0, 0, turnSign);
++      if (gb > gf && gf > 0) {
++        var w = ab < STEER_BANK_TO ? (ab - STEER_BANK_FROM) / (STEER_BANK_TO - STEER_BANK_FROM) : 1;
++        t *= 1 + (gb / gf - 1) * w; up = true;
++      }
++    }
++    if (!up) return lock;
++    t = Math.atan(t);
++    return t < STEER_LOCK_MAX ? t : STEER_LOCK_MAX;
++  }
++
+   // Tuning + the load model itself, for other modules (racing line) so they use the same physics.
+   F1.CAR_PERF = {
+     topSpeed: TOP_SPEED, dragK: DRAG_K, roll: ROLL, traction: TRACTION, power: POWER,
+     brakeBase: BRAKE_BASE, brakeAero: BRAKE_AERO, latBase: LAT_BASE, latAero: LAT_AERO, latMax: LAT_MAX,
+     gravity: GRAVITY, carHalfWidth: CAR_HALF_WIDTH,
+     wheelbase: WHEELBASE, steerLock: STEER_LOCK, steerSpeedRef: STEER_SPEED_REF,
++    steerLockMax: STEER_LOCK_MAX, steerLowGrip: STEER_LOW_GRIP, steerLockAt: steerLockAt,
+     muLat: MU_LAT, muTraction: MU_TRACTION, muBrake: MU_BRAKE, downforce: DOWNFORCE, brakeDrag: BRAKE_DRAG,
+     minNormalAccel: AN_MIN,
+     bankGrip: 1 + MU_LAT * MU_LAT,   // legacy linearisation: d(maxLat) ~ bankGrip * g * sin(bank into the turn)
+@@ -234,8 +261,7 @@
+       // --- lateral / yaw (bicycle model with grip cap -> understeer) ---
+       var resist = ROLL + DRAG_K * av * av;   // magnitude, always opposes motion
+       if (grass) resist += GRASS_DRAG_BASE + GRASS_DRAG_LIN * av;
+-      var ratio = av / STEER_SPEED_REF;
+-      var delta = state.steer * STEER_LOCK / (1 + ratio * ratio);
++      var delta = state.steer === 0 ? 0 : state.steer * steerLockAt(av, Math.atan(slopeLeft), state.steer);
+       var yaw = v * Math.tan(delta) / WHEELBASE;
+       var aLeft = v * yaw;                    // centripetal acceleration asked for, towards the left
+       if (aLeft !== 0) {

@@ -117,14 +117,16 @@
     // steering lock: tan(lock(v)) / WHEELBASE >= k * margin
     var x = Math.atan(WHEELBASE * k * STEER_MARGIN);
     if (steerLockAt) {
-      // the car's law (js/car.js perf.steerLockAt: speed, banking); it falls with speed: the fastest speed whose lock is enough
+      // the car's own law (js/car.js perf.steerLockAt: speed, banking), falling with speed: the fastest speed whose lock
+      // is enough. A path tighter than full lock with the margin cannot be followed any better slower (below ~52 km/h
+      // the radius at full lock does not shrink any more): the car turns its tightest, so the target is the top of the
+      // full-lock range (or the grip speed below it), not a crawl.
+      var lk0 = steerLockAt(MIN_SPEED, bank, turnSign);
+      if (lk0 < x) x = lk0;
       if (steerLockAt(v, bank, turnSign) < x) {
         var a = MIN_SPEED, b = v, c;
-        if (steerLockAt(a, bank, turnSign) < x) v = MIN_SPEED;
-        else {
-          for (var n = 0; n < 18; n++) { c = 0.5 * (a + b); if (steerLockAt(c, bank, turnSign) >= x) a = c; else b = c; }
-          v = a;
-        }
+        for (var n = 0; n < 24; n++) { c = 0.5 * (a + b); if (steerLockAt(c, bank, turnSign) >= x) a = c; else b = c; }
+        v = a;
       }
     } else if (x >= STEER_LOCK) v = MIN_SPEED;
     else v = Math.min(v, STEER_SPEED_REF * Math.sqrt(STEER_LOCK / x - 1));

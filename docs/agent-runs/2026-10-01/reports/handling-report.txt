@@ -1,0 +1,109 @@
+
+################ steering + banking analysis
+
+== summary
+STEERING + BANKING ANALYSIS (v6.2 prep). This finishes the handling-test agent's work. I only worked on copies; the only project files touched are the task's own files in devtests/handling-test/.
+
+Real-world numbers:
+- Steering lock: normal F1 cars run about 14-17 deg at the wheels. Monaco racks give about 20 deg ([formula1.com 2015](https://www.formula1.com/en/latest/article/ferrari-sf15-t-monaco-steering-modifications.2VI1MigPJ4tIvcrdtRNiiw)). Rob Smedley gives 21-22 deg on 3.1-3.3 m wheelbases ([formula1.com 2019](https://www.formula1.com/en/latest/article/f1-inbox-your-questions-on-hamilton-tyresand-leclercs-home-race-monaco-grand-2019.4zHk6V0eVvQ5g4yIl3KHk)), which is a kinematic radius of 8.1-8.6 m. Mercedes uses 40 % more lock at Monaco than at Montreal ([Autosport](https://www.autosport.com/f1/news/mercedes-formula-1-team-explains-tech-tricks-for-monaco-circuit-5319772/5319772/)).
+- Fairmont hairpin: about 10 m radius, 45 km/h in 2023 ([motorsport.com](https://www.motorsport.com/f1/news/fastest-slowest-turns-f1-calendar/10572266/)). F1 live timing, decoded earlier into devtests/handling-test/ref: 2025 qualifying median minimum 46.6 km/h (max 50.2), 2026 45.1 (max 52.3).
+- Zandvoort T3: 4.5 deg at the bottom rising to 19 deg at the top, and the fast line is high on the outside ([motorsport.com](https://www.motorsport.com/f1/news/turn-3-fibonacci-angles-zandvoort-standout/6659050/), [carthrottle](https://www.carthrottle.com/news/zandvoorts-weirdest-corner-and-its-atypical-racing-line-explained)). 2025 qualifying minimum 142-151 km/h, about 4.6-4.8 g.
+- Zandvoort T14: 18 deg, built to be taken flat out ([motorsport.com](https://www.motorsport.com/f1/news/f1-trial-drs-zandvoort-banking-dutch-gp-fp1/10360292/)). Pole lap averaged 268 km/h through it.
+- Madring La Monumental: 13.5 deg (24 %), 547 m, about 4 g lateral for 2-3 s and 4 g compression ([Motor Sport](https://www.motorsportmagazine.com/archive/article/september-2026/62/madrings-la-monumental-gives-madrids-new-f1-circuit-a-distinctive-challenge/), [The Race](https://www.the-race.com/formula-1/madrid-f1-track-spanish-gp-standout-corner-la-monumental-our-verdict/)). 2026 pole lap 244-262 km/h over the section.
+- Indianapolis T13 (9 deg 12'): flat out in top gear; Michelin quoted about 800 kg average load on the left-rear tyre.
+- Jeddah T13 (12 deg): 2025 qualifying minimum 156-162 km/h.
+
+(a) Monaco hairpin: no, what the user saw is not normal. Today the steering lock shrinks from standstill on. The full-lock radius is 10.5 m at 20 km/h and 13.3 m at 45 km/h, and below about 75 km/h full lock asks for less than the car's grip (0.66 x the grip at 50 km/h). The hairpin's centreline radius is 10-11 m. Measured today:
+- The racing line drops to 25 km/h there (it falls back to its minimum speed).
+- The autopilot crawls through at 18-21 km/h at full lock; in the real game it was at 21 km/h with the wheel fully turned.
+- Following the middle of the road, the car runs 4.6 m wide at 40 km/h and onto the grass at 47 km/h.
+- The real 2025 pole lap's line cannot be followed (3.9-8.9 m off, on the grass).
+- At 20 km/h the hairpin can be taken, but only by turning in at the right point from the middle or the outside (a 16 m window). From the inside it is impossible at any speed, in both versions. At 47 km/h the turn-in windows are small and only exist from the middle or the outside; at 55 km/h only from the far outside.
+
+Proposed steering law (car.js `perf.steerLockAt`):
+- Lock = the old law (0.35 / (1 + (v/22)^2)), but never less than the lock that asks 1.25 x the car's mechanical grip, and at most 0.40 rad (23 deg). On this 3.6 m car that gives the same 8.5 m radius as the real Monaco racks.
+- On a real banked corner (more than 6 deg, full effect from 9 deg) the lock grows by the bank's grip gain.
+- Result: full lock (8.5 m) up to about 52 km/h. On flat roads above about 85 km/h it is exactly the old law.
+- The racing line uses the same law, and a path tighter than full lock now targets the top of the full-lock range instead of 25 km/h.
+
+Measured with the proposal:
+- Hairpin line target 52.5 km/h. The autopilot goes through at 47-52 km/h with steer 0.7-0.88, i.e. lock to spare; in the real game 43 km/h at steer 0.85. Real cars: 45-52 km/h.
+- The 2025 pole line is followed within 1.1 m (the timing data is only accurate to about 2 m).
+- Turn-in windows are 12-18 m from every sensible line at 20-55 km/h.
+
+All 40 tracks (keyboard and analog autopilots, 3 laps each):
+- Every track still laps with no grass and no wall contact. Total -47.3 s over the 40 tracks.
+- The gains are where the lock was the limit: Monaco -6.9 s, Singapore -4.6, Bahrain -4.3, COTA -4.3, Magny-Cours -3.8, Madring -3.5, Miami -2.5, Albert Park -2.4, Yas -2.3, Zandvoort -1.5. Fast tracks barely move (Silverstone 0.0, Suzuka -0.2). Worst slowdown is +0.07 s.
+- Against the real 2025 poles, the game/real lap ratio's spread across tracks drops from 5.94 % to 4.92 %; Monaco goes from x1.241 to x1.142.
+- With the proposal the 2026/2025 lap ratio at Monaco is 1.028 (real 1.030; today 1.009).
+- The harness drivers that still use the old lock formula also lap all 40 tracks clean.
+- Stability: on the flat at 120-300 km/h the numbers are identical (keyboard and analog step response, weave, key taps). At 50 km/h the keyboard weave grows from 0.13 to 0.18 m RMS, which is still tame. A 0.1 s tap at 60 km/h turns 2.9 deg instead of 2.1. Tracking through the banked corners is about the same as today (keyboard: 0.85 m off the line at T3 vs 0.72 m today).
+- I kept the same law for analog sticks. Above 85 km/h it is already identical, and giving the stick more lock at speed would make it twitchy.
+
+(b) Banking, today:
+- Zandvoort T3: the steering lock limits the line at 104 km/h; the grip would allow 137. With or without the 19 deg bank, the line target is 104 and the autopilot minimum 99 km/h, so the bank gains nothing.
+- Jeddah T13: lock-limited at 137 km/h (grip allows 161). Madring: lock-limited at 193 (grip allows 215).
+- T14 and Indianapolis are limited by acceleration (flat out, as in reality). There the bank only shows as extra load: 3.1 vs 2.2 g at T14, 3.4 vs 2.9 g at Indianapolis.
+
+Banking, with the proposal:
+- T3: 134-137 km/h (real 142-151), 5.1 g, 3.0 g load. Jeddah: 159-161 (real 156-162). Madring: 213-215. T14: 243 mean (real 268).
+
+Why it looks muted on screen (screenshots taken in the real game, muted Electron, and read):
+- The camera rolls 1:1 with the car (19.6 deg of tilt at T3). So the banked road, kerbs and barriers stay level on screen and only the scenery leans.
+- At T3 and T14 the raised outer barrier hides the horizon. Madring's infield is flat grey with few vertical shapes. Jeddah reads well because of its buildings.
+
+Proposed cues:
+- The head takes out 45 % of the car's roll. Camera tilt drops to 11.5 deg at T3, 10.8 at T14, 8.5 at Madring, 7.5 at Jeddah, and 3.4 at an ordinary corner (Tarzan). The road and the cockpit now visibly tilt.
+- A compression cue: the eye sinks and nods from car.state.compress. Strongest at T3 (+1.8 g, 2.2 cm), Spa dips (+1.6 g), T14 and Madring (+1.3 g); it also lifts the eye over crests, which helps with the "Spa slope not felt" item.
+
+Other findings:
+- js/track.js gives every corner up to 6 deg of artificial banking (42 % of corner samples have more than 3 deg). That adds 14-33 % grip everywhere and blurs the contrast with the real bankings.
+- Each banked corner is one flat tilted plane. The real T3 bowl gets steeper towards the outside, so in the game the racing line hugs the inside (d +5.1 m) while the real pole lap ran at -3.6..+0.3 m.
+- Madring: the line's radius is 87 m where the bank starts, against about 125 m in reality; this is for the track audit.
+- Seen from outside, the banked sections show a dark vertical face under the raised edge.
+
+All patches were checked on scratchpad copies of HEAD (handling-snap-test / handling-snap-cues).
+- 10 of the 11 node suites pass as they are. test/cars.test.js passes after recalibrating and widening its spot-check tolerance (see open issues).
+- The node harnesses and these Electron harnesses pass: v6-smoke golden and 6 more parts, gp-e2e solo and solo-v6, gp-smoke without the room parts, audio-test.
+- Recalibration took 1335 s + 261 s + 63 s, and every season hit its index. Grip scales moved by -1.7 to +0.5 %.
+
+== recommendations
+ - APPLY (all diffs pass `git apply --check` against the current tree after rewriting the b/ path to the a/ path; or copy the *.proposed file). js/car.js <- devtests/handling-test/variants/car.diff: STEER_LOCK_MAX 0.40, STEER_LOW_GRIP 1.25, STEER_BANK_FROM/TO 6/9 deg; new perf.steerLockAt(v, bank, turnSign) / steerLockMax / steerLowGrip; stepPhysics: `var delta = state.steer === 0 ? 0 : state.steer * K.steerLockAt(av, Math.atan(slopeLeft), state.steer);`. Why: today's lock shrinks from standstill (10.5 m radius at 20 km/h, 13.3 m at 45 km/h vs the hairpin's 10-11 m; full lock below ~75 km/h asks less than the grip) and ignores banking (T3 / Jeddah / Madring lock-limited). Effect: Monaco hairpin 18-21 -> 47-52 km/h (real 45-52); T3 99 -> 134 km/h (real 142-151); Jeddah T13 133 -> 159 (real 156-162); Madring 191 -> 213; flat at >= 85 km/h bit-identical; 40 tracks lap clean, -47 s in total, realism spread 5.94 -> 4.92 %.
+ - js/raceline.js <- raceline.diff: syncCarPerf picks perf.steerLockAt; cornerSpeed's lock part = the car's law (bisection on speed), and a path tighter than full lock with the 1.22 margin targets the top of the full-lock range instead of MIN_SPEED (25 km/h). Effect: Monaco line 82.46 -> 77.22 s predicted, hairpin target 25 -> 52.5 km/h; elsewhere identical to the old cliff rule (only Monaco differs: -6.93 vs -5.25 s).
+ - devtests/car-v6/car-v5.js <- car-v5.diff (the golden oracle gets the identical module-level steerLockAt; verified: test/car.test.js 'all car tests passed'). Also copy the patched car-v5.js over <scratchpad>/v5build/js/car.js (the default V5 of devtests/v6-smoke/smoke.js part golden; verified with handling-v5build-law: every golden check PASS, bit-identical).
+ - tools/build-cars.mjs <- build-cars.diff (its copy of raceline cornerSpeed uses p.steerLockAt; its start-up self-check against F1.buildRaceLine passed on the copy). devtests/seasons-calib/driver.mjs <- calib-driver.diff (the calibration autopilot steers with car.perf.steerLockAt; recommended, not required: the old formula also laps all 40 tracks clean).
+ - js/audio.js <- audio.diff: the remote-car scrub guess uses F1.CAR_PERF.steerLockAt (else it under-reads slip below 85 km/h). audio-test render + analyze 358/358 + ears 45/45 on the patched copy.
+ - Cues (optional, measured): js/car.js <- car-cues.diff on top of car.diff (state.load, state.compress in g; no effect on the physics or the golden rule) and js/cockpit.js <- cockpit.diff: HEAD_ROLL_KEEP 0.45 (tau 0.25 s), COMPRESS_EYE 0.012 m/g, COMPRESS_NOD 0.004 rad/g, clamp -1..2.5 g (tau 0.08 s). The counter-roll is added to the YXZ look angles (x -= a sin(yaw), z += a cos(yaw)) so camera.rotation.y stays PI + yaw for main.js's listener and gp-smoke's pad checks. A first quaternion version broke 2 gp-smoke pad checks (rotation.y wrapped by 2 pi); this version passes 25/25. Effect: camera tilt T3 19.6 -> 11.5 deg, T14 18.9 -> 10.8, Madring 14.4 -> 8.5, Jeddah 12.8 -> 7.5, ordinary Tarzan 5.5 -> 3.4; eye drop 2.2 cm at T3 (+1.81 g). Screenshots: devtests/handling-test/out/shots/*-cues-cockpit.png vs *-cockpit.png. devtests/cockpit-test/api.test.js <- cockpit-test.diff: the v5 camera-identity check uses roll 0 (otherwise 1 FAIL, maxDiff 0.0135), plus 2 new checks of the cues (ALL PASS; both fail against today's cockpit).
+ - js/README-interfaces.md (doc): CAR_PERF / carPerf gain steerLockAt(v, bank rad, turnSign) -> rad, steerLockMax, steerLowGrip; car.state gains load and compress (g) if the cues go in; F1.buildRaceLine takes the lock limit from perf.steerLockAt.
+ - RE-DO AFTER APPLYING: (1) node devtests/seasons-calib/calibrate.mjs (1335 s on the copy while other workflows ran; every index hit; grip scale changes 2010 +0.3 %, 2018 -0.7 %, 2020 -1.7 %, 2026 +0.4 %), node devtests/seasons-calib/ers-effect.mjs (261 s), node tools/build-cars.mjs (63 s: js/seasons-data.js, devtests/seasons-calib/entries.json, docs/seasons-data.md), node tools/build-cars.mjs --check. (2) test/cars.test.js <- cars-test.diff: its 4-circuit spot check (Sepang, COTA, Jeddah, Zandvoort) measured 2010..2025 within +-0.57 % but 2026 +0.84 % (it was +0.56 % before the change: COTA and Zandvoort now respond to grip); tolerance 0.6 % -> 1.0 % ('all cars tests passed' on the copy). (3) the 11 node suites; the node harnesses (all passed on the copy); the Electron harnesses: at least v6-smoke (with the patched V5 build), gp-smoke pad, cockpit-test, audio-test, then the full list of CLAUDE.md. (4) Harness autopilots that hard-code 0.35 / (1 + (v/22)^2) (gp-e2e/solo-page.js, pitplan.js, raceline-test/test.js, laps-test/drive.js, pit-test/drive.js, test/car.test.js pursuit, review drivers) need no change (laps40 --old: 40/40 clean); switch them to car.perf.steerLockAt only for consistency.
+ - FURTHER (not part of this change, measured only): js/track.js BANK_MAX 6 deg of derived banking on every corner (42 % of corner samples above 3 deg: +14-33 % grip) dilutes the real bankings; a 2-3 deg cap would sharpen the contrast but shifts every lap (own recalibration). Zandvoort T3's real bowl (4.5 -> 19 deg towards the outside, line high) needs a lateral bank profile in track.js / car.js surface() / raceline. Madring's line radius 87 m at the start of La Monumental vs ~125 m real (track audit). The outside of the banked sections renders as a dark vertical face (outside views only).
+
+== openIssues
+ - The project files are NOT changed: the proposal must be applied by the v6.2 integration together with the recalibration. The cockpit cues are optional (the user may prefer a setting); HEAD_ROLL_KEEP 0.45 was judged on stills only, not in motion.
+ - test/cars.test.js spot check: 2026 sits at +0.84 % on its 4 circuits after the recalibration (limit 0.6 %). I propose raising it to 1.0 % (cars-test.diff). The alternative is more check circuits: adding Monaco and Silverstone gives +0.55 %.
+ - Real-speed gaps that remain and are not steering issues: T14 mean 243 vs 268 km/h real (acceleration out of T13); Madring 213 vs 244 km/h (the line's 87 m radius where the bank starts: track audit); T3 134-137 vs 142-151 (the real line runs high on a bowl that steepens outwards; the game's bank is one flat plane).
+ - Not run on the patched copy: v6-critic, ui-gp, ui-v6, hudmirrors-test, gp-e2e online / online-v6, mp-e2e, the gp-smoke room / spec parts. The other workflow was editing main.js / ui.js / harnesses and using ports. They need the full re-run after integration.
+ - The recalibrated outputs on the copy (handling-snap-test) were computed on HEAD 27cea48's data. The integration must recalibrate on its own final tree; it cannot copy those files, because any change to tracks-data, eras or car.js changes the fingerprint.
+ - Housekeeping: the scratchpad is shared with the other agents. My chain overwrote the old build.log / carstest.log; I restored them from backups. The copies' node_modules (made by `ln -s` in Git Bash, which copies) and the HEAD snapshots were removed. Leftovers named handling-* are about 300 MB and can be deleted after integration.
+ - The derived banking (up to 6 deg on every corner) and the dark faces outside the banked sections are reported only, not proposed.
+
+== testsRun
+ - {"cmd":"node devtests/handling-test/hairpin.js today proposed","result":"line target at the hairpin 25.2 -> 52.5 km/h; autopilot keys 86.82 -> 79.90 s, through the hairpin 18-21 km/h at steer 0.92-1.0 -> 47-52 km/h at steer 0.7-0.88; full-lock radius 10.0-14.1 m -> 8.5 m up to 52 km/h"}
+ - {"cmd":"node devtests/handling-test/hairpin-follow.js today proposed x:{lockMax:0.35}","result":"line / centre / real 2025 pole line: today off 0.7-4.9 / 1.2-11.0 / 3.9-11.8 m (grass, wall at 55); proposed 0.7-1.2 / 0.2-0.8 / 1.1-1.9 m"}
+ - {"cmd":"node devtests/handling-test/hairpin-player.js today proposed ...","result":"turn-in windows: today 47 km/h only from the middle or outside, 55 km/h only from the far outside (10 m); proposed 12-18 m from d0 -5..+1 at 20-55 km/h; 20 km/h about 16 m both; never from the inside"}
+ - {"cmd":"node devtests/handling-test/laps40.js today proposed x:{bank:false} x:{cliff:true} x:{lockMax:0.35} --out final","result":"40/40 tracks lap, 0 grass, 0 walls; proposed -47.27 s keys / -47.17 s analog in total; worst +0.07 s (za-1961)"}
+ - {"cmd":"node devtests/handling-test/laps40.js today proposed --old --out final-olddriver","result":"old-formula harness drivers: 40/40 clean, -47.97 s"}
+ - {"cmd":"node devtests/handling-test/realism.js out/final.json","result":"game / real 2025 pole: mean x1.113 -> x1.093, spread 5.94 % -> 4.92 %, Monaco x1.241 -> x1.142"}
+ - {"cmd":"node devtests/handling-test/banking.js today proposed","result":"T3 lock-limited 104 km/h (grip 137), bank gain 0 -> 137 km/h; Jeddah 137 -> 161; Madring 193 -> 215; T14 / Indy acceleration-limited; roll = bank; load T3 2.35 -> 2.98 g"}
+ - {"cmd":"node devtests/handling-test/stability.js today proposed","result":"120-300 km/h identical (keys: overshoot 0.23 m, weave 0.057 m, 1.3 reversals/s at 300; analog: 0.11 m, 0.007 m); 50 km/h keys weave 0.13 -> 0.18 m; banked-corner tracking 0.40-0.85 m (today 0.35-0.72 m)"}
+ - {"cmd":"node devtests/handling-test/compress.js proposed","result":"compression T3 +1.81 g, Spa +1.57, T14 +1.28, Madring +1.26, Suzuka +1.13, Jeddah +0.90, Indy +0.63; lift Spa -1.88, Monza -0.76"}
+ - {"cmd":"node devtests/handling-test/scratch/specs.js","result":"low / high-grip specs lap clean; at Monaco the high-grip car is 0.74 s faster than the reference today (lock-limited) vs 3.4 s with the proposal"}
+ - {"cmd":"npx electron devtests/handling-test/bank-shots.js (APP_ROOT = HEAD copy / proposed / proposed + cues; muted)","result":"shots of T3 / T14 / Madring / Jeddah / Tarzan / Monaco hairpin read; 0 console errors; camera tilt 19.6 -> 11.5 deg at T3 with the cues; hairpin in the real game 21 km/h at steer 1.0 -> 43 km/h at steer 0.85"}
+ - {"cmd":"for f in test/*.test.js (HEAD copy + patches)","result":"10/11 pass incl. the golden rule; cars.test fails only on the stale calibration / 2026 spot check; after calibrate + ers-effect + build-cars + the 1.0 % tolerance: all cars tests passed"}
+ - {"cmd":"node devtests/seasons-calib/calibrate.mjs; ers-effect.mjs; tools/build-cars.mjs (patched copy)","result":"rc 0 / 0 / 0 (1335 s / 261 s / 63 s); every season within tolerance; build-cars 'checks passed'"}
+ - {"cmd":"raceline-test build / drive (0 and 0.15 s delay) / test3, laps-test/drive.js, 3d-test escape + drive-all, pit-test/drive.js all, car-v6 pit-drive / pit-fuzz / car-bump / traction-cap (patched copy)","result":"all pass: 0 bad builds, 40/40 drives, laps OK, escape TOTAL 0, 640 pit visits, fuzz 0"}
+ - {"cmd":"node devtests/cockpit-test/api.test.js (patched copy)","result":"with the cockpit cues but the old test: 1 FAIL (v5 camera identity, maxDiff 0.0135); with cockpit-test.diff: ALL PASS (new cue checks fail against today's cockpit, as they should)"}
+ - {"cmd":"npx electron devtests/v6-smoke/smoke.js ONLY=golden V5=handling-v5build-law, and ONLY=boot,year,pit,monaco,battery,pad","result":"golden all PASS (bit-identical to the patched v5 build and to node); 85/85"}
+ - {"cmd":"npx electron devtests/gp-e2e/solo.js; solo-v6.js (patched copy)","result":"588/588; 295/295"}
+ - {"cmd":"npx electron devtests/gp-smoke/smoke.js ONLY=free,solo,lap,pad,nopad,suzuka","result":"first cockpit version 112/114 (pad head-look checks read rotation.y); fixed to the Euler form: pad 25/25"}
+ - {"cmd":"npx electron devtests/audio-test/render.js; analyze.js; ears.js; control-test.js (patched copy)","result":"358/358, 45/45, 23/23"}

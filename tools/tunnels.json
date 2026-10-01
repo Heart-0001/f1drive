@@ -1,0 +1,433 @@
+{
+ "about": "Covered stretches of the F1Drive circuits (the car drives through them), for js/tunnels.js (F1.TUNNEL_DATA is a copy of \"tracks\"). Built by devtests/tunnel-test/make-data.js from OpenStreetMap responses (devtests/tunnel-test/osm-fetch.mjs) and the decisions recorded in that script. Positions: [lat, lon] (WGS84) mapped onto the game track through tracks-data.js geo; f* = fractions of the game lap (the fallback). from / to: the first / last covered metre along the lap; split: where the block's facade changes from the entry portal's to the exit portal's; open: a side (+1 = the driver's left) open to the sea.",
+ "license": "Positions and tags derived from OpenStreetMap, (c) OpenStreetMap contributors, ODbL 1.0 (https://www.openstreetmap.org/copyright)",
+ "osmFetched": {
+  "au-1953": "2026-10-01T06:51:37.410Z",
+  "pt-1972": "2026-10-01T06:51:41.801Z",
+  "it-1953": "2026-10-01T06:55:39.615Z",
+  "mx-1962": "2026-10-01T06:55:42.108Z",
+  "pt-2008": "2026-10-01T06:55:46.561Z",
+  "br-1977": "2026-10-01T06:57:39.229Z",
+  "it-1914": "2026-10-01T07:06:06.036Z",
+  "br-1940": "2026-10-01T07:23:12.362Z",
+  "it-1922": "2026-10-01T07:32:25.372Z",
+  "ar-1952": "2026-10-01T07:46:39.779Z",
+  "bh-2002": "2026-10-01T07:47:00.726Z",
+  "az-2016": "2026-10-01T07:47:11.653Z",
+  "es-1991": "2026-10-01T08:23:21.773Z",
+  "mc-1929": "2026-10-01T06:51:30.399Z",
+  "fr-1960": "2026-10-01T08:04:14.411Z",
+  "be-1925": "2026-10-01T08:04:31.546Z",
+  "ca-1978": "2026-10-01T08:04:43.821Z",
+  "us-2012": "2026-10-01T08:06:15.975Z",
+  "fr-1969": "2026-10-01T08:10:01.689Z",
+  "nl-1948": "2026-10-01T08:10:12.052Z",
+  "es-2026": "2026-10-01T08:10:21.738Z",
+  "de-1932": "2026-10-01T08:10:36.148Z",
+  "hu-1986": "2026-10-01T08:10:57.926Z",
+  "us-1909": "2026-10-01T08:11:12.331Z",
+  "tr-2005": "2026-10-01T08:12:01.614Z",
+  "sa-2021": "2026-10-01T08:12:19.008Z",
+  "za-1961": "2026-10-01T08:12:35.459Z",
+  "us-2023": "2026-10-01T08:12:47.450Z",
+  "qa-2004": "2026-10-01T08:13:38.899Z",
+  "sg-2008": "2026-10-01T08:13:58.055Z",
+  "us-2022": "2026-10-01T08:14:16.600Z",
+  "de-1927": "2026-10-01T08:14:24.611Z",
+  "at-1969": "2026-10-01T08:15:13.161Z",
+  "my-1999": "2026-10-01T08:16:08.722Z",
+  "cn-2004": "2026-10-01T08:16:29.016Z",
+  "gb-1948": "2026-10-01T08:16:45.388Z",
+  "ru-2014": "2026-10-01T08:17:41.942Z",
+  "jp-1962": "2026-10-01T08:17:52.232Z",
+  "us-1956": "2026-10-01T08:18:18.310Z",
+  "ae-2009": "2026-10-01T08:18:28.191Z"
+ },
+ "tracks": {
+  "it-1922": [
+   {
+    "name": "Sopraelevata underpass",
+    "kind": "underpass",
+    "facade": "plain",
+    "ads": "none",
+    "from": [
+     45.624834,
+     9.289355
+    ],
+    "to": [
+     45.624692,
+     9.289124
+    ],
+    "fFrom": 0.56692,
+    "fTo": 0.57106
+   }
+  ],
+  "mc-1929": [
+   {
+    "name": "Portier",
+    "kind": "underpass",
+    "facade": "plain",
+    "ads": "monaco",
+    "from": [
+     43.741073,
+     7.430032
+    ],
+    "to": [
+     43.741088,
+     7.430246
+    ],
+    "fFrom": 0.42636,
+    "fTo": 0.4316
+   },
+   {
+    "name": "Tunnel",
+    "kind": "tunnel",
+    "facade": [
+     "hotel",
+     "plain"
+    ],
+    "ads": "monaco",
+    "from": [
+     43.740359,
+     7.430326
+    ],
+    "to": [
+     43.737778,
+     7.427973
+    ],
+    "fFrom": 0.45721,
+    "fTo": 0.56752,
+    "split": [
+     43.73859,
+     7.429497
+    ],
+    "fSplit": 0.52074,
+    "open": [
+     {
+      "side": 1,
+      "from": [
+       43.740365,
+       7.430331
+      ],
+      "to": [
+       43.738704,
+       7.429618
+      ],
+      "fFrom": 0.45699,
+      "fTo": 0.51593
+     }
+    ]
+   }
+  ],
+  "es-2026": [
+   {
+    "name": "Tunnel 1 (under the motorway)",
+    "kind": "tunnel",
+    "facade": "plain",
+    "from": [
+     40.472201,
+     -3.624061
+    ],
+    "to": [
+     40.472797,
+     -3.624293
+    ],
+    "fFrom": 0.25146,
+    "fTo": 0.26412
+   },
+   {
+    "name": "Tunnel 2 (under the motorway)",
+    "kind": "tunnel",
+    "facade": "plain",
+    "from": [
+     40.472714,
+     -3.618774
+    ],
+    "to": [
+     40.471681,
+     -3.617988
+    ],
+    "fFrom": 0.70592,
+    "fTo": 0.73043
+   }
+  ],
+  "sg-2008": [
+   {
+    "name": "Raffles Boulevard link",
+    "kind": "underpass",
+    "facade": "plain",
+    "ceil": 4.5,
+    "deck": 6,
+    "wings": false,
+    "from": [
+     1.291445,
+     103.859372
+    ],
+    "to": [
+     1.291459,
+     103.859171
+    ],
+    "fFrom": 0.25105,
+    "fTo": 0.25563
+   },
+   {
+    "name": "Raffles Boulevard passage",
+    "kind": "underpass",
+    "facade": "plain",
+    "ceil": 5,
+    "from": [
+     1.29177,
+     103.858258
+    ],
+    "to": [
+     1.291982,
+     103.85789
+    ],
+    "fFrom": 0.27771,
+    "fTo": 0.28729
+   }
+  ],
+  "ae-2009": [
+   {
+    "name": "W hotel bridge",
+    "kind": "underpass",
+    "facade": "plain",
+    "ceil": 9,
+    "deck": 18,
+    "wings": false,
+    "from": [
+     24.467333,
+     54.606494
+    ],
+    "to": [
+     24.467586,
+     54.60648
+    ],
+    "fFrom": 0.8352,
+    "fTo": 0.8405
+   }
+  ]
+ },
+ "sources": {
+  "it-1922": [
+   {
+    "name": "Sopraelevata underpass",
+    "osmWays": [
+     1443867793
+    ],
+    "game": {
+     "from": 1641,
+     "to": 1653,
+     "sFrom": 3282,
+     "sTo": 3306,
+     "length": 24
+    },
+    "why": "The road course's own raceway way 1443867793 is tagged covered=yes where it passes under the north curve of the old high-speed oval (raceway way 34404729 \"anello alta velocità\", bridge=yes, layer=1, and 34404730 / 725687994 \"Sopraelevata Nord\"), between the Lesmos and Ascari. js/scenery.js has no oval: the underpass stands alone as a concrete bridge.",
+    "refs": [
+     "https://www.openstreetmap.org/way/1443867793",
+     "https://www.openstreetmap.org/way/34404729",
+     "https://en.wikipedia.org/wiki/Monza_Circuit (the banked oval and the road course crossing under it)"
+    ]
+   }
+  ],
+  "mc-1929": [
+   {
+    "name": "Portier",
+    "osmWays": [
+     353889280,
+     1470365899,
+     1470365900,
+     1470365903,
+     1470365904,
+     1470365907
+    ],
+    "game": {
+     "from": 709,
+     "to": 718,
+     "sFrom": 1418,
+     "sTo": 1436,
+     "length": 18
+    },
+    "why": "The circuit's own raceway way 1470365907 at Portier is tagged tunnel=yes, layer=-1, together with the Rond-Point du Portier ways: since the Portier Cove / Mareterra works (roundabout finished 2020) the corner passes under the roundabout's \"virole\" (OSM building way 1470365896 \"Neuehouse\" = scenery footprint #17 over the road) and the Boulevard du Larvotto bridge (way 92627405, bridge=yes, layer=1). Mapped from 2023-12 Bing imagery; nobody here has seen it in a race onboard: lower confidence than the tunnel.",
+    "refs": [
+     "https://www.openstreetmap.org/way/1470365907",
+     "https://www.openstreetmap.org/way/1470365896",
+     "https://www.openstreetmap.org/way/92627405",
+     "https://ageprim.com/news/monaco/first-step-of-the-ambitious-portier-cove-monaco-project-completed/ (Portier roundabout and its virole, 2020)"
+    ]
+   },
+   {
+    "name": "Tunnel",
+    "osmWays": [
+     4230891,
+     1230247123,
+     1365041486
+    ],
+    "game": {
+     "from": 760,
+     "to": 944,
+     "sFrom": 1520,
+     "sTo": 1888,
+     "length": 368
+    },
+    "why": "Boulevard Louis II in the tunnel (tunnel=yes, layer=-1): the circuit itself. Entry under the Fairmont Monte-Carlo (OSM node 9944534420 tourism=hotel lies in scenery footprint #9 over the road), exit under the building next to the Auditorium Rainier III (OSM way 112689159; bus platform way 1230247124 \"Auditorium Rainier III\", covered=yes, is inside the tunnel at its exit) -> facades hotel / plain. The sea side (the driver's left) is open along the hotel part: \"partly open on one side along the shoreline\" (SGM), \"partially open to the sea view beside the pedestrian walkway\"; OSM sidewalk way 450334964 (tunnel=yes) runs on that side.",
+    "refs": [
+     "https://www.openstreetmap.org/way/4230891",
+     "https://www.openstreetmap.org/way/1230247123",
+     "https://www.openstreetmap.org/node/9944534420",
+     "https://www.openstreetmap.org/way/112689159",
+     "https://en.wikipedia.org/wiki/Circuit_de_Monaco (1973: the tunnel extended towards Portier under the new Loews, now Fairmont, hotel)",
+     "https://en.wikipedia.org/wiki/Fairmont_Monte_Carlo (built over part of the course on pillars over the sea)",
+     "https://www.sgmlighting.com/projects/famous-tunnel-lit-by-sgm-fixtures-for-the-monaco-formula-1-grand-prix (partly open on one side along the shoreline; LED lighting since the drivers' complaints)",
+     "https://routes.fandom.com/wiki/Tunnel_Louis_II_(MC) (Tunnel Louis II / tunnel du Fairmont, about 400 m; seen through a search summary)"
+    ]
+   }
+  ],
+  "es-2026": [
+   {
+    "name": "Tunnel 1 (under the motorway)",
+    "osmWays": [
+     34049751,
+     87096566
+    ],
+    "game": {
+     "from": 689,
+     "to": 723,
+     "sFrom": 1378,
+     "sTo": 1446,
+     "length": 68
+    },
+    "why": "Madring runs through two short tunnels under the motorway between the IFEMA and the Valdebebas halves of the lap (one out, one back). OSM: road tunnels 87096566 (tunnel=yes, layer=-1) / 34049751 that the game centreline follows within ~2 m for the whole run; the MadRing raceway ways (construction=raceway) carry no tunnel tags yet. Plain concrete: nobody here has seen the finished tunnels.",
+    "refs": [
+     "https://www.openstreetmap.org/way/87096566",
+     "https://www.openstreetmap.org/way/34049751",
+     "https://www.racingcircuits.info/europe/spain/madring.html",
+     "https://above.guide/madrid-f1/circuit (seen through a search summary: two short tunnels, Curve 18 \"Norte\" just outside the one back to IFEMA)"
+    ]
+   },
+   {
+    "name": "Tunnel 2 (under the motorway)",
+    "osmWays": [
+     827423913,
+     827423914
+    ],
+    "game": {
+     "from": 1933,
+     "to": 2000,
+     "sFrom": 3866,
+     "sTo": 4000,
+     "length": 134
+    },
+    "why": "The second of Madring's two tunnels: twin one-way service tunnels 827423914 (the game centreline within ~2 m) and 827423913 beside it, under the motorway link bridge 34049818 (highway=trunk_link, bridge=yes, layer=1) that crosses the circuit there.",
+    "refs": [
+     "https://www.openstreetmap.org/way/827423914",
+     "https://www.openstreetmap.org/way/827423913",
+     "https://www.openstreetmap.org/way/34049818",
+     "https://www.racingcircuits.info/europe/spain/madring.html"
+    ]
+   }
+  ],
+  "sg-2008": [
+   {
+    "name": "Raffles Boulevard link",
+    "osmWays": [
+     479745478
+    ],
+    "game": {
+     "from": 618,
+     "to": 629,
+     "sFrom": 1236,
+     "sTo": 1258,
+     "length": 22
+    },
+    "why": "The circuit on Raffles Boulevard passes under a link building: the road way 479745478 is tagged tunnel=building_passage (maxheight 4.5) under OSM building way 393090492 (layer=1, min_height=4.5, height=6, built 1986) -> ceil 4.5, deck 6.",
+    "refs": [
+     "https://www.openstreetmap.org/way/479745478",
+     "https://www.openstreetmap.org/way/393090492"
+    ]
+   },
+   {
+    "name": "Raffles Boulevard passage",
+    "osmWays": [
+     545362402,
+     545362403
+    ],
+    "game": {
+     "from": 684,
+     "to": 707,
+     "sFrom": 1368,
+     "sTo": 1414,
+     "length": 46
+    },
+    "why": "Raffles Boulevard again passes through a building (ways 545362402 / 545362403 tunnel=building_passage, maxheight 4.5) that scenery footprint #15 (h 8) covers across the road -> a 5 m clear passage, the building above and beside it (wings).",
+    "refs": [
+     "https://www.openstreetmap.org/way/545362402",
+     "https://www.openstreetmap.org/way/545362403"
+    ]
+   }
+  ],
+  "ae-2009": [
+   {
+    "name": "W hotel bridge",
+    "osmWays": [
+     1255169704
+    ],
+    "game": {
+     "from": 2204,
+     "to": 2218,
+     "sFrom": 4408,
+     "sTo": 4436,
+     "length": 28
+    },
+    "why": "The circuit's raceway way 1255169704 is tagged covered=yes where it passes under the link bridge of the W Abu Dhabi Yas Island hotel: OSM building:part way 1387292013 (white glass, min_height=9, height=18, round roof) spans the road there -> a 9 m clear passage under an 18 m high bridge (ceil / deck), no wings (scenery footprint #10 is the whole hotel complex and its gridshell, 272 x 158 m: not a solid mass over the road).",
+    "refs": [
+     "https://www.openstreetmap.org/way/1255169704",
+     "https://www.openstreetmap.org/way/1387292013",
+     "https://en.wikipedia.org/wiki/Yas_Marina_Circuit (the track passes under the hotel bridge)"
+    ]
+   }
+  ]
+ },
+ "checked": {
+  "au-1953": "no covered stretch of the circuit in OpenStreetMap",
+  "pt-1972": "no covered stretch of the circuit in OpenStreetMap",
+  "it-1953": "no covered stretch of the circuit in OpenStreetMap",
+  "mx-1962": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): building=bridge way 1315400019 (3 samples)",
+  "pt-2008": "no covered stretch of the circuit in OpenStreetMap",
+  "br-1977": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): highway=pedestrian bridge way 424704414 (14 samples), building=yes way 1248729410 (27 samples), highway=pedestrian bridge \"Via Olímpica\" way 1305989801 (7 samples), building=roof way 1424694454 (6 samples), building=roof way 1424694455 (7 samples), building=roof way 1424694468 (3 samples); bridge ways running ALONG the circuit (it is on them, or they are above it, e.g. a monorail): highway=pedestrian bridge way 1305094942 (6 samples)",
+  "it-1914": "no covered stretch of the circuit in OpenStreetMap",
+  "br-1940": "no covered stretch of the circuit in OpenStreetMap",
+  "it-1922": "covered stretches: Sopraelevata underpass",
+  "ar-1952": "no covered stretch of the circuit in OpenStreetMap",
+  "bh-2002": "no covered stretch of the circuit in OpenStreetMap",
+  "az-2016": "no covered stretch of the circuit in OpenStreetMap",
+  "es-1991": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): building=yes \"VIP Rooftop\" way 1372681544 (3 samples)",
+  "mc-1929": "covered stretches: Portier, Tunnel; excluded Tunnel I.M.2S (Boulevard du Larvotto): A road tunnel (the former railway tunnel, abandoned:railway=rail, tunnel:name I.M.2S) BELOW the circuit's street on the climb after Sainte-Devote; the circuit runs in the open there. [samples 231..261 (s 462..522 m, 62 m), ways 78149827]; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): highway=primary bridge \"Boulevard du Larvotto\" way 92627405 (4 samples)",
+  "fr-1960": "no covered stretch of the circuit in OpenStreetMap",
+  "be-1925": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): man_made=bridge way 1353164215 (3 samples)",
+  "ca-1978": "no covered stretch of the circuit in OpenStreetMap",
+  "us-2012": "no covered stretch of the circuit in OpenStreetMap",
+  "fr-1969": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): highway=footway bridge \"Passerelle Pinède\" way 1107731474 (2 samples)",
+  "nl-1948": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): man_made=bridge way 765476850 (2 samples)",
+  "es-2026": "covered stretches: Tunnel 1 (under the motorway), Tunnel 2 (under the motorway); over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): highway=trunk_link bridge way 34049818 (2 samples); bridge ways running ALONG the circuit (it is on them, or they are above it, e.g. a monorail): highway=footway bridge way 516431587 (7 samples)",
+  "de-1932": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): man_made=bridge way 1302600377 (3 samples), man_made=bridge way 1302600378 (8 samples)",
+  "hu-1986": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): highway=service bridge way 54843543 (2 samples)",
+  "us-1909": "no covered stretch of the circuit in OpenStreetMap",
+  "tr-2005": "no covered stretch of the circuit in OpenStreetMap",
+  "sa-2021": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): highway=footway bridge way 1485777389 (4 samples)",
+  "za-1961": "no covered stretch of the circuit in OpenStreetMap",
+  "us-2023": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): highway=footway bridge \"Las Vegas Boulevard Overpass\" way 25724074 (7 samples), highway=footway bridge way 133878942 (5 samples), highway=footway bridge way 146617830 (2 samples), highway=footway bridge way 155133670 (3 samples), highway=footway bridge way 297110936 (4 samples), man_made=bridge way 1419057401 (11 samples), highway=footway bridge way 1436531125 (2 samples); bridge ways running ALONG the circuit (it is on them, or they are above it, e.g. a monorail): railway bridge \"Las Vegas Monorail\" way 43875943 (153 samples), railway bridge \"Las Vegas Monorail\" way 395310512 (152 samples)",
+  "qa-2004": "no covered stretch of the circuit in OpenStreetMap",
+  "sg-2008": "covered stretches: Raffles Boulevard link, Raffles Boulevard passage; excluded car park aisles: Underground car-park aisles (service=parking_aisle, layer=-1) beneath the circuit near the new NS Square: not the circuit. [samples 1638..1733 (s 3276..3466 m, 192 m), ways 1545634137, 1545634145, 1545634132, 1545634125, 1545634124, 1545634147]; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): highway=trunk_link bridge \"East Coast Parkway\" way 21697558 (6 samples), highway=trunk_link bridge way 21786033 (4 samples), highway=motorway bridge \"East Coast Parkway\" way 39961203 (3 samples), highway=motorway bridge \"East Coast Parkway\" way 74722808 (3 samples), highway=motorway_link bridge way 99007260 (6 samples), highway=motorway_link bridge way 121906574 (5 samples), highway=motorway bridge \"East Coast Parkway\" way 122067627 (2 samples), highway=motorway bridge \"East Coast Parkway\" way 122067629 (4 samples), highway=motorway bridge \"East Coast Parkway\" way 122067630 (4 samples), highway=motorway bridge \"East Coast Parkway\" way 122067631 (2 samples), building=yes way 393090492 (2 samples), highway=footway bridge way 740112301 (6 samples), highway=footway bridge way 740112303 (9 samples), highway=footway bridge way 741164882 (5 samples), highway=footway bridge way 1314036589 (5 samples), building=construction \"NS Square\" way 1492514975 (10 samples); bridge ways running ALONG the circuit (it is on them, or they are above it, e.g. a monorail): highway=footway bridge \"Fullerton Road\" way 29377119 (36 samples), highway=trunk bridge \"Esplanade Drive\" way 35037536 (64 samples), highway=trunk bridge \"Esplanade Drive\" way 763010995 (64 samples), highway=trunk bridge \"Esplanade Drive\" way 1313321640 (19 samples)",
+  "us-2022": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): highway=motorway_link bridge way 39361952 (3 samples), highway=motorway_link bridge way 39362012 (8 samples)",
+  "de-1927": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): man_made=bridge way 790945811 (3 samples); bridge ways running ALONG the circuit (it is on them, or they are above it, e.g. a monorail): highway=raceway bridge \"Nürburgring Sprintstrecke\" way 1443047844 (23 samples), highway=raceway bridge \"Nürburgring Sprintstrecke\" way 1443047846 (22 samples)",
+  "at-1969": "no covered stretch of the circuit in OpenStreetMap",
+  "my-1999": "no covered stretch of the circuit in OpenStreetMap",
+  "cn-2004": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): building=grandstand \"A看台\" way 107371135 (4 samples)",
+  "gb-1948": "no covered stretch of the circuit in OpenStreetMap; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): highway=footway bridge way 360077715 (2 samples), man_made=bridge way 605922107 (2 samples), building=bridge way 1412628537 (3 samples)",
+  "ru-2014": "no covered stretch of the circuit in OpenStreetMap",
+  "jp-1962": "no covered stretch of the circuit in OpenStreetMap; excluded service area: A service area (area=yes, highway=service, tunnel=yes) 25..40 m beside the circuit: not the circuit. [samples 787..839 (s 1574..1678 m, 106 m), ways 467945733]; excluded service area: A service area (area=yes, highway=service, tunnel=yes) 25..40 m beside the circuit: not the circuit. [samples 852..861 (s 1704..1722 m, 20 m), ways 467945733]; excluded crossover (lower road): The raceway way 183391655 (two nodes, 244 m) is tagged covered=yes over its whole length although only the part under the crossover bridge (raceway way 175231434, bridge=yes, layer=1, ~36 m) is covered; and js/track.js levels both roads into one flat crossing (track.crossings), so the game has no bridge to drive under. [samples 1124..1245 (s 2248..2490 m, 244 m), ways 183391655]; bridge ways running ALONG the circuit (it is on them, or they are above it, e.g. a monorail): highway=raceway bridge way 175231434 (20 samples); Suzuka's figure-of-eight: js/track.js levels both roads into one flat crossing (track.crossings), so there is no bridge / underpass in the game to cover.",
+  "us-1956": "no covered stretch of the circuit in OpenStreetMap",
+  "ae-2009": "covered stretches: W hotel bridge; over the circuit (bridges / link buildings, not tunnels; js/scenery.js decks where in its data): building:part way 1387292013 (5 samples), man_made=bridge way 1473728620 (3 samples), man_made=bridge way 1473750056 (2 samples); bridge ways running ALONG the circuit (it is on them, or they are above it, e.g. a monorail): highway=raceway bridge \"YAS Marina Circuit\" way 188337196 (18 samples); Yas Marina: the real pit exit dives under the track in a tunnel; js/track.js builds a surface pit lane on every circuit, so there is no tunnel in the game to cover."
+ }
+}

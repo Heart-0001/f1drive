@@ -1,0 +1,5760 @@
+{
+ "id": "ca-1978",
+ "name": "Circuit Gilles-Villeneuve",
+ "audited": "2026-10-01",
+ "auditor": "devtests/track-audit/americas (audit.mjs + report.mjs)",
+ "verdict": "major issues",
+ "summary": "layout, length, direction and pit side right; the bridge underpass before Turn 8 is missing; elevation is a flattened GLO-90 guess (gentle in reality too)",
+ "layout": {
+  "gameLayout": "Grand Prix Circuit 2002-present (14 turns), the layout of every 2010-2026 Canadian GP",
+  "officialLengthKm": 4.361,
+  "sources": [
+   "https://en.wikipedia.org/wiki/Circuit_Gilles_Villeneuve (infobox: Grand Prix Circuit 2002-present, 4.361 km, 14 turns)",
+   "OpenStreetMap (ODbL) via Overpass API (maps.mail.ru mirror), cached in devtests/track-audit/cache/overpass/"
+  ],
+  "gameBuiltLengthM": 4359.1,
+  "lengthDiffPct": -0.04,
+  "osmCenterlineDeviationM": {
+   "mean": 0.8,
+   "median": 0.7,
+   "p95": 2,
+   "max": 3.9,
+   "maxAt": {
+    "s": 2969,
+    "at": [
+     45.513792,
+     -73.527191
+    ],
+    "way": "136717490 Circuit Gilles-Villeneuve"
+   }
+  },
+  "offStretchesOver12m": [],
+  "osmRacewayWaysNotFollowed": [],
+  "onewayDirectionCheck": {
+   "sameM": 4360,
+   "oppositeM": 0
+  }
+ },
+ "direction": {
+  "game": "clockwise",
+  "real": "clockwise",
+  "ok": true,
+  "source": "OSM oneway raceway ways agree over 4360 m, 0 m against"
+ },
+ "startFinish": {
+  "gameStart": [
+   45.501816,
+   -73.5232461
+  ],
+  "osm": [
+   {
+    "node": 5250486978,
+    "tags": {
+     "name": "Ligne droite du Casino",
+     "place": "locality"
+    },
+    "lat": 45.5098381,
+    "lon": -73.5251781,
+    "gameS": -921.1,
+    "lateral": 0.3
+   },
+   {
+    "node": 10897781457,
+    "tags": {
+     "description": "https://www.meetup.com/Montreal-Cyclists-and-Bike-Enthusiasts/\nWeekly and weekend rides",
+     "name": "MCBE start point (Henry's meetup)"
+    },
+    "lat": 45.5068378,
+    "lon": -73.5175311,
+    "gameS": -473.9,
+    "lateral": 515.8
+   },
+   {
+    "node": 13282374071,
+    "tags": {
+     "building": "yes",
+     "man_made": "tower",
+     "name": "Tour de départ",
+     "tower:construction": "concrete",
+     "tower:type": "observation"
+    },
+    "lat": 45.4979418,
+    "lon": -73.5205185,
+    "gameS": 523.9,
+    "lateral": 125.6
+   }
+  ]
+ },
+ "pit": {
+  "game": {
+   "side": "left",
+   "limitKmh": 80,
+   "laneFromS": -210,
+   "laneToS": 250,
+   "entryLineS": -124,
+   "exitLineS": 164,
+   "lengthM": 460
+  },
+  "osm": [
+   {
+    "way": 413000959,
+    "lengthM": 826,
+    "fromS": -270.1,
+    "toS": 593.8,
+    "side": "left",
+    "first": [
+     45.5040959,
+     -73.5234683
+    ],
+    "last": [
+     45.4970649,
+     -73.5224658
+    ]
+   }
+  ],
+  "realLimitKmh": 80,
+  "limitSource": "FIA 2025 Formula 1 Sporting Regulations, Issue 5 (2025-04-30), art. 34.7: \"A speed limit of 80km/h will be imposed in the pit lane during the whole Competition. However, this limit may be amended by the Race Director\" (cache/fia/fia_2025_formula_1_sporting_regulations_-_issue_5_-_2025-04-30.txt)"
+ },
+ "elevation": {
+  "demUsedForReference": "NRCan HRDEM mosaic DTM (lidar, 1 m grid; WCS datacube.services.geo.ca)",
+  "gameSource": "GLO-90 (Open-Meteo), FLAT_TRACKS (range scaled to <= 4 m)",
+  "real": {
+   "range": 5.2,
+   "min": 10.4,
+   "max": 15.6,
+   "sMin": 3739,
+   "sMax": 720
+  },
+  "game": {
+   "range": 4,
+   "min": 0,
+   "max": 4,
+   "sMin": 2060,
+   "sMax": 830
+  },
+  "buildRawAlongDatasetLine": null,
+  "rmsDiffM": 1.98,
+  "correlation": 0.052,
+  "maxAbsDiff": {
+   "m": -4.3,
+   "s": 2030,
+   "at": [
+    45.507103,
+    -73.529721
+   ]
+  },
+  "grades": {
+   "w50": {
+    "real": {
+     "maxClimb": {
+      "pct": 3.5,
+      "s": 610,
+      "at": [
+       45.49708,
+       -73.522667
+      ]
+     },
+     "maxDescent": {
+      "pct": -3.6,
+      "s": 1000,
+      "at": [
+       45.499198,
+       -73.525998
+      ]
+     }
+    },
+    "game": {
+     "maxClimb": {
+      "pct": 0.9,
+      "s": 2380,
+      "at": [
+       45.509738,
+       -73.527867
+      ]
+     },
+     "maxDescent": {
+      "pct": -0.9,
+      "s": 1770,
+      "at": [
+       45.50477,
+       -73.529904
+      ]
+     }
+    },
+    "rmsDiffPct": 0.94,
+    "mismatches": [
+     {
+      "s0": 580,
+      "s1": 660,
+      "worstAtS": 610,
+      "realPct": 3.5,
+      "gamePct": 0.2,
+      "at": [
+       45.49708,
+       -73.522667
+      ]
+     },
+     {
+      "s0": 940,
+      "s1": 1050,
+      "worstAtS": 1000,
+      "realPct": -3.6,
+      "gamePct": 0,
+      "at": [
+       45.499198,
+       -73.525998
+      ]
+     },
+     {
+      "s0": 1420,
+      "s1": 1530,
+      "worstAtS": 1450,
+      "realPct": 2,
+      "gamePct": -0.4,
+      "at": [
+       45.502688,
+       -73.528137
+      ]
+     }
+    ]
+   },
+   "w100": {
+    "real": {
+     "maxClimb": {
+      "pct": 3.1,
+      "s": 620,
+      "at": [
+       45.497099,
+       -73.522791
+      ]
+     },
+     "maxDescent": {
+      "pct": -3.3,
+      "s": 1000,
+      "at": [
+       45.499198,
+       -73.525998
+      ]
+     }
+    },
+    "game": {
+     "maxClimb": {
+      "pct": 0.9,
+      "s": 2360,
+      "at": [
+       45.509565,
+       -73.527937
+      ]
+     },
+     "maxDescent": {
+      "pct": -0.8,
+      "s": 1760,
+      "at": [
+       45.50468,
+       -73.529896
+      ]
+     }
+    },
+    "rmsDiffPct": 0.9,
+    "mismatches": [
+     {
+      "s0": 580,
+      "s1": 660,
+      "worstAtS": 620,
+      "realPct": 3.1,
+      "gamePct": 0.2,
+      "at": [
+       45.497099,
+       -73.522791
+      ]
+     },
+     {
+      "s0": 940,
+      "s1": 1050,
+      "worstAtS": 1000,
+      "realPct": -3.3,
+      "gamePct": 0,
+      "at": [
+       45.499198,
+       -73.525998
+      ]
+     },
+     {
+      "s0": 1410,
+      "s1": 1510,
+      "worstAtS": 1480,
+      "realPct": 1.9,
+      "gamePct": -0.4,
+      "at": [
+       45.502801,
+       -73.528471
+      ]
+     }
+    ]
+   }
+  },
+  "published": [
+   {
+    "what": "Turn 8",
+    "value": "\"The very fast Pont de la Concorde corner (Turn 8) is after the bridge underpass\"",
+    "source": "https://en.wikipedia.org/wiki/Circuit_Gilles_Villeneuve"
+   }
+  ],
+  "famousFeatures": [
+   {
+    "feature": "bridge underpass before Turn 8 (Pont de la Concorde corner)",
+    "real": "the track passes under the Avenue Pierre-Dupuy bridges and the \"Pont des Iles\" cycle bridge (OSM, layer 1) at s 2113.7-2135.2 m, ~60 m before the Turn 8-9 chicane",
+    "game": "no deck over the track: the six man_made=bridge polygons in scenery-data.js all stand beside the line (none over it); the two nearest (OSM 1266996939 / 1266996940 outlines) end ~20 m east of the centreline",
+    "verdict": "missing"
+   },
+   {
+    "feature": "elevation (flat artificial island)",
+    "real": "HRDEM lidar: 5.2 m range; start / pit straight ~10.6 m, a ~4.5 m rise after the Senna S (s 600-700, 3.5 % over 50 m), plateau to Turn 3, drop into Turns 3-4 (-3.6 %), 13.5-14.3 m from Turn 6 to the hairpin, then the Casino straight falls back to 10.4 m",
+    "game": "GLO-90 flattened to 4 m with an unrelated shape (r = 0.052): its low point (s 2060) is where the ground is level at ~14 m",
+    "verdict": "wrong shape, gentle"
+   }
+  ]
+ },
+ "banking": {
+  "method": "lidar heights at +-4 m across the OSM centreline every 10 m; tilt = atan((hLeft - hRight) / 8 m)",
+  "straightsAbsTiltMedianDeg": 0.9,
+  "gameOverrides": null,
+  "gameMaxAbsBankDeg": 5.9,
+  "corners": [
+   {
+    "s0": 430,
+    "s1": 480,
+    "dir": "L",
+    "minRadius": 22,
+    "at": [
+     45.497753,
+     -73.522666
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.7,
+     "max": 0.8,
+     "min": 0.4
+    },
+    "gameInsideLowerDeg": {
+     "median": 4.2,
+     "max": 5.3
+    }
+   },
+   {
+    "s0": 500,
+    "s1": 610,
+    "dir": "R",
+    "minRadius": 18,
+    "at": [
+     45.497171,
+     -73.522083
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 1.1,
+     "max": 1.7,
+     "min": 0.3
+    },
+    "gameInsideLowerDeg": {
+     "median": 5,
+     "max": 5.7
+    }
+   },
+   {
+    "s0": 690,
+    "s1": 720,
+    "dir": "R",
+    "minRadius": 143,
+    "at": [
+     45.497342,
+     -73.523884
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 1.2,
+     "max": 1.2,
+     "min": 1.1
+    },
+    "gameInsideLowerDeg": {
+     "median": 1.6,
+     "max": 1.7
+    }
+   },
+   {
+    "s0": 900,
+    "s1": 950,
+    "dir": "R",
+    "minRadius": 31,
+    "at": [
+     45.498594,
+     -73.526052
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 1,
+     "max": 1.4,
+     "min": 0.6
+    },
+    "gameInsideLowerDeg": {
+     "median": 4.5,
+     "max": 5.2
+    }
+   },
+   {
+    "s0": 970,
+    "s1": 1010,
+    "dir": "L",
+    "minRadius": 31,
+    "at": [
+     45.49912,
+     -73.52594
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.1,
+     "max": 0.7,
+     "min": -0.5
+    },
+    "gameInsideLowerDeg": {
+     "median": 3.9,
+     "max": 5
+    }
+   },
+   {
+    "s0": 1110,
+    "s1": 1140,
+    "dir": "L",
+    "minRadius": 109,
+    "at": [
+     45.500106,
+     -73.527038
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.2,
+     "max": 0.4,
+     "min": -0.2
+    },
+    "gameInsideLowerDeg": {
+     "median": 2,
+     "max": 2.1
+    }
+   },
+   {
+    "s0": 1180,
+    "s1": 1290,
+    "dir": "R",
+    "minRadius": 81,
+    "at": [
+     45.500812,
+     -73.527982
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 1.1,
+     "max": 1.4,
+     "min": 0.5
+    },
+    "gameInsideLowerDeg": {
+     "median": 2,
+     "max": 2.8
+    }
+   },
+   {
+    "s0": 1440,
+    "s1": 1490,
+    "dir": "L",
+    "minRadius": 23,
+    "at": [
+     45.50279,
+     -73.528344
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.6,
+     "max": 1,
+     "min": -0.4
+    },
+    "gameInsideLowerDeg": {
+     "median": 5.3,
+     "max": 5.6
+    }
+   },
+   {
+    "s0": 1500,
+    "s1": 1610,
+    "dir": "R",
+    "minRadius": 38,
+    "at": [
+     45.502935,
+     -73.529403
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 1.2,
+     "max": 1.7,
+     "min": 0.5
+    },
+    "gameInsideLowerDeg": {
+     "median": 3.3,
+     "max": 4.8
+    }
+   },
+   {
+    "s0": 1650,
+    "s1": 1670,
+    "dir": "R",
+    "minRadius": 105,
+    "at": [
+     45.503782,
+     -73.529804
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.7,
+     "max": 0.7,
+     "min": 0.6
+    },
+    "gameInsideLowerDeg": {
+     "median": 1.5,
+     "max": 2.2
+    }
+   },
+   {
+    "s0": 2190,
+    "s1": 2230,
+    "dir": "R",
+    "minRadius": 21,
+    "at": [
+     45.508661,
+     -73.529115
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.7,
+     "max": 1,
+     "min": 0.1
+    },
+    "gameInsideLowerDeg": {
+     "median": 4.4,
+     "max": 5.4
+    }
+   },
+   {
+    "s0": 2240,
+    "s1": 2320,
+    "dir": "L",
+    "minRadius": 50,
+    "at": [
+     45.5089,
+     -73.528308
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.6,
+     "max": 0.9,
+     "min": 0.3
+    },
+    "gameInsideLowerDeg": {
+     "median": 2.9,
+     "max": 4.2
+    }
+   },
+   {
+    "s0": 2699,
+    "s1": 2719,
+    "dir": "L",
+    "minRadius": 219,
+    "at": [
+     45.512674,
+     -73.527294
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.6,
+     "max": 0.6,
+     "min": 0.5
+    },
+    "gameInsideLowerDeg": {
+     "median": 1.2,
+     "max": 1.2
+    }
+   },
+   {
+    "s0": 2869,
+    "s1": 2929,
+    "dir": "R",
+    "minRadius": 14,
+    "at": [
+     45.514287,
+     -73.527517
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.8,
+     "max": 1,
+     "min": 0.6
+    },
+    "gameInsideLowerDeg": {
+     "median": 5.6,
+     "max": 5.9
+    }
+   },
+   {
+    "s0": 3019,
+    "s1": 3039,
+    "dir": "L",
+    "minRadius": 74,
+    "at": [
+     45.513265,
+     -73.527058
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.2,
+     "max": 0.3,
+     "min": 0.2
+    },
+    "gameInsideLowerDeg": {
+     "median": 2.6,
+     "max": 2.6
+    }
+   },
+   {
+    "s0": 4089,
+    "s1": 4109,
+    "dir": "R",
+    "minRadius": 16,
+    "at": [
+     45.504006,
+     -73.523463
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.5,
+     "max": 0.8,
+     "min": 0.3
+    },
+    "gameInsideLowerDeg": {
+     "median": 4.3,
+     "max": 5.3
+    }
+   },
+   {
+    "s0": 4119,
+    "s1": 4159,
+    "dir": "L",
+    "minRadius": 20,
+    "at": [
+     45.503756,
+     -73.523792
+    ],
+    "way": "Circuit Gilles-Villeneuve",
+    "realInsideLowerDeg": {
+     "median": 0.4,
+     "max": 0.9,
+     "min": 0
+    },
+    "gameInsideLowerDeg": {
+     "median": 4,
+     "max": 5.4
+    }
+   }
+  ]
+ },
+ "tunnelsAndBridges": {
+  "crossings": [
+   {
+    "kind": "crosses",
+    "osmWay": 135527655,
+    "s": 2113.7,
+    "at": [
+     45.507838,
+     -73.529457
+    ],
+    "what": "unclassified",
+    "bridge": "yes",
+    "tunnel": null,
+    "layer": "1",
+    "name": null
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 164863796,
+    "s": 2135.2,
+    "at": [
+     45.508026,
+     -73.529391
+    ],
+    "what": "cycleway",
+    "bridge": "yes",
+    "tunnel": null,
+    "layer": "1",
+    "name": "Pont des Iles"
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 413000974,
+    "s": 2130.4,
+    "at": [
+     45.507984,
+     -73.529406
+    ],
+    "what": "unclassified",
+    "bridge": "yes",
+    "tunnel": null,
+    "layer": "1",
+    "name": null
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 814256358,
+    "s": 2126.3,
+    "at": [
+     45.507948,
+     -73.529418
+    ],
+    "what": "footway",
+    "bridge": "yes",
+    "tunnel": null,
+    "layer": "1",
+    "name": null
+   },
+   {
+    "kind": "crosses",
+    "osmWay": 1427698141,
+    "s": 2121.4,
+    "at": [
+     45.507905,
+     -73.529434
+    ],
+    "what": "tertiary",
+    "bridge": "yes",
+    "tunnel": null,
+    "layer": "1",
+    "name": "Avenue Pierre-Dupuy"
+   }
+  ],
+  "gameSceneryBridges": [
+   {
+    "centre": [
+     45.505207,
+     -73.524793
+    ],
+    "overLine": false,
+    "lineInsideM": 0,
+    "s": null,
+    "h": 7
+   },
+   {
+    "centre": [
+     45.512963,
+     -73.529303
+    ],
+    "overLine": false,
+    "lineInsideM": 0,
+    "s": null,
+    "h": 7
+   },
+   {
+    "centre": [
+     45.507986,
+     -73.528905
+    ],
+    "overLine": false,
+    "lineInsideM": 0,
+    "s": null,
+    "h": 7
+   },
+   {
+    "centre": [
+     45.508055,
+     -73.529002
+    ],
+    "overLine": false,
+    "lineInsideM": 0,
+    "s": null,
+    "h": 7
+   },
+   {
+    "centre": [
+     45.508534,
+     -73.532759
+    ],
+    "overLine": false,
+    "lineInsideM": 0,
+    "s": null,
+    "h": 7
+   },
+   {
+    "centre": [
+     45.495655,
+     -73.519437
+    ],
+    "overLine": false,
+    "lineInsideM": 0,
+    "s": null,
+    "h": 7
+   }
+  ]
+ },
+ "findings": [
+  {
+   "aspect": "bridge",
+   "severity": "major",
+   "game": "nothing over the track at s 2113.7-2135.2 m; scenery draws bridge decks beside the line only (6 man_made=bridge polygons, none over it)",
+   "real": "5 bridge ways cross over the track there (OSM 135527655, 164863796 \"Pont des Iles\", 413000974, 814256358, 1427698141 \"Avenue Pierre-Dupuy\"; all bridge=yes, layer 1): the \"bridge underpass\" Wikipedia names before Turn 8, the Pont de la Concorde corner",
+   "proposedFix": "add one deck (or the 4 parallel decks) spanning the track at s 2113.7-2135.2 m, ~21 m long along the track, clearance >= 6.5 m; build-scenery.mjs would need to turn crossing linear bridge ways (highway=* bridge=yes layer>=1) into deck polygons (buffer by their width)",
+   "sources": [
+    "https://www.openstreetmap.org/way/135527655",
+    "https://www.openstreetmap.org/way/164863796",
+    "https://www.openstreetmap.org/way/413000974",
+    "https://www.openstreetmap.org/way/814256358",
+    "https://www.openstreetmap.org/way/1427698141",
+    "https://en.wikipedia.org/wiki/Circuit_Gilles_Villeneuve: \"The very fast Pont de la Concorde corner (Turn 8) is after the bridge underpass\"",
+    "OpenStreetMap (ODbL) via Overpass API (maps.mail.ru mirror), cached in devtests/track-audit/cache/overpass/"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "minor",
+   "game": "GLO-90 + FLAT_TRACKS: range 4 m, 50 m grades <= 0.9 %, correlation with the ground 0.052, rms 1.98 m (max -4.3 m at s 2030)",
+   "real": "NRCan HRDEM lidar along the OSM centreline: range 5.2 m (10.4-15.6 m ASL); grades flattened by > 2 pp at s 580-660 (real 3.5 %, game 0.2 %), 940-1050 (real -3.6 %, game 0 %), 1420-1530 (real 2 %, game -0.4 %). Cross-check: SRTM 30 m (OpenTopoData) correlates 0.52 with the lidar and shows the same higher middle of the lap",
+   "proposedFix": "new elevation source 'hrdem' (WCS GetCoverage of coverage dtm, EPSG:4326 1e-5 deg tiles, bilinear; see devtests/track-audit/americas/net.mjs hrdem()) with ELEV_SOURCE['ca-1978'] = 'hrdem' and 'ca-1978' removed from FLAT_TRACKS. Predicted in game: range 5.2 m, 3.2 % / -3.3 % over 50 m. The profile at 10 m is in profile.rows (realH) if a static override is preferred",
+   "sources": [
+    "NRCan HRDEM mosaic DTM (lidar; Open Government Licence - Canada): WCS https://datacube.services.geo.ca/ows/elevation, coverage dtm, EPSG:4326, 1e-5 deg grid",
+    "OpenTopoData srtm30m (cache/opentopodata/srtm30m-americas.json)",
+    "tools/build-tracks.mjs FLAT_TRACKS"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "severity": "minor",
+   "game": "curvature-derived banking: s 2869-2929 R R14 m (Circuit Gilles-Villeneuve): real 0.8 deg, game 5.6 (max 5.9); s 1440-1490 L R23 m (Circuit Gilles-Villeneuve): real 0.6 deg, game 5.3 (max 5.6); s 500-610 R R18 m (Circuit Gilles-Villeneuve): real 1.1 deg, game 5 (max 5.7); s 970-1010 L R31 m (Circuit Gilles-Villeneuve): real 0.1 deg, game 3.9 (max 5)",
+   "real": "lidar: all 17 corners within +-2.2 deg (park roads; straights 0.9 deg)",
+   "proposedFix": "scale the derived banking down for this circuit (or use the measured cross-slope profile)",
+   "sources": [
+    "NRCan HRDEM mosaic DTM (lidar; Open Government Licence - Canada): WCS https://datacube.services.geo.ca/ows/elevation, coverage dtm, EPSG:4326, 1e-5 deg grid",
+    "game data: tracks-data.js + js/track.js built in node (devtests/track-audit/americas/game.js -> out/game-<id>.json)"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "pit lane {\"side\":\"left\",\"limitKmh\":80,\"laneFromS\":-210,\"laneToS\":250,\"entryLineS\":-124,\"exitLineS\":164,\"lengthM\":460}",
+   "real": "OSM way 413000959 \"Circuit Gilles Villeneuve pit lane\" (826 m) on the left from s -270.1 m (at the final chicane) to +593.8 m (it rejoins after Turn 2, the 2002 pit exit); 80 km/h",
+   "proposedFix": "side and limit right; real exit is ~340 m further on, after the Senna S (pitLane {entry: [45.5040959, -73.5234683], exit: [45.4970649, -73.5224658]} if js/track.js ever supports it)",
+   "sources": [
+    "https://www.openstreetmap.org/way/413000959",
+    "https://en.wikipedia.org/wiki/Circuit_Gilles_Villeneuve (pit exit changed in 2002)",
+    "FIA 2025 Formula 1 Sporting Regulations, Issue 5 (2025-04-30), art. 34.7: \"A speed limit of 80km/h will be imposed in the pit lane during the whole Competition. However, this limit may be amended by the Race Director\" (cache/fia/fia_2025_formula_1_sporting_regulations_-_issue_5_-_2025-04-30.txt)"
+   ]
+  },
+  {
+   "aspect": "start",
+   "severity": "cosmetic",
+   "game": "start / finish at [45.501816,-73.523246]",
+   "real": "no start / finish node or line in OSM; not verified",
+   "proposedFix": "none",
+   "sources": [
+    "OpenStreetMap (ODbL) via Overpass API (maps.mail.ru mirror), cached in devtests/track-audit/cache/overpass/"
+   ]
+  }
+ ],
+ "proposedCorrection": {
+  "ELEV_SOURCE": "hrdem (new source: NRCan HRDEM DTM via WCS)",
+  "FLAT_TRACKS": "remove ca-1978",
+  "predictedWithHrdem": {
+   "kind": "dtm",
+   "override": null,
+   "rangeM": 5.2,
+   "maxClimb50Pct": 3.2,
+   "atS": 610,
+   "maxDescent50Pct": -3.3,
+   "atS2": 1000,
+   "maxClimb100Pct": 2.9,
+   "maxDescent100Pct": -3.1,
+   "rmsGradeDiffVsLidarPct": 0.08
+  },
+  "bridgesOverTrack": [
+   {
+    "osmWay": 135527655,
+    "name": null,
+    "kind": "unclassified",
+    "s": 2113.7,
+    "at": [
+     45.507838,
+     -73.529457
+    ]
+   },
+   {
+    "osmWay": 164863796,
+    "name": "Pont des Iles",
+    "kind": "cycleway",
+    "s": 2135.2,
+    "at": [
+     45.508026,
+     -73.529391
+    ]
+   },
+   {
+    "osmWay": 413000974,
+    "name": null,
+    "kind": "unclassified",
+    "s": 2130.4,
+    "at": [
+     45.507984,
+     -73.529406
+    ]
+   },
+   {
+    "osmWay": 814256358,
+    "name": null,
+    "kind": "footway",
+    "s": 2126.3,
+    "at": [
+     45.507948,
+     -73.529418
+    ]
+   },
+   {
+    "osmWay": 1427698141,
+    "name": "Avenue Pierre-Dupuy",
+    "kind": "tertiary",
+    "s": 2121.4,
+    "at": [
+     45.507905,
+     -73.529434
+    ]
+   }
+  ],
+  "underpassDeck": {
+   "sFrom": 2111.7,
+   "sTo": 2137.2,
+   "clearanceM": 6.5
+  },
+  "derivedBankScale": 0.3
+ },
+ "profile": {
+  "step": 10,
+  "note": "s from the game line; real = lidar on the OSM foot point (30 m median); game = js/track.js sample y; tilt = lidar cross-slope (deg, + = left higher); gBank = game bank (deg, same sign)",
+  "rows": [
+   [
+    0,
+    45.501818,
+    -73.523231,
+    10.57,
+    11.24,
+    1.2,
+    0.9,
+    -0.1,
+    null
+   ],
+   [
+    10,
+    45.50173,
+    -73.523204,
+    10.58,
+    11.27,
+    1.2,
+    0.6,
+    -0.1,
+    null
+   ],
+   [
+    20,
+    45.501642,
+    -73.523178,
+    10.58,
+    11.31,
+    1.1,
+    0.7,
+    -0.1,
+    null
+   ],
+   [
+    30,
+    45.501554,
+    -73.523151,
+    10.58,
+    11.35,
+    1.1,
+    0.8,
+    0,
+    null
+   ],
+   [
+    40,
+    45.501466,
+    -73.523125,
+    10.58,
+    11.38,
+    1,
+    0.7,
+    0,
+    null
+   ],
+   [
+    50,
+    45.501378,
+    -73.523098,
+    10.58,
+    11.42,
+    1,
+    0.7,
+    0,
+    null
+   ],
+   [
+    60,
+    45.501289,
+    -73.523072,
+    10.58,
+    11.45,
+    0.9,
+    0.8,
+    0,
+    null
+   ],
+   [
+    70,
+    45.501201,
+    -73.523045,
+    10.58,
+    11.49,
+    0.9,
+    0.8,
+    0,
+    null
+   ],
+   [
+    80,
+    45.501113,
+    -73.523019,
+    10.58,
+    11.53,
+    0.8,
+    0.9,
+    0,
+    null
+   ],
+   [
+    90,
+    45.501025,
+    -73.522992,
+    10.58,
+    11.56,
+    0.8,
+    0.9,
+    0,
+    null
+   ],
+   [
+    100,
+    45.500937,
+    -73.522966,
+    10.58,
+    11.6,
+    0.8,
+    0.8,
+    0,
+    null
+   ],
+   [
+    110,
+    45.500849,
+    -73.522939,
+    10.59,
+    11.63,
+    0.7,
+    0.9,
+    0,
+    null
+   ],
+   [
+    120,
+    45.50076,
+    -73.522913,
+    10.58,
+    11.66,
+    0.7,
+    0.9,
+    0,
+    null
+   ],
+   [
+    130,
+    45.500672,
+    -73.522886,
+    10.59,
+    11.68,
+    0.6,
+    0.9,
+    0,
+    null
+   ],
+   [
+    140,
+    45.500584,
+    -73.52286,
+    10.59,
+    11.7,
+    0.6,
+    0.8,
+    0,
+    null
+   ],
+   [
+    150,
+    45.500496,
+    -73.522833,
+    10.59,
+    11.73,
+    0.5,
+    0.8,
+    -0.1,
+    null
+   ],
+   [
+    160,
+    45.500408,
+    -73.522807,
+    10.58,
+    11.77,
+    0.4,
+    0.9,
+    -0.1,
+    null
+   ],
+   [
+    170,
+    45.50032,
+    -73.52278,
+    10.58,
+    11.82,
+    0.3,
+    0.8,
+    0.1,
+    null
+   ],
+   [
+    180,
+    45.500232,
+    -73.522754,
+    10.58,
+    11.87,
+    0.2,
+    0.9,
+    0.3,
+    null
+   ],
+   [
+    190,
+    45.500143,
+    -73.522727,
+    10.59,
+    11.91,
+    0.2,
+    0.9,
+    0.5,
+    null
+   ],
+   [
+    200,
+    45.500055,
+    -73.522701,
+    10.58,
+    11.96,
+    0.4,
+    0.8,
+    0.5,
+    null
+   ],
+   [
+    210,
+    45.499967,
+    -73.522676,
+    10.59,
+    11.99,
+    0.7,
+    0.9,
+    0.2,
+    null
+   ],
+   [
+    220,
+    45.499879,
+    -73.522651,
+    10.6,
+    12.02,
+    1.1,
+    0.9,
+    -0.2,
+    null
+   ],
+   [
+    230,
+    45.49979,
+    -73.522627,
+    10.6,
+    12.06,
+    1.4,
+    0.9,
+    -0.1,
+    null
+   ],
+   [
+    240,
+    45.4997,
+    -73.522612,
+    10.61,
+    12.09,
+    0.7,
+    0.9,
+    0.7,
+    null
+   ],
+   [
+    250,
+    45.49961,
+    -73.522599,
+    10.62,
+    12.12,
+    0.2,
+    1,
+    1.2,
+    null
+   ],
+   [
+    260,
+    45.499521,
+    -73.522585,
+    10.63,
+    12.16,
+    0.2,
+    0.9,
+    1.1,
+    null
+   ],
+   [
+    270,
+    45.499431,
+    -73.522579,
+    10.65,
+    12.2,
+    0.1,
+    0.7,
+    0.8,
+    null
+   ],
+   [
+    280,
+    45.499341,
+    -73.522575,
+    10.66,
+    12.24,
+    0,
+    0.8,
+    0.7,
+    null
+   ],
+   [
+    290,
+    45.49925,
+    -73.522572,
+    10.7,
+    12.28,
+    0.1,
+    0.8,
+    0.8,
+    null
+   ],
+   [
+    300,
+    45.49916,
+    -73.522576,
+    10.74,
+    12.32,
+    0,
+    0.8,
+    1.1,
+    null
+   ],
+   [
+    310,
+    45.49907,
+    -73.522579,
+    10.77,
+    12.36,
+    0.2,
+    1,
+    1.1,
+    null
+   ],
+   [
+    320,
+    45.49898,
+    -73.522584,
+    10.82,
+    12.41,
+    0.9,
+    1,
+    0.8,
+    null
+   ],
+   [
+    330,
+    45.49889,
+    -73.522599,
+    10.87,
+    12.45,
+    1,
+    1,
+    0.2,
+    null
+   ],
+   [
+    340,
+    45.498801,
+    -73.522615,
+    10.89,
+    12.5,
+    1.1,
+    1.2,
+    -0.2,
+    null
+   ],
+   [
+    350,
+    45.498711,
+    -73.52263,
+    10.94,
+    12.55,
+    1.2,
+    1.2,
+    -0.2,
+    null
+   ],
+   [
+    360,
+    45.498622,
+    -73.522646,
+    10.97,
+    12.59,
+    1.1,
+    1.1,
+    -0.1,
+    null
+   ],
+   [
+    370,
+    45.498533,
+    -73.522662,
+    11.02,
+    12.64,
+    1,
+    1.3,
+    0,
+    null
+   ],
+   [
+    380,
+    45.498443,
+    -73.522678,
+    11.06,
+    12.69,
+    0.9,
+    0.8,
+    0.1,
+    null
+   ],
+   [
+    390,
+    45.498354,
+    -73.522694,
+    11.11,
+    12.72,
+    0.8,
+    0.5,
+    0.3,
+    null
+   ],
+   [
+    400,
+    45.498264,
+    -73.52271,
+    11.15,
+    12.75,
+    0.8,
+    0.3,
+    0.3,
+    null
+   ],
+   [
+    410,
+    45.498175,
+    -73.522726,
+    11.17,
+    12.78,
+    1,
+    0,
+    -0.2,
+    null
+   ],
+   [
+    420,
+    45.498086,
+    -73.522742,
+    11.18,
+    12.8,
+    1.1,
+    -0.4,
+    -1.2,
+    null
+   ],
+   [
+    430,
+    45.497996,
+    -73.522758,
+    11.19,
+    12.82,
+    0.9,
+    -0.4,
+    -2.6,
+    null
+   ],
+   [
+    440,
+    45.497908,
+    -73.522765,
+    11.22,
+    12.86,
+    0.4,
+    -0.5,
+    -4.2,
+    null
+   ],
+   [
+    450,
+    45.497821,
+    -73.522737,
+    11.22,
+    12.91,
+    0.8,
+    -0.8,
+    -5.3,
+    null
+   ],
+   [
+    460,
+    45.497753,
+    -73.522666,
+    11.24,
+    12.93,
+    1,
+    -0.7,
+    -5.1,
+    null
+   ],
+   [
+    470,
+    45.497707,
+    -73.522561,
+    11.25,
+    12.96,
+    1.5,
+    -0.7,
+    -3.7,
+    null
+   ],
+   [
+    480,
+    45.497671,
+    -73.522444,
+    11.27,
+    13,
+    1.8,
+    -0.6,
+    -1.8,
+    null
+   ],
+   [
+    490,
+    45.497634,
+    -73.522327,
+    11.3,
+    13.04,
+    1.5,
+    -0.2,
+    -0.1,
+    null
+   ],
+   [
+    500,
+    45.497597,
+    -73.522211,
+    11.33,
+    13.09,
+    1.1,
+    0.3,
+    1.9,
+    null
+   ],
+   [
+    510,
+    45.497551,
+    -73.5221,
+    11.35,
+    13.12,
+    0.1,
+    0.5,
+    4.2,
+    null
+   ],
+   [
+    520,
+    45.497489,
+    -73.522015,
+    11.39,
+    13.14,
+    1.2,
+    0.9,
+    5.5,
+    null
+   ],
+   [
+    530,
+    45.497408,
+    -73.521972,
+    11.41,
+    13.16,
+    1.3,
+    1,
+    5.7,
+    null
+   ],
+   [
+    540,
+    45.497324,
+    -73.521972,
+    11.45,
+    13.2,
+    1.1,
+    1.1,
+    5.4,
+    null
+   ],
+   [
+    550,
+    45.49724,
+    -73.522011,
+    11.55,
+    13.24,
+    1,
+    0.9,
+    5.3,
+    null
+   ],
+   [
+    560,
+    45.497171,
+    -73.522083,
+    11.7,
+    13.27,
+    1.1,
+    1.4,
+    5.2,
+    null
+   ],
+   [
+    570,
+    45.497115,
+    -73.522181,
+    11.91,
+    13.31,
+    0.9,
+    1.1,
+    5,
+    null
+   ],
+   [
+    580,
+    45.49708,
+    -73.522293,
+    12.19,
+    13.34,
+    0.9,
+    1.2,
+    4.8,
+    null
+   ],
+   [
+    590,
+    45.497066,
+    -73.522416,
+    12.47,
+    13.38,
+    1.1,
+    1.4,
+    4.2,
+    null
+   ],
+   [
+    600,
+    45.497068,
+    -73.522541,
+    12.84,
+    13.41,
+    1,
+    1.7,
+    3.2,
+    null
+   ],
+   [
+    610,
+    45.49708,
+    -73.522667,
+    13.26,
+    13.43,
+    0.9,
+    1.6,
+    2.1,
+    null
+   ],
+   [
+    620,
+    45.497099,
+    -73.522791,
+    13.63,
+    13.44,
+    0.6,
+    1.2,
+    0.9,
+    null
+   ],
+   [
+    630,
+    45.497121,
+    -73.522915,
+    13.99,
+    13.45,
+    0.6,
+    1.3,
+    0.4,
+    null
+   ],
+   [
+    640,
+    45.497146,
+    -73.523037,
+    14.3,
+    13.47,
+    0.8,
+    1.4,
+    0.3,
+    null
+   ],
+   [
+    650,
+    45.497172,
+    -73.523159,
+    14.56,
+    13.49,
+    1,
+    1.1,
+    0.2,
+    null
+   ],
+   [
+    660,
+    45.497199,
+    -73.523281,
+    14.8,
+    13.51,
+    1.2,
+    1.3,
+    0.2,
+    null
+   ],
+   [
+    670,
+    45.497225,
+    -73.523403,
+    15.03,
+    13.54,
+    1.3,
+    1.1,
+    0.2,
+    null
+   ],
+   [
+    680,
+    45.497252,
+    -73.523525,
+    15.23,
+    13.57,
+    1.4,
+    1.1,
+    0.5,
+    null
+   ],
+   [
+    690,
+    45.497279,
+    -73.523647,
+    15.39,
+    13.6,
+    1.4,
+    1.2,
+    1.2,
+    null
+   ],
+   [
+    700,
+    45.497308,
+    -73.523766,
+    15.51,
+    13.62,
+    1.2,
+    1.2,
+    1.7,
+    null
+   ],
+   [
+    710,
+    45.497342,
+    -73.523884,
+    15.6,
+    13.64,
+    0.9,
+    1.2,
+    1.6,
+    null
+   ],
+   [
+    720,
+    45.49738,
+    -73.523999,
+    15.63,
+    13.64,
+    0.6,
+    1.1,
+    1.1,
+    null
+   ],
+   [
+    730,
+    45.497422,
+    -73.524112,
+    15.63,
+    13.64,
+    0.2,
+    0.8,
+    0.7,
+    null
+   ],
+   [
+    740,
+    45.497467,
+    -73.524222,
+    15.62,
+    13.64,
+    0.1,
+    1,
+    0.5,
+    null
+   ],
+   [
+    750,
+    45.497515,
+    -73.524331,
+    15.6,
+    13.63,
+    0.2,
+    0.7,
+    0.7,
+    null
+   ],
+   [
+    760,
+    45.497566,
+    -73.524435,
+    15.55,
+    13.63,
+    0.5,
+    0.6,
+    1,
+    null
+   ],
+   [
+    770,
+    45.49762,
+    -73.524537,
+    15.5,
+    13.64,
+    0.7,
+    0.6,
+    1.2,
+    null
+   ],
+   [
+    780,
+    45.497676,
+    -73.524637,
+    15.49,
+    13.66,
+    0.8,
+    1,
+    1,
+    null
+   ],
+   [
+    790,
+    45.497732,
+    -73.524737,
+    15.45,
+    13.68,
+    0.6,
+    1.1,
+    0.6,
+    null
+   ],
+   [
+    800,
+    45.497789,
+    -73.524835,
+    15.44,
+    13.7,
+    0.3,
+    1,
+    0.1,
+    null
+   ],
+   [
+    810,
+    45.497846,
+    -73.524934,
+    15.44,
+    13.72,
+    0.1,
+    1.1,
+    -0.2,
+    null
+   ],
+   [
+    820,
+    45.497903,
+    -73.525033,
+    15.43,
+    13.74,
+    0.3,
+    1.2,
+    -0.2,
+    null
+   ],
+   [
+    830,
+    45.497961,
+    -73.525131,
+    15.43,
+    13.74,
+    0.3,
+    1.2,
+    0,
+    null
+   ],
+   [
+    840,
+    45.49802,
+    -73.525228,
+    15.43,
+    13.74,
+    0.2,
+    1.3,
+    0.2,
+    null
+   ],
+   [
+    850,
+    45.498079,
+    -73.525325,
+    15.43,
+    13.74,
+    0.2,
+    1.2,
+    0.2,
+    null
+   ],
+   [
+    860,
+    45.498138,
+    -73.525421,
+    15.43,
+    13.74,
+    0.3,
+    1.2,
+    0.1,
+    null
+   ],
+   [
+    870,
+    45.498198,
+    -73.525516,
+    15.42,
+    13.74,
+    0.1,
+    1.2,
+    0.1,
+    null
+   ],
+   [
+    880,
+    45.498259,
+    -73.52561,
+    15.42,
+    13.74,
+    0.1,
+    1.5,
+    0.3,
+    null
+   ],
+   [
+    890,
+    45.49832,
+    -73.525704,
+    15.41,
+    13.74,
+    0.1,
+    1.1,
+    0.6,
+    null
+   ],
+   [
+    900,
+    45.498381,
+    -73.525798,
+    15.37,
+    13.74,
+    0,
+    1.3,
+    1.5,
+    null
+   ],
+   [
+    910,
+    45.498442,
+    -73.525893,
+    15.33,
+    13.74,
+    0.5,
+    1.4,
+    2.9,
+    null
+   ],
+   [
+    920,
+    45.498503,
+    -73.525984,
+    15.21,
+    13.74,
+    1.9,
+    1,
+    4.5,
+    null
+   ],
+   [
+    930,
+    45.498594,
+    -73.526052,
+    15.06,
+    13.74,
+    2.6,
+    0.9,
+    5.2,
+    null
+   ],
+   [
+    940,
+    45.49869,
+    -73.526049,
+    14.8,
+    13.74,
+    1.4,
+    1,
+    4.8,
+    null
+   ],
+   [
+    950,
+    45.498776,
+    -73.526013,
+    14.58,
+    13.74,
+    0.1,
+    0.6,
+    3,
+    null
+   ],
+   [
+    960,
+    45.498861,
+    -73.52597,
+    14.3,
+    13.74,
+    0.1,
+    0.2,
+    -0.3,
+    null
+   ],
+   [
+    970,
+    45.498948,
+    -73.525937,
+    14,
+    13.74,
+    0.3,
+    0,
+    -3.1,
+    null
+   ],
+   [
+    980,
+    45.499036,
+    -73.525922,
+    13.62,
+    13.74,
+    0.7,
+    -0.7,
+    -4.7,
+    null
+   ],
+   [
+    990,
+    45.49912,
+    -73.52594,
+    13.29,
+    13.74,
+    1.3,
+    -0.5,
+    -5,
+    null
+   ],
+   [
+    1000,
+    45.499198,
+    -73.525998,
+    12.88,
+    13.74,
+    2,
+    -0.1,
+    -3.9,
+    null
+   ],
+   [
+    1010,
+    45.499266,
+    -73.526076,
+    12.51,
+    13.74,
+    2.6,
+    0.5,
+    -2.1,
+    null
+   ],
+   [
+    1020,
+    45.499336,
+    -73.526157,
+    12.15,
+    13.74,
+    2.6,
+    0.8,
+    -0.8,
+    null
+   ],
+   [
+    1030,
+    45.499405,
+    -73.526237,
+    11.81,
+    13.74,
+    2.5,
+    1,
+    -0.2,
+    null
+   ],
+   [
+    1040,
+    45.499475,
+    -73.526318,
+    11.52,
+    13.74,
+    2.3,
+    0.9,
+    0,
+    null
+   ],
+   [
+    1050,
+    45.499545,
+    -73.526399,
+    11.29,
+    13.74,
+    2.1,
+    0.9,
+    0.2,
+    null
+   ],
+   [
+    1060,
+    45.499615,
+    -73.52648,
+    11.09,
+    13.74,
+    1.9,
+    1,
+    0.3,
+    null
+   ],
+   [
+    1070,
+    45.499685,
+    -73.52656,
+    10.95,
+    13.74,
+    1.9,
+    0.8,
+    0.3,
+    null
+   ],
+   [
+    1080,
+    45.499756,
+    -73.526639,
+    10.84,
+    13.74,
+    1.7,
+    1,
+    0,
+    null
+   ],
+   [
+    1090,
+    45.499827,
+    -73.526717,
+    10.77,
+    13.74,
+    1.6,
+    0.7,
+    -0.2,
+    null
+   ],
+   [
+    1100,
+    45.499898,
+    -73.526795,
+    10.77,
+    13.74,
+    1.4,
+    0.6,
+    -0.6,
+    null
+   ],
+   [
+    1110,
+    45.49997,
+    -73.526874,
+    10.76,
+    13.74,
+    1,
+    0.2,
+    -1.3,
+    null
+   ],
+   [
+    1120,
+    45.50004,
+    -73.526953,
+    10.77,
+    13.74,
+    0.4,
+    -0.2,
+    -2.1,
+    null
+   ],
+   [
+    1130,
+    45.500106,
+    -73.527038,
+    10.8,
+    13.74,
+    0.6,
+    -0.2,
+    -2,
+    null
+   ],
+   [
+    1140,
+    45.500166,
+    -73.527136,
+    10.81,
+    13.74,
+    1.1,
+    -0.4,
+    -1.3,
+    null
+   ],
+   [
+    1150,
+    45.500217,
+    -73.527242,
+    10.82,
+    13.74,
+    0.9,
+    -0.3,
+    -0.4,
+    null
+   ],
+   [
+    1160,
+    45.500264,
+    -73.527351,
+    10.83,
+    13.74,
+    0.3,
+    -0.3,
+    0.4,
+    null
+   ],
+   [
+    1170,
+    45.500312,
+    -73.527458,
+    10.86,
+    13.74,
+    0.2,
+    0,
+    1.2,
+    null
+   ],
+   [
+    1180,
+    45.500368,
+    -73.527559,
+    10.9,
+    13.74,
+    0,
+    0.5,
+    2.2,
+    null
+   ],
+   [
+    1190,
+    45.500429,
+    -73.527653,
+    10.92,
+    13.74,
+    0,
+    0.8,
+    2.6,
+    null
+   ],
+   [
+    1200,
+    45.500495,
+    -73.527741,
+    10.94,
+    13.74,
+    0.4,
+    1,
+    2.6,
+    null
+   ],
+   [
+    1210,
+    45.500569,
+    -73.527814,
+    10.94,
+    13.74,
+    0.2,
+    1,
+    2.8,
+    null
+   ],
+   [
+    1220,
+    45.500647,
+    -73.527878,
+    10.94,
+    13.72,
+    0.2,
+    1.1,
+    2.8,
+    null
+   ],
+   [
+    1230,
+    45.500728,
+    -73.527934,
+    10.93,
+    13.68,
+    0.7,
+    1.1,
+    2,
+    null
+   ],
+   [
+    1240,
+    45.500812,
+    -73.527982,
+    10.93,
+    13.65,
+    1.2,
+    1.3,
+    1.2,
+    null
+   ],
+   [
+    1250,
+    45.500899,
+    -73.528021,
+    10.92,
+    13.64,
+    1.2,
+    1.4,
+    1.2,
+    null
+   ],
+   [
+    1260,
+    45.500987,
+    -73.528052,
+    10.9,
+    13.64,
+    1,
+    1,
+    1.6,
+    null
+   ],
+   [
+    1270,
+    45.501076,
+    -73.528073,
+    10.89,
+    13.64,
+    0.7,
+    1.2,
+    1.9,
+    null
+   ],
+   [
+    1280,
+    45.501166,
+    -73.528085,
+    10.87,
+    13.64,
+    0.3,
+    1,
+    1.8,
+    null
+   ],
+   [
+    1290,
+    45.501256,
+    -73.528092,
+    10.85,
+    13.64,
+    0.3,
+    1.2,
+    1.3,
+    null
+   ],
+   [
+    1300,
+    45.501346,
+    -73.528096,
+    10.85,
+    13.64,
+    0.4,
+    1.1,
+    0.7,
+    null
+   ],
+   [
+    1310,
+    45.501436,
+    -73.528096,
+    10.82,
+    13.64,
+    0.5,
+    1,
+    0.3,
+    null
+   ],
+   [
+    1320,
+    45.501527,
+    -73.528094,
+    10.8,
+    13.64,
+    0.5,
+    1,
+    -0.1,
+    null
+   ],
+   [
+    1330,
+    45.501617,
+    -73.528091,
+    10.8,
+    13.64,
+    0.5,
+    1.3,
+    -0.2,
+    null
+   ],
+   [
+    1340,
+    45.501707,
+    -73.528089,
+    10.82,
+    13.63,
+    0.3,
+    1,
+    -0.1,
+    null
+   ],
+   [
+    1350,
+    45.501797,
+    -73.528086,
+    10.85,
+    13.61,
+    0.2,
+    1,
+    0,
+    null
+   ],
+   [
+    1360,
+    45.501887,
+    -73.528084,
+    10.93,
+    13.59,
+    0,
+    0.7,
+    0,
+    null
+   ],
+   [
+    1370,
+    45.501977,
+    -73.528081,
+    11.01,
+    13.57,
+    0.2,
+    0.8,
+    0,
+    null
+   ],
+   [
+    1380,
+    45.502067,
+    -73.528079,
+    11.15,
+    13.54,
+    0.4,
+    0.9,
+    0,
+    null
+   ],
+   [
+    1390,
+    45.502157,
+    -73.528076,
+    11.32,
+    13.5,
+    0.5,
+    0.6,
+    0,
+    null
+   ],
+   [
+    1400,
+    45.502247,
+    -73.528074,
+    11.47,
+    13.46,
+    0.7,
+    0.5,
+    0,
+    null
+   ],
+   [
+    1410,
+    45.502337,
+    -73.528071,
+    11.58,
+    13.42,
+    0.8,
+    0.5,
+    0,
+    null
+   ],
+   [
+    1420,
+    45.502428,
+    -73.528068,
+    11.71,
+    13.38,
+    1,
+    -0.2,
+    -0.2,
+    null
+   ],
+   [
+    1430,
+    45.502518,
+    -73.528069,
+    11.87,
+    13.34,
+    0.9,
+    -0.6,
+    -1.8,
+    null
+   ],
+   [
+    1440,
+    45.502608,
+    -73.528084,
+    12.08,
+    13.31,
+    0,
+    -1,
+    -4.5,
+    null
+   ],
+   [
+    1450,
+    45.502688,
+    -73.528137,
+    12.35,
+    13.27,
+    0.1,
+    -0.9,
+    -5.6,
+    null
+   ],
+   [
+    1460,
+    45.502755,
+    -73.528225,
+    12.59,
+    13.23,
+    0.6,
+    -0.6,
+    -5.5,
+    null
+   ],
+   [
+    1470,
+    45.50279,
+    -73.528344,
+    12.76,
+    13.19,
+    0.4,
+    -0.4,
+    -5.3,
+    null
+   ],
+   [
+    1480,
+    45.502801,
+    -73.528471,
+    12.89,
+    13.14,
+    0.3,
+    -0.1,
+    -4.6,
+    null
+   ],
+   [
+    1490,
+    45.502788,
+    -73.528598,
+    13.02,
+    13.09,
+    0.4,
+    0.4,
+    -2,
+    null
+   ],
+   [
+    1500,
+    45.502759,
+    -73.52872,
+    13.16,
+    13.06,
+    0.1,
+    0.5,
+    1.7,
+    null
+   ],
+   [
+    1510,
+    45.502741,
+    -73.528845,
+    13.39,
+    13.03,
+    0.3,
+    1,
+    4.2,
+    null
+   ],
+   [
+    1520,
+    45.502746,
+    -73.528973,
+    13.59,
+    13,
+    0.3,
+    1.2,
+    4.8,
+    null
+   ],
+   [
+    1530,
+    45.502773,
+    -73.529096,
+    13.74,
+    12.94,
+    0.4,
+    1.6,
+    4.4,
+    null
+   ],
+   [
+    1540,
+    45.502815,
+    -73.529209,
+    13.9,
+    12.88,
+    0.6,
+    1.4,
+    3.8,
+    null
+   ],
+   [
+    1550,
+    45.502871,
+    -73.529312,
+    14,
+    12.81,
+    0.7,
+    1.7,
+    3.3,
+    null
+   ],
+   [
+    1560,
+    45.502935,
+    -73.529403,
+    14.11,
+    12.73,
+    0.8,
+    1.3,
+    3.2,
+    null
+   ],
+   [
+    1570,
+    45.503005,
+    -73.529484,
+    14.2,
+    12.66,
+    1,
+    1.2,
+    3.3,
+    null
+   ],
+   [
+    1580,
+    45.503082,
+    -73.529553,
+    14.25,
+    12.58,
+    1.3,
+    1.3,
+    2.9,
+    null
+   ],
+   [
+    1590,
+    45.503164,
+    -73.529609,
+    14.27,
+    12.52,
+    1.8,
+    1.1,
+    2,
+    null
+   ],
+   [
+    1600,
+    45.503251,
+    -73.529653,
+    14.27,
+    12.46,
+    1.9,
+    1.2,
+    1.5,
+    null
+   ],
+   [
+    1610,
+    45.503339,
+    -73.529688,
+    14.27,
+    12.4,
+    1.7,
+    0.8,
+    1.1,
+    null
+   ],
+   [
+    1620,
+    45.503427,
+    -73.529717,
+    14.29,
+    12.32,
+    1.7,
+    0.4,
+    0.4,
+    null
+   ],
+   [
+    1630,
+    45.503515,
+    -73.529746,
+    14.29,
+    12.25,
+    1.6,
+    0.4,
+    -0.1,
+    null
+   ],
+   [
+    1640,
+    45.503604,
+    -73.529767,
+    14.29,
+    12.18,
+    0.8,
+    0.6,
+    0.3,
+    null
+   ],
+   [
+    1650,
+    45.503693,
+    -73.529788,
+    14.29,
+    12.11,
+    0.1,
+    0.7,
+    1.4,
+    null
+   ],
+   [
+    1660,
+    45.503782,
+    -73.529804,
+    14.32,
+    12.05,
+    0.5,
+    0.7,
+    2.2,
+    null
+   ],
+   [
+    1670,
+    45.503871,
+    -73.529818,
+    14.32,
+    11.97,
+    0.3,
+    0.6,
+    1.5,
+    null
+   ],
+   [
+    1680,
+    45.503961,
+    -73.529829,
+    14.33,
+    11.9,
+    0.4,
+    0.6,
+    -0.1,
+    null
+   ],
+   [
+    1690,
+    45.50405,
+    -73.529841,
+    14.34,
+    11.82,
+    0.9,
+    0.8,
+    -0.7,
+    null
+   ],
+   [
+    1700,
+    45.50414,
+    -73.529852,
+    14.34,
+    11.75,
+    1.1,
+    0.5,
+    -0.4,
+    null
+   ],
+   [
+    1710,
+    45.50423,
+    -73.529859,
+    14.33,
+    11.68,
+    0.9,
+    1.1,
+    -0.2,
+    null
+   ],
+   [
+    1720,
+    45.50432,
+    -73.529867,
+    14.32,
+    11.6,
+    0.6,
+    0.9,
+    0,
+    null
+   ],
+   [
+    1730,
+    45.50441,
+    -73.529874,
+    14.32,
+    11.53,
+    0.3,
+    0.9,
+    0,
+    null
+   ],
+   [
+    1740,
+    45.5045,
+    -73.529881,
+    14.27,
+    11.45,
+    0.1,
+    0.5,
+    -0.1,
+    null
+   ],
+   [
+    1750,
+    45.50459,
+    -73.529889,
+    14.26,
+    11.37,
+    0.2,
+    0.8,
+    -0.2,
+    null
+   ],
+   [
+    1760,
+    45.50468,
+    -73.529896,
+    14.24,
+    11.28,
+    0.6,
+    1,
+    0,
+    null
+   ],
+   [
+    1770,
+    45.50477,
+    -73.529904,
+    14.2,
+    11.18,
+    1,
+    0.8,
+    0.3,
+    null
+   ],
+   [
+    1780,
+    45.50486,
+    -73.529911,
+    14.2,
+    11.09,
+    1.3,
+    0.8,
+    0.5,
+    null
+   ],
+   [
+    1790,
+    45.50495,
+    -73.529918,
+    14.19,
+    11,
+    1.4,
+    0.9,
+    0.7,
+    null
+   ],
+   [
+    1800,
+    45.50504,
+    -73.529926,
+    14.19,
+    10.92,
+    1.2,
+    0.9,
+    0.8,
+    null
+   ],
+   [
+    1810,
+    45.505129,
+    -73.529933,
+    14.2,
+    10.84,
+    0.8,
+    1,
+    0.6,
+    null
+   ],
+   [
+    1820,
+    45.505219,
+    -73.529937,
+    14.2,
+    10.77,
+    0.3,
+    0.7,
+    0.4,
+    null
+   ],
+   [
+    1830,
+    45.505309,
+    -73.529941,
+    14.19,
+    10.71,
+    0.3,
+    0.9,
+    0.2,
+    null
+   ],
+   [
+    1840,
+    45.505399,
+    -73.529943,
+    14.19,
+    10.64,
+    0.7,
+    1.1,
+    0,
+    null
+   ],
+   [
+    1850,
+    45.505489,
+    -73.529943,
+    14.19,
+    10.58,
+    1,
+    1,
+    -0.1,
+    null
+   ],
+   [
+    1860,
+    45.50558,
+    -73.529939,
+    14.2,
+    10.51,
+    1,
+    1,
+    -0.1,
+    null
+   ],
+   [
+    1870,
+    45.50567,
+    -73.529935,
+    14.2,
+    10.45,
+    0.8,
+    1.2,
+    0,
+    null
+   ],
+   [
+    1880,
+    45.50576,
+    -73.529929,
+    14.2,
+    10.38,
+    0.6,
+    1,
+    0.2,
+    null
+   ],
+   [
+    1890,
+    45.50585,
+    -73.529923,
+    14.22,
+    10.32,
+    0.5,
+    0.9,
+    0.3,
+    null
+   ],
+   [
+    1900,
+    45.50594,
+    -73.529917,
+    14.22,
+    10.26,
+    0.4,
+    1.1,
+    0.3,
+    null
+   ],
+   [
+    1910,
+    45.50603,
+    -73.529909,
+    14.22,
+    10.2,
+    0.3,
+    1.1,
+    0.3,
+    null
+   ],
+   [
+    1920,
+    45.50612,
+    -73.5299,
+    14.22,
+    10.14,
+    0.3,
+    1,
+    0.3,
+    null
+   ],
+   [
+    1930,
+    45.50621,
+    -73.529892,
+    14.2,
+    10.08,
+    0.3,
+    0.7,
+    0.3,
+    null
+   ],
+   [
+    1940,
+    45.5063,
+    -73.529881,
+    14.2,
+    10.02,
+    0.3,
+    0.8,
+    0.3,
+    null
+   ],
+   [
+    1950,
+    45.506389,
+    -73.529868,
+    14.19,
+    9.97,
+    0.2,
+    0.8,
+    0.4,
+    null
+   ],
+   [
+    1960,
+    45.506479,
+    -73.529854,
+    14.16,
+    9.93,
+    0.2,
+    0.8,
+    0.4,
+    null
+   ],
+   [
+    1970,
+    45.506568,
+    -73.529838,
+    14.16,
+    9.9,
+    0.1,
+    0.7,
+    0.4,
+    null
+   ],
+   [
+    1980,
+    45.506658,
+    -73.529822,
+    14.14,
+    9.88,
+    0.2,
+    1,
+    0.3,
+    null
+   ],
+   [
+    1990,
+    45.506747,
+    -73.529805,
+    14.12,
+    9.85,
+    0.3,
+    1.1,
+    0.2,
+    null
+   ],
+   [
+    2000,
+    45.506836,
+    -73.529786,
+    14.1,
+    9.83,
+    0.4,
+    1,
+    0.2,
+    null
+   ],
+   [
+    2010,
+    45.506925,
+    -73.529767,
+    14.1,
+    9.8,
+    0.3,
+    1,
+    0.4,
+    null
+   ],
+   [
+    2020,
+    45.507014,
+    -73.529745,
+    14.08,
+    9.77,
+    0.3,
+    1,
+    0.7,
+    null
+   ],
+   [
+    2030,
+    45.507103,
+    -73.529721,
+    14.07,
+    9.74,
+    0.3,
+    1.1,
+    0.7,
+    null
+   ],
+   [
+    2040,
+    45.507191,
+    -73.529696,
+    14.04,
+    9.73,
+    0.5,
+    1.3,
+    0.6,
+    null
+   ],
+   [
+    2050,
+    45.507279,
+    -73.529666,
+    14.01,
+    9.72,
+    0.5,
+    0.9,
+    0.3,
+    null
+   ],
+   [
+    2060,
+    45.507366,
+    -73.529635,
+    14.01,
+    9.72,
+    0.6,
+    0.9,
+    0.1,
+    null
+   ],
+   [
+    2070,
+    45.507454,
+    -73.529602,
+    14.01,
+    9.72,
+    0.6,
+    0.6,
+    0,
+    null
+   ],
+   [
+    2080,
+    45.507541,
+    -73.529569,
+    13.97,
+    9.73,
+    0.4,
+    0.6,
+    -0.1,
+    null
+   ],
+   [
+    2090,
+    45.507627,
+    -73.529534,
+    13.96,
+    9.76,
+    0.1,
+    0.9,
+    -0.1,
+    null
+   ],
+   [
+    2100,
+    45.507714,
+    -73.529499,
+    13.96,
+    9.78,
+    0.1,
+    1.3,
+    0,
+    null
+   ],
+   [
+    2110,
+    45.507801,
+    -73.529465,
+    13.95,
+    9.82,
+    0.4,
+    -2.4,
+    0,
+    null
+   ],
+   [
+    2120,
+    45.507887,
+    -73.52943,
+    13.97,
+    9.86,
+    0.7,
+    -10.1,
+    0,
+    null
+   ],
+   [
+    2130,
+    45.507974,
+    -73.529395,
+    13.95,
+    9.9,
+    1,
+    -11.8,
+    -0.1,
+    null
+   ],
+   [
+    2140,
+    45.508061,
+    -73.529361,
+    13.89,
+    9.94,
+    1.3,
+    1,
+    -0.2,
+    null
+   ],
+   [
+    2150,
+    45.508147,
+    -73.529326,
+    13.88,
+    9.98,
+    1.7,
+    0.9,
+    -0.1,
+    null
+   ],
+   [
+    2160,
+    45.508234,
+    -73.529291,
+    13.87,
+    10.02,
+    2.2,
+    0.8,
+    0.1,
+    null
+   ],
+   [
+    2170,
+    45.508321,
+    -73.529257,
+    13.86,
+    10.05,
+    2.6,
+    0.9,
+    0.5,
+    null
+   ],
+   [
+    2180,
+    45.508408,
+    -73.529224,
+    13.84,
+    10.09,
+    2.8,
+    1,
+    1.2,
+    null
+   ],
+   [
+    2190,
+    45.508495,
+    -73.52919,
+    13.83,
+    10.14,
+    2.6,
+    1,
+    2.5,
+    null
+   ],
+   [
+    2200,
+    45.508581,
+    -73.529157,
+    13.81,
+    10.2,
+    1.8,
+    0.8,
+    4.4,
+    null
+   ],
+   [
+    2210,
+    45.508661,
+    -73.529115,
+    13.8,
+    10.27,
+    1.1,
+    0.7,
+    5.4,
+    null
+   ],
+   [
+    2220,
+    45.508714,
+    -73.528993,
+    13.78,
+    10.36,
+    1.9,
+    0.3,
+    4.6,
+    null
+   ],
+   [
+    2230,
+    45.508718,
+    -73.528863,
+    13.78,
+    10.45,
+    0.6,
+    0.1,
+    1.5,
+    null
+   ],
+   [
+    2240,
+    45.50872,
+    -73.528736,
+    13.75,
+    10.53,
+    0.1,
+    -0.9,
+    -2.4,
+    null
+   ],
+   [
+    2250,
+    45.50874,
+    -73.528611,
+    13.73,
+    10.61,
+    0.4,
+    -0.3,
+    -4.1,
+    null
+   ],
+   [
+    2260,
+    45.508779,
+    -73.528496,
+    13.71,
+    10.68,
+    0.3,
+    -0.6,
+    -4.2,
+    null
+   ],
+   [
+    2270,
+    45.508833,
+    -73.528393,
+    13.71,
+    10.76,
+    0.2,
+    -0.8,
+    -4,
+    null
+   ],
+   [
+    2280,
+    45.5089,
+    -73.528308,
+    13.68,
+    10.82,
+    0.2,
+    -0.4,
+    -3.4,
+    null
+   ],
+   [
+    2290,
+    45.508974,
+    -73.528235,
+    13.66,
+    10.88,
+    0.3,
+    -0.7,
+    -2.9,
+    null
+   ],
+   [
+    2300,
+    45.509053,
+    -73.528174,
+    13.64,
+    10.95,
+    0.5,
+    -0.7,
+    -2.4,
+    null
+   ],
+   [
+    2310,
+    45.509136,
+    -73.528128,
+    13.64,
+    11.04,
+    1.1,
+    -0.4,
+    -2.1,
+    null
+   ],
+   [
+    2320,
+    45.509221,
+    -73.528088,
+    13.65,
+    11.13,
+    1.3,
+    -0.4,
+    -1.7,
+    null
+   ],
+   [
+    2330,
+    45.509307,
+    -73.528049,
+    13.66,
+    11.23,
+    1.1,
+    -0.6,
+    -1.1,
+    null
+   ],
+   [
+    2340,
+    45.509393,
+    -73.528011,
+    13.66,
+    11.32,
+    0.5,
+    -0.1,
+    -0.6,
+    null
+   ],
+   [
+    2350,
+    45.509478,
+    -73.527973,
+    13.66,
+    11.41,
+    0.2,
+    -0.5,
+    -0.2,
+    null
+   ],
+   [
+    2360,
+    45.509565,
+    -73.527937,
+    13.67,
+    11.51,
+    0.8,
+    -0.3,
+    0.1,
+    null
+   ],
+   [
+    2370,
+    45.509651,
+    -73.527902,
+    13.67,
+    11.6,
+    1.2,
+    -0.5,
+    0.2,
+    null
+   ],
+   [
+    2380,
+    45.509738,
+    -73.527867,
+    13.69,
+    11.7,
+    1.6,
+    -0.5,
+    0.1,
+    null
+   ],
+   [
+    2390,
+    45.509825,
+    -73.527833,
+    13.7,
+    11.79,
+    1.9,
+    -0.5,
+    0,
+    null
+   ],
+   [
+    2400,
+    45.509912,
+    -73.5278,
+    13.71,
+    11.89,
+    2,
+    -0.5,
+    0,
+    null
+   ],
+   [
+    2410,
+    45.51,
+    -73.527769,
+    13.71,
+    11.98,
+    2.1,
+    -0.6,
+    0,
+    null
+   ],
+   [
+    2419,
+    45.510087,
+    -73.527738,
+    13.73,
+    12.07,
+    2,
+    -0.6,
+    0,
+    null
+   ],
+   [
+    2429,
+    45.510175,
+    -73.527708,
+    13.73,
+    12.16,
+    2,
+    -0.9,
+    0.1,
+    null
+   ],
+   [
+    2439,
+    45.510263,
+    -73.527679,
+    13.76,
+    12.24,
+    1.7,
+    -0.8,
+    0,
+    null
+   ],
+   [
+    2449,
+    45.510351,
+    -73.527652,
+    13.75,
+    12.31,
+    1.4,
+    -0.8,
+    -0.1,
+    null
+   ],
+   [
+    2459,
+    45.510439,
+    -73.527625,
+    13.75,
+    12.38,
+    1,
+    -0.9,
+    -0.3,
+    null
+   ],
+   [
+    2469,
+    45.510528,
+    -73.527599,
+    13.74,
+    12.46,
+    0.7,
+    -0.8,
+    -0.4,
+    null
+   ],
+   [
+    2479,
+    45.510616,
+    -73.527574,
+    13.74,
+    12.54,
+    0.4,
+    -0.9,
+    -0.6,
+    null
+   ],
+   [
+    2489,
+    45.510704,
+    -73.52755,
+    13.74,
+    12.63,
+    0.3,
+    -0.6,
+    -0.5,
+    null
+   ],
+   [
+    2499,
+    45.510793,
+    -73.527527,
+    13.74,
+    12.72,
+    0.2,
+    -0.6,
+    -0.3,
+    null
+   ],
+   [
+    2509,
+    45.510882,
+    -73.527505,
+    13.73,
+    12.82,
+    0.3,
+    -0.7,
+    0,
+    null
+   ],
+   [
+    2519,
+    45.510971,
+    -73.527483,
+    13.73,
+    12.9,
+    0.3,
+    -0.8,
+    0.2,
+    null
+   ],
+   [
+    2529,
+    45.511059,
+    -73.527462,
+    13.72,
+    12.97,
+    0.1,
+    -0.7,
+    0.2,
+    null
+   ],
+   [
+    2539,
+    45.511148,
+    -73.527441,
+    13.72,
+    13.02,
+    0.2,
+    -0.6,
+    -0.2,
+    null
+   ],
+   [
+    2549,
+    45.511237,
+    -73.52742,
+    13.72,
+    13.07,
+    0.4,
+    -0.6,
+    -0.6,
+    null
+   ],
+   [
+    2559,
+    45.511326,
+    -73.527396,
+    13.72,
+    13.11,
+    0.2,
+    -0.7,
+    -0.8,
+    null
+   ],
+   [
+    2569,
+    45.511415,
+    -73.527374,
+    13.73,
+    13.16,
+    0.2,
+    -0.8,
+    -0.7,
+    null
+   ],
+   [
+    2579,
+    45.511504,
+    -73.527359,
+    13.73,
+    13.21,
+    0.3,
+    -0.6,
+    -0.5,
+    null
+   ],
+   [
+    2589,
+    45.511594,
+    -73.527346,
+    13.74,
+    13.26,
+    0.4,
+    -0.6,
+    -0.4,
+    null
+   ],
+   [
+    2599,
+    45.511683,
+    -73.527332,
+    13.74,
+    13.31,
+    0.7,
+    -0.8,
+    -0.2,
+    null
+   ],
+   [
+    2609,
+    45.511773,
+    -73.527318,
+    13.75,
+    13.36,
+    1,
+    -0.6,
+    -0.2,
+    null
+   ],
+   [
+    2619,
+    45.511863,
+    -73.527306,
+    13.75,
+    13.41,
+    1.4,
+    -0.8,
+    -0.3,
+    null
+   ],
+   [
+    2629,
+    45.511953,
+    -73.5273,
+    13.75,
+    13.45,
+    1.2,
+    -0.8,
+    -0.3,
+    null
+   ],
+   [
+    2639,
+    45.512043,
+    -73.527294,
+    13.74,
+    13.49,
+    1.2,
+    -0.8,
+    -0.2,
+    null
+   ],
+   [
+    2649,
+    45.512133,
+    -73.527289,
+    13.71,
+    13.52,
+    1.3,
+    -0.5,
+    0.1,
+    null
+   ],
+   [
+    2659,
+    45.512223,
+    -73.527283,
+    13.71,
+    13.55,
+    1.4,
+    -0.4,
+    0.1,
+    null
+   ],
+   [
+    2669,
+    45.512314,
+    -73.527282,
+    13.69,
+    13.59,
+    1,
+    -0.7,
+    -0.2,
+    null
+   ],
+   [
+    2679,
+    45.512404,
+    -73.527282,
+    13.69,
+    13.62,
+    0.6,
+    -0.7,
+    -0.7,
+    null
+   ],
+   [
+    2689,
+    45.512494,
+    -73.527285,
+    13.68,
+    13.63,
+    0.3,
+    -0.7,
+    -0.9,
+    null
+   ],
+   [
+    2699,
+    45.512584,
+    -73.527287,
+    13.65,
+    13.64,
+    0.3,
+    -0.5,
+    -1.1,
+    null
+   ],
+   [
+    2709,
+    45.512674,
+    -73.527294,
+    13.63,
+    13.64,
+    0.3,
+    -0.6,
+    -1.2,
+    null
+   ],
+   [
+    2719,
+    45.512764,
+    -73.527309,
+    13.63,
+    13.64,
+    0.2,
+    -0.6,
+    -1.2,
+    null
+   ],
+   [
+    2729,
+    45.512853,
+    -73.527327,
+    13.62,
+    13.65,
+    0.2,
+    -0.6,
+    -1,
+    null
+   ],
+   [
+    2739,
+    45.512942,
+    -73.52735,
+    13.6,
+    13.66,
+    0.3,
+    -0.5,
+    -0.6,
+    null
+   ],
+   [
+    2749,
+    45.51303,
+    -73.527377,
+    13.59,
+    13.69,
+    0.2,
+    -0.1,
+    -0.2,
+    null
+   ],
+   [
+    2759,
+    45.513118,
+    -73.527404,
+    13.58,
+    13.71,
+    0.2,
+    0.3,
+    0,
+    null
+   ],
+   [
+    2769,
+    45.513206,
+    -73.52743,
+    13.57,
+    13.73,
+    0.2,
+    0.2,
+    0.1,
+    null
+   ],
+   [
+    2779,
+    45.513294,
+    -73.527457,
+    13.56,
+    13.74,
+    0.1,
+    0.4,
+    0.1,
+    null
+   ],
+   [
+    2789,
+    45.513382,
+    -73.527484,
+    13.55,
+    13.74,
+    0.1,
+    0.6,
+    0,
+    null
+   ],
+   [
+    2799,
+    45.513471,
+    -73.52751,
+    13.54,
+    13.74,
+    0,
+    0.5,
+    0,
+    null
+   ],
+   [
+    2809,
+    45.513559,
+    -73.527537,
+    13.54,
+    13.74,
+    0.1,
+    0.6,
+    0,
+    null
+   ],
+   [
+    2819,
+    45.513647,
+    -73.527564,
+    13.52,
+    13.74,
+    0.1,
+    0.5,
+    -0.1,
+    null
+   ],
+   [
+    2829,
+    45.513735,
+    -73.52759,
+    13.52,
+    13.74,
+    0.2,
+    0.4,
+    -0.1,
+    null
+   ],
+   [
+    2839,
+    45.513823,
+    -73.527617,
+    13.52,
+    13.74,
+    0.2,
+    0.4,
+    0.1,
+    null
+   ],
+   [
+    2849,
+    45.513911,
+    -73.527644,
+    13.49,
+    13.74,
+    0.2,
+    0.8,
+    0.4,
+    null
+   ],
+   [
+    2859,
+    45.513999,
+    -73.52767,
+    13.48,
+    13.74,
+    0.3,
+    0.7,
+    1.3,
+    null
+   ],
+   [
+    2869,
+    45.514088,
+    -73.527694,
+    13.46,
+    13.73,
+    0.5,
+    1,
+    3.4,
+    null
+   ],
+   [
+    2879,
+    45.514177,
+    -73.527685,
+    13.46,
+    13.72,
+    0.4,
+    0.6,
+    5.3,
+    null
+   ],
+   [
+    2889,
+    45.514251,
+    -73.527627,
+    13.47,
+    13.68,
+    0.8,
+    0.8,
+    5.9,
+    null
+   ],
+   [
+    2899,
+    45.514287,
+    -73.527517,
+    13.47,
+    13.65,
+    0.7,
+    0.8,
+    5.9,
+    null
+   ],
+   [
+    2909,
+    45.514281,
+    -73.527395,
+    13.47,
+    13.64,
+    0.6,
+    0.8,
+    5.9,
+    null
+   ],
+   [
+    2919,
+    45.514231,
+    -73.527295,
+    13.45,
+    13.64,
+    0.4,
+    0.7,
+    5.6,
+    null
+   ],
+   [
+    2929,
+    45.514153,
+    -73.527235,
+    13.41,
+    13.64,
+    0.7,
+    0.9,
+    4.1,
+    null
+   ],
+   [
+    2939,
+    45.514065,
+    -73.527204,
+    13.41,
+    13.64,
+    1.9,
+    0.6,
+    1.7,
+    null
+   ],
+   [
+    2949,
+    45.513976,
+    -73.527177,
+    13.4,
+    13.64,
+    3,
+    0.6,
+    0.3,
+    null
+   ],
+   [
+    2959,
+    45.513888,
+    -73.527155,
+    13.4,
+    13.63,
+    3.8,
+    0.5,
+    0,
+    null
+   ],
+   [
+    2969,
+    45.513796,
+    -73.527141,
+    13.39,
+    13.62,
+    3.9,
+    0.4,
+    0,
+    null
+   ],
+   [
+    2979,
+    45.513704,
+    -73.527131,
+    13.37,
+    13.59,
+    3.7,
+    0.3,
+    0,
+    null
+   ],
+   [
+    2989,
+    45.513614,
+    -73.527125,
+    13.34,
+    13.57,
+    3.2,
+    0.3,
+    -0.1,
+    null
+   ],
+   [
+    2999,
+    45.513524,
+    -73.52712,
+    13.34,
+    13.55,
+    2.7,
+    0.1,
+    -0.3,
+    null
+   ],
+   [
+    3009,
+    45.513436,
+    -73.52711,
+    13.35,
+    13.54,
+    2.5,
+    0,
+    -1.2,
+    null
+   ],
+   [
+    3019,
+    45.513349,
+    -73.52709,
+    13.35,
+    13.54,
+    2.8,
+    -0.2,
+    -2.6,
+    null
+   ],
+   [
+    3029,
+    45.513265,
+    -73.527058,
+    13.34,
+    13.54,
+    2.8,
+    -0.2,
+    -2.6,
+    null
+   ],
+   [
+    3039,
+    45.513181,
+    -73.527017,
+    13.27,
+    13.53,
+    2.4,
+    -0.3,
+    -1.7,
+    null
+   ],
+   [
+    3049,
+    45.513098,
+    -73.52697,
+    13.16,
+    13.52,
+    2,
+    -0.4,
+    -1,
+    null
+   ],
+   [
+    3059,
+    45.513016,
+    -73.526918,
+    13.02,
+    13.49,
+    1.7,
+    -0.7,
+    -0.4,
+    null
+   ],
+   [
+    3069,
+    45.512936,
+    -73.52686,
+    12.88,
+    13.47,
+    1.6,
+    -0.7,
+    -0.1,
+    null
+   ],
+   [
+    3079,
+    45.512856,
+    -73.526803,
+    12.71,
+    13.45,
+    1.5,
+    -0.8,
+    0.1,
+    null
+   ],
+   [
+    3089,
+    45.512775,
+    -73.526747,
+    12.6,
+    13.44,
+    1.4,
+    -1.1,
+    0,
+    null
+   ],
+   [
+    3099,
+    45.512693,
+    -73.526692,
+    12.51,
+    13.44,
+    1.2,
+    -1,
+    0.1,
+    null
+   ],
+   [
+    3109,
+    45.512612,
+    -73.526636,
+    12.45,
+    13.44,
+    1,
+    -1,
+    0.5,
+    null
+   ],
+   [
+    3119,
+    45.512531,
+    -73.526581,
+    12.42,
+    13.44,
+    0.9,
+    -0.9,
+    0.8,
+    null
+   ],
+   [
+    3129,
+    45.51245,
+    -73.526526,
+    12.39,
+    13.43,
+    1.1,
+    -0.7,
+    0.8,
+    null
+   ],
+   [
+    3139,
+    45.512367,
+    -73.526475,
+    12.39,
+    13.42,
+    1.3,
+    -0.9,
+    0.6,
+    null
+   ],
+   [
+    3149,
+    45.512283,
+    -73.526427,
+    12.39,
+    13.4,
+    1.5,
+    -1,
+    0.3,
+    null
+   ],
+   [
+    3159,
+    45.512199,
+    -73.52638,
+    12.38,
+    13.38,
+    1.6,
+    -1.1,
+    0,
+    null
+   ],
+   [
+    3169,
+    45.512115,
+    -73.526334,
+    12.39,
+    13.35,
+    1.7,
+    -1.3,
+    -0.1,
+    null
+   ],
+   [
+    3179,
+    45.512031,
+    -73.526288,
+    12.39,
+    13.33,
+    1.7,
+    -0.8,
+    -0.1,
+    null
+   ],
+   [
+    3189,
+    45.511947,
+    -73.526241,
+    12.39,
+    13.31,
+    1.7,
+    -0.9,
+    0,
+    null
+   ],
+   [
+    3199,
+    45.511863,
+    -73.526195,
+    12.39,
+    13.29,
+    1.7,
+    -0.6,
+    0,
+    null
+   ],
+   [
+    3209,
+    45.511779,
+    -73.526149,
+    12.39,
+    13.27,
+    1.7,
+    -0.4,
+    0,
+    null
+   ],
+   [
+    3219,
+    45.511695,
+    -73.526103,
+    12.38,
+    13.25,
+    1.7,
+    -0.4,
+    0,
+    null
+   ],
+   [
+    3229,
+    45.511611,
+    -73.526057,
+    12.36,
+    13.24,
+    1.7,
+    -0.2,
+    0,
+    null
+   ],
+   [
+    3239,
+    45.511527,
+    -73.526011,
+    12.34,
+    13.24,
+    1.7,
+    0.1,
+    0,
+    null
+   ],
+   [
+    3249,
+    45.511443,
+    -73.525965,
+    12.28,
+    13.24,
+    1.6,
+    0.2,
+    0,
+    null
+   ],
+   [
+    3259,
+    45.511359,
+    -73.525918,
+    12.19,
+    13.24,
+    1.6,
+    0.2,
+    0,
+    null
+   ],
+   [
+    3269,
+    45.511275,
+    -73.525872,
+    12.11,
+    13.24,
+    1.6,
+    0.5,
+    0,
+    null
+   ],
+   [
+    3279,
+    45.511191,
+    -73.525826,
+    12,
+    13.23,
+    1.5,
+    0.5,
+    0,
+    null
+   ],
+   [
+    3289,
+    45.511107,
+    -73.52578,
+    11.86,
+    13.22,
+    1.5,
+    0.7,
+    0,
+    null
+   ],
+   [
+    3299,
+    45.511023,
+    -73.525734,
+    11.69,
+    13.2,
+    1.5,
+    0.8,
+    0,
+    null
+   ],
+   [
+    3309,
+    45.510938,
+    -73.525688,
+    11.52,
+    13.18,
+    1.5,
+    0.7,
+    0,
+    null
+   ],
+   [
+    3319,
+    45.510854,
+    -73.525643,
+    11.37,
+    13.16,
+    1.4,
+    0.6,
+    0,
+    null
+   ],
+   [
+    3329,
+    45.510769,
+    -73.525599,
+    11.26,
+    13.14,
+    1.3,
+    0.8,
+    -0.1,
+    null
+   ],
+   [
+    3339,
+    45.510685,
+    -73.525555,
+    11.16,
+    13.12,
+    1,
+    0.8,
+    0,
+    null
+   ],
+   [
+    3349,
+    45.5106,
+    -73.52551,
+    11.08,
+    13.1,
+    0.8,
+    0.8,
+    0,
+    null
+   ],
+   [
+    3359,
+    45.510516,
+    -73.525466,
+    11.01,
+    13.08,
+    0.6,
+    1,
+    0.1,
+    null
+   ],
+   [
+    3369,
+    45.510431,
+    -73.525422,
+    10.98,
+    13.06,
+    0.4,
+    0.7,
+    0.2,
+    null
+   ],
+   [
+    3379,
+    45.510347,
+    -73.525378,
+    10.96,
+    13.03,
+    0.3,
+    1.1,
+    0.2,
+    null
+   ],
+   [
+    3389,
+    45.510262,
+    -73.525334,
+    10.95,
+    13,
+    0.3,
+    1,
+    0.5,
+    null
+   ],
+   [
+    3399,
+    45.510177,
+    -73.52529,
+    10.93,
+    12.97,
+    0.3,
+    1,
+    1.1,
+    null
+   ],
+   [
+    3409,
+    45.510091,
+    -73.525254,
+    10.89,
+    12.94,
+    0.1,
+    1.1,
+    1.2,
+    null
+   ],
+   [
+    3419,
+    45.510003,
+    -73.525226,
+    10.88,
+    12.92,
+    0.2,
+    1.2,
+    1,
+    null
+   ],
+   [
+    3429,
+    45.509915,
+    -73.5252,
+    10.87,
+    12.9,
+    0.3,
+    1,
+    0.6,
+    null
+   ],
+   [
+    3439,
+    45.509826,
+    -73.525175,
+    10.85,
+    12.88,
+    0.3,
+    0.9,
+    0.2,
+    null
+   ],
+   [
+    3449,
+    45.509738,
+    -73.52515,
+    10.83,
+    12.87,
+    0.3,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3459,
+    45.50965,
+    -73.525125,
+    10.81,
+    12.85,
+    0.2,
+    1,
+    -0.2,
+    null
+   ],
+   [
+    3469,
+    45.509561,
+    -73.525099,
+    10.81,
+    12.84,
+    0.2,
+    1,
+    -0.2,
+    null
+   ],
+   [
+    3479,
+    45.509473,
+    -73.525074,
+    10.8,
+    12.82,
+    0.3,
+    0.8,
+    -0.1,
+    null
+   ],
+   [
+    3489,
+    45.509385,
+    -73.525049,
+    10.79,
+    12.81,
+    0.4,
+    1,
+    0,
+    null
+   ],
+   [
+    3499,
+    45.509296,
+    -73.525024,
+    10.78,
+    12.79,
+    0.5,
+    1.1,
+    0,
+    null
+   ],
+   [
+    3509,
+    45.509208,
+    -73.524999,
+    10.76,
+    12.78,
+    0.6,
+    1,
+    0,
+    null
+   ],
+   [
+    3519,
+    45.50912,
+    -73.524974,
+    10.73,
+    12.76,
+    0.7,
+    1,
+    0,
+    null
+   ],
+   [
+    3529,
+    45.509031,
+    -73.524949,
+    10.71,
+    12.74,
+    0.8,
+    1,
+    0,
+    null
+   ],
+   [
+    3539,
+    45.508943,
+    -73.524924,
+    10.7,
+    12.71,
+    0.9,
+    1.1,
+    0,
+    null
+   ],
+   [
+    3549,
+    45.508855,
+    -73.524899,
+    10.68,
+    12.67,
+    1,
+    1.2,
+    0,
+    null
+   ],
+   [
+    3559,
+    45.508766,
+    -73.524872,
+    10.67,
+    12.64,
+    1,
+    1.1,
+    0,
+    null
+   ],
+   [
+    3569,
+    45.508678,
+    -73.524846,
+    10.67,
+    12.6,
+    0.9,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3579,
+    45.50859,
+    -73.524819,
+    10.62,
+    12.57,
+    0.9,
+    1,
+    0,
+    null
+   ],
+   [
+    3589,
+    45.508502,
+    -73.524792,
+    10.61,
+    12.54,
+    0.9,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3599,
+    45.508414,
+    -73.524765,
+    10.59,
+    12.52,
+    0.8,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3609,
+    45.508326,
+    -73.524739,
+    10.58,
+    12.5,
+    0.8,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3619,
+    45.508238,
+    -73.524712,
+    10.56,
+    12.49,
+    0.7,
+    0.8,
+    0,
+    null
+   ],
+   [
+    3629,
+    45.508149,
+    -73.524685,
+    10.56,
+    12.47,
+    0.7,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3639,
+    45.508061,
+    -73.524658,
+    10.53,
+    12.46,
+    0.7,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3649,
+    45.507973,
+    -73.524632,
+    10.49,
+    12.43,
+    0.6,
+    1.1,
+    0,
+    null
+   ],
+   [
+    3659,
+    45.507885,
+    -73.524605,
+    10.48,
+    12.41,
+    0.6,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3669,
+    45.507797,
+    -73.524578,
+    10.47,
+    12.38,
+    0.6,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3679,
+    45.507709,
+    -73.524551,
+    10.46,
+    12.35,
+    0.5,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3689,
+    45.507621,
+    -73.524525,
+    10.44,
+    12.31,
+    0.5,
+    1.1,
+    0,
+    null
+   ],
+   [
+    3699,
+    45.507533,
+    -73.524498,
+    10.44,
+    12.28,
+    0.4,
+    1.1,
+    0,
+    null
+   ],
+   [
+    3709,
+    45.507445,
+    -73.524471,
+    10.42,
+    12.23,
+    0.4,
+    1,
+    0,
+    null
+   ],
+   [
+    3719,
+    45.507356,
+    -73.524444,
+    10.42,
+    12.19,
+    0.4,
+    1,
+    0,
+    null
+   ],
+   [
+    3729,
+    45.507268,
+    -73.524418,
+    10.41,
+    12.14,
+    0.3,
+    0.8,
+    0,
+    null
+   ],
+   [
+    3739,
+    45.50718,
+    -73.524391,
+    10.4,
+    12.09,
+    0.3,
+    0.8,
+    0,
+    null
+   ],
+   [
+    3749,
+    45.507092,
+    -73.524364,
+    10.41,
+    12.03,
+    0.2,
+    1,
+    0,
+    null
+   ],
+   [
+    3759,
+    45.507004,
+    -73.524337,
+    10.41,
+    11.98,
+    0.2,
+    0.7,
+    0,
+    null
+   ],
+   [
+    3769,
+    45.506916,
+    -73.524311,
+    10.41,
+    11.94,
+    0.2,
+    1,
+    0,
+    null
+   ],
+   [
+    3779,
+    45.506828,
+    -73.524284,
+    10.41,
+    11.9,
+    0.1,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3789,
+    45.50674,
+    -73.524257,
+    10.41,
+    11.86,
+    0.1,
+    0.7,
+    0,
+    null
+   ],
+   [
+    3799,
+    45.506652,
+    -73.52423,
+    10.42,
+    11.83,
+    0,
+    1.1,
+    0,
+    null
+   ],
+   [
+    3809,
+    45.506563,
+    -73.524204,
+    10.42,
+    11.8,
+    0,
+    0.7,
+    0,
+    null
+   ],
+   [
+    3819,
+    45.506475,
+    -73.524177,
+    10.42,
+    11.77,
+    0,
+    1,
+    0,
+    null
+   ],
+   [
+    3829,
+    45.506387,
+    -73.52415,
+    10.42,
+    11.73,
+    0.1,
+    0.8,
+    0,
+    null
+   ],
+   [
+    3839,
+    45.506299,
+    -73.524123,
+    10.44,
+    11.7,
+    0.1,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3849,
+    45.506211,
+    -73.524097,
+    10.45,
+    11.67,
+    0.1,
+    1,
+    0,
+    null
+   ],
+   [
+    3859,
+    45.506123,
+    -73.52407,
+    10.47,
+    11.63,
+    0.2,
+    1,
+    0,
+    null
+   ],
+   [
+    3869,
+    45.506035,
+    -73.524044,
+    10.49,
+    11.6,
+    0.2,
+    1.1,
+    0,
+    null
+   ],
+   [
+    3879,
+    45.505946,
+    -73.524017,
+    10.5,
+    11.57,
+    0.2,
+    1.1,
+    0,
+    null
+   ],
+   [
+    3889,
+    45.505858,
+    -73.523991,
+    10.53,
+    11.53,
+    0.2,
+    1.1,
+    0,
+    null
+   ],
+   [
+    3899,
+    45.50577,
+    -73.523965,
+    10.53,
+    11.5,
+    0.2,
+    1,
+    0,
+    null
+   ],
+   [
+    3909,
+    45.505682,
+    -73.523938,
+    10.54,
+    11.47,
+    0.2,
+    0.8,
+    0,
+    null
+   ],
+   [
+    3919,
+    45.505594,
+    -73.523912,
+    10.56,
+    11.43,
+    0.2,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3929,
+    45.505506,
+    -73.523886,
+    10.59,
+    11.4,
+    0.2,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3939,
+    45.505417,
+    -73.523859,
+    10.61,
+    11.37,
+    0.2,
+    0.8,
+    0,
+    null
+   ],
+   [
+    3949,
+    45.505329,
+    -73.523833,
+    10.64,
+    11.33,
+    0.2,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3959,
+    45.505241,
+    -73.523806,
+    10.65,
+    11.3,
+    0.2,
+    0.6,
+    0,
+    null
+   ],
+   [
+    3969,
+    45.505153,
+    -73.52378,
+    10.7,
+    11.27,
+    0.2,
+    0.9,
+    0,
+    null
+   ],
+   [
+    3979,
+    45.505065,
+    -73.523754,
+    10.73,
+    11.23,
+    0.2,
+    0.7,
+    0,
+    null
+   ],
+   [
+    3989,
+    45.504977,
+    -73.523727,
+    10.74,
+    11.2,
+    0.2,
+    1,
+    0,
+    null
+   ],
+   [
+    3999,
+    45.504888,
+    -73.523701,
+    10.79,
+    11.17,
+    0.2,
+    0.7,
+    0,
+    null
+   ],
+   [
+    4009,
+    45.5048,
+    -73.523675,
+    10.81,
+    11.13,
+    0.3,
+    0.7,
+    0,
+    null
+   ],
+   [
+    4019,
+    45.504712,
+    -73.523648,
+    10.86,
+    11.1,
+    0.3,
+    1.1,
+    0,
+    null
+   ],
+   [
+    4029,
+    45.504624,
+    -73.523622,
+    10.89,
+    11.06,
+    0.3,
+    1.1,
+    0,
+    null
+   ],
+   [
+    4039,
+    45.504536,
+    -73.523596,
+    10.91,
+    11.02,
+    0.3,
+    1.1,
+    0,
+    null
+   ],
+   [
+    4049,
+    45.504447,
+    -73.52357,
+    10.94,
+    10.99,
+    0.2,
+    0.9,
+    0,
+    null
+   ],
+   [
+    4059,
+    45.504359,
+    -73.523545,
+    10.96,
+    10.96,
+    0.1,
+    0.9,
+    -0.2,
+    null
+   ],
+   [
+    4069,
+    45.504271,
+    -73.523519,
+    10.97,
+    10.94,
+    0,
+    1,
+    -0.2,
+    null
+   ],
+   [
+    4079,
+    45.504183,
+    -73.523493,
+    10.98,
+    10.93,
+    0.3,
+    0.6,
+    1.1,
+    null
+   ],
+   [
+    4089,
+    45.504095,
+    -73.523468,
+    10.98,
+    10.93,
+    0.4,
+    0.8,
+    3.6,
+    null
+   ],
+   [
+    4099,
+    45.504006,
+    -73.523463,
+    10.95,
+    10.94,
+    0.2,
+    0.5,
+    5.3,
+    null
+   ],
+   [
+    4109,
+    45.503926,
+    -73.523518,
+    10.92,
+    10.94,
+    0.1,
+    0.3,
+    4.3,
+    null
+   ],
+   [
+    4119,
+    45.503884,
+    -73.523629,
+    10.88,
+    10.94,
+    0.2,
+    0,
+    -0.4,
+    null
+   ],
+   [
+    4129,
+    45.503833,
+    -73.523733,
+    10.85,
+    10.94,
+    0.1,
+    -0.3,
+    -4.7,
+    null
+   ],
+   [
+    4139,
+    45.503756,
+    -73.523792,
+    10.8,
+    10.94,
+    0.3,
+    -0.4,
+    -5.4,
+    null
+   ],
+   [
+    4149,
+    45.503669,
+    -73.523787,
+    10.75,
+    10.94,
+    1.4,
+    -0.9,
+    -4,
+    null
+   ],
+   [
+    4159,
+    45.503581,
+    -73.523762,
+    10.68,
+    10.94,
+    1.8,
+    -0.7,
+    -1.9,
+    null
+   ],
+   [
+    4169,
+    45.503493,
+    -73.523735,
+    10.64,
+    10.94,
+    1.9,
+    -0.2,
+    -0.7,
+    null
+   ],
+   [
+    4179,
+    45.503405,
+    -73.523709,
+    10.58,
+    10.94,
+    1.7,
+    0.1,
+    -0.2,
+    null
+   ],
+   [
+    4189,
+    45.503317,
+    -73.523682,
+    10.56,
+    10.94,
+    1.5,
+    0.3,
+    0,
+    null
+   ],
+   [
+    4199,
+    45.503229,
+    -73.523655,
+    10.55,
+    10.94,
+    1.3,
+    0.4,
+    0.1,
+    null
+   ],
+   [
+    4209,
+    45.503141,
+    -73.523629,
+    10.54,
+    10.94,
+    1.1,
+    1,
+    0.1,
+    null
+   ],
+   [
+    4219,
+    45.503052,
+    -73.523602,
+    10.54,
+    10.94,
+    1,
+    1,
+    0,
+    null
+   ],
+   [
+    4229,
+    45.502964,
+    -73.523576,
+    10.54,
+    10.93,
+    0.9,
+    1.2,
+    0,
+    null
+   ],
+   [
+    4239,
+    45.502876,
+    -73.523549,
+    10.55,
+    10.93,
+    0.9,
+    0.7,
+    0,
+    null
+   ],
+   [
+    4249,
+    45.502788,
+    -73.523523,
+    10.56,
+    10.93,
+    0.8,
+    0.7,
+    0.1,
+    null
+   ],
+   [
+    4259,
+    45.5027,
+    -73.523496,
+    10.58,
+    10.93,
+    0.7,
+    0.7,
+    0.1,
+    null
+   ],
+   [
+    4269,
+    45.502612,
+    -73.52347,
+    10.58,
+    10.94,
+    0.7,
+    0.8,
+    0.1,
+    null
+   ],
+   [
+    4279,
+    45.502524,
+    -73.523443,
+    10.58,
+    10.96,
+    0.7,
+    0.8,
+    0.1,
+    null
+   ],
+   [
+    4289,
+    45.502435,
+    -73.523417,
+    10.58,
+    10.98,
+    0.8,
+    0.7,
+    0,
+    null
+   ],
+   [
+    4299,
+    45.502347,
+    -73.52339,
+    10.59,
+    11,
+    0.8,
+    0.9,
+    0,
+    null
+   ],
+   [
+    4309,
+    45.502259,
+    -73.523364,
+    10.59,
+    11.03,
+    0.9,
+    0.6,
+    0,
+    null
+   ],
+   [
+    4319,
+    45.502171,
+    -73.523337,
+    10.6,
+    11.06,
+    1,
+    0.8,
+    0,
+    null
+   ],
+   [
+    4329,
+    45.502083,
+    -73.523311,
+    10.59,
+    11.1,
+    1,
+    0.8,
+    0,
+    null
+   ],
+   [
+    4339,
+    45.501995,
+    -73.523284,
+    10.59,
+    11.15,
+    1.1,
+    0.7,
+    0,
+    null
+   ],
+   [
+    4349,
+    45.501906,
+    -73.523258,
+    10.58,
+    11.19,
+    1.2,
+    0.7,
+    -0.1,
+    null
+   ]
+  ],
+  "columns": [
+   "s",
+   "lat",
+   "lon",
+   "realH",
+   "gameH(offset to real mean)",
+   "osmDev",
+   "realTiltDeg",
+   "gameBankDeg",
+   "buildRawH"
+  ]
+ },
+ "sources": [
+  "game data: tracks-data.js + js/track.js built in node (devtests/track-audit/americas/game.js -> out/game-<id>.json)",
+  "OpenStreetMap (ODbL) via Overpass API (maps.mail.ru mirror), cached in devtests/track-audit/cache/overpass/",
+  "NRCan HRDEM mosaic DTM (lidar; Open Government Licence - Canada): WCS https://datacube.services.geo.ca/ows/elevation, coverage dtm, EPSG:4326, 1e-5 deg grid",
+  "FIA 2025 Formula 1 Sporting Regulations, Issue 5 (2025-04-30), art. 34.7: \"A speed limit of 80km/h will be imposed in the pit lane during the whole Competition. However, this limit may be amended by the Race Director\" (cache/fia/fia_2025_formula_1_sporting_regulations_-_issue_5_-_2025-04-30.txt)",
+  "https://en.wikipedia.org/wiki/Circuit_Gilles_Villeneuve (infobox: Grand Prix Circuit 2002-present, 4.361 km, 14 turns)",
+  "OpenStreetMap (ODbL) via Overpass API (maps.mail.ru mirror), cached in devtests/track-audit/cache/overpass/"
+ ]
+}

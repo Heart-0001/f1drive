@@ -1,0 +1,1 @@
+{"out":"devtests/track-audit/apac/img/sg-2008-ov.png","center":[1.2905,103.858],"zoom":16,"w":1400,"h":1100,"lines":[{"file":"devtests/track-audit/apac/out/osm-sg-2008.json","color":"#00e5ff","width":2,"label":"OSM"},{"file":"devtests/track-audit/apac/out/gameline-sg-2008.json","key":"samplesLL","color":"#ff3030","width":2,"label":"game"}]}

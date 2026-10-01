@@ -1,0 +1,14 @@
+diff --git a/js/audio.js b/devtests/handling-test/variants/audio.proposed.js
+index d15e9ab..e9720ba 100644
+--- a/js/audio.js
++++ b/devtests/handling-test/variants/audio.proposed.js
+@@ -1600,7 +1600,8 @@
+         t = o.steer;
+         if (av >= 5 && typeof t === 'number' && t > -BIG && t < BIG) {
+           r = av / PH.steerSpeedRef;
+-          req = av * av * Math.abs(Math.tan(t * PH.steerLock / (1 + r * r))) / PH.wheelbase;
++          r = F1.CAR_PERF && typeof F1.CAR_PERF.steerLockAt === 'function' ? F1.CAR_PERF.steerLockAt(av, 0, t) : PH.steerLock / (1 + r * r);
++          req = av * av * Math.abs(Math.tan(t * r)) / PH.wheelbase;
+           cap = Math.min(PH.latBase + PH.latAero * av * av, PH.latMax) * (grass ? 0.45 : 1);
+           S[S_3] = Math.min(1, Math.max(0, (req / cap - 1) / 0.6));
+         }

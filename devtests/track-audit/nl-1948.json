@@ -1,0 +1,4751 @@
+{
+ "id": "nl-1948",
+ "name": "Circuit Zandvoort",
+ "auditedBy": "track audit, region be-nl-de-gb (2026-10-01)",
+ "verdict": "major issues",
+ "summary": "Layout, length, direction and the height profile (already AHN4 lidar) are right. T14 banking matches the lidar. T3 is banked progressively in reality (about 5 deg on the inside, 9-10 deg across the middle, ~20 deg only on the outer 6 m), while the game banks the whole width at 19 deg. Tarzan, Hunserug, Rob Slotemaker and Scheivlak have real 4.5-7 deg cambers the game renders at 1-3 deg. The pit limit was 60 km/h before 2025 (game: 80 for every season). Scenery: a phantom concrete deck floats over the main straight (the OSM outline of the track own deck over a service tunnel).",
+ "findings": [
+  {
+   "aspect": "banking",
+   "severity": "minor",
+   "game": "bankOverrides T3 Hugenholtzbocht 19 deg from lap fraction 0.20053 to 0.23226 (854-989 m): planar 19 deg across the whole road (game mean over the corner 17.7 deg).",
+   "real": "AHN4 lidar cross-sections through T3 (OSM way 1311522216, 480-600 m along the OSM lap): best-fit slope over the central +-3 / +-7 / +-10 m = 8.9-10.4 deg; the profile is concave: ~5 deg on the inside half, 18-23 deg on the outer 6 m (e.g. at OSM s 520: +0.62 m over the inner 7 m, +2.50 m over the next 6 m outward). Published: en.wikipedia \"turn 3 has a 19-degree bank\"; nl.wikipedia gives T3 18 / T14 19 deg; OSM way 1311522216 description \"Helling 32% / 18 graden\". The published figure is the steep outer part.",
+   "proposedFix": "Keep 19 deg as the published peak if the cross-section stays planar (it is what makes the bowl visible), or model the progressive cross-section (inside ~5 deg rising to ~20 deg at the outer edge). Do not lower it to the centre value without a variable cross-section: the user already finds the banking not pronounced.",
+   "sources": [
+    "AHN4 DTM 0.5 m (Actueel Hoogtebestand Nederland, CC0), https://ahn.arcgisonline.nl/arcgis/rest/services/AHNviewer/AHN4_DTM_50cm/ImageServer (getSamples); cached in devtests/track-audit/cache/ahn4/points.json",
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/nl-1948.json; way 1311522216 \"Hugenholtzbocht\"",
+    "en.wikipedia.org/wiki/Circuit_Zandvoort",
+    "nl.wikipedia.org/wiki/Circuit_Zandvoort"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "severity": "cosmetic",
+   "game": "T14 Arie Luyendijkbocht 18 deg (game max 18, mean 10.3 over 551 m incl. the ramps).",
+   "real": "AHN4 cross-sections OSM s 3350-3600: 11.9-17.3 deg over +-3 m, 14.6 deg over +-10 m (more uniform than T3); en.wikipedia 18 deg (nl.wikipedia 19).",
+   "proposedFix": "None.",
+   "sources": [
+    "AHN4 DTM 0.5 m (Actueel Hoogtebestand Nederland, CC0), https://ahn.arcgisonline.nl/arcgis/rest/services/AHNviewer/AHN4_DTM_50cm/ImageServer (getSamples); cached in devtests/track-audit/cache/ahn4/points.json",
+    "en.wikipedia.org/wiki/Circuit_Zandvoort"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "severity": "minor",
+   "game": "Curvature-derived bank: Tarzanbocht mean 3.3 deg (max 5.1), Hunserug 0.9, Rob Slotemakerbocht 1.5, Scheivlak 2.4, the braking zone before Tarzan 0.4; but 4.4-5 deg in CM.com bocht and the Hans Ernst chicane entry where the road is nearly flat.",
+   "real": "AHN4 cross slopes (planar, consistent over +-3..+-10 m): Tarzanbocht 6.4-7.4 deg, the approach to Tarzan 5.1-5.4, Hunserug 4.7-5.4, Rob Slotemakerbocht 4.4-4.8 (both directions of the S), Scheivlak 4.1-5.9; CM.com bocht 1.5-1.7, Hans Ernst chicane entry 1.1-1.2. Every one inside-lower.",
+   "proposedFix": "bankOverrides from the lidar (proposedCorrection.bankOverridesFromLidar: Tarzan 6.5, Hunserug 4.5, Rob Slotemaker 4.5 / 5, Scheivlak 5 deg ...). This also helps the \"banking not felt\" complaint at Zandvoort.",
+   "sources": [
+    "AHN4 DTM 0.5 m (Actueel Hoogtebestand Nederland, CC0), https://ahn.arcgisonline.nl/arcgis/rest/services/AHNviewer/AHN4_DTM_50cm/ImageServer (getSamples); cached in devtests/track-audit/cache/ahn4/points.json"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "pitLimitKmh absent -> 80 km/h for every season (js/track.js lane at 80). Lane on the right (correct), entry 169 m before the line, exit 164 m after.",
+   "real": "60 km/h until 2024, 80 km/h from the 2025 Dutch GP (en.wikipedia \"2025 Dutch Grand Prix\": \"The pit lane speed limit was increased from 60 km/h to 80 km/h\", citing Pirelli; speedcafe.com; planetf1.com). Whether all of 2021-2024 ran at 60 was not checked year by year (the 2025 sources call 60 the previous limit). OSM way 38144527 \"Pitstraat\" (759 m) leaves 173 m before the line (game 169: matches) and rejoins 615 m after it, past Tarzan.",
+   "proposedFix": "Season-dependent limit: 60 km/h for the 2021-2024 Dutch GP seasons, 80 from 2025 (e.g. pitLimitKmhBySeason {\"2021\":60,\"2022\":60,\"2023\":60,\"2024\":60}); if only one value is possible keep 80 (2025-2026 and the default season 2026).",
+   "sources": [
+    "en.wikipedia.org/wiki/2025_Dutch_Grand_Prix (cached)",
+    "speedcafe.com/f1-news-2025-dutch-grand-prix-pit-speed-limit-change-explained-fia-pirelli-strategy-shakeup/",
+    "planetf1.com/news/dutch-grand-prix-pit-lane-change-strategic-curveball-zandvoort (2025): Zandvoort raised from 60 to 80 km/h, \"matching the speed limit at most other venues\"",
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/nl-1948.json; way 38144527 \"Pitstraat\""
+   ]
+  },
+  {
+   "aspect": "start",
+   "severity": "cosmetic",
+   "game": "Line = dataset first vertex.",
+   "real": "OSM circuit relation 13545573: node 12148116710 \"Finish\" (raceway=finish) 70 m after the game's line, node 12148116709 \"Start\" (raceway=start) 126 m after it.",
+   "proposedFix": "Optional START_AT 'nl-1948': [52.3889948, 4.5408762] (OSM node 12148116710, the finish = timing line).",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/nl-1948.json; relation 13545573 nodes 12148116709 / 12148116710"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "cosmetic",
+   "game": "AHN4 lidar already (since 2026-10-01): range 8.5 m, max grade 6.2 % / -4.8 % over 50 m.",
+   "real": "AHN4 along the OSM centreline: range 8.7 m (published 8.9 m, nl/en.wikipedia), max 7.6 % (Hugenholtz exit) / -5.4 % (Hunserug) over 50 m; RMS difference 0.17 m, no stretch > 2 pp over 100 m.",
+   "proposedFix": "None.",
+   "sources": [
+    "AHN4 DTM 0.5 m (Actueel Hoogtebestand Nederland, CC0), https://ahn.arcgisonline.nl/arcgis/rest/services/AHNviewer/AHN4_DTM_50cm/ImageServer (getSamples); cached in devtests/track-audit/cache/ahn4/points.json",
+    "nl.wikipedia.org/wiki/Circuit_Zandvoort: \"Het hoogteverschil is 8,9 meter\""
+   ]
+  },
+  {
+   "aspect": "layout",
+   "severity": "cosmetic",
+   "game": "Current layout (2020-present, banked T3 / T14), 4.259 km; within 3.0 m of OSM everywhere (mean 0.88 m); direction correct.",
+   "real": "en.wikipedia infobox \"Grand Prix Circuit (2020-present)\" 4.259 km; OSM lap 4261.9 m. F1 used it 2021-2026.",
+   "proposedFix": "None.",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/nl-1948.json; relation 13545573 \"Grand Prix Formule 1 van Nederland\"",
+    "en.wikipedia.org/wiki/Circuit_Zandvoort"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "severity": "major",
+   "game": "js/scenery.js builds a floating concrete deck OVER the main straight 160 m before the line (lap s 4101, underside 8.8 m above the road; scenery-data.js \"bridge\" at 52.387092, 4.539550; screenshot shots/shot-zandvoort-phantom.png). It is a phantom.",
+   "real": "That item is OSM way 765476850 (man_made=bridge, layer 1, 232 m2) = the track's own deck over the service tunnel OSM way 186321842 (layer -1) under the main straight. OSM has nothing crossing over the lap; only service / foot tunnels pass under it (ways 186321842, 906789803, 906789798). AHN4 shows no dip there.",
+   "proposedFix": "Drop OSM way 765476850 from the scenery bridges (proposedCorrection.sceneryBridgesToDrop) or skip man_made=bridge outlines that carry the lap.",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/nl-1948.json; ways 765476850, 186321842",
+    "game: node devtests/track-audit/be-nl-de-gb/bridges.js nl-1948"
+   ]
+  }
+ ],
+ "proposedCorrection": {
+  "pitLimitKmhBySeason": {
+   "2021": 60,
+   "2022": 60,
+   "2023": 60,
+   "2024": 60,
+   "2025": 80,
+   "2026": 80,
+   "note": "2021-2023 inferred from the 2025 sources (\"raised from 60\"), not checked per year"
+  },
+  "startAt": {
+   "nl-1948": [
+    52.3889948,
+    4.5408762
+   ],
+   "optional": true
+  },
+  "bankOverridesKeep": "T3 19 deg and T14 18 deg stay (published); T3 measured profile: inside ~5, centre 9-10, outer 18-23 deg",
+  "sceneryBridgesToDrop": {
+   "osmWays": [
+    765476850
+   ],
+   "rule": "a man_made=bridge outline that contains the lap centreline and has a tunnel / layer<0 way crossing the lap inside it, or a bridge=yes raceway inside it, is the lap own deck: do not build it over the road (tools/build-scenery.mjs or js/scenery.js addBridge)"
+  },
+  "bankOverridesFromLidar": {
+   "note": "optional, minor: replaces the curvature-derived bank where the 0.5-1 m lidar DTM measures a different cross slope (+-4 m about the OSM centreline, median of 3 samples 10 m apart); the full measured series is under measurements.crossSlope.series",
+   "list": [
+    {
+     "side": "inside-lower (radius 60 m)",
+     "name": "Tarzanbocht (OSM s 0-180 m, 387 m from the line)",
+     "deg": 6.5,
+     "from": [
+      52.3916242,
+      4.5426454
+     ],
+     "to": [
+      52.3908736,
+      4.5434526
+     ],
+     "measured": {
+      "lidarMeanDeg": 6.4,
+      "lidarMaxDeg": 7.5,
+      "gameMeanDeg": 3.3,
+      "gameMaxDeg": 5.1
+     },
+     "kind": "real camber missing / too small in the game"
+    },
+    {
+     "side": "inside-lower (radius 232 m)",
+     "name": "37 m from CM.com Circuit Zandvoort (OSM s 260-310 m, 647 m from the line)",
+     "deg": 4.5,
+     "from": [
+      52.3902076,
+      4.5430133
+     ],
+     "to": [
+      52.3897659,
+      4.5428895
+     ],
+     "measured": {
+      "lidarMeanDeg": -4.3,
+      "lidarMaxDeg": -5.2,
+      "gameMeanDeg": -1.2,
+      "gameMaxDeg": -1.4
+     },
+     "kind": "real camber missing / too small in the game"
+    },
+    {
+     "side": "inside-lower (radius 310 m)",
+     "name": "Hunserug (OSM s 690-810 m, 1077 m from the line)",
+     "deg": 4.5,
+     "from": [
+      52.388405,
+      4.5433259
+     ],
+     "to": [
+      52.3884474,
+      4.5450726
+     ],
+     "measured": {
+      "lidarMeanDeg": 4.6,
+      "lidarMaxDeg": 5.7,
+      "gameMeanDeg": 0.9,
+      "gameMaxDeg": 1.2
+     },
+     "kind": "real camber missing / too small in the game"
+    },
+    {
+     "side": "inside-lower (radius 173 m)",
+     "name": "Rob Slotemakerbocht (OSM s 890-1000 m, 1277 m from the line)",
+     "deg": 5,
+     "from": [
+      52.3882938,
+      4.5462202
+     ],
+     "to": [
+      52.3884478,
+      4.5477831
+     ],
+     "measured": {
+      "lidarMeanDeg": -4.8,
+      "lidarMaxDeg": -5.6,
+      "gameMeanDeg": -1.5,
+      "gameMaxDeg": -2.9
+     },
+     "kind": "real camber missing / too small in the game"
+    },
+    {
+     "side": "inside-lower (radius 180 m)",
+     "name": "Rob Slotemakerbocht (OSM s 1070-1151 m, 1457 m from the line)",
+     "deg": 4.5,
+     "from": [
+      52.3887735,
+      4.5486623
+     ],
+     "to": [
+      52.3889693,
+      4.5497944
+     ],
+     "measured": {
+      "lidarMeanDeg": 4.4,
+      "lidarMaxDeg": 5.1,
+      "gameMeanDeg": 1.5,
+      "gameMaxDeg": 1.8
+     },
+     "kind": "real camber missing / too small in the game"
+    },
+    {
+     "side": "inside-lower (radius 106 m)",
+     "name": "Scheivlak (OSM s 1291-1501 m, 1677 m from the line)",
+     "deg": 5,
+     "from": [
+      52.3888916,
+      4.5518451
+     ],
+     "to": [
+      52.3874188,
+      4.5527161
+     ],
+     "measured": {
+      "lidarMeanDeg": 5.2,
+      "lidarMaxDeg": 5.8,
+      "gameMeanDeg": 2.4,
+      "gameMaxDeg": 3.3
+     },
+     "kind": "real camber missing / too small in the game"
+    },
+    {
+     "side": "inside-lower (radius 46 m)",
+     "name": "CM.com bocht (OSM s 2151-2251 m, -1724 m from the line)",
+     "deg": 1.5,
+     "from": [
+      52.3872051,
+      4.5508212
+     ],
+     "to": [
+      52.3879477,
+      4.5507501
+     ],
+     "measured": {
+      "lidarMeanDeg": -1.6,
+      "lidarMaxDeg": -1.8,
+      "gameMeanDeg": -4.4,
+      "gameMaxDeg": -4.9
+     },
+     "kind": "game banks a corner that is (nearly) flat"
+    },
+    {
+     "side": "nearly straight (radius 1507 m): bankOverrides take the side from the corner direction, check it",
+     "name": "30 m from Tarzanbocht (OSM s 4212-4252 m, 337 m from the line)",
+     "deg": 5.5,
+     "from": [
+      52.3912094,
+      4.5423663
+     ],
+     "to": [
+      52.3915418,
+      4.54259
+     ],
+     "measured": {
+      "lidarMeanDeg": 5.3,
+      "lidarMaxDeg": 6.1,
+      "gameMeanDeg": 0.4,
+      "gameMaxDeg": 1.8
+     },
+     "kind": "real camber missing / too small in the game"
+    }
+   ]
+  }
+ },
+ "measurements": {
+  "method": "devtests/track-audit/be-nl-de-gb/audit.mjs: game = tracks-data.js + js/track.js built in node (out/game-<id>.json from dump-game.js); OSM = Overpass (cache/overpass/<id>.json), the F1 lap chained from its raceway ways in their oneway direction; DEM sampled every 5 m along the OSM centreline, 25 m median + 5 m Gauss; game heights mapped to the OSM centreline by nearest point and aligned by the mean difference",
+  "osmLapWays": [
+   {
+    "id": 1311522212,
+    "name": "Tarzanbocht",
+    "osmS": 0
+   },
+   {
+    "id": 1313671989,
+    "name": "",
+    "osmS": 127
+   },
+   {
+    "id": 1311522213,
+    "name": "",
+    "osmS": 232
+   },
+   {
+    "id": 1313671990,
+    "name": "CM.com Circuit Zandvoort",
+    "osmS": 322
+   },
+   {
+    "id": 1311522214,
+    "name": "Gerlachbocht",
+    "osmS": 363
+   },
+   {
+    "id": 1311522215,
+    "name": "",
+    "osmS": 420
+   },
+   {
+    "id": 1311522216,
+    "name": "Hugenholtzbocht",
+    "osmS": 473
+   },
+   {
+    "id": 1311522217,
+    "name": "Hunserug",
+    "osmS": 607
+   },
+   {
+    "id": 1311522218,
+    "name": "Rob Slotemakerbocht",
+    "osmS": 880
+   },
+   {
+    "id": 1311566938,
+    "name": "",
+    "osmS": 1197
+   },
+   {
+    "id": 1311566937,
+    "name": "Scheivlak",
+    "osmS": 1264
+   },
+   {
+    "id": 1313671991,
+    "name": "",
+    "osmS": 1501
+   },
+   {
+    "id": 1311566939,
+    "name": "",
+    "osmS": 1573
+   },
+   {
+    "id": 1313671992,
+    "name": "",
+    "osmS": 1647
+   },
+   {
+    "id": 1311566940,
+    "name": "Mastersbocht",
+    "osmS": 1698
+   },
+   {
+    "id": 1311710253,
+    "name": "",
+    "osmS": 1831
+   },
+   {
+    "id": 24626850,
+    "name": "CM.com bocht",
+    "osmS": 2037
+   },
+   {
+    "id": 1311765615,
+    "name": "",
+    "osmS": 2270
+   },
+   {
+    "id": 1311802779,
+    "name": "Hans Ernst chicane",
+    "osmS": 2771
+   },
+   {
+    "id": 1311822339,
+    "name": "",
+    "osmS": 2924
+   },
+   {
+    "id": 1311822340,
+    "name": "",
+    "osmS": 3157
+   },
+   {
+    "id": 1311822341,
+    "name": "",
+    "osmS": 3255
+   },
+   {
+    "id": 1311879069,
+    "name": "Arie Luyendykbocht",
+    "osmS": 3325
+   },
+   {
+    "id": 1311522211,
+    "name": "",
+    "osmS": 3591
+   }
+  ],
+  "osmRelation": {
+   "id": 13545573,
+   "tags": {
+    "name": "Grand Prix Formule 1 van Nederland",
+    "name:en": "Dutch Grand Prix",
+    "name:fr": "Grand Prix automobile des Pays-Bas",
+    "type": "circuit"
+   }
+  },
+  "lengths": {
+   "osmCentrelineM": 4261.9,
+   "gameBuiltM": 4260.7,
+   "gameLengthKm": 4.259
+  },
+  "layoutDeviationM": {
+   "gameToOsm": {
+    "max": 3,
+    "mean": 0.88,
+    "p95": 2
+   },
+   "osmToGame": {
+    "max": 3,
+    "mean": 0.88,
+    "p95": 2
+   },
+   "worstGameSamples": [
+    {
+     "d": 3,
+     "at": {
+      "gameS": 418,
+      "osmS": 35,
+      "near": "Tarzanbocht"
+     }
+    }
+   ],
+   "worstOsmPoints": [
+    {
+     "d": 3,
+     "at": {
+      "osmS": 35,
+      "gameS": 419,
+      "near": "Tarzanbocht",
+      "lat": 52.391821,
+      "lon": 4.543027
+     }
+    }
+   ]
+  },
+  "direction": {
+   "agreeFraction": 1,
+   "note": "fraction of game samples whose direction agrees with the OSM oneway raceway direction"
+  },
+  "startFinish": [
+   {
+    "node": 12148116709,
+    "tags": {
+     "name": "Start",
+     "raceway": "start"
+    },
+    "lat": 52.3894534,
+    "lon": 4.5411848,
+    "offTrackM": 1,
+    "gameS": 125.5,
+    "osmS": 4000.7,
+    "note": "126 m after the game's line (game s = 0)"
+   },
+   {
+    "node": 12148116710,
+    "tags": {
+     "name": "Finish",
+     "raceway": "finish"
+    },
+    "lat": 52.3889948,
+    "lon": 4.5408762,
+    "offTrackM": 0.8,
+    "gameS": 70.4,
+    "osmS": 3945.5,
+    "note": "70 m after the game's line (game s = 0)"
+   }
+  ],
+  "pitOsm": [
+   {
+    "way": 38144527,
+    "tags": {
+     "access": "private",
+     "amenity": "circuit",
+     "highway": "raceway",
+     "name": "Pitstraat",
+     "note": "racetrack",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 759,
+    "startGameS": -173,
+    "startOffM": 0.1,
+    "endGameS": 615,
+    "endOffM": 0.9,
+    "midSide": "right",
+    "midOffM": 9.9,
+    "midGameS": 281
+   }
+  ],
+  "pitGame": {
+   "side": "right",
+   "limitKmh": 80,
+   "laneFromS": -255,
+   "laneToS": 250,
+   "entryS": -169,
+   "exitS": 164,
+   "boxes": 16
+  },
+  "structures": [
+   {
+    "way": 186321842,
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 3715,
+    "near": "124 m from Arie Luyendykbocht",
+    "gameS": -160
+   },
+   {
+    "way": 765476850,
+    "tags": {
+     "layer": "1",
+     "man_made": "bridge"
+    },
+    "kind": "crosses over the lap",
+    "osmS": 3720,
+    "near": "129 m from Arie Luyendykbocht",
+    "gameS": -155
+   },
+   {
+    "way": 906789798,
+    "tags": {
+     "highway": "footway",
+     "layer": "-1",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 4170,
+    "near": "92 m from Tarzanbocht",
+    "gameS": 294
+   },
+   {
+    "way": 906789803,
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 3349,
+    "near": "Arie Luyendykbocht",
+    "gameS": -526
+   }
+  ],
+  "elevation": {
+   "dem": "AHN4 DTM 0.5 m (ahn.arcgisonline.nl AHNviewer/AHN4_DTM_50cm ImageServer getSamples)",
+   "stepM": 5.002243513361451,
+   "holesFilled": 2,
+   "covered": [],
+   "realRangeM": 8.7,
+   "realMinASL": 2.6,
+   "realMinAt": {
+    "osmS": 2956,
+    "near": "32 m from Hans Ernst chicane"
+   },
+   "realMaxASL": 11.3,
+   "realMaxAt": {
+    "osmS": 1221,
+    "near": "24 m from Rob Slotemakerbocht"
+   },
+   "gameRangeM": 8.5,
+   "rmsDiffM": 0.17,
+   "maxDiffM": 0.7,
+   "maxDiffAt": {
+    "osmS": 560,
+    "fromLine": 947,
+    "near": "Hugenholtzbocht",
+    "gameMinusReal": 0.7
+   },
+   "grades50m": {
+    "realMaxPct": 7.6,
+    "realMinPct": -5.4,
+    "gameMaxPct": 6.2,
+    "gameMinPct": -4.8,
+    "steepestClimbsReal": [
+     {
+      "osmS": 595,
+      "fromLine": 982,
+      "near": "Hugenholtzbocht",
+      "realPct": 7.6,
+      "gamePct": 6.1
+     },
+     {
+      "osmS": 1080,
+      "fromLine": 1467,
+      "near": "Rob Slotemakerbocht",
+      "realPct": 5.5,
+      "gamePct": 4.7
+     },
+     {
+      "osmS": 3331,
+      "fromLine": -544,
+      "near": "Arie Luyendykbocht",
+      "realPct": 3.7,
+      "gamePct": 3.1
+     },
+     {
+      "osmS": 375,
+      "fromLine": 762,
+      "near": "Gerlachbocht",
+      "realPct": 2.9,
+      "gamePct": 1.9
+     }
+    ],
+    "steepestDescentsReal": [
+     {
+      "osmS": 815,
+      "fromLine": 1202,
+      "near": "Hunserug",
+      "realPct": -5.4,
+      "gamePct": -4.8
+     },
+     {
+      "osmS": 1356,
+      "fromLine": 1742,
+      "near": "Scheivlak",
+      "realPct": -5.1,
+      "gamePct": -4.5
+     },
+     {
+      "osmS": 490,
+      "fromLine": 877,
+      "near": "Hugenholtzbocht",
+      "realPct": -4,
+      "gamePct": -2.6
+     },
+     {
+      "osmS": 2721,
+      "fromLine": -1154,
+      "near": "50 m from Hans Ernst chicane",
+      "realPct": -2.6,
+      "gamePct": -2.3
+     }
+    ],
+    "steepestClimbsGame": [
+     {
+      "osmS": 600,
+      "fromLine": 987,
+      "near": "Hugenholtzbocht",
+      "realPct": 7.5,
+      "gamePct": 6.2
+     },
+     {
+      "osmS": 1090,
+      "fromLine": 1477,
+      "near": "Rob Slotemakerbocht",
+      "realPct": 5.5,
+      "gamePct": 4.8
+     },
+     {
+      "osmS": 3347,
+      "fromLine": -529,
+      "near": "Arie Luyendykbocht",
+      "realPct": 3.5,
+      "gamePct": 3.1
+     },
+     {
+      "osmS": 1486,
+      "fromLine": 1872,
+      "near": "Scheivlak",
+      "realPct": 2.6,
+      "gamePct": 2.2
+     }
+    ],
+    "steepestDescentsGame": [
+     {
+      "osmS": 810,
+      "fromLine": 1197,
+      "near": "Hunserug",
+      "realPct": -5.4,
+      "gamePct": -4.8
+     },
+     {
+      "osmS": 1336,
+      "fromLine": 1722,
+      "near": "Scheivlak",
+      "realPct": -5.1,
+      "gamePct": -4.7
+     },
+     {
+      "osmS": 485,
+      "fromLine": 872,
+      "near": "Hugenholtzbocht",
+      "realPct": -4,
+      "gamePct": -2.7
+     },
+     {
+      "osmS": 2701,
+      "fromLine": -1174,
+      "near": "70 m from Hans Ernst chicane",
+      "realPct": -2.5,
+      "gamePct": -2.4
+     }
+    ]
+   },
+   "grades100m": {
+    "realMaxPct": 6.3,
+    "realMinPct": -5,
+    "gameMaxPct": 5.4,
+    "gameMinPct": -4.4,
+    "steepestClimbsReal": [
+     {
+      "osmS": 610,
+      "fromLine": 997,
+      "near": "Hunserug",
+      "realPct": 6.3,
+      "gamePct": 5.4
+     },
+     {
+      "osmS": 1095,
+      "fromLine": 1482,
+      "near": "Rob Slotemakerbocht",
+      "realPct": 5.1,
+      "gamePct": 4.5
+     },
+     {
+      "osmS": 3341,
+      "fromLine": -534,
+      "near": "Arie Luyendykbocht",
+      "realPct": 3.2,
+      "gamePct": 3
+     },
+     {
+      "osmS": 1496,
+      "fromLine": 1882,
+      "near": "Scheivlak",
+      "realPct": 2.2,
+      "gamePct": 1.8
+     }
+    ],
+    "steepestDescentsReal": [
+     {
+      "osmS": 815,
+      "fromLine": 1202,
+      "near": "Hunserug",
+      "realPct": -5,
+      "gamePct": -4.3
+     },
+     {
+      "osmS": 1341,
+      "fromLine": 1727,
+      "near": "Scheivlak",
+      "realPct": -4.8,
+      "gamePct": -4.3
+     },
+     {
+      "osmS": 485,
+      "fromLine": 872,
+      "near": "Hugenholtzbocht",
+      "realPct": -2.7,
+      "gamePct": -2.1
+     },
+     {
+      "osmS": 2701,
+      "fromLine": -1174,
+      "near": "70 m from Hans Ernst chicane",
+      "realPct": -2.5,
+      "gamePct": -2.2
+     }
+    ],
+    "steepestClimbsGame": [
+     {
+      "osmS": 610,
+      "fromLine": 997,
+      "near": "Hunserug",
+      "realPct": 6.3,
+      "gamePct": 5.4
+     },
+     {
+      "osmS": 1095,
+      "fromLine": 1482,
+      "near": "Rob Slotemakerbocht",
+      "realPct": 5.1,
+      "gamePct": 4.5
+     },
+     {
+      "osmS": 3336,
+      "fromLine": -539,
+      "near": "Arie Luyendykbocht",
+      "realPct": 3.2,
+      "gamePct": 3
+     },
+     {
+      "osmS": 1491,
+      "fromLine": 1877,
+      "near": "Scheivlak",
+      "realPct": 2.1,
+      "gamePct": 1.8
+     }
+    ],
+    "steepestDescentsGame": [
+     {
+      "osmS": 810,
+      "fromLine": 1197,
+      "near": "Hunserug",
+      "realPct": -5,
+      "gamePct": -4.4
+     },
+     {
+      "osmS": 1336,
+      "fromLine": 1722,
+      "near": "Scheivlak",
+      "realPct": -4.7,
+      "gamePct": -4.3
+     },
+     {
+      "osmS": 2701,
+      "fromLine": -1174,
+      "near": "70 m from Hans Ernst chicane",
+      "realPct": -2.5,
+      "gamePct": -2.2
+     },
+     {
+      "osmS": 480,
+      "fromLine": 867,
+      "near": "Hugenholtzbocht",
+      "realPct": -2.7,
+      "gamePct": -2.1
+     }
+    ]
+   },
+   "mismatchRuns100m": [],
+   "namedFeatures": [
+    {
+     "name": "Tarzanbocht",
+     "way": 1311522212,
+     "osmFrom": 0,
+     "lengthM": 125,
+     "realRise": 0.1,
+     "gameRise": 0.2,
+     "real50MaxPct": 1.8,
+     "real50MinPct": -1.8,
+     "game50MaxPct": 1.1,
+     "game50MinPct": -1.5
+    },
+    {
+     "name": "CM.com Circuit Zandvoort",
+     "way": 1313671990,
+     "osmFrom": 320,
+     "lengthM": 45,
+     "realRise": 0.4,
+     "gameRise": 0.5,
+     "real50MaxPct": 2.6,
+     "real50MinPct": -0.5,
+     "game50MaxPct": 1.7,
+     "game50MinPct": 0.5
+    },
+    {
+     "name": "Gerlachbocht",
+     "way": 1311522214,
+     "osmFrom": 365,
+     "lengthM": 55,
+     "realRise": 1.3,
+     "gameRise": 0.9,
+     "real50MaxPct": 2.9,
+     "real50MinPct": 0.6,
+     "game50MaxPct": 1.9,
+     "game50MinPct": 0.2
+    },
+    {
+     "name": "Hugenholtzbocht",
+     "way": 1311522216,
+     "osmFrom": 475,
+     "lengthM": 130,
+     "realRise": 1.4,
+     "gameRise": 1.8,
+     "real50MaxPct": 7.6,
+     "real50MinPct": -4,
+     "game50MaxPct": 6.2,
+     "game50MinPct": -2.7
+    },
+    {
+     "name": "Hunserug",
+     "way": 1311522217,
+     "osmFrom": 605,
+     "lengthM": 275,
+     "realRise": -2.5,
+     "gameRise": -2.3,
+     "real50MaxPct": 7.3,
+     "real50MinPct": -5.4,
+     "game50MaxPct": 6.2,
+     "game50MinPct": -4.8
+    },
+    {
+     "name": "Rob Slotemakerbocht",
+     "way": 1311522218,
+     "osmFrom": 880,
+     "lengthM": 315,
+     "realRise": 6.7,
+     "gameRise": 6.3,
+     "real50MaxPct": 5.5,
+     "real50MinPct": -2.3,
+     "game50MaxPct": 4.8,
+     "game50MinPct": -2.2
+    },
+    {
+     "name": "Scheivlak",
+     "way": 1311566937,
+     "osmFrom": 1266,
+     "lengthM": 235,
+     "realRise": -4.8,
+     "gameRise": -4.4,
+     "real50MaxPct": 2.6,
+     "real50MinPct": -5.1,
+     "game50MaxPct": 2.2,
+     "game50MinPct": -4.7
+    },
+    {
+     "name": "Mastersbocht",
+     "way": 1311566940,
+     "osmFrom": 1696,
+     "lengthM": 135,
+     "realRise": -0.9,
+     "gameRise": -0.9,
+     "real50MaxPct": 0,
+     "real50MinPct": -1.3,
+     "game50MaxPct": 0,
+     "game50MinPct": -1.3
+    },
+    {
+     "name": "CM.com bocht",
+     "way": 24626850,
+     "osmFrom": 2036,
+     "lengthM": 235,
+     "realRise": 0.9,
+     "gameRise": 0.8,
+     "real50MaxPct": 0.6,
+     "real50MinPct": -0.1,
+     "game50MaxPct": 0.5,
+     "game50MinPct": 0
+    },
+    {
+     "name": "Hans Ernst chicane",
+     "way": 1311802779,
+     "osmFrom": 2771,
+     "lengthM": 155,
+     "realRise": -0.9,
+     "gameRise": -1,
+     "real50MaxPct": 0.1,
+     "real50MinPct": -1.2,
+     "game50MaxPct": -0.2,
+     "game50MinPct": -1.2
+    },
+    {
+     "name": "Arie Luyendykbocht",
+     "way": 1311879069,
+     "osmFrom": 3326,
+     "lengthM": 265,
+     "realRise": 2.8,
+     "gameRise": 2.3,
+     "real50MaxPct": 3.7,
+     "real50MinPct": -0.7,
+     "game50MaxPct": 3.1,
+     "game50MinPct": -0.6
+    }
+   ],
+   "profile25m": {
+    "columns": [
+     "osmS",
+     "fromGameLine",
+     "lidarASL",
+     "gameAlignedASL"
+    ],
+    "rows": [
+     [
+      0,
+      387,
+      5.9,
+      5.73
+     ],
+     [
+      25,
+      412,
+      6.4,
+      6.03
+     ],
+     [
+      50,
+      437,
+      6.66,
+      6.25
+     ],
+     [
+      75,
+      462,
+      6.61,
+      6.34
+     ],
+     [
+      100,
+      487,
+      6.37,
+      6.26
+     ],
+     [
+      125,
+      512,
+      5.96,
+      5.93
+     ],
+     [
+      150,
+      537,
+      5.46,
+      5.52
+     ],
+     [
+      175,
+      562,
+      5.14,
+      5.1
+     ],
+     [
+      200,
+      587,
+      4.77,
+      4.8
+     ],
+     [
+      225,
+      612,
+      4.59,
+      4.68
+     ],
+     [
+      250,
+      637,
+      4.68,
+      4.64
+     ],
+     [
+      275,
+      662,
+      4.85,
+      4.64
+     ],
+     [
+      300,
+      687,
+      4.72,
+      4.62
+     ],
+     [
+      325,
+      712,
+      4.51,
+      4.68
+     ],
+     [
+      350,
+      737,
+      4.55,
+      4.93
+     ],
+     [
+      375,
+      762,
+      5.28,
+      5.36
+     ],
+     [
+      400,
+      787,
+      6,
+      5.87
+     ],
+     [
+      425,
+      812,
+      6.21,
+      6.1
+     ],
+     [
+      450,
+      837,
+      6.12,
+      5.8
+     ],
+     [
+      475,
+      862,
+      5.53,
+      5.25
+     ],
+     [
+      500,
+      887,
+      4.34,
+      4.55
+     ],
+     [
+      525,
+      912,
+      3.61,
+      4.02
+     ],
+     [
+      550,
+      937,
+      3.54,
+      4.19
+     ],
+     [
+      575,
+      962,
+      4.63,
+      5.22
+     ],
+     [
+      600,
+      987,
+      6.55,
+      6.77
+     ],
+     [
+      625,
+      1012,
+      8.4,
+      8.32
+     ],
+     [
+      650,
+      1037,
+      9.65,
+      9.52
+     ],
+     [
+      675,
+      1062,
+      10.5,
+      10.34
+     ],
+     [
+      700,
+      1087,
+      10.92,
+      10.67
+     ],
+     [
+      725,
+      1112,
+      10.89,
+      10.54
+     ],
+     [
+      750,
+      1137,
+      10.36,
+      9.99
+     ],
+     [
+      775,
+      1162,
+      9.48,
+      9.12
+     ],
+     [
+      800,
+      1187,
+      8.24,
+      8
+     ],
+     [
+      825,
+      1212,
+      6.87,
+      6.75
+     ],
+     [
+      850,
+      1237,
+      5.55,
+      5.65
+     ],
+     [
+      875,
+      1262,
+      4.6,
+      4.87
+     ],
+     [
+      900,
+      1287,
+      4.16,
+      4.42
+     ],
+     [
+      925,
+      1312,
+      4.1,
+      4.23
+     ],
+     [
+      950,
+      1337,
+      4.11,
+      4.14
+     ],
+     [
+      975,
+      1362,
+      4.08,
+      4.14
+     ],
+     [
+      1000,
+      1387,
+      4.05,
+      4.21
+     ],
+     [
+      1025,
+      1412,
+      4.31,
+      4.64
+     ],
+     [
+      1050,
+      1437,
+      5.07,
+      5.48
+     ],
+     [
+      1075,
+      1462,
+      6.43,
+      6.58
+     ],
+     [
+      1100,
+      1487,
+      7.83,
+      7.81
+     ],
+     [
+      1126,
+      1512,
+      9.08,
+      8.97
+     ],
+     [
+      1151,
+      1537,
+      10.1,
+      10.01
+     ],
+     [
+      1176,
+      1562,
+      10.82,
+      10.71
+     ],
+     [
+      1201,
+      1587,
+      11.21,
+      11.06
+     ],
+     [
+      1226,
+      1612,
+      11.3,
+      11.13
+     ],
+     [
+      1251,
+      1637,
+      11.01,
+      10.81
+     ],
+     [
+      1276,
+      1662,
+      10.43,
+      10.2
+     ],
+     [
+      1301,
+      1687,
+      9.61,
+      9.37
+     ],
+     [
+      1326,
+      1712,
+      8.43,
+      8.25
+     ],
+     [
+      1351,
+      1737,
+      7.14,
+      7.06
+     ],
+     [
+      1376,
+      1762,
+      5.86,
+      5.94
+     ],
+     [
+      1401,
+      1787,
+      4.94,
+      5.13
+     ],
+     [
+      1426,
+      1812,
+      4.53,
+      4.81
+     ],
+     [
+      1451,
+      1837,
+      4.64,
+      4.97
+     ],
+     [
+      1476,
+      1862,
+      5.2,
+      5.46
+     ],
+     [
+      1501,
+      1887,
+      5.9,
+      6.03
+     ],
+     [
+      1526,
+      1912,
+      6.46,
+      6.49
+     ],
+     [
+      1551,
+      1937,
+      6.78,
+      6.7
+     ],
+     [
+      1576,
+      1962,
+      6.81,
+      6.64
+     ],
+     [
+      1601,
+      1987,
+      6.47,
+      6.33
+     ],
+     [
+      1626,
+      2012,
+      5.9,
+      5.85
+     ],
+     [
+      1651,
+      2038,
+      5.33,
+      5.32
+     ],
+     [
+      1676,
+      2063,
+      4.85,
+      4.93
+     ],
+     [
+      1701,
+      2088,
+      4.55,
+      4.62
+     ],
+     [
+      1726,
+      2113,
+      4.25,
+      4.27
+     ],
+     [
+      1751,
+      -2124,
+      3.9,
+      4.04
+     ],
+     [
+      1776,
+      -2099,
+      3.73,
+      3.84
+     ],
+     [
+      1801,
+      -2074,
+      3.7,
+      3.75
+     ],
+     [
+      1826,
+      -2049,
+      3.69,
+      3.74
+     ],
+     [
+      1851,
+      -2024,
+      3.68,
+      3.74
+     ],
+     [
+      1876,
+      -1999,
+      3.69,
+      3.74
+     ],
+     [
+      1901,
+      -1974,
+      3.72,
+      3.76
+     ],
+     [
+      1926,
+      -1949,
+      3.83,
+      3.83
+     ],
+     [
+      1951,
+      -1924,
+      3.88,
+      3.83
+     ],
+     [
+      1976,
+      -1899,
+      3.78,
+      3.76
+     ],
+     [
+      2001,
+      -1874,
+      3.72,
+      3.74
+     ],
+     [
+      2026,
+      -1849,
+      3.72,
+      3.74
+     ],
+     [
+      2051,
+      -1824,
+      3.71,
+      3.74
+     ],
+     [
+      2076,
+      -1799,
+      3.69,
+      3.73
+     ],
+     [
+      2101,
+      -1774,
+      3.67,
+      3.75
+     ],
+     [
+      2126,
+      -1749,
+      3.77,
+      3.86
+     ],
+     [
+      2151,
+      -1724,
+      3.9,
+      3.98
+     ],
+     [
+      2176,
+      -1699,
+      4.05,
+      4.11
+     ],
+     [
+      2201,
+      -1674,
+      4.19,
+      4.25
+     ],
+     [
+      2226,
+      -1649,
+      4.35,
+      4.37
+     ],
+     [
+      2251,
+      -1624,
+      4.5,
+      4.49
+     ],
+     [
+      2276,
+      -1599,
+      4.58,
+      4.6
+     ],
+     [
+      2301,
+      -1574,
+      4.64,
+      4.64
+     ],
+     [
+      2326,
+      -1549,
+      4.65,
+      4.64
+     ],
+     [
+      2351,
+      -1524,
+      4.69,
+      4.67
+     ],
+     [
+      2376,
+      -1499,
+      4.74,
+      4.74
+     ],
+     [
+      2401,
+      -1474,
+      4.86,
+      4.86
+     ],
+     [
+      2426,
+      -1449,
+      4.98,
+      4.99
+     ],
+     [
+      2451,
+      -1424,
+      5.09,
+      5.11
+     ],
+     [
+      2476,
+      -1399,
+      5.2,
+      5.25
+     ],
+     [
+      2501,
+      -1374,
+      5.4,
+      5.46
+     ],
+     [
+      2526,
+      -1349,
+      5.7,
+      5.79
+     ],
+     [
+      2551,
+      -1324,
+      6.11,
+      6.2
+     ],
+     [
+      2576,
+      -1299,
+      6.59,
+      6.56
+     ],
+     [
+      2601,
+      -1274,
+      6.87,
+      6.74
+     ],
+     [
+      2626,
+      -1249,
+      6.8,
+      6.66
+     ],
+     [
+      2651,
+      -1224,
+      6.45,
+      6.3
+     ],
+     [
+      2676,
+      -1199,
+      5.83,
+      5.8
+     ],
+     [
+      2701,
+      -1174,
+      5.21,
+      5.2
+     ],
+     [
+      2726,
+      -1149,
+      4.55,
+      4.6
+     ],
+     [
+      2751,
+      -1124,
+      3.94,
+      4.07
+     ],
+     [
+      2776,
+      -1099,
+      3.65,
+      3.75
+     ],
+     [
+      2801,
+      -1074,
+      3.57,
+      3.54
+     ],
+     [
+      2826,
+      -1049,
+      3.35,
+      3.3
+     ],
+     [
+      2851,
+      -1024,
+      2.97,
+      3
+     ],
+     [
+      2876,
+      -999,
+      2.93,
+      2.86
+     ],
+     [
+      2901,
+      -974,
+      3.01,
+      2.83
+     ],
+     [
+      2926,
+      -949,
+      2.82,
+      2.77
+     ],
+     [
+      2951,
+      -924,
+      2.64,
+      2.7
+     ],
+     [
+      2976,
+      -899,
+      2.65,
+      2.66
+     ],
+     [
+      3001,
+      -874,
+      2.64,
+      2.64
+     ],
+     [
+      3026,
+      -849,
+      2.67,
+      2.63
+     ],
+     [
+      3051,
+      -824,
+      2.69,
+      2.65
+     ],
+     [
+      3076,
+      -799,
+      2.68,
+      2.69
+     ],
+     [
+      3101,
+      -774,
+      2.67,
+      2.76
+     ],
+     [
+      3126,
+      -749,
+      2.69,
+      2.89
+     ],
+     [
+      3151,
+      -724,
+      2.93,
+      3.02
+     ],
+     [
+      3176,
+      -699,
+      3.05,
+      3.1
+     ],
+     [
+      3201,
+      -674,
+      3.04,
+      3.14
+     ],
+     [
+      3226,
+      -649,
+      2.99,
+      3.14
+     ],
+     [
+      3251,
+      -624,
+      2.99,
+      3.21
+     ],
+     [
+      3276,
+      -599,
+      3.18,
+      3.51
+     ],
+     [
+      3301,
+      -574,
+      3.76,
+      4.11
+     ],
+     [
+      3326,
+      -549,
+      4.65,
+      4.88
+     ],
+     [
+      3352,
+      -524,
+      5.58,
+      5.63
+     ],
+     [
+      3377,
+      -499,
+      6.35,
+      6.43
+     ],
+     [
+      3402,
+      -474,
+      6.95,
+      7.04
+     ],
+     [
+      3427,
+      -449,
+      7.38,
+      7.41
+     ],
+     [
+      3452,
+      -424,
+      7.63,
+      7.54
+     ],
+     [
+      3477,
+      -399,
+      7.54,
+      7.53
+     ],
+     [
+      3502,
+      -374,
+      7.57,
+      7.41
+     ],
+     [
+      3527,
+      -349,
+      7.65,
+      7.25
+     ],
+     [
+      3552,
+      -324,
+      7.61,
+      7.24
+     ],
+     [
+      3577,
+      -299,
+      7.52,
+      7.24
+     ],
+     [
+      3602,
+      -274,
+      7.33,
+      7.14
+     ],
+     [
+      3627,
+      -249,
+      7.12,
+      6.94
+     ],
+     [
+      3652,
+      -224,
+      6.76,
+      6.67
+     ],
+     [
+      3677,
+      -198,
+      6.39,
+      6.34
+     ],
+     [
+      3702,
+      -173,
+      6.03,
+      6.03
+     ],
+     [
+      3727,
+      -148,
+      5.72,
+      5.74
+     ],
+     [
+      3752,
+      -123,
+      5.52,
+      5.51
+     ],
+     [
+      3777,
+      -98,
+      5.34,
+      5.35
+     ],
+     [
+      3802,
+      -73,
+      5.19,
+      5.24
+     ],
+     [
+      3827,
+      -48,
+      5.15,
+      5.18
+     ],
+     [
+      3852,
+      -23,
+      5.15,
+      5.15
+     ],
+     [
+      3877,
+      2,
+      5.17,
+      5.14
+     ],
+     [
+      3902,
+      27,
+      5.18,
+      5.14
+     ],
+     [
+      3927,
+      52,
+      5.17,
+      5.14
+     ],
+     [
+      3952,
+      77,
+      5.18,
+      5.14
+     ],
+     [
+      3977,
+      102,
+      5.18,
+      5.14
+     ],
+     [
+      4002,
+      127,
+      5.19,
+      5.17
+     ],
+     [
+      4027,
+      152,
+      5.18,
+      5.22
+     ],
+     [
+      4052,
+      177,
+      5.19,
+      5.23
+     ],
+     [
+      4077,
+      202,
+      5.21,
+      5.19
+     ],
+     [
+      4102,
+      227,
+      5.16,
+      5.15
+     ],
+     [
+      4127,
+      252,
+      5.18,
+      5.17
+     ],
+     [
+      4152,
+      277,
+      5.2,
+      5.23
+     ],
+     [
+      4177,
+      302,
+      5.29,
+      5.26
+     ],
+     [
+      4202,
+      327,
+      5.42,
+      5.31
+     ],
+     [
+      4227,
+      352,
+      5.54,
+      5.43
+     ],
+     [
+      4252,
+      377,
+      5.72,
+      5.63
+     ]
+    ]
+   },
+   "fullProfile": "devtests/track-audit/be-nl-de-gb/out/profile-nl-1948.json (5 m, with lat / lon)"
+  },
+  "crossSlope": {
+   "halfBaseM": 4,
+   "note": "lidar cross slope = atan((h(left) - h(right)) / (2 * halfBase)), negative = left side lower; game bank = samples[i].bank (same sign convention); median of 3 measurements",
+   "stretches": [
+    {
+     "osmFrom": 0,
+     "osmTo": 180,
+     "fromLine": 387,
+     "near": "Tarzanbocht",
+     "realMeanDeg": 6.4,
+     "realMaxDeg": 7.5,
+     "gameMeanDeg": 3.3,
+     "gameMaxDeg": 5.1
+    },
+    {
+     "osmFrom": 260,
+     "osmTo": 310,
+     "fromLine": 647,
+     "near": "37 m from CM.com Circuit Zandvoort",
+     "realMeanDeg": -4.3,
+     "realMaxDeg": -5.2,
+     "gameMeanDeg": -1.2,
+     "gameMaxDeg": -1.4
+    },
+    {
+     "osmFrom": 360,
+     "osmTo": 410,
+     "fromLine": 747,
+     "near": "Gerlachbocht",
+     "realMeanDeg": 2.6,
+     "realMaxDeg": 3.1,
+     "gameMeanDeg": 3.8,
+     "gameMaxDeg": 4.9
+    },
+    {
+     "osmFrom": 450,
+     "osmTo": 620,
+     "fromLine": 837,
+     "near": "Hugenholtzbocht",
+     "realMeanDeg": -7,
+     "realMaxDeg": -10,
+     "gameMeanDeg": -17.7,
+     "gameMaxDeg": -19
+    },
+    {
+     "osmFrom": 690,
+     "osmTo": 810,
+     "fromLine": 1077,
+     "near": "Hunserug",
+     "realMeanDeg": 4.6,
+     "realMaxDeg": 5.7,
+     "gameMeanDeg": 0.9,
+     "gameMaxDeg": 1.2
+    },
+    {
+     "osmFrom": 890,
+     "osmTo": 1000,
+     "fromLine": 1277,
+     "near": "Rob Slotemakerbocht",
+     "realMeanDeg": -4.8,
+     "realMaxDeg": -5.6,
+     "gameMeanDeg": -1.5,
+     "gameMaxDeg": -2.9
+    },
+    {
+     "osmFrom": 1070,
+     "osmTo": 1151,
+     "fromLine": 1457,
+     "near": "Rob Slotemakerbocht",
+     "realMeanDeg": 4.4,
+     "realMaxDeg": 5.1,
+     "gameMeanDeg": 1.5,
+     "gameMaxDeg": 1.8
+    },
+    {
+     "osmFrom": 1291,
+     "osmTo": 1501,
+     "fromLine": 1677,
+     "near": "Scheivlak",
+     "realMeanDeg": 5.2,
+     "realMaxDeg": 5.8,
+     "gameMeanDeg": 2.4,
+     "gameMaxDeg": 3.3
+    },
+    {
+     "osmFrom": 1701,
+     "osmTo": 1721,
+     "fromLine": 2088,
+     "near": "Mastersbocht",
+     "realMeanDeg": 2.8,
+     "realMaxDeg": 3,
+     "gameMeanDeg": 4.3,
+     "gameMaxDeg": 4.9
+    },
+    {
+     "osmFrom": 1921,
+     "osmTo": 1991,
+     "fromLine": -1954,
+     "near": "81 m from CM.com bocht",
+     "realMeanDeg": 2.6,
+     "realMaxDeg": 2.9,
+     "gameMeanDeg": 4.5,
+     "gameMaxDeg": 5.5
+    },
+    {
+     "osmFrom": 2151,
+     "osmTo": 2251,
+     "fromLine": -1724,
+     "near": "CM.com bocht",
+     "realMeanDeg": -1.6,
+     "realMaxDeg": -1.8,
+     "gameMeanDeg": -4.4,
+     "gameMaxDeg": -4.9
+    },
+    {
+     "osmFrom": 2771,
+     "osmTo": 2791,
+     "fromLine": -1104,
+     "near": "Hans Ernst chicane",
+     "realMeanDeg": 1.1,
+     "realMaxDeg": 1.2,
+     "gameMeanDeg": 5,
+     "gameMaxDeg": 5.6
+    },
+    {
+     "osmFrom": 2821,
+     "osmTo": 2921,
+     "fromLine": -1054,
+     "near": "Hans Ernst chicane",
+     "realMeanDeg": -4.9,
+     "realMaxDeg": -6.3,
+     "gameMeanDeg": -4.6,
+     "gameMaxDeg": -5.4
+    },
+    {
+     "osmFrom": 3141,
+     "osmTo": 3692,
+     "fromLine": -734,
+     "near": "Arie Luyendykbocht",
+     "realMeanDeg": 11,
+     "realMaxDeg": 17.6,
+     "gameMeanDeg": 10.3,
+     "gameMaxDeg": 18
+    },
+    {
+     "osmFrom": 4212,
+     "osmTo": 4252,
+     "fromLine": 337,
+     "near": "30 m from Tarzanbocht",
+     "realMeanDeg": 5.3,
+     "realMaxDeg": 6.1,
+     "gameMeanDeg": 0.4,
+     "gameMaxDeg": 1.8
+    }
+   ],
+   "realAbsMaxDeg": 17.6,
+   "gameAbsMaxDeg": 19,
+   "series": {
+    "columns": [
+     "osmS",
+     "fromLine",
+     "lidarDeg",
+     "gameDeg"
+    ],
+    "rows": [
+     [
+      0,
+      387,
+      6.5,
+      3.4
+     ],
+     [
+      10,
+      397,
+      6.5,
+      4.7
+     ],
+     [
+      20,
+      407,
+      6.6,
+      5
+     ],
+     [
+      30,
+      417,
+      6.9,
+      4.9
+     ],
+     [
+      40,
+      427,
+      6.9,
+      4.8
+     ],
+     [
+      50,
+      437,
+      6.9,
+      5
+     ],
+     [
+      60,
+      447,
+      7.2,
+      5.1
+     ],
+     [
+      70,
+      457,
+      7.5,
+      4.9
+     ],
+     [
+      80,
+      467,
+      7.2,
+      4.8
+     ],
+     [
+      90,
+      477,
+      7,
+      4.9
+     ],
+     [
+      100,
+      487,
+      6.7,
+      4.9
+     ],
+     [
+      110,
+      497,
+      6.7,
+      4.9
+     ],
+     [
+      120,
+      507,
+      6.5,
+      4.4
+     ],
+     [
+      130,
+      517,
+      6.7,
+      2.4
+     ],
+     [
+      140,
+      527,
+      6.3,
+      0.2
+     ],
+     [
+      150,
+      537,
+      6,
+      -0.6
+     ],
+     [
+      160,
+      547,
+      5,
+      -0.3
+     ],
+     [
+      170,
+      557,
+      4.7,
+      -0.1
+     ],
+     [
+      180,
+      567,
+      3.7,
+      0
+     ],
+     [
+      190,
+      577,
+      2.3,
+      0.2
+     ],
+     [
+      200,
+      587,
+      1.8,
+      0.2
+     ],
+     [
+      210,
+      597,
+      0.7,
+      0
+     ],
+     [
+      220,
+      607,
+      0.4,
+      -0.5
+     ],
+     [
+      230,
+      617,
+      -0.9,
+      -0.8
+     ],
+     [
+      240,
+      627,
+      -1.7,
+      -0.9
+     ],
+     [
+      250,
+      637,
+      -2.8,
+      -0.9
+     ],
+     [
+      260,
+      647,
+      -3.4,
+      -1
+     ],
+     [
+      270,
+      657,
+      -4.6,
+      -1.2
+     ],
+     [
+      280,
+      667,
+      -5.2,
+      -1.2
+     ],
+     [
+      290,
+      677,
+      -5.2,
+      -1.2
+     ],
+     [
+      300,
+      687,
+      -4.4,
+      -1.2
+     ],
+     [
+      310,
+      697,
+      -3.1,
+      -1.4
+     ],
+     [
+      320,
+      707,
+      -1.9,
+      -1.8
+     ],
+     [
+      330,
+      717,
+      -0.5,
+      -1.4
+     ],
+     [
+      340,
+      727,
+      0.6,
+      0.1
+     ],
+     [
+      350,
+      737,
+      1.5,
+      2.2
+     ],
+     [
+      360,
+      747,
+      1.9,
+      4
+     ],
+     [
+      370,
+      757,
+      2.8,
+      4.9
+     ],
+     [
+      380,
+      767,
+      3.1,
+      4.3
+     ],
+     [
+      390,
+      777,
+      3.1,
+      3.2
+     ],
+     [
+      400,
+      787,
+      3,
+      3.3
+     ],
+     [
+      410,
+      797,
+      1.9,
+      3.3
+     ],
+     [
+      420,
+      807,
+      1.7,
+      1.8
+     ],
+     [
+      430,
+      817,
+      1,
+      0.4
+     ],
+     [
+      440,
+      827,
+      0.3,
+      -0.3
+     ],
+     [
+      450,
+      837,
+      -1.1,
+      -7.1
+     ],
+     [
+      460,
+      847,
+      -2.2,
+      -16.3
+     ],
+     [
+      470,
+      857,
+      -3.9,
+      -19
+     ],
+     [
+      480,
+      867,
+      -5.4,
+      -19
+     ],
+     [
+      490,
+      877,
+      -7.4,
+      -19
+     ],
+     [
+      500,
+      887,
+      -9.1,
+      -19
+     ],
+     [
+      510,
+      897,
+      -10,
+      -19
+     ],
+     [
+      520,
+      907,
+      -10,
+      -19
+     ],
+     [
+      530,
+      917,
+      -9.9,
+      -19
+     ],
+     [
+      540,
+      927,
+      -9.8,
+      -19
+     ],
+     [
+      550,
+      937,
+      -9.4,
+      -19
+     ],
+     [
+      560,
+      947,
+      -9.4,
+      -19
+     ],
+     [
+      570,
+      957,
+      -9.4,
+      -19
+     ],
+     [
+      580,
+      967,
+      -9.2,
+      -19
+     ],
+     [
+      590,
+      977,
+      -8.1,
+      -19
+     ],
+     [
+      600,
+      987,
+      -5.8,
+      -19
+     ],
+     [
+      610,
+      997,
+      -3.8,
+      -18.3
+     ],
+     [
+      620,
+      1007,
+      -1.5,
+      -11
+     ],
+     [
+      630,
+      1017,
+      -0.8,
+      -1.9
+     ],
+     [
+      640,
+      1027,
+      -0.2,
+      0
+     ],
+     [
+      650,
+      1037,
+      0,
+      0.1
+     ],
+     [
+      660,
+      1047,
+      0.9,
+      0.4
+     ],
+     [
+      670,
+      1057,
+      1.8,
+      0.7
+     ],
+     [
+      680,
+      1067,
+      2.8,
+      0.9
+     ],
+     [
+      690,
+      1077,
+      3.5,
+      0.9
+     ],
+     [
+      700,
+      1087,
+      4,
+      0.8
+     ],
+     [
+      710,
+      1097,
+      4.7,
+      0.9
+     ],
+     [
+      720,
+      1107,
+      5.1,
+      1.1
+     ],
+     [
+      730,
+      1117,
+      5.6,
+      1.2
+     ],
+     [
+      740,
+      1127,
+      5.7,
+      1.1
+     ],
+     [
+      750,
+      1137,
+      5.7,
+      0.9
+     ],
+     [
+      760,
+      1147,
+      5.1,
+      0.8
+     ],
+     [
+      770,
+      1157,
+      5,
+      0.8
+     ],
+     [
+      780,
+      1167,
+      4.3,
+      0.9
+     ],
+     [
+      790,
+      1177,
+      4.2,
+      0.8
+     ],
+     [
+      800,
+      1187,
+      3.6,
+      0.8
+     ],
+     [
+      810,
+      1197,
+      3,
+      0.9
+     ],
+     [
+      820,
+      1207,
+      2.4,
+      1.3
+     ],
+     [
+      830,
+      1217,
+      1.7,
+      1.4
+     ],
+     [
+      840,
+      1227,
+      1,
+      0.4
+     ],
+     [
+      850,
+      1237,
+      0.7,
+      -0.8
+     ],
+     [
+      860,
+      1247,
+      -0.1,
+      -0.9
+     ],
+     [
+      870,
+      1257,
+      -1.2,
+      -0.8
+     ],
+     [
+      880,
+      1267,
+      -2.4,
+      -0.9
+     ],
+     [
+      890,
+      1277,
+      -3.4,
+      -0.9
+     ],
+     [
+      900,
+      1287,
+      -4.2,
+      -1.2
+     ],
+     [
+      910,
+      1297,
+      -5.3,
+      -2
+     ],
+     [
+      920,
+      1307,
+      -5.5,
+      -2.9
+     ],
+     [
+      930,
+      1317,
+      -5.5,
+      -2.3
+     ],
+     [
+      940,
+      1327,
+      -5.6,
+      -0.8
+     ],
+     [
+      950,
+      1337,
+      -5.5,
+      -0.3
+     ],
+     [
+      960,
+      1347,
+      -5.5,
+      -1.2
+     ],
+     [
+      970,
+      1357,
+      -5.4,
+      -1.9
+     ],
+     [
+      980,
+      1367,
+      -5.1,
+      -1.9
+     ],
+     [
+      990,
+      1377,
+      -3.9,
+      -1.4
+     ],
+     [
+      1000,
+      1387,
+      -3.1,
+      -1
+     ],
+     [
+      1010,
+      1397,
+      -2.3,
+      -1
+     ],
+     [
+      1020,
+      1407,
+      -1.4,
+      -1
+     ],
+     [
+      1030,
+      1417,
+      -0.5,
+      -0.5
+     ],
+     [
+      1040,
+      1427,
+      0.2,
+      0.2
+     ],
+     [
+      1050,
+      1437,
+      1.2,
+      1
+     ],
+     [
+      1060,
+      1447,
+      2.2,
+      1.4
+     ],
+     [
+      1070,
+      1457,
+      3.2,
+      1.4
+     ],
+     [
+      1080,
+      1467,
+      4.1,
+      1.5
+     ],
+     [
+      1090,
+      1477,
+      4.6,
+      1.6
+     ],
+     [
+      1100,
+      1487,
+      4.9,
+      1.8
+     ],
+     [
+      1110,
+      1497,
+      5,
+      1.8
+     ],
+     [
+      1121,
+      1507,
+      5.1,
+      1.7
+     ],
+     [
+      1131,
+      1517,
+      5.1,
+      1.4
+     ],
+     [
+      1141,
+      1527,
+      4.1,
+      1.3
+     ],
+     [
+      1151,
+      1537,
+      3.1,
+      1.3
+     ],
+     [
+      1161,
+      1547,
+      1.9,
+      1.1
+     ],
+     [
+      1171,
+      1557,
+      1.7,
+      0.5
+     ],
+     [
+      1181,
+      1567,
+      0.8,
+      0.2
+     ],
+     [
+      1191,
+      1577,
+      -0.2,
+      0.2
+     ],
+     [
+      1201,
+      1587,
+      -0.3,
+      0.1
+     ],
+     [
+      1211,
+      1597,
+      -0.3,
+      0
+     ],
+     [
+      1221,
+      1607,
+      -0.2,
+      -0.1
+     ],
+     [
+      1231,
+      1617,
+      -0.2,
+      -0.2
+     ],
+     [
+      1241,
+      1627,
+      -0.2,
+      -0.1
+     ],
+     [
+      1251,
+      1637,
+      0,
+      0.2
+     ],
+     [
+      1261,
+      1647,
+      0.8,
+      0.6
+     ],
+     [
+      1271,
+      1657,
+      1.2,
+      1.1
+     ],
+     [
+      1281,
+      1667,
+      3,
+      1.6
+     ],
+     [
+      1291,
+      1677,
+      4.2,
+      2.1
+     ],
+     [
+      1301,
+      1687,
+      5.1,
+      2.5
+     ],
+     [
+      1311,
+      1697,
+      5.5,
+      2.6
+     ],
+     [
+      1321,
+      1707,
+      5.6,
+      2.6
+     ],
+     [
+      1331,
+      1717,
+      5.6,
+      2.8
+     ],
+     [
+      1341,
+      1727,
+      5.6,
+      3.1
+     ],
+     [
+      1351,
+      1737,
+      5.8,
+      3.1
+     ],
+     [
+      1361,
+      1747,
+      5.8,
+      2.2
+     ],
+     [
+      1371,
+      1757,
+      5.8,
+      1.3
+     ],
+     [
+      1381,
+      1767,
+      5.6,
+      2.3
+     ],
+     [
+      1391,
+      1777,
+      5.6,
+      3.3
+     ],
+     [
+      1401,
+      1787,
+      5.6,
+      3
+     ],
+     [
+      1411,
+      1797,
+      5.5,
+      2.5
+     ],
+     [
+      1421,
+      1807,
+      5.5,
+      2.4
+     ],
+     [
+      1431,
+      1817,
+      5.5,
+      2.4
+     ],
+     [
+      1441,
+      1827,
+      5.1,
+      2.4
+     ],
+     [
+      1451,
+      1837,
+      5.1,
+      2.5
+     ],
+     [
+      1461,
+      1847,
+      5.1,
+      2.7
+     ],
+     [
+      1471,
+      1857,
+      4.9,
+      2.8
+     ],
+     [
+      1481,
+      1867,
+      4.4,
+      2.2
+     ],
+     [
+      1491,
+      1877,
+      3.5,
+      1.4
+     ],
+     [
+      1501,
+      1887,
+      3.4,
+      1
+     ],
+     [
+      1511,
+      1897,
+      2.7,
+      0.6
+     ],
+     [
+      1521,
+      1907,
+      1.9,
+      0.2
+     ],
+     [
+      1531,
+      1917,
+      1.7,
+      0
+     ],
+     [
+      1541,
+      1927,
+      1.6,
+      0
+     ],
+     [
+      1551,
+      1937,
+      1,
+      -0.1
+     ],
+     [
+      1561,
+      1947,
+      0.9,
+      -0.4
+     ],
+     [
+      1571,
+      1957,
+      0.6,
+      -0.7
+     ],
+     [
+      1581,
+      1967,
+      -0.2,
+      -0.8
+     ],
+     [
+      1591,
+      1977,
+      -0.6,
+      -0.8
+     ],
+     [
+      1601,
+      1987,
+      -0.9,
+      -1
+     ],
+     [
+      1611,
+      1997,
+      -0.9,
+      -1
+     ],
+     [
+      1621,
+      2007,
+      -0.8,
+      -0.9
+     ],
+     [
+      1631,
+      2017,
+      -0.6,
+      -0.5
+     ],
+     [
+      1641,
+      2028,
+      0,
+      -0.2
+     ],
+     [
+      1651,
+      2038,
+      0,
+      -0.2
+     ],
+     [
+      1661,
+      2048,
+      0.6,
+      -0.7
+     ],
+     [
+      1671,
+      2058,
+      1,
+      -0.5
+     ],
+     [
+      1681,
+      2068,
+      1.6,
+      0.8
+     ],
+     [
+      1691,
+      2078,
+      2.2,
+      2.7
+     ],
+     [
+      1701,
+      2088,
+      2.5,
+      4.6
+     ],
+     [
+      1711,
+      2098,
+      3,
+      4.9
+     ],
+     [
+      1721,
+      2108,
+      3,
+      3.2
+     ],
+     [
+      1731,
+      2118,
+      2.9,
+      2
+     ],
+     [
+      1741,
+      2128,
+      2.3,
+      1.9
+     ],
+     [
+      1751,
+      -2124,
+      1.8,
+      1.9
+     ],
+     [
+      1761,
+      -2114,
+      1.7,
+      1.7
+     ],
+     [
+      1771,
+      -2104,
+      1.7,
+      1.3
+     ],
+     [
+      1781,
+      -2094,
+      1.7,
+      1.3
+     ],
+     [
+      1791,
+      -2084,
+      1.8,
+      1.6
+     ],
+     [
+      1801,
+      -2074,
+      1.8,
+      1.7
+     ],
+     [
+      1811,
+      -2064,
+      1.8,
+      1.5
+     ],
+     [
+      1821,
+      -2054,
+      1.7,
+      1.1
+     ],
+     [
+      1831,
+      -2044,
+      1.7,
+      0.9
+     ],
+     [
+      1841,
+      -2034,
+      1.8,
+      1
+     ],
+     [
+      1851,
+      -2024,
+      1.8,
+      1.3
+     ],
+     [
+      1861,
+      -2014,
+      1.7,
+      1.4
+     ],
+     [
+      1871,
+      -2004,
+      1.7,
+      1.4
+     ],
+     [
+      1881,
+      -1994,
+      1.8,
+      1.4
+     ],
+     [
+      1891,
+      -1984,
+      1.8,
+      1.7
+     ],
+     [
+      1901,
+      -1974,
+      1.8,
+      2
+     ],
+     [
+      1911,
+      -1964,
+      2.2,
+      2.9
+     ],
+     [
+      1921,
+      -1954,
+      2.8,
+      4.3
+     ],
+     [
+      1931,
+      -1944,
+      2.9,
+      5.3
+     ],
+     [
+      1941,
+      -1934,
+      2.9,
+      5.5
+     ],
+     [
+      1951,
+      -1924,
+      2.9,
+      5.1
+     ],
+     [
+      1961,
+      -1914,
+      2.9,
+      4.6
+     ],
+     [
+      1971,
+      -1904,
+      2.6,
+      4.4
+     ],
+     [
+      1981,
+      -1894,
+      2.2,
+      3.9
+     ],
+     [
+      1991,
+      -1884,
+      2,
+      3
+     ],
+     [
+      2001,
+      -1874,
+      1.7,
+      2.4
+     ],
+     [
+      2011,
+      -1864,
+      1.7,
+      2.2
+     ],
+     [
+      2021,
+      -1854,
+      1.8,
+      2
+     ],
+     [
+      2031,
+      -1844,
+      1.8,
+      1.3
+     ],
+     [
+      2041,
+      -1834,
+      1.4,
+      0.2
+     ],
+     [
+      2051,
+      -1824,
+      0.5,
+      -0.7
+     ],
+     [
+      2061,
+      -1814,
+      -0.1,
+      -0.9
+     ],
+     [
+      2071,
+      -1804,
+      -0.6,
+      -0.7
+     ],
+     [
+      2081,
+      -1794,
+      -1.3,
+      -0.7
+     ],
+     [
+      2091,
+      -1784,
+      -1.4,
+      -0.8
+     ],
+     [
+      2101,
+      -1774,
+      -1.6,
+      -0.8
+     ],
+     [
+      2111,
+      -1764,
+      -1.7,
+      -0.8
+     ],
+     [
+      2121,
+      -1754,
+      -1.7,
+      -1.2
+     ],
+     [
+      2131,
+      -1744,
+      -1.8,
+      -1.7
+     ],
+     [
+      2141,
+      -1734,
+      -1.8,
+      -2.3
+     ],
+     [
+      2151,
+      -1724,
+      -1.8,
+      -3.4
+     ],
+     [
+      2161,
+      -1714,
+      -1.7,
+      -4.6
+     ],
+     [
+      2171,
+      -1704,
+      -1.7,
+      -4.9
+     ],
+     [
+      2181,
+      -1694,
+      -1.8,
+      -4.5
+     ],
+     [
+      2191,
+      -1684,
+      -1.8,
+      -4.5
+     ],
+     [
+      2201,
+      -1674,
+      -1.6,
+      -4.6
+     ],
+     [
+      2211,
+      -1664,
+      -1.6,
+      -4.7
+     ],
+     [
+      2221,
+      -1654,
+      -1.6,
+      -4.6
+     ],
+     [
+      2231,
+      -1644,
+      -1.6,
+      -4.4
+     ],
+     [
+      2241,
+      -1634,
+      -1.5,
+      -4.6
+     ],
+     [
+      2251,
+      -1624,
+      -1.5,
+      -4
+     ],
+     [
+      2261,
+      -1614,
+      -1.6,
+      -2.6
+     ],
+     [
+      2271,
+      -1604,
+      -1.7,
+      -1.3
+     ],
+     [
+      2281,
+      -1594,
+      -1.9,
+      -0.3
+     ],
+     [
+      2291,
+      -1584,
+      -1.9,
+      0.3
+     ],
+     [
+      2301,
+      -1574,
+      -1.9,
+      0.4
+     ],
+     [
+      2311,
+      -1564,
+      -1.8,
+      0
+     ],
+     [
+      2321,
+      -1554,
+      -2,
+      -0.7
+     ],
+     [
+      2331,
+      -1544,
+      -1.9,
+      -1.2
+     ],
+     [
+      2341,
+      -1534,
+      -1.9,
+      -1.2
+     ],
+     [
+      2351,
+      -1524,
+      -1.8,
+      -0.8
+     ],
+     [
+      2361,
+      -1514,
+      -1.8,
+      -0.2
+     ],
+     [
+      2371,
+      -1504,
+      -1.7,
+      0.3
+     ],
+     [
+      2381,
+      -1494,
+      -1.6,
+      0.3
+     ],
+     [
+      2391,
+      -1484,
+      -1.6,
+      -0.1
+     ],
+     [
+      2401,
+      -1474,
+      -1.6,
+      -0.7
+     ],
+     [
+      2411,
+      -1464,
+      -1.6,
+      -1.1
+     ],
+     [
+      2421,
+      -1454,
+      -1.6,
+      -1.1
+     ],
+     [
+      2431,
+      -1444,
+      -1.6,
+      -0.7
+     ],
+     [
+      2441,
+      -1434,
+      -1.6,
+      -0.2
+     ],
+     [
+      2451,
+      -1424,
+      -1.7,
+      0.3
+     ],
+     [
+      2461,
+      -1414,
+      -1.7,
+      0.3
+     ],
+     [
+      2471,
+      -1404,
+      -1.8,
+      0
+     ],
+     [
+      2481,
+      -1394,
+      -1.7,
+      -0.5
+     ],
+     [
+      2491,
+      -1384,
+      -1.6,
+      -1.1
+     ],
+     [
+      2501,
+      -1374,
+      -1.6,
+      -1.3
+     ],
+     [
+      2511,
+      -1364,
+      -1.8,
+      -1
+     ],
+     [
+      2521,
+      -1354,
+      -1.8,
+      -0.3
+     ],
+     [
+      2531,
+      -1344,
+      -1.8,
+      0.2
+     ],
+     [
+      2541,
+      -1334,
+      -1.7,
+      0.2
+     ],
+     [
+      2551,
+      -1324,
+      -1.8,
+      -0.1
+     ],
+     [
+      2561,
+      -1314,
+      -1.8,
+      -0.4
+     ],
+     [
+      2571,
+      -1304,
+      -1.9,
+      -0.5
+     ],
+     [
+      2581,
+      -1294,
+      -2,
+      -0.4
+     ],
+     [
+      2591,
+      -1284,
+      -2,
+      -0.4
+     ],
+     [
+      2601,
+      -1274,
+      -1.9,
+      -0.3
+     ],
+     [
+      2611,
+      -1264,
+      -1.8,
+      -0.3
+     ],
+     [
+      2621,
+      -1254,
+      -1.5,
+      -0.3
+     ],
+     [
+      2631,
+      -1244,
+      -1.4,
+      -0.3
+     ],
+     [
+      2641,
+      -1234,
+      -1.4,
+      -0.3
+     ],
+     [
+      2651,
+      -1224,
+      -1.5,
+      -0.2
+     ],
+     [
+      2661,
+      -1214,
+      -1.5,
+      -0.2
+     ],
+     [
+      2671,
+      -1204,
+      -1.7,
+      -0.1
+     ],
+     [
+      2681,
+      -1194,
+      -1.7,
+      -0.2
+     ],
+     [
+      2691,
+      -1184,
+      -1.7,
+      -0.4
+     ],
+     [
+      2701,
+      -1174,
+      -1.5,
+      -0.7
+     ],
+     [
+      2711,
+      -1164,
+      -1,
+      -1.1
+     ],
+     [
+      2721,
+      -1154,
+      -0.1,
+      -1.3
+     ],
+     [
+      2731,
+      -1144,
+      0.2,
+      -1
+     ],
+     [
+      2741,
+      -1134,
+      0.5,
+      -0.2
+     ],
+     [
+      2751,
+      -1124,
+      1,
+      0.8
+     ],
+     [
+      2761,
+      -1114,
+      1.2,
+      2.3
+     ],
+     [
+      2771,
+      -1104,
+      1.2,
+      4.3
+     ],
+     [
+      2781,
+      -1094,
+      1.1,
+      5.6
+     ],
+     [
+      2791,
+      -1084,
+      1.1,
+      5.1
+     ],
+     [
+      2801,
+      -1074,
+      1.1,
+      2.9
+     ],
+     [
+      2811,
+      -1064,
+      0.4,
+      -0.8
+     ],
+     [
+      2821,
+      -1054,
+      -1,
+      -4.2
+     ],
+     [
+      2831,
+      -1044,
+      -2.7,
+      -5.4
+     ],
+     [
+      2841,
+      -1034,
+      -4.6,
+      -5.3
+     ],
+     [
+      2851,
+      -1024,
+      -5.3,
+      -5.2
+     ],
+     [
+      2861,
+      -1014,
+      -5.4,
+      -5.1
+     ],
+     [
+      2871,
+      -1004,
+      -6.3,
+      -5.2
+     ],
+     [
+      2881,
+      -994,
+      -6.3,
+      -5.1
+     ],
+     [
+      2891,
+      -984,
+      -5.8,
+      -5
+     ],
+     [
+      2901,
+      -974,
+      -5.8,
+      -5
+     ],
+     [
+      2911,
+      -964,
+      -5.7,
+      -3.6
+     ],
+     [
+      2921,
+      -954,
+      -4.4,
+      -1.1
+     ],
+     [
+      2931,
+      -944,
+      -3,
+      0.2
+     ],
+     [
+      2941,
+      -934,
+      -2,
+      0.1
+     ],
+     [
+      2951,
+      -924,
+      -1.9,
+      0
+     ],
+     [
+      2961,
+      -914,
+      -1.8,
+      0
+     ],
+     [
+      2971,
+      -904,
+      -1.8,
+      0
+     ],
+     [
+      2981,
+      -894,
+      -1.7,
+      0
+     ],
+     [
+      2991,
+      -884,
+      -1.7,
+      0
+     ],
+     [
+      3001,
+      -874,
+      -1.8,
+      0
+     ],
+     [
+      3011,
+      -864,
+      -1.8,
+      0
+     ],
+     [
+      3021,
+      -854,
+      -1.8,
+      0
+     ],
+     [
+      3031,
+      -844,
+      -1.8,
+      0
+     ],
+     [
+      3041,
+      -834,
+      -1.2,
+      0
+     ],
+     [
+      3051,
+      -824,
+      -0.5,
+      0
+     ],
+     [
+      3061,
+      -814,
+      0.3,
+      0
+     ],
+     [
+      3071,
+      -804,
+      0.9,
+      0
+     ],
+     [
+      3081,
+      -794,
+      1.5,
+      0
+     ],
+     [
+      3091,
+      -784,
+      1.7,
+      -0.1
+     ],
+     [
+      3101,
+      -774,
+      1.7,
+      -0.1
+     ],
+     [
+      3111,
+      -764,
+      1.7,
+      -0.1
+     ],
+     [
+      3121,
+      -754,
+      1.7,
+      0.1
+     ],
+     [
+      3131,
+      -744,
+      2.5,
+      0.3
+     ],
+     [
+      3141,
+      -734,
+      3.3,
+      0.7
+     ],
+     [
+      3151,
+      -724,
+      4.6,
+      1.7
+     ],
+     [
+      3161,
+      -714,
+      5.6,
+      3.4
+     ],
+     [
+      3171,
+      -704,
+      5.9,
+      4.2
+     ],
+     [
+      3181,
+      -694,
+      5.9,
+      3.9
+     ],
+     [
+      3191,
+      -684,
+      5.9,
+      3.7
+     ],
+     [
+      3201,
+      -674,
+      5.9,
+      4.1
+     ],
+     [
+      3211,
+      -664,
+      6.1,
+      4.3
+     ],
+     [
+      3221,
+      -654,
+      5.9,
+      4.3
+     ],
+     [
+      3231,
+      -644,
+      5.9,
+      4
+     ],
+     [
+      3241,
+      -634,
+      5.9,
+      3
+     ],
+     [
+      3251,
+      -624,
+      6.1,
+      1.8
+     ],
+     [
+      3261,
+      -614,
+      6.2,
+      0.7
+     ],
+     [
+      3271,
+      -604,
+      6.3,
+      -0.1
+     ],
+     [
+      3281,
+      -594,
+      6.3,
+      -0.3
+     ],
+     [
+      3291,
+      -584,
+      7.1,
+      0.4
+     ],
+     [
+      3301,
+      -574,
+      7.4,
+      6.9
+     ],
+     [
+      3311,
+      -564,
+      8.2,
+      15.5
+     ],
+     [
+      3321,
+      -554,
+      9.5,
+      18
+     ],
+     [
+      3331,
+      -544,
+      10.5,
+      18
+     ],
+     [
+      3341,
+      -534,
+      11.5,
+      18
+     ],
+     [
+      3352,
+      -524,
+      11.8,
+      18
+     ],
+     [
+      3362,
+      -514,
+      13.7,
+      18
+     ],
+     [
+      3372,
+      -504,
+      14.5,
+      18
+     ],
+     [
+      3382,
+      -494,
+      14.6,
+      18
+     ],
+     [
+      3392,
+      -484,
+      15.3,
+      18
+     ],
+     [
+      3402,
+      -474,
+      16.6,
+      18
+     ],
+     [
+      3412,
+      -464,
+      16.7,
+      18
+     ],
+     [
+      3422,
+      -454,
+      17,
+      18
+     ],
+     [
+      3432,
+      -444,
+      17.6,
+      18
+     ],
+     [
+      3442,
+      -434,
+      17.6,
+      18
+     ],
+     [
+      3452,
+      -424,
+      16.9,
+      18
+     ],
+     [
+      3462,
+      -414,
+      16.8,
+      18
+     ],
+     [
+      3472,
+      -404,
+      16.9,
+      18
+     ],
+     [
+      3482,
+      -394,
+      16.5,
+      18
+     ],
+     [
+      3492,
+      -384,
+      17,
+      18
+     ],
+     [
+      3502,
+      -374,
+      16.5,
+      18
+     ],
+     [
+      3512,
+      -364,
+      16.5,
+      18
+     ],
+     [
+      3522,
+      -354,
+      16,
+      18
+     ],
+     [
+      3532,
+      -344,
+      15.9,
+      18
+     ],
+     [
+      3542,
+      -334,
+      15.6,
+      18
+     ],
+     [
+      3552,
+      -324,
+      15.2,
+      18
+     ],
+     [
+      3562,
+      -314,
+      15,
+      18
+     ],
+     [
+      3572,
+      -304,
+      14.1,
+      18
+     ],
+     [
+      3582,
+      -294,
+      13.9,
+      18
+     ],
+     [
+      3592,
+      -284,
+      13,
+      17.3
+     ],
+     [
+      3602,
+      -274,
+      12.5,
+      10.7
+     ],
+     [
+      3612,
+      -264,
+      12.2,
+      2.2
+     ],
+     [
+      3622,
+      -254,
+      11.1,
+      -0.1
+     ],
+     [
+      3632,
+      -244,
+      10.1,
+      -0.2
+     ],
+     [
+      3642,
+      -234,
+      8.9,
+      -0.1
+     ],
+     [
+      3652,
+      -224,
+      8,
+      0
+     ],
+     [
+      3662,
+      -214,
+      7.1,
+      0
+     ],
+     [
+      3672,
+      -203,
+      6.3,
+      0
+     ],
+     [
+      3682,
+      -193,
+      5.4,
+      0
+     ],
+     [
+      3692,
+      -183,
+      3.8,
+      0
+     ],
+     [
+      3702,
+      -173,
+      2.6,
+      0
+     ],
+     [
+      3722,
+      -153,
+      1.1,
+      0
+     ],
+     [
+      3732,
+      -143,
+      0.5,
+      0
+     ],
+     [
+      3742,
+      -133,
+      0.4,
+      0
+     ],
+     [
+      3752,
+      -123,
+      0.4,
+      0
+     ],
+     [
+      3762,
+      -113,
+      0.4,
+      0
+     ],
+     [
+      3772,
+      -103,
+      0.5,
+      0
+     ],
+     [
+      3782,
+      -93,
+      0.4,
+      0
+     ],
+     [
+      3792,
+      -83,
+      0.5,
+      0
+     ],
+     [
+      3802,
+      -73,
+      0.5,
+      0
+     ],
+     [
+      3812,
+      -63,
+      0.6,
+      0
+     ],
+     [
+      3822,
+      -53,
+      0.6,
+      0
+     ],
+     [
+      3832,
+      -43,
+      0.6,
+      0
+     ],
+     [
+      3842,
+      -33,
+      0.7,
+      0.1
+     ],
+     [
+      3852,
+      -23,
+      0.9,
+      0.2
+     ],
+     [
+      3862,
+      -13,
+      0.9,
+      0
+     ],
+     [
+      3872,
+      -3,
+      1,
+      -0.1
+     ],
+     [
+      3882,
+      7,
+      1,
+      -0.2
+     ],
+     [
+      3892,
+      17,
+      0.7,
+      -0.1
+     ],
+     [
+      3902,
+      27,
+      0.7,
+      0
+     ],
+     [
+      3912,
+      37,
+      0.7,
+      0
+     ],
+     [
+      3922,
+      47,
+      0.7,
+      0
+     ],
+     [
+      3932,
+      57,
+      0.8,
+      0
+     ],
+     [
+      3942,
+      67,
+      0.9,
+      0
+     ],
+     [
+      3952,
+      77,
+      1,
+      0
+     ],
+     [
+      3962,
+      87,
+      0.9,
+      0
+     ],
+     [
+      3972,
+      97,
+      0.9,
+      0
+     ],
+     [
+      3982,
+      107,
+      0.7,
+      0
+     ],
+     [
+      3992,
+      117,
+      0.7,
+      0
+     ],
+     [
+      4002,
+      127,
+      0.7,
+      0
+     ],
+     [
+      4012,
+      137,
+      0.8,
+      0
+     ],
+     [
+      4022,
+      147,
+      0.7,
+      0
+     ],
+     [
+      4032,
+      157,
+      0.9,
+      0
+     ],
+     [
+      4042,
+      167,
+      0.9,
+      0
+     ],
+     [
+      4052,
+      177,
+      0.9,
+      0
+     ],
+     [
+      4062,
+      187,
+      0.9,
+      0
+     ],
+     [
+      4072,
+      197,
+      0.9,
+      0
+     ],
+     [
+      4082,
+      207,
+      0.7,
+      0
+     ],
+     [
+      4092,
+      217,
+      0.7,
+      0
+     ],
+     [
+      4102,
+      227,
+      0.5,
+      0
+     ],
+     [
+      4112,
+      237,
+      0.5,
+      0
+     ],
+     [
+      4122,
+      247,
+      0.7,
+      0
+     ],
+     [
+      4132,
+      257,
+      0.7,
+      0
+     ],
+     [
+      4142,
+      267,
+      0.5,
+      0.1
+     ],
+     [
+      4152,
+      277,
+      0.5,
+      0.1
+     ],
+     [
+      4162,
+      287,
+      0.7,
+      0.1
+     ],
+     [
+      4172,
+      297,
+      0.8,
+      0.1
+     ],
+     [
+      4182,
+      307,
+      1.5,
+      0
+     ],
+     [
+      4192,
+      317,
+      1.6,
+      0
+     ],
+     [
+      4202,
+      327,
+      2.9,
+      -0.1
+     ],
+     [
+      4212,
+      337,
+      3.9,
+      -0.3
+     ],
+     [
+      4222,
+      347,
+      4.9,
+      -0.3
+     ],
+     [
+      4232,
+      357,
+      5.4,
+      0
+     ],
+     [
+      4242,
+      367,
+      6,
+      0.7
+     ],
+     [
+      4252,
+      377,
+      6.1,
+      1.8
+     ]
+    ]
+   }
+  }
+ },
+ "sources": [
+  "AHN4 DTM 0.5 m (Actueel Hoogtebestand Nederland, CC0), https://ahn.arcgisonline.nl/arcgis/rest/services/AHNviewer/AHN4_DTM_50cm/ImageServer (getSamples); cached in devtests/track-audit/cache/ahn4/points.json",
+  "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/nl-1948.json; relation 13545573",
+  "en.wikipedia.org/wiki/Circuit_Zandvoort",
+  "nl.wikipedia.org/wiki/Circuit_Zandvoort",
+  "en.wikipedia.org/wiki/2025_Dutch_Grand_Prix",
+  "planetf1.com/news/dutch-grand-prix-pit-lane-change-strategic-curveball-zandvoort (2025): Zandvoort raised from 60 to 80 km/h, \"matching the speed limit at most other venues\""
+ ]
+}

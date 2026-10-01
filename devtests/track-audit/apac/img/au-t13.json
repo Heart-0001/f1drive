@@ -1,0 +1,3 @@
+{ "out": "devtests/track-audit/apac/img/au-t13.png", "center": [-37.8530, 144.9779], "zoom": 18, "w": 1000, "h": 800,
+  "lines": [ { "file": "devtests/track-audit/apac/out/osm-au-1953-relation.json", "color": "#00e5ff", "width": 2, "label": "OSM circuit relation 280443" },
+             { "file": "devtests/track-audit/apac/out/gameline-au-1953.json", "key": "samplesLL", "color": "#ff3030", "width": 2, "label": "game centreline (built samples)" } ] }

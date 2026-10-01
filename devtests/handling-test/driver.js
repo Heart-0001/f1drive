@@ -7,7 +7,8 @@
 // (opts.oldLock: the v5 formula 0.35 / (1 + (v/22)^2) even then: what the project's harnesses do until they are updated).
 // drive(F1, track, opts) -> {laps, flying, pred, grass, hits, vmax, trace?}
 //   opts: {laps 3, hz 120, mode 'keys' | 'analog', spec, line (prebuilt), oldLock, trace: [from, to] sample range to record
-//          (every step: lap, i, d, v, steer, delta, latG, yaw), startIdx 0, maxTime 900}
+//          (every step: lap, t, i, d, v, steer, lock, latG (horizontal, + left), an (normal load m/s^2 without crest),
+//          slip, roll, pitch, lineD, lineV), startIdx 0, maxTime 900}
 function drive(F1, track, opts) {
   opts = opts || {};
   const car = F1.createCar(opts.spec || null, { tyres: false });
@@ -45,7 +46,8 @@ function drive(F1, track, opts) {
       if (((i - a + N) % N) <= ((b - a + N) % N)) {
         let dh = st.heading - h0; dh = Math.atan2(Math.sin(dh), Math.cos(dh));
         const lk = typeof K.steerLockAt === 'function' ? K.steerLockAt(st.speed, Math.atan(Math.tan(st.roll)), st.steer || 1) : 0.35 / (1 + (st.speed / 22) ** 2);
-        trace.push({ lap: laps.length, t: time, i, d: st.d, v: st.speed, steer: st.steer, lock: lk, latG: st.speed * dh / dt / 9.81, slip: st.slip, roll: st.roll, lineD: P[i].d, lineV: P[i].speed });
+        const latL = st.speed * dh / dt, an = K.normalAccel(st.speed, Math.atan(Math.tan(st.roll)), st.pitch, 0, latL);
+        trace.push({ lap: laps.length, t: time, i, d: st.d, v: st.speed, steer: st.steer, lock: lk, latG: latL / 9.81, an, slip: st.slip, roll: st.roll, pitch: st.pitch, lineD: P[i].d, lineV: P[i].speed });
       }
     }
     if (prevIdx > N * 0.75 && st.sampleIndex < N * 0.25) {

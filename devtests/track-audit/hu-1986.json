@@ -1,0 +1,5238 @@
+{
+ "id": "hu-1986",
+ "name": "Hungaroring",
+ "audited": "2026-10-01",
+ "auditor": "devtests/track-audit/eu-south-central/ (game.js, layout.mjs, lt.mjs, elev.mjs, dem.mjs, compose.mjs; measurement files in its out/)",
+ "verdict": "major issues",
+ "findings": [
+  {
+   "aspect": "layout",
+   "severity": "cosmetic",
+   "game": "2003+ layout; built 4378.4 m (dataset 4.381 km); vs OSM F1 ways mean 3.54 m, p95 5.96 m, max 7.4 m (s 2336, T8)",
+   "real": "FIA 2026 Hungarian GP map \"CIRCUIT CENTRELINE LENGTH - 4.381km\"; OSM relation 284557 4371 m. Where game and OSM differ by > 3 m the 2026 cars' median path is closer to the game line (mean |car - game| 2.6 m vs |car - OSM| 5.3 m): the OSM ways are the less accurate ones",
+   "proposedFix": "none",
+   "sources": [
+    "FIA decision document https://www.fia.com/system/files/decision-document/2026_hungarian_grand_prix_-_competition_notes_-_circuit_map_pit_lane_drawing_emergency_exits_map_and_red_zone.pdf (cache devtests/track-audit/cache/fia/, text via pypdf)",
+    "OpenStreetMap (ODbL) circuit relation 284557 (F1 ways, oneway tags, relation roles start / finish / pit_lane), cache/osmapi/hu-1986.json (OSM API 0.6 /map); fetched 2026-10-01",
+    "F1 live-timing archive (feed read by FastF1): https://livetiming.formula1.com/static/2026/2026-07-26_Hungarian_Grand_Prix/2026-07-25_Qualifying/Position.z.jsonStream (car X / Y / Z ~4 Hz; cached devtests/track-audit/cache/f1livetiming/)"
+   ]
+  },
+  {
+   "aspect": "direction",
+   "severity": "cosmetic",
+   "game": "clockwise",
+   "real": "OSM oneway ways agree (100%); 2026 qualifying cars 101970 forward vs 72 backward steps",
+   "proposedFix": "none",
+   "sources": [
+    "OpenStreetMap (ODbL) circuit relation 284557 (F1 ways, oneway tags, relation roles start / finish / pit_lane), cache/osmapi/hu-1986.json (OSM API 0.6 /map); fetched 2026-10-01",
+    "F1 live-timing archive (feed read by FastF1): https://livetiming.formula1.com/static/2026/2026-07-26_Hungarian_Grand_Prix/2026-07-25_Qualifying/Position.z.jsonStream (car X / Y / Z ~4 Hz; cached devtests/track-audit/cache/f1livetiming/)"
+   ]
+  },
+  {
+   "aspect": "start",
+   "severity": "major",
+   "game": "start / finish line (dataset point 0) 373 m before Turn 1 apex, under the footbridge (OSM way 493519980)",
+   "real": "the real start / control line is ~240 m earlier: 2025 Hungarian GP grid pole car (16) at -244.5 m, P2 (81) -249.5 m, P3 (4) -260.6 m; 2026 grid pole at -243.5 m; FIA 2026 circuit map: START LINE and CONTROL LINE side by side ~600 m before T1 (scaled with its \"SPEED TRAP [T] - 310m before T1\"); no OSM start / finish node",
+   "proposedFix": "START_AT 'hu-1986': [47.5789212, 19.2483897] (game centreline 240 m before the current line; +-10 m). Moves the grid, the timing line and the generic pit lane; the scenery pit building (s -280..+32 around the old line) then lies around the line as it should",
+   "sources": [
+    "F1 live-timing archive (feed read by FastF1): https://livetiming.formula1.com/static/2025/2025-08-03_Hungarian_Grand_Prix/2025-08-03_Race/Position.z.jsonStream (first 3 MB) (car X / Y / Z ~4 Hz; cached devtests/track-audit/cache/f1livetiming/)",
+    "F1 live-timing archive (feed read by FastF1): https://livetiming.formula1.com/static/2026/2026-07-26_Hungarian_Grand_Prix/2026-07-26_Race/Position.z.jsonStream (first 3 MB) (car X / Y / Z ~4 Hz; cached devtests/track-audit/cache/f1livetiming/)",
+    "FIA decision document https://www.fia.com/system/files/decision-document/2026_hungarian_grand_prix_-_competition_notes_-_circuit_map_pit_lane_drawing_emergency_exits_map_and_red_zone.pdf (cache devtests/track-audit/cache/fia/, text via pypdf)",
+    "MultiViewer circuit API (F1 live-timing derived corner numbers / positions): https://api.multiviewer.app/api/v1/circuits/<key>/<year> (cache devtests/track-audit/cache/multiviewer/)"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "right, 80 km/h, 500 m centred on the (misplaced) line",
+   "real": "right, 80 km/h (FIA 2026 decision car 44: \"set at 80 km/h for this event\"); OSM pit lane way 231417580 1069 m from 789 m before the game line (~549 m before the real line) to 327 m after it (~567 m after the real line); real pit loss ~21.2 s (MultiViewer)",
+   "proposedFix": "side / limit correct; follows the START_AT fix",
+   "sources": [
+    "FIA decision document https://www.fia.com/system/files/decision-document/2026_hungarian_grand_prix_-_infringement_-_car_44_-_pit_lane_speeding.pdf (cache devtests/track-audit/cache/fia/, text via pypdf)",
+    "OpenStreetMap (ODbL) circuit relation 284557 (F1 ways, oneway tags, relation roles start / finish / pit_lane), cache/osmapi/hu-1986.json (OSM API 0.6 /map); fetched 2026-10-01",
+    "MultiViewer circuit API (F1 live-timing derived corner numbers / positions): https://api.multiviewer.app/api/v1/circuits/<key>/<year> (cache devtests/track-audit/cache/multiviewer/)"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "severity": "minor",
+   "game": "range 33.4 m, steepest 5.5% / -7.9% over 50 m; T8-T13 section ~4 m too low relative to the rest (net +1.6 m over s 2400-3700)",
+   "real": "F1 car heights (2026 qualifying): range 34.7 m, 6.1% / -7.3% over 50 m, s 2400-3700 +5.4 m; formula1.com 34.7 m; de.wikipedia \"Höhenunterschied ... 36 m, der größte Anstieg beträgt 6,2 % und das größte Gefälle 7,0 %\"; EU-DEM 39.7 m / SRTM 36.5 m (surface models). Game vs car heights: rms 2.11 m, max 4.6 m at s 1175, grade over 100 m rms 1.48 pp, max 3.4 pp",
+   "proposedFix": "optional: the car-height profile in proposedCorrections.elevation (range 34.7 m); no open lidar for Hungary",
+   "sources": [
+    "F1 live-timing archive (feed read by FastF1): https://livetiming.formula1.com/static/2026/2026-07-26_Hungarian_Grand_Prix/2026-07-25_Qualifying/Position.z.jsonStream (car X / Y / Z ~4 Hz; cached devtests/track-audit/cache/f1livetiming/)",
+    "https://www.formula1.com/en/latest/article/highs-and-lows-which-f1-track-has-the-most-elevation-changes-.7I9JEcBw3R2AqXbnJ6hyvc (cache devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)",
+    "https://de.wikipedia.org/wiki/Hungaroring (raw wikitext cached in devtests/track-audit/cache/wikipedia/)",
+    "OpenTopoData public API https://api.opentopodata.org/v1/eudem25m (cache devtests/track-audit/cache/opentopodata/)",
+    "OpenTopoData public API https://api.opentopodata.org/v1/srtm30m (cache devtests/track-audit/cache/opentopodata/)"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "severity": "cosmetic",
+   "game": "curvature-derived, up to 5.8 deg (T1, T12)",
+   "real": "no published bank angles; not measured (no open lidar / DTM finer than 25 m for Hungary)",
+   "proposedFix": "none until measured",
+   "sources": []
+  },
+  {
+   "aspect": "bridge",
+   "severity": "minor",
+   "game": "no structures over the track",
+   "real": "footbridge over the main straight (OSM way 493519980, layer 1) at the game line (~240 m after the real line); service-road bridge (OSM way 54843543, bridge=yes, layer 1) over the track at s ~694 between T1A and T2",
+   "proposedFix": "scenery: both bridges (proposedCorrections.bridgesOver)",
+   "sources": [
+    "OpenStreetMap (ODbL) circuit relation 284557 (F1 ways, oneway tags, relation roles start / finish / pit_lane), cache/osmapi/hu-1986.json (OSM API 0.6 /map); fetched 2026-10-01"
+   ]
+  }
+ ],
+ "measurements": {
+  "game": {
+   "lengthKm": 4.381,
+   "builtLengthM": 4378.4,
+   "samples": 2189,
+   "elevRangeM": 33.4,
+   "maxClimb50": {
+    "pct": 5.5,
+    "s": 1475,
+    "at": "59 m before T4 / Hungaroring"
+   },
+   "maxDescent50": {
+    "pct": -7.9,
+    "s": 920,
+    "at": "47 m after T2 / Hungaroring"
+   },
+   "maxClimb100": {
+    "pct": 5.2,
+    "s": 1475,
+    "at": "59 m before T4 / Hungaroring"
+   },
+   "maxDescent100": {
+    "pct": -7.5,
+    "s": 925,
+    "at": "52 m after T2 / Hungaroring"
+   },
+   "pit": {
+    "side": -1,
+    "sideWord": "right",
+    "limitKmh": 80,
+    "laneLengthM": 500,
+    "entryGameS": 4214,
+    "exitGameS": 164,
+    "fromS": 4128,
+    "toS": 250,
+    "entryBeforeLineM": 164,
+    "exitAfterLineM": 164
+   },
+   "bankOverrides": null,
+   "pitSide": null,
+   "pitLimitKmh": null
+  },
+  "layout": {
+   "osmSource": "cache/osmapi/hu-1986.json (OSM API 0.6 /map)",
+   "osmRelation": 284557,
+   "osmLayoutM": 4371,
+   "osmLoopOK": true,
+   "gameToOsm": {
+    "mean": 3.54,
+    "median": 3.58,
+    "p95": 5.96,
+    "max": 7.4,
+    "maxAt": 2336.2
+   },
+   "gameOffOsmZones": [
+    {
+     "from": 202,
+     "to": 202,
+     "maxM": 5,
+     "at": 202
+    },
+    {
+     "from": 206,
+     "to": 208,
+     "maxM": 5,
+     "at": 206
+    },
+    {
+     "from": 212,
+     "to": 302,
+     "maxM": 5.4,
+     "at": 258
+    },
+    {
+     "from": 334,
+     "to": 346,
+     "maxM": 5.5,
+     "at": 340
+    },
+    {
+     "from": 616,
+     "to": 616,
+     "maxM": 5,
+     "at": 616
+    },
+    {
+     "from": 806,
+     "to": 834,
+     "maxM": 5.4,
+     "at": 828
+    },
+    {
+     "from": 942,
+     "to": 980,
+     "maxM": 5.9,
+     "at": 954
+    },
+    {
+     "from": 1070,
+     "to": 1076,
+     "maxM": 5.1,
+     "at": 1072
+    },
+    {
+     "from": 1806,
+     "to": 1828,
+     "maxM": 5.2,
+     "at": 1814
+    },
+    {
+     "from": 1852,
+     "to": 1902,
+     "maxM": 6.1,
+     "at": 1870
+    },
+    {
+     "from": 1906,
+     "to": 1906,
+     "maxM": 5,
+     "at": 1906
+    },
+    {
+     "from": 1910,
+     "to": 2096,
+     "maxM": 6.8,
+     "at": 1944
+    },
+    {
+     "from": 2308,
+     "to": 2396,
+     "maxM": 7.4,
+     "at": 2336
+    },
+    {
+     "from": 2674,
+     "to": 2764,
+     "maxM": 5.7,
+     "at": 2698
+    },
+    {
+     "from": 3332,
+     "to": 3332,
+     "maxM": 5,
+     "at": 3332
+    },
+    {
+     "from": 3336,
+     "to": 3504,
+     "maxM": 6.3,
+     "at": 3452
+    }
+   ],
+   "osmToGameMax": {
+    "d": 7.4,
+    "gameS": 2336,
+    "way": 231328650
+   },
+   "osmFarFromGameM": 904,
+   "onewayAgree": 1,
+   "corners": [
+    {
+     "name": "Hungaroring",
+     "ref": null,
+     "from": 3925,
+     "to": 327,
+     "mid": 129
+    },
+    {
+     "name": "Hungaroring",
+     "ref": null,
+     "from": 327,
+     "to": 3925,
+     "mid": 2329
+    }
+   ]
+  },
+  "turnNumbers": {
+   "source": "https://api.multiviewer.app/api/v1/circuits/4/2025 (F1 live-timing positions; data year 2021, candidate lap {\"driverNumber\":\"3\",\"lapNumber\":2,\"lapStartDate\":\"2021-07-30T09:32:13.518000\",\"lapStartSessionTime\":1033.51,\"lapTime\":81.317,\"session\":\"FP1\",\"sessionStartTime\":)",
+   "fitResidualM": {
+    "median": 2,
+    "p90": 4.4,
+    "max": 6.9
+   },
+   "corners": [
+    {
+     "turn": "1",
+     "gameS": 373.4,
+     "d": 2.9
+    },
+    {
+     "turn": "1A",
+     "gameS": 558.5,
+     "d": 2
+    },
+    {
+     "turn": "2",
+     "gameS": 873.1,
+     "d": 1.1
+    },
+    {
+     "turn": "3",
+     "gameS": 1059.1,
+     "d": 3.2
+    },
+    {
+     "turn": "4",
+     "gameS": 1533.5,
+     "d": 4.9
+    },
+    {
+     "turn": "5",
+     "gameS": 1776,
+     "d": 2.7
+    },
+    {
+     "turn": "6",
+     "gameS": 2114.8,
+     "d": 4.6
+    },
+    {
+     "turn": "7",
+     "gameS": 2161.2,
+     "d": 0.4
+    },
+    {
+     "turn": "8",
+     "gameS": 2326.6,
+     "d": 2
+    },
+    {
+     "turn": "9",
+     "gameS": 2468.5,
+     "d": 2.2
+    },
+    {
+     "turn": "10",
+     "gameS": 2661.8,
+     "d": 3.2
+    },
+    {
+     "turn": "11",
+     "gameS": 2861,
+     "d": 2
+    },
+    {
+     "turn": "12",
+     "gameS": 3257.5,
+     "d": 6.4
+    },
+    {
+     "turn": "12A",
+     "gameS": 3388.9,
+     "d": 1
+    },
+    {
+     "turn": "13",
+     "gameS": 3531.9,
+     "d": 3.4
+    },
+    {
+     "turn": "14",
+     "gameS": 3828.2,
+     "d": 3.8
+    }
+   ]
+  },
+  "startFinish": {
+   "osmNodes": [],
+   "gridFromLiveTiming": {
+    "url": "https://livetiming.formula1.com/static/2026/2026-07-26_Hungarian_Grand_Prix/2026-07-26_Race/Position.z.jsonStream (first 3 MB)",
+    "startUtc": "2026-07-26T13:03:18.979Z",
+    "cars": 21,
+    "poleSlotFromGameLineM": -243.5,
+    "lastSlotFromGameLineM": -407.8,
+    "firstSlots": [
+     {
+      "car": "1",
+      "s": -243.5
+     },
+     {
+      "car": "16",
+      "s": -248.8
+     },
+     {
+      "car": "81",
+      "s": -259.5
+     },
+     {
+      "car": "3",
+      "s": -267.2
+     }
+    ]
+   }
+  },
+  "pitOSM": [
+   {
+    "id": 231417580,
+    "name": "Bokszutca",
+    "maxspeed": null,
+    "lengthM": 1069,
+    "entryGameS": 3590,
+    "entryD": 4.4,
+    "exitGameS": 327,
+    "exitD": 4.7,
+    "entryBeforeLineM": 789,
+    "exitAfterLineM": 327,
+    "side": -1,
+    "sideWord": "right of the racing direction",
+    "laneOffsetM": 18.6
+   }
+  ],
+  "liveTiming": {
+   "source": "https://livetiming.formula1.com/static/2026/2026-07-26_Hungarian_Grand_Prix/2026-07-25_Qualifying/Position.z.jsonStream",
+   "method": "Z of moving cars (> 60 km/h) within 5 m of their median path, median per 10 m bin of game arc length, Gauss sigma 10 m",
+   "fit": {
+    "meanErrM": 3.23,
+    "mirror": 1,
+    "rotDeg": 0.03,
+    "scale": 1.0003,
+    "rowsUsed": 104803,
+    "rowsTotal": 300836,
+    "emptyBins": 16,
+    "bins": 438,
+    "binCountMedian": 217
+   },
+   "direction": {
+    "forwardSteps": 101970,
+    "backwardSteps": 72,
+    "sameAsGame": true
+   }
+  },
+  "elevation": {
+   "stepM": 5,
+   "game": {
+    "rangeM": 33.4,
+    "datasetElevRangeM": 33.3,
+    "maxClimb50": {
+     "pct": 5.5,
+     "s": 1475,
+     "at": "59 m before T4 / Hungaroring"
+    },
+    "maxDescent50": {
+     "pct": -7.9,
+     "s": 920,
+     "at": "47 m after T2 / Hungaroring"
+    },
+    "maxClimb100": {
+     "pct": 5.2,
+     "s": 1475,
+     "at": "59 m before T4 / Hungaroring"
+    },
+    "maxDescent100": {
+     "pct": -7.5,
+     "s": 925,
+     "at": "52 m after T2 / Hungaroring"
+    }
+   },
+   "sources": {
+    "eudem": {
+     "label": "EU-DEM v1.1 25 m via OpenTopoData",
+     "stepM": 25,
+     "holes": 0,
+     "absMinM": 205.3,
+     "absMaxM": 244.9,
+     "rangeM": 39.7,
+     "maxClimb50": {
+      "pct": 8.2,
+      "s": 3795,
+      "at": "T14 / Hungaroring"
+     },
+     "maxDescent50": {
+      "pct": -9.1,
+      "s": 870,
+      "at": "T2 / Hungaroring"
+     },
+     "maxClimb100": {
+      "pct": 7.4,
+      "s": 3800,
+      "at": "T14 / Hungaroring"
+     },
+     "maxDescent100": {
+      "pct": -7.8,
+      "s": 875,
+      "at": "T2 / Hungaroring"
+     }
+    },
+    "srtm30": {
+     "label": "SRTM GL1 30 m via OpenTopoData",
+     "stepM": 25,
+     "holes": 0,
+     "absMinM": 202,
+     "absMaxM": 238.5,
+     "rangeM": 36.5,
+     "maxClimb50": {
+      "pct": 8.6,
+      "s": 3830,
+      "at": "T14 / Hungaroring"
+     },
+     "maxDescent50": {
+      "pct": -9.7,
+      "s": 830,
+      "at": "43 m before T2 / Hungaroring"
+     },
+     "maxClimb100": {
+      "pct": 6.7,
+      "s": 3835,
+      "at": "T14 / Hungaroring"
+     },
+     "maxDescent100": {
+      "pct": -7.5,
+      "s": 1050,
+      "at": "T3 / Hungaroring"
+     }
+    },
+    "lt": {
+     "label": "F1 live-timing car heights (Position Z, median of all cars, https://livetiming.formula1.com/static/2026/2026-07-26_Hungarian_Grand_Prix/2026-07-25_Qualifying/Position.z.jsonStream)",
+     "fit": {
+      "meanErrM": 3.23,
+      "mirror": 1,
+      "rotDeg": 0.03,
+      "scale": 1.0003,
+      "rowsUsed": 104803,
+      "rowsTotal": 300836,
+      "emptyBins": 16,
+      "bins": 438,
+      "binCountMedian": 217
+     },
+     "rangeM": 34.7,
+     "maxClimb50": {
+      "pct": 6.1,
+      "s": 1440,
+      "at": "94 m before T4 / Hungaroring"
+     },
+     "maxDescent50": {
+      "pct": -7.3,
+      "s": 940,
+      "at": "67 m after T2 / Hungaroring"
+     },
+     "maxClimb100": {
+      "pct": 5.8,
+      "s": 1435,
+      "at": "99 m before T4 / Hungaroring"
+     },
+     "maxDescent100": {
+      "pct": -7.1,
+      "s": 965,
+      "at": "92 m after T2 / Hungaroring"
+     }
+    }
+   },
+   "compare": {
+    "game_vs_eudem": {
+     "rmsM": 2.11,
+     "maxAbsM": 5.1,
+     "maxAt": {
+      "s": 3890,
+      "at": "62 m after T14 / Hungaroring",
+      "sign": "first lower"
+     },
+     "grade100": {
+      "rmsPP": 1.77,
+      "p95PP": 3.6,
+      "maxPP": 5
+     },
+     "grade50": {
+      "rmsPP": 2.1,
+      "p95PP": 4.2,
+      "maxPP": 5.8
+     },
+     "zonesOver2pp100m": [
+      {
+       "from": 0,
+       "to": 60,
+       "at": "368 m before T1 / Hungaroring",
+       "firstPct": -2.7,
+       "secondPct": -6.6,
+       "diffPP": 3.9
+      },
+      {
+       "from": 160,
+       "to": 230,
+       "at": "178 m before T1 / Hungaroring",
+       "firstPct": -2.5,
+       "secondPct": 0.2,
+       "diffPP": -2.7
+      },
+      {
+       "from": 930,
+       "to": 1015,
+       "at": "84 m before T3 / Hungaroring",
+       "firstPct": -6.4,
+       "secondPct": -2.9,
+       "diffPP": -3.5
+      },
+      {
+       "from": 1065,
+       "to": 1165,
+       "at": "51 m after T3 / Hungaroring",
+       "firstPct": -2.1,
+       "secondPct": -6.4,
+       "diffPP": 4.3
+      },
+      {
+       "from": 1505,
+       "to": 1565,
+       "at": "T4 / Hungaroring",
+       "firstPct": 3.4,
+       "secondPct": 1,
+       "diffPP": 2.5
+      },
+      {
+       "from": 1760,
+       "to": 1830,
+       "at": "T5 / Hungaroring",
+       "firstPct": 2.6,
+       "secondPct": 5.3,
+       "diffPP": -2.7
+      },
+      {
+       "from": 3300,
+       "to": 3355,
+       "at": "62 m after T12 / Hungaroring",
+       "firstPct": -1.6,
+       "secondPct": -3.9,
+       "diffPP": 2.3
+      },
+      {
+       "from": 3505,
+       "to": 3570,
+       "at": "T13 / Hungaroring",
+       "firstPct": 1.1,
+       "secondPct": 4.4,
+       "diffPP": -3.3
+      },
+      {
+       "from": 3750,
+       "to": 3860,
+       "at": "T14 / Hungaroring",
+       "firstPct": 3,
+       "secondPct": 7.3,
+       "diffPP": -4.3
+      },
+      {
+       "from": 3905,
+       "to": 4015,
+       "at": "132 m after T14 / Hungaroring",
+       "firstPct": 1.8,
+       "secondPct": -3.1,
+       "diffPP": 5
+      },
+      {
+       "from": 4150,
+       "to": 4260,
+       "at": "392 m after T14 / Hungaroring",
+       "firstPct": -1.3,
+       "secondPct": 1.4,
+       "diffPP": -2.7
+      }
+     ]
+    },
+    "game_vs_srtm30": {
+     "rmsM": 2.29,
+     "maxAbsM": 5.5,
+     "maxAt": {
+      "s": 395,
+      "at": "T1 / Hungaroring",
+      "sign": "first lower"
+     },
+     "grade100": {
+      "rmsPP": 2.07,
+      "p95PP": 3.9,
+      "maxPP": 5.2
+     },
+     "grade50": {
+      "rmsPP": 2.58,
+      "p95PP": 4.7,
+      "maxPP": 7.2
+     },
+     "zonesOver2pp100m": [
+      {
+       "from": 180,
+       "to": 285,
+       "at": "133 m before T1 / Hungaroring",
+       "firstPct": -2.8,
+       "secondPct": 0.8,
+       "diffPP": -3.6
+      },
+      {
+       "from": 425,
+       "to": 540,
+       "at": "69 m before T1A / Hungaroring",
+       "firstPct": 1.2,
+       "secondPct": -2.9,
+       "diffPP": 4.2
+      },
+      {
+       "from": 890,
+       "to": 975,
+       "at": "52 m after T2 / Hungaroring",
+       "firstPct": -7.5,
+       "secondPct": -3.5,
+       "diffPP": -4.1
+      },
+      {
+       "from": 1025,
+       "to": 1110,
+       "at": "T3 / Hungaroring",
+       "firstPct": -3.2,
+       "secondPct": -7.4,
+       "diffPP": 4.2
+      },
+      {
+       "from": 1290,
+       "to": 1385,
+       "at": "209 m before T4 / Hungaroring",
+       "firstPct": 1.3,
+       "secondPct": 4.3,
+       "diffPP": -3.1
+      },
+      {
+       "from": 1485,
+       "to": 1585,
+       "at": "T4 / Hungaroring",
+       "firstPct": 3.7,
+       "secondPct": -1.6,
+       "diffPP": 5.2
+      },
+      {
+       "from": 2005,
+       "to": 2075,
+       "at": "80 m before T6 / Hungaroring",
+       "firstPct": 4.2,
+       "secondPct": 1.1,
+       "diffPP": 3.1
+      },
+      {
+       "from": 2505,
+       "to": 2590,
+       "at": "76 m after T9 / Hungaroring",
+       "firstPct": -0.6,
+       "secondPct": 3.5,
+       "diffPP": -4
+      },
+      {
+       "from": 3005,
+       "to": 3100,
+       "at": "189 m after T11 / Hungaroring",
+       "firstPct": 0.4,
+       "secondPct": -3.5,
+       "diffPP": 3.9
+      },
+      {
+       "from": 3165,
+       "to": 3225,
+       "at": "63 m before T12 / Hungaroring",
+       "firstPct": -1.5,
+       "secondPct": 1.8,
+       "diffPP": -3.3
+      },
+      {
+       "from": 3270,
+       "to": 3365,
+       "at": "57 m after T12 / Hungaroring",
+       "firstPct": -1.7,
+       "secondPct": -5.8,
+       "diffPP": 4.1
+      },
+      {
+       "from": 3520,
+       "to": 3600,
+       "at": "T13 / Hungaroring",
+       "firstPct": 1.8,
+       "secondPct": 5.4,
+       "diffPP": -3.6
+      },
+      {
+       "from": 3805,
+       "to": 3875,
+       "at": "T14 / Hungaroring",
+       "firstPct": 2.3,
+       "secondPct": 6.6,
+       "diffPP": -4.4
+      },
+      {
+       "from": 3915,
+       "to": 4000,
+       "at": "117 m after T14 / Hungaroring",
+       "firstPct": 1.7,
+       "secondPct": -1.8,
+       "diffPP": 3.5
+      }
+     ]
+    },
+    "game_vs_lt": {
+     "rmsM": 2.11,
+     "maxAbsM": 4.6,
+     "maxAt": {
+      "s": 1175,
+      "at": "116 m after T3 / Hungaroring",
+      "sign": "first higher"
+     },
+     "grade100": {
+      "rmsPP": 1.48,
+      "p95PP": 2.7,
+      "maxPP": 3.4
+     },
+     "grade50": {
+      "rmsPP": 1.6,
+      "p95PP": 2.9,
+      "maxPP": 4
+     },
+     "zonesOver2pp100m": [
+      {
+       "from": 445,
+       "to": 550,
+       "at": "69 m before T1A / Hungaroring",
+       "firstPct": 1.2,
+       "secondPct": -2.1,
+       "diffPP": 3.4
+      },
+      {
+       "from": 620,
+       "to": 680,
+       "at": "91 m after T1A / Hungaroring",
+       "firstPct": 1.4,
+       "secondPct": -1,
+       "diffPP": 2.4
+      },
+      {
+       "from": 1300,
+       "to": 1400,
+       "at": "179 m before T4 / Hungaroring",
+       "firstPct": 2,
+       "secondPct": 4.4,
+       "diffPP": -2.4
+      },
+      {
+       "from": 1985,
+       "to": 2065,
+       "at": "90 m before T6 / Hungaroring",
+       "firstPct": 4.4,
+       "secondPct": 1.5,
+       "diffPP": 2.9
+      },
+      {
+       "from": 2130,
+       "to": 2215,
+       "at": "T7 / Hungaroring",
+       "firstPct": -2.6,
+       "secondPct": 0.7,
+       "diffPP": -3.3
+      },
+      {
+       "from": 2825,
+       "to": 2895,
+       "at": "T11 / Hungaroring",
+       "firstPct": -1,
+       "secondPct": 1.4,
+       "diffPP": -2.4
+      },
+      {
+       "from": 3025,
+       "to": 3110,
+       "at": "193 m before T12 / Hungaroring",
+       "firstPct": 0.4,
+       "secondPct": -2.1,
+       "diffPP": 2.4
+      },
+      {
+       "from": 3955,
+       "to": 4060,
+       "at": "187 m after T14 / Hungaroring",
+       "firstPct": 2.1,
+       "secondPct": -0.7,
+       "diffPP": 2.8
+      },
+      {
+       "from": 4245,
+       "to": 4350,
+       "at": "447 m before T1 / Hungaroring",
+       "firstPct": -1.9,
+       "secondPct": 0.7,
+       "diffPP": -2.7
+      }
+     ]
+    },
+    "eudem_vs_srtm30": {
+     "rmsM": 1.83,
+     "maxAbsM": 5.8,
+     "maxAt": {
+      "s": 4310,
+      "at": "442 m before T1 / Hungaroring",
+      "sign": "first higher"
+     },
+     "grade100": {
+      "rmsPP": 1.88,
+      "p95PP": 3.7,
+      "maxPP": 4.9
+     },
+     "grade50": {
+      "rmsPP": 2.39,
+      "p95PP": 4.7,
+      "maxPP": 6.4
+     },
+     "zonesOver2pp100m": [
+      {
+       "from": 0,
+       "to": 85,
+       "at": "338 m before T1 / Hungaroring",
+       "firstPct": -6.1,
+       "secondPct": -1.2,
+       "diffPP": -4.9
+      },
+      {
+       "from": 245,
+       "to": 345,
+       "at": "63 m before T1 / Hungaroring",
+       "firstPct": -6.2,
+       "secondPct": -2.4,
+       "diffPP": -3.8
+      },
+      {
+       "from": 405,
+       "to": 490,
+       "at": "57 m after T1 / Hungaroring",
+       "firstPct": 0.2,
+       "secondPct": -3.5,
+       "diffPP": 3.7
+      },
+      {
+       "from": 875,
+       "to": 925,
+       "at": "T2 / Hungaroring",
+       "firstPct": -7.1,
+       "secondPct": -4.2,
+       "diffPP": -2.9
+      },
+      {
+       "from": 990,
+       "to": 1065,
+       "at": "T3 / Hungaroring",
+       "firstPct": -3,
+       "secondPct": -7,
+       "diffPP": 4
+      },
+      {
+       "from": 1110,
+       "to": 1165,
+       "at": "76 m after T3 / Hungaroring",
+       "firstPct": -5.2,
+       "secondPct": -2.3,
+       "diffPP": -2.9
+      },
+      {
+       "from": 1275,
+       "to": 1340,
+       "at": "219 m before T4 / Hungaroring",
+       "firstPct": 1.2,
+       "secondPct": 4,
+       "diffPP": -2.8
+      },
+      {
+       "from": 1505,
+       "to": 1560,
+       "at": "T4 / Hungaroring",
+       "firstPct": 1.2,
+       "secondPct": -1.6,
+       "diffPP": 2.8
+      },
+      {
+       "from": 2010,
+       "to": 2075,
+       "at": "75 m before T6 / Hungaroring",
+       "firstPct": 4.3,
+       "secondPct": 1,
+       "diffPP": 3.3
+      },
+      {
+       "from": 2490,
+       "to": 2575,
+       "at": "66 m after T9 / Hungaroring",
+       "firstPct": -1,
+       "secondPct": 3.2,
+       "diffPP": -4.3
+      },
+      {
+       "from": 3025,
+       "to": 3075,
+       "at": "189 m after T11 / Hungaroring",
+       "firstPct": -0.9,
+       "secondPct": -3.5,
+       "diffPP": 2.6
+      },
+      {
+       "from": 3155,
+       "to": 3220,
+       "at": "73 m before T12 / Hungaroring",
+       "firstPct": -1,
+       "secondPct": 1.9,
+       "diffPP": -2.8
+      },
+      {
+       "from": 3710,
+       "to": 3805,
+       "at": "73 m before T14 / Hungaroring",
+       "firstPct": 6,
+       "secondPct": 1.6,
+       "diffPP": 4.4
+      },
+      {
+       "from": 4055,
+       "to": 4145,
+       "at": "252 m after T14 / Hungaroring",
+       "firstPct": 2.7,
+       "secondPct": 0,
+       "diffPP": 2.7
+      }
+     ]
+    },
+    "eudem_vs_lt": {
+     "rmsM": 2.33,
+     "maxAbsM": 6.6,
+     "maxAt": {
+      "s": 4255,
+      "at": "427 m after T14 / Hungaroring",
+      "sign": "first higher"
+     },
+     "grade100": {
+      "rmsPP": 2.11,
+      "p95PP": 4.3,
+      "maxPP": 6.2
+     },
+     "grade50": {
+      "rmsPP": 2.43,
+      "p95PP": 5,
+      "maxPP": 6.7
+     },
+     "zonesOver2pp100m": [
+      {
+       "from": 0,
+       "to": 75,
+       "at": "373 m before T1 / Hungaroring",
+       "firstPct": -6.6,
+       "secondPct": -1.1,
+       "diffPP": -5.5
+      },
+      {
+       "from": 170,
+       "to": 220,
+       "at": "183 m before T1 / Hungaroring",
+       "firstPct": 0.2,
+       "secondPct": -2.1,
+       "diffPP": 2.3
+      },
+      {
+       "from": 290,
+       "to": 370,
+       "at": "43 m before T1 / Hungaroring",
+       "firstPct": -6.4,
+       "secondPct": -2.5,
+       "diffPP": -3.9
+      },
+      {
+       "from": 935,
+       "to": 1040,
+       "at": "69 m before T3 / Hungaroring",
+       "firstPct": -2.4,
+       "secondPct": -6.9,
+       "diffPP": 4.4
+      },
+      {
+       "from": 1095,
+       "to": 1145,
+       "at": "61 m after T3 / Hungaroring",
+       "firstPct": -6.1,
+       "secondPct": -3.5,
+       "diffPP": -2.6
+      },
+      {
+       "from": 1225,
+       "to": 1320,
+       "at": "211 m after T3 / Hungaroring",
+       "firstPct": -0.5,
+       "secondPct": 1.9,
+       "diffPP": -2.5
+      },
+      {
+       "from": 1995,
+       "to": 2065,
+       "at": "75 m before T6 / Hungaroring",
+       "firstPct": 4.3,
+       "secondPct": 1.2,
+       "diffPP": 3.1
+      },
+      {
+       "from": 2110,
+       "to": 2210,
+       "at": "T7 / Hungaroring",
+       "firstPct": -3.9,
+       "secondPct": 0.7,
+       "diffPP": -4.6
+      },
+      {
+       "from": 2315,
+       "to": 2410,
+       "at": "43 m after T8 / Hungaroring",
+       "firstPct": 4.5,
+       "secondPct": 0.8,
+       "diffPP": 3.7
+      },
+      {
+       "from": 2470,
+       "to": 2545,
+       "at": "T9 / Hungaroring",
+       "firstPct": -1.8,
+       "secondPct": 1.3,
+       "diffPP": -3.1
+      },
+      {
+       "from": 3615,
+       "to": 3670,
+       "at": "108 m after T13 / Hungaroring",
+       "firstPct": 1.4,
+       "secondPct": 4.1,
+       "diffPP": -2.7
+      },
+      {
+       "from": 3735,
+       "to": 3875,
+       "at": "T14 / Hungaroring",
+       "firstPct": 7.4,
+       "secondPct": 1.2,
+       "diffPP": 6.2
+      },
+      {
+       "from": 3920,
+       "to": 3975,
+       "at": "122 m after T14 / Hungaroring",
+       "firstPct": -3.2,
+       "secondPct": -0.2,
+       "diffPP": -3
+      },
+      {
+       "from": 4035,
+       "to": 4120,
+       "at": "247 m after T14 / Hungaroring",
+       "firstPct": 2.7,
+       "secondPct": -0.4,
+       "diffPP": 3.1
+      },
+      {
+       "from": 4290,
+       "to": 4370,
+       "at": "382 m before T1 / Hungaroring",
+       "firstPct": -6.5,
+       "secondPct": -0.9,
+       "diffPP": -5.6
+      }
+     ]
+    },
+    "srtm30_vs_lt": {
+     "rmsM": 1.55,
+     "maxAbsM": 3.9,
+     "maxAt": {
+      "s": 3250,
+      "at": "T12 / Hungaroring",
+      "sign": "first higher"
+     },
+     "grade100": {
+      "rmsPP": 1.75,
+      "p95PP": 3.6,
+      "maxPP": 5.9
+     },
+     "grade50": {
+      "rmsPP": 2.29,
+      "p95PP": 4.7,
+      "maxPP": 7.9
+     },
+     "zonesOver2pp100m": [
+      {
+       "from": 190,
+       "to": 265,
+       "at": "138 m before T1 / Hungaroring",
+       "firstPct": 0.8,
+       "secondPct": -2.2,
+       "diffPP": 3
+      },
+      {
+       "from": 785,
+       "to": 845,
+       "at": "63 m before T2 / Hungaroring",
+       "firstPct": -6.2,
+       "secondPct": -3,
+       "diffPP": -3.2
+      },
+      {
+       "from": 895,
+       "to": 990,
+       "at": "57 m after T2 / Hungaroring",
+       "firstPct": -3.5,
+       "secondPct": -6.9,
+       "diffPP": 3.5
+      },
+      {
+       "from": 1485,
+       "to": 1585,
+       "at": "T4 / Hungaroring",
+       "firstPct": -1.6,
+       "secondPct": 2.9,
+       "diffPP": -4.5
+      },
+      {
+       "from": 3140,
+       "to": 3225,
+       "at": "68 m before T12 / Hungaroring",
+       "firstPct": 1.9,
+       "secondPct": -2,
+       "diffPP": 3.9
+      },
+      {
+       "from": 3270,
+       "to": 3360,
+       "at": "52 m after T12 / Hungaroring",
+       "firstPct": -5.8,
+       "secondPct": -1.9,
+       "diffPP": -3.9
+      },
+      {
+       "from": 3650,
+       "to": 3730,
+       "at": "138 m after T13 / Hungaroring",
+       "firstPct": 1.5,
+       "secondPct": 4,
+       "diffPP": -2.5
+      },
+      {
+       "from": 3785,
+       "to": 3885,
+       "at": "T14 / Hungaroring",
+       "firstPct": 6.6,
+       "secondPct": 0.7,
+       "diffPP": 5.9
+      },
+      {
+       "from": 4270,
+       "to": 4355,
+       "at": "432 m before T1 / Hungaroring",
+       "firstPct": -3.2,
+       "secondPct": 0.4,
+       "diffPP": -3.6
+      }
+     ]
+    }
+   },
+   "profile25m": [
+    {
+     "s": 0,
+     "game": 29.5,
+     "eudem": 35.4,
+     "srtm30": 31.4,
+     "lt": 34.4
+    },
+    {
+     "s": 25,
+     "game": 28.8,
+     "eudem": 33.8,
+     "srtm30": 31,
+     "lt": 34
+    },
+    {
+     "s": 50,
+     "game": 28.1,
+     "eudem": 32.1,
+     "srtm30": 31,
+     "lt": 33.5
+    },
+    {
+     "s": 75,
+     "game": 27.4,
+     "eudem": 30.8,
+     "srtm30": 31,
+     "lt": 32.9
+    },
+    {
+     "s": 100,
+     "game": 26.8,
+     "eudem": 30,
+     "srtm30": 30.7,
+     "lt": 32.4
+    },
+    {
+     "s": 125,
+     "game": 26.1,
+     "eudem": 29.6,
+     "srtm30": 30,
+     "lt": 31.9
+    },
+    {
+     "s": 150,
+     "game": 25.5,
+     "eudem": 29.3,
+     "srtm30": 29.2,
+     "lt": 31.4
+    },
+    {
+     "s": 175,
+     "game": 24.9,
+     "eudem": 29.1,
+     "srtm30": 29,
+     "lt": 30.9
+    },
+    {
+     "s": 200,
+     "game": 24.3,
+     "eudem": 29.4,
+     "srtm30": 29.2,
+     "lt": 30.3
+    },
+    {
+     "s": 225,
+     "game": 23.7,
+     "eudem": 29.7,
+     "srtm30": 29.5,
+     "lt": 29.8
+    },
+    {
+     "s": 250,
+     "game": 23,
+     "eudem": 29.5,
+     "srtm30": 29.4,
+     "lt": 29.2
+    },
+    {
+     "s": 275,
+     "game": 22.2,
+     "eudem": 28.8,
+     "srtm30": 29.8,
+     "lt": 28.7
+    },
+    {
+     "s": 300,
+     "game": 21.4,
+     "eudem": 27.6,
+     "srtm30": 29.7,
+     "lt": 28
+    },
+    {
+     "s": 325,
+     "game": 20.4,
+     "eudem": 25.9,
+     "srtm30": 28.8,
+     "lt": 27.3
+    },
+    {
+     "s": 350,
+     "game": 19.3,
+     "eudem": 23.8,
+     "srtm30": 27.4,
+     "lt": 26.7
+    },
+    {
+     "s": 375,
+     "game": 18.1,
+     "eudem": 22.3,
+     "srtm30": 26.8,
+     "lt": 26.1
+    },
+    {
+     "s": 400,
+     "game": 17.1,
+     "eudem": 22,
+     "srtm30": 26,
+     "lt": 25.8
+    },
+    {
+     "s": 425,
+     "game": 16.6,
+     "eudem": 22.2,
+     "srtm30": 25,
+     "lt": 25.3
+    },
+    {
+     "s": 450,
+     "game": 16.5,
+     "eudem": 22.3,
+     "srtm30": 24,
+     "lt": 24.6
+    },
+    {
+     "s": 475,
+     "game": 16.8,
+     "eudem": 22.3,
+     "srtm30": 23.2,
+     "lt": 24
+    },
+    {
+     "s": 500,
+     "game": 17.3,
+     "eudem": 22.1,
+     "srtm30": 22.8,
+     "lt": 23.5
+    },
+    {
+     "s": 525,
+     "game": 17.6,
+     "eudem": 21.7,
+     "srtm30": 22,
+     "lt": 23
+    },
+    {
+     "s": 550,
+     "game": 17.8,
+     "eudem": 21.3,
+     "srtm30": 21.2,
+     "lt": 22.6
+    },
+    {
+     "s": 575,
+     "game": 17.8,
+     "eudem": 21.2,
+     "srtm30": 21.2,
+     "lt": 22.3
+    },
+    {
+     "s": 600,
+     "game": 17.8,
+     "eudem": 21.3,
+     "srtm30": 21.8,
+     "lt": 22
+    },
+    {
+     "s": 625,
+     "game": 18.1,
+     "eudem": 21.5,
+     "srtm30": 22.2,
+     "lt": 21.8
+    },
+    {
+     "s": 650,
+     "game": 18.5,
+     "eudem": 21.6,
+     "srtm30": 22.5,
+     "lt": 21.5
+    },
+    {
+     "s": 675,
+     "game": 18.9,
+     "eudem": 21.5,
+     "srtm30": 22,
+     "lt": 21.3
+    },
+    {
+     "s": 700,
+     "game": 19.3,
+     "eudem": 21.1,
+     "srtm30": 21.2,
+     "lt": 21
+    },
+    {
+     "s": 725,
+     "game": 19.3,
+     "eudem": 20.8,
+     "srtm30": 21,
+     "lt": 20.8
+    },
+    {
+     "s": 750,
+     "game": 19,
+     "eudem": 20.7,
+     "srtm30": 21,
+     "lt": 20.5
+    },
+    {
+     "s": 775,
+     "game": 18.5,
+     "eudem": 20.6,
+     "srtm30": 20.9,
+     "lt": 20.2
+    },
+    {
+     "s": 800,
+     "game": 17.7,
+     "eudem": 20.4,
+     "srtm30": 20.3,
+     "lt": 19.7
+    },
+    {
+     "s": 825,
+     "game": 16.8,
+     "eudem": 19.7,
+     "srtm30": 18,
+     "lt": 19
+    },
+    {
+     "s": 850,
+     "game": 15.5,
+     "eudem": 18,
+     "srtm30": 15.5,
+     "lt": 18
+    },
+    {
+     "s": 875,
+     "game": 14.1,
+     "eudem": 15.6,
+     "srtm30": 14.2,
+     "lt": 16.5
+    },
+    {
+     "s": 900,
+     "game": 12.3,
+     "eudem": 13.5,
+     "srtm30": 13.5,
+     "lt": 14.8
+    },
+    {
+     "s": 925,
+     "game": 10.3,
+     "eudem": 11.9,
+     "srtm30": 12.2,
+     "lt": 13.2
+    },
+    {
+     "s": 950,
+     "game": 8.3,
+     "eudem": 10.8,
+     "srtm30": 11.2,
+     "lt": 11.3
+    },
+    {
+     "s": 975,
+     "game": 6.5,
+     "eudem": 10,
+     "srtm30": 10.7,
+     "lt": 9.5
+    },
+    {
+     "s": 1000,
+     "game": 5.1,
+     "eudem": 9.4,
+     "srtm30": 9.7,
+     "lt": 7.8
+    },
+    {
+     "s": 1025,
+     "game": 3.9,
+     "eudem": 9,
+     "srtm30": 8,
+     "lt": 6.1
+    },
+    {
+     "s": 1050,
+     "game": 3,
+     "eudem": 8.5,
+     "srtm30": 6,
+     "lt": 4.7
+    },
+    {
+     "s": 1075,
+     "game": 2.2,
+     "eudem": 7.3,
+     "srtm30": 4,
+     "lt": 3.4
+    },
+    {
+     "s": 1100,
+     "game": 1.6,
+     "eudem": 5.3,
+     "srtm30": 2.2,
+     "lt": 2.2
+    },
+    {
+     "s": 1125,
+     "game": 1.1,
+     "eudem": 3.4,
+     "srtm30": 1.2,
+     "lt": 1.2
+    },
+    {
+     "s": 1150,
+     "game": 0.7,
+     "eudem": 2.1,
+     "srtm30": 1,
+     "lt": 0.5
+    },
+    {
+     "s": 1175,
+     "game": 0.4,
+     "eudem": 1.5,
+     "srtm30": 1,
+     "lt": 0.1
+    },
+    {
+     "s": 1200,
+     "game": 0.2,
+     "eudem": 1.1,
+     "srtm30": 0.8,
+     "lt": 0
+    },
+    {
+     "s": 1225,
+     "game": 0.1,
+     "eudem": 0.7,
+     "srtm30": 0.2,
+     "lt": 0.1
+    },
+    {
+     "s": 1250,
+     "game": 0,
+     "eudem": 0.3,
+     "srtm30": 0,
+     "lt": 0.3
+    },
+    {
+     "s": 1275,
+     "game": 0,
+     "eudem": 0,
+     "srtm30": 0.2,
+     "lt": 0.7
+    },
+    {
+     "s": 1300,
+     "game": 0.2,
+     "eudem": 0.1,
+     "srtm30": 1,
+     "lt": 1.3
+    },
+    {
+     "s": 1325,
+     "game": 0.4,
+     "eudem": 0.3,
+     "srtm30": 2,
+     "lt": 2.2
+    },
+    {
+     "s": 1350,
+     "game": 0.8,
+     "eudem": 0.8,
+     "srtm30": 3.2,
+     "lt": 3.1
+    },
+    {
+     "s": 1375,
+     "game": 1.3,
+     "eudem": 1.6,
+     "srtm30": 4.5,
+     "lt": 4.3
+    },
+    {
+     "s": 1400,
+     "game": 2,
+     "eudem": 2.8,
+     "srtm30": 5.4,
+     "lt": 5.5
+    },
+    {
+     "s": 1425,
+     "game": 3,
+     "eudem": 4.3,
+     "srtm30": 6.8,
+     "lt": 7
+    },
+    {
+     "s": 1450,
+     "game": 4.2,
+     "eudem": 6,
+     "srtm30": 8.4,
+     "lt": 8.5
+    },
+    {
+     "s": 1475,
+     "game": 5.5,
+     "eudem": 7.5,
+     "srtm30": 10.3,
+     "lt": 10
+    },
+    {
+     "s": 1500,
+     "game": 6.9,
+     "eudem": 8.5,
+     "srtm30": 10.9,
+     "lt": 11.3
+    },
+    {
+     "s": 1525,
+     "game": 8.1,
+     "eudem": 9,
+     "srtm30": 10.5,
+     "lt": 12.2
+    },
+    {
+     "s": 1550,
+     "game": 9,
+     "eudem": 9,
+     "srtm30": 9.4,
+     "lt": 12.8
+    },
+    {
+     "s": 1575,
+     "game": 9.4,
+     "eudem": 9,
+     "srtm30": 9,
+     "lt": 13.2
+    },
+    {
+     "s": 1600,
+     "game": 9.7,
+     "eudem": 8.9,
+     "srtm30": 9,
+     "lt": 13.3
+    },
+    {
+     "s": 1625,
+     "game": 9.8,
+     "eudem": 9,
+     "srtm30": 9,
+     "lt": 13.4
+    },
+    {
+     "s": 1650,
+     "game": 9.9,
+     "eudem": 9.1,
+     "srtm30": 9.2,
+     "lt": 13.4
+    },
+    {
+     "s": 1675,
+     "game": 9.9,
+     "eudem": 9.2,
+     "srtm30": 10,
+     "lt": 13.5
+    },
+    {
+     "s": 1700,
+     "game": 10,
+     "eudem": 9.2,
+     "srtm30": 11,
+     "lt": 13.6
+    },
+    {
+     "s": 1725,
+     "game": 10,
+     "eudem": 9.2,
+     "srtm30": 11.5,
+     "lt": 13.8
+    },
+    {
+     "s": 1750,
+     "game": 10.3,
+     "eudem": 9.7,
+     "srtm30": 11.2,
+     "lt": 14.2
+    },
+    {
+     "s": 1775,
+     "game": 10.7,
+     "eudem": 10.8,
+     "srtm30": 11.5,
+     "lt": 14.9
+    },
+    {
+     "s": 1800,
+     "game": 11.3,
+     "eudem": 12.3,
+     "srtm30": 12.8,
+     "lt": 15.7
+    },
+    {
+     "s": 1825,
+     "game": 12.1,
+     "eudem": 13.8,
+     "srtm30": 14.2,
+     "lt": 16.7
+    },
+    {
+     "s": 1850,
+     "game": 13.2,
+     "eudem": 15.3,
+     "srtm30": 16,
+     "lt": 17.8
+    },
+    {
+     "s": 1875,
+     "game": 14.3,
+     "eudem": 16.5,
+     "srtm30": 17.7,
+     "lt": 18.9
+    },
+    {
+     "s": 1900,
+     "game": 15.4,
+     "eudem": 17.7,
+     "srtm30": 18.7,
+     "lt": 20
+    },
+    {
+     "s": 1925,
+     "game": 16.3,
+     "eudem": 18.9,
+     "srtm30": 19.2,
+     "lt": 21
+    },
+    {
+     "s": 1950,
+     "game": 17.2,
+     "eudem": 19.9,
+     "srtm30": 20.2,
+     "lt": 21.9
+    },
+    {
+     "s": 1975,
+     "game": 18.3,
+     "eudem": 20.8,
+     "srtm30": 21.5,
+     "lt": 22.7
+    },
+    {
+     "s": 2000,
+     "game": 19.4,
+     "eudem": 21.9,
+     "srtm30": 22.2,
+     "lt": 23.3
+    },
+    {
+     "s": 2025,
+     "game": 20.7,
+     "eudem": 23.1,
+     "srtm30": 22.8,
+     "lt": 23.8
+    },
+    {
+     "s": 2050,
+     "game": 21.9,
+     "eudem": 24.2,
+     "srtm30": 23,
+     "lt": 24
+    },
+    {
+     "s": 2075,
+     "game": 22.7,
+     "eudem": 25.2,
+     "srtm30": 23,
+     "lt": 24.2
+    },
+    {
+     "s": 2100,
+     "game": 23.1,
+     "eudem": 25.8,
+     "srtm30": 23,
+     "lt": 24.3
+    },
+    {
+     "s": 2125,
+     "game": 22.9,
+     "eudem": 25.2,
+     "srtm30": 22.8,
+     "lt": 24.5
+    },
+    {
+     "s": 2150,
+     "game": 22.2,
+     "eudem": 23.5,
+     "srtm30": 22.2,
+     "lt": 24.6
+    },
+    {
+     "s": 2175,
+     "game": 21.3,
+     "eudem": 22.3,
+     "srtm30": 21.8,
+     "lt": 24.8
+    },
+    {
+     "s": 2200,
+     "game": 20.7,
+     "eudem": 21.9,
+     "srtm30": 21.2,
+     "lt": 25
+    },
+    {
+     "s": 2225,
+     "game": 20.3,
+     "eudem": 21.7,
+     "srtm30": 21.2,
+     "lt": 25.1
+    },
+    {
+     "s": 2250,
+     "game": 20.1,
+     "eudem": 21.6,
+     "srtm30": 21.8,
+     "lt": 25.3
+    },
+    {
+     "s": 2275,
+     "game": 20.2,
+     "eudem": 21.6,
+     "srtm30": 22.2,
+     "lt": 25.4
+    },
+    {
+     "s": 2300,
+     "game": 20.5,
+     "eudem": 21.7,
+     "srtm30": 22.7,
+     "lt": 25.5
+    },
+    {
+     "s": 2325,
+     "game": 21,
+     "eudem": 22.2,
+     "srtm30": 22.8,
+     "lt": 25.7
+    },
+    {
+     "s": 2350,
+     "game": 21.5,
+     "eudem": 23.5,
+     "srtm30": 22.7,
+     "lt": 25.9
+    },
+    {
+     "s": 2375,
+     "game": 22.1,
+     "eudem": 24.9,
+     "srtm30": 23.8,
+     "lt": 26.1
+    },
+    {
+     "s": 2400,
+     "game": 22.7,
+     "eudem": 25.9,
+     "srtm30": 25.2,
+     "lt": 26.2
+    },
+    {
+     "s": 2425,
+     "game": 23.1,
+     "eudem": 26.7,
+     "srtm30": 26.3,
+     "lt": 26.5
+    },
+    {
+     "s": 2450,
+     "game": 23.3,
+     "eudem": 27,
+     "srtm30": 26,
+     "lt": 26.6
+    },
+    {
+     "s": 2475,
+     "game": 23.3,
+     "eudem": 26.7,
+     "srtm30": 25.2,
+     "lt": 26.9
+    },
+    {
+     "s": 2500,
+     "game": 23,
+     "eudem": 26.1,
+     "srtm30": 25.2,
+     "lt": 27.3
+    },
+    {
+     "s": 2525,
+     "game": 22.8,
+     "eudem": 25.5,
+     "srtm30": 26,
+     "lt": 27.6
+    },
+    {
+     "s": 2550,
+     "game": 22.6,
+     "eudem": 25.2,
+     "srtm30": 27,
+     "lt": 27.9
+    },
+    {
+     "s": 2575,
+     "game": 22.5,
+     "eudem": 25.3,
+     "srtm30": 28,
+     "lt": 28.3
+    },
+    {
+     "s": 2600,
+     "game": 22.6,
+     "eudem": 25.7,
+     "srtm30": 28.7,
+     "lt": 28.7
+    },
+    {
+     "s": 2625,
+     "game": 22.7,
+     "eudem": 26.1,
+     "srtm30": 29,
+     "lt": 29.1
+    },
+    {
+     "s": 2650,
+     "game": 23.2,
+     "eudem": 26.6,
+     "srtm30": 29,
+     "lt": 29.4
+    },
+    {
+     "s": 2675,
+     "game": 23.7,
+     "eudem": 27.3,
+     "srtm30": 29,
+     "lt": 29.8
+    },
+    {
+     "s": 2700,
+     "game": 24.4,
+     "eudem": 28.1,
+     "srtm30": 29,
+     "lt": 30.2
+    },
+    {
+     "s": 2725,
+     "game": 25,
+     "eudem": 28.9,
+     "srtm30": 29.4,
+     "lt": 30.5
+    },
+    {
+     "s": 2750,
+     "game": 25.5,
+     "eudem": 29.5,
+     "srtm30": 30.5,
+     "lt": 30.9
+    },
+    {
+     "s": 2775,
+     "game": 25.7,
+     "eudem": 30.1,
+     "srtm30": 31,
+     "lt": 31.3
+    },
+    {
+     "s": 2800,
+     "game": 25.8,
+     "eudem": 30.7,
+     "srtm30": 31.2,
+     "lt": 31.6
+    },
+    {
+     "s": 2825,
+     "game": 25.6,
+     "eudem": 31.2,
+     "srtm30": 31.7,
+     "lt": 31.9
+    },
+    {
+     "s": 2850,
+     "game": 25.3,
+     "eudem": 31.4,
+     "srtm30": 31.7,
+     "lt": 32.2
+    },
+    {
+     "s": 2875,
+     "game": 25.1,
+     "eudem": 31.2,
+     "srtm30": 31.2,
+     "lt": 32.7
+    },
+    {
+     "s": 2900,
+     "game": 24.8,
+     "eudem": 31,
+     "srtm30": 31.2,
+     "lt": 33
+    },
+    {
+     "s": 2925,
+     "game": 24.6,
+     "eudem": 30.8,
+     "srtm30": 32,
+     "lt": 33.2
+    },
+    {
+     "s": 2950,
+     "game": 24.4,
+     "eudem": 30.8,
+     "srtm30": 32.7,
+     "lt": 33.2
+    },
+    {
+     "s": 2975,
+     "game": 24.3,
+     "eudem": 30.6,
+     "srtm30": 33,
+     "lt": 33.1
+    },
+    {
+     "s": 3000,
+     "game": 24.3,
+     "eudem": 30.5,
+     "srtm30": 32.7,
+     "lt": 32.8
+    },
+    {
+     "s": 3025,
+     "game": 24.4,
+     "eudem": 30.2,
+     "srtm30": 32,
+     "lt": 32.3
+    },
+    {
+     "s": 3050,
+     "game": 24.5,
+     "eudem": 29.9,
+     "srtm30": 31,
+     "lt": 31.8
+    },
+    {
+     "s": 3075,
+     "game": 24.6,
+     "eudem": 29.7,
+     "srtm30": 30,
+     "lt": 31.3
+    },
+    {
+     "s": 3100,
+     "game": 24.7,
+     "eudem": 29.6,
+     "srtm30": 29.2,
+     "lt": 30.8
+    },
+    {
+     "s": 3125,
+     "game": 24.7,
+     "eudem": 29.4,
+     "srtm30": 29,
+     "lt": 30.3
+    },
+    {
+     "s": 3150,
+     "game": 24.7,
+     "eudem": 29,
+     "srtm30": 29,
+     "lt": 29.8
+    },
+    {
+     "s": 3175,
+     "game": 24.5,
+     "eudem": 28.7,
+     "srtm30": 29.2,
+     "lt": 29.3
+    },
+    {
+     "s": 3200,
+     "game": 24.2,
+     "eudem": 28.5,
+     "srtm30": 30,
+     "lt": 28.9
+    },
+    {
+     "s": 3225,
+     "game": 23.7,
+     "eudem": 28.3,
+     "srtm30": 30.7,
+     "lt": 28.3
+    },
+    {
+     "s": 3250,
+     "game": 23.1,
+     "eudem": 28.1,
+     "srtm30": 30.7,
+     "lt": 27.7
+    },
+    {
+     "s": 3275,
+     "game": 22.5,
+     "eudem": 27.2,
+     "srtm30": 29.5,
+     "lt": 27.2
+    },
+    {
+     "s": 3300,
+     "game": 22,
+     "eudem": 26,
+     "srtm30": 27.4,
+     "lt": 26.8
+    },
+    {
+     "s": 3325,
+     "game": 21.6,
+     "eudem": 25,
+     "srtm30": 26,
+     "lt": 26.3
+    },
+    {
+     "s": 3350,
+     "game": 21.3,
+     "eudem": 24.1,
+     "srtm30": 25,
+     "lt": 25.8
+    },
+    {
+     "s": 3375,
+     "game": 21,
+     "eudem": 23.3,
+     "srtm30": 24,
+     "lt": 25.3
+    },
+    {
+     "s": 3400,
+     "game": 20.6,
+     "eudem": 22.5,
+     "srtm30": 23.2,
+     "lt": 25
+    },
+    {
+     "s": 3425,
+     "game": 20.3,
+     "eudem": 22,
+     "srtm30": 23,
+     "lt": 24.8
+    },
+    {
+     "s": 3450,
+     "game": 20.2,
+     "eudem": 21.6,
+     "srtm30": 22.8,
+     "lt": 24.8
+    },
+    {
+     "s": 3475,
+     "game": 20.1,
+     "eudem": 21.3,
+     "srtm30": 22.2,
+     "lt": 24.8
+    },
+    {
+     "s": 3500,
+     "game": 20,
+     "eudem": 21.4,
+     "srtm30": 22,
+     "lt": 25
+    },
+    {
+     "s": 3525,
+     "game": 20.1,
+     "eudem": 22.1,
+     "srtm30": 22.2,
+     "lt": 25.4
+    },
+    {
+     "s": 3550,
+     "game": 20.4,
+     "eudem": 23.7,
+     "srtm30": 23.4,
+     "lt": 25.9
+    },
+    {
+     "s": 3575,
+     "game": 20.9,
+     "eudem": 25.3,
+     "srtm30": 25.5,
+     "lt": 26.6
+    },
+    {
+     "s": 3600,
+     "game": 21.5,
+     "eudem": 26,
+     "srtm30": 26.9,
+     "lt": 27.6
+    },
+    {
+     "s": 3625,
+     "game": 22.2,
+     "eudem": 26.1,
+     "srtm30": 27.8,
+     "lt": 28.6
+    },
+    {
+     "s": 3650,
+     "game": 22.9,
+     "eudem": 26.4,
+     "srtm30": 28.2,
+     "lt": 29.7
+    },
+    {
+     "s": 3675,
+     "game": 23.6,
+     "eudem": 26.9,
+     "srtm30": 28.8,
+     "lt": 30.7
+    },
+    {
+     "s": 3700,
+     "game": 24.2,
+     "eudem": 27.5,
+     "srtm30": 29,
+     "lt": 31.7
+    },
+    {
+     "s": 3725,
+     "game": 25,
+     "eudem": 28.2,
+     "srtm30": 29.2,
+     "lt": 32.5
+    },
+    {
+     "s": 3750,
+     "game": 25.9,
+     "eudem": 29.3,
+     "srtm30": 29.5,
+     "lt": 33.1
+    },
+    {
+     "s": 3775,
+     "game": 26.8,
+     "eudem": 31.1,
+     "srtm30": 29.4,
+     "lt": 33.5
+    },
+    {
+     "s": 3800,
+     "game": 27.8,
+     "eudem": 33.2,
+     "srtm30": 30.2,
+     "lt": 34
+    },
+    {
+     "s": 3825,
+     "game": 28.5,
+     "eudem": 35.1,
+     "srtm30": 32.2,
+     "lt": 34.3
+    },
+    {
+     "s": 3850,
+     "game": 29.1,
+     "eudem": 36.8,
+     "srtm30": 34.5,
+     "lt": 34.4
+    },
+    {
+     "s": 3875,
+     "game": 29.5,
+     "eudem": 37.9,
+     "srtm30": 35.9,
+     "lt": 34.5
+    },
+    {
+     "s": 3900,
+     "game": 29.8,
+     "eudem": 38.2,
+     "srtm30": 36.5,
+     "lt": 34.5
+    },
+    {
+     "s": 3925,
+     "game": 30.1,
+     "eudem": 37.6,
+     "srtm30": 36,
+     "lt": 34.7
+    },
+    {
+     "s": 3950,
+     "game": 30.5,
+     "eudem": 36.6,
+     "srtm30": 35,
+     "lt": 34.7
+    },
+    {
+     "s": 3975,
+     "game": 31,
+     "eudem": 35.6,
+     "srtm30": 34.4,
+     "lt": 34.5
+    },
+    {
+     "s": 4000,
+     "game": 31.5,
+     "eudem": 35,
+     "srtm30": 34.8,
+     "lt": 34.4
+    },
+    {
+     "s": 4025,
+     "game": 32.1,
+     "eudem": 35,
+     "srtm30": 35,
+     "lt": 34.2
+    },
+    {
+     "s": 4050,
+     "game": 32.6,
+     "eudem": 35.5,
+     "srtm30": 35,
+     "lt": 34
+    },
+    {
+     "s": 4075,
+     "game": 33.1,
+     "eudem": 36.3,
+     "srtm30": 35,
+     "lt": 33.9
+    },
+    {
+     "s": 4100,
+     "game": 33.3,
+     "eudem": 37.1,
+     "srtm30": 35,
+     "lt": 33.8
+    },
+    {
+     "s": 4125,
+     "game": 33.4,
+     "eudem": 37.7,
+     "srtm30": 35,
+     "lt": 33.8
+    },
+    {
+     "s": 4150,
+     "game": 33.3,
+     "eudem": 38,
+     "srtm30": 35,
+     "lt": 33.8
+    },
+    {
+     "s": 4175,
+     "game": 33.1,
+     "eudem": 38.2,
+     "srtm30": 34.8,
+     "lt": 33.8
+    },
+    {
+     "s": 4200,
+     "game": 32.7,
+     "eudem": 38.5,
+     "srtm30": 34.4,
+     "lt": 33.8
+    },
+    {
+     "s": 4225,
+     "game": 32.4,
+     "eudem": 39.1,
+     "srtm30": 34.8,
+     "lt": 33.8
+    },
+    {
+     "s": 4250,
+     "game": 32.1,
+     "eudem": 39.5,
+     "srtm30": 35,
+     "lt": 33.8
+    },
+    {
+     "s": 4275,
+     "game": 31.7,
+     "eudem": 39.6,
+     "srtm30": 34.7,
+     "lt": 34.1
+    },
+    {
+     "s": 4300,
+     "game": 31.3,
+     "eudem": 39.6,
+     "srtm30": 34,
+     "lt": 34.5
+    },
+    {
+     "s": 4325,
+     "game": 30.8,
+     "eudem": 38.7,
+     "srtm30": 33.2,
+     "lt": 34.6
+    },
+    {
+     "s": 4350,
+     "game": 30.2,
+     "eudem": 37.2,
+     "srtm30": 32.5,
+     "lt": 34.6
+    }
+   ],
+   "snapToOsm": {
+    "stationsSnapped": 875,
+    "stations": 875,
+    "maxSnapD": 7.3
+   }
+  },
+  "coveredAndCrossings": [
+   {
+    "kind": "crossing",
+    "osmWay": 54843543,
+    "gameS": 694,
+    "tags": {
+     "bridge": "yes",
+     "highway": "service",
+     "layer": "1"
+    }
+   },
+   {
+    "kind": "crossing",
+    "osmWay": 230935178,
+    "gameS": 420,
+    "tags": {
+     "highway": "service",
+     "layer": "-1",
+     "tunnel": "yes"
+    }
+   },
+   {
+    "kind": "crossing",
+    "osmWay": 493519980,
+    "gameS": 0,
+    "tags": {
+     "bridge": "yes",
+     "highway": "footway",
+     "layer": "1"
+    }
+   }
+  ],
+  "grid2025": {
+   "url": "https://livetiming.formula1.com/static/2025/2025-08-03_Hungarian_Grand_Prix/2025-08-03_Race/Position.z.jsonStream (first 3 MB)",
+   "startUtc": "2025-08-03T13:03:06.828Z",
+   "poleSlotFromGameLineM": -244.5,
+   "firstSlots": [
+    {
+     "car": "16",
+     "s": -244.5
+    },
+    {
+     "car": "81",
+     "s": -249.5
+    },
+    {
+     "car": "4",
+     "s": -260.6
+    },
+    {
+     "car": "63",
+     "s": -269
+    }
+   ],
+   "zRangeM": 34.7
+  },
+  "fiaMapScaling": "FIA 2026 map page 2: speed trap T is \"310m before T1\"; T -> T1 = 205 px, control line -> T = 194 px => control line ~600 m before T1 (approximate, read off the PDF render cache/fia/hu-2026-p2.png)"
+ },
+ "proposedCorrections": {
+  "START_AT": {
+   "hu-1986": [
+    47.5789212,
+    19.2483897
+   ],
+   "note": "on the game centreline 240 m before the current line (grid pole at -244.5 m in 2025, -243.5 m in 2026)"
+  },
+  "elevation": {
+   "source": "F1 live-timing car heights (2026 Hungarian GP qualifying, median of all cars per 10 m)",
+   "optional": true,
+   "stats": {
+    "rangeM": 34.7,
+    "maxClimb50": {
+     "pct": 6,
+     "s": 1440
+    },
+    "maxDescent50": {
+     "pct": -7.3,
+     "s": 950
+    },
+    "maxClimb100": {
+     "pct": 5.8,
+     "s": 1440
+    },
+    "maxDescent100": {
+     "pct": -7.1,
+     "s": 960
+    }
+   },
+   "profile10m": {
+    "columns": [
+     "s (game arc length from the CURRENT line, m)",
+     "lat",
+     "lon (OSM-snapped centreline)",
+     "h (m above the lowest point)"
+    ],
+    "rows": [
+     [
+      0,
+      47.580232,
+      19.2458555,
+      34.36
+     ],
+     [
+      10,
+      47.5802876,
+      19.245751,
+      34.24
+     ],
+     [
+      20,
+      47.580343,
+      19.2456471,
+      34.12
+     ],
+     [
+      30,
+      47.5803987,
+      19.2455428,
+      33.97
+     ],
+     [
+      40,
+      47.5804544,
+      19.2454385,
+      33.77
+     ],
+     [
+      50,
+      47.5805102,
+      19.2453342,
+      33.54
+     ],
+     [
+      60,
+      47.5805659,
+      19.2452299,
+      33.29
+     ],
+     [
+      70,
+      47.5806217,
+      19.2451256,
+      33.06
+     ],
+     [
+      80,
+      47.5806774,
+      19.2450213,
+      32.84
+     ],
+     [
+      90,
+      47.5807331,
+      19.244917,
+      32.62
+     ],
+     [
+      100,
+      47.5807889,
+      19.2448127,
+      32.41
+     ],
+     [
+      110,
+      47.5808443,
+      19.244709,
+      32.2
+     ],
+     [
+      120,
+      47.5809,
+      19.2446047,
+      31.99
+     ],
+     [
+      130,
+      47.5809557,
+      19.2445004,
+      31.79
+     ],
+     [
+      140,
+      47.5810113,
+      19.244396,
+      31.59
+     ],
+     [
+      150,
+      47.5810669,
+      19.2442915,
+      31.39
+     ],
+     [
+      160,
+      47.5811226,
+      19.2441871,
+      31.19
+     ],
+     [
+      170,
+      47.5811782,
+      19.2440827,
+      30.97
+     ],
+     [
+      180,
+      47.5812338,
+      19.2439782,
+      30.75
+     ],
+     [
+      190,
+      47.5812894,
+      19.2438738,
+      30.53
+     ],
+     [
+      200,
+      47.581345,
+      19.2437693,
+      30.33
+     ],
+     [
+      210,
+      47.5814007,
+      19.2436649,
+      30.12
+     ],
+     [
+      220,
+      47.5814567,
+      19.2435597,
+      29.9
+     ],
+     [
+      230,
+      47.581512,
+      19.2434559,
+      29.69
+     ],
+     [
+      240,
+      47.5815676,
+      19.2433515,
+      29.47
+     ],
+     [
+      250,
+      47.5816232,
+      19.243247,
+      29.24
+     ],
+     [
+      260,
+      47.5816788,
+      19.2431426,
+      29.01
+     ],
+     [
+      270,
+      47.5817344,
+      19.2430383,
+      28.78
+     ],
+     [
+      280,
+      47.58179,
+      19.2429339,
+      28.54
+     ],
+     [
+      290,
+      47.5818459,
+      19.2428289,
+      28.28
+     ],
+     [
+      300,
+      47.5819011,
+      19.2427252,
+      28.01
+     ],
+     [
+      310,
+      47.5819569,
+      19.2426205,
+      27.71
+     ],
+     [
+      320,
+      47.5820124,
+      19.2425163,
+      27.41
+     ],
+     [
+      330,
+      47.5820736,
+      19.2424088,
+      27.15
+     ],
+     [
+      340,
+      47.5821547,
+      19.2423146,
+      26.92
+     ],
+     [
+      350,
+      47.5822613,
+      19.242274,
+      26.71
+     ],
+     [
+      360,
+      47.5823619,
+      19.2423056,
+      26.47
+     ],
+     [
+      370,
+      47.5824379,
+      19.2423889,
+      26.22
+     ],
+     [
+      380,
+      47.5824792,
+      19.2425035,
+      26.04
+     ],
+     [
+      390,
+      47.5824933,
+      19.2426291,
+      25.91
+     ],
+     [
+      400,
+      47.5824998,
+      19.2427587,
+      25.77
+     ],
+     [
+      410,
+      47.5824996,
+      19.2428886,
+      25.58
+     ],
+     [
+      420,
+      47.5824975,
+      19.2430206,
+      25.37
+     ],
+     [
+      430,
+      47.5824941,
+      19.243153,
+      25.14
+     ],
+     [
+      440,
+      47.5824902,
+      19.2432848,
+      24.89
+     ],
+     [
+      450,
+      47.5824845,
+      19.2434166,
+      24.64
+     ],
+     [
+      460,
+      47.5824768,
+      19.2435465,
+      24.39
+     ],
+     [
+      470,
+      47.582465,
+      19.2436759,
+      24.15
+     ],
+     [
+      480,
+      47.5824489,
+      19.2438034,
+      23.91
+     ],
+     [
+      490,
+      47.5824309,
+      19.2439324,
+      23.7
+     ],
+     [
+      500,
+      47.5824121,
+      19.2440587,
+      23.49
+     ],
+     [
+      510,
+      47.5823888,
+      19.2441864,
+      23.29
+     ],
+     [
+      520,
+      47.5823624,
+      19.2443092,
+      23.1
+     ],
+     [
+      530,
+      47.5823303,
+      19.244431,
+      22.91
+     ],
+     [
+      540,
+      47.5822988,
+      19.2445506,
+      22.75
+     ],
+     [
+      550,
+      47.5822607,
+      19.2446703,
+      22.6
+     ],
+     [
+      560,
+      47.5822215,
+      19.2447899,
+      22.46
+     ],
+     [
+      570,
+      47.5821779,
+      19.2448993,
+      22.35
+     ],
+     [
+      580,
+      47.5821298,
+      19.2450089,
+      22.24
+     ],
+     [
+      590,
+      47.5820806,
+      19.2451152,
+      22.14
+     ],
+     [
+      600,
+      47.5820266,
+      19.2452211,
+      22.04
+     ],
+     [
+      610,
+      47.5819716,
+      19.2453251,
+      21.94
+     ],
+     [
+      620,
+      47.5819159,
+      19.2454294,
+      21.84
+     ],
+     [
+      630,
+      47.5818601,
+      19.2455337,
+      21.74
+     ],
+     [
+      640,
+      47.5818044,
+      19.245638,
+      21.64
+     ],
+     [
+      650,
+      47.5817486,
+      19.2457423,
+      21.54
+     ],
+     [
+      660,
+      47.5816929,
+      19.2458466,
+      21.44
+     ],
+     [
+      670,
+      47.5816375,
+      19.2459502,
+      21.34
+     ],
+     [
+      680,
+      47.5815818,
+      19.2460546,
+      21.24
+     ],
+     [
+      690,
+      47.5815257,
+      19.2461595,
+      21.14
+     ],
+     [
+      700,
+      47.58147,
+      19.2462637,
+      21.04
+     ],
+     [
+      710,
+      47.5814146,
+      19.2463674,
+      20.94
+     ],
+     [
+      720,
+      47.5813585,
+      19.2464723,
+      20.84
+     ],
+     [
+      730,
+      47.5813032,
+      19.2465759,
+      20.74
+     ],
+     [
+      740,
+      47.5812471,
+      19.2466808,
+      20.64
+     ],
+     [
+      750,
+      47.5811918,
+      19.2467844,
+      20.54
+     ],
+     [
+      760,
+      47.581136,
+      19.2468887,
+      20.42
+     ],
+     [
+      770,
+      47.5810802,
+      19.2469931,
+      20.29
+     ],
+     [
+      780,
+      47.5810245,
+      19.2470975,
+      20.12
+     ],
+     [
+      790,
+      47.5809684,
+      19.2472025,
+      19.92
+     ],
+     [
+      800,
+      47.580913,
+      19.2473061,
+      19.69
+     ],
+     [
+      810,
+      47.580855,
+      19.2474206,
+      19.42
+     ],
+     [
+      820,
+      47.5808138,
+      19.2475509,
+      19.13
+     ],
+     [
+      830,
+      47.5807876,
+      19.2476983,
+      18.82
+     ],
+     [
+      840,
+      47.5807924,
+      19.2478447,
+      18.45
+     ],
+     [
+      850,
+      47.5808168,
+      19.2479799,
+      17.99
+     ],
+     [
+      860,
+      47.5808569,
+      19.2481101,
+      17.44
+     ],
+     [
+      870,
+      47.5809131,
+      19.2482216,
+      16.8
+     ],
+     [
+      880,
+      47.5809855,
+      19.2483104,
+      16.11
+     ],
+     [
+      890,
+      47.5810644,
+      19.2483701,
+      15.45
+     ],
+     [
+      900,
+      47.5811481,
+      19.2484009,
+      14.83
+     ],
+     [
+      910,
+      47.5812316,
+      19.2484164,
+      14.2
+     ],
+     [
+      920,
+      47.5813206,
+      19.2484121,
+      13.53
+     ],
+     [
+      930,
+      47.581396,
+      19.2483805,
+      12.81
+     ],
+     [
+      940,
+      47.5814732,
+      19.2483281,
+      12.07
+     ],
+     [
+      950,
+      47.5815513,
+      19.248263,
+      11.31
+     ],
+     [
+      960,
+      47.5816296,
+      19.2481977,
+      10.58
+     ],
+     [
+      970,
+      47.581708,
+      19.2481323,
+      9.88
+     ],
+     [
+      980,
+      47.5817859,
+      19.2480673,
+      9.17
+     ],
+     [
+      990,
+      47.5818643,
+      19.2480019,
+      8.46
+     ],
+     [
+      1000,
+      47.5819427,
+      19.2479365,
+      7.76
+     ],
+     [
+      1010,
+      47.5820209,
+      19.2478713,
+      7.1
+     ],
+     [
+      1020,
+      47.5820993,
+      19.2478059,
+      6.45
+     ],
+     [
+      1030,
+      47.5821803,
+      19.2477387,
+      5.81
+     ],
+     [
+      1040,
+      47.5822639,
+      19.2476833,
+      5.22
+     ],
+     [
+      1050,
+      47.5823542,
+      19.2476368,
+      4.67
+     ],
+     [
+      1060,
+      47.5824523,
+      19.2476172,
+      4.15
+     ],
+     [
+      1070,
+      47.5825452,
+      19.2476299,
+      3.64
+     ],
+     [
+      1080,
+      47.5826423,
+      19.2476761,
+      3.15
+     ],
+     [
+      1090,
+      47.5827252,
+      19.2477345,
+      2.67
+     ],
+     [
+      1100,
+      47.5828056,
+      19.2477931,
+      2.22
+     ],
+     [
+      1110,
+      47.5828861,
+      19.2478517,
+      1.8
+     ],
+     [
+      1120,
+      47.5829674,
+      19.2479109,
+      1.42
+     ],
+     [
+      1130,
+      47.5830481,
+      19.2479696,
+      1.07
+     ],
+     [
+      1140,
+      47.5831288,
+      19.2480284,
+      0.77
+     ],
+     [
+      1150,
+      47.5832093,
+      19.248087,
+      0.52
+     ],
+     [
+      1160,
+      47.5832898,
+      19.2481456,
+      0.32
+     ],
+     [
+      1170,
+      47.5833711,
+      19.2482048,
+      0.17
+     ],
+     [
+      1180,
+      47.5834515,
+      19.2482634,
+      0.07
+     ],
+     [
+      1190,
+      47.5835328,
+      19.2483225,
+      0.02
+     ],
+     [
+      1200,
+      47.5836133,
+      19.2483811,
+      0
+     ],
+     [
+      1210,
+      47.5836943,
+      19.2484401,
+      0.01
+     ],
+     [
+      1220,
+      47.5837748,
+      19.2484987,
+      0.05
+     ],
+     [
+      1230,
+      47.5838558,
+      19.2485577,
+      0.1
+     ],
+     [
+      1240,
+      47.5839367,
+      19.2486166,
+      0.18
+     ],
+     [
+      1250,
+      47.584017,
+      19.248675,
+      0.3
+     ],
+     [
+      1260,
+      47.584098,
+      19.248734,
+      0.45
+     ],
+     [
+      1270,
+      47.584179,
+      19.248793,
+      0.61
+     ],
+     [
+      1280,
+      47.5842595,
+      19.2488516,
+      0.81
+     ],
+     [
+      1290,
+      47.5843405,
+      19.2489106,
+      1.05
+     ],
+     [
+      1300,
+      47.5844214,
+      19.2489695,
+      1.31
+     ],
+     [
+      1310,
+      47.5845017,
+      19.249028,
+      1.63
+     ],
+     [
+      1320,
+      47.5845827,
+      19.2490869,
+      1.98
+     ],
+     [
+      1330,
+      47.5846637,
+      19.2491459,
+      2.34
+     ],
+     [
+      1340,
+      47.5847439,
+      19.2492043,
+      2.71
+     ],
+     [
+      1350,
+      47.5848249,
+      19.2492633,
+      3.12
+     ],
+     [
+      1360,
+      47.5849059,
+      19.2493223,
+      3.56
+     ],
+     [
+      1370,
+      47.5849869,
+      19.2493813,
+      4.03
+     ],
+     [
+      1380,
+      47.5850676,
+      19.24944,
+      4.51
+     ],
+     [
+      1390,
+      47.5851488,
+      19.2495007,
+      5.01
+     ],
+     [
+      1400,
+      47.5852283,
+      19.2495615,
+      5.55
+     ],
+     [
+      1410,
+      47.5853082,
+      19.2496244,
+      6.11
+     ],
+     [
+      1420,
+      47.5853876,
+      19.2496907,
+      6.7
+     ],
+     [
+      1430,
+      47.5854656,
+      19.2497596,
+      7.3
+     ],
+     [
+      1440,
+      47.585541,
+      19.2498298,
+      7.91
+     ],
+     [
+      1450,
+      47.5856155,
+      19.2499047,
+      8.54
+     ],
+     [
+      1460,
+      47.5856893,
+      19.2499823,
+      9.15
+     ],
+     [
+      1470,
+      47.5857604,
+      19.250063,
+      9.73
+     ],
+     [
+      1480,
+      47.5858314,
+      19.2501453,
+      10.28
+     ],
+     [
+      1490,
+      47.5859019,
+      19.2502282,
+      10.8
+     ],
+     [
+      1500,
+      47.5859688,
+      19.2503183,
+      11.27
+     ],
+     [
+      1510,
+      47.5860332,
+      19.2504106,
+      11.68
+     ],
+     [
+      1520,
+      47.5860985,
+      19.2505017,
+      12.03
+     ],
+     [
+      1530,
+      47.5861779,
+      19.2505647,
+      12.32
+     ],
+     [
+      1540,
+      47.5862616,
+      19.250591,
+      12.55
+     ],
+     [
+      1550,
+      47.5863452,
+      19.2505896,
+      12.77
+     ],
+     [
+      1560,
+      47.5864301,
+      19.2505628,
+      12.97
+     ],
+     [
+      1570,
+      47.5865169,
+      19.2505276,
+      13.12
+     ],
+     [
+      1580,
+      47.5866038,
+      19.2504923,
+      13.22
+     ],
+     [
+      1590,
+      47.5866906,
+      19.2504571,
+      13.27
+     ],
+     [
+      1600,
+      47.5867774,
+      19.250422,
+      13.31
+     ],
+     [
+      1610,
+      47.5868642,
+      19.2503868,
+      13.34
+     ],
+     [
+      1620,
+      47.5869512,
+      19.2503515,
+      13.37
+     ],
+     [
+      1630,
+      47.587038,
+      19.2503163,
+      13.39
+     ],
+     [
+      1640,
+      47.5871248,
+      19.2502811,
+      13.4
+     ],
+     [
+      1650,
+      47.5872115,
+      19.2502459,
+      13.41
+     ],
+     [
+      1660,
+      47.5872983,
+      19.2502107,
+      13.45
+     ],
+     [
+      1670,
+      47.5873851,
+      19.2501755,
+      13.49
+     ],
+     [
+      1680,
+      47.5874722,
+      19.2501402,
+      13.54
+     ],
+     [
+      1690,
+      47.5875593,
+      19.2501049,
+      13.58
+     ],
+     [
+      1700,
+      47.5876464,
+      19.2500696,
+      13.61
+     ],
+     [
+      1710,
+      47.5877364,
+      19.2500387,
+      13.67
+     ],
+     [
+      1720,
+      47.5878269,
+      19.2500172,
+      13.75
+     ],
+     [
+      1730,
+      47.5879189,
+      19.2500085,
+      13.87
+     ],
+     [
+      1740,
+      47.5880095,
+      19.2500333,
+      14.02
+     ],
+     [
+      1750,
+      47.5880943,
+      19.2500746,
+      14.22
+     ],
+     [
+      1760,
+      47.5881732,
+      19.2501308,
+      14.47
+     ],
+     [
+      1770,
+      47.5882423,
+      19.2502037,
+      14.76
+     ],
+     [
+      1780,
+      47.5883022,
+      19.2502929,
+      15.08
+     ],
+     [
+      1790,
+      47.5883507,
+      19.2503943,
+      15.4
+     ],
+     [
+      1800,
+      47.5883889,
+      19.2505054,
+      15.73
+     ],
+     [
+      1810,
+      47.5884154,
+      19.2506187,
+      16.09
+     ],
+     [
+      1820,
+      47.5884275,
+      19.2507372,
+      16.47
+     ],
+     [
+      1830,
+      47.5884265,
+      19.2508657,
+      16.88
+     ],
+     [
+      1840,
+      47.588414,
+      19.2509869,
+      17.33
+     ],
+     [
+      1850,
+      47.5883872,
+      19.2511008,
+      17.79
+     ],
+     [
+      1860,
+      47.5883485,
+      19.2512085,
+      18.24
+     ],
+     [
+      1870,
+      47.5883027,
+      19.251322,
+      18.68
+     ],
+     [
+      1880,
+      47.5882564,
+      19.2514364,
+      19.11
+     ],
+     [
+      1890,
+      47.5882105,
+      19.25155,
+      19.54
+     ],
+     [
+      1900,
+      47.5881615,
+      19.2516564,
+      19.98
+     ],
+     [
+      1910,
+      47.5881119,
+      19.2517595,
+      20.41
+     ],
+     [
+      1920,
+      47.5880541,
+      19.2518617,
+      20.84
+     ],
+     [
+      1930,
+      47.5879963,
+      19.2519595,
+      21.25
+     ],
+     [
+      1940,
+      47.587938,
+      19.2520554,
+      21.62
+     ],
+     [
+      1950,
+      47.5878758,
+      19.2521515,
+      21.94
+     ],
+     [
+      1960,
+      47.5878152,
+      19.2522439,
+      22.24
+     ],
+     [
+      1970,
+      47.5877493,
+      19.2523349,
+      22.54
+     ],
+     [
+      1980,
+      47.5876841,
+      19.2524247,
+      22.81
+     ],
+     [
+      1990,
+      47.587618,
+      19.252516,
+      23.06
+     ],
+     [
+      2000,
+      47.5875523,
+      19.2526066,
+      23.29
+     ],
+     [
+      2010,
+      47.5874863,
+      19.2526976,
+      23.49
+     ],
+     [
+      2020,
+      47.5874207,
+      19.2527882,
+      23.67
+     ],
+     [
+      2030,
+      47.587355,
+      19.2528787,
+      23.82
+     ],
+     [
+      2040,
+      47.587289,
+      19.2529698,
+      23.94
+     ],
+     [
+      2050,
+      47.5872234,
+      19.2530603,
+      24.04
+     ],
+     [
+      2060,
+      47.5871576,
+      19.253151,
+      24.12
+     ],
+     [
+      2070,
+      47.587092,
+      19.2532415,
+      24.19
+     ],
+     [
+      2080,
+      47.5870262,
+      19.2533323,
+      24.24
+     ],
+     [
+      2090,
+      47.5869605,
+      19.253423,
+      24.28
+     ],
+     [
+      2100,
+      47.5868984,
+      19.2535042,
+      24.31
+     ],
+     [
+      2110,
+      47.5868293,
+      19.2535465,
+      24.37
+     ],
+     [
+      2120,
+      47.586749,
+      19.2535423,
+      24.44
+     ],
+     [
+      2130,
+      47.5866728,
+      19.2534916,
+      24.52
+     ],
+     [
+      2140,
+      47.5866065,
+      19.253401,
+      24.57
+     ],
+     [
+      2150,
+      47.5865367,
+      19.253323,
+      24.61
+     ],
+     [
+      2160,
+      47.5864452,
+      19.2532986,
+      24.67
+     ],
+     [
+      2170,
+      47.5863505,
+      19.2533209,
+      24.74
+     ],
+     [
+      2180,
+      47.5862628,
+      19.2533557,
+      24.82
+     ],
+     [
+      2190,
+      47.5861758,
+      19.2533904,
+      24.89
+     ],
+     [
+      2200,
+      47.5860887,
+      19.2534252,
+      24.96
+     ],
+     [
+      2210,
+      47.5860017,
+      19.25346,
+      25.03
+     ],
+     [
+      2220,
+      47.5859148,
+      19.2534947,
+      25.09
+     ],
+     [
+      2230,
+      47.5858279,
+      19.2535294,
+      25.16
+     ],
+     [
+      2240,
+      47.5857402,
+      19.2535644,
+      25.23
+     ],
+     [
+      2250,
+      47.5856532,
+      19.2535992,
+      25.29
+     ],
+     [
+      2260,
+      47.5855665,
+      19.2536338,
+      25.34
+     ],
+     [
+      2270,
+      47.5854799,
+      19.2536684,
+      25.39
+     ],
+     [
+      2280,
+      47.585393,
+      19.2537031,
+      25.44
+     ],
+     [
+      2290,
+      47.5853053,
+      19.2537381,
+      25.49
+     ],
+     [
+      2300,
+      47.5852197,
+      19.2537723,
+      25.54
+     ],
+     [
+      2310,
+      47.585127,
+      19.2538212,
+      25.6
+     ],
+     [
+      2320,
+      47.5850437,
+      19.2539009,
+      25.66
+     ],
+     [
+      2330,
+      47.5849694,
+      19.2540193,
+      25.74
+     ],
+     [
+      2340,
+      47.5849259,
+      19.2541735,
+      25.82
+     ],
+     [
+      2350,
+      47.584913,
+      19.2543145,
+      25.89
+     ],
+     [
+      2360,
+      47.5849028,
+      19.2544455,
+      25.96
+     ],
+     [
+      2370,
+      47.5848925,
+      19.2545778,
+      26.03
+     ],
+     [
+      2380,
+      47.5848823,
+      19.2547093,
+      26.09
+     ],
+     [
+      2390,
+      47.584872,
+      19.2548416,
+      26.16
+     ],
+     [
+      2400,
+      47.5848618,
+      19.2549729,
+      26.25
+     ],
+     [
+      2410,
+      47.5848515,
+      19.255105,
+      26.34
+     ],
+     [
+      2420,
+      47.5848359,
+      19.2552279,
+      26.42
+     ],
+     [
+      2430,
+      47.584812,
+      19.2553429,
+      26.49
+     ],
+     [
+      2440,
+      47.5847713,
+      19.2554506,
+      26.56
+     ],
+     [
+      2450,
+      47.5847183,
+      19.2555457,
+      26.65
+     ],
+     [
+      2460,
+      47.5846573,
+      19.2556313,
+      26.75
+     ],
+     [
+      2470,
+      47.5845895,
+      19.2556881,
+      26.86
+     ],
+     [
+      2480,
+      47.584507,
+      19.2557272,
+      27
+     ],
+     [
+      2490,
+      47.5844244,
+      19.2557383,
+      27.15
+     ],
+     [
+      2500,
+      47.5843376,
+      19.2557296,
+      27.3
+     ],
+     [
+      2510,
+      47.5842493,
+      19.2557118,
+      27.46
+     ],
+     [
+      2520,
+      47.5841601,
+      19.2556938,
+      27.59
+     ],
+     [
+      2530,
+      47.5840701,
+      19.2556757,
+      27.71
+     ],
+     [
+      2540,
+      47.5839811,
+      19.2556578,
+      27.83
+     ],
+     [
+      2550,
+      47.5838921,
+      19.2556399,
+      27.95
+     ],
+     [
+      2560,
+      47.5838029,
+      19.2556219,
+      28.07
+     ],
+     [
+      2570,
+      47.5837129,
+      19.2556038,
+      28.21
+     ],
+     [
+      2580,
+      47.5836237,
+      19.2555858,
+      28.37
+     ],
+     [
+      2590,
+      47.5835345,
+      19.2555678,
+      28.54
+     ],
+     [
+      2600,
+      47.5834452,
+      19.2555499,
+      28.69
+     ],
+     [
+      2610,
+      47.5833561,
+      19.2555319,
+      28.84
+     ],
+     [
+      2620,
+      47.5832672,
+      19.255514,
+      28.99
+     ],
+     [
+      2630,
+      47.5831774,
+      19.2554962,
+      29.13
+     ],
+     [
+      2640,
+      47.5830873,
+      19.2554848,
+      29.26
+     ],
+     [
+      2650,
+      47.5829923,
+      19.2554879,
+      29.41
+     ],
+     [
+      2660,
+      47.582899,
+      19.2555037,
+      29.57
+     ],
+     [
+      2670,
+      47.5828088,
+      19.2555348,
+      29.72
+     ],
+     [
+      2680,
+      47.5827182,
+      19.255581,
+      29.86
+     ],
+     [
+      2690,
+      47.5826323,
+      19.2556406,
+      30.01
+     ],
+     [
+      2700,
+      47.5825508,
+      19.2557114,
+      30.17
+     ],
+     [
+      2710,
+      47.5824752,
+      19.255785,
+      30.32
+     ],
+     [
+      2720,
+      47.5824002,
+      19.2558583,
+      30.46
+     ],
+     [
+      2730,
+      47.5823256,
+      19.2559313,
+      30.61
+     ],
+     [
+      2740,
+      47.58225,
+      19.2560051,
+      30.77
+     ],
+     [
+      2750,
+      47.582175,
+      19.2560785,
+      30.92
+     ],
+     [
+      2760,
+      47.5821001,
+      19.2561516,
+      31.06
+     ],
+     [
+      2770,
+      47.5820248,
+      19.2562253,
+      31.2
+     ],
+     [
+      2780,
+      47.5819499,
+      19.2562985,
+      31.34
+     ],
+     [
+      2790,
+      47.5818746,
+      19.2563721,
+      31.49
+     ],
+     [
+      2800,
+      47.5818016,
+      19.2564434,
+      31.62
+     ],
+     [
+      2810,
+      47.5817247,
+      19.2565035,
+      31.74
+     ],
+     [
+      2820,
+      47.5816448,
+      19.2565438,
+      31.84
+     ],
+     [
+      2830,
+      47.5815611,
+      19.2565654,
+      31.95
+     ],
+     [
+      2840,
+      47.5814756,
+      19.2565694,
+      32.07
+     ],
+     [
+      2850,
+      47.5813872,
+      19.2565546,
+      32.22
+     ],
+     [
+      2860,
+      47.5813037,
+      19.2565247,
+      32.39
+     ],
+     [
+      2870,
+      47.581223,
+      19.2564774,
+      32.57
+     ],
+     [
+      2880,
+      47.5811461,
+      19.2564144,
+      32.74
+     ],
+     [
+      2890,
+      47.5810734,
+      19.2563388,
+      32.89
+     ],
+     [
+      2900,
+      47.5810037,
+      19.2562555,
+      33.02
+     ],
+     [
+      2910,
+      47.5809357,
+      19.2561683,
+      33.12
+     ],
+     [
+      2920,
+      47.5808678,
+      19.2560806,
+      33.19
+     ],
+     [
+      2930,
+      47.5808009,
+      19.2559917,
+      33.23
+     ],
+     [
+      2940,
+      47.5807339,
+      19.2559027,
+      33.25
+     ],
+     [
+      2950,
+      47.5806671,
+      19.2558141,
+      33.23
+     ],
+     [
+      2960,
+      47.5806001,
+      19.255725,
+      33.19
+     ],
+     [
+      2970,
+      47.5805334,
+      19.2556364,
+      33.12
+     ],
+     [
+      2980,
+      47.5804664,
+      19.2555475,
+      33.03
+     ],
+     [
+      2990,
+      47.5803994,
+      19.2554585,
+      32.92
+     ],
+     [
+      3000,
+      47.5803328,
+      19.2553699,
+      32.79
+     ],
+     [
+      3010,
+      47.5802658,
+      19.2552809,
+      32.63
+     ],
+     [
+      3020,
+      47.5801988,
+      19.2551919,
+      32.45
+     ],
+     [
+      3030,
+      47.5801316,
+      19.2551027,
+      32.24
+     ],
+     [
+      3040,
+      47.5800646,
+      19.2550138,
+      32.01
+     ],
+     [
+      3050,
+      47.5799982,
+      19.2549255,
+      31.8
+     ],
+     [
+      3060,
+      47.579931,
+      19.2548363,
+      31.59
+     ],
+     [
+      3070,
+      47.5798641,
+      19.2547474,
+      31.39
+     ],
+     [
+      3080,
+      47.5797972,
+      19.2546586,
+      31.19
+     ],
+     [
+      3090,
+      47.5797304,
+      19.2545697,
+      30.99
+     ],
+     [
+      3100,
+      47.5796635,
+      19.2544809,
+      30.79
+     ],
+     [
+      3110,
+      47.5795964,
+      19.2543918,
+      30.59
+     ],
+     [
+      3120,
+      47.5795295,
+      19.254303,
+      30.39
+     ],
+     [
+      3130,
+      47.5794626,
+      19.2542141,
+      30.19
+     ],
+     [
+      3140,
+      47.5793958,
+      19.2541254,
+      29.99
+     ],
+     [
+      3150,
+      47.5793289,
+      19.2540364,
+      29.79
+     ],
+     [
+      3160,
+      47.579262,
+      19.2539476,
+      29.6
+     ],
+     [
+      3170,
+      47.5791954,
+      19.2538591,
+      29.41
+     ],
+     [
+      3180,
+      47.5791282,
+      19.2537699,
+      29.24
+     ],
+     [
+      3190,
+      47.5790613,
+      19.253681,
+      29.07
+     ],
+     [
+      3200,
+      47.5789942,
+      19.2535919,
+      28.88
+     ],
+     [
+      3210,
+      47.5789275,
+      19.2535033,
+      28.67
+     ],
+     [
+      3220,
+      47.5788607,
+      19.2534145,
+      28.44
+     ],
+     [
+      3230,
+      47.5787935,
+      19.2533254,
+      28.19
+     ],
+     [
+      3240,
+      47.5787286,
+      19.253237,
+      27.96
+     ],
+     [
+      3250,
+      47.5786741,
+      19.2531409,
+      27.74
+     ],
+     [
+      3260,
+      47.5786446,
+      19.2530214,
+      27.53
+     ],
+     [
+      3270,
+      47.5786546,
+      19.252885,
+      27.33
+     ],
+     [
+      3280,
+      47.5787008,
+      19.2527562,
+      27.15
+     ],
+     [
+      3290,
+      47.578769,
+      19.2526563,
+      26.99
+     ],
+     [
+      3300,
+      47.5788354,
+      19.2525672,
+      26.82
+     ],
+     [
+      3310,
+      47.5789022,
+      19.2524776,
+      26.62
+     ],
+     [
+      3320,
+      47.5789689,
+      19.2523883,
+      26.41
+     ],
+     [
+      3330,
+      47.5790353,
+      19.2522992,
+      26.2
+     ],
+     [
+      3340,
+      47.5791021,
+      19.2522095,
+      25.99
+     ],
+     [
+      3350,
+      47.5791687,
+      19.2521202,
+      25.79
+     ],
+     [
+      3360,
+      47.5792351,
+      19.2520311,
+      25.6
+     ],
+     [
+      3370,
+      47.579302,
+      19.2519415,
+      25.42
+     ],
+     [
+      3380,
+      47.5793686,
+      19.2518522,
+      25.27
+     ],
+     [
+      3390,
+      47.5794292,
+      19.2517626,
+      25.15
+     ],
+     [
+      3400,
+      47.5794899,
+      19.2516655,
+      25.04
+     ],
+     [
+      3410,
+      47.5795437,
+      19.2515656,
+      24.95
+     ],
+     [
+      3420,
+      47.5795997,
+      19.2514616,
+      24.87
+     ],
+     [
+      3430,
+      47.5796557,
+      19.2513575,
+      24.81
+     ],
+     [
+      3440,
+      47.5797117,
+      19.2512533,
+      24.8
+     ],
+     [
+      3450,
+      47.5797672,
+      19.2511501,
+      24.79
+     ],
+     [
+      3460,
+      47.5798233,
+      19.2510458,
+      24.79
+     ],
+     [
+      3470,
+      47.5798683,
+      19.2509486,
+      24.8
+     ],
+     [
+      3480,
+      47.5798952,
+      19.2508382,
+      24.81
+     ],
+     [
+      3490,
+      47.5799047,
+      19.2507262,
+      24.88
+     ],
+     [
+      3500,
+      47.5799002,
+      19.2506044,
+      25
+     ],
+     [
+      3510,
+      47.5798826,
+      19.2504914,
+      25.15
+     ],
+     [
+      3520,
+      47.5798451,
+      19.2503878,
+      25.33
+     ],
+     [
+      3530,
+      47.5797909,
+      19.2502906,
+      25.53
+     ],
+     [
+      3540,
+      47.5797156,
+      19.2502177,
+      25.73
+     ],
+     [
+      3550,
+      47.5796295,
+      19.2501743,
+      25.93
+     ],
+     [
+      3560,
+      47.579535,
+      19.2501656,
+      26.17
+     ],
+     [
+      3570,
+      47.5794394,
+      19.2501846,
+      26.47
+     ],
+     [
+      3580,
+      47.5793469,
+      19.2502478,
+      26.82
+     ],
+     [
+      3590,
+      47.5792715,
+      19.2503482,
+      27.2
+     ],
+     [
+      3600,
+      47.5792163,
+      19.2504534,
+      27.59
+     ],
+     [
+      3610,
+      47.5791612,
+      19.2505584,
+      28
+     ],
+     [
+      3620,
+      47.5791065,
+      19.2506626,
+      28.41
+     ],
+     [
+      3630,
+      47.5790511,
+      19.2507682,
+      28.84
+     ],
+     [
+      3640,
+      47.5789962,
+      19.2508727,
+      29.27
+     ],
+     [
+      3650,
+      47.5789408,
+      19.2509782,
+      29.69
+     ],
+     [
+      3660,
+      47.5788859,
+      19.2510828,
+      30.09
+     ],
+     [
+      3670,
+      47.5788306,
+      19.2511884,
+      30.49
+     ],
+     [
+      3680,
+      47.5787754,
+      19.2512935,
+      30.89
+     ],
+     [
+      3690,
+      47.5787206,
+      19.2513978,
+      31.29
+     ],
+     [
+      3700,
+      47.5786655,
+      19.2515028,
+      31.69
+     ],
+     [
+      3710,
+      47.5786104,
+      19.2516079,
+      32.07
+     ],
+     [
+      3720,
+      47.5785552,
+      19.251713,
+      32.4
+     ],
+     [
+      3730,
+      47.5784959,
+      19.251809,
+      32.67
+     ],
+     [
+      3740,
+      47.5784339,
+      19.251891,
+      32.89
+     ],
+     [
+      3750,
+      47.5783561,
+      19.2519509,
+      33.09
+     ],
+     [
+      3760,
+      47.578275,
+      19.2519925,
+      33.27
+     ],
+     [
+      3770,
+      47.5781906,
+      19.252016,
+      33.44
+     ],
+     [
+      3780,
+      47.5781043,
+      19.2520205,
+      33.61
+     ],
+     [
+      3790,
+      47.5780175,
+      19.2520083,
+      33.79
+     ],
+     [
+      3800,
+      47.5779332,
+      19.2519757,
+      33.97
+     ],
+     [
+      3810,
+      47.5778524,
+      19.2519257,
+      34.12
+     ],
+     [
+      3820,
+      47.5777797,
+      19.2518519,
+      34.23
+     ],
+     [
+      3830,
+      47.5777173,
+      19.2517606,
+      34.32
+     ],
+     [
+      3840,
+      47.5776609,
+      19.2516593,
+      34.37
+     ],
+     [
+      3850,
+      47.5776159,
+      19.2515442,
+      34.41
+     ],
+     [
+      3860,
+      47.577586,
+      19.2514178,
+      34.44
+     ],
+     [
+      3870,
+      47.5775677,
+      19.2512871,
+      34.47
+     ],
+     [
+      3880,
+      47.5775661,
+      19.2511528,
+      34.49
+     ],
+     [
+      3890,
+      47.577577,
+      19.2510196,
+      34.51
+     ],
+     [
+      3900,
+      47.5776017,
+      19.2508899,
+      34.55
+     ],
+     [
+      3910,
+      47.5776364,
+      19.2507655,
+      34.59
+     ],
+     [
+      3920,
+      47.5776849,
+      19.2506466,
+      34.64
+     ],
+     [
+      3930,
+      47.5777394,
+      19.2505388,
+      34.67
+     ],
+     [
+      3940,
+      47.5777949,
+      19.2504344,
+      34.69
+     ],
+     [
+      3950,
+      47.5778505,
+      19.25033,
+      34.68
+     ],
+     [
+      3960,
+      47.5779061,
+      19.2502255,
+      34.64
+     ],
+     [
+      3970,
+      47.5779615,
+      19.2501216,
+      34.59
+     ],
+     [
+      3980,
+      47.578017,
+      19.2500172,
+      34.52
+     ],
+     [
+      3990,
+      47.578073,
+      19.2499121,
+      34.45
+     ],
+     [
+      4000,
+      47.5781286,
+      19.2498077,
+      34.38
+     ],
+     [
+      4010,
+      47.5781838,
+      19.2497039,
+      34.31
+     ],
+     [
+      4020,
+      47.5782394,
+      19.2495993,
+      34.24
+     ],
+     [
+      4030,
+      47.5782953,
+      19.2494944,
+      34.18
+     ],
+     [
+      4040,
+      47.5783509,
+      19.2493899,
+      34.11
+     ],
+     [
+      4050,
+      47.5784064,
+      19.2492856,
+      34.04
+     ],
+     [
+      4060,
+      47.578462,
+      19.2491811,
+      33.97
+     ],
+     [
+      4070,
+      47.5785173,
+      19.2490773,
+      33.9
+     ],
+     [
+      4080,
+      47.5785729,
+      19.2489728,
+      33.84
+     ],
+     [
+      4090,
+      47.5786285,
+      19.2488683,
+      33.81
+     ],
+     [
+      4100,
+      47.5786841,
+      19.2487639,
+      33.79
+     ],
+     [
+      4110,
+      47.5787398,
+      19.2486593,
+      33.79
+     ],
+     [
+      4120,
+      47.5787956,
+      19.2485545,
+      33.79
+     ],
+     [
+      4130,
+      47.5788509,
+      19.2484506,
+      33.79
+     ],
+     [
+      4140,
+      47.5789065,
+      19.2483461,
+      33.79
+     ],
+     [
+      4150,
+      47.5789624,
+      19.248241,
+      33.79
+     ],
+     [
+      4160,
+      47.5790179,
+      19.2481367,
+      33.79
+     ],
+     [
+      4170,
+      47.5790732,
+      19.2480328,
+      33.79
+     ],
+     [
+      4180,
+      47.5791289,
+      19.2479282,
+      33.79
+     ],
+     [
+      4190,
+      47.5791848,
+      19.2478233,
+      33.79
+     ],
+     [
+      4200,
+      47.57924,
+      19.2477195,
+      33.79
+     ],
+     [
+      4210,
+      47.5792956,
+      19.2476151,
+      33.79
+     ],
+     [
+      4220,
+      47.5793513,
+      19.2475105,
+      33.79
+     ],
+     [
+      4230,
+      47.579407,
+      19.2474057,
+      33.79
+     ],
+     [
+      4240,
+      47.5794623,
+      19.2473018,
+      33.8
+     ],
+     [
+      4250,
+      47.5795179,
+      19.2471973,
+      33.83
+     ],
+     [
+      4260,
+      47.5795739,
+      19.2470922,
+      33.91
+     ],
+     [
+      4270,
+      47.5796295,
+      19.2469878,
+      34.04
+     ],
+     [
+      4280,
+      47.579685,
+      19.2468834,
+      34.19
+     ],
+     [
+      4290,
+      47.5797406,
+      19.246779,
+      34.35
+     ],
+     [
+      4300,
+      47.5797962,
+      19.2466745,
+      34.48
+     ],
+     [
+      4310,
+      47.5798515,
+      19.2465706,
+      34.56
+     ],
+     [
+      4320,
+      47.5799071,
+      19.2464661,
+      34.59
+     ],
+     [
+      4330,
+      47.5799627,
+      19.2463617,
+      34.59
+     ],
+     [
+      4340,
+      47.5800183,
+      19.2462571,
+      34.59
+     ],
+     [
+      4350,
+      47.5800738,
+      19.2461528,
+      34.59
+     ],
+     [
+      4360,
+      47.5801294,
+      19.2460484,
+      34.55
+     ],
+     [
+      4370,
+      47.5801851,
+      19.2459438,
+      34.47
+     ]
+    ]
+   }
+  },
+  "pitSide": -1,
+  "pitLimitKmh": 80,
+  "bankOverrides": [],
+  "bridgesOver": [
+   {
+    "kind": "footbridge over the main straight",
+    "osmWay": 493519980,
+    "gameS": 0,
+    "at": [
+     47.58026,
+     19.245888
+    ]
+   },
+   {
+    "kind": "service-road bridge",
+    "osmWay": 54843543,
+    "gameS": 694,
+    "at": [
+     47.5815376,
+     19.24624
+    ]
+   }
+  ],
+  "layoutNote": "layout current (4.381 km); OSM centreline less accurate than the dataset here (up to 7.4 m)"
+ },
+ "reproduce": [
+  "node devtests/track-audit/eu-south-central/game.js",
+  "node devtests/track-audit/eu-south-central/layout.mjs",
+  "node devtests/track-audit/eu-south-central/lt.mjs",
+  "node devtests/track-audit/eu-south-central/grid-check.mjs",
+  "node devtests/track-audit/eu-south-central/elev.mjs",
+  "node devtests/track-audit/eu-south-central/hu-centre.mjs hu-1986",
+  "node devtests/track-audit/eu-south-central/feat.mjs hu-1986 lt 2400-3700:T8-T13",
+  "node devtests/track-audit/eu-south-central/compose.mjs"
+ ]
+}

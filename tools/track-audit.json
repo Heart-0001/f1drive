@@ -1,0 +1,4276 @@
+{
+ "about": {
+  "what": "Verified corrections of the 40 circuits' track data (2026-10-01 audit), for tools/build-tracks.mjs to apply later. Nothing here is applied yet.",
+  "howMade": "Nine auditors measured every circuit (devtests/track-audit/<id>.json); the synthesis re-measured every major finding independently (devtests/track-audit/verify/: own DEM sampling on the built centreline, fresh OSM API queries, re-read sources, imagery). Minor findings are carried as \"optional\" with the auditor's evidence unless a verification line says otherwise.",
+  "report": "docs/track-audit.md",
+  "conventions": {
+   "latLon": "[lat, lon] WGS84",
+   "BANKED": "same as tools/build-tracks.mjs BANKED: {name, deg, from, to}, deg > 0 = inside of the corner lower, < 0 = contra-banked; js/track.js skips deg 0",
+   "START_AT": "same as tools/build-tracks.mjs START_AT",
+   "COVERED": "same as tools/build-tracks.mjs COVERED",
+   "positionCheck": "every START_AT / BANKED / COVERED point projected on the current built lap: sFromLineM (negative = before the line) and offCentrelineM (should be < 25-30 m)"
+  },
+  "afterApplying": [
+   "node tools/build-tracks.mjs (fetches the new DEM samples; caches them)",
+   "node tools/build-scenery.mjs only where points / geo change (au-1953, pt-1972, es-2026 length, az-2016 width)",
+   "node devtests/seasons-calib/calibrate.mjs (~22 min) and node tools/build-cars.mjs --check",
+   "all node suites and the Electron harnesses"
+  ]
+ },
+ "global": {
+  "derivedBanking": {
+   "finding": "js/track.js derives up to 6 deg (BANK_MAX) inside-lower bank from curvature at every slow corner. Lidar cross-slopes at 14 circuits (Spa, Zandvoort, Hockenheim, Nürburgring, Silverstone, Imola, Mugello, Red Bull Ring, COTA, Las Vegas, Miami, Indianapolis, Watkins Glen, Montreal) measure 0-2.4 deg in hairpins and chicanes where the game has 3.5-6 deg; real cambers of 4-7 deg exist only in specific corners (Zandvoort Tarzan / Hunserug / Scheivlak, Nürburgring Goodyear-Kehre, Mugello Arrabbiata 1, Hockenheim Sachs-Kurve, COTA T1, Watkins Glen) and are rendered at 1-3 deg.",
+   "recommend": {
+    "derivedBankMaxDeg": 2.5,
+    "streetCircuitsDeg": 1.5,
+    "streetCircuits": [
+     "mc-1929",
+     "sg-2008",
+     "az-2016",
+     "us-2023",
+     "sa-2021",
+     "ca-1978",
+     "au-1953",
+     "ru-2014",
+     "us-2022",
+     "es-2026"
+    ],
+    "keep": "all BANKED overrides (published) plus the lidar-measured ones listed per circuit",
+    "why": "faithful, and the real banked corners (Zandvoort 19 / 18, Madring 13.5, Jeddah 12, Indy 9.2) stand out against flat corners: the user said the banking is not felt"
+   },
+   "cost": "changes cornering everywhere -> recalibrate"
+  },
+  "phantomBridges": {
+   "finding": "js/scenery.js addBridge() builds an OSM man_made=bridge outline that contains the lap as a deck OVER the road even when the outline is the lap's own deck over an underpass. Game-wide check (verify/decks.js + decks-osm.js): 11 decks are built over the road; 6 are phantoms (be-1925 1353164215, nl-1948 765476850, de-1932 1302356195 / 1302600377 / 1302600378, de-1927 790945811), 5 are real (de-1927 BMW-Brücke 34444288, gb-1948 605922107 Hangar Straight, ae-2009 1473728620 and 1473750056 Marina Walk, us-2023 1419057401 Las Vegas Boulevard Overpass).",
+   "rule": "tools/build-scenery.mjs: drop a man_made=bridge outline that contains the lap centreline when a raceway way inside it is bridge=yes, or a tunnel=* / layer<0 way crosses the lap inside it and no non-raceway way with a HIGHER layer than the lap crosses it."
+  },
+  "missingOverpasses": {
+   "finding": "build-scenery only takes man_made=bridge AREAS, so linear bridge ways that cross over the lap are missing (Montreal bridge underpass before T8 [major], Marina Bay ECP viaduct [major], Yas W hotel link [major, building:part], Miami Turnpike ramps, Las Vegas monorail + Strip footbridges, footbridges at COTA, Indianapolis, Watkins Glen, Mexico, Interlagos, Jeddah, Baku, Imola, Mugello, Monza, Hungaroring, Shanghai wings).",
+   "rule": "tools/build-scenery.mjs: also emit decks for highway / railway ways with bridge=* and layer > lap layer that cross the lap (buffered to their width, deck underside >= 6.5 m above the road), and for building / building:part with min_height >= 5 m that span the corridor."
+  },
+  "lengthRescale": {
+   "finding": "tools/build-tracks.mjs rescales each line to the dataset's \"length\" property (up to 15 %). Built length vs the line's own geodesic length: pt-1972 +4.4 %, us-1909 +2.6 %, br-1977 +1.5 %, fr-1960 -1.1 %, az-2016 +1.0 %, es-2026 +0.85 %, ar-1952 +0.7 %, qa-2004 -0.7 %, tr-2005 +0.6 %; all others within 0.4 %.",
+   "recommend": "LENGTH_OVERRIDE_M where the official figure is sourced for the drawn layout (es-2026 5414, qa-2004 5419, ar-1952 4259); no rescale where the figure belongs to another layout (pt-1972). kz = 110540 m/deg is 0.3-0.6 % short of WGS84 at these latitudes (cosmetic)."
+  },
+  "pitLanes": {
+   "finding": "Every pit lane is a generic lane within PIT_REACH = 250 m of the line. Real F1 lanes (OSM) are 569-1373 m and leave 170-890 m before the line. Sides are right everywhere they could be checked; limits: 80 km/h except Monaco 60, Singapore 60 until 2024, Zandvoort 60 until 2024, Sochi 60.",
+   "recommend": "optional new track inputs pitEntry / pitExit [lat, lon] (listed per circuit as pitLaneReal) and per-season limits; pit-stop time loss is too small today."
+  },
+  "presentation": {
+   "note": "Not track data (js/cockpit.js, js/car.js, js/track.js); from the perception analyst (devtests/track-audit/perception/), code facts re-checked in the synthesis.",
+   "verifiedCodeFacts": [
+    "js/cockpit.js FOV_MIN 70 / FOV_MAX 82 (vertical), smoothstep to V_TOP 330 km/h",
+    "group.rotation.set(-(state.pitch), heading, state.roll): the camera is a child of the cockpit group, so view pitch / roll = car pitch / roll; the camera adds only look, shake and a 0.006 m + 0.005 rad per g lean",
+    "js/car.js has no seat-load output (no seatG); ATTITUDE_TAU 0.07 s",
+    "geometry: a 28 deg tall monitor showing an 80 deg vertical FOV draws angles near the centre at tan(14)/tan(40) = 0.30 of their size: 15 % (8.5 deg) reads like ~4.5 %"
+   ],
+   "recommend": [
+    {
+     "what": "FOV",
+     "change": "FOV_MIN 70 -> 58, FOV_MAX 82 -> 62 (vertical) + a 視野 50-75 deg setting",
+     "measured": "10.5 px/deg instead of 7.3 at 280 km/h; the Raidillon climb 39 -> 56 px",
+     "sideEffect": "the steering-wheel display sits lower, partly behind the bottom HUD panel"
+    },
+    {
+     "what": "horizon stabilisation",
+     "change": "a head Object3D between group and camera: head.rotation.x = +0.5 * pitch, head.rotation.z = -0.4 * roll, setting 地平線穩定 0-100 % (0 = today); mirrors untouched"
+    },
+    {
+     "what": "seat load",
+     "change": "car.js exports state.seatG = (g cos - kappa v^2 - aLeft sin) / g and longG; cockpit head spring 2.2 Hz, damping 0.45, 0.03 m drop + 1.5 deg nod per g, 17 Hz bump-stop buzz above 0.3 g"
+    },
+    {
+     "what": "banking cues",
+     "change": "world-vertical fence posts (3 m, every 4 m) on stretches with |bank| > 8 deg; track.js stamp(): carry the banked plane 15-20 m beyond the outer wall"
+    },
+    {
+     "what": "Spa profile",
+     "change": "the walmnt elevation source (be-1925): the compression at the Eau Rouge bottom only exists in the lidar profile"
+    }
+   ]
+  },
+  "timingHeights": "F1 live-timing car heights validate the lidar (Imola rms 0.55 m) but are FOM data: use only for validation unless the licence is cleared."
+ },
+ "newElevationSources": {
+  "walmnt": {
+   "label": "SPW Relief de la Wallonie MNT 2021-2022 (lidar DTM 0.5 m), (c) SPW",
+   "access": "ArcGIS MapServer identify, 1 point per request: https://geoservices.wallonie.be/arcgis/rest/services/RELIEF/WALLONIE_MNT_2021_2022/MapServer/identify?geometry={\"x\":<lon>,\"y\":<lat>,\"spatialReference\":{\"wkid\":4326}}&geometryType=esriGeometryPoint&sr=4326&layers=all&tolerance=0&mapExtent=<lon-0.001>,<lat-0.001>,<lon+0.001>,<lat+0.001>&imageDisplay=400,400,96&returnGeometry=false&f=json -> results[0].attributes[\"Stretch.Pixel Value\"]",
+   "settings": {
+    "dtm": true
+   },
+   "licence": "SPW web-service conditions, attribution \"(c) SPW\"; no explicit open licence found: check before shipping (fallback: the static profile devtests/track-audit/be-nl-de-gb/out/profile-be-1925.json)",
+   "usedBy": [
+    "be-1925"
+   ],
+   "politeness": "~700 points, 1 request at a time, >= 0.5 s apart"
+  },
+  "ignes-mdt05": {
+   "label": "IGN Espana / CNIG MDT05 (5 m DTM from PNOA-LiDAR), CC BY 4.0 (scne.es)",
+   "access": "INSPIRE WCS 2.0.1 GetCoverage, one GeoTIFF per circuit (int16 whole metres, EPSG:4258): https://servicios.idee.es/wcs-inspire/mdt?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=Elevacion4258_5&SUBSET=Lat(<lat0>,<lat1>)&SUBSET=Long(<lon0>,<lon1>)&FORMAT=image/tiff",
+   "settings": {
+    "dtm": true,
+    "note": "bilinear sampling; whole-metre steps are removed by the DTM median + Gauss"
+   },
+   "usedBy": [
+    "es-1991",
+    "es-2026"
+   ],
+   "caveat": "PNOA-LiDAR flight year not stated: Madring (built 2025-26) must be re-checked (La Monumental, Valdebebas section)"
+  },
+  "er-dtmrer2022": {
+   "label": "Regione Emilia-Romagna DTM RER2022 0.5 m (lidar 2022/23)",
+   "access": "ArcGIS ImageServer getSamples, POST, 100 points per request: https://servizigis.regione.emilia-romagna.it/arcgis/rest/services/public/DtmRER2022/ImageServer/getSamples (body geometry={\"points\":[[lon,lat],...],\"spatialReference\":{\"wkid\":4326}}&geometryType=esriGeometryMultipoint&returnFirstValueOnly=true&f=json)",
+   "settings": {
+    "dtm": true
+   },
+   "usedBy": [
+    "it-1953"
+   ],
+   "licence": "Regione Emilia-Romagna open data (CC BY 4.0 per the regional geoportal; confirm)"
+  },
+  "toscana-dsm2021": {
+   "label": "Regione Toscana DSM 1 m 2021 (lidar SURFACE model; its 1 m DTM has no data at Mugello)",
+   "access": "WMS GetMap image/tiff float32, EPSG:32632: https://www502.regione.toscana.it/wmsraster/com.rt.wms.RTmap/wms?map=wmsmorfologia&service=WMS&version=1.3.0&request=GetMap&layers=rt_morfologia.iddsm2021.1m.rt&crs=EPSG:32632&format=image/tiff",
+   "settings": {
+    "dtm": true,
+    "medianHalfM": 25,
+    "note": "a surface model: a 25 m median removes the footbridge spike on the main straight; plus the COVERED footbridge entry"
+   },
+   "usedBy": [
+    "it-1914"
+   ],
+   "licence": "Regione Toscana open data (CC BY 4.0; confirm)"
+  },
+  "tinitaly": {
+   "label": "TINITALY 1.1 DEM 10 m (INGV, Tarquini et al. 2023, doi 10.13127/tinitaly/1.1), CC BY 4.0",
+   "access": "WCS 2.0.1: https://tinitaly.pi.ingv.it/TINItaly_1_1/wcs?service=WCS&version=2.0.1&request=GetCoverage&coverageId=TINItaly_1_1__tinitaly_dem&... (EPSG:32632, 10 m, float32)",
+   "settings": {
+    "dtm": true
+   },
+   "usedBy": [
+    "it-1922"
+   ],
+   "caveat": "a 10 m DEM does not resolve the ~5 m dip under the old banking: add it by hand (see it-1922)"
+  },
+  "glo30": {
+   "label": "Copernicus DEM GLO-30 (30 m SURFACE model, (c) DLR / Airbus, provided under COPERNICUS by the EU and ESA)",
+   "access": "AWS Open Data COGs, no key: https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_<N|S>yy_00_<E|W>xxx_00_DEM/Copernicus_DSM_COG_10_<...>_DEM.tif (HTTP range reads; reader: devtests/track-audit/latam-za/glo30.mjs)",
+   "settings": {
+    "dtm": false,
+    "note": "surface model: keep a median >= 50 m (or a low-percentile \"road\" envelope where stands / trees line the track, as for my-1999)"
+   },
+   "usedBy": [
+    "br-1940",
+    "my-1999",
+    "pt-2008"
+   ],
+   "caveat": "not published for Azerbaijan; useless where the circuit was built after 2015 (Jeddah) or beside tall stands (Yas)"
+  },
+  "usgs3dep": {
+   "label": "existing source (tools/build-tracks.mjs SOURCES.usgs3dep)",
+   "usedBy": [
+    "us-2022"
+   ]
+  },
+  "hrdem": {
+   "label": "NRCan HRDEM DTM (lidar, 1 m), Open Government Licence - Canada",
+   "access": "WCS GetCoverage of coverage dtm (EPSG:4326 1e-5 deg tiles); reader: devtests/track-audit/americas/net.mjs hrdem()",
+   "settings": {
+    "dtm": true
+   },
+   "usedBy": [
+    "ca-1978"
+   ],
+   "status": "auditor-only (minor finding, not re-measured in the synthesis)"
+  },
+  "bwdgm1": {
+   "label": "LGL-BW DGM1 (1 m lidar DTM), Datenlizenz Deutschland Namensnennung 2.0",
+   "access": "opengeodata.lgl-bw.de/data/dgm/dgm1_32_<E>_<N>_2_bw.zip (XYZ); NOT the INSPIRE WCS (16-bit integer metres)",
+   "settings": {
+    "dtm": true
+   },
+   "usedBy": [
+    "de-1932"
+   ],
+   "status": "auditor-only (minor)"
+  },
+  "rlpdgm1": {
+   "label": "LVermGeo RLP DGM1 (1 m lidar DTM), Datenlizenz Deutschland Namensnennung 2.0",
+   "access": "geobasis-rlp.de/data/dgm1/current/tif/dgm1_32_<E>_<N>_1_rp_2025.tif (Float32 LZW, predictor 2)",
+   "settings": {
+    "dtm": true,
+    "covered": "the three COVERED entries of de-1927"
+   },
+   "usedBy": [
+    "de-1927"
+   ],
+   "status": "auditor-only (minor)"
+  },
+  "ealidar": {
+   "label": "Environment Agency LIDAR Composite DTM 1 m, Open Government Licence",
+   "access": "WCS 2.0.1 GeoTIFF, EPSG:27700",
+   "settings": {
+    "dtm": true
+   },
+   "usedBy": [
+    "gb-1948 (optional)"
+   ],
+   "status": "auditor-only (minor)"
+  },
+  "bevals": {
+   "label": "BEV ALS DTM 1 m (Austria), CC BY 4.0",
+   "access": "COG https://data.bev.gv.at/download/ALS/DTM/20230915/ALS_DTM_CRS3035RES50000mN2650000E4650000.tif (EPSG:3035, range reads)",
+   "settings": {
+    "dtm": true
+   },
+   "usedBy": [
+    "at-1969 (optional)"
+   ],
+   "status": "auditor-only (minor)"
+  }
+ },
+ "circuits": {
+  "au-1953": {
+   "name": "Albert Park Circuit",
+   "auditFile": "devtests/track-audit/au-1953.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "layout",
+     "status": "verified",
+     "claim": "Two dataset stretches run across the grass ~22 m off the road; T11 built with a 10 m radius",
+     "evidence": "Game line vs OSM relation 280443 (cache + 5 member / road ways re-fetched from the OSM API): mean 1.6 m; s 2530-2686 max 22.6 m (s 2594), s 4099-4205 max 22.1 m (s 4113); everything else <= 8.4 m. Esri imagery re-rendered: both stretches visibly on grass. Built T11 minimum radius 10.3 m (12 m chord) at s 4091."
+    }
+   ],
+   "apply": {
+    "layoutPatches": [
+     {
+      "fromGameS": 2440,
+      "toGameS": 2780,
+      "fromLatLon": [
+       -37.8414812,
+       144.9718069
+      ],
+      "toLatLon": [
+       -37.8443426,
+       144.9706324
+      ],
+      "replaceWithOsmVertices": [
+       [
+        -37.8414811,
+        144.9717653
+       ],
+       [
+        -37.8415544,
+        144.9717607
+       ],
+       [
+        -37.8416443,
+        144.9717519
+       ],
+       [
+        -37.8417462,
+        144.9717326
+       ],
+       [
+        -37.841826,
+        144.9717105
+       ],
+       [
+        -37.8419452,
+        144.9716741
+       ],
+       [
+        -37.8420564,
+        144.9716318
+       ],
+       [
+        -37.8421636,
+        144.9715871
+       ],
+       [
+        -37.8423052,
+        144.9715266
+       ],
+       [
+        -37.8424139,
+        144.9714758
+       ],
+       [
+        -37.8424935,
+        144.9714357
+       ],
+       [
+        -37.8425748,
+        144.9713944
+       ],
+       [
+        -37.8426533,
+        144.9713542
+       ],
+       [
+        -37.842739,
+        144.9713129
+       ],
+       [
+        -37.8427969,
+        144.9712826
+       ],
+       [
+        -37.8429002,
+        144.971226
+       ],
+       [
+        -37.8430401,
+        144.9711535
+       ],
+       [
+        -37.8433352,
+        144.9710078
+       ],
+       [
+        -37.84365,
+        144.970854
+       ],
+       [
+        -37.8438488,
+        144.9707746
+       ],
+       [
+        -37.8441607,
+        144.9706708
+       ],
+       [
+        -37.844292,
+        144.970644
+       ]
+      ]
+     },
+     {
+      "fromGameS": 4030,
+      "toGameS": 4300,
+      "fromLatLon": [
+       -37.8525793,
+       144.9784521
+      ],
+      "toLatLon": [
+       -37.8538387,
+       144.9764091
+      ],
+      "replaceWithOsmVertices": [
+       [
+        -37.8526204,
+        144.978468
+       ],
+       [
+        -37.8527697,
+        144.9785149
+       ],
+       [
+        -37.8529031,
+        144.9785564
+       ],
+       [
+        -37.8531462,
+        144.9786056
+       ],
+       [
+        -37.8533681,
+        144.9786557
+       ],
+       [
+        -37.8535501,
+        144.9776749
+       ],
+       [
+        -37.8536137,
+        144.9773215
+       ],
+       [
+        -37.8536761,
+        144.9770152
+       ],
+       [
+        -37.8537084,
+        144.9768607
+       ],
+       [
+        -37.853739,
+        144.976725
+       ],
+       [
+        -37.8537787,
+        144.9765678
+       ],
+       [
+        -37.8538081,
+        144.976451
+       ]
+      ]
+     }
+    ],
+    "layoutNote": "round the T11 junction vertex with an arc that stays on the paved junction"
+   },
+   "optional": {
+    "START_AT": [
+     -37.8500562,
+     144.9689843
+    ],
+    "START_AT_note": "OSM node 9123374386 (raceway=start-finish) 45 m before the game line; painted line on imagery (auditor)",
+    "flatMaxRangeM": 2.6
+   },
+   "breaks": [
+    "points change -> scenery-data.js alignment near T8 / T11 (re-run build-scenery), recalibrate"
+   ],
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": -45,
+     "offCentrelineM": 1.9
+    }
+   }
+  },
+  "pt-1972": {
+   "name": "Autódromo do Estoril",
+   "auditFile": "devtests/track-audit/pt-1972.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "layout",
+     "status": "verified",
+     "claim": "The geometry is the post-2000 layout, labelled and stretched as the 1972-93 one",
+     "evidence": "Game line vs current OSM raceway ways: mean 2.3 m, max 6.6 m (no stretch off the modern road); geodesic length of the dataset line 4166 m, built 4350 m (+4.4 %). en.wikipedia Circuito do Estoril: original 4.349 km, 4.360 km with the 1994 chicane, \"redesign of the parabolica ... reduced to 4.182 km ... in 2000\"."
+    }
+   ],
+   "apply": {
+    "LENGTH_OVERRIDE_M": "geometric (no rescale, ~4166 m) or 4163 (Tanque variant)",
+    "nameNote": "label it the current (2000+) layout; F1 never raced it (F1 1984-96 used the old Parabolica)"
+   },
+   "optional": {
+    "addGanchoChicane": {
+     "osmWays": [
+      1301627165,
+      363138870,
+      363138867
+     ],
+     "replaces": [
+      38160804
+     ],
+     "resultingLengthM": 4177,
+     "officialKm": 4.182
+    },
+    "elevation": "GLO-30 profile (range 22.6 m vs game 30.6 m; auditor-only, minor)",
+    "pitLaneReal": {
+     "side": -1,
+     "entryLL": [
+      38.753124,
+      -9.390716
+     ],
+     "exitLL": [
+      38.746388,
+      -9.396228
+     ],
+     "note": "entry/exit LL need a new track.js input (today the lane is synthesised beside the straight)"
+    }
+   },
+   "doNotApply": [
+    {
+     "what": "redraw the pre-2000 Parabolica",
+     "why": "no OSM geometry survives; DGT 1995 orthophotos need an account"
+    }
+   ],
+   "breaks": [
+    "every distance shrinks 4.4 % -> recalibrate; scenery-data.js is in lat/lon-derived metres of the same geo: rebuild scenery with the new geo scale"
+   ]
+  },
+  "it-1953": {
+   "name": "Autodromo Enzo e Dino Ferrari",
+   "auditFile": "devtests/track-audit/it-1953.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "banking",
+     "status": "verified (spot check)",
+     "claim": "T7 Tosa over-banked in the game",
+     "evidence": "Own RER2022 cross-sections (9 stations): 2.6 deg (auditor 2.4), game 4.7 deg."
+    },
+    {
+     "aspect": "elevation",
+     "status": "verified",
+     "claim": "Profile shifted and smeared; Acque Minerali too shallow, Rivazza too steep",
+     "evidence": "Re-sampled the RER2022 0.5 m DTM myself (491 new points, 5 POST requests): range 34.3 m vs game 35.2, RMS 3.90 m; game +9.7 % at s 2169 where the lidar has -0.3 %, Rivazza -10.7 % vs lidar -6.9 %, Piratella -> Acque Minerali lidar 32.3 -> 12.0 m (game 32.4 -> 18.2)."
+    }
+   ],
+   "apply": {
+    "ELEV_SOURCE": "er-dtmrer2022",
+    "BANKED": [
+     {
+      "name": "T6",
+      "deg": 0.8,
+      "from": [
+       44.3388621,
+       11.7044979
+      ],
+      "to": [
+       44.3382567,
+       11.7041738
+      ],
+      "note": "measured cross-fall 0.8 deg (inside lower), game 2.9 deg; lap s 1379-1459"
+     },
+     {
+      "name": "T7",
+      "deg": 2.4,
+      "from": [
+       44.337067,
+       11.7022103
+      ],
+      "to": [
+       44.3365095,
+       11.7023853
+      ],
+      "note": "measured cross-fall 2.4 deg (inside lower), game 5 deg; lap s 1664-1744"
+     },
+     {
+      "name": "T17",
+      "deg": 1.2,
+      "from": [
+       44.3438417,
+       11.7248089
+      ],
+      "to": [
+       44.3444122,
+       11.7250105
+      ],
+      "note": "measured cross-fall 1.2 deg (inside lower), game 3.5 deg; lap s 4104-4184"
+     },
+     {
+      "name": "T18",
+      "deg": 0.8,
+      "from": [
+       44.344914,
+       11.724681
+      ],
+      "to": [
+       44.3449402,
+       11.7237756
+      ],
+      "note": "measured cross-fall 0.8 deg (inside lower), game 3.3 deg; lap s 4245-4325"
+     }
+    ]
+   },
+   "breaks": [
+    "elev, banking -> recalibrate"
+   ],
+   "positionCheck": {
+    "apply.BANKED": [
+     {
+      "name": "T6",
+      "from": {
+       "sFromLineM": 1379,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 1459,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T7",
+      "from": {
+       "sFromLineM": 1664,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 1744,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T17",
+      "from": {
+       "sFromLineM": -804,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -724,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T18",
+      "from": {
+       "sFromLineM": -662,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -582,
+       "offCentrelineM": 0
+      }
+     }
+    ]
+   }
+  },
+  "mx-1962": {
+   "name": "Autódromo Hermanos Rodríguez",
+   "auditFile": "devtests/track-audit/mx-1962.json",
+   "verdict": "minor issues",
+   "optional": {
+    "START_AT": [
+     19.4061212,
+     -99.0936552
+    ],
+    "START_AT_note": "OSM \"Start Line\" node 13826403209, 73 m after the game line",
+    "sceneryOverpasses": [
+     {
+      "s": 3979.4,
+      "latlon": [
+       19.4054537,
+       -99.0968444
+      ],
+      "osmWay": 54241135,
+      "kind": "footway"
+     },
+     {
+      "s": 855.7,
+      "latlon": [
+       19.4052351,
+       -99.0862895
+      ],
+      "osmWay": 685930807,
+      "kind": "unclassified",
+      "name": "Calle 63"
+     },
+     {
+      "s": 1505.3,
+      "latlon": [
+       19.4019821,
+       -99.0837425
+      ],
+      "osmWay": 736211970,
+      "kind": "footway"
+     },
+     {
+      "s": 443.8,
+      "latlon": [
+       19.4056858,
+       -99.0901754
+      ],
+      "osmWay": 736211972,
+      "kind": "footway"
+     },
+     {
+      "s": 833.9,
+      "latlon": [
+       19.4052614,
+       -99.0864775
+      ],
+      "osmWay": 736211974,
+      "kind": "footway"
+     },
+     {
+      "s": 1810.7,
+      "latlon": [
+       19.3996254,
+       -99.0852591
+      ],
+      "osmWay": 736211978,
+      "kind": "footway"
+     }
+    ],
+    "pitLaneReal": {
+     "note": "real pit lane from OSM; js/track.js keeps the lane within PIT_REACH = 250 m of the line, so these ends need a per-track reach",
+     "side": "right",
+     "limitKmh": 80,
+     "osmWays": [
+      638504647,
+      772763791
+     ],
+     "lengthM": 795.2,
+     "entry": {
+      "s": 3990.8,
+      "sRelLine": -308.2,
+      "latlon": [
+       19.4056272,
+       -99.0968145
+      ],
+      "offTrackM": 1.9
+     },
+     "exit": {
+      "s": 506.3,
+      "sRelLine": 506.3,
+      "latlon": [
+       19.4056207,
+       -99.0895581
+      ],
+      "offTrackM": 0.2
+     }
+    }
+   },
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": 73,
+     "offCentrelineM": 1.7
+    }
+   }
+  },
+  "pt-2008": {
+   "name": "Autódromo Internacional do Algarve",
+   "auditFile": "devtests/track-audit/pt-2008.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "elevation",
+     "status": "verified (surface models only)",
+     "claim": "Crests about halved; steepest fall 7.9 % vs published 12 %",
+     "evidence": "Own bilinear re-sample of the cached GLO-30 grid (10 m, 25 m median): range 27.6 vs game 24.1 m, steepest fall -10.2 % (100 m) vs game -7.9 %, T9-T11 dip s 2171-2351 -8.4 % vs game -1.9 %; own OpenTopoData SRTM 30 m request (99 points): range 34.8 m, -11.0 % / +12.9 %. de.wikipedia: \"Die steilste Abfahrt hat 12 % im Maximum, ... bis zu 6,2 % bergauf\". No lidar reachable (DGT needs an account)."
+    }
+   ],
+   "apply": {
+    "ELEV_SOURCE": "glo30",
+    "settings": {
+     "medianHalfM": 25,
+     "gaussSigmaM": 20
+    },
+    "note": "check after the build: max fall ~10-12 %, max rise must not exceed ~7 % (published 6.2 %); clamp or smooth climbs if it does"
+   },
+   "optional": {
+    "staticProfile": "devtests/track-audit/pt-2008.json proposedCorrections.elevation.stations",
+    "pitLaneReal": {
+     "side": -1,
+     "limitKmh": 80,
+     "entryLL": [
+      37.227374,
+      -8.629111
+     ],
+     "exitLL": [
+      37.234861,
+      -8.631817
+     ]
+    },
+    "lidarLater": "DGT MDT 2 m (2024) with a DGT account"
+   },
+   "breaks": [
+    "elev -> recalibrate"
+   ]
+  },
+  "br-1977": {
+   "name": "Autódromo Internacional Nelson Piquet",
+   "auditFile": "devtests/track-audit/br-1977.json",
+   "verdict": "minor issues",
+   "optional": {
+    "FLAT_TRACKS": "add br-1977",
+    "note": "the only relief is the 2007 arena over the old Curva Norte in the 2011-15 radar data; SRTM 2000 is flat"
+   }
+  },
+  "it-1914": {
+   "name": "Autodromo Internazionale del Mugello",
+   "auditFile": "devtests/track-audit/it-1914.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "banking",
+     "status": "verified (spot check)",
+     "claim": "Arrabbiata 1 cambered ~5 deg",
+     "evidence": "Own Toscana DSM cross-sections (11 stations): mean 5.2 deg (auditor 5.1), game 2.1 deg."
+    },
+    {
+     "aspect": "elevation",
+     "status": "verified",
+     "claim": "San Donato taken downhill in the game, uphill in reality",
+     "evidence": "Own read of the cached Toscana DSM 1 m tiles (8 tiles, UTM 32N, 25 m median): s 450 -> 900 lidar +12.9 m (21.7 -> 34.6) vs game -3.5 m; range 42.7 vs 37.2 m, RMS 4.9 m, 17 stretches > 2 pp. it.wikipedia: main straight \"in salita\"."
+    }
+   ],
+   "apply": {
+    "ELEV_SOURCE": "toscana-dsm2021",
+    "COVERED": [
+     {
+      "name": "main-straight footbridge",
+      "from": [
+       43.997901,
+       11.37166
+      ],
+      "to": [
+       43.998082,
+       11.371773
+      ],
+      "pad": 5,
+      "note": "only with a surface model"
+     }
+    ],
+    "BANKED": [
+     {
+      "name": "T4 Curva Materassi",
+      "deg": 1.1,
+      "from": [
+       43.9977623,
+       11.3749903
+      ],
+      "to": [
+       43.9971817,
+       11.3748715
+      ],
+      "note": "measured cross-fall 1.1 deg (inside lower), game 3.1 deg; lap s 1470-1539"
+     },
+     {
+      "name": "T8 Curva dell'Arrabbiata 1",
+      "deg": 5.1,
+      "from": [
+       43.9921731,
+       11.3694135
+      ],
+      "to": [
+       43.9917035,
+       11.3672609
+      ],
+      "note": "measured cross-fall 5.1 deg (inside lower), game 2.1 deg; lap s 2342-2548"
+     }
+    ]
+   },
+   "optional": {
+    "flatten": [
+     {
+      "name": "T2 Curva Luco",
+      "deg": 0,
+      "from": [
+       44.001701,
+       11.3760825
+      ],
+      "to": [
+       44.00118,
+       11.376298
+      ],
+      "note": "measured cross-fall -0.1 deg (inside lower), game 3.8 deg; lap s 933-998"
+     },
+     {
+      "name": "T7 Curva Savelli",
+      "deg": 0,
+      "from": [
+       43.994086,
+       11.3713758
+      ],
+      "to": [
+       43.9935292,
+       11.3700865
+      ],
+      "note": "measured cross-fall -0.2 deg (inside lower), game 2.4 deg; lap s 2052-2182"
+     },
+     {
+      "name": "T10 Curva Scarperia",
+      "deg": 0,
+      "from": [
+       43.9953182,
+       11.3663986
+      ],
+      "to": [
+       43.995721,
+       11.367078
+      ],
+      "note": "measured cross-fall 0 deg (inside lower), game 3.6 deg; lap s 3015-3093"
+     }
+    ],
+    "flattenNote": "deg 0 is skipped by js/track.js applyBankOverrides: use the derived-bank cap, or support deg 0"
+   },
+   "breaks": [
+    "elev, banking -> recalibrate"
+   ],
+   "positionCheck": {
+    "apply.BANKED": [
+     {
+      "name": "T4 Curva Materassi",
+      "from": {
+       "sFromLineM": 1470,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 1539,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T8 Curva dell'Arrabbiata 1",
+      "from": {
+       "sFromLineM": 2342,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 2548,
+       "offCentrelineM": 0
+      }
+     }
+    ],
+    "apply.COVERED": [
+     {
+      "name": "main-straight footbridge",
+      "from": {
+       "sFromLineM": 38,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 60,
+       "offCentrelineM": 0
+      }
+     }
+    ]
+   }
+  },
+  "br-1940": {
+   "name": "Autódromo José Carlos Pace - Interlagos",
+   "auditFile": "devtests/track-audit/br-1940.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "elevation",
+     "status": "verified",
+     "claim": "S do Senna too gentle, Descida do Lago flat, invented Bico de Pato hill, start straight falls",
+     "evidence": "Own GLO-30 re-sample (25 m median): S do Senna -11.4 % (100 m) vs game -8.8 %; Descida do Lago s 1389-1629 -4.9 % vs game +0.4 %; Bico de Pato s 2518-2628 +4.6 % vs game +10.6 %; start straight s 4197-4297 +5.2 % vs game -0.7 %; RMS 4.45 m. Own OpenTopoData SRTM 30 m request (98 points) shows the same pattern (start straight +5.5 %, Descida do Lago -4.1 %). pt.wikipedia range 43 m (GLO-30 43.6 m)."
+    }
+   ],
+   "apply": {
+    "ELEV_SOURCE": "glo30",
+    "settings": {
+     "medianHalfM": 25,
+     "gaussSigmaM": 10
+    }
+   },
+   "optional": {
+    "staticProfile": "devtests/track-audit/br-1940.json proposedCorrections.elevationProfile (GeoSampa 1 m contours, bare earth; best data)",
+    "pitLaneReal": {
+     "note": "real pit lane from OSM; js/track.js keeps the lane within PIT_REACH = 250 m of the line, so these ends need a per-track reach",
+     "side": "left",
+     "limitKmh": 80,
+     "osmWays": [
+      33779109
+     ],
+     "lengthM": 1372.9,
+     "entry": {
+      "s": 3847.2,
+      "sRelLine": -460,
+      "latlon": [
+       -23.6998857,
+       -46.7003703
+      ],
+      "offTrackM": 7.1
+     },
+     "exit": {
+      "s": 982.6,
+      "sRelLine": 982.6,
+      "latlon": [
+       -23.7031047,
+       -46.6949777
+      ],
+      "offTrackM": 3.3
+     }
+    },
+    "sceneryOverpasses": [
+     {
+      "s": 260.4,
+      "latlon": [
+       -23.7060064,
+       -46.6992649
+      ],
+      "osmWay": 189535484,
+      "kind": "footway"
+     }
+    ]
+   },
+   "breaks": [
+    "elev -> recalibrate"
+   ]
+  },
+  "it-1922": {
+   "name": "Autodromo Nazionale Monza",
+   "auditFile": "devtests/track-audit/it-1922.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "elevation",
+     "status": "verified",
+     "claim": "Invented hills (game range 22.4 m vs ~12 m)",
+     "evidence": "Own read of the cached TINITALY 10 m tile (UTM 32N, own projection): range 12.0 m vs game 22.4 m, RMS 3.90 m, 16 stretches > 2 pp; game -5.5 % at s 2400 and +4.7 % at s 2660 where TINITALY has -0.9 / -0.2 %. formula1.com 12.8 m."
+    },
+    {
+     "aspect": "gradient",
+     "status": "partly verified",
+     "claim": "No dip under the old banking; one long invented descent Lesmo 2 -> Ascari",
+     "evidence": "The invented 11.6 m descent (game s 2900-3600) is confirmed: TINITALY is flat within 1.2 m there. The ~5 m dip itself is NOT resolved by the 10 m DEM; it rests on the F1 timing car heights and formula1.com (\"the significant dip ... between the second Lesmo and Ascari\"): plausible, add by hand."
+    }
+   ],
+   "apply": {
+    "ELEV_SOURCE": "tinitaly",
+    "manualDip": {
+     "name": "underpass under the old banking (OSM bridge 34404729 over car way 1443867793)",
+     "centreLL": [
+      45.6247798,
+      9.2892658
+     ],
+     "depthM": 5,
+     "lengthM": 600,
+     "note": "from the timing heights 192.7 / 187.6 / 190.9 m at s 3005 / 3300 / 3595 (-1.7 % / +1.2 %)"
+    }
+   },
+   "optional": {
+    "staticProfile": "devtests/track-audit/it-1922.json proposedCorrections.elevation.profile10m (timing heights + TINITALY; FOM data: licence question)"
+   },
+   "breaks": [
+    "elev -> recalibrate"
+   ]
+  },
+  "ar-1952": {
+   "name": "Autódromo Oscar y Juan Gálvez",
+   "auditFile": "devtests/track-audit/ar-1952.json",
+   "verdict": "minor issues",
+   "optional": {
+    "LENGTH_OVERRIDE_M": 4259,
+    "START_AT": [
+     -34.6945638,
+     -58.4616652
+    ],
+    "START_AT_note": "OSM node 9311100671 (raceway=start-finish) 68 m before",
+    "pitLaneReal": {
+     "note": "real pit lane from OSM; js/track.js keeps the lane within PIT_REACH = 250 m of the line, so these ends need a per-track reach",
+     "side": "right",
+     "limitKmh": null,
+     "osmWays": [
+      48747026
+     ],
+     "lengthM": 645.1,
+     "entry": {
+      "s": 3864,
+      "sRelLine": -460.9,
+      "latlon": [
+       -34.6972177,
+       -58.4638335
+      ],
+      "offTrackM": 1.1
+     },
+     "exit": {
+      "s": 208.9,
+      "sRelLine": 208.9,
+      "latlon": [
+       -34.6924833,
+       -58.4599772
+      ],
+      "offTrackM": 0.2
+     }
+    }
+   },
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": -69,
+     "offCentrelineM": 0.4
+    }
+   }
+  },
+  "bh-2002": {
+   "name": "Bahrain International Circuit",
+   "auditFile": "devtests/track-audit/bh-2002.json",
+   "verdict": "minor issues",
+   "verification": [
+    {
+     "aspect": "start",
+     "status": "verified (minor)",
+     "claim": "Real grid ~90 m further along",
+     "evidence": "Esri imagery re-rendered: the start gantry spans the track at s ~+95; grid marks run back from there past the game line; nothing marks the game line."
+    }
+   ],
+   "optional": {
+    "START_AT": [
+     26.032575,
+     50.510498
+    ],
+    "elevation": "GLO-30 (corr 0.99 with timing heights) removes the 5 m grandstand hump on the main straight"
+   },
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": 89,
+     "offCentrelineM": 6.6
+    }
+   }
+  },
+  "az-2016": {
+   "name": "Baku City Circuit",
+   "auditFile": "devtests/track-audit/az-2016.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "other",
+     "status": "verified",
+     "claim": "Castle section 14 m wide in the game, 7.6 m real",
+     "evidence": "en.wikipedia Baku City Circuit: \"the track has a narrow 7.6 m (25 ft) uphill section\". Built samples s 2550-2850: road 14.0 m wide, walls 12 m from the centreline on both sides."
+    }
+   ],
+   "apply": {
+    "widthOverrides": [
+     {
+      "name": "castle section T8-T12",
+      "from": [
+       40.368589,
+       49.837431
+      ],
+      "to": [
+       40.369393,
+       49.835656
+      ],
+      "halfW": 3.8,
+      "note": "narrowest 7.6 m (en.wikipedia); ends at game T8 apex / T12 exit; exact per-corner widths not published"
+     }
+    ],
+    "widthNote": "needs js/track.js support (per-stretch halfW cap, walls follow); HALF_WIDTH_MIN 3.5 allows 3.8"
+   },
+   "optional": {
+    "elevationScaleToRangeM": 26.8,
+    "elevationNote": "GLO-90 range 34.4 m includes old-town buildings; formula1.com 26.8 m (auditor-only)",
+    "START_AT": [
+     40.3725853,
+     49.8529141
+    ],
+    "pitLaneReal": {
+     "side": 1,
+     "limitKmh": 80,
+     "entryLL": [
+      40.371524,
+      49.849646
+     ],
+     "exitLL": [
+      40.373934,
+      49.854913
+     ]
+    }
+   },
+   "breaks": [
+    "narrower road -> recalibrate; walls / scenery clearance in the castle section"
+   ],
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": -31,
+     "offCentrelineM": 0.4
+    }
+   }
+  },
+  "es-1991": {
+   "name": "Circuit de Barcelona-Catalunya",
+   "auditFile": "devtests/track-audit/es-1991.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "elevation",
+     "status": "verified",
+     "claim": "Invented crest at T3 and dip into T4",
+     "evidence": "Own read of the cached IGN MDT05 GeoTIFF (own TIFF reader, bilinear, 10 m on the built centreline): range 29.9 m vs game 34.7 m, RMS 2.73 m; s 981-1221 game -3.5 % vs lidar +3.2 %; game +8.5 % at s 891 vs lidar +4.1 %; 12 stretches > 2 pp."
+    }
+   ],
+   "apply": {
+    "ELEV_SOURCE": "ignes-mdt05",
+    "bbox": [
+     41.56148,
+     2.24852,
+     41.57745,
+     2.26728
+    ]
+   },
+   "optional": {
+    "fallbackProfile": "devtests/track-audit/es-1991.json proposedCorrections.elevationProfile10m",
+    "derivedBankMaxDeg": 3
+   },
+   "layoutNote": "one layout (2023+, no final chicane) for every season; 2010-2022 raced with the RACC chicane (OSM relation 2049529): a per-season layout is not supported today",
+   "breaks": [
+    "elev -> recalibrate"
+   ]
+  },
+  "mc-1929": {
+   "name": "Circuit de Monaco",
+   "auditFile": "devtests/track-audit/mc-1929.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "tunnel",
+     "status": "verified",
+     "claim": "The 360 m tunnel under the Fairmont is open road in the game",
+     "evidence": "Fresh OSM API: Boulevard Louis II way 4230891 (tunnel=yes, layer -1) runs along the lap from s 1521 to s 1882 (all 26 nodes within 7.9 m of the centreline); the Portier raceway way 1470365907 (tunnel=yes, layer -1) at s 1418-1436 under Boulevard du Larvotto (bridge 92627405)."
+    }
+   ],
+   "apply": {
+    "tunnels": [
+     {
+      "name": "Tunnel",
+      "kind": "tunnel",
+      "from": [
+       43.740362,
+       7.430326
+      ],
+      "to": [
+       43.737778,
+       7.427973
+      ],
+      "openSide": 1,
+      "source": "OSM ways 4230891 + 1230247123 (already in js/tunnels.js prep data)"
+     },
+     {
+      "name": "Portier",
+      "kind": "underpass",
+      "from": [
+       43.741073,
+       7.430032
+      ],
+      "to": [
+       43.741089,
+       7.430253
+      ],
+      "source": "OSM raceway way 1470365907 (tunnel=yes) + bridge way 92627405 over it"
+     }
+    ],
+    "tunnelsNote": "already the prep data of js/tunnels.js (v6.2); COVERED for the tunnel already exists in build-tracks",
+    "derivedBankMaxDeg": 2
+   },
+   "optional": {
+    "pitLaneReal": {
+     "entryLL": [
+      43.7323832,
+      7.4229757
+     ],
+     "exitLL": [
+      43.7370216,
+      7.4221175
+     ],
+     "note": "enters between La Rascasse and Anthony Noghes, exit lane rejoins after Sainte Devote; needs js/track.js support"
+    },
+    "elevNote": "IGN lidar keeps Beau Rivage at 9.2 % (lidar 10 %); optional DTM median half 1"
+   },
+   "notTrackData": "Fairmont hairpin: centreline radius 9.6-9.8 m vs OSM 8.9 m is correct; \"cannot take it at 20 km/h\" is js/car.js steering lock (min radius 10 m), v6.2"
+  },
+  "fr-1960": {
+   "name": "Circuit de Nevers Magny-Cours",
+   "auditFile": "devtests/track-audit/fr-1960.json",
+   "verdict": "minor issues",
+   "optional": {
+    "pitLaneReal": {
+     "entryLL": [
+      46.862807,
+      3.1607953
+     ],
+     "exitLL": [
+      46.8676721,
+      3.1656763
+     ]
+    },
+    "derivedBankMaxDeg": 3
+   },
+   "notes": "IGN lidar profile matches (range 30.3 vs 29.95 m); no F1 race 2010-2026; real length 4.411 km vs OSM 4458 m geometry (rescale 0.994)"
+  },
+  "be-1925": {
+   "name": "Circuit de Spa-Francorchamps",
+   "auditFile": "devtests/track-audit/be-1925.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "gradient",
+     "status": "verified",
+     "claim": "GLO-90 profile flattens Eau Rouge / Raidillon and moves the steep climb up the Kemmel straight",
+     "evidence": "Re-sampled the Wallonia MNT 2021-22 lidar myself (new points every 20 m on the built centreline, 350 identify requests): Raidillon +14.8 % over 50 m / +13.9 % over 100 m at s 1021 where the game has +3.0 %; the game's steepest climb +12.2 % (50 m) is at s 1921 on the Kemmel straight where the lidar has +4.6 %. fr.wikipedia \"côte très raide à 17 %\", f1.com \"maximum gradient of 15%\"."
+    },
+    {
+     "aspect": "elevation",
+     "status": "verified",
+     "claim": "Tree-canopy hump Paul Frere -> Bus Stop, RMS ~10 m",
+     "evidence": "Same re-sample: range lidar 102.3 m vs game 99.0 m (en.wikipedia 102.2 m), RMS 9.8 m, 25 stretches with 100 m grades > 2 pp apart, worst in s 4900-6700 (game +8.5 / +11.2 / +11.0 % where the lidar has +0.5..+3.5 %)."
+    },
+    {
+     "aspect": "bridge",
+     "status": "verified",
+     "claim": "Phantom deck 686 m after the line (OSM 1353164215)",
+     "evidence": "Fresh OSM API query of the deck box: outline 1353164215 (man_made=bridge) has only way 1353164214 (layer -1) under it and nothing over the lap; js/scenery.js builds it over the road (my decks.js: 2 m of centreline inside the polygon, s 688)."
+    }
+   ],
+   "apply": {
+    "ELEV_SOURCE": "walmnt",
+    "PUBLISHED": [
+     102.2,
+     "en.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps \"102.2 m\"; = Wallonia lidar range of the lap"
+    ],
+    "expectedAfter": {
+     "rangeM": 102,
+     "raidillonMax50mPct": 14.3,
+     "raidillonMax20mPct": 14.5,
+     "kemmelPct": "4.3-4.8",
+     "paulFrereToBlanchimontPct": "-1.0..+3.3",
+     "rmsVsLidarM": 0.08,
+     "note": "sim.mjs be-1925 (pipeline + js/track.js smoothing)"
+    },
+    "sceneryDropBridges": [
+     1353164215
+    ]
+   },
+   "optional": {
+    "BANKED": [
+     {
+      "name": "Kemmel",
+      "deg": 4,
+      "from": [
+       50.4387159,
+       5.9742126
+      ],
+      "to": [
+       50.4378817,
+       5.9747185
+      ],
+      "measured": {
+       "lidarMeanDeg": 3.8,
+       "lidarMaxDeg": 4.3,
+       "gameMeanDeg": 0.7,
+       "gameMaxDeg": 1.1
+      },
+      "kind": "real camber missing / too small in the game",
+      "side": "inside-lower (radius 475 m)"
+     },
+     {
+      "name": "Blanchimont",
+      "deg": 4,
+      "from": [
+       50.4355115,
+       5.9673803
+      ],
+      "to": [
+       50.4373789,
+       5.9678398
+      ],
+      "measured": {
+       "lidarMeanDeg": -3.8,
+       "lidarMaxDeg": -4.2,
+       "gameMeanDeg": -1,
+       "gameMaxDeg": -2.4
+      },
+      "kind": "real camber missing / too small in the game",
+      "side": "inside-lower (radius 274 m)"
+     }
+    ],
+    "START_AT": [
+     50.4440643,
+     5.9651626
+    ],
+    "START_AT_note": "OSM node 258602622 (relation 284560 start), 23 m before the game line; cosmetic"
+   },
+   "breaks": [
+    "tracks-data.js elev of be-1925 -> rerun devtests/seasons-calib/calibrate.mjs"
+   ],
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": -23,
+     "offCentrelineM": 1.5
+    },
+    "optional.BANKED": [
+     {
+      "name": "Kemmel",
+      "from": {
+       "sFromLineM": 1423,
+       "offCentrelineM": 2.1
+      },
+      "to": {
+       "sFromLineM": 1522,
+       "offCentrelineM": 0.6
+      }
+     },
+     {
+      "name": "Blanchimont",
+      "from": {
+       "sFromLineM": -1096,
+       "offCentrelineM": 1
+      },
+      "to": {
+       "sFromLineM": -875,
+       "offCentrelineM": 0.6
+      }
+     }
+    ]
+   }
+  },
+  "ca-1978": {
+   "name": "Circuit Gilles-Villeneuve",
+   "auditFile": "devtests/track-audit/ca-1978.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "bridge",
+     "status": "verified",
+     "claim": "Bridge underpass before T8 missing",
+     "evidence": "Fresh OSM API: five bridge=yes layer 1 ways cross the lap between s 2114 and 2134 (135527655, 1427698141 Avenue Pierre-Dupuy, 814256358, 413000974, 164863796 Pont des Iles); en.wikipedia: \"Pont de la Concorde corner (Turn 8) is after the bridge underpass\"."
+    }
+   ],
+   "apply": {
+    "sceneryOverpasses": [
+     {
+      "osmWay": 135527655,
+      "name": null,
+      "kind": "unclassified",
+      "s": 2113.7,
+      "at": [
+       45.507838,
+       -73.529457
+      ]
+     },
+     {
+      "osmWay": 164863796,
+      "name": "Pont des Iles",
+      "kind": "cycleway",
+      "s": 2135.2,
+      "at": [
+       45.508026,
+       -73.529391
+      ]
+     },
+     {
+      "osmWay": 413000974,
+      "name": null,
+      "kind": "unclassified",
+      "s": 2130.4,
+      "at": [
+       45.507984,
+       -73.529406
+      ]
+     },
+     {
+      "osmWay": 814256358,
+      "name": null,
+      "kind": "footway",
+      "s": 2126.3,
+      "at": [
+       45.507948,
+       -73.529418
+      ]
+     },
+     {
+      "osmWay": 1427698141,
+      "name": "Avenue Pierre-Dupuy",
+      "kind": "tertiary",
+      "s": 2121.4,
+      "at": [
+       45.507905,
+       -73.529434
+      ]
+     }
+    ],
+    "underpassDeck": {
+     "sFrom": 2111.7,
+     "sTo": 2137.2,
+     "clearanceM": 6.5
+    }
+   },
+   "optional": {
+    "ELEV_SOURCE": "hrdem",
+    "FLAT_TRACKS": "remove ca-1978",
+    "elevNote": "minor, auditor-only: GLO-90 shape uncorrelated with the ground (r 0.05); HRDEM range 5.2 m",
+    "derivedBankScale": 0.3
+   }
+  },
+  "us-2012": {
+   "name": "Circuit of the Americas",
+   "auditFile": "devtests/track-audit/us-2012.json",
+   "verdict": "minor issues",
+   "optional": {
+    "START_AT": [
+     30.131893,
+     -97.6398291
+    ],
+    "sceneryOverpasses": [
+     {
+      "osmWay": 191582144,
+      "kind": "footbridge",
+      "s": 815.2,
+      "at": [
+       30.133442,
+       -97.635374
+      ]
+     },
+     {
+      "osmWay": 1285657865,
+      "kind": "footbridge",
+      "s": 1843.3,
+      "at": [
+       30.136495,
+       -97.627199
+      ]
+     },
+     {
+      "osmWay": 191582102,
+      "kind": "footbridge",
+      "s": 4176.2,
+      "at": [
+       30.134969,
+       -97.636817
+      ]
+     }
+    ],
+    "pitLaneReal": {
+     "side": "left",
+     "limitKmh": 80,
+     "realEntry": [
+      30.1353383,
+      -97.6413928
+     ],
+     "realExit": [
+      30.1300873,
+      -97.6370612
+     ]
+    }
+   },
+   "notes": "USGS lidar profile good (rms 0.15 m); only T1 has a real 4.3 deg camber",
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": -23,
+     "offCentrelineM": 1.1
+    }
+   }
+  },
+  "fr-1969": {
+   "name": "Circuit Paul Ricard",
+   "auditFile": "devtests/track-audit/fr-1969.json",
+   "verdict": "minor issues",
+   "optional": {
+    "COVERED": [
+     {
+      "name": "bridge over the service underpass (Virage du Pont)",
+      "from": [
+       43.2500184,
+       5.7951677
+      ],
+      "to": [
+       43.2503472,
+       5.7945838
+      ],
+      "pad": 10
+     }
+    ],
+    "layoutPatch": {
+     "replaceBetween": [
+      [
+       43.254156,
+       5.791693
+      ],
+      [
+       43.253813,
+       5.792959
+      ]
+     ],
+     "withOsmWay": 229454180,
+     "note": "Mistral chicane entry bulge"
+    },
+    "START_AT_candidate": {
+     "candidate": [
+      43.251187,
+      5.7930593
+     ],
+     "status": "unverified (OSM only)"
+    },
+    "pitLaneReal": {
+     "entryLL": [
+      43.2506981,
+      5.7968856
+     ],
+     "exitLL": [
+      43.25385,
+      5.788233
+     ]
+    }
+   },
+   "notes": "Mistral chicane entry bulge missing (dataset 5818 m, stretched 0.35 %); START_AT candidate 152 m earlier is OSM-only: check the FIA map first",
+   "positionCheck": {
+    "optional.COVERED": [
+     {
+      "name": "bridge over the service underpass (Virage du Pont)",
+      "from": {
+       "sFromLineM": -368,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -308,
+       "offCentrelineM": 0
+      }
+     }
+    ]
+   }
+  },
+  "nl-1948": {
+   "name": "Circuit Zandvoort",
+   "auditFile": "devtests/track-audit/nl-1948.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "banking",
+     "status": "verified (spot check)",
+     "claim": "Tarzanbocht camber 6.5 deg vs 3.3 deg in the game",
+     "evidence": "Own AHN4 cross-sections (9 stations, +-4 m, 1 m apart, 1 request): mean 6.5 deg, all planar (residual <= 0.07 m); game 3.4 deg. Confirms the auditor 6.4 deg and its method."
+    },
+    {
+     "aspect": "bridge",
+     "status": "verified",
+     "claim": "Phantom deck over the main straight 160 m before the line (OSM 765476850)",
+     "evidence": "Fresh OSM API: outline 765476850 has service tunnel 186321842 (layer -1, tunnel=yes) under it; nothing over the lap. Built over the road at s 4097-4105."
+    },
+    {
+     "aspect": "pit",
+     "status": "verified (minor)",
+     "claim": "Pit limit 60 km/h before 2025",
+     "evidence": "en.wikipedia 2025 Dutch Grand Prix, \"Circuit change\": \"The pit lane speed limit was increased from 60 km/h to 80 km/h\"."
+    }
+   ],
+   "apply": {
+    "sceneryDropBridges": [
+     765476850
+    ],
+    "BANKED_keep": "T3 19 deg and T14 18 deg stay (published; the lidar shows a progressive cross-section, ~5 deg inside to 18-23 deg outside)",
+    "BANKED_add": [
+     {
+      "name": "Tarzanbocht",
+      "deg": 6.5,
+      "from": [
+       52.3916242,
+       4.5426454
+      ],
+      "to": [
+       52.3908736,
+       4.5434526
+      ],
+      "measured": {
+       "lidarMeanDeg": 6.4,
+       "lidarMaxDeg": 7.5,
+       "gameMeanDeg": 3.3,
+       "gameMaxDeg": 5.1
+      },
+      "kind": "real camber missing / too small in the game",
+      "side": "inside-lower (radius 60 m)"
+     },
+     {
+      "name": "37 m from CM.com Circuit Zandvoort",
+      "deg": 4.5,
+      "from": [
+       52.3902076,
+       4.5430133
+      ],
+      "to": [
+       52.3897659,
+       4.5428895
+      ],
+      "measured": {
+       "lidarMeanDeg": -4.3,
+       "lidarMaxDeg": -5.2,
+       "gameMeanDeg": -1.2,
+       "gameMaxDeg": -1.4
+      },
+      "kind": "real camber missing / too small in the game",
+      "side": "inside-lower (radius 232 m)"
+     },
+     {
+      "name": "Hunserug",
+      "deg": 4.5,
+      "from": [
+       52.388405,
+       4.5433259
+      ],
+      "to": [
+       52.3884474,
+       4.5450726
+      ],
+      "measured": {
+       "lidarMeanDeg": 4.6,
+       "lidarMaxDeg": 5.7,
+       "gameMeanDeg": 0.9,
+       "gameMaxDeg": 1.2
+      },
+      "kind": "real camber missing / too small in the game",
+      "side": "inside-lower (radius 310 m)"
+     },
+     {
+      "name": "Rob Slotemakerbocht",
+      "deg": 5,
+      "from": [
+       52.3882938,
+       4.5462202
+      ],
+      "to": [
+       52.3884478,
+       4.5477831
+      ],
+      "measured": {
+       "lidarMeanDeg": -4.8,
+       "lidarMaxDeg": -5.6,
+       "gameMeanDeg": -1.5,
+       "gameMaxDeg": -2.9
+      },
+      "kind": "real camber missing / too small in the game",
+      "side": "inside-lower (radius 173 m)"
+     },
+     {
+      "name": "Rob Slotemakerbocht",
+      "deg": 4.5,
+      "from": [
+       52.3887735,
+       4.5486623
+      ],
+      "to": [
+       52.3889693,
+       4.5497944
+      ],
+      "measured": {
+       "lidarMeanDeg": 4.4,
+       "lidarMaxDeg": 5.1,
+       "gameMeanDeg": 1.5,
+       "gameMaxDeg": 1.8
+      },
+      "kind": "real camber missing / too small in the game",
+      "side": "inside-lower (radius 180 m)"
+     },
+     {
+      "name": "Scheivlak",
+      "deg": 5,
+      "from": [
+       52.3888916,
+       4.5518451
+      ],
+      "to": [
+       52.3874188,
+       4.5527161
+      ],
+      "measured": {
+       "lidarMeanDeg": 5.2,
+       "lidarMaxDeg": 5.8,
+       "gameMeanDeg": 2.4,
+       "gameMaxDeg": 3.3
+      },
+      "kind": "real camber missing / too small in the game",
+      "side": "inside-lower (radius 106 m)"
+     },
+     {
+      "name": "CM.com bocht",
+      "deg": 1.5,
+      "from": [
+       52.3872051,
+       4.5508212
+      ],
+      "to": [
+       52.3879477,
+       4.5507501
+      ],
+      "measured": {
+       "lidarMeanDeg": -1.6,
+       "lidarMaxDeg": -1.8,
+       "gameMeanDeg": -4.4,
+       "gameMaxDeg": -4.9
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 46 m)"
+     }
+    ],
+    "PIT_FACTS": {
+     "limitKmhBySeason": {
+      "2021": 60,
+      "2022": 60,
+      "2023": 60,
+      "2024": 60
+     },
+     "note": "80 from 2025 (default). Needs per-season support in js/track.js / the season code; if only one value is possible keep 80 (current layout year)."
+    }
+   },
+   "optional": {
+    "START_AT": [
+     52.3889948,
+     4.5408762
+    ],
+    "START_AT_note": "OSM relation 13545573 \"Finish\" node 12148116710, 70 m after the game line",
+    "BANKED_sideCheck": [
+     {
+      "name": "30 m from Tarzanbocht",
+      "deg": 5.5,
+      "from": [
+       52.3912094,
+       4.5423663
+      ],
+      "to": [
+       52.3915418,
+       4.54259
+      ],
+      "measured": {
+       "lidarMeanDeg": 5.3,
+       "lidarMaxDeg": 6.1,
+       "gameMeanDeg": 0.4,
+       "gameMaxDeg": 1.8
+      },
+      "kind": "real camber missing / too small in the game",
+      "side": "nearly straight (radius 1507 m): bankOverrides take the side from the corner direction, check it"
+     }
+    ]
+   },
+   "breaks": [
+    "bankOverrides change handling at Tarzan / Hunserug / Scheivlak -> recalibrate"
+   ],
+   "positionCheck": {
+    "apply.BANKED_add": [
+     {
+      "name": "Tarzanbocht",
+      "from": {
+       "sFromLineM": 385,
+       "offCentrelineM": 2.5
+      },
+      "to": {
+       "sFromLineM": 561,
+       "offCentrelineM": 0.1
+      }
+     },
+     {
+      "name": "37 m from CM.com Circuit Zandvoort",
+      "from": {
+       "sFromLineM": 641,
+       "offCentrelineM": 0.8
+      },
+      "to": {
+       "sFromLineM": 690,
+       "offCentrelineM": 0.2
+      }
+     },
+     {
+      "name": "Hunserug",
+      "from": {
+       "sFromLineM": 1073,
+       "offCentrelineM": 0.6
+      },
+      "to": {
+       "sFromLineM": 1192,
+       "offCentrelineM": 1
+      }
+     },
+     {
+      "name": "Rob Slotemakerbocht",
+      "from": {
+       "sFromLineM": 1272,
+       "offCentrelineM": 2
+      },
+      "to": {
+       "sFromLineM": 1383,
+       "offCentrelineM": 0.7
+      }
+     },
+     {
+      "name": "Rob Slotemakerbocht",
+      "from": {
+       "sFromLineM": 1453,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 1534,
+       "offCentrelineM": 1
+      }
+     },
+     {
+      "name": "Scheivlak",
+      "from": {
+       "sFromLineM": 1674,
+       "offCentrelineM": 0.5
+      },
+      "to": {
+       "sFromLineM": 1884,
+       "offCentrelineM": 1.9
+      }
+     },
+     {
+      "name": "CM.com bocht",
+      "from": {
+       "sFromLineM": -1725,
+       "offCentrelineM": 0.9
+      },
+      "to": {
+       "sFromLineM": -1623,
+       "offCentrelineM": 1.1
+      }
+     }
+    ],
+    "optional.START_AT": {
+     "sFromLineM": 70,
+     "offCentrelineM": 0.8
+    }
+   }
+  },
+  "es-2026": {
+   "name": "Circuito de Madring",
+   "auditFile": "devtests/track-audit/es-2026.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "elevation",
+     "status": "verified",
+     "claim": "GLO-90 profile has the wrong shape (main straight climbs, fake drop to T3)",
+     "evidence": "Own read of the cached IGN MDT05 tile: range 25.7 m (official 697-671 = 26 m) vs game 24.1 m, RMS 2.99 m, 27 stretches > 2 pp; main straight s 5200-5400 flat at 673 m in the lidar while the game climbs 7 m; the lidar's +-13 % 50 m grades at s 1439 / 3877 are the two tunnels (ground above) and need COVERED."
+    },
+    {
+     "aspect": "tunnel",
+     "status": "verified",
+     "claim": "Two tunnels under the motorway link are missing",
+     "evidence": "Fresh OSM API: tunnel=yes ways 87096566 (s 1376-1446, the tube the game line follows) and 827423913 / 827423914 (s 3865-4000) with motorway link bridge 34049818 (layer 1) over s 3912; en.wikipedia Madring: \"Two tunnel sections running underneath an elevated motorway\"."
+    },
+    {
+     "aspect": "length",
+     "status": "verified (minor)",
+     "claim": "Dataset length 5474 m is wrong",
+     "evidence": "en.wikipedia Madring \"5.414 km\"; the dataset line is 5430 m geodesic, built 5476 m (+0.85 %)."
+    }
+   ],
+   "apply": {
+    "ELEV_SOURCE": "ignes-mdt05",
+    "bbox": [
+     40.46158,
+     -3.62889,
+     40.48334,
+     -3.60844
+    ],
+    "COVERED": [
+     {
+      "name": "tunnel 1 (the tube the game line follows, OSM way 87096566)",
+      "from": [
+       40.4721947,
+       -3.6240596
+      ],
+      "to": [
+       40.4727971,
+       -3.6242927
+      ],
+      "pad": 10
+     },
+     {
+      "name": "Valdebebas - IFEMA tunnel",
+      "from": [
+       40.4726371,
+       -3.6188896
+      ],
+      "to": [
+       40.4716693,
+       -3.6181083
+      ],
+      "pad": 10
+     }
+    ],
+    "tunnels": [
+     {
+      "name": "Tunnel 1",
+      "kind": "tunnel",
+      "facade": "plain",
+      "from": [
+       40.4721947,
+       -3.6240596
+      ],
+      "to": [
+       40.4727971,
+       -3.6242927
+      ],
+      "osm": 87096566,
+      "note": "the OSM circuit relation uses the parallel tube 34049751 (14.8 m away); the dataset line runs in 87096566"
+     },
+     {
+      "name": "Valdebebas - IFEMA tunnel",
+      "kind": "tunnel",
+      "facade": "plain",
+      "from": [
+       40.4726371,
+       -3.6188896
+      ],
+      "to": [
+       40.4716693,
+       -3.6181083
+      ]
+     }
+    ],
+    "LENGTH_OVERRIDE_M": 5414
+   },
+   "optional": {
+    "BANKED": [
+     {
+      "name": "T1",
+      "deg": 1.72,
+      "from": [
+       40.464926,
+       -3.618821
+      ],
+      "to": [
+       40.464636,
+       -3.619247
+      ]
+     },
+     {
+      "name": "T2",
+      "deg": 0.57,
+      "from": [
+       40.4646,
+       -3.619244
+      ],
+      "to": [
+       40.464336,
+       -3.619582
+      ]
+     },
+     {
+      "name": "T3 Hortaleza",
+      "deg": -1.72,
+      "from": [
+       40.464298,
+       -3.619881
+      ],
+      "to": [
+       40.464855,
+       -3.621387
+      ]
+     },
+     {
+      "name": "T4",
+      "deg": 1.15,
+      "from": [
+       40.469731,
+       -3.624626
+      ],
+      "to": [
+       40.471389,
+       -3.624198
+      ]
+     },
+     {
+      "name": "T5",
+      "deg": 1.72,
+      "from": [
+       40.471464,
+       -3.624134
+      ],
+      "to": [
+       40.471725,
+       -3.6241
+      ]
+     },
+     {
+      "name": "T6 Subida de las Carcavas",
+      "deg": 1.72,
+      "from": [
+       40.472002,
+       -3.624135
+      ],
+      "to": [
+       40.472506,
+       -3.624165
+      ]
+     },
+     {
+      "name": "T7 Subida de las Carcavas",
+      "deg": 1.72,
+      "from": [
+       40.474603,
+       -3.625226
+      ],
+      "to": [
+       40.474884,
+       -3.625159
+      ]
+     },
+     {
+      "name": "T8 El Bunker",
+      "deg": 2.86,
+      "from": [
+       40.474915,
+       -3.625102
+      ],
+      "to": [
+       40.475635,
+       -3.625031
+      ]
+     },
+     {
+      "name": "T9",
+      "deg": 4,
+      "from": [
+       40.475836,
+       -3.625184
+      ],
+      "to": [
+       40.476278,
+       -3.625332
+      ]
+     },
+     {
+      "name": "T10 La Chicane",
+      "deg": 1.15,
+      "from": [
+       40.477226,
+       -3.625338
+      ],
+      "to": [
+       40.477748,
+       -3.624981
+      ]
+     },
+     {
+      "name": "T11 La Chicane",
+      "deg": -1.15,
+      "from": [
+       40.477897,
+       -3.624718
+      ],
+      "to": [
+       40.478826,
+       -3.624472
+      ]
+     },
+     {
+      "name": "T13",
+      "deg": 2.29,
+      "from": [
+       40.47676,
+       -3.62446
+      ],
+      "to": [
+       40.476054,
+       -3.624221
+      ]
+     },
+     {
+      "name": "T14 Las Enlazadas de Valdebebas",
+      "deg": -1.72,
+      "from": [
+       40.47567,
+       -3.623489
+      ],
+      "to": [
+       40.474834,
+       -3.622898
+      ]
+     },
+     {
+      "name": "T15 Las Enlazadas de Valdebebas",
+      "deg": 1.72,
+      "from": [
+       40.474208,
+       -3.622913
+      ],
+      "to": [
+       40.472977,
+       -3.621381
+      ]
+     },
+     {
+      "name": "T16 Las Enlazadas de Valdebebas",
+      "deg": -1.15,
+      "from": [
+       40.472976,
+       -3.620331
+      ],
+      "to": [
+       40.473084,
+       -3.619753
+      ]
+     },
+     {
+      "name": "T17",
+      "deg": 2.29,
+      "from": [
+       40.473129,
+       -3.619651
+      ],
+      "to": [
+       40.473001,
+       -3.619092
+      ]
+     },
+     {
+      "name": "T18 Norte",
+      "deg": 1.15,
+      "from": [
+       40.471799,
+       -3.618169
+      ],
+      "to": [
+       40.471444,
+       -3.617238
+      ]
+     },
+     {
+      "name": "T19",
+      "deg": 0.57,
+      "from": [
+       40.471505,
+       -3.616706
+      ],
+      "to": [
+       40.470744,
+       -3.61512
+      ]
+     },
+     {
+      "name": "T20",
+      "deg": 1.15,
+      "from": [
+       40.468576,
+       -3.61463
+      ],
+      "to": [
+       40.468372,
+       -3.614203
+      ]
+     },
+     {
+      "name": "T21",
+      "deg": -0.57,
+      "from": [
+       40.468569,
+       -3.613107
+      ],
+      "to": [
+       40.468325,
+       -3.612604
+      ]
+     },
+     {
+      "name": "T22 El Parque",
+      "deg": -0.57,
+      "from": [
+       40.466229,
+       -3.612009
+      ],
+      "to": [
+       40.465772,
+       -3.612445
+      ]
+     },
+     {
+      "name": "T12 La Monumental",
+      "deg": 13.5,
+      "keep": true
+     }
+    ],
+    "BANKED_note": "per-turn banking from madring.com/en/circuit (auditor-read, not re-read here); negative = contra-banked (js/track.js supports it); keep T12 13.5 deg",
+    "fallbackProfile": "devtests/track-audit/es-2026.json proposedCorrections.elevationProfile10m"
+   },
+   "caveat": "lidar flight year unknown (circuit built 2025-26): re-check La Monumental and the Valdebebas section after applying",
+   "breaks": [
+    "elev, length -> recalibrate; scenery-data.js has no stands / pit building yet"
+   ],
+   "positionCheck": {
+    "apply.COVERED": [
+     {
+      "name": "tunnel 1 (the tube the game line follows, OSM way 87096566)",
+      "from": {
+       "sFromLineM": 1376,
+       "offCentrelineM": 1.8
+      },
+      "to": {
+       "sFromLineM": 1446,
+       "offCentrelineM": 0.6
+      }
+     },
+     {
+      "name": "Valdebebas - IFEMA tunnel",
+      "from": {
+       "sFromLineM": -1609,
+       "offCentrelineM": 8.1
+      },
+      "to": {
+       "sFromLineM": -1481,
+       "offCentrelineM": 2.1
+      }
+     }
+    ],
+    "optional.BANKED": [
+     {
+      "name": "T1",
+      "from": {
+       "sFromLineM": 168,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 226,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T2",
+      "from": {
+       "sFromLineM": 230,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 280,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T3 Hortaleza",
+      "from": {
+       "sFromLineM": 306,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 460,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T4",
+      "from": {
+       "sFromLineM": 1078,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 1270,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T5",
+      "from": {
+       "sFromLineM": 1280,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 1316,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T6 Subida de las Carcavas",
+      "from": {
+       "sFromLineM": 1354,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 1412,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T7 Subida de las Carcavas",
+      "from": {
+       "sFromLineM": 1666,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 1708,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T8 El Bunker",
+      "from": {
+       "sFromLineM": 1714,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 1806,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T9",
+      "from": {
+       "sFromLineM": 1832,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 1884,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T10 La Chicane",
+      "from": {
+       "sFromLineM": 1990,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 2060,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T11 La Chicane",
+      "from": {
+       "sFromLineM": 2088,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": 2206,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T13",
+      "from": {
+       "sFromLineM": -2434,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -2336,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T14 Las Enlazadas de Valdebebas",
+      "from": {
+       "sFromLineM": -2260,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -2148,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T15 Las Enlazadas de Valdebebas",
+      "from": {
+       "sFromLineM": -2078,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -1866,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T16 Las Enlazadas de Valdebebas",
+      "from": {
+       "sFromLineM": -1776,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -1724,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T17",
+      "from": {
+       "sFromLineM": -1714,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -1652,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T18 Norte",
+      "from": {
+       "sFromLineM": -1496,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -1398,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T19",
+      "from": {
+       "sFromLineM": -1352,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -1170,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T20",
+      "from": {
+       "sFromLineM": -924,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -862,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T21",
+      "from": {
+       "sFromLineM": -764,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -702,
+       "offCentrelineM": 0
+      }
+     },
+     {
+      "name": "T22 El Parque",
+      "from": {
+       "sFromLineM": -462,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -386,
+       "offCentrelineM": 0
+      }
+     }
+    ]
+   }
+  },
+  "de-1932": {
+   "name": "Hockenheimring",
+   "auditFile": "devtests/track-audit/de-1932.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "bridge",
+     "status": "verified",
+     "claim": "Three phantom decks (OSM 1302356195, 1302600377, 1302600378)",
+     "evidence": "Fresh OSM API: each outline has a service / foot tunnel (layer -2) under it (31320990, 26336602 + 534265659, 192994934) and nothing over the lap; built over the road at s 552-558, 3378-3388, 3232-3240."
+    }
+   ],
+   "apply": {
+    "sceneryDropBridges": [
+     1302356195,
+     1302600377,
+     1302600378
+    ]
+   },
+   "optional": {
+    "ELEV_SOURCE": "bwdgm1",
+    "ELEV_note": "minor: GLO-90 puts a 5 m hump on the Parabolika (lidar range 4.2 m vs game 7.9 m); auditor-only",
+    "BANKED": [
+     {
+      "name": "Bernie-Ecclestone-Kurve",
+      "deg": 2.5,
+      "from": [
+       49.3337697,
+       8.5689331
+      ],
+      "to": [
+       49.3336272,
+       8.5694703
+      ],
+      "measured": {
+       "lidarMeanDeg": 2.3,
+       "lidarMaxDeg": 2.4,
+       "gameMeanDeg": 4.8,
+       "gameMaxDeg": 5.7
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 31 m)"
+     },
+     {
+      "name": "Spitzkehre",
+      "deg": 1.5,
+      "from": [
+       49.3325769,
+       8.584054
+      ],
+      "to": [
+       49.3323348,
+       8.5841701
+      ],
+      "measured": {
+       "lidarMeanDeg": 1.4,
+       "lidarMaxDeg": 1.5,
+       "gameMeanDeg": 5.2,
+       "gameMaxDeg": 6
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 19 m)"
+     },
+     {
+      "name": "unnamed",
+      "deg": 1.5,
+      "from": [
+       49.3306009,
+       8.5756345
+      ],
+      "to": [
+       49.3302979,
+       8.5754379
+      ],
+      "measured": {
+       "lidarMeanDeg": -1.3,
+       "lidarMaxDeg": -1.4,
+       "gameMeanDeg": -4.3,
+       "gameMaxDeg": -5.5
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 28 m)"
+     },
+     {
+      "name": "unnamed",
+      "deg": 1.5,
+      "from": [
+       49.329307,
+       8.5759631
+      ],
+      "to": [
+       49.328874,
+       8.5758891
+      ],
+      "measured": {
+       "lidarMeanDeg": 1.3,
+       "lidarMaxDeg": 1.4,
+       "gameMeanDeg": 4,
+       "gameMaxDeg": 4.4
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 56 m)"
+     },
+     {
+      "name": "40 m from Südkurve",
+      "deg": 1.5,
+      "from": [
+       49.3263776,
+       8.5694159
+      ],
+      "to": [
+       49.3260677,
+       8.56922
+      ],
+      "measured": {
+       "lidarMeanDeg": 1.5,
+       "lidarMaxDeg": 1.6,
+       "gameMeanDeg": 4.6,
+       "gameMaxDeg": 5.1
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 40 m)"
+     }
+    ]
+   },
+   "positionCheck": {
+    "optional.BANKED": [
+     {
+      "name": "Bernie-Ecclestone-Kurve",
+      "from": {
+       "sFromLineM": 823,
+       "offCentrelineM": 0.8
+      },
+      "to": {
+       "sFromLineM": 873,
+       "offCentrelineM": 0.9
+      }
+     },
+     {
+      "name": "Spitzkehre",
+      "from": {
+       "sFromLineM": 2086,
+       "offCentrelineM": 1.8
+      },
+      "to": {
+       "sFromLineM": 2129,
+       "offCentrelineM": 1.2
+      }
+     },
+     {
+      "name": "unnamed",
+      "from": {
+       "sFromLineM": -1753,
+       "offCentrelineM": 0.5
+      },
+      "to": {
+       "sFromLineM": -1712,
+       "offCentrelineM": 2.4
+      }
+     },
+     {
+      "name": "unnamed",
+      "from": {
+       "sFromLineM": -1591,
+       "offCentrelineM": 0.2
+      },
+      "to": {
+       "sFromLineM": -1542,
+       "offCentrelineM": 2.1
+      }
+     },
+     {
+      "name": "40 m from Südkurve",
+      "from": {
+       "sFromLineM": -442,
+       "offCentrelineM": 1.5
+      },
+      "to": {
+       "sFromLineM": -402,
+       "offCentrelineM": 0.1
+      }
+     }
+    ]
+   }
+  },
+  "hu-1986": {
+   "name": "Hungaroring",
+   "auditFile": "devtests/track-audit/hu-1986.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "start",
+     "status": "verified",
+     "claim": "Start / finish ~240 m too far towards T1",
+     "evidence": "FIA 2026 Hungarian GP circuit map (cache/fia/hu-2026-p2.png) re-measured: start + control line ~620 m before T1 using its own \"Speed trap 310 m before T1\" scale; the game line is 360 m before the T1 apex -> ~250 m. The auditor's 2025 / 2026 timing grids put pole at -244.5 / -243.5 m. Esri imagery (2024) shows no line at the game position."
+    }
+   ],
+   "apply": {
+    "START_AT": [
+     47.5789212,
+     19.2483897
+    ]
+   },
+   "optional": {
+    "elevation": "F1 timing car heights (range 34.7 m, rms 2.1 m vs game): optional, licence question; no open lidar for Hungary"
+   },
+   "breaks": [
+    "grid, pit lane and timing move 240 m back -> recalibrate"
+   ],
+   "positionCheck": {
+    "apply.START_AT": {
+     "sFromLineM": -240,
+     "offCentrelineM": 0
+    }
+   }
+  },
+  "us-1909": {
+   "name": "Indianapolis Motor Speedway",
+   "auditFile": "devtests/track-audit/us-1909.json",
+   "verdict": "minor issues",
+   "optional": {
+    "sceneryOverpasses": [
+     {
+      "osmWay": 152842141,
+      "kind": "footbridge (Hulman Boulevard Pedestrian Bridge)",
+      "s": 2117.1,
+      "at": [
+       39.79487,
+       -86.234945
+      ]
+     }
+    ],
+    "derivedBankScale": 0.3
+   },
+   "notes": "T13 9.2 deg override confirmed by lidar (8.4-8.8); dataset line follows OSM within 2.8 m but is 4084 m geodesic, built 4191 m (+2.6 %) to match 4.192 km: consider no rescale"
+  },
+  "tr-2005": {
+   "name": "Intercity Istanbul Park",
+   "auditFile": "devtests/track-audit/tr-2005.json",
+   "verdict": "minor issues",
+   "optional": {
+    "START_AT": [
+     40.95222,
+     29.4063884
+    ],
+    "elevation": "GLO-30 profile (hilltop 6-7 m higher)",
+    "pitLaneReal": {
+     "side": 1,
+     "limitKmh": 80,
+     "entryLL": [
+      40.95238,
+      29.401025
+     ],
+     "exitLL": [
+      40.954302,
+      29.408926
+     ]
+    }
+   },
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": 22,
+     "offCentrelineM": 5.5
+    }
+   }
+  },
+  "sa-2021": {
+   "name": "Jeddah Corniche Circuit",
+   "auditFile": "devtests/track-audit/sa-2021.json",
+   "verdict": "minor issues",
+   "optional": {
+    "START_AT": [
+     21.632651,
+     39.104482
+    ],
+    "gridPoleSide": -1,
+    "note": "auditor: 2025 timing grid wholly ahead of the game line (pole +180 m), FIA \"Pole RHS\"; my imagery check was inconclusive; needs js/track.js pole-side support"
+   },
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": 187,
+     "offCentrelineM": 0.5
+    }
+   }
+  },
+  "za-1961": {
+   "name": "Kyalami Grand Prix Circuit",
+   "auditFile": "devtests/track-audit/za-1961.json",
+   "verdict": "minor issues",
+   "optional": {
+    "elevation": "GLO-30 + SRTM mean profile (Leeukop 7 m lower); surface models only",
+    "START_AT": [
+     -25.998677,
+     28.0700067
+    ]
+   },
+   "notes": "2015+ layout, never raced by F1",
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": 14,
+     "offCentrelineM": 1.3
+    }
+   }
+  },
+  "us-2023": {
+   "name": "Las Vegas Street Circuit",
+   "auditFile": "devtests/track-audit/us-2023.json",
+   "verdict": "minor issues",
+   "optional": {
+    "START_AT": [
+     36.1092838,
+     -115.1618816
+    ],
+    "START_AT_note": "OSM raceway=start node 92 m before the game line; the control line is 92 m further back",
+    "sceneryOverpasses": [
+     {
+      "osmWay": 43875943,
+      "kind": "monorail viaduct",
+      "s": 2381.1,
+      "at": [
+       36.122375,
+       -115.163532
+      ]
+     },
+     {
+      "osmWay": 43875943,
+      "kind": "monorail viaduct",
+      "s": 5552.5,
+      "at": [
+       36.10795,
+       -115.167491
+      ]
+     },
+     {
+      "osmWay": 395310512,
+      "kind": "monorail viaduct",
+      "s": 5556.2,
+      "at": [
+       36.10795,
+       -115.16745
+      ]
+     },
+     {
+      "osmWay": 395310512,
+      "kind": "monorail viaduct",
+      "s": 2110.5,
+      "at": [
+       36.122279,
+       -115.160528
+      ]
+     },
+     {
+      "osmWay": 25724071,
+      "kind": "footbridge",
+      "s": 4390.7,
+      "at": [
+       36.11425,
+       -115.172991
+      ]
+     },
+     {
+      "osmWay": 25724074,
+      "kind": "footbridge",
+      "s": 4268.4,
+      "at": [
+       36.115356,
+       -115.172974
+      ]
+     },
+     {
+      "osmWay": 133878942,
+      "kind": "footbridge",
+      "s": 4944.3,
+      "at": [
+       36.109244,
+       -115.173153
+      ]
+     },
+     {
+      "osmWay": 146617830,
+      "kind": "footbridge",
+      "s": 3385.8,
+      "at": [
+       36.123046,
+       -115.171009
+      ]
+     },
+     {
+      "osmWay": 155133670,
+      "kind": "footbridge",
+      "s": 2987.7,
+      "at": [
+       36.125385,
+       -115.168456
+      ]
+     },
+     {
+      "osmWay": 297110936,
+      "kind": "footbridge",
+      "s": 5123,
+      "at": [
+       36.108104,
+       -115.172234
+      ]
+     },
+     {
+      "osmWay": 1436531125,
+      "kind": "footbridge",
+      "s": 2405.4,
+      "at": [
+       36.122377,
+       -115.163802
+      ]
+     }
+    ],
+    "derivedBankMaxDeg": 1.5
+   },
+   "positionCheck": {
+    "optional.START_AT": {
+     "sFromLineM": -92,
+     "offCentrelineM": 0.1
+    }
+   }
+  },
+  "qa-2004": {
+   "name": "Losail International Circuit",
+   "auditFile": "devtests/track-audit/qa-2004.json",
+   "verdict": "minor issues",
+   "verification": [
+    {
+     "aspect": "length",
+     "status": "verified (minor)",
+     "claim": "Length 5.380 is the 2004-2022 figure",
+     "evidence": "FIA 2025 Qatar circuit map text: \"Circuit Centreline Length = 5.419km\"; dataset geodesic 5421 m, built 5382 m (-0.7 %)."
+    }
+   ],
+   "optional": {
+    "LENGTH_OVERRIDE_M": 5419
+   }
+  },
+  "sg-2008": {
+   "name": "Marina Bay Street Circuit",
+   "auditFile": "devtests/track-audit/sg-2008.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "bridge",
+     "status": "verified",
+     "claim": "ECP / Benjamin Sheares viaduct over the lap missing",
+     "evidence": "Fresh OSM API: East Coast Parkway bridges (layer 1-2) cross the lap at s 202-256 (T1), 530-1020 (T3-T5) and 4278-4334 (before the line); a building (layer 1, min_height 4.5) spans Raffles Boulevard at s 1234-1258. en.wikipedia: \"The pit straight approaching just below the Benjamin Sheares Bridge\"."
+    },
+    {
+     "aspect": "pit",
+     "status": "verified",
+     "claim": "Pit limit 80 km/h since 2025",
+     "evidence": "en.wikipedia 2025 Singapore Grand Prix: \"the pit lane was widened by one metre; as such, the pit lane speed limit was increased from 60 km/h to 80 km/h\"."
+    }
+   ],
+   "apply": {
+    "PIT_FACTS": {
+     "limitKmhBySeason": {
+      "2010": 60,
+      "2011": 60,
+      "2012": 60,
+      "2013": 60,
+      "2014": 60,
+      "2015": 60,
+      "2016": 60,
+      "2017": 60,
+      "2018": 60,
+      "2019": 60,
+      "2022": 60,
+      "2023": 60,
+      "2024": 60
+     },
+     "defaultLimitKmh": 80,
+     "note": "if only one value is possible: drop the 60 (the game uses the 2025 layout, 2026 is the default season)"
+    },
+    "scenery": [
+     {
+      "what": "East Coast Parkway / Benjamin Sheares Bridge (motorway viaduct, layer 1-2) and its ramps",
+      "osmWays": [
+       74722808,
+       122067627,
+       122067629,
+       122067630,
+       99007260,
+       121906574,
+       21786033,
+       21697558,
+       39961203,
+       122067631,
+       635253783
+      ],
+      "gameS": [
+       [
+        196,
+        260
+       ],
+       [
+        520,
+        720
+       ],
+       [
+        644,
+        981
+       ],
+       [
+        1020
+       ],
+       [
+        4282,
+        4339
+       ]
+      ],
+      "source": "en.wikipedia lap description: \"The pit straight approaching just below the Benjamin Sheares Bridge\""
+     },
+     {
+      "what": "covered link building over Raffles Boulevard (min_height 4.5 m, height 6 m; Raffles Boulevard tunnel=building_passage, maxheight 4.5)",
+      "osmWays": [
+       393090492,
+       479745478,
+       545362402
+      ],
+      "gameS": [
+       [
+        1236,
+        1259
+       ]
+      ]
+     },
+     {
+      "what": "footbridges (layer 1-2)",
+      "osmWays": [
+       740112301,
+       740112303,
+       741164882,
+       1314036589
+      ],
+      "gameS": [
+       [
+        196,
+        715
+       ],
+       [
+        898
+       ],
+       [
+        1028
+       ],
+       [
+        4282,
+        4339
+       ]
+      ]
+     }
+    ]
+   },
+   "optional": {
+    "flatMaxRangeM": 5.3,
+    "flatNote": "formula1.com 5.3 m (auditor-only)"
+   }
+  },
+  "us-2022": {
+   "name": "Miami International Autodrome",
+   "auditFile": "devtests/track-audit/us-2022.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "elevation",
+     "status": "verified",
+     "claim": "Turn 13-16 climb and crest flattened (FLAT_TRACKS, GLO-90)",
+     "evidence": "Own USGS 3DEP EPQS samples (36 points, 10 m apart, s 3250-3600): the road rises 3.2 m from s 3270 to a crest at s 3350 (4.46 m ASL), +4.7 % over 50 m, then falls -3.2 % to 0.9 m at s 3540; the game varies 0.21 m there. OpenTopoData NED 10 m (pre-2022 data) shows only a 1.6 m bump: the ramp was built with the circuit. formula1.com describes the uphill approach and crest in the T14-15 chicane."
+    }
+   ],
+   "apply": {
+    "ELEV_SOURCE": "usgs3dep",
+    "FLAT_TRACKS": "remove us-2022",
+    "settings": {
+     "medianHalf": 1,
+     "gaussSigmaM": 10,
+     "note": "lighter DTM smoothing keeps 4.4 / -2.8 % at the T14-15 ramp (auditor sim)"
+    }
+   },
+   "optional": {
+    "sceneryOverpasses": [
+     {
+      "osmWay": 39361952,
+      "kind": "Florida's Turnpike ramp",
+      "s": 3369.3,
+      "at": [
+       25.959373,
+       -80.230008
+      ]
+     },
+     {
+      "osmWay": 39361975,
+      "kind": "Florida's Turnpike ramp",
+      "s": 3423.5,
+      "at": [
+       25.95984,
+       -80.229846
+      ]
+     },
+     {
+      "osmWay": 39362012,
+      "kind": "Florida's Turnpike ramp",
+      "s": 3499.9,
+      "at": [
+       25.960144,
+       -80.230339
+      ]
+     },
+     {
+      "osmWay": 1525113996,
+      "kind": "footbridge",
+      "s": 1297,
+      "at": [
+       25.957421,
+       -80.243496
+      ]
+     },
+     {
+      "osmWay": 1525113997,
+      "kind": "footbridge",
+      "s": 1594.3,
+      "at": [
+       25.956162,
+       -80.243944
+      ]
+     }
+    ]
+   },
+   "breaks": [
+    "elev -> recalibrate"
+   ]
+  },
+  "de-1927": {
+   "name": "Nürburgring",
+   "auditFile": "devtests/track-audit/de-1927.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "bridge",
+     "status": "verified",
+     "claim": "Phantom deck 1466 m after the line (OSM 790945811); BMW-Bruecke real",
+     "evidence": "Fresh OSM API: the lap raceway 1443047846 is bridge=yes layer 1 inside outline 790945811 and the B 258 (layer 0) crosses the lap there (s 1456): the outline is the lap's own bridge. Outline 34444288 \"BMW-Brücke\" (man_made=bridge, bridge=covered, cable-stayed) spans the start straight: keep."
+    }
+   ],
+   "apply": {
+    "sceneryDropBridges": [
+     790945811
+    ],
+    "sceneryKeepBridges": [
+     34444288
+    ]
+   },
+   "optional": {
+    "ELEV_SOURCE": "rlpdgm1",
+    "COVERED": [
+     {
+      "name": "lap bridge, OSM way 1443047844",
+      "from": [
+       50.330283,
+       6.938282
+      ],
+      "to": [
+       50.330884,
+       6.938575
+      ],
+      "pad": 0
+     },
+     {
+      "name": "lap over service tunnel, OSM way 31010592",
+      "from": [
+       50.332661,
+       6.943229
+      ],
+      "to": [
+       50.332344,
+       6.942656
+      ],
+      "pad": 0
+     },
+     {
+      "name": "lap bridge, OSM way 1443047846",
+      "from": [
+       50.330639,
+       6.939605
+      ],
+      "to": [
+       50.330069,
+       6.939355
+      ],
+      "pad": 0
+     }
+    ],
+    "ELEV_note": "minor: NGK climb displaced ~150 m, RMS 3.4 m; auditor-only",
+    "BANKED": [
+     {
+      "name": "Nürburgring Sprintstrecke",
+      "deg": 1,
+      "from": [
+       50.3317663,
+       6.9413513
+      ],
+      "to": [
+       50.3318767,
+       6.9409565
+      ],
+      "measured": {
+       "lidarMeanDeg": 1.1,
+       "lidarMaxDeg": 1.1,
+       "gameMeanDeg": 5,
+       "gameMaxDeg": 5.8
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 20 m)"
+     },
+     {
+      "name": "Nürburgring Sprintstrecke",
+      "deg": 1.5,
+      "from": [
+       50.332948,
+       6.9416486
+      ],
+      "to": [
+       50.333623,
+       6.940829
+      ],
+      "measured": {
+       "lidarMeanDeg": -1.4,
+       "lidarMaxDeg": -1.5,
+       "gameMeanDeg": -3.9,
+       "gameMaxDeg": -4.3
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 58 m)"
+     },
+     {
+      "name": "Nürburgring Sprintstrecke",
+      "deg": 1.5,
+      "from": [
+       50.3332806,
+       6.9388173
+      ],
+      "to": [
+       50.3327031,
+       6.9390953
+      ],
+      "measured": {
+       "lidarMeanDeg": -1.3,
+       "lidarMaxDeg": -1.4,
+       "gameMeanDeg": -4.6,
+       "gameMaxDeg": -5.4
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 38 m)"
+     },
+     {
+      "name": "Nürburgring Sprintstrecke",
+      "deg": 1.5,
+      "from": [
+       50.3327097,
+       6.9396563
+      ],
+      "to": [
+       50.3324794,
+       6.9400017
+      ],
+      "measured": {
+       "lidarMeanDeg": 1.4,
+       "lidarMaxDeg": 1.4,
+       "gameMeanDeg": 4.9,
+       "gameMaxDeg": 5.6
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 31 m)"
+     }
+    ]
+   },
+   "positionCheck": {
+    "optional.BANKED": [
+     {
+      "name": "Nürburgring Sprintstrecke",
+      "from": {
+       "sFromLineM": 615,
+       "offCentrelineM": 1.1
+      },
+      "to": {
+       "sFromLineM": 657,
+       "offCentrelineM": 0.8
+      }
+     },
+     {
+      "name": "Nürburgring Sprintstrecke",
+      "from": {
+       "sFromLineM": 787,
+       "offCentrelineM": 0.4
+      },
+      "to": {
+       "sFromLineM": 898,
+       "offCentrelineM": 0.1
+      }
+     },
+     {
+      "name": "Nürburgring Sprintstrecke",
+      "from": {
+       "sFromLineM": 1048,
+       "offCentrelineM": 0.7
+      },
+      "to": {
+       "sFromLineM": 1141,
+       "offCentrelineM": 1
+      }
+     },
+     {
+      "name": "Nürburgring Sprintstrecke",
+      "from": {
+       "sFromLineM": 1181,
+       "offCentrelineM": 0.3
+      },
+      "to": {
+       "sFromLineM": 1221,
+       "offCentrelineM": 1.3
+      }
+     }
+    ],
+    "optional.COVERED": [
+     {
+      "name": "lap bridge, OSM way 1443047844",
+      "from": {
+       "sFromLineM": -1867,
+       "offCentrelineM": 0.3
+      },
+      "to": {
+       "sFromLineM": -1797,
+       "offCentrelineM": 0.3
+      }
+     },
+     {
+      "name": "lap over service tunnel, OSM way 31010592",
+      "from": {
+       "sFromLineM": 448,
+       "offCentrelineM": 1.4
+      },
+      "to": {
+       "sFromLineM": 502,
+       "offCentrelineM": 0.7
+      }
+     },
+     {
+      "name": "lap bridge, OSM way 1443047846",
+      "from": {
+       "sFromLineM": 1428,
+       "offCentrelineM": 0.4
+      },
+      "to": {
+       "sFromLineM": 1493,
+       "offCentrelineM": 0.2
+      }
+     }
+    ]
+   }
+  },
+  "at-1969": {
+   "name": "Red Bull Ring",
+   "auditFile": "devtests/track-audit/at-1969.json",
+   "verdict": "minor issues",
+   "optional": {
+    "ELEV_SOURCE": "bevals",
+    "note": "GLO-90 4-6 m humps on the Schönberg straight; climbs to T1 / T3 right"
+   }
+  },
+  "my-1999": {
+   "name": "Sepang International Circuit",
+   "auditFile": "devtests/track-audit/my-1999.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "start",
+     "status": "verified",
+     "claim": "Line and grid ~300 m too far down the straight",
+     "evidence": "Fresh OSM API: node 1578189278 \"Start-Finish\" (raceway=start-finish) is 302 m before the game line, 2.6 m off the centreline. Esri imagery: staggered grid marks run back from s -300 towards T15; none between s -270 and the game line; gantry shadow at s ~-270."
+    },
+    {
+     "aspect": "elevation",
+     "status": "verified (surface models)",
+     "claim": "High point on the back straight instead of T10/T11",
+     "evidence": "Own GLO-30 re-sample: highest s 3192 (T10/T11), lowest s 881 (T3); game highest s 4293. Own SRTM request: highest s 3192, lowest s 896. T9 exit s 2843-2993 game -2.0 % vs +3.4 % (SRTM +4.7 %); T2->T3 descent starts late (s 540-671: -0.5 % vs -5.4 %). formula1.com \"22m difference between Turn 3 and Turn 11\"."
+    }
+   ],
+   "apply": {
+    "START_AT": [
+     2.7607601,
+     101.7383513
+    ],
+    "ELEV_SOURCE": "glo30",
+    "settings": {
+     "lowerEnvelope": "rolling 20th percentile over 150 m, then median 50 m, Gauss sigma 40 m (auditor)"
+    }
+   },
+   "optional": {
+    "staticProfile": "devtests/track-audit/my-1999.json proposedCorrections.profileOverride (20 m, from the CURRENT line: re-key after START_AT)"
+   },
+   "breaks": [
+    "grid, pit lane, timing move 302 m back; elev -> recalibrate"
+   ],
+   "positionCheck": {
+    "apply.START_AT": {
+     "sFromLineM": -302,
+     "offCentrelineM": 2.6
+    }
+   }
+  },
+  "cn-2004": {
+   "name": "Shanghai International Circuit",
+   "auditFile": "devtests/track-audit/cn-2004.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "start",
+     "status": "verified (approximate)",
+     "claim": "Line ~210 m too close to T1",
+     "evidence": "Esri imagery z19 re-rendered: staggered grid marks start at s ~-215 and run back past s -400; none between s -190 and the game line (which is beyond the west wing bridge, at the T1 entry). START_AT at s -209 is consistent; +-15 m, confirm on an official map."
+    }
+   ],
+   "apply": {
+    "START_AT": [
+     31.3372693,
+     121.2205226
+    ],
+    "START_AT_confidence": "+-15 m (imagery)"
+   },
+   "optional": {
+    "scenery": [
+     {
+      "name": "west wing",
+      "gameS": [
+       5380,
+       5411
+      ],
+      "undersideM": 24.5,
+      "osm": 1371942060
+     },
+     {
+      "name": "east wing",
+      "gameS": [
+       5019,
+       5050
+      ],
+      "undersideM": 24.5,
+      "osm": 1371942059
+     }
+    ]
+   },
+   "breaks": [
+    "grid, pit lane, timing move ~210 m back -> recalibrate"
+   ],
+   "positionCheck": {
+    "apply.START_AT": {
+     "sFromLineM": -210,
+     "offCentrelineM": 0
+    }
+   }
+  },
+  "gb-1948": {
+   "name": "Silverstone Circuit",
+   "auditFile": "devtests/track-audit/gb-1948.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "start",
+     "status": "verified",
+     "claim": "Line and pits at the pre-2011 National straight",
+     "evidence": "en.wikipedia 2011 British Grand Prix: \"the pits and the start/finish line moved to the straight between Club Corner and the new Abbey\". Fresh OSM API: node 13036050131 (raceway=finish) lies on the game lap 3038 m after the game line (1.1 m off the centreline), node 13036050130 (raceway=start/finish) 151 m further."
+    },
+    {
+     "aspect": "pit",
+     "status": "verified",
+     "claim": "F1 pit lane is the Wing lane on the right",
+     "evidence": "OSM way 227902927 \"International pit lane\" runs on the driver's right from 604 m before to 706 m after the finish node (side test on 73 nodes: 69 right)."
+    }
+   ],
+   "apply": {
+    "START_AT": [
+     52.0682609,
+     -1.0234867
+    ],
+    "START_AT_note": "the timing (finish) line; the start line (grid) is node 13036050130 [52.0693366, -1.0221521], 151 m further on",
+    "PIT_FACTS": {
+     "side": -1
+    }
+   },
+   "optional": {
+    "ELEV_SOURCE": "ealidar",
+    "BANKED": [
+     {
+      "name": "Abbey",
+      "deg": 1,
+      "from": [
+       52.0711914,
+       -1.019826
+      ],
+      "to": [
+       52.0713009,
+       -1.0194313
+      ],
+      "measured": {
+       "lidarMeanDeg": 1,
+       "lidarMaxDeg": 1.3,
+       "gameMeanDeg": 3.5,
+       "gameMaxDeg": 3.8
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 66 m)"
+     },
+     {
+      "name": "Village",
+      "deg": 1.5,
+      "from": [
+       52.0725024,
+       -1.0135819
+      ],
+      "to": [
+       52.0723406,
+       -1.0130157
+      ],
+      "measured": {
+       "lidarMeanDeg": 1.6,
+       "lidarMaxDeg": 1.6,
+       "gameMeanDeg": 4.8,
+       "gameMaxDeg": 5.6
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 31 m)"
+     },
+     {
+      "name": "The Loop",
+      "deg": 1.5,
+      "from": [
+       52.0715682,
+       -1.0126261
+      ],
+      "to": [
+       52.0715995,
+       -1.0119014
+      ],
+      "measured": {
+       "lidarMeanDeg": -1.7,
+       "lidarMaxDeg": -1.8,
+       "gameMeanDeg": -4.9,
+       "gameMaxDeg": -5.7
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 32 m)"
+     },
+     {
+      "name": "Brooklands",
+      "deg": 0.5,
+      "from": [
+       52.0771521,
+       -1.0193439
+      ],
+      "to": [
+       52.0767797,
+       -1.0200572
+      ],
+      "measured": {
+       "lidarMeanDeg": -0.3,
+       "lidarMaxDeg": -0.4,
+       "gameMeanDeg": -3.9,
+       "gameMaxDeg": -4.8
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 55 m)"
+     },
+     {
+      "name": "Luffield",
+      "deg": 1.5,
+      "from": [
+       52.0760695,
+       -1.0202098
+      ],
+      "to": [
+       52.0763987,
+       -1.021677
+      ],
+      "measured": {
+       "lidarMeanDeg": 1.7,
+       "lidarMaxDeg": 1.8,
+       "gameMeanDeg": 4.2,
+       "gameMaxDeg": 4.8
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 52 m)"
+     },
+     {
+      "name": "Chapel Curve",
+      "deg": 0.5,
+      "from": [
+       52.0712254,
+       -1.0093563
+      ],
+      "to": [
+       52.070624,
+       -1.0094699
+      ],
+      "measured": {
+       "lidarMeanDeg": 0.6,
+       "lidarMaxDeg": 0.8,
+       "gameMeanDeg": 3.5,
+       "gameMaxDeg": 4.1
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 68 m)"
+     },
+     {
+      "name": "Stowe",
+      "deg": 0.5,
+      "from": [
+       52.063602,
+       -1.0183386
+      ],
+      "to": [
+       52.0637588,
+       -1.0186917
+      ],
+      "measured": {
+       "lidarMeanDeg": 0.6,
+       "lidarMaxDeg": 0.6,
+       "gameMeanDeg": 3.4,
+       "gameMaxDeg": 3.6
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 74 m)"
+     },
+     {
+      "name": "Club",
+      "deg": 0.5,
+      "from": [
+       52.0662784,
+       -1.0227876
+      ],
+      "to": [
+       52.0662914,
+       -1.0233314
+      ],
+      "measured": {
+       "lidarMeanDeg": 0.6,
+       "lidarMaxDeg": 0.7,
+       "gameMeanDeg": 4.7,
+       "gameMaxDeg": 5.5
+      },
+      "kind": "game banks a corner that is (nearly) flat",
+      "side": "inside-lower (radius 31 m)"
+     }
+    ],
+    "scenery": "tag the Wing as the pit building; add the Wellington Straight bridges and the Wing glass footbridge (building=bridge, min_height 14.5 m)"
+   },
+   "breaks": [
+    "grid, pit lane and timing move 3.04 km round the lap (2010 used the old line: the game has one line for all seasons; 16 of the 17 seasons used the Wing)",
+    "scenery-data.js still has the old pit building as \"pit\": js/scenery.js may draw garages at the old place",
+    "recalibrate (lap start moves)"
+   ],
+   "positionCheck": {
+    "apply.START_AT": {
+     "sFromLineM": -2854,
+     "offCentrelineM": 1.1
+    },
+    "optional.BANKED": [
+     {
+      "name": "Abbey",
+      "from": {
+       "sFromLineM": -2443,
+       "offCentrelineM": 2.5
+      },
+      "to": {
+       "sFromLineM": -2413,
+       "offCentrelineM": 0.6
+      }
+     },
+     {
+      "name": "Village",
+      "from": {
+       "sFromLineM": -1963,
+       "offCentrelineM": 2.3
+      },
+      "to": {
+       "sFromLineM": -1912,
+       "offCentrelineM": 3.5
+      }
+     },
+     {
+      "name": "The Loop",
+      "from": {
+       "sFromLineM": -1822,
+       "offCentrelineM": 2
+      },
+      "to": {
+       "sFromLineM": -1755,
+       "offCentrelineM": 3.3
+      }
+     },
+     {
+      "name": "Brooklands",
+      "from": {
+       "sFromLineM": -870,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -802,
+       "offCentrelineM": 2.3
+      }
+     },
+     {
+      "name": "Luffield",
+      "from": {
+       "sFromLineM": -722,
+       "offCentrelineM": 2.4
+      },
+      "to": {
+       "sFromLineM": -560,
+       "offCentrelineM": 2.6
+      }
+     },
+     {
+      "name": "Chapel Curve",
+      "from": {
+       "sFromLineM": 1151,
+       "offCentrelineM": 0.8
+      },
+      "to": {
+       "sFromLineM": 1224,
+       "offCentrelineM": 3.3
+      }
+     },
+     {
+      "name": "Stowe",
+      "from": {
+       "sFromLineM": 2266,
+       "offCentrelineM": 1.3
+      },
+      "to": {
+       "sFromLineM": 2295,
+       "offCentrelineM": 1.9
+      }
+     },
+     {
+      "name": "Club",
+      "from": {
+       "sFromLineM": 2744,
+       "offCentrelineM": 1.1
+      },
+      "to": {
+       "sFromLineM": 2784,
+       "offCentrelineM": 1.8
+      }
+     }
+    ]
+   }
+  },
+  "ru-2014": {
+   "name": "Sochi Autodrom",
+   "auditFile": "devtests/track-audit/ru-2014.json",
+   "verdict": "minor issues",
+   "verification": [
+    {
+     "aspect": "pit",
+     "status": "verified (minor)",
+     "claim": "Pit limit 60 km/h",
+     "evidence": "FIA 2021 Russian GP event notes (cached text): \"The Pit lane Speed limit ... is hereby amended to 60km/h for the duration of the Event\"."
+    }
+   ],
+   "apply": {
+    "PIT_FACTS": {
+     "limitKmh": 60
+    }
+   },
+   "optional": {
+    "elevationScaleToRangeM": 1.9
+   }
+  },
+  "jp-1962": {
+   "name": "Suzuka International Racing Course",
+   "auditFile": "devtests/track-audit/jp-1962.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "bridge",
+     "status": "verified",
+     "claim": "The crossover is a flat junction in the game",
+     "evidence": "Built track: both roads at y 28.93 m at the crossing (s 2320 / 4690), bank 0; tracks-data elev there 25.8 / 32.0 m. GSI 5 m cache next to the crossing: lower road 43.4 m, upper road approaches 49.4-49.7 m ASL (6.2 m apart). OSM raceway way 175231434 bridge=yes layer 1 at s 4675-4711 (fresh API)."
+    },
+    {
+     "aspect": "elevation",
+     "status": "corrected",
+     "claim": "PUBLISHED 52 m \"not in ja.wikipedia\"",
+     "evidence": "Re-read: ja.wikipedia 鈴鹿サーキット still says \"最大高低差は52 m\"; the lap lidar range is 40.4 m (formula1.com 40.4 m). Keep gsi5m; show both figures."
+    }
+   ],
+   "apply": {
+    "PUBLISHED": [
+     40.4,
+     "formula1.com \"Highs and lows\" (2016) 40.4 m = GSI lidar range of the lap; ja.wikipedia \"最大高低差は52 m\" is the whole site"
+    ]
+   },
+   "needsCode": [
+    "js/track.js: at a self-crossing whose tracks-data heights differ by > 4 m keep both heights (no levelling, no bank fade), draw a 37 m deck with parapets over the lower road, locate()/collision by height"
+   ],
+   "optional": {
+    "BANKED_flatten": [
+     {
+      "name": "T6 Gyaku Bank (no cant)",
+      "deg": 0,
+      "fromLatLon": [
+       34.8423083,
+       136.5379594
+      ],
+      "toLatLon": [
+       34.8432867,
+       136.5370669
+      ],
+      "note": "ends of OSM way 183391631 (逆バンク); needs deg 0 support"
+     }
+    ],
+    "note": "T6 逆バンク has no cant; deg 0 needs js/track.js support or the derived cap"
+   }
+  },
+  "us-1956": {
+   "name": "Watkins Glen International",
+   "auditFile": "devtests/track-audit/us-1956.json",
+   "verdict": "minor issues",
+   "optional": {
+    "BANKED": [
+     {
+      "name": "The Ninety (s 320-410 m)",
+      "deg": 6,
+      "from": [
+       42.343934,
+       -76.928566
+      ],
+      "to": [
+       42.34425,
+       -76.927768
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     },
+     {
+      "name": "The Esses (s 630-840 m)",
+      "deg": 4.5,
+      "from": [
+       42.343879,
+       -76.925145
+      ],
+      "to": [
+       42.342555,
+       -76.923574
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     },
+     {
+      "name": "The Esses (s 910-1041 m)",
+      "deg": 4,
+      "from": [
+       42.341928,
+       -76.923465
+      ],
+      "to": [
+       42.340927,
+       -76.92269
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     },
+     {
+      "name": "The Esses (s 1121-1141 m)",
+      "deg": 4.5,
+      "from": [
+       42.340471,
+       -76.921936
+      ],
+      "to": [
+       42.340345,
+       -76.921765
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     },
+     {
+      "name": "The Esses (s 1301-1321 m)",
+      "deg": 4,
+      "from": [
+       42.339108,
+       -76.920805
+      ],
+      "to": [
+       42.338933,
+       -76.920744
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     },
+     {
+      "name": "Outer Loop (s 2171-2461 m)",
+      "deg": 5.5,
+      "from": [
+       42.33125,
+       -76.920333
+      ],
+      "to": [
+       42.330652,
+       -76.922961
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     },
+     {
+      "name": "The Chute (s 2701-2902 m)",
+      "deg": 5.5,
+      "from": [
+       42.332347,
+       -76.924786
+      ],
+      "to": [
+       42.331742,
+       -76.926402
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     },
+     {
+      "name": "The Toe (s 3192-3402 m)",
+      "deg": 5.5,
+      "from": [
+       42.329122,
+       -76.926219
+      ],
+      "to": [
+       42.329082,
+       -76.927802
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     },
+     {
+      "name": "The Heel (s 3932-4072 m)",
+      "deg": 5,
+      "from": [
+       42.333857,
+       -76.928375
+      ],
+      "to": [
+       42.334261,
+       -76.927168
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     },
+     {
+      "name": "The Fast Lefthander (s 4662-4783 m)",
+      "deg": 4.5,
+      "from": [
+       42.336541,
+       -76.924849
+      ],
+      "to": [
+       42.337175,
+       -76.925881
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     },
+     {
+      "name": "Turn 11 (final corner) (s 4983-5113 m)",
+      "deg": 5.5,
+      "from": [
+       42.337284,
+       -76.928307
+      ],
+      "to": [
+       42.338158,
+       -76.929073
+      ],
+      "source": "measured: USGS 3DEP 1 m lidar cross-slope at +-4 m (median over the corner); no published figure"
+     }
+    ],
+    "COVERED": [
+     {
+      "name": "service tunnel s1098",
+      "from": [
+       42.340698,
+       -76.922312
+      ],
+      "to": [
+       42.340527,
+       -76.922029
+      ],
+      "pad": 5
+     },
+     {
+      "name": "service tunnel s4512",
+      "from": [
+       42.33513,
+       -76.924418
+      ],
+      "to": [
+       42.335306,
+       -76.924471
+      ],
+      "pad": 5
+     }
+    ],
+    "sceneryOverpasses": [
+     {
+      "osmWay": 293208080,
+      "kind": "footbridge",
+      "s": 5161.4,
+      "at": [
+       42.338597,
+       -76.929071
+      ]
+     }
+    ]
+   },
+   "notes": "real 4-6 deg superelevation everywhere (lidar), under-banked in the game; historic venue",
+   "positionCheck": {
+    "optional.BANKED": [
+     {
+      "name": "The Ninety (s 320-410 m)",
+      "from": {
+       "sFromLineM": 320,
+       "offCentrelineM": 1.8
+      },
+      "to": {
+       "sFromLineM": 410,
+       "offCentrelineM": 2.1
+      }
+     },
+     {
+      "name": "The Esses (s 630-840 m)",
+      "from": {
+       "sFromLineM": 630,
+       "offCentrelineM": 3.5
+      },
+      "to": {
+       "sFromLineM": 840,
+       "offCentrelineM": 0.7
+      }
+     },
+     {
+      "name": "The Esses (s 910-1041 m)",
+      "from": {
+       "sFromLineM": 910,
+       "offCentrelineM": 0.9
+      },
+      "to": {
+       "sFromLineM": 1041,
+       "offCentrelineM": 1.3
+      }
+     },
+     {
+      "name": "The Esses (s 1121-1141 m)",
+      "from": {
+       "sFromLineM": 1121,
+       "offCentrelineM": 1.8
+      },
+      "to": {
+       "sFromLineM": 1141,
+       "offCentrelineM": 2.1
+      }
+     },
+     {
+      "name": "The Esses (s 1301-1321 m)",
+      "from": {
+       "sFromLineM": 1301,
+       "offCentrelineM": 0.6
+      },
+      "to": {
+       "sFromLineM": 1321,
+       "offCentrelineM": 0.1
+      }
+     },
+     {
+      "name": "Outer Loop (s 2171-2461 m)",
+      "from": {
+       "sFromLineM": 2171,
+       "offCentrelineM": 0.8
+      },
+      "to": {
+       "sFromLineM": 2461,
+       "offCentrelineM": 1.7
+      }
+     },
+     {
+      "name": "The Chute (s 2701-2902 m)",
+      "from": {
+       "sFromLineM": 2702,
+       "offCentrelineM": 0.7
+      },
+      "to": {
+       "sFromLineM": -2531,
+       "offCentrelineM": 0.9
+      }
+     },
+     {
+      "name": "The Toe (s 3192-3402 m)",
+      "from": {
+       "sFromLineM": -2241,
+       "offCentrelineM": 0.3
+      },
+      "to": {
+       "sFromLineM": -2031,
+       "offCentrelineM": 2
+      }
+     },
+     {
+      "name": "The Heel (s 3932-4072 m)",
+      "from": {
+       "sFromLineM": -1501,
+       "offCentrelineM": 0.6
+      },
+      "to": {
+       "sFromLineM": -1361,
+       "offCentrelineM": 0.1
+      }
+     },
+     {
+      "name": "The Fast Lefthander (s 4662-4783 m)",
+      "from": {
+       "sFromLineM": -770,
+       "offCentrelineM": 1
+      },
+      "to": {
+       "sFromLineM": -650,
+       "offCentrelineM": 2.1
+      }
+     },
+     {
+      "name": "Turn 11 (final corner) (s 4983-5113 m)",
+      "from": {
+       "sFromLineM": -450,
+       "offCentrelineM": 0.9
+      },
+      "to": {
+       "sFromLineM": -320,
+       "offCentrelineM": 3.9
+      }
+     }
+    ],
+    "optional.COVERED": [
+     {
+      "name": "service tunnel s1098",
+      "from": {
+       "sFromLineM": 1081,
+       "offCentrelineM": 1.5
+      },
+      "to": {
+       "sFromLineM": 1111,
+       "offCentrelineM": 1.9
+      }
+     },
+     {
+      "name": "service tunnel s4512",
+      "from": {
+       "sFromLineM": -930,
+       "offCentrelineM": 0.9
+      },
+      "to": {
+       "sFromLineM": -911,
+       "offCentrelineM": 0.7
+      }
+     }
+    ]
+   }
+  },
+  "ae-2009": {
+   "name": "Yas Marina Circuit",
+   "auditFile": "devtests/track-audit/ae-2009.json",
+   "verdict": "major issues",
+   "verification": [
+    {
+     "aspect": "pit",
+     "status": "verified",
+     "claim": "Pit exit tunnels under the track and rejoins on the left at T3",
+     "evidence": "OSM: pit lane 176695254 on the right from s -406 to 256, tunnel way 176695255 (tunnel=yes, layer -1) s 256-297 (fresh API query confirms tunnel=yes at s 278-291), then 176695253 on the LEFT (25/25 nodes) to s 728. en.wikipedia: \"the pit exit, which dips under the main circuit by way of a tunnel\"."
+    },
+    {
+     "aspect": "bridge",
+     "status": "verified",
+     "claim": "The lap passes under the W hotel link",
+     "evidence": "Fresh OSM API: raceway way 1255169704 covered=yes at s 4408-4437, building:part 1387292013 (min_height 9, height 18) crosses the lap at s 4408 / 4436. en.wikipedia: \"passes by the marina and under the W Abu Dhabi hotel\"."
+    }
+   ],
+   "apply": {
+    "scenery": [
+     {
+      "osmWay": 1387292013,
+      "kind": "W hotel link (building:part)",
+      "undersideM": 9,
+      "topM": 18,
+      "lapS": [
+       4408,
+       4437
+      ]
+     }
+    ],
+    "pitLaneReal": {
+     "side": -1,
+     "limitKmh": 80,
+     "osmWays": [
+      176695254,
+      176695255,
+      176695253
+     ],
+     "entryLL": [
+      24.4685853,
+      54.6029417
+     ],
+     "exitLL": [
+      24.4735071,
+      54.6058105
+     ],
+     "exitTunnel": {
+      "osmWay": 176695255,
+      "underLapS": 282,
+      "from": [
+       24.470176,
+       54.608055
+      ],
+      "to": [
+       24.470615,
+       54.607953
+      ]
+     },
+     "rejoinSide": 1,
+     "change": "needs OSM pit geometry + underpass support in js/track.js"
+    }
+   },
+   "optional": {
+    "elevation": "timing-Z profile (rms 1.45 -> 0.05 m; licence question); START_AT [24.46995, 54.605311] (-16 m)",
+    "BANKED": [
+     {
+      "name": "T9",
+      "deg": 5,
+      "from": [
+       24.463222,
+       54.608575
+      ],
+      "to": [
+       24.464561,
+       54.608796
+      ],
+      "optional": true,
+      "note": "The Race 5 deg vs RaceFans 5 % (2.9 deg); derived 2.9-3.9 deg today"
+     }
+    ]
+   },
+   "needsCode": [
+    "js/track.js: real pit geometry with an underpass and a left-side merge"
+   ],
+   "positionCheck": {
+    "optional.BANKED": [
+     {
+      "name": "T9",
+      "from": {
+       "sFromLineM": -1788,
+       "offCentrelineM": 0
+      },
+      "to": {
+       "sFromLineM": -1520,
+       "offCentrelineM": 0
+      }
+     }
+    ]
+   }
+  }
+ }
+}

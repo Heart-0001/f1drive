@@ -1,0 +1,366 @@
+{
+ "id": "fr-1960",
+ "name": "Circuit de Nevers Magny-Cours",
+ "audited": "2026-10-01",
+ "verdict": "minor issues",
+ "layoutNote": "Grand Prix circuit 2003-present (4.411 km, the last F1 layout; French GP 1991-2008). Not on any 2010-2026 calendar.",
+ "measurements": {
+  "layout": {
+   "osmRelation": "11249753",
+   "osmLength": 4457.8,
+   "gameBuiltLength": 4410.9,
+   "gameLengthKm": 4.412,
+   "gameToOsm": {
+    "meanM": 0.41,
+    "p50M": 0.33,
+    "p95M": 0.9,
+    "maxM": 2.4,
+    "maxAtGameS": 446,
+    "runsOver8m": []
+   },
+   "osmToGame": {
+    "meanM": 0.4,
+    "p95M": 0.9,
+    "maxM": 2.4,
+    "runsOver8mOsmS": []
+   }
+  },
+  "datasetGeodesicLengthM": 4458.5,
+  "buildScale": 0.99361,
+  "lengthNote": "the dataset line and the OSM GP way 63951656 (tagged \"4 411 m pour la piste Grand Prix\") agree within 2.4 m and both measure ~4458 m; the build shrinks the circuit by 0.64 % to the official 4.411 km",
+  "direction": "clockwise; OSM oneway way 63951656 (4411 m) and pit lane 195975305 run with the game direction",
+  "start": "no start-finish node in OSM; points[0] lies on the pit straight between the OSM pit lane ends (cosmetic, unverified)",
+  "pit": {
+   "game": {
+    "side": "left (+1)",
+    "limitKmh": 80,
+    "entryS": 4270.9,
+    "exitS": 92,
+    "laneLengthM": 404
+   },
+   "osm": {
+    "way": 195975305,
+    "side": "left",
+    "entryS": 4135,
+    "entryLatLon": [
+     46.862807,
+     3.1607953
+    ],
+    "exitMergeS": 478,
+    "exitMergeLatLon": [
+     46.8676721,
+     3.1656763
+    ],
+    "laneLengthM": 728
+   }
+  },
+  "elevation": {
+   "source": "IGN RGE ALTI 1-5 m bare-earth DEM via https://data.geopf.fr/altimetrie (resource ign_rge_alti_wld), sampled every 5 m on the OSM centreline; cache devtests/track-audit/cache/ignalti/",
+   "osmLine": {
+    "id": "fr-1960",
+    "source": "ignalti",
+    "step": 4.998,
+    "samples": 892,
+    "osmLength": 4457.8,
+    "covered": [],
+    "rawMinASL": 207.5,
+    "rawMaxASL": 237.9,
+    "realRange": 30.3,
+    "realMinAtOsmS": 530,
+    "realMaxAtOsmS": 3498,
+    "realMinAtGameS": 531,
+    "realMaxAtGameS": 3499,
+    "gameRange": 29.9,
+    "gameRangeOnOsm": 29.9,
+    "residualRms": 0.73,
+    "residualMax": 1.7,
+    "residualMaxAtGameS": 3725,
+    "real": {
+     "g20": {
+      "win": 20,
+      "maxClimb": {
+       "pct": 4.5,
+       "fromS": 3223,
+       "toS": 3243,
+       "at": [
+        46.86126880252355,
+        3.166313470432322
+       ],
+       "rise": 0.9
+      },
+      "maxDescent": {
+       "pct": -4.6,
+       "fromS": 3723,
+       "toS": 3743,
+       "at": [
+        46.86050383314182,
+        3.1640023260616603
+       ],
+       "rise": -0.9
+      }
+     },
+     "g50": {
+      "win": 50,
+      "maxClimb": {
+       "pct": 4.3,
+       "fromS": 3208,
+       "toS": 3258,
+       "at": [
+        46.86136268248543,
+        3.1664550031204644
+       ],
+       "rise": 2.2
+      },
+      "maxDescent": {
+       "pct": -4.3,
+       "fromS": 3718,
+       "toS": 3768,
+       "at": [
+        46.86046970793932,
+        3.164045102723946
+       ],
+       "rise": -2.2
+      }
+     },
+     "g100": {
+      "win": 100,
+      "maxClimb": {
+       "pct": 4,
+       "fromS": 3198,
+       "toS": 3298,
+       "at": [
+        46.86142519611957,
+        3.1665494701437016
+       ],
+       "rise": 4
+      },
+      "maxDescent": {
+       "pct": -4.2,
+       "fromS": 3653,
+       "toS": 3753,
+       "at": [
+        46.86002608030685,
+        3.1646011993336596
+       ],
+       "rise": -4.2
+      }
+     },
+     "runs100_4pct": [
+      {
+       "fromS": 3188,
+       "toS": 3303,
+       "peakPct": 4
+      },
+      {
+       "fromS": 3638,
+       "toS": 3783,
+       "peakPct": -4.2
+      }
+     ]
+    },
+    "gameOnOsm": {
+     "g50": {
+      "win": 50,
+      "maxClimb": {
+       "pct": 4,
+       "fromS": 3193,
+       "toS": 3243,
+       "at": [
+        46.86145645293664,
+        3.1665967036553204
+       ],
+       "rise": 2
+      },
+      "maxDescent": {
+       "pct": -4.2,
+       "fromS": 3683,
+       "toS": 3733,
+       "at": [
+        46.86023083152184,
+        3.164344539359946
+       ],
+       "rise": -2.1
+      }
+     },
+     "g100": {
+      "win": 100,
+      "maxClimb": {
+       "pct": 3.8,
+       "fromS": 3173,
+       "toS": 3273,
+       "at": [
+        46.86160014735294,
+        3.1667508891407343
+       ],
+       "rise": 3.8
+      },
+      "maxDescent": {
+       "pct": -4.1,
+       "fromS": 3643,
+       "toS": 3743,
+       "at": [
+        46.85995782280594,
+        3.1646867405454735
+       ],
+       "rise": -4.1
+      }
+     }
+    },
+    "gradeDiffRuns100": []
+   },
+   "game": {
+    "range": 29.95,
+    "g50": {
+     "win": 50,
+     "maxClimb": {
+      "pct": 4,
+      "fromS": 3193,
+      "toS": 3243,
+      "at": [
+       46.8612243,
+       3.1662713
+      ],
+      "rise": 2
+     },
+     "maxDescent": {
+      "pct": -4.2,
+      "fromS": 3685,
+      "toS": 3735,
+      "at": [
+       46.8605088,
+       3.163983
+      ],
+      "rise": -2.1
+     }
+    },
+    "g100": {
+     "win": 100,
+     "maxClimb": {
+      "pct": 3.8,
+      "fromS": 3169,
+      "toS": 3269,
+      "at": [
+       46.8613822,
+       3.1664904
+      ],
+      "rise": 3.8
+     },
+     "maxDescent": {
+      "pct": -4.1,
+      "fromS": 3645,
+      "toS": 3745,
+      "at": [
+       46.8602349,
+       3.1643315
+      ],
+      "rise": -4.1
+     }
+    }
+   }
+  },
+  "banking": {
+   "gameMaxAbsDeg": 5.91,
+   "gameSectionsOver3deg": 17,
+   "real": "no banking published"
+  },
+  "covered": [
+   {
+    "name": "footbridge",
+    "osmWay": 199007717,
+    "gameS": 18
+   },
+   {
+    "name": "footbridge",
+    "osmWay": 199007702,
+    "gameS": 1408
+   },
+   {
+    "name": "footbridge (spans two parts of the track)",
+    "osmWay": 820455063,
+    "gameS": [
+     2035,
+     2999
+    ]
+   },
+   {
+    "name": "service road bridge",
+    "osmWay": 199007695,
+    "gameS": 3726
+   }
+  ]
+ },
+ "findings": [
+  {
+   "aspect": "pit",
+   "game": "Lane on the left (side +1), entry line s 4271, exit s 92, 404 m long, 80 km/h.",
+   "real": "OSM pit lane (way 195975305, relation 11249753 role pit_lane) is on the left; it leaves the track at s 4135 before the Lycee chicane ([46.862807, 3.1607953]) and rejoins at s 478 ([46.8676721, 3.1656763]), 728 m long.",
+   "severity": "minor",
+   "proposedFix": "Side is correct. Optional pitEntry / pitExit points as for Monaco. Limit: no 2010-2026 F1 event; keep 80.",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01): way 195975305, relation 11249753"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "game": "Derived banking up to 5.91 deg: s 1638 (Adelaide hairpin) 5.9, s 3407-3475 5.7, s 4017-4055 5.7, s 2437-2573 5.2, final chicane s 4127-4181 5.1 deg.",
+   "real": "No banked corners published.",
+   "severity": "minor",
+   "proposedFix": "Same global cap as Monaco (2-3 deg) for circuits without published banking.",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Circuit_de_Nevers_Magny-Cours (fetched 2026-10-01: Grand Prix Circuit 2003-present 4.411 km, 17 turns; French GP 1991-2008)"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "game": "No bridges over the track.",
+   "real": "OSM: footbridges cross over the track at s 18, 1408, 2035 and 2999 (ways 199007717, 199007702, 820455063) and a service-road bridge at s 3726 (way 199007695).",
+   "severity": "cosmetic",
+   "proposedFix": "Optional: draw them as gantries (js/scenery.js only draws man_made=bridge areas).",
+   "sources": [
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01)"
+   ]
+  },
+  {
+   "aspect": "length",
+   "game": "lengthKm 4.412 (circuit scaled by 0.9936).",
+   "real": "Official 4.411 km; the OSM GP centreline measures 4457.8 m.",
+   "severity": "cosmetic",
+   "proposedFix": "None (keep the official length).",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Circuit_de_Nevers_Magny-Cours (fetched 2026-10-01: Grand Prix Circuit 2003-present 4.411 km, 17 turns; French GP 1991-2008)",
+    "OpenStreetMap (ODbL), Overpass API queries cached in devtests/track-audit/cache/overpass/ (fetched 2026-10-01): way 63951656"
+   ]
+  },
+  {
+   "aspect": "elevation",
+   "game": "Range 29.95 m; max climb 3.8 % / descent -4.1 % over 100 m.",
+   "real": "IGN lidar on the OSM line: range 30.3 m, +4.0 / -4.2 % over 100 m, residual RMS 0.73 m: matches.",
+   "severity": "cosmetic",
+   "proposedFix": "None.",
+   "sources": [
+    "IGN RGE ALTI 1-5 m bare-earth DEM via https://data.geopf.fr/altimetrie (resource ign_rge_alti_wld), sampled every 5 m on the OSM centreline; cache devtests/track-audit/cache/ignalti/"
+   ]
+  }
+ ],
+ "proposedCorrections": {
+  "pitFacts": {
+   "side": 1,
+   "limitKmh": 80,
+   "realEntry": [
+    46.862807,
+    3.1607953
+   ],
+   "realExitMerge": [
+    46.8676721,
+    3.1656763
+   ]
+  },
+  "banking": {
+   "bankMaxDeg": 3
+  },
+  "elevation": "keep ignalti",
+  "layout": "keep"
+ },
+ "method": "devtests/track-audit/west/: dump-game.js (game build), ovp.mjs / osm-fetch2.mjs (Overpass), osm-loop.mjs + pr-chicane-loop.mjs (OSM reference loops), layout.mjs, profile.mjs (DEM on the OSM line vs game), raw-vs-game.mjs, crossings.mjs, way-on-track.mjs, direction.mjs, corners.mjs, madring-bank.mjs; results in west/res/",
+ "globalNote": "tools/build-tracks.mjs projects with kz = 110540 m/deg and kx = 111320 cos(lat) m/deg: at these latitudes north-south distances come out 0.31-0.39 % shorter than east-west ones before the official-length rescale (WGS84: 111044-111168 m/deg of latitude). Cosmetic (<= 4 m per km)."
+}

@@ -7,6 +7,8 @@
 //   npx electron devtests/track-audit/perception/shots.js
 //   env TRACK=<id>  PLAN=<json file | inline json array>  TAG=<suffix>  W=1280 H=720
 //       PATCH=<snap-relative file>=<replacement>[,...]   e.g. PATCH=js/cockpit.js=devtests/track-audit/perception/patched/cockpit.js
+//       CFG=<json>  window.PERC_CFG for patched/cockpit.js (see patched/make.js), e.g. CFG={"fovMin":50,"fovMax":54}
+//       SCN=<json>  window.PERC_SCN for patched/scenery.js (set before the track loads), e.g. SCN={"bankFence":8}
 //       DUMP=1   also write out/<track>-samples.json (s, y, grade, bank, curvature, lat, lon per sample)
 // Shot: { n: name, at: [lat, lon] | i: sample | s: metres along the lap | f: lap fraction,
 //         lead: metres driven before the target (default 450; 0 = standing still at the target),
@@ -83,6 +85,7 @@ const LIB = `(function () {
   };
   // drive from lead metres before the target at the racing line's speed there; freeze on arrival
   P.go = function (q) {
+    P.q = q;
     var T = tr(), S = T.samples, n = S.length, ds = T.length / n, car = F1.game.car, L = F1.game.raceLine;
     var tgt = P.index(q), lead = q.lead === undefined ? 450 : q.lead, i0 = wq(tgt - Math.round(lead / ds));
     P.hold = false; P.armed = false; P.drive = false;
@@ -113,6 +116,12 @@ const LIB = `(function () {
       var k = (i + Math.round(d / ds)) % n, a = S[k], p = scr(a.x, a.y, a.z);
       ahead.push({ d: d, dy: +(a.y - pos.y).toFixed(2), grade: +(a.grade * 100).toFixed(1), bank: +(a.bank * D).toFixed(1), sx: p.x, sy: p.y, front: p.front });
     });
+    // q.marks: absolute lap positions (m) projected on the screen (centreline and both edges): apparent size of a hill
+    var marks = (P.q && P.q.marks || []).map(function (sm) {
+      var k = Math.round(sm / ds) % n, a = S[k], hw = a.halfW || 6, c = scr(a.x, a.y, a.z);
+      var l = scr(a.x + a.nx * hw, T.surfaceY ? T.surfaceY(k, hw) : a.y, a.z + a.nz * hw), r = scr(a.x - a.nx * hw, T.surfaceY ? T.surfaceY(k, -hw) : a.y, a.z - a.nz * hw);
+      return { s: sm, dy: +(a.y - pos.y).toFixed(2), dist: Math.round(Math.hypot(a.x - pos.x, a.z - pos.z)), sx: c.x, sy: c.y, front: c.front, edgeA: [l.x, l.y], edgeB: [r.x, r.y] };
+    });
     var gmax = -1e9, gmin = 1e9, bmax = 0;
     for (var k = -50; k <= 150; k++) { var a = S[(i + k + n) % n]; if (a.grade > gmax) gmax = a.grade; if (a.grade < gmin) gmin = a.grade; if (Math.abs(a.bank) > Math.abs(bmax)) bmax = a.bank; }
     return { i: i, s: Math.round(s.s), y: +s.y.toFixed(2), gradePct: +(s.grade * 100).toFixed(1), bankDeg: +(s.bank * D).toFixed(2), d: +st.d.toFixed(2),
@@ -121,7 +130,7 @@ const LIB = `(function () {
       camH: +(pos.y - groundY).toFixed(2), viewPitch: +viewPitch.toFixed(2), viewRoll: +viewRoll.toFixed(2),
       horizonY: horizon.y, horizonFront: horizon.front, H: innerHeight, pxPerDegCentre: +((innerHeight / 2) / Math.tan(cam.fov / 2 / D) / D).toFixed(2),
       win: { gradeMinPct: +(gmin * 100).toFixed(1), gradeMaxPct: +(gmax * 100).toFixed(1), bankMaxDeg: +(bmax * D).toFixed(1) },
-      ahead: ahead };
+      ahead: ahead, perc: window.__perc || null, cfg: window.PERC_CFG || null, marks: marks };
   };
   P.dump = function () {
     var T = tr(), S = T.samples, g = F1.game.trackData.geo, out = { length: T.length, n: S.length, s: [], y: [], grade: [], bank: [], curv: [], lat: [], lon: [], halfW: [] };
@@ -178,6 +187,7 @@ app.whenReady().then(async () => {
     if (err) console.log('error overlay: ' + err.slice(0, 400));
     await js(AUTOPILOT + '\n;true');
     await js(LIB);
+    if (process.env.SCN) await js('window.PERC_SCN = ' + process.env.SCN + '; true');
     const clicked = await js(`(function () { var i = F1_TRACKS.findIndex(function (t) { return t.id === ${J(TRACK)}; });
       var c = document.querySelector('.card[data-i="' + i + '"]');
       if (!c) { var cs = [].slice.call(document.querySelectorAll('.card')); c = cs.filter(function (n) { return n.textContent.indexOf(F1_TRACKS[i].name) >= 0; })[0]; }
@@ -185,6 +195,7 @@ app.whenReady().then(async () => {
     const ok = clicked && await until(`F1.game && F1.game.running && F1.game.trackData && F1.game.trackData.id === ${J(TRACK)} && F1.game.raceLine`, 40000);
     if (!ok) { console.log('track did not load'); app.exit(1); return; }
     await js('__p.hook()');
+    if (process.env.CFG) await js('window.PERC_CFG = ' + process.env.CFG + '; true');
     if (process.env.DUMP) {
       fs.writeFileSync(path.join(OUT, TRACK + '-samples.json'), J(await js('__p.dump()')));
       console.log('dumped samples');

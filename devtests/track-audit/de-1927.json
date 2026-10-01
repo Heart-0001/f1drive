@@ -1,0 +1,5799 @@
+{
+ "id": "de-1927",
+ "name": "Nürburgring",
+ "auditedBy": "track audit, region be-nl-de-gb (2026-10-01)",
+ "verdict": "major issues",
+ "summary": "Layout (GP-Strecke 2002-present with the Mercedes Arena and the tight NGK/Veedol car chicane), length, direction, start line and the total range (53.4 m vs lidar 55.9 m, published 55 m) are right. The GLO-90 profile misplaces gradients by 100-200 m: the 7 % climb up to the NGK chicane is 3 % in the game while the chicane itself climbs 8.5 % (real 4 %), and the Mercedes Arena gets an invented 9 m dip (-7.4 % / +5.2 % where the road is within +-2.6 %). Scenery: besides the real BMW-Bruecke, a phantom deck floats over the road 1.47 km after the line (the OSM outline of the bridge the lap itself runs on).",
+ "findings": [
+  {
+   "aspect": "gradient",
+   "severity": "minor",
+   "game": "GLO-90 profile (range 53.4 m): max +9.0 % / -9.3 % over 50 m; the climb up to the NGK chicane is displaced ~150 m: 2.6-3.1 % where the road climbs 7.1-7.4 % (670-730 m before the line) and 8.5 % (100 m) inside the chicane (550 m before the line) where it climbs 4.0 %; after T1, in the Mercedes-Arena section (0.74-1.15 km after the line), -7.4 % then +5.2 % and up to 8.8 m below the lidar; 13 stretches differ by > 2 pp over 100 m; RMS 3.4 m.",
+   "real": "RLP DGM1 lidar along the OSM centreline (underpasses bridged): 564.2 m ASL (Goodyear/Dunlop-Kehre, the lowest point) to 620.1 m (~200 m before the line, Coca-Cola-Kurve / start straight), range 55.9 m (published 55 m, de.wikipedia infobox \"Hoehenunterschied 55 m\" for the GP-Strecke); steepest climb 8.5 % (50 m) / 8.3 % (100 m) in the Michael-Schumacher-S (game 7.2: fine), 7.1-7.4 % after the Advan-Bogen; steepest descents -6.3 % (50 m) 1.4 km before the line and -5.9 % into the Ford-Kurve; Mercedes Arena within -2.6..-1.1 %.",
+   "proposedFix": "ELEV_SOURCE 'de-1927' = a new RLP DGM1 source (9 open GeoTIFF tiles, 1 km, see proposedCorrection.elevationSource) with the terrain-model settings AND three COVERED entries (the bare-earth DTM drops 7-8 m under the lap's two bridges and over the service tunnel).",
+   "sources": [
+    "LVermGeo RLP DGM1 (1 m lidar DTM, 2025 tiles, Datenlizenz Deutschland Namensnennung 2.0), https://geobasis-rlp.de/data/dgm1/current/tif/dgm1_32_{352..354}_{5576..5578}_1_rp_2025.tif; cached in devtests/track-audit/cache/rlp-dgm1/",
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/de-1927.json; relation 38567 \"Nuerburgring Grand Prix Strecke\"",
+    "de.wikipedia.org/wiki/Nürburgring (infobox Hoehenunterschied2 = 55)"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "severity": "major",
+   "game": "js/scenery.js builds two decks over the road: the BMW-Bruecke 50 m after the line (correct, shots/shot-nurb-bmw-real.png) and a PHANTOM floating deck 1466 m after the line (underside 8.7 m above the road, shots/shot-nurb-phantom.png) from OSM way 790945811 (man_made=bridge, layer 1, 2033 m2), which is the structure the lap itself runs ON (the raceway way 1443047846 there is bridge=yes, layer 1, together with service / footway bridges 223251412, 849684573, 74171524).",
+   "real": "OSM: the only structure over the lap is the BMW-Bruecke (way 34444288, bridge=covered, cable-stayed footbridge). Way 790945811 is a bridge the lap crosses on.",
+   "proposedFix": "Drop OSM way 790945811 from the scenery bridges (proposedCorrection.sceneryBridgesToDrop); keep 34444288.",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/de-1927.json; ways 790945811, 1443047846, 34444288",
+    "game: node devtests/track-audit/be-nl-de-gb/bridges.js de-1927"
+   ]
+  },
+  {
+   "aspect": "bridge",
+   "severity": "cosmetic",
+   "game": "Elevation: the lap's bridges are not special in the data (GLO-90 sees the embankment; fine).",
+   "real": "OSM: the lap runs over two bridges (ways 1443047844 at 1.84 km before the line and 1443047846 at 1.43 km after it) and over a service tunnel (way 31010592, 0.5 km after the line); the BMW-Bruecke (way 34444288, bridge=covered) crosses over the lap. A bare-earth DTM reads the ground under the two bridges and at the tunnel (dips of 7-8 m in the raw lidar).",
+   "proposedFix": "With a lidar source add COVERED for de-1927 (straight between the ends, pad 0): {name: \"bridge (OSM way 1443047844)\", from:[50.330283, 6.938282], to:[50.330884, 6.938575]} (OSM s 1472-1542), {name: \"over service tunnel (OSM way 31010592)\", from:[50.332661, 6.943229], to:[50.332344, 6.942656]} (s 3784-3838), {name: \"bridge (OSM way 1443047846)\", from:[50.330639, 6.939605], to:[50.330069, 6.939355]} (s 4758-4824): see proposedCorrection.covered.",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/de-1927.json; ways 1443047844, 1443047846, 31010592, 34444288",
+    "LVermGeo RLP DGM1 (1 m lidar DTM, 2025 tiles, Datenlizenz Deutschland Namensnennung 2.0), https://geobasis-rlp.de/data/dgm1/current/tif/dgm1_32_{352..354}_{5576..5578}_1_rp_2025.tif; cached in devtests/track-audit/cache/rlp-dgm1/"
+   ]
+  },
+  {
+   "aspect": "layout",
+   "severity": "cosmetic",
+   "game": "GP-Strecke incl. Mercedes Arena, 5.148 km; within 2.2 m of OSM (mean 0.59 m) when the NGK chicane is taken through OSM way 1149161211; direction correct.",
+   "real": "en.wikipedia infobox \"GP-Strecke (2001-present)\" 5.148 km (F1 2011, 2013, 2020). At the NGK (Veedol) chicane OSM has two paths: way 1149161211 (sharp left-right, the car chicane rebuilt 1997) and way 820679450 \"NGK-Schikane\" (a gentler line, used by OSM relation 38567; de.wikipedia: since 1997 a separate line for motorcycle races, also used in the 24 h race). The dataset follows the sharp car line (up to 30 m from way 820679450).",
+   "proposedFix": "None (the dataset has the F1 line). Note for other auditors: OSM relation 38567 routes via the motorcycle variant.",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/de-1927.json; ways 1149161211 / 820679450, relation 38567",
+    "de.wikipedia.org/wiki/Nürburgring (\"Diese engere Streckenfuehrung ... 1997 eine gesonderte Streckenfuehrung fuer Motorradrennen\")",
+    "en.wikipedia.org/wiki/Nürburgring"
+   ]
+  },
+  {
+   "aspect": "banking",
+   "severity": "minor",
+   "game": "Derived bank 4.6-5.9 deg in the Mercedes Arena and NGK chicane; 3.5 deg in the Goodyear-Kehre.",
+   "real": "Lidar: Mercedes Arena 1.1-1.4 deg, NGK chicane -1.0..-1.6 deg; Goodyear(Dunlop)-Kehre 5.2-5.8 deg and Ford-Kurve 4.3-4.7 deg real cambers.",
+   "proposedFix": "Optional bankOverrides from the lidar (proposedCorrection.bankOverridesFromLidar).",
+   "sources": [
+    "LVermGeo RLP DGM1 (1 m lidar DTM, 2025 tiles, Datenlizenz Deutschland Namensnennung 2.0), https://geobasis-rlp.de/data/dgm1/current/tif/dgm1_32_{352..354}_{5576..5578}_1_rp_2025.tif; cached in devtests/track-audit/cache/rlp-dgm1/"
+   ]
+  },
+  {
+   "aspect": "pit",
+   "severity": "minor",
+   "game": "Right side (correct); entry 130 m before the line, exit 164 m after; 80 km/h. The game's pit lane (js/track.js) is generated beside the start / finish straight from up to 250 m before to 250 m after the line; it cannot follow a real lane that leaves at a chicane or rejoins after the first corner.",
+   "real": "OSM way 30815119 \"Boxengasse\" (952 m, raceway=pitlane): leaves 492 m before the line (from the NGK chicane / Coca-Cola-Kurve) and rejoins 494 m after it (after the Castrol-S / T1). de.wikipedia: \"Laenge der Boxengasse: 381,4 Meter\" (the garage row). No source found for a limit other than 80 km/h.",
+   "proposedFix": "None required.",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/de-1927.json; way 30815119",
+    "de.wikipedia.org/wiki/Nürburgring"
+   ]
+  },
+  {
+   "aspect": "start",
+   "severity": "cosmetic",
+   "game": "Line = dataset first vertex.",
+   "real": "OSM node 370477491 \"Start-Ziel\" is 6 m before the game line (2 m off the centreline); node 3099078401 raceway=start-finish \"Nuerburgring Start-Finish\" is 239 m further on (probably a grid / other series' line).",
+   "proposedFix": "None.",
+   "sources": [
+    "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/de-1927.json; nodes 370477491, 3099078401"
+   ]
+  }
+ ],
+ "proposedCorrection": {
+  "elevationSource": {
+   "id": "rlpdgm1",
+   "apply": "ELEV_SOURCE['de-1927'] = 'rlpdgm1'",
+   "label": "LVermGeo RLP DGM1 1 m lidar DTM, Datenlizenz Deutschland Namensnennung 2.0, \"GeoBasis-DE / LVermGeoRP (2026)\"",
+   "files": "https://geobasis-rlp.de/data/dgm1/current/tif/dgm1_32_<E km>_<N km>_1_rp_2025.tif for E 352..354, N 5576..5578 (names from the directory listing; 1 km tiles, Float32 LZW with horizontal predictor 2 on the 32-bit words, ~1.4 MB each)",
+   "settings": "dtm: true + the three COVERED entries",
+   "expected": {
+    "rangeM": 55.8,
+    "max50mPct": 8.3,
+    "min50mPct": -6,
+    "rmsVsLidarM": 0.08,
+    "note": "sim.mjs de-1927 (pipeline + js/track.js smoothing, underpasses bridged)"
+   }
+  },
+  "covered": [
+   {
+    "name": "lap bridge, OSM way 1443047844",
+    "from": [
+     50.330283,
+     6.938282
+    ],
+    "to": [
+     50.330884,
+     6.938575
+    ],
+    "pad": 0
+   },
+   {
+    "name": "lap over service tunnel, OSM way 31010592",
+    "from": [
+     50.332661,
+     6.943229
+    ],
+    "to": [
+     50.332344,
+     6.942656
+    ],
+    "pad": 0
+   },
+   {
+    "name": "lap bridge, OSM way 1443047846",
+    "from": [
+     50.330639,
+     6.939605
+    ],
+    "to": [
+     50.330069,
+     6.939355
+    ],
+    "pad": 0
+   }
+  ],
+  "sceneryBridgesToDrop": {
+   "osmWays": [
+    790945811
+   ],
+   "keep": [
+    34444288
+   ],
+   "rule": "a man_made=bridge outline that contains the lap centreline and has a tunnel / layer<0 way crossing the lap inside it, or a bridge=yes raceway inside it, is the lap own deck: do not build it over the road (tools/build-scenery.mjs or js/scenery.js addBridge)"
+  },
+  "published": {
+   "de-1927": [
+    55,
+    "de.wikipedia.org/wiki/Nürburgring infobox (GP-Strecke) \"Hoehenunterschied 55 m\"; lidar 55.9 m"
+   ]
+  },
+  "bankOverridesFromLidar": {
+   "note": "optional, minor: replaces the curvature-derived bank where the 0.5-1 m lidar DTM measures a different cross slope (+-4 m about the OSM centreline, median of 3 samples 10 m apart); the full measured series is under measurements.crossSlope.series",
+   "list": [
+    {
+     "side": "inside-lower (radius 20 m)",
+     "name": "Nürburgring Sprintstrecke (OSM s 3951-3991 m, 615 m from the line)",
+     "deg": 1,
+     "from": [
+      50.3317663,
+      6.9413513
+     ],
+     "to": [
+      50.3318767,
+      6.9409565
+     ],
+     "measured": {
+      "lidarMeanDeg": 1.1,
+      "lidarMaxDeg": 1.1,
+      "gameMeanDeg": 5,
+      "gameMaxDeg": 5.8
+     },
+     "kind": "game banks a corner that is (nearly) flat"
+    },
+    {
+     "side": "inside-lower (radius 58 m)",
+     "name": "Nürburgring Sprintstrecke (OSM s 4121-4231 m, 785 m from the line)",
+     "deg": 1.5,
+     "from": [
+      50.332948,
+      6.9416486
+     ],
+     "to": [
+      50.333623,
+      6.940829
+     ],
+     "measured": {
+      "lidarMeanDeg": -1.4,
+      "lidarMaxDeg": -1.5,
+      "gameMeanDeg": -3.9,
+      "gameMaxDeg": -4.3
+     },
+     "kind": "game banks a corner that is (nearly) flat"
+    },
+    {
+     "side": "inside-lower (radius 38 m)",
+     "name": "Nürburgring Sprintstrecke (OSM s 4381-4471 m, 1045 m from the line)",
+     "deg": 1.5,
+     "from": [
+      50.3332806,
+      6.9388173
+     ],
+     "to": [
+      50.3327031,
+      6.9390953
+     ],
+     "measured": {
+      "lidarMeanDeg": -1.3,
+      "lidarMaxDeg": -1.4,
+      "gameMeanDeg": -4.6,
+      "gameMaxDeg": -5.4
+     },
+     "kind": "game banks a corner that is (nearly) flat"
+    },
+    {
+     "side": "inside-lower (radius 31 m)",
+     "name": "Nürburgring Sprintstrecke (OSM s 4511-4551 m, 1175 m from the line)",
+     "deg": 1.5,
+     "from": [
+      50.3327097,
+      6.9396563
+     ],
+     "to": [
+      50.3324794,
+      6.9400017
+     ],
+     "measured": {
+      "lidarMeanDeg": 1.4,
+      "lidarMaxDeg": 1.4,
+      "gameMeanDeg": 4.9,
+      "gameMaxDeg": 5.6
+     },
+     "kind": "game banks a corner that is (nearly) flat"
+    }
+   ]
+  }
+ },
+ "measurements": {
+  "method": "devtests/track-audit/be-nl-de-gb/audit.mjs: game = tracks-data.js + js/track.js built in node (out/game-<id>.json from dump-game.js); OSM = Overpass (cache/overpass/<id>.json), the F1 lap chained from its raceway ways in their oneway direction; DEM sampled every 5 m along the OSM centreline, 25 m median + 5 m Gauss; game heights mapped to the OSM centreline by nearest point and aligned by the mean difference",
+  "osmLapWays": [
+   {
+    "id": 820679446,
+    "name": "Ford-Kurve",
+    "osmS": 0
+   },
+   {
+    "id": 1113009623,
+    "name": "",
+    "osmS": 126
+   },
+   {
+    "id": 820679445,
+    "name": "",
+    "osmS": 261
+   },
+   {
+    "id": 820330155,
+    "name": "Goodyear-Kehre",
+    "osmS": 538
+   },
+   {
+    "id": 820330154,
+    "name": "",
+    "osmS": 768
+   },
+   {
+    "id": 1113009624,
+    "name": "",
+    "osmS": 951
+   },
+   {
+    "id": 820330153,
+    "name": "Michael-Schumacher-S",
+    "osmS": 1006
+   },
+   {
+    "id": 820330152,
+    "name": "",
+    "osmS": 1247
+   },
+   {
+    "id": 1079809245,
+    "name": "Anbindung zur Sprintstrecke",
+    "osmS": 1286
+   },
+   {
+    "id": 1443047845,
+    "name": "Nürburgring Sprintstrecke",
+    "osmS": 1403
+   },
+   {
+    "id": 1443047844,
+    "name": "Nürburgring Sprintstrecke",
+    "osmS": 1483
+   },
+   {
+    "id": 27852990,
+    "name": "Nürburgring Sprintstrecke",
+    "osmS": 1527
+   },
+   {
+    "id": 1149161211,
+    "name": "Nürburgring Sprintstrecke",
+    "osmS": 2704
+   },
+   {
+    "id": 1149161210,
+    "name": "Nürburgring Sprintstrecke",
+    "osmS": 2840
+   },
+   {
+    "id": 1149161208,
+    "name": "Nürburgring Sprintstrecke",
+    "osmS": 3971
+   },
+   {
+    "id": 1443047846,
+    "name": "Nürburgring Sprintstrecke",
+    "osmS": 4771
+   },
+   {
+    "id": 1443047847,
+    "name": "Nürburgring Sprintstrecke",
+    "osmS": 4813
+   },
+   {
+    "id": 1079809244,
+    "name": "Anbindung zur Müllenbachschleife",
+    "osmS": 4896
+   },
+   {
+    "id": 820679447,
+    "name": "",
+    "osmS": 4970
+   },
+   {
+    "id": 820679448,
+    "name": "",
+    "osmS": 5072
+   }
+  ],
+  "osmRelation": {
+   "id": 38567,
+   "tags": {
+    "name": "Nürburgring Grand Prix Strecke",
+    "operator": "Nürburgring 1927 GmbH & Co. KG",
+    "type": "circuit"
+   }
+  },
+  "chicaneNote": "NGK chicane: the car (F1) line = OSM way 1149161211; the relation routes via way 820679450 (the gentler motorcycle / 24h variant)",
+  "lengths": {
+   "osmCentrelineM": 5135.8,
+   "gameBuiltM": 5146.8,
+   "gameLengthKm": 5.148
+  },
+  "layoutDeviationM": {
+   "gameToOsm": {
+    "max": 2.2,
+    "mean": 0.59,
+    "p95": 1.7
+   },
+   "osmToGame": {
+    "max": 2.2,
+    "mean": 0.59,
+    "p95": 1.7
+   },
+   "worstGameSamples": [],
+   "worstOsmPoints": []
+  },
+  "direction": {
+   "agreeFraction": 1,
+   "note": "fraction of game samples whose direction agrees with the OSM oneway raceway direction"
+  },
+  "startFinish": [
+   {
+    "node": 3099078401,
+    "tags": {
+     "name": "Nürburgring Start-Finish",
+     "raceway": "start-finish"
+    },
+    "lat": 50.3339987,
+    "lon": 6.9452952,
+    "offTrackM": 1.3,
+    "gameS": 238.7,
+    "osmS": 3574.7,
+    "note": "239 m after the game's line (game s = 0)"
+   }
+  ],
+  "pitOsm": [
+   {
+    "way": 30815119,
+    "tags": {
+     "access": "permissive",
+     "highway": "raceway",
+     "layer": "1",
+     "name": "Boxengasse",
+     "oneway": "yes",
+     "raceway": "pitlane",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 952,
+    "startGameS": -492,
+    "startOffM": 0.4,
+    "endGameS": 494,
+    "endOffM": 0.5,
+    "midSide": "right",
+    "midOffM": 14.3,
+    "midGameS": -227
+   },
+   {
+    "way": 31009257,
+    "tags": {
+     "access": "permissive",
+     "highway": "raceway",
+     "name": "Boxengasse an T13",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 91,
+    "startGameS": -279,
+    "startOffM": 202.9,
+    "endGameS": -282,
+    "endOffM": 119.6,
+    "midSide": "left",
+    "midOffM": 175.9,
+    "midGameS": -283
+   },
+   {
+    "way": 32894824,
+    "tags": {
+     "access": "permissive",
+     "bridge": "yes",
+     "highway": "raceway",
+     "layer": "1",
+     "name": "Boxengasse an T13",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 20,
+    "startGameS": -282,
+    "startOffM": 119.6,
+    "endGameS": -280,
+    "endOffM": 100.2,
+    "midSide": "left",
+    "midOffM": 100.2,
+    "midGameS": -280
+   },
+   {
+    "way": 32894825,
+    "tags": {
+     "highway": "raceway",
+     "name": "Boxengasse an T13",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 129,
+    "startGameS": -280,
+    "startOffM": 100.2,
+    "endGameS": -324,
+    "endOffM": 81,
+    "midSide": "left",
+    "midOffM": 84.2,
+    "midGameS": -283
+   },
+   {
+    "way": 32894842,
+    "tags": {
+     "highway": "raceway",
+     "name": "Boxengasse an T13",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 151,
+    "startGameS": -284,
+    "startOffM": 81.6,
+    "endGameS": -334,
+    "endOffM": 110.7,
+    "midSide": "left",
+    "midOffM": 102.5,
+    "midGameS": -330
+   },
+   {
+    "way": 46194345,
+    "tags": {
+     "highway": "raceway",
+     "name": "Boxengasse",
+     "note": "Boxenzufahrt Schikane",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 93,
+    "startGameS": -123,
+    "startOffM": 13.1,
+    "endGameS": -41,
+    "endOffM": 16.9,
+    "midSide": "right",
+    "midOffM": 28.3,
+    "midGameS": -113
+   },
+   {
+    "way": 199642469,
+    "tags": {
+     "bridge": "yes",
+     "highway": "raceway",
+     "layer": "1",
+     "name": "Boxengasse an T13",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 30,
+    "startGameS": -338,
+    "startOffM": 123.2,
+    "endGameS": -344,
+    "endOffM": 148.6,
+    "midSide": "left",
+    "midOffM": 148.6,
+    "midGameS": -344
+   },
+   {
+    "way": 199642470,
+    "tags": {
+     "highway": "raceway",
+     "name": "Boxengasse an T13",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 48,
+    "startGameS": -344,
+    "startOffM": 148.6,
+    "endGameS": -356,
+    "endOffM": 185.5,
+    "midSide": "left",
+    "midOffM": 181.3,
+    "midGameS": -352
+   },
+   {
+    "way": 710354617,
+    "tags": {
+     "highway": "raceway",
+     "name": "Boxengasse an T13",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 62,
+    "startGameS": -324,
+    "startOffM": 81,
+    "endGameS": -338,
+    "endOffM": 123.2,
+    "midSide": "left",
+    "midOffM": 113,
+    "midGameS": -336
+   },
+   {
+    "way": 769107218,
+    "tags": {
+     "access": "permissive",
+     "highway": "raceway",
+     "layer": "1",
+     "name": "Boxengasse",
+     "oneway": "yes",
+     "raceway": "pitlane",
+     "sport": "motor",
+     "surface": "asphalt"
+    },
+    "lengthM": 143,
+    "startGameS": -278,
+    "startOffM": 97.4,
+    "endGameS": -213,
+    "endOffM": 13.9,
+    "midSide": "right",
+    "midOffM": 0.3,
+    "midGameS": -252
+   }
+  ],
+  "pitGame": {
+   "side": "right",
+   "limitKmh": 80,
+   "laneFromS": -216,
+   "laneToS": 250,
+   "entryS": -130,
+   "exitS": 164,
+   "boxes": 16
+  },
+  "structures": [
+   {
+    "way": 31010592,
+    "tags": {
+     "access": "permit",
+     "highway": "service",
+     "lanes": "2",
+     "lanes:backward": "1",
+     "lanes:forward": "1",
+     "layer": "-1",
+     "maxheight": "4.7",
+     "oneway": "no",
+     "surface": "asphalt",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 3814,
+    "near": "Nürburgring Sprintstrecke",
+    "gameS": 478
+   },
+   {
+    "way": 32743989,
+    "tags": {
+     "access": "permit",
+     "highway": "service",
+     "layer": "-1",
+     "maxheight": "4.1",
+     "sidewalk": "left",
+     "surface": "asphalt",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 3111,
+    "near": "Nürburgring Sprintstrecke",
+    "gameS": -225
+   },
+   {
+    "way": 32894586,
+    "tags": {
+     "access": "permit",
+     "highway": "service",
+     "layer": "-1",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 2059,
+    "near": "Nürburgring Sprintstrecke",
+    "gameS": -1277
+   },
+   {
+    "way": 34444288,
+    "tags": {
+     "bridge": "covered",
+     "bridge:structure": "cable-stayed",
+     "layer": "1",
+     "man_made": "bridge",
+     "name": "BMW-Brücke"
+    },
+    "kind": "crosses over the lap",
+    "osmS": 3382,
+    "near": "Nürburgring Sprintstrecke",
+    "gameS": 46
+   },
+   {
+    "way": 790945811,
+    "tags": {
+     "bridge:structure": "beam",
+     "layer": "1",
+     "man_made": "bridge"
+    },
+    "kind": "crosses over the lap",
+    "osmS": 4813,
+    "near": "Nürburgring Sprintstrecke",
+    "gameS": 1477
+   },
+   {
+    "way": 849687759,
+    "tags": {
+     "highway": "footway",
+     "layer": "-1",
+     "name": "Pressetunnel",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 3357,
+    "near": "Nürburgring Sprintstrecke",
+    "gameS": 21
+   },
+   {
+    "way": 967796160,
+    "tags": {
+     "highway": "footway",
+     "layer": "-1",
+     "tunnel": "yes"
+    },
+    "kind": "passes under the lap",
+    "osmS": 3767,
+    "near": "Nürburgring Sprintstrecke",
+    "gameS": 431
+   },
+   {
+    "way": 1149161210,
+    "tags": {
+     "access": "permissive",
+     "bridge": "no",
+     "highway": "raceway",
+     "layer": "1",
+     "name": "Nürburgring Sprintstrecke",
+     "name:en": "Nürburgring Sprint course",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt",
+     "wikipedia": "de:Nürburgring"
+    },
+    "kind": "the lap itself",
+    "osmS": 2840
+   },
+   {
+    "way": 1149161211,
+    "tags": {
+     "access": "permissive",
+     "bridge": "no",
+     "highway": "raceway",
+     "layer": "1",
+     "name": "Nürburgring Sprintstrecke",
+     "name:en": "Nürburgring Sprint course",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt",
+     "wikipedia": "de:Nürburgring"
+    },
+    "kind": "the lap itself",
+    "osmS": 2704
+   },
+   {
+    "way": 1443047844,
+    "tags": {
+     "access": "permissive",
+     "bridge": "yes",
+     "highway": "raceway",
+     "layer": "1",
+     "name": "Nürburgring Sprintstrecke",
+     "name:en": "Nürburgring Sprint course",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt",
+     "wikipedia": "de:Nürburgring"
+    },
+    "kind": "the lap itself",
+    "osmS": 1483
+   },
+   {
+    "way": 1443047846,
+    "tags": {
+     "access": "permissive",
+     "bridge": "yes",
+     "highway": "raceway",
+     "layer": "1",
+     "name": "Nürburgring Sprintstrecke",
+     "name:en": "Nürburgring Sprint course",
+     "oneway": "yes",
+     "sport": "motor",
+     "surface": "asphalt",
+     "wikipedia": "de:Nürburgring"
+    },
+    "kind": "the lap itself",
+    "osmS": 4771
+   }
+  ],
+  "elevation": {
+   "dem": "LVermGeo RLP DGM1 1 m lidar DTM (2025 tiles), open data geobasis-rlp.de/data/dgm1/current/tif/ (Datenlizenz Deutschland Namensnennung 2.0)",
+   "stepM": 5.00077774566888,
+   "holesFilled": 3,
+   "covered": [
+    {
+     "name": "lap bridge OSM way 1443047844 (bare-earth DTM reads the underpass)",
+     "fromS": 1472,
+     "toS": 1542
+    },
+    {
+     "name": "lap over service tunnel OSM way 31010592 (DTM reads the underpass)",
+     "fromS": 3784,
+     "toS": 3838
+    },
+    {
+     "name": "lap bridge OSM way 1443047846",
+     "fromS": 4758,
+     "toS": 4824
+    }
+   ],
+   "realRangeM": 55.9,
+   "realMinASL": 564.2,
+   "realMinAt": {
+    "osmS": 660,
+    "near": "Goodyear-Kehre"
+   },
+   "realMaxASL": 620.1,
+   "realMaxAt": {
+    "osmS": 3135,
+    "near": "Nürburgring Sprintstrecke"
+   },
+   "gameRangeM": 53.4,
+   "rmsDiffM": 3.37,
+   "maxDiffM": 8.8,
+   "maxDiffAt": {
+    "osmS": 4326,
+    "fromLine": 990,
+    "near": "Nürburgring Sprintstrecke",
+    "gameMinusReal": -8.8
+   },
+   "grades50m": {
+    "realMaxPct": 8.5,
+    "realMinPct": -6.3,
+    "gameMaxPct": 9,
+    "gameMinPct": -9.3,
+    "steepestClimbsReal": [
+     {
+      "osmS": 1040,
+      "fromLine": -2296,
+      "near": "Michael-Schumacher-S",
+      "realPct": 8.5,
+      "gamePct": 7.2
+     },
+     {
+      "osmS": 2670,
+      "fromLine": -666,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": 7.4,
+      "gamePct": 2.6
+     },
+     {
+      "osmS": 1240,
+      "fromLine": -2096,
+      "near": "Michael-Schumacher-S",
+      "realPct": 5.4,
+      "gamePct": 3.6
+     },
+     {
+      "osmS": 4071,
+      "fromLine": 735,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": 5.3,
+      "gamePct": 2.6
+     }
+    ],
+    "steepestDescentsReal": [
+     {
+      "osmS": 1925,
+      "fromLine": -1411,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": -6.3,
+      "gamePct": -9.1
+     },
+     {
+      "osmS": 60,
+      "fromLine": 1860,
+      "near": "Ford-Kurve",
+      "realPct": -5.9,
+      "gamePct": -4.6
+     },
+     {
+      "osmS": 4301,
+      "fromLine": 965,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": -5.7,
+      "gamePct": -7.9
+     },
+     {
+      "osmS": 290,
+      "fromLine": 2090,
+      "near": "",
+      "realPct": -5.7,
+      "gamePct": -7.1
+     }
+    ],
+    "steepestClimbsGame": [
+     {
+      "osmS": 2855,
+      "fromLine": -481,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": 4.6,
+      "gamePct": 9
+     },
+     {
+      "osmS": 940,
+      "fromLine": -2396,
+      "near": "65 m from Michael-Schumacher-S",
+      "realPct": 6.5,
+      "gamePct": 8.7
+     },
+     {
+      "osmS": 4416,
+      "fromLine": 1080,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": -0.6,
+      "gamePct": 6.5
+     },
+     {
+      "osmS": 1140,
+      "fromLine": -2196,
+      "near": "Michael-Schumacher-S",
+      "realPct": 7.1,
+      "gamePct": 5.4
+     }
+    ],
+    "steepestDescentsGame": [
+     {
+      "osmS": 4266,
+      "fromLine": 930,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": -4.8,
+      "gamePct": -9.3
+     },
+     {
+      "osmS": 1915,
+      "fromLine": -1421,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": -6.2,
+      "gamePct": -9.2
+     },
+     {
+      "osmS": 225,
+      "fromLine": 2025,
+      "near": "99 m from Ford-Kurve",
+      "realPct": -5.6,
+      "gamePct": -8.5
+     },
+     {
+      "osmS": 425,
+      "fromLine": 2225,
+      "near": "112 m from Goodyear-Kehre",
+      "realPct": -5.5,
+      "gamePct": -5.6
+     }
+    ]
+   },
+   "grades100m": {
+    "realMaxPct": 8.3,
+    "realMinPct": -6,
+    "gameMaxPct": 8.8,
+    "gameMinPct": -8.6,
+    "steepestClimbsReal": [
+     {
+      "osmS": 1050,
+      "fromLine": -2286,
+      "near": "Michael-Schumacher-S",
+      "realPct": 8.3,
+      "gamePct": 7.1
+     },
+     {
+      "osmS": 2655,
+      "fromLine": -681,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": 7.1,
+      "gamePct": 3.2
+     },
+     {
+      "osmS": 1250,
+      "fromLine": -2086,
+      "near": "4 m from Michael-Schumacher-S",
+      "realPct": 5.2,
+      "gamePct": 3.6
+     },
+     {
+      "osmS": 2855,
+      "fromLine": -481,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": 4.6,
+      "gamePct": 8.8
+     }
+    ],
+    "steepestDescentsReal": [
+     {
+      "osmS": 1935,
+      "fromLine": -1401,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": -6,
+      "gamePct": -8
+     },
+     {
+      "osmS": 90,
+      "fromLine": 1890,
+      "near": "Ford-Kurve",
+      "realPct": -5.7,
+      "gamePct": -4.1
+     },
+     {
+      "osmS": 295,
+      "fromLine": 2095,
+      "near": "",
+      "realPct": -5.6,
+      "gamePct": -7.4
+     },
+     {
+      "osmS": 4296,
+      "fromLine": 960,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": -5.1,
+      "gamePct": -7.3
+     }
+    ],
+    "steepestClimbsGame": [
+     {
+      "osmS": 2855,
+      "fromLine": -481,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": 4.6,
+      "gamePct": 8.8
+     },
+     {
+      "osmS": 940,
+      "fromLine": -2396,
+      "near": "65 m from Michael-Schumacher-S",
+      "realPct": 6.5,
+      "gamePct": 8.6
+     },
+     {
+      "osmS": 4421,
+      "fromLine": 1085,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": -0.2,
+      "gamePct": 5.7
+     },
+     {
+      "osmS": 1140,
+      "fromLine": -2196,
+      "near": "Michael-Schumacher-S",
+      "realPct": 7.1,
+      "gamePct": 5.4
+     }
+    ],
+    "steepestDescentsGame": [
+     {
+      "osmS": 1910,
+      "fromLine": -1426,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": -5.8,
+      "gamePct": -8.6
+     },
+     {
+      "osmS": 4266,
+      "fromLine": 930,
+      "near": "Nürburgring Sprintstrecke",
+      "realPct": -4.6,
+      "gamePct": -8.6
+     },
+     {
+      "osmS": 235,
+      "fromLine": 2035,
+      "near": "109 m from Ford-Kurve",
+      "realPct": -5.6,
+      "gamePct": -8.1
+     },
+     {
+      "osmS": 435,
+      "fromLine": 2235,
+      "near": "102 m from Goodyear-Kehre",
+      "realPct": -5.2,
+      "gamePct": -5.3
+     }
+    ]
+   },
+   "mismatchRuns100m": [
+    {
+     "osmFrom": 210,
+     "osmTo": 270,
+     "fromLine": 2010,
+     "lengthM": 65,
+     "near": "109 m from Ford-Kurve",
+     "worstPP": -2.4,
+     "real": -5.6,
+     "game": -8.1,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 885,
+     "osmTo": 940,
+     "fromLine": -2451,
+     "lengthM": 60,
+     "near": "85 m from Michael-Schumacher-S",
+     "worstPP": 2.3,
+     "real": 6,
+     "game": 8.3,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 1325,
+     "osmTo": 1455,
+     "fromLine": -2011,
+     "lengthM": 135,
+     "near": "Anbindung zur Sprintstrecke",
+     "worstPP": -3.5,
+     "real": 3.1,
+     "game": -0.4,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 1855,
+     "osmTo": 1935,
+     "fromLine": -1481,
+     "lengthM": 85,
+     "near": "Nürburgring Sprintstrecke",
+     "worstPP": -3,
+     "real": -5.5,
+     "game": -8.5,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 2010,
+     "osmTo": 2080,
+     "fromLine": -1326,
+     "lengthM": 75,
+     "near": "Nürburgring Sprintstrecke",
+     "worstPP": 2.7,
+     "real": -4,
+     "game": -1.3,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 2270,
+     "osmTo": 2340,
+     "fromLine": -1066,
+     "lengthM": 75,
+     "near": "Nürburgring Sprintstrecke",
+     "worstPP": 2.4,
+     "real": 1.4,
+     "game": 3.8,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 2605,
+     "osmTo": 2715,
+     "fromLine": -731,
+     "lengthM": 115,
+     "near": "Nürburgring Sprintstrecke",
+     "worstPP": -4,
+     "real": 7.1,
+     "game": 3.1,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 2785,
+     "osmTo": 2955,
+     "fromLine": -551,
+     "lengthM": 175,
+     "near": "Nürburgring Sprintstrecke",
+     "worstPP": 4.5,
+     "real": 4,
+     "game": 8.5,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 3020,
+     "osmTo": 3105,
+     "fromLine": -316,
+     "lengthM": 90,
+     "near": "Nürburgring Sprintstrecke",
+     "worstPP": -3.4,
+     "real": 1.2,
+     "game": -2.2,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 3926,
+     "osmTo": 4001,
+     "fromLine": 590,
+     "lengthM": 80,
+     "near": "Nürburgring Sprintstrecke",
+     "worstPP": 2.9,
+     "real": -3.8,
+     "game": -0.9,
+     "kind": "flattened"
+    },
+    {
+     "osmFrom": 4076,
+     "osmTo": 4296,
+     "fromLine": 740,
+     "lengthM": 225,
+     "near": "Nürburgring Sprintstrecke",
+     "worstPP": -4.8,
+     "real": -2.6,
+     "game": -7.4,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 4341,
+     "osmTo": 4486,
+     "fromLine": 1005,
+     "lengthM": 150,
+     "near": "Nürburgring Sprintstrecke",
+     "worstPP": 6.3,
+     "real": -1.1,
+     "game": 5.2,
+     "kind": "steeper / invented"
+    },
+    {
+     "osmFrom": 5016,
+     "osmTo": 5116,
+     "fromLine": 1680,
+     "lengthM": 105,
+     "near": "70 m from Ford-Kurve",
+     "worstPP": 2.8,
+     "real": -4.2,
+     "game": -1.4,
+     "kind": "flattened"
+    }
+   ],
+   "namedFeatures": [
+    {
+     "name": "Ford-Kurve",
+     "way": 820679446,
+     "osmFrom": 0,
+     "lengthM": 125,
+     "realRise": -6.9,
+     "gameRise": -5.2,
+     "real50MaxPct": -5.1,
+     "real50MinPct": -5.9,
+     "game50MaxPct": -3.6,
+     "game50MinPct": -4.7
+    },
+    {
+     "name": "Goodyear-Kehre",
+     "way": 820330155,
+     "osmFrom": 535,
+     "lengthM": 235,
+     "realRise": -0.7,
+     "gameRise": 2.2,
+     "real50MaxPct": 2.4,
+     "real50MinPct": -3,
+     "game50MaxPct": 2.8,
+     "game50MinPct": -2.3
+    },
+    {
+     "name": "Michael-Schumacher-S",
+     "way": 820330153,
+     "osmFrom": 1005,
+     "lengthM": 240,
+     "realRise": 17.4,
+     "gameRise": 13.7,
+     "real50MaxPct": 8.5,
+     "real50MinPct": 5.4,
+     "game50MaxPct": 7.7,
+     "game50MinPct": 3.6
+    },
+    {
+     "name": "Anbindung zur Sprintstrecke",
+     "way": 1079809245,
+     "osmFrom": 1285,
+     "lengthM": 120,
+     "realRise": 4.5,
+     "gameRise": 1.5,
+     "real50MaxPct": 4.6,
+     "real50MinPct": 3.1,
+     "game50MaxPct": 3.2,
+     "game50MinPct": -0.7
+    },
+    {
+     "name": "Nürburgring Sprintstrecke",
+     "way": 1443047845,
+     "osmFrom": 1405,
+     "lengthM": 75,
+     "realRise": 1.9,
+     "gameRise": -0.2,
+     "real50MaxPct": 3.1,
+     "real50MinPct": 2.1,
+     "game50MaxPct": 1.4,
+     "game50MinPct": -0.9
+    },
+    {
+     "name": "Nürburgring Sprintstrecke",
+     "way": 1443047844,
+     "osmFrom": 1480,
+     "lengthM": 45,
+     "realRise": 1.1,
+     "gameRise": 1,
+     "real50MaxPct": 2.3,
+     "real50MinPct": 2,
+     "game50MaxPct": 2.8,
+     "game50MinPct": 1.4
+    },
+    {
+     "name": "Nürburgring Sprintstrecke",
+     "way": 27852990,
+     "osmFrom": 1525,
+     "lengthM": 1180,
+     "realRise": 1.9,
+     "gameRise": -1.8,
+     "real50MaxPct": 7.4,
+     "real50MinPct": -6.3,
+     "game50MaxPct": 4.7,
+     "game50MinPct": -9.2
+    },
+    {
+     "name": "Nürburgring Sprintstrecke",
+     "way": 1149161211,
+     "osmFrom": 2705,
+     "lengthM": 135,
+     "realRise": 6.8,
+     "gameRise": 8.9,
+     "real50MaxPct": 5.6,
+     "real50MinPct": 4.7,
+     "game50MaxPct": 8.9,
+     "game50MinPct": 2.7
+    },
+    {
+     "name": "Nürburgring Sprintstrecke",
+     "way": 1149161210,
+     "osmFrom": 2840,
+     "lengthM": 1130,
+     "realRise": -6.3,
+     "gameRise": -3.9,
+     "real50MaxPct": 4.9,
+     "real50MinPct": -4.7,
+     "game50MaxPct": 9,
+     "game50MinPct": -3.9
+    },
+    {
+     "name": "Nürburgring Sprintstrecke",
+     "way": 1149161208,
+     "osmFrom": 3971,
+     "lengthM": 800,
+     "realRise": -2.1,
+     "gameRise": -1.5,
+     "real50MaxPct": 5.3,
+     "real50MinPct": -5.7,
+     "game50MaxPct": 6.5,
+     "game50MinPct": -9.3
+    },
+    {
+     "name": "Nürburgring Sprintstrecke",
+     "way": 1443047846,
+     "osmFrom": 4771,
+     "lengthM": 45,
+     "realRise": -0.6,
+     "gameRise": -0.6,
+     "real50MaxPct": -1.1,
+     "real50MinPct": -1.3,
+     "game50MaxPct": -1.3,
+     "game50MinPct": -1.5
+    },
+    {
+     "name": "Nürburgring Sprintstrecke",
+     "way": 1443047847,
+     "osmFrom": 4816,
+     "lengthM": 80,
+     "realRise": -1.2,
+     "gameRise": -1.1,
+     "real50MaxPct": -1.1,
+     "real50MinPct": -2,
+     "game50MaxPct": -1.2,
+     "game50MinPct": -1.7
+    },
+    {
+     "name": "Anbindung zur Müllenbachschleife",
+     "way": 1079809244,
+     "osmFrom": 4896,
+     "lengthM": 75,
+     "realRise": -1.9,
+     "gameRise": -1.5,
+     "real50MaxPct": -2,
+     "real50MinPct": -3,
+     "game50MaxPct": -1.7,
+     "game50MinPct": -2.1
+    }
+   ],
+   "profile25m": {
+    "columns": [
+     "osmS",
+     "fromGameLine",
+     "lidarASL",
+     "gameAlignedASL"
+    ],
+    "rows": [
+     [
+      0,
+      1800,
+      594.69,
+      598.61
+     ],
+     [
+      25,
+      1825,
+      593.39,
+      597.58
+     ],
+     [
+      50,
+      1850,
+      592,
+      596.42
+     ],
+     [
+      75,
+      1875,
+      590.5,
+      595.25
+     ],
+     [
+      100,
+      1900,
+      589.15,
+      594.28
+     ],
+     [
+      125,
+      1925,
+      587.77,
+      593.38
+     ],
+     [
+      150,
+      1950,
+      586.36,
+      592.36
+     ],
+     [
+      175,
+      1975,
+      584.94,
+      590.99
+     ],
+     [
+      200,
+      2000,
+      583.52,
+      589.18
+     ],
+     [
+      225,
+      2025,
+      582.11,
+      587.03
+     ],
+     [
+      250,
+      2050,
+      580.71,
+      584.91
+     ],
+     [
+      275,
+      2075,
+      579.31,
+      582.97
+     ],
+     [
+      300,
+      2100,
+      577.87,
+      581.22
+     ],
+     [
+      325,
+      2125,
+      576.47,
+      579.45
+     ],
+     [
+      350,
+      2150,
+      575.08,
+      577.56
+     ],
+     [
+      375,
+      2175,
+      573.72,
+      575.63
+     ],
+     [
+      400,
+      2200,
+      572.33,
+      573.93
+     ],
+     [
+      425,
+      2225,
+      570.92,
+      572.43
+     ],
+     [
+      450,
+      2250,
+      569.56,
+      571.12
+     ],
+     [
+      475,
+      2275,
+      568.37,
+      570.03
+     ],
+     [
+      500,
+      2300,
+      567.36,
+      569.08
+     ],
+     [
+      525,
+      2325,
+      566.47,
+      568.27
+     ],
+     [
+      550,
+      2350,
+      565.73,
+      567.74
+     ],
+     [
+      575,
+      2375,
+      565.16,
+      567.48
+     ],
+     [
+      600,
+      2400,
+      564.7,
+      567.46
+     ],
+     [
+      625,
+      2425,
+      564.5,
+      567.59
+     ],
+     [
+      650,
+      2450,
+      564.27,
+      567.82
+     ],
+     [
+      675,
+      2475,
+      564.26,
+      568.17
+     ],
+     [
+      700,
+      2500,
+      564.33,
+      568.61
+     ],
+     [
+      725,
+      2525,
+      564.7,
+      569.1
+     ],
+     [
+      750,
+      2550,
+      565.07,
+      569.69
+     ],
+     [
+      775,
+      -2561,
+      565.62,
+      570.37
+     ],
+     [
+      800,
+      -2536,
+      566.34,
+      571.14
+     ],
+     [
+      825,
+      -2511,
+      567.2,
+      572.1
+     ],
+     [
+      850,
+      -2486,
+      568.21,
+      573.27
+     ],
+     [
+      875,
+      -2461,
+      569.38,
+      574.76
+     ],
+     [
+      900,
+      -2436,
+      570.69,
+      576.71
+     ],
+     [
+      925,
+      -2411,
+      572.14,
+      578.86
+     ],
+     [
+      950,
+      -2386,
+      573.75,
+      581.02
+     ],
+     [
+      975,
+      -2361,
+      575.5,
+      583.19
+     ],
+     [
+      1000,
+      -2336,
+      577.42,
+      585.23
+     ],
+     [
+      1025,
+      -2311,
+      579.49,
+      587.11
+     ],
+     [
+      1050,
+      -2286,
+      581.59,
+      588.9
+     ],
+     [
+      1075,
+      -2261,
+      583.7,
+      590.66
+     ],
+     [
+      1100,
+      -2236,
+      585.73,
+      592.34
+     ],
+     [
+      1125,
+      -2211,
+      587.62,
+      593.84
+     ],
+     [
+      1150,
+      -2186,
+      589.39,
+      595.21
+     ],
+     [
+      1175,
+      -2161,
+      591.09,
+      596.44
+     ],
+     [
+      1200,
+      -2136,
+      592.65,
+      597.55
+     ],
+     [
+      1225,
+      -2111,
+      594.11,
+      598.56
+     ],
+     [
+      1250,
+      -2086,
+      595.49,
+      599.47
+     ],
+     [
+      1275,
+      -2061,
+      596.75,
+      600.32
+     ],
+     [
+      1300,
+      -2036,
+      597.89,
+      601.13
+     ],
+     [
+      1325,
+      -2011,
+      598.94,
+      601.82
+     ],
+     [
+      1350,
+      -1986,
+      599.89,
+      602.2
+     ],
+     [
+      1375,
+      -1961,
+      600.73,
+      602.28
+     ],
+     [
+      1400,
+      -1936,
+      601.52,
+      602.2
+     ],
+     [
+      1425,
+      -1911,
+      602.28,
+      601.95
+     ],
+     [
+      1450,
+      -1886,
+      602.99,
+      601.78
+     ],
+     [
+      1475,
+      -1861,
+      603.49,
+      601.94
+     ],
+     [
+      1500,
+      -1836,
+      604.07,
+      602.36
+     ],
+     [
+      1525,
+      -1811,
+      604.65,
+      603.02
+     ],
+     [
+      1550,
+      -1786,
+      605.09,
+      603.76
+     ],
+     [
+      1575,
+      -1761,
+      605.43,
+      604.25
+     ],
+     [
+      1600,
+      -1736,
+      605.79,
+      604.35
+     ],
+     [
+      1625,
+      -1711,
+      605.99,
+      604.06
+     ],
+     [
+      1650,
+      -1686,
+      606.04,
+      603.62
+     ],
+     [
+      1675,
+      -1661,
+      605.97,
+      603.16
+     ],
+     [
+      1700,
+      -1636,
+      605.75,
+      602.86
+     ],
+     [
+      1725,
+      -1611,
+      605.42,
+      602.71
+     ],
+     [
+      1750,
+      -1586,
+      604.93,
+      602.48
+     ],
+     [
+      1775,
+      -1561,
+      604.3,
+      602.11
+     ],
+     [
+      1800,
+      -1536,
+      603.47,
+      601.4
+     ],
+     [
+      1825,
+      -1511,
+      602.34,
+      600.36
+     ],
+     [
+      1850,
+      -1486,
+      601.28,
+      598.88
+     ],
+     [
+      1875,
+      -1461,
+      600.15,
+      597.04
+     ],
+     [
+      1900,
+      -1436,
+      598.78,
+      594.83
+     ],
+     [
+      1925,
+      -1411,
+      597.23,
+      592.49
+     ],
+     [
+      1950,
+      -1386,
+      595.66,
+      590.28
+     ],
+     [
+      1975,
+      -1361,
+      594.21,
+      588.66
+     ],
+     [
+      2000,
+      -1336,
+      592.91,
+      587.62
+     ],
+     [
+      2025,
+      -1311,
+      591.74,
+      587.02
+     ],
+     [
+      2050,
+      -1286,
+      590.7,
+      586.84
+     ],
+     [
+      2075,
+      -1261,
+      589.8,
+      586.7
+     ],
+     [
+      2100,
+      -1236,
+      589.07,
+      586.42
+     ],
+     [
+      2125,
+      -1211,
+      588.46,
+      586.04
+     ],
+     [
+      2150,
+      -1186,
+      587.99,
+      585.49
+     ],
+     [
+      2175,
+      -1161,
+      587.66,
+      584.96
+     ],
+     [
+      2200,
+      -1136,
+      587.44,
+      584.71
+     ],
+     [
+      2225,
+      -1111,
+      587.38,
+      584.7
+     ],
+     [
+      2250,
+      -1086,
+      587.48,
+      585.14
+     ],
+     [
+      2275,
+      -1061,
+      587.69,
+      585.91
+     ],
+     [
+      2300,
+      -1036,
+      588.04,
+      586.87
+     ],
+     [
+      2325,
+      -1011,
+      588.43,
+      587.89
+     ],
+     [
+      2350,
+      -986,
+      588.85,
+      588.93
+     ],
+     [
+      2375,
+      -961,
+      589.35,
+      589.88
+     ],
+     [
+      2400,
+      -936,
+      589.98,
+      590.69
+     ],
+     [
+      2425,
+      -911,
+      590.7,
+      591.42
+     ],
+     [
+      2450,
+      -886,
+      591.55,
+      592.08
+     ],
+     [
+      2475,
+      -861,
+      592.51,
+      592.73
+     ],
+     [
+      2500,
+      -836,
+      593.6,
+      593.49
+     ],
+     [
+      2525,
+      -811,
+      594.81,
+      594.36
+     ],
+     [
+      2550,
+      -786,
+      596.12,
+      595.37
+     ],
+     [
+      2575,
+      -761,
+      597.55,
+      596.56
+     ],
+     [
+      2600,
+      -736,
+      599.07,
+      597.74
+     ],
+     [
+      2625,
+      -711,
+      600.71,
+      598.85
+     ],
+     [
+      2650,
+      -686,
+      602.51,
+      599.84
+     ],
+     [
+      2675,
+      -661,
+      604.34,
+      600.54
+     ],
+     [
+      2700,
+      -636,
+      606.19,
+      601.07
+     ],
+     [
+      2725,
+      -611,
+      607.33,
+      601.79
+     ],
+     [
+      2750,
+      -586,
+      608.57,
+      602.95
+     ],
+     [
+      2775,
+      -561,
+      609.97,
+      604.68
+     ],
+     [
+      2800,
+      -536,
+      611.23,
+      606.61
+     ],
+     [
+      2825,
+      -511,
+      612.52,
+      608.73
+     ],
+     [
+      2850,
+      -486,
+      613.76,
+      610.97
+     ],
+     [
+      2875,
+      -461,
+      614.87,
+      613.22
+     ],
+     [
+      2900,
+      -436,
+      615.88,
+      615.43
+     ],
+     [
+      2925,
+      -411,
+      616.76,
+      617.41
+     ],
+     [
+      2950,
+      -386,
+      617.5,
+      619.04
+     ],
+     [
+      2975,
+      -361,
+      618.19,
+      620.14
+     ],
+     [
+      3000,
+      -336,
+      618.81,
+      620.74
+     ],
+     [
+      3025,
+      -311,
+      619.24,
+      620.65
+     ],
+     [
+      3050,
+      -286,
+      619.58,
+      620.1
+     ],
+     [
+      3075,
+      -261,
+      619.85,
+      619.35
+     ],
+     [
+      3100,
+      -236,
+      620.1,
+      618.7
+     ],
+     [
+      3125,
+      -211,
+      620.13,
+      618.42
+     ],
+     [
+      3150,
+      -186,
+      620.11,
+      618.3
+     ],
+     [
+      3175,
+      -161,
+      619.99,
+      618.22
+     ],
+     [
+      3200,
+      -136,
+      619.82,
+      618.19
+     ],
+     [
+      3226,
+      -111,
+      619.68,
+      618.13
+     ],
+     [
+      3251,
+      -86,
+      619.53,
+      617.99
+     ],
+     [
+      3276,
+      -61,
+      619.37,
+      617.87
+     ],
+     [
+      3301,
+      -36,
+      619.22,
+      617.86
+     ],
+     [
+      3326,
+      -11,
+      619.08,
+      617.92
+     ],
+     [
+      3351,
+      14,
+      618.91,
+      617.98
+     ],
+     [
+      3376,
+      39,
+      618.75,
+      618.03
+     ],
+     [
+      3401,
+      64,
+      618.58,
+      618.03
+     ],
+     [
+      3426,
+      89,
+      618.41,
+      617.96
+     ],
+     [
+      3451,
+      114,
+      618.24,
+      617.84
+     ],
+     [
+      3476,
+      139,
+      618.08,
+      617.67
+     ],
+     [
+      3501,
+      164,
+      617.89,
+      617.49
+     ],
+     [
+      3526,
+      189,
+      617.67,
+      617.38
+     ],
+     [
+      3551,
+      214,
+      617.4,
+      617.3
+     ],
+     [
+      3576,
+      239,
+      617.12,
+      617.17
+     ],
+     [
+      3601,
+      264,
+      616.84,
+      616.97
+     ],
+     [
+      3626,
+      289,
+      616.51,
+      616.65
+     ],
+     [
+      3651,
+      314,
+      616.16,
+      616.18
+     ],
+     [
+      3676,
+      339,
+      615.8,
+      615.57
+     ],
+     [
+      3701,
+      364,
+      615.38,
+      614.8
+     ],
+     [
+      3726,
+      389,
+      614.96,
+      613.94
+     ],
+     [
+      3751,
+      414,
+      614.53,
+      613.07
+     ],
+     [
+      3776,
+      439,
+      614.02,
+      612.21
+     ],
+     [
+      3801,
+      465,
+      613.49,
+      611.35
+     ],
+     [
+      3826,
+      490,
+      612.75,
+      610.43
+     ],
+     [
+      3851,
+      515,
+      612.15,
+      609.43
+     ],
+     [
+      3876,
+      540,
+      611.26,
+      608.46
+     ],
+     [
+      3901,
+      565,
+      610.24,
+      607.63
+     ],
+     [
+      3926,
+      590,
+      609.1,
+      606.94
+     ],
+     [
+      3951,
+      615,
+      607.9,
+      606.39
+     ],
+     [
+      3976,
+      640,
+      606.78,
+      606.1
+     ],
+     [
+      4001,
+      665,
+      605.92,
+      606.08
+     ],
+     [
+      4026,
+      690,
+      605.81,
+      606.44
+     ],
+     [
+      4051,
+      715,
+      606.56,
+      607.09
+     ],
+     [
+      4076,
+      740,
+      607.97,
+      607.77
+     ],
+     [
+      4101,
+      765,
+      609.2,
+      608.34
+     ],
+     [
+      4126,
+      790,
+      610.14,
+      608.75
+     ],
+     [
+      4151,
+      815,
+      610.7,
+      608.66
+     ],
+     [
+      4176,
+      840,
+      610.93,
+      607.96
+     ],
+     [
+      4201,
+      865,
+      610.83,
+      606.76
+     ],
+     [
+      4226,
+      890,
+      610.36,
+      605.09
+     ],
+     [
+      4251,
+      915,
+      609.52,
+      602.93
+     ],
+     [
+      4276,
+      940,
+      608.35,
+      600.59
+     ],
+     [
+      4301,
+      965,
+      606.91,
+      598.33
+     ],
+     [
+      4326,
+      990,
+      605.49,
+      596.65
+     ],
+     [
+      4351,
+      1015,
+      604.43,
+      596.12
+     ],
+     [
+      4376,
+      1040,
+      603.79,
+      596.71
+     ],
+     [
+      4401,
+      1065,
+      603.43,
+      598.19
+     ],
+     [
+      4426,
+      1090,
+      603.25,
+      599.82
+     ],
+     [
+      4451,
+      1115,
+      603.38,
+      601.34
+     ],
+     [
+      4476,
+      1140,
+      603.82,
+      602.45
+     ],
+     [
+      4501,
+      1165,
+      604.29,
+      603.23
+     ],
+     [
+      4526,
+      1190,
+      604.66,
+      603.8
+     ],
+     [
+      4551,
+      1215,
+      604.95,
+      604.28
+     ],
+     [
+      4576,
+      1240,
+      605.26,
+      604.75
+     ],
+     [
+      4601,
+      1265,
+      605.53,
+      605.13
+     ],
+     [
+      4626,
+      1290,
+      605.79,
+      605.39
+     ],
+     [
+      4651,
+      1315,
+      605.99,
+      605.57
+     ],
+     [
+      4676,
+      1340,
+      605.98,
+      605.64
+     ],
+     [
+      4701,
+      1365,
+      605.75,
+      605.58
+     ],
+     [
+      4726,
+      1390,
+      605.42,
+      605.33
+     ],
+     [
+      4751,
+      1415,
+      605.11,
+      604.97
+     ],
+     [
+      4776,
+      1440,
+      604.83,
+      604.59
+     ],
+     [
+      4801,
+      1465,
+      604.51,
+      604.25
+     ],
+     [
+      4826,
+      1490,
+      604.2,
+      603.94
+     ],
+     [
+      4851,
+      1515,
+      603.92,
+      603.63
+     ],
+     [
+      4876,
+      1540,
+      603.53,
+      603.31
+     ],
+     [
+      4901,
+      1565,
+      603.04,
+      602.9
+     ],
+     [
+      4926,
+      1590,
+      602.47,
+      602.41
+     ],
+     [
+      4951,
+      1615,
+      601.84,
+      601.88
+     ],
+     [
+      4976,
+      1640,
+      601.13,
+      601.36
+     ],
+     [
+      5001,
+      1665,
+      600.35,
+      600.9
+     ],
+     [
+      5026,
+      1690,
+      599.48,
+      600.53
+     ],
+     [
+      5051,
+      1715,
+      598.51,
+      600.26
+     ],
+     [
+      5076,
+      1740,
+      597.46,
+      599.98
+     ],
+     [
+      5101,
+      1765,
+      596.38,
+      599.63
+     ],
+     [
+      5126,
+      1790,
+      595.19,
+      598.96
+     ]
+    ]
+   },
+   "fullProfile": "devtests/track-audit/be-nl-de-gb/out/profile-de-1927.json (5 m, with lat / lon)"
+  },
+  "crossSlope": {
+   "halfBaseM": 4,
+   "note": "lidar cross slope = atan((h(left) - h(right)) / (2 * halfBase)), negative = left side lower; game bank = samples[i].bank (same sign convention); median of 3 measurements",
+   "stretches": [
+    {
+     "osmFrom": 10,
+     "osmTo": 120,
+     "fromLine": 1810,
+     "near": "Ford-Kurve",
+     "realMeanDeg": 4.3,
+     "realMaxDeg": 4.7,
+     "gameMeanDeg": 3.8,
+     "gameMaxDeg": 5
+    },
+    {
+     "osmFrom": 590,
+     "osmTo": 780,
+     "fromLine": 2390,
+     "near": "Goodyear-Kehre",
+     "realMeanDeg": 5.2,
+     "realMaxDeg": 5.8,
+     "gameMeanDeg": 3.5,
+     "gameMaxDeg": 5.1
+    },
+    {
+     "osmFrom": 1560,
+     "osmTo": 1660,
+     "fromLine": -1776,
+     "near": "Nürburgring Sprintstrecke",
+     "realMeanDeg": -3.3,
+     "realMaxDeg": -3.4,
+     "gameMeanDeg": -2.8,
+     "gameMaxDeg": -4.8
+    },
+    {
+     "osmFrom": 1740,
+     "osmTo": 1950,
+     "fromLine": -1596,
+     "near": "Nürburgring Sprintstrecke",
+     "realMeanDeg": 4.3,
+     "realMaxDeg": 4.8,
+     "gameMeanDeg": 2.1,
+     "gameMaxDeg": 4.2
+    },
+    {
+     "osmFrom": 3000,
+     "osmTo": 3110,
+     "fromLine": -336,
+     "near": "Nürburgring Sprintstrecke",
+     "realMeanDeg": 2.3,
+     "realMaxDeg": 2.5,
+     "gameMeanDeg": 4.3,
+     "gameMaxDeg": 4.9
+    },
+    {
+     "osmFrom": 3951,
+     "osmTo": 3991,
+     "fromLine": 615,
+     "near": "Nürburgring Sprintstrecke",
+     "realMeanDeg": 1.1,
+     "realMaxDeg": 1.1,
+     "gameMeanDeg": 5,
+     "gameMaxDeg": 5.8
+    },
+    {
+     "osmFrom": 4121,
+     "osmTo": 4231,
+     "fromLine": 785,
+     "near": "Nürburgring Sprintstrecke",
+     "realMeanDeg": -1.4,
+     "realMaxDeg": -1.5,
+     "gameMeanDeg": -3.9,
+     "gameMaxDeg": -4.3
+    },
+    {
+     "osmFrom": 4381,
+     "osmTo": 4471,
+     "fromLine": 1045,
+     "near": "Nürburgring Sprintstrecke",
+     "realMeanDeg": -1.3,
+     "realMaxDeg": -1.4,
+     "gameMeanDeg": -4.6,
+     "gameMaxDeg": -5.4
+    },
+    {
+     "osmFrom": 4511,
+     "osmTo": 4551,
+     "fromLine": 1175,
+     "near": "Nürburgring Sprintstrecke",
+     "realMeanDeg": 1.4,
+     "realMaxDeg": 1.4,
+     "gameMeanDeg": 4.9,
+     "gameMaxDeg": 5.6
+    },
+    {
+     "osmFrom": 4961,
+     "osmTo": 5081,
+     "fromLine": 1625,
+     "near": "51 m from Anbindung zur Müllenbachschleife",
+     "realMeanDeg": -4.3,
+     "realMaxDeg": -4.6,
+     "gameMeanDeg": -2.7,
+     "gameMaxDeg": -3.9
+    }
+   ],
+   "realAbsMaxDeg": 5.8,
+   "gameAbsMaxDeg": 5.9,
+   "series": {
+    "columns": [
+     "osmS",
+     "fromLine",
+     "lidarDeg",
+     "gameDeg"
+    ],
+    "rows": [
+     [
+      0,
+      1800,
+      2.9,
+      1.1
+     ],
+     [
+      10,
+      1810,
+      3.8,
+      2.4
+     ],
+     [
+      20,
+      1820,
+      4.2,
+      3.9
+     ],
+     [
+      30,
+      1830,
+      4.6,
+      4.8
+     ],
+     [
+      40,
+      1840,
+      4.6,
+      5
+     ],
+     [
+      50,
+      1850,
+      4.5,
+      5
+     ],
+     [
+      60,
+      1860,
+      4.5,
+      4.6
+     ],
+     [
+      70,
+      1870,
+      4.5,
+      4.5
+     ],
+     [
+      80,
+      1880,
+      4.7,
+      5
+     ],
+     [
+      90,
+      1890,
+      4.6,
+      4.5
+     ],
+     [
+      100,
+      1900,
+      4.6,
+      3.2
+     ],
+     [
+      110,
+      1910,
+      3.8,
+      1.9
+     ],
+     [
+      120,
+      1920,
+      3.3,
+      0.9
+     ],
+     [
+      130,
+      1930,
+      2.4,
+      0.2
+     ],
+     [
+      140,
+      1940,
+      1.7,
+      -0.3
+     ],
+     [
+      150,
+      1950,
+      1,
+      -0.6
+     ],
+     [
+      160,
+      1960,
+      0.2,
+      -0.5
+     ],
+     [
+      180,
+      1980,
+      -1.3,
+      0
+     ],
+     [
+      190,
+      1990,
+      -1.6,
+      0.2
+     ],
+     [
+      200,
+      2000,
+      -2,
+      0.1
+     ],
+     [
+      210,
+      2010,
+      -2,
+      -0.1
+     ],
+     [
+      220,
+      2020,
+      -2.1,
+      -0.4
+     ],
+     [
+      230,
+      2030,
+      -2.2,
+      -0.6
+     ],
+     [
+      240,
+      2040,
+      -2.4,
+      -0.6
+     ],
+     [
+      250,
+      2050,
+      -2.4,
+      -0.4
+     ],
+     [
+      260,
+      2060,
+      -2.4,
+      -0.3
+     ],
+     [
+      270,
+      2070,
+      -2.4,
+      -0.2
+     ],
+     [
+      280,
+      2080,
+      -2.3,
+      -0.3
+     ],
+     [
+      290,
+      2090,
+      -2.3,
+      -0.6
+     ],
+     [
+      300,
+      2100,
+      -2.2,
+      -1
+     ],
+     [
+      310,
+      2110,
+      -2.2,
+      -1.2
+     ],
+     [
+      320,
+      2120,
+      -2.2,
+      -0.8
+     ],
+     [
+      330,
+      2130,
+      -2.2,
+      -0.1
+     ],
+     [
+      340,
+      2140,
+      -2.3,
+      0.3
+     ],
+     [
+      350,
+      2150,
+      -2.3,
+      0.1
+     ],
+     [
+      360,
+      2160,
+      -2.2,
+      -0.2
+     ],
+     [
+      370,
+      2170,
+      -2.2,
+      -0.3
+     ],
+     [
+      380,
+      2180,
+      -2.1,
+      -0.3
+     ],
+     [
+      390,
+      2190,
+      -2.1,
+      -0.6
+     ],
+     [
+      400,
+      2200,
+      -2.2,
+      -0.9
+     ],
+     [
+      410,
+      2210,
+      -2.2,
+      -1.1
+     ],
+     [
+      420,
+      2220,
+      -2.2,
+      -0.9
+     ],
+     [
+      430,
+      2230,
+      -2.2,
+      -0.5
+     ],
+     [
+      440,
+      2240,
+      -2.2,
+      -0.1
+     ],
+     [
+      450,
+      2250,
+      -2.2,
+      0
+     ],
+     [
+      460,
+      2260,
+      -2.2,
+      -0.2
+     ],
+     [
+      470,
+      2270,
+      -2.3,
+      -0.4
+     ],
+     [
+      480,
+      2280,
+      -2.3,
+      -0.5
+     ],
+     [
+      490,
+      2290,
+      -2.4,
+      -0.5
+     ],
+     [
+      500,
+      2300,
+      -2.4,
+      -0.5
+     ],
+     [
+      510,
+      2310,
+      -2.3,
+      -0.5
+     ],
+     [
+      520,
+      2320,
+      -2.1,
+      -0.5
+     ],
+     [
+      530,
+      2330,
+      -1.8,
+      -0.5
+     ],
+     [
+      540,
+      2340,
+      -1.3,
+      -0.3
+     ],
+     [
+      550,
+      2350,
+      -0.5,
+      -0.1
+     ],
+     [
+      560,
+      2360,
+      0.5,
+      -0.2
+     ],
+     [
+      570,
+      2370,
+      1.7,
+      -0.1
+     ],
+     [
+      580,
+      2380,
+      2.8,
+      0.6
+     ],
+     [
+      590,
+      2390,
+      3.7,
+      1.8
+     ],
+     [
+      600,
+      2400,
+      4.8,
+      3.1
+     ],
+     [
+      610,
+      2410,
+      5.2,
+      4.4
+     ],
+     [
+      620,
+      2420,
+      5.5,
+      5
+     ],
+     [
+      630,
+      2430,
+      5.7,
+      5.1
+     ],
+     [
+      640,
+      2440,
+      5.7,
+      5
+     ],
+     [
+      650,
+      2450,
+      5.8,
+      4.9
+     ],
+     [
+      660,
+      2460,
+      5.8,
+      4.9
+     ],
+     [
+      670,
+      2470,
+      5.8,
+      5
+     ],
+     [
+      680,
+      2480,
+      5.7,
+      5.1
+     ],
+     [
+      690,
+      2490,
+      5.7,
+      4.9
+     ],
+     [
+      700,
+      2500,
+      5.7,
+      4.6
+     ],
+     [
+      710,
+      2510,
+      5.7,
+      4.8
+     ],
+     [
+      720,
+      2520,
+      5.8,
+      5
+     ],
+     [
+      730,
+      2530,
+      5.8,
+      4.3
+     ],
+     [
+      740,
+      2540,
+      5.4,
+      2.2
+     ],
+     [
+      750,
+      2550,
+      5,
+      0.2
+     ],
+     [
+      760,
+      2560,
+      4.2,
+      -0.3
+     ],
+     [
+      770,
+      -2566,
+      3.6,
+      -0.1
+     ],
+     [
+      780,
+      -2556,
+      3.3,
+      0
+     ],
+     [
+      800,
+      -2536,
+      2,
+      0
+     ],
+     [
+      810,
+      -2526,
+      1.4,
+      0
+     ],
+     [
+      820,
+      -2516,
+      0.9,
+      0
+     ],
+     [
+      830,
+      -2506,
+      0.4,
+      0
+     ],
+     [
+      840,
+      -2496,
+      -0.2,
+      0
+     ],
+     [
+      850,
+      -2486,
+      -0.9,
+      0
+     ],
+     [
+      860,
+      -2476,
+      -1.4,
+      0
+     ],
+     [
+      870,
+      -2466,
+      -1.4,
+      0
+     ],
+     [
+      880,
+      -2456,
+      -1.5,
+      0
+     ],
+     [
+      890,
+      -2446,
+      -1.7,
+      0
+     ],
+     [
+      900,
+      -2436,
+      -1.9,
+      0
+     ],
+     [
+      910,
+      -2426,
+      -2,
+      0
+     ],
+     [
+      920,
+      -2416,
+      -2.1,
+      0
+     ],
+     [
+      930,
+      -2406,
+      -2.2,
+      0
+     ],
+     [
+      940,
+      -2396,
+      -2.2,
+      0
+     ],
+     [
+      950,
+      -2386,
+      -2.3,
+      0
+     ],
+     [
+      960,
+      -2376,
+      -2.3,
+      0
+     ],
+     [
+      970,
+      -2366,
+      -2.4,
+      0
+     ],
+     [
+      980,
+      -2356,
+      -2.4,
+      0.1
+     ],
+     [
+      990,
+      -2346,
+      -2.4,
+      0.1
+     ],
+     [
+      1000,
+      -2336,
+      -2.3,
+      -0.6
+     ],
+     [
+      1010,
+      -2326,
+      -2.1,
+      -2.1
+     ],
+     [
+      1020,
+      -2316,
+      -2.1,
+      -3.1
+     ],
+     [
+      1030,
+      -2306,
+      -2.5,
+      -2.9
+     ],
+     [
+      1040,
+      -2296,
+      -2.5,
+      -2.5
+     ],
+     [
+      1050,
+      -2286,
+      -2.3,
+      -2.4
+     ],
+     [
+      1060,
+      -2276,
+      -2.1,
+      -2.7
+     ],
+     [
+      1070,
+      -2266,
+      -2,
+      -2.6
+     ],
+     [
+      1080,
+      -2256,
+      -2,
+      -2.5
+     ],
+     [
+      1090,
+      -2246,
+      -2,
+      -2.6
+     ],
+     [
+      1100,
+      -2236,
+      -1.8,
+      -2.3
+     ],
+     [
+      1110,
+      -2226,
+      -1.6,
+      -1.9
+     ],
+     [
+      1120,
+      -2216,
+      -0.9,
+      -1.1
+     ],
+     [
+      1130,
+      -2206,
+      0.1,
+      0.3
+     ],
+     [
+      1140,
+      -2196,
+      1.1,
+      1.7
+     ],
+     [
+      1150,
+      -2186,
+      1.8,
+      2.4
+     ],
+     [
+      1160,
+      -2176,
+      2.3,
+      2.2
+     ],
+     [
+      1170,
+      -2166,
+      2.3,
+      1.8
+     ],
+     [
+      1180,
+      -2156,
+      2.4,
+      1.9
+     ],
+     [
+      1190,
+      -2146,
+      2.4,
+      2.3
+     ],
+     [
+      1200,
+      -2136,
+      2.3,
+      2.1
+     ],
+     [
+      1210,
+      -2126,
+      2.2,
+      1.3
+     ],
+     [
+      1220,
+      -2116,
+      2.2,
+      0.8
+     ],
+     [
+      1230,
+      -2106,
+      2.2,
+      0.5
+     ],
+     [
+      1240,
+      -2096,
+      2.3,
+      0.3
+     ],
+     [
+      1250,
+      -2086,
+      2.4,
+      0.1
+     ],
+     [
+      1260,
+      -2076,
+      2.4,
+      -0.1
+     ],
+     [
+      1270,
+      -2066,
+      2.3,
+      -0.1
+     ],
+     [
+      1280,
+      -2056,
+      2.1,
+      -0.1
+     ],
+     [
+      1290,
+      -2046,
+      2,
+      0
+     ],
+     [
+      1300,
+      -2036,
+      1.8,
+      0
+     ],
+     [
+      1310,
+      -2026,
+      1.5,
+      0
+     ],
+     [
+      1320,
+      -2016,
+      1.5,
+      0
+     ],
+     [
+      1330,
+      -2006,
+      1.5,
+      0
+     ],
+     [
+      1340,
+      -1996,
+      1.5,
+      0
+     ],
+     [
+      1350,
+      -1986,
+      1.5,
+      0
+     ],
+     [
+      1360,
+      -1976,
+      1.4,
+      0
+     ],
+     [
+      1370,
+      -1966,
+      1.4,
+      0
+     ],
+     [
+      1380,
+      -1956,
+      1.4,
+      0
+     ],
+     [
+      1390,
+      -1946,
+      1.4,
+      0
+     ],
+     [
+      1400,
+      -1936,
+      1.4,
+      0
+     ],
+     [
+      1410,
+      -1926,
+      1.1,
+      0
+     ],
+     [
+      1420,
+      -1916,
+      0.6,
+      0
+     ],
+     [
+      1430,
+      -1906,
+      0.2,
+      0
+     ],
+     [
+      1440,
+      -1896,
+      -0.3,
+      0
+     ],
+     [
+      1450,
+      -1886,
+      -0.8,
+      0
+     ],
+     [
+      1460,
+      -1876,
+      -1.3,
+      0
+     ],
+     [
+      1470,
+      -1866,
+      -1.3,
+      0
+     ],
+     [
+      1480,
+      -1856,
+      -0.4,
+      0
+     ],
+     [
+      1490,
+      -1846,
+      -0.4,
+      0
+     ],
+     [
+      1500,
+      -1836,
+      -0.5,
+      0
+     ],
+     [
+      1510,
+      -1826,
+      -0.6,
+      0.1
+     ],
+     [
+      1520,
+      -1816,
+      -0.9,
+      0
+     ],
+     [
+      1530,
+      -1806,
+      -1.6,
+      -0.1
+     ],
+     [
+      1540,
+      -1796,
+      -2.3,
+      -0.2
+     ],
+     [
+      1550,
+      -1786,
+      -2.7,
+      -0.1
+     ],
+     [
+      1560,
+      -1776,
+      -3.2,
+      0.1
+     ],
+     [
+      1570,
+      -1766,
+      -3.3,
+      -0.4
+     ],
+     [
+      1580,
+      -1756,
+      -3.3,
+      -1.8
+     ],
+     [
+      1590,
+      -1746,
+      -3.3,
+      -3.7
+     ],
+     [
+      1600,
+      -1736,
+      -3.3,
+      -4.8
+     ],
+     [
+      1610,
+      -1726,
+      -3.4,
+      -4.7
+     ],
+     [
+      1620,
+      -1716,
+      -3.4,
+      -4.5
+     ],
+     [
+      1630,
+      -1706,
+      -3.4,
+      -4.7
+     ],
+     [
+      1640,
+      -1696,
+      -3.4,
+      -3.9
+     ],
+     [
+      1650,
+      -1686,
+      -3.4,
+      -1.5
+     ],
+     [
+      1660,
+      -1676,
+      -3.1,
+      -0.4
+     ],
+     [
+      1670,
+      -1666,
+      -2.8,
+      0
+     ],
+     [
+      1680,
+      -1656,
+      -2.1,
+      0.1
+     ],
+     [
+      1690,
+      -1646,
+      -1.3,
+      0.1
+     ],
+     [
+      1700,
+      -1636,
+      -0.4,
+      0
+     ],
+     [
+      1710,
+      -1626,
+      0.6,
+      0
+     ],
+     [
+      1720,
+      -1616,
+      1.6,
+      -0.1
+     ],
+     [
+      1730,
+      -1606,
+      2.6,
+      -0.3
+     ],
+     [
+      1740,
+      -1596,
+      3.5,
+      -0.3
+     ],
+     [
+      1750,
+      -1586,
+      3.9,
+      0.1
+     ],
+     [
+      1760,
+      -1576,
+      4.3,
+      1.1
+     ],
+     [
+      1770,
+      -1566,
+      4.5,
+      2.3
+     ],
+     [
+      1780,
+      -1556,
+      4.5,
+      3.4
+     ],
+     [
+      1790,
+      -1546,
+      4.5,
+      3.9
+     ],
+     [
+      1800,
+      -1536,
+      4.4,
+      4.1
+     ],
+     [
+      1810,
+      -1526,
+      4.4,
+      4.2
+     ],
+     [
+      1820,
+      -1516,
+      4.2,
+      3.9
+     ],
+     [
+      1830,
+      -1506,
+      4.2,
+      3.5
+     ],
+     [
+      1840,
+      -1496,
+      4.4,
+      3.6
+     ],
+     [
+      1850,
+      -1486,
+      4.8,
+      4
+     ],
+     [
+      1860,
+      -1476,
+      4.8,
+      3.9
+     ],
+     [
+      1870,
+      -1466,
+      4.8,
+      3.4
+     ],
+     [
+      1880,
+      -1456,
+      4.7,
+      2.5
+     ],
+     [
+      1890,
+      -1446,
+      4.7,
+      1.2
+     ],
+     [
+      1900,
+      -1436,
+      4.5,
+      0.3
+     ],
+     [
+      1910,
+      -1426,
+      4.2,
+      0.1
+     ],
+     [
+      1920,
+      -1416,
+      4,
+      0.1
+     ],
+     [
+      1930,
+      -1406,
+      3.9,
+      0.1
+     ],
+     [
+      1940,
+      -1396,
+      3.5,
+      0
+     ],
+     [
+      1950,
+      -1386,
+      3.2,
+      0
+     ],
+     [
+      1960,
+      -1376,
+      2.9,
+      0
+     ],
+     [
+      1970,
+      -1366,
+      2.6,
+      0
+     ],
+     [
+      1980,
+      -1356,
+      2.4,
+      0
+     ],
+     [
+      1990,
+      -1346,
+      2.2,
+      0
+     ],
+     [
+      2000,
+      -1336,
+      2.2,
+      0
+     ],
+     [
+      2010,
+      -1326,
+      2.2,
+      0
+     ],
+     [
+      2020,
+      -1316,
+      2.2,
+      0
+     ],
+     [
+      2030,
+      -1306,
+      2.2,
+      0
+     ],
+     [
+      2040,
+      -1296,
+      2.2,
+      0
+     ],
+     [
+      2050,
+      -1286,
+      2.3,
+      0
+     ],
+     [
+      2060,
+      -1276,
+      2.3,
+      0
+     ],
+     [
+      2070,
+      -1266,
+      2.2,
+      0
+     ],
+     [
+      2080,
+      -1256,
+      2.2,
+      0
+     ],
+     [
+      2090,
+      -1246,
+      2.2,
+      0
+     ],
+     [
+      2100,
+      -1236,
+      2.1,
+      0
+     ],
+     [
+      2110,
+      -1226,
+      2.2,
+      0
+     ],
+     [
+      2120,
+      -1216,
+      2.2,
+      0
+     ],
+     [
+      2130,
+      -1206,
+      2.2,
+      0
+     ],
+     [
+      2140,
+      -1196,
+      2.3,
+      0
+     ],
+     [
+      2150,
+      -1186,
+      2.3,
+      0
+     ],
+     [
+      2160,
+      -1176,
+      2.4,
+      0
+     ],
+     [
+      2170,
+      -1166,
+      2.4,
+      -0.1
+     ],
+     [
+      2180,
+      -1156,
+      2.4,
+      -0.2
+     ],
+     [
+      2190,
+      -1146,
+      2.3,
+      -0.2
+     ],
+     [
+      2200,
+      -1136,
+      2.3,
+      0
+     ],
+     [
+      2210,
+      -1126,
+      2.3,
+      0.4
+     ],
+     [
+      2220,
+      -1116,
+      2.3,
+      1.1
+     ],
+     [
+      2230,
+      -1106,
+      2.3,
+      2.1
+     ],
+     [
+      2240,
+      -1096,
+      2.4,
+      2.1
+     ],
+     [
+      2250,
+      -1086,
+      2.4,
+      1.3
+     ],
+     [
+      2260,
+      -1076,
+      2.4,
+      1.8
+     ],
+     [
+      2270,
+      -1066,
+      2.3,
+      2.4
+     ],
+     [
+      2280,
+      -1056,
+      2.3,
+      2.3
+     ],
+     [
+      2290,
+      -1046,
+      2.4,
+      1.9
+     ],
+     [
+      2300,
+      -1036,
+      2.4,
+      1.2
+     ],
+     [
+      2310,
+      -1026,
+      2.3,
+      0.4
+     ],
+     [
+      2320,
+      -1016,
+      2.3,
+      -0.2
+     ],
+     [
+      2340,
+      -996,
+      2.3,
+      -0.1
+     ],
+     [
+      2350,
+      -986,
+      2.3,
+      0.1
+     ],
+     [
+      2360,
+      -976,
+      2.4,
+      0.2
+     ],
+     [
+      2370,
+      -966,
+      2.4,
+      0.2
+     ],
+     [
+      2380,
+      -956,
+      2.4,
+      0.2
+     ],
+     [
+      2390,
+      -946,
+      2.3,
+      0.1
+     ],
+     [
+      2400,
+      -936,
+      2.2,
+      0
+     ],
+     [
+      2410,
+      -926,
+      1.8,
+      0
+     ],
+     [
+      2420,
+      -916,
+      1.2,
+      0
+     ],
+     [
+      2430,
+      -906,
+      0.8,
+      0
+     ],
+     [
+      2440,
+      -896,
+      0.2,
+      0
+     ],
+     [
+      2450,
+      -886,
+      -0.4,
+      0
+     ],
+     [
+      2460,
+      -876,
+      -0.9,
+      0
+     ],
+     [
+      2470,
+      -866,
+      -1.2,
+      0
+     ],
+     [
+      2480,
+      -856,
+      -1.4,
+      0
+     ],
+     [
+      2490,
+      -846,
+      -1.4,
+      0
+     ],
+     [
+      2500,
+      -836,
+      -1.6,
+      0
+     ],
+     [
+      2510,
+      -826,
+      -1.6,
+      0
+     ],
+     [
+      2520,
+      -816,
+      -1.6,
+      0
+     ],
+     [
+      2530,
+      -806,
+      -1.6,
+      0
+     ],
+     [
+      2540,
+      -796,
+      -1.6,
+      0
+     ],
+     [
+      2550,
+      -786,
+      -1.8,
+      0
+     ],
+     [
+      2560,
+      -776,
+      -1.9,
+      0
+     ],
+     [
+      2570,
+      -766,
+      -2,
+      0
+     ],
+     [
+      2580,
+      -756,
+      -2,
+      0
+     ],
+     [
+      2590,
+      -746,
+      -2.1,
+      0
+     ],
+     [
+      2600,
+      -736,
+      -2.2,
+      0
+     ],
+     [
+      2610,
+      -726,
+      -2.2,
+      0
+     ],
+     [
+      2620,
+      -716,
+      -2.3,
+      0
+     ],
+     [
+      2630,
+      -706,
+      -2.3,
+      0
+     ],
+     [
+      2640,
+      -696,
+      -2.4,
+      0
+     ],
+     [
+      2650,
+      -686,
+      -2.5,
+      0.2
+     ],
+     [
+      2660,
+      -676,
+      -2.5,
+      0.4
+     ],
+     [
+      2670,
+      -666,
+      -2.4,
+      0.2
+     ],
+     [
+      2680,
+      -656,
+      -2,
+      -0.2
+     ],
+     [
+      2690,
+      -646,
+      -1.5,
+      -0.9
+     ],
+     [
+      2700,
+      -636,
+      -1.5,
+      -2.6
+     ],
+     [
+      2710,
+      -626,
+      -1.5,
+      -4.8
+     ],
+     [
+      2720,
+      -616,
+      -2,
+      -5.1
+     ],
+     [
+      2730,
+      -606,
+      -2,
+      -2.2
+     ],
+     [
+      2740,
+      -596,
+      -1.5,
+      2.5
+     ],
+     [
+      2750,
+      -586,
+      0.6,
+      5.2
+     ],
+     [
+      2760,
+      -576,
+      2,
+      5
+     ],
+     [
+      2770,
+      -566,
+      2.9,
+      2.8
+     ],
+     [
+      2780,
+      -556,
+      2.9,
+      1
+     ],
+     [
+      2790,
+      -546,
+      2.7,
+      0.3
+     ],
+     [
+      2800,
+      -536,
+      2.6,
+      -0.3
+     ],
+     [
+      2810,
+      -526,
+      2.6,
+      -0.2
+     ],
+     [
+      2820,
+      -516,
+      2.4,
+      0.7
+     ],
+     [
+      2830,
+      -506,
+      2.3,
+      1.5
+     ],
+     [
+      2840,
+      -496,
+      2.1,
+      1.5
+     ],
+     [
+      2850,
+      -486,
+      2.1,
+      1
+     ],
+     [
+      2860,
+      -476,
+      2.3,
+      0.5
+     ],
+     [
+      2870,
+      -466,
+      2.3,
+      0.3
+     ],
+     [
+      2880,
+      -456,
+      2.3,
+      0.3
+     ],
+     [
+      2890,
+      -446,
+      2.4,
+      0.2
+     ],
+     [
+      2900,
+      -436,
+      2.4,
+      0
+     ],
+     [
+      2910,
+      -426,
+      2.4,
+      -0.1
+     ],
+     [
+      2920,
+      -416,
+      2.3,
+      -0.1
+     ],
+     [
+      2930,
+      -406,
+      2.3,
+      0
+     ],
+     [
+      2940,
+      -396,
+      2.4,
+      0
+     ],
+     [
+      2950,
+      -386,
+      2.4,
+      -0.2
+     ],
+     [
+      2960,
+      -376,
+      2.4,
+      -0.2
+     ],
+     [
+      2970,
+      -366,
+      2.3,
+      0.1
+     ],
+     [
+      2980,
+      -356,
+      2.2,
+      1
+     ],
+     [
+      2990,
+      -346,
+      2.2,
+      2.1
+     ],
+     [
+      3000,
+      -336,
+      2.3,
+      3.4
+     ],
+     [
+      3010,
+      -326,
+      2.3,
+      4.6
+     ],
+     [
+      3020,
+      -316,
+      2.3,
+      4.9
+     ],
+     [
+      3030,
+      -306,
+      2.2,
+      4.6
+     ],
+     [
+      3040,
+      -296,
+      2.3,
+      4.3
+     ],
+     [
+      3050,
+      -286,
+      2.4,
+      4.2
+     ],
+     [
+      3060,
+      -276,
+      2.5,
+      4.3
+     ],
+     [
+      3070,
+      -266,
+      2.5,
+      4.1
+     ],
+     [
+      3080,
+      -256,
+      2.3,
+      3.9
+     ],
+     [
+      3090,
+      -246,
+      2.2,
+      4.1
+     ],
+     [
+      3100,
+      -236,
+      2.2,
+      4.6
+     ],
+     [
+      3110,
+      -226,
+      2.4,
+      4.2
+     ],
+     [
+      3120,
+      -216,
+      2.5,
+      2.7
+     ],
+     [
+      3130,
+      -206,
+      2.5,
+      1.3
+     ],
+     [
+      3140,
+      -196,
+      2.5,
+      0.4
+     ],
+     [
+      3150,
+      -186,
+      2.5,
+      -0.2
+     ],
+     [
+      3160,
+      -176,
+      2.4,
+      -0.5
+     ],
+     [
+      3170,
+      -166,
+      2.3,
+      -0.3
+     ],
+     [
+      3180,
+      -156,
+      2,
+      -0.1
+     ],
+     [
+      3190,
+      -146,
+      1.9,
+      0
+     ],
+     [
+      3200,
+      -136,
+      1.7,
+      0
+     ],
+     [
+      3210,
+      -126,
+      1.6,
+      0
+     ],
+     [
+      3221,
+      -116,
+      1.5,
+      0
+     ],
+     [
+      3231,
+      -106,
+      1.4,
+      0
+     ],
+     [
+      3241,
+      -96,
+      1.4,
+      0
+     ],
+     [
+      3251,
+      -86,
+      1.4,
+      0
+     ],
+     [
+      3261,
+      -76,
+      1.4,
+      0
+     ],
+     [
+      3271,
+      -66,
+      1.4,
+      0
+     ],
+     [
+      3281,
+      -56,
+      1.4,
+      0
+     ],
+     [
+      3291,
+      -46,
+      1.4,
+      0
+     ],
+     [
+      3301,
+      -36,
+      1.2,
+      0
+     ],
+     [
+      3311,
+      -26,
+      1.2,
+      0
+     ],
+     [
+      3321,
+      -16,
+      1.2,
+      0.1
+     ],
+     [
+      3331,
+      -6,
+      1.2,
+      0.1
+     ],
+     [
+      3341,
+      4,
+      1.3,
+      -0.1
+     ],
+     [
+      3351,
+      14,
+      1.3,
+      -0.1
+     ],
+     [
+      3361,
+      24,
+      1.3,
+      0
+     ],
+     [
+      3371,
+      34,
+      1.4,
+      0
+     ],
+     [
+      3381,
+      44,
+      1.4,
+      0
+     ],
+     [
+      3391,
+      54,
+      1.3,
+      0
+     ],
+     [
+      3401,
+      64,
+      1.3,
+      0
+     ],
+     [
+      3411,
+      74,
+      1.4,
+      0
+     ],
+     [
+      3421,
+      84,
+      1.4,
+      0
+     ],
+     [
+      3431,
+      94,
+      1.4,
+      0
+     ],
+     [
+      3441,
+      104,
+      1.3,
+      0
+     ],
+     [
+      3451,
+      114,
+      1.3,
+      0
+     ],
+     [
+      3461,
+      124,
+      1.3,
+      0
+     ],
+     [
+      3471,
+      134,
+      1.4,
+      0
+     ],
+     [
+      3481,
+      144,
+      1.4,
+      0
+     ],
+     [
+      3491,
+      154,
+      1.4,
+      0
+     ],
+     [
+      3501,
+      164,
+      1.4,
+      0
+     ],
+     [
+      3511,
+      174,
+      1.3,
+      0
+     ],
+     [
+      3521,
+      184,
+      1.3,
+      0
+     ],
+     [
+      3531,
+      194,
+      1.2,
+      0
+     ],
+     [
+      3541,
+      204,
+      1.2,
+      0
+     ],
+     [
+      3551,
+      214,
+      1.2,
+      0
+     ],
+     [
+      3561,
+      224,
+      1.4,
+      0
+     ],
+     [
+      3571,
+      234,
+      1.4,
+      0
+     ],
+     [
+      3581,
+      244,
+      1.4,
+      0
+     ],
+     [
+      3591,
+      254,
+      1.4,
+      0
+     ],
+     [
+      3601,
+      264,
+      1.4,
+      0
+     ],
+     [
+      3611,
+      274,
+      1.4,
+      0
+     ],
+     [
+      3621,
+      284,
+      1.4,
+      0
+     ],
+     [
+      3631,
+      294,
+      1.3,
+      0
+     ],
+     [
+      3641,
+      304,
+      1.3,
+      0
+     ],
+     [
+      3651,
+      314,
+      1.3,
+      0
+     ],
+     [
+      3661,
+      324,
+      1.3,
+      0
+     ],
+     [
+      3671,
+      334,
+      1.3,
+      0
+     ],
+     [
+      3681,
+      344,
+      1.3,
+      0
+     ],
+     [
+      3691,
+      354,
+      1.3,
+      0
+     ],
+     [
+      3701,
+      364,
+      1.3,
+      0
+     ],
+     [
+      3711,
+      374,
+      1.5,
+      0.1
+     ],
+     [
+      3721,
+      384,
+      1.5,
+      0.1
+     ],
+     [
+      3731,
+      394,
+      1.5,
+      0.2
+     ],
+     [
+      3741,
+      404,
+      1.4,
+      0.2
+     ],
+     [
+      3751,
+      414,
+      1.4,
+      0.1
+     ],
+     [
+      3761,
+      424,
+      1.4,
+      0
+     ],
+     [
+      3771,
+      434,
+      1.4,
+      -0.2
+     ],
+     [
+      3781,
+      444,
+      1.4,
+      -0.2
+     ],
+     [
+      3791,
+      454,
+      1.4,
+      0.2
+     ],
+     [
+      3801,
+      465,
+      0.9,
+      0.7
+     ],
+     [
+      3811,
+      475,
+      0.9,
+      1.1
+     ],
+     [
+      3821,
+      485,
+      1.8,
+      1.2
+     ],
+     [
+      3831,
+      495,
+      1.8,
+      0.7
+     ],
+     [
+      3841,
+      505,
+      1.5,
+      0.2
+     ],
+     [
+      3851,
+      515,
+      1.5,
+      0
+     ],
+     [
+      3861,
+      525,
+      1.5,
+      0.1
+     ],
+     [
+      3871,
+      535,
+      1.5,
+      0.3
+     ],
+     [
+      3881,
+      545,
+      1.4,
+      0.4
+     ],
+     [
+      3891,
+      555,
+      1.3,
+      0.3
+     ],
+     [
+      3901,
+      565,
+      1.2,
+      0.2
+     ],
+     [
+      3911,
+      575,
+      1.2,
+      -0.1
+     ],
+     [
+      3921,
+      585,
+      1.2,
+      -0.5
+     ],
+     [
+      3931,
+      595,
+      1.2,
+      -0.1
+     ],
+     [
+      3941,
+      605,
+      1.2,
+      1.4
+     ],
+     [
+      3951,
+      615,
+      1.1,
+      3.6
+     ],
+     [
+      3961,
+      625,
+      1.1,
+      5.2
+     ],
+     [
+      3971,
+      635,
+      1.1,
+      5.8
+     ],
+     [
+      3981,
+      645,
+      1.1,
+      5.8
+     ],
+     [
+      3991,
+      655,
+      1.1,
+      4.7
+     ],
+     [
+      4001,
+      665,
+      1.2,
+      2.1
+     ],
+     [
+      4011,
+      675,
+      1.2,
+      0.7
+     ],
+     [
+      4021,
+      685,
+      1.2,
+      1.2
+     ],
+     [
+      4031,
+      695,
+      1.2,
+      1.9
+     ],
+     [
+      4041,
+      705,
+      1.3,
+      2
+     ],
+     [
+      4051,
+      715,
+      1.3,
+      1.3
+     ],
+     [
+      4061,
+      725,
+      1.1,
+      0.6
+     ],
+     [
+      4071,
+      735,
+      0.5,
+      0.6
+     ],
+     [
+      4081,
+      745,
+      -0.2,
+      0.4
+     ],
+     [
+      4091,
+      755,
+      -0.8,
+      -0.1
+     ],
+     [
+      4101,
+      765,
+      -1.4,
+      -0.8
+     ],
+     [
+      4111,
+      775,
+      -1.4,
+      -2.2
+     ],
+     [
+      4121,
+      785,
+      -1.4,
+      -3.8
+     ],
+     [
+      4131,
+      795,
+      -1.4,
+      -4.3
+     ],
+     [
+      4141,
+      805,
+      -1.4,
+      -4
+     ],
+     [
+      4151,
+      815,
+      -1.4,
+      -4.1
+     ],
+     [
+      4161,
+      825,
+      -1.5,
+      -4.2
+     ],
+     [
+      4171,
+      835,
+      -1.4,
+      -3.8
+     ],
+     [
+      4181,
+      845,
+      -1.5,
+      -3.5
+     ],
+     [
+      4191,
+      855,
+      -1.5,
+      -3.8
+     ],
+     [
+      4201,
+      865,
+      -1.5,
+      -4
+     ],
+     [
+      4211,
+      875,
+      -1.4,
+      -4.1
+     ],
+     [
+      4221,
+      885,
+      -1.4,
+      -4
+     ],
+     [
+      4231,
+      895,
+      -1.5,
+      -3.2
+     ],
+     [
+      4241,
+      905,
+      -1.5,
+      -1.7
+     ],
+     [
+      4251,
+      915,
+      -1.4,
+      -0.5
+     ],
+     [
+      4261,
+      925,
+      -1.4,
+      0.1
+     ],
+     [
+      4271,
+      935,
+      -1.4,
+      0.2
+     ],
+     [
+      4281,
+      945,
+      -1.4,
+      -0.2
+     ],
+     [
+      4291,
+      955,
+      -1.4,
+      -0.9
+     ],
+     [
+      4301,
+      965,
+      -1.4,
+      -1.3
+     ],
+     [
+      4311,
+      975,
+      -1.4,
+      -1.1
+     ],
+     [
+      4321,
+      985,
+      -1.4,
+      -0.5
+     ],
+     [
+      4331,
+      995,
+      -1.4,
+      -0.1
+     ],
+     [
+      4341,
+      1005,
+      -1.3,
+      -0.8
+     ],
+     [
+      4351,
+      1015,
+      -1.3,
+      -2.1
+     ],
+     [
+      4361,
+      1025,
+      -1.3,
+      -2.8
+     ],
+     [
+      4371,
+      1035,
+      -1.3,
+      -2.7
+     ],
+     [
+      4381,
+      1045,
+      -1.2,
+      -3.1
+     ],
+     [
+      4391,
+      1055,
+      -1.2,
+      -4.5
+     ],
+     [
+      4401,
+      1065,
+      -1.3,
+      -5.3
+     ],
+     [
+      4411,
+      1075,
+      -1.4,
+      -4.8
+     ],
+     [
+      4421,
+      1085,
+      -1.4,
+      -4.3
+     ],
+     [
+      4431,
+      1095,
+      -1.4,
+      -5
+     ],
+     [
+      4441,
+      1105,
+      -1.4,
+      -5.4
+     ],
+     [
+      4451,
+      1115,
+      -1.4,
+      -5.1
+     ],
+     [
+      4461,
+      1125,
+      -1.2,
+      -4.7
+     ],
+     [
+      4471,
+      1135,
+      -1.1,
+      -3.7
+     ],
+     [
+      4481,
+      1145,
+      -0.6,
+      -1.9
+     ],
+     [
+      4491,
+      1155,
+      -0.1,
+      0.3
+     ],
+     [
+      4501,
+      1165,
+      0.6,
+      2.1
+     ],
+     [
+      4511,
+      1175,
+      1.1,
+      3.9
+     ],
+     [
+      4521,
+      1185,
+      1.3,
+      5.2
+     ],
+     [
+      4531,
+      1195,
+      1.4,
+      5.6
+     ],
+     [
+      4541,
+      1205,
+      1.4,
+      5.5
+     ],
+     [
+      4551,
+      1215,
+      1.4,
+      4.4
+     ],
+     [
+      4561,
+      1225,
+      1.4,
+      2.5
+     ],
+     [
+      4571,
+      1235,
+      1.4,
+      1
+     ],
+     [
+      4581,
+      1245,
+      1.4,
+      0.2
+     ],
+     [
+      4591,
+      1255,
+      1.4,
+      0.1
+     ],
+     [
+      4601,
+      1265,
+      1.4,
+      0.2
+     ],
+     [
+      4611,
+      1275,
+      1.4,
+      0.3
+     ],
+     [
+      4621,
+      1285,
+      1.4,
+      0.4
+     ],
+     [
+      4631,
+      1295,
+      1.4,
+      0.5
+     ],
+     [
+      4641,
+      1305,
+      1.4,
+      0.5
+     ],
+     [
+      4651,
+      1315,
+      1.4,
+      0.2
+     ],
+     [
+      4661,
+      1325,
+      1.4,
+      0
+     ],
+     [
+      4671,
+      1335,
+      1.4,
+      -0.1
+     ],
+     [
+      4681,
+      1345,
+      1.4,
+      0
+     ],
+     [
+      4691,
+      1355,
+      1.3,
+      0.1
+     ],
+     [
+      4701,
+      1365,
+      1,
+      0.1
+     ],
+     [
+      4711,
+      1375,
+      0.5,
+      0.1
+     ],
+     [
+      4721,
+      1385,
+      -0.1,
+      0.1
+     ],
+     [
+      4731,
+      1395,
+      -0.5,
+      0
+     ],
+     [
+      4741,
+      1405,
+      -1,
+      0
+     ],
+     [
+      4751,
+      1415,
+      -1.2,
+      0
+     ],
+     [
+      4761,
+      1425,
+      -1.2,
+      0.3
+     ],
+     [
+      4771,
+      1435,
+      0.9,
+      0.7
+     ],
+     [
+      4781,
+      1445,
+      1.1,
+      1
+     ],
+     [
+      4791,
+      1455,
+      1,
+      0.8
+     ],
+     [
+      4801,
+      1465,
+      1.1,
+      0.6
+     ],
+     [
+      4811,
+      1475,
+      1,
+      0.4
+     ],
+     [
+      4821,
+      1485,
+      -1.4,
+      0.2
+     ],
+     [
+      4831,
+      1495,
+      -1.5,
+      0
+     ],
+     [
+      4841,
+      1505,
+      -1.5,
+      0
+     ],
+     [
+      4851,
+      1515,
+      -1.5,
+      0
+     ],
+     [
+      4861,
+      1525,
+      -1.5,
+      -0.1
+     ],
+     [
+      4871,
+      1535,
+      -1.5,
+      -0.2
+     ],
+     [
+      4881,
+      1545,
+      -1.5,
+      -0.2
+     ],
+     [
+      4891,
+      1555,
+      -1.5,
+      -0.2
+     ],
+     [
+      4901,
+      1565,
+      -1.4,
+      -0.1
+     ],
+     [
+      4911,
+      1575,
+      -1.4,
+      0
+     ],
+     [
+      4921,
+      1585,
+      -1.4,
+      0
+     ],
+     [
+      4931,
+      1595,
+      -1.7,
+      0
+     ],
+     [
+      4941,
+      1605,
+      -2.3,
+      0.2
+     ],
+     [
+      4951,
+      1615,
+      -3,
+      0.4
+     ],
+     [
+      4961,
+      1625,
+      -3.8,
+      0.1
+     ],
+     [
+      4971,
+      1635,
+      -4.1,
+      -1.5
+     ],
+     [
+      4981,
+      1645,
+      -4.3,
+      -2.7
+     ],
+     [
+      4991,
+      1655,
+      -4.6,
+      -2.8
+     ],
+     [
+      5001,
+      1665,
+      -4.6,
+      -3.7
+     ],
+     [
+      5011,
+      1675,
+      -4.6,
+      -3.9
+     ],
+     [
+      5021,
+      1685,
+      -4.6,
+      -3.3
+     ],
+     [
+      5031,
+      1695,
+      -4.5,
+      -3.2
+     ],
+     [
+      5041,
+      1705,
+      -4.5,
+      -3.6
+     ],
+     [
+      5051,
+      1715,
+      -4.5,
+      -3.7
+     ],
+     [
+      5061,
+      1725,
+      -4.3,
+      -3.4
+     ],
+     [
+      5071,
+      1735,
+      -4,
+      -2.5
+     ],
+     [
+      5081,
+      1745,
+      -3.2,
+      -1.2
+     ],
+     [
+      5091,
+      1755,
+      -2.2,
+      -0.4
+     ],
+     [
+      5101,
+      1765,
+      -1,
+      -0.2
+     ],
+     [
+      5111,
+      1775,
+      0.2,
+      -0.2
+     ],
+     [
+      5121,
+      1785,
+      1.4,
+      -0.1
+     ],
+     [
+      5131,
+      1795,
+      2.5,
+      0.5
+     ]
+    ]
+   }
+  }
+ },
+ "sources": [
+  "LVermGeo RLP DGM1 (1 m lidar DTM, 2025 tiles, Datenlizenz Deutschland Namensnennung 2.0), https://geobasis-rlp.de/data/dgm1/current/tif/dgm1_32_{352..354}_{5576..5578}_1_rp_2025.tif; cached in devtests/track-audit/cache/rlp-dgm1/",
+  "OpenStreetMap (ODbL) via the Overpass API, cached in devtests/track-audit/cache/overpass/de-1927.json; relation 38567",
+  "de.wikipedia.org/wiki/Nürburgring",
+  "en.wikipedia.org/wiki/Nürburgring"
+ ]
+}

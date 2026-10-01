@@ -1,0 +1,23 @@
+diff --git a/tools/build-cars.mjs b/devtests/handling-test/variants/build-cars.proposed.mjs
+index b638f5d..49f1885 100644
+--- a/tools/build-cars.mjs
++++ b/devtests/handling-test/variants/build-cars.proposed.mjs
+@@ -343,8 +343,16 @@ function cornerSpeed(p, k, bank, pitch, kappaV, turnSign) {
+       v = lo;
+     }
+   }
+-  const x = Math.atan(p.wheelbase * k * STEER_MARGIN);
+-  if (x >= p.steerLock) v = MIN_SPEED;
++  let x = Math.atan(p.wheelbase * k * STEER_MARGIN);
++  if (typeof p.steerLockAt === 'function') {           // = js/raceline.js cornerSpeed (v6.2): the car's own lock law
++    const lk0 = p.steerLockAt(MIN_SPEED, bank, turnSign);
++    if (lk0 < x) x = lk0;
++    if (p.steerLockAt(v, bank, turnSign) < x) {
++      let a = MIN_SPEED, b = v;
++      for (let n = 0; n < 24; n++) { const c = 0.5 * (a + b); if (p.steerLockAt(c, bank, turnSign) >= x) a = c; else b = c; }
++      v = a;
++    }
++  } else if (x >= p.steerLock) v = MIN_SPEED;
+   else v = Math.min(v, p.steerSpeedRef * Math.sqrt(p.steerLock / x - 1));
+   return Math.max(MIN_SPEED, Math.min(p.topSpeed, v));
+ }

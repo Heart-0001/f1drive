@@ -1,0 +1,21 @@
+{
+ "_note": "OSM relation 19882715 'Yas Marina Circuit 2025' (type=track) = ways 168477013, 1469184731, 1469184732, 188337196 (bridge=yes layer 1), 1255169703, 1255169704 (covered=yes). 1469184731 / 1469184732 were missing from the Overpass answer: fetched from api.openstreetmap.org (cache/osmapi). F1 pit lane = ways 176695254, 176695255 (tunnel=yes layer -1), 176695253.",
+ "ways": [
+  168477013,
+  1469184731,
+  1469184732,
+  188337196,
+  1255169703,
+  1255169704
+ ],
+ "pitWays": [
+  176695254,
+  176695255,
+  176695253
+ ],
+ "officialKm": 5.281,
+ "extraFrom": [
+  "osmapi/way-1469184731-full.json",
+  "osmapi/way-1469184732-full.json"
+ ]
+}

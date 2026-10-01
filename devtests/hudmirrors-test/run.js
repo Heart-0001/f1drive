@@ -4,6 +4,8 @@
 // render; key V and the 後照鏡 switch of 設定, remembered). page.js (injected) only looks: the renderer for a separate
 // instance (the no-track checks) and the cost loops, test cars behind ours, frame timing. Nothing in the project is
 // edited. Screenshots in ./out (READ them), results on stdout and in out/results.json. Exit code 1 on a failed check.
+// The last part (a second window: the setting stored off) also breaks the game's mirror pass on purpose: main.js must
+// switch the mirrors off for good (設定: 無法顯示) and keep the game running.
 //   npx electron devtests/hudmirrors-test/run.js            env TRACK (default it-1922 = Monza), ONLY=layouts|cost|robust
 'use strict';
 const path = require('path'), fs = require('fs');
@@ -188,12 +190,15 @@ async function main() {
       hm.render({ x: 0, y: 0, z: 0, heading: 0 }, 0.016); var b = hm.info();
       hm.render({ x: NaN, z: 0, heading: 0 }, 0.016); var c = hm.info().passes;
       hm.dispose(); hm.render({ x: 0, z: 0, heading: 0 }, 0.016);
-      return { nullPose: a, sky: b.passes, blits: b.blits, nan: c, rects: b.rects, target: b.target, errs: __hm.errs.length };
+      return { nullPose: a, sky: b.passes, blits: b.blits, nan: c, rects: b.rects, target: b.target, errs: __hm.errs.length,
+        W: __hm.renderer.getSize(new THREE.Vector2()).x };
     })()`);
     check('no track: null pose draws nothing, a pose draws both mirrors (sky), NaN pose nothing, after dispose nothing',
       r1.nullPose === 0 && r1.sky === 2 && r1.blits === 2 && r1.nan === 2 && r1.errs === 0, r1);
-    check('built-in layout at 1280x720 = glass 240x80 at (22,16) and (1018,16)',
-      J(r1.rects) === J([[22, 16, 240, 80], [1018, 16, 240, 80]]), r1.rects);
+    // (the window asked for 1280 x 720 may come out 1 px larger at some device pixel ratios: the right glass is placed from
+    //  the right edge, 22 px in - 1018 at exactly 1280)
+    check('built-in layout at 1280x720 = glass 240x80 at (22,16) and (W - 262,16) = (1018,16) at exactly 1280',
+      Math.abs(r1.W - 1280) <= 1 && J(r1.rects) === J([[22, 16, 240, 80], [r1.W - 262, 16, 240, 80]]), { rects: r1.rects, W: r1.W });
   }
 
   // ---------- 2. a track: the game's own mirrors ----------
@@ -457,6 +462,24 @@ async function restart() {
   const v = await mirState(w);
   check('... V shows them (drawn, frames, boxes under them)', v.visible === true && v.frames.every(Boolean) && !v.noMirrors && v.timingTop === 110 && v.passes > 0, v);
   check('no page errors / console errors (new start)', w.errors.length === 0, w.errors.slice(0, 4));
+  // the mirrors are decoration: one that throws while drawing is switched off (設定: 無法顯示), the game drives on
+  await w.js(`(function () { var hm = F1.game.hudMirrors; hm.render = function () { throw new Error('hudmirrors-test: a broken mirror pass'); }; return true; })()`);
+  w.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'W' });
+  await sleep(900);
+  w.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'W' });
+  const broken = await w.js(`({ running: F1.game.running, hm: F1.game.hudMirrors === null ? null : 'still there', overlay: !document.getElementById('error').classList.contains('hidden'),
+    kmh: Math.round(F1.game.car.state.speed * 3.6), dis: document.getElementById('set-mirrors').disabled, txt: document.getElementById('set-mirrors-text').textContent,
+    cls: document.getElementById('hud').classList.contains('no-mirrors'), timingTop: Math.round(document.getElementById('hud-timing').getBoundingClientRect().top),
+    frames: ['hud-mirror-l', 'hud-mirror-r'].map(function (id) { return document.getElementById(id).getBoundingClientRect().width > 0; }), setting: F1.ui.getMirrors() })`);
+  await w.js(`F1.ui.toast(''), true`);
+  await w.key('V');
+  await sleep(300);
+  const afterV = await w.js(`({ hm: F1.game.hudMirrors === null ? null : 'back', cls: document.getElementById('hud').classList.contains('no-mirrors'), toast: document.getElementById('hud-toast').textContent })`);
+  const expected = w.errors.filter(e => /a broken mirror pass/.test(e));
+  check('a mirror pass that throws: mirrors switched off for good (game instance gone, 設定 switch disabled 無法顯示, HUD laid out without them, the setting kept), the game drives on (no error overlay, W accelerates); V then does nothing',
+    broken.running && broken.hm === null && !broken.overlay && broken.kmh > 20 && broken.dis && broken.txt === '無法顯示' && broken.cls && broken.timingTop === 18 &&
+    broken.frames.every(f => !f) && broken.setting === true && afterV.hm === null && afterV.cls && !/後照鏡/.test(afterV.toast) && expected.length === 1 && w.errors.length === 1,
+    { broken, afterV, errors: w.errors.slice(0, 3) });
   try { w.destroy(); } catch (e) {}
 }
 
@@ -468,4 +491,5 @@ function finish() {
   setTimeout(() => app.exit(failed ? 1 : 0), 300);
 }
 
+app.on('window-all-closed', () => {});      // the restart check opens a second window after the first is destroyed
 main().catch(e => { console.log('FATAL ' + (e && e.stack || e)); app.exit(2); });

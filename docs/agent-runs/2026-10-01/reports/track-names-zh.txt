@@ -1,0 +1,155 @@
+
+################ Chinese track names
+
+== summary
+Wrote js/track-names-zh.js. It is a classic script that sets window.F1_TRACK_NAMES_ZH and also exports through module.exports for node. Every id in tracks-data.js has one entry of the form { name, short, location, aliases }. The display fields (name, short, location) follow the forms Taiwanese F1 coverage uses. The main source is 運動視界 Sports Vision's 'F1賽道簡介' series: I downloaded all 27 articles and counted which '…賽道' forms they use. The other sources are U-CAR F1's season calendars for GP and country names, plus 聯合報 / 自由時報 / ETtoday / 中央社 hits. zh-tw Wikipedia titles, fetched through the MediaWiki API with varianttitles, were used as a cross-check, and as the fallback where Taiwan has no established form.
+
+Examples: 鈴鹿賽道, 蒙札賽道 (Sports Vision uses 蒙札; 蒙扎 is only an alias), 紐柏林賽道, 銀石賽道, 斯帕-法蘭柯爾尚賽道, 亞伯特公園賽道, 英特拉哥斯賽道, 贊德沃特賽道, 羅賽爾國際賽道, 吉達濱海賽道 and 亞斯碼頭賽道. Countries and cities use Taiwan forms: 澳洲, 義大利, 沙烏地阿拉伯, 卡達, 亞塞拜然, 蒙特婁, 伊斯坦堡, 阿布達比, 摩納哥 蒙地卡羅.
+
+The aliases are for search only (243 in total). They cover the zh-tw Wikipedia form where it differs, other spellings found in Taiwanese media, mainland and Hong Kong forms in simplified and traditional characters, and a few ASCII forms for names with diacritics or abbreviations (Portimao, Nurburgring, Jacarepagua, Galvez, Hermanos Rodriguez, COTA). Every name or short that contains a middle dot also has an alias without the dot.
+
+Validation (scratchpad/validate.js) loads the file both as a classic script in a vm with a window object and through require(), and the two results are identical. All 40 ids are present exactly once; this is checked against the raw source text too, because duplicate object keys would otherwise disappear silently. There are no unknown ids and no empty or untrimmed fields. Aliases have no duplicates and never repeat name, short or location. name, short and location contain no simplified-only characters, no mainland terms and no Latin letters. Every location has the form '<country> <place>'.
+
+A simulated search uses the same key as js/ui.js: English name + location + id, plus the Chinese fields, lower-cased. Run with plain substring matching (which ui.js uses today), all 53 test queries find the right track: 鈴鹿, 铃鹿, 鈴鹿國際賽車場, 蒙扎, 纽博格林, portimao, cota and others. Every name and every short finds its own card. Running the 11 node test suites was not needed: no test loads this file and no other file was touched. package.json already packages js/*.js. Nothing was committed.
+
+== table
+ - au-1953: 亞伯特公園賽道 / 墨爾本 / 澳洲 墨爾本 — Sports Vision 26771 (zh-tw Wikipedia: 阿爾伯特公園賽道)
+ - pt-1972: 艾斯托利爾賽道 / 艾斯托利爾 / 葡萄牙 艾斯托利爾 — Sports Vision 78452 (zh-tw Wikipedia: 埃什托里爾賽道)
+ - it-1953: 伊莫拉賽道 / 伊莫拉 / 義大利 伊莫拉 — Sports Vision 78617 (also 恩佐與帝諾．法拉利賽道; zh-tw Wikipedia: 安佐與迪諾·法拉利賽道)
+ - mx-1962: 羅德里格斯兄弟賽道 / 墨西哥城 / 墨西哥 墨西哥城 — Sports Vision 21804 + zh-tw Wikipedia
+ - pt-2008: 阿爾加維國際賽道 / 波爾蒂芒 / 葡萄牙 波爾蒂芒 — Sports Vision 78452 + zh-tw Wikipedia
+ - br-1977: 雅卡雷帕瓜賽道 / 雅卡雷帕瓜 / 巴西 里約熱內盧 — Sports Vision 22539 (雅卡雷帕瓜-皮奎特賽道, one mention); no zh-tw Wikipedia article (its 1989 Brazilian GP article uses 尼爾森·畢奇國際賽道)
+ - it-1914: 穆傑羅賽道 / 穆傑羅 / 義大利 斯卡爾佩里亞 — Sports Vision 77295 and its tag page (zh-tw Wikipedia: 穆傑洛賽道; comune 斯卡爾佩里亞和聖皮耶羅 from zh-tw Wikipedia)
+ - br-1940: 英特拉哥斯賽道 / 英特拉哥斯 / 巴西 聖保羅 — Sports Vision 22539 (zh-tw Wikipedia: 若澤·卡洛斯·帕塞賽道, formerly 英特拉格斯賽道)
+ - it-1922: 蒙札賽道 / 蒙札 / 義大利 蒙札 — Sports Vision 33452 (also 國立蒙札賽道; zh-tw Wikipedia: 蒙扎國家賽車場)
+ - ar-1952: 胡安與奧斯卡·加爾韋斯賽道 / 布宜諾斯艾利斯 / 阿根廷 布宜諾斯艾利斯 — zh-tw Wikipedia only, no Taiwan form (聯合報 9467052 calls it 加爾韋斯賽車場, kept as an alias)
+ - bh-2002: 巴林國際賽道 / 巴林 / 巴林 薩基爾 — Sports Vision 27512 + zh-tw Wikipedia + 聯合報
+ - az-2016: 巴庫市街賽道 / 巴庫 / 亞塞拜然 巴庫 — zh-tw Wikipedia (Sports Vision 30791: 巴庫市賽道 / 巴庫賽道); 亞塞拜然 from U-CAR
+ - es-1991: 巴塞隆納-加泰隆尼亞賽道 / 巴塞隆納 / 西班牙 巴塞隆納 — Sports Vision 29398 + zh-tw Wikipedia
+ - mc-1929: 摩納哥賽道 / 摩納哥 / 摩納哥 蒙地卡羅 — Sports Vision 29945 + zh-tw Wikipedia; 蒙地卡羅 from Sports Vision and 聯合報
+ - fr-1960: 馬尼庫爾賽道 / 馬尼庫爾 / 法國 馬尼庫爾 — zh-tw Wikipedia only, no Taiwan form
+ - be-1925: 斯帕-法蘭柯爾尚賽道 / 斯帕 / 比利時 斯帕 — Sports Vision 33257 / 105133 (zh-tw Wikipedia: 斯帕-弗朗科爾尚賽道)
+ - ca-1978: 吉爾·維倫紐夫賽道 / 蒙特婁 / 加拿大 蒙特婁 — Sports Vision 28764 + zh-tw Wikipedia; 蒙特婁 from Sports Vision 30456
+ - us-2012: 美洲賽道 / 奧斯汀 / 美國 奧斯汀 — Sports Vision 21408 + zh-tw Wikipedia
+ - fr-1969: 保羅·里卡爾賽道 / 保羅·里卡爾 / 法國 勒卡斯特雷 — Sports Vision 52818 + zh-tw Wikipedia; 勒卡斯特雷 from Sports Vision (zh-tw Wikipedia: 勒卡斯特萊)
+ - nl-1948: 贊德沃特賽道 / 贊德沃特 / 荷蘭 贊德沃特 — Sports Vision 87857 / 109265 (zh-tw Wikipedia: 贊德福特賽道)
+ - es-2026: 馬德里賽道 / 馬德里 / 西班牙 馬德里 — Sports Vision 109265 / 128387 (zh-tw Wikipedia: 馬德里環賽道)
+ - de-1932: 霍根海姆賽道 / 霍根海姆 / 德國 霍根海姆 — Sports Vision 65577 + zh-tw Wikipedia (Sports Vision 32372 also writes 霍肯海姆)
+ - hu-1986: 匈牙利賽道 / 匈牙利賽道 / 匈牙利 布達佩斯 — Sports Vision 32134 + zh-tw Wikipedia
+ - us-1909: 印第安納波利斯賽車場 / 印第安納波利斯 / 美國 印第安納波利斯 — 中央社 (zh-tw Wikipedia: 印第安納波利斯賽道)
+ - tr-2005: 伊斯坦堡賽道 / 伊斯坦堡 / 土耳其 伊斯坦堡 — Sports Vision 78909 + zh-tw Wikipedia display title
+ - sa-2021: 吉達濱海賽道 / 吉達 / 沙烏地阿拉伯 吉達 — Sports Vision 90293 + zh-tw Wikipedia; 沙烏地阿拉伯 from U-CAR
+ - za-1961: 卡亞拉米賽道 / 卡亞拉米 / 南非 約翰尼斯堡 — Sports Vision 48677 / 103978 + zh-tw Wikipedia
+ - us-2023: 拉斯維加斯市街賽道 / 拉斯維加斯 / 美國 拉斯維加斯 — Sports Vision 107849 (zh-tw Wikipedia: 拉斯維加斯大道賽道)
+ - qa-2004: 羅賽爾國際賽道 / 羅賽爾 / 卡達 盧賽爾 — Sports Vision 89947 + zh-tw Wikipedia; city 盧賽爾 from 中央社 (zh-tw Wikipedia: 路薩爾)
+ - sg-2008: 濱海灣市街賽道 / 濱海灣 / 新加坡 濱海灣 — Sports Vision 19591 + zh-tw Wikipedia
+ - us-2022: 邁阿密國際賽道 / 邁阿密 / 美國 邁阿密 — Sports Vision 94025 + zh-tw Wikipedia
+ - de-1927: 紐柏林賽道 / 紐柏林 / 德國 紐堡 — 自由時報 + Sports Vision 126351 (Sports Vision 78098 writes 紐堡林 and calls the village 紐堡村; 聯合報: 紐伯林; zh-tw Wikipedia: 紐博格林賽道)
+ - at-1969: 紅牛賽道 / 紅牛賽道 / 奧地利 斯皮爾伯格 — Sports Vision 31396 + zh-tw Wikipedia (zh-tw Wikipedia town name: 施皮爾貝格)
+ - my-1999: 雪邦國際賽道 / 雪邦 / 馬來西亞 雪邦 — 聯合報 9653645 + 中央社 + zh-tw Wikipedia
+ - cn-2004: 上海國際賽車場 / 上海 / 中國 上海 — zh-tw Wikipedia, the official name (Sports Vision 28037: 上海賽道)
+ - gb-1948: 銀石賽道 / 銀石 / 英國 銀石 — Sports Vision 31707 + zh-tw Wikipedia
+ - ru-2014: 索契賽道 / 索契 / 俄羅斯 索契 — Sports Vision 28764 + zh-tw Wikipedia
+ - jp-1962: 鈴鹿賽道 / 鈴鹿 / 日本 鈴鹿 — Sports Vision 19925 + 自由時報 5386450 + ETtoday + zh-tw Wikipedia (U-CAR: 鈴鹿賽車場; 鈴鹿國際賽車場 kept as an alias)
+ - us-1956: 華金谷國際賽道 / 華金谷 / 美國 華金谷 — zh-tw Wikipedia only, no Taiwan form
+ - ae-2009: 亞斯碼頭賽道 / 亞斯碼頭 / 阿聯 阿布達比 — Sports Vision 23206 + zh-tw Wikipedia; 阿布達比 from Sports Vision; 阿聯 is short for U-CAR's 阿拉伯聯合大公國
+
+== openIssues
+ - Not wired yet (UI owner): load js/track-names-zh.js in index.html before js/ui.js. Show name/location on the cards, and add name + short + location + aliases to the card search key while keeping the English name/location/id in it. Plain lower-case substring matching (what ui.js does now) is enough. If the search normalises, map '．' and '・' to '·'; do not strip the dot ('卡洛斯·帕塞' would become '卡洛斯帕塞' and match 斯帕).
+ - Suzuka name: the task example said name '鈴鹿國際賽車場'. I used '鈴鹿賽道', the form 自由時報 / ETtoday / Sports Vision / zh-tw Wikipedia actually use, and kept 鈴鹿國際賽車場 as an alias. Swap them if the card should mirror the formal English name.
+ - Taiwan has no established form for three circuits, so their names are zh-tw Wikipedia forms: ar-1952 胡安與奧斯卡·加爾韋斯賽道, fr-1960 馬尼庫爾賽道, us-1956 華金谷國際賽道. br-1977 雅卡雷帕瓜賽道 rests on a single Sports Vision mention; there is no zh Wikipedia article for it.
+ - Locations that differ from the English location field or shorten it: hu-1986 布達佩斯 (the track is really in Mogyoród), de-1927 德國 紐堡 (Nürburg village, Sports Vision's 紐堡村), us-1956 華金谷 (English location says Dix), it-1914 斯卡爾佩里亞 (short for Scarperia e San Piero), be-1925 比利時 斯帕, ae-2009 阿聯 (short for 阿拉伯聯合大公國, which is an alias).
+ - short equals name for hu-1986 (匈牙利賽道) and at-1969 (紅牛賽道), because that is the familiar handle. Elsewhere short is the place name.
+ - Some mainland or Hong Kong aliases come from general knowledge and were not checked one by one (e.g. 凯拉米赛道, 红牛环赛道, 巴库城市赛道, 吉达街道赛道, 卢赛尔国际赛道). They are search-only, so a wrong one can only cause an extra or missed match, never wrong text on screen.
+ - Sports Vision writes 尼德蘭 for the Netherlands; the location uses the standard Taiwan form 荷蘭 (U-CAR: 荷蘭站), and 尼德蘭 is an alias.
+ - Nothing committed (per instructions). The validation script lives only in the session scratchpad (validate.js) and is not part of the repo.
+
+################ check Chinese names
+
+== summary
+I checked js/track-names-zh.js on its own and now own it. Suzuka is there: jp-1962 is 鈴鹿賽道 / 鈴鹿 / 日本 鈴鹿, with 鈴鹿國際賽車場, 鈴鹿賽車場, 铃鹿 and 铃鹿赛道 as aliases. All 40 ids in tracks-data.js appear exactly once, in both the parsed object and the raw source text. There are no unknown ids.
+
+How I checked:
+- I got the zh-tw Wikipedia title for every circuit and place through the MediaWiki API (variant=zh-tw, starting from the English articles' langlinks).
+- I recounted the forms in each Sports Vision article the file cites (the cached pages, plus 105133 fetched again).
+- I spot-checked Taiwanese media: CNA 202211010118, ETtoday 20240401/2710938, UDN 8324/3957358 and 8324/1867441, and LightsOut.
+
+Most display forms held up. Two display forms changed:
+1. **de-1932 Hockenheim:** 霍根海姆賽道 / 霍根海姆 / 德國 霍根海姆 became 霍肯海姆賽道 / 霍肯海姆 / 德國 霍肯海姆.
+   - 霍根海姆 is the form Baidu and other mainland sites use.
+   - The Sports Vision article cited for it (65577) was written by Red Bull. The circuit's article in Sports Vision's own circuit-guide series (32372) uses 霍肯海姆 ten times.
+   - ETtoday (2024) also uses 霍肯海姆.
+   - zh-tw Wikipedia's title is 霍肯海姆賽道, and its regional-names table lists 臺灣 霍肯海姆. The file had claimed Wikipedia used 霍根海姆, which was wrong.
+   - 霍根海姆, 霍根海姆賽道 and the Hong Kong form 賀根咸 are now aliases.
+2. **qa-2004 Lusail location:** 卡達 盧賽爾 became 卡達 盧塞爾. The file cited CNA for 盧賽爾, but CNA writes 盧塞爾 (盧塞爾地標體育場). 盧賽爾 and the mainland 卢赛尔 are now aliases.
+
+Other fixes, without changing any card text:
+- Five Wikipedia forms the file quoted were the unconverted (mainland-character) titles, not zh-tw. Corrected:
+  - Monza: zh-tw 國立蒙札賽車場
+  - Zandvoort: zh-tw 贊德沃特賽道
+  - Estoril: zh-tw 埃斯托里爾賽道
+  - Nürburgring: zh-tw 紐柏林賽道, village 紐堡
+  - Spielberg: zh-tw 斯皮爾堡
+- Two more source notes were wrong:
+  - Paul Ricard: zh-tw Wikipedia is 保羅·理察賽道, not 保羅·里卡爾.
+  - Spa: Sports Vision 33257 writes 法蘭科爾尚; 法蘭柯爾尚 comes from 105133 and 19925.
+- New search-only aliases: 國立蒙札賽車場, 埃斯托里爾賽道, 保羅·理察賽道, 保羅理察賽道, 斯皮爾堡, 墨西哥市 (CNA's general form), 賀根咸, 卢赛尔.
+- The header comment now tells the UI owner to treat other middle dots as '·'. Those are '‧' (U+2027, what Taiwanese keyboards usually produce), '．' (what Sports Vision writes), '・', '･' and '•'. It also says to treat the dashes '–', '—' and '－' as '-'.
+
+The other agent's validator, extended with 10 new search queries and 霍根海姆 / 盧賽爾 added to the list of forms banned from display fields, passes. It loads the file both as a browser script and through require(), and the two give the same data. There are 251 aliases, and every name and short finds its own card. `node --check` also passes. I touched no file other than js/track-names-zh.js and committed nothing.
+
+== table
+ - au-1953: 亞伯特公園賽道 / 墨爾本 / 澳洲 墨爾本 — SV 26771; WP 阿爾伯特公園賽道 (alias)
+ - pt-1972: 艾斯托利爾賽道 / 艾斯托利爾 / 葡萄牙 艾斯托利爾 — SV 78452; WP zh-tw 埃斯托里爾賽道 (alias added)
+ - it-1953: 伊莫拉賽道 / 伊莫拉 / 義大利 伊莫拉 — SV 78617; WP 安佐與迪諾·法拉利賽道 (alias)
+ - mx-1962: 羅德里格斯兄弟賽道 / 墨西哥城 / 墨西哥 墨西哥城 — SV 21804 + WP; 墨西哥城 SV/UDN/WP; 墨西哥市 (CNA) alias added
+ - pt-2008: 阿爾加維國際賽道 / 波爾蒂芒 / 葡萄牙 波爾蒂芒 — SV 78452 + WP zh-tw
+ - br-1977: 雅卡雷帕瓜賽道 / 雅卡雷帕瓜 / 巴西 里約熱內盧 — SV 22539 (single mention; no zh WP article)
+ - it-1914: 穆傑羅賽道 / 穆傑羅 / 義大利 斯卡爾佩里亞 — SV 77295; WP 穆傑洛賽道 (alias); place WP 斯卡爾佩里亞和聖皮耶羅
+ - br-1940: 英特拉哥斯賽道 / 英特拉哥斯 / 巴西 聖保羅 — SV 22539 (x8); WP 若澤·卡洛斯·帕塞賽道 (alias)
+ - it-1922: 蒙札賽道 / 蒙札 / 義大利 蒙札 — SV 33452 (x8); WP zh-tw 國立蒙札賽車場 (alias added)
+ - ar-1952: 胡安與奧斯卡·加爾韋斯賽道 / 布宜諾斯艾利斯 / 阿根廷 布宜諾斯艾利斯 — WP zh-tw only
+ - bh-2002: 巴林國際賽道 / 巴林 / 巴林 薩基爾 — SV 27512 + WP zh-tw
+ - az-2016: 巴庫市街賽道 / 巴庫 / 亞塞拜然 巴庫 — WP zh-tw; SV 30791 巴庫; U-CAR 亞塞拜然
+ - es-1991: 巴塞隆納-加泰隆尼亞賽道 / 巴塞隆納 / 西班牙 巴塞隆納 — SV 29398 + WP zh-tw
+ - mc-1929: 摩納哥賽道 / 摩納哥 / 摩納哥 蒙地卡羅 — SV 29945 + WP zh-tw; 蒙地卡羅 SV
+ - fr-1960: 馬尼庫爾賽道 / 馬尼庫爾 / 法國 馬尼庫爾 — WP zh-tw only
+ - be-1925: 斯帕-法蘭柯爾尚賽道 / 斯帕 / 比利時 斯帕 — SV 105133 + 19925 (法蘭柯爾尚); 法蘭科爾尚 (SV 33257) and 弗朗科爾尚 (WP, LightsOut) are aliases
+ - ca-1978: 吉爾·維倫紐夫賽道 / 蒙特婁 / 加拿大 蒙特婁 — SV 28764 + WP; 蒙特婁 SV 30456 + WP zh-tw
+ - us-2012: 美洲賽道 / 奧斯汀 / 美國 奧斯汀 — SV 21408 + WP zh-tw
+ - fr-1969: 保羅·里卡爾賽道 / 保羅·里卡爾 / 法國 勒卡斯特雷 — SV 52818 (保羅．里卡爾賽道); WP zh-tw 保羅·理察賽道 (alias added)
+ - nl-1948: 贊德沃特賽道 / 贊德沃特 / 荷蘭 贊德沃特 — SV 87857 + WP zh-tw
+ - es-2026: 馬德里賽道 / 馬德里 / 西班牙 馬德里 — SV 109265 / 128387; WP 馬德里環賽道 (alias)
+ - de-1932: 霍肯海姆賽道 / 霍肯海姆 / 德國 霍肯海姆 — CORRECTED from 霍根海姆: SV 32372 (series) + ETtoday 2024 + WP zh-tw (regional-names table: 臺灣 霍肯海姆)
+ - hu-1986: 匈牙利賽道 / 匈牙利賽道 / 匈牙利 布達佩斯 — SV 32134 + WP zh-tw
+ - us-1909: 印第安納波利斯賽車場 / 印第安納波利斯 / 美國 印第安納波利斯 — CNA; WP 印第安納波利斯賽道 (alias)
+ - tr-2005: 伊斯坦堡賽道 / 伊斯坦堡 / 土耳其 伊斯坦堡 — SV 78909 + WP zh-tw
+ - sa-2021: 吉達濱海賽道 / 吉達 / 沙烏地阿拉伯 吉達 — SV 90293 + WP zh-tw; U-CAR 沙烏地阿拉伯
+ - za-1961: 卡亞拉米賽道 / 卡亞拉米 / 南非 約翰尼斯堡 — SV 48677; WP zh-tw 卡亞拉米大獎賽賽道 (alias)
+ - us-2023: 拉斯維加斯市街賽道 / 拉斯維加斯 / 美國 拉斯維加斯 — SV 107849; WP 拉斯維加斯大道賽道 (alias)
+ - qa-2004: 羅賽爾國際賽道 / 羅賽爾 / 卡達 盧塞爾 — SV 89947 + WP; location CORRECTED from 盧賽爾 to CNA 盧塞爾 (202211010118)
+ - sg-2008: 濱海灣市街賽道 / 濱海灣 / 新加坡 濱海灣 — SV 19591 + WP zh-tw
+ - us-2022: 邁阿密國際賽道 / 邁阿密 / 美國 邁阿密 — SV 94025 + WP zh-tw
+ - de-1927: 紐柏林賽道 / 紐柏林 / 德國 紐堡 — LTN, UDN, ETtoday + WP zh-tw 紐柏林賽道; village 紐堡 (WP zh-tw)
+ - at-1969: 紅牛賽道 / 紅牛賽道 / 奧地利 斯皮爾伯格 — SV 31396 + WP; 斯皮爾伯格 SV 31396; WP zh-tw 斯皮爾堡 (alias added)
+ - my-1999: 雪邦國際賽道 / 雪邦 / 馬來西亞 雪邦 — UDN, CNA + WP zh-tw
+ - cn-2004: 上海國際賽車場 / 上海 / 中國 上海 — WP zh-tw (official name); SV 上海賽道 (alias)
+ - gb-1948: 銀石賽道 / 銀石 / 英國 銀石 — SV 31707 + WP zh-tw
+ - ru-2014: 索契賽道 / 索契 / 俄羅斯 索契 — SV 28764 + WP zh-tw
+ - jp-1962: 鈴鹿賽道 / 鈴鹿 / 日本 鈴鹿 — SV 19925 (x8), LTN, ETtoday + WP zh-tw 鈴鹿賽道
+ - us-1956: 華金谷國際賽道 / 華金谷 / 美國 華金谷 — WP zh-tw only (circuit and village)
+ - ae-2009: 亞斯碼頭賽道 / 亞斯碼頭 / 阿聯 阿布達比 — SV 23206 + WP zh-tw
+
+== corrections
+ - de-1932 name/short/location: 霍根海姆賽道 / 霍根海姆 / 德國 霍根海姆 -> 霍肯海姆賽道 / 霍肯海姆 / 德國 霍肯海姆. Sources: zh-tw Wikipedia title 霍肯海姆賽道 and its regional-names table (臺灣 霍肯海姆); Sports Vision 32372 (circuit-guide series, x10; the 霍根海姆 citation 65577 was written by Red Bull); ETtoday 2024-04-01 (x12). 霍根海姆 is the Baidu / mainland form and is kept as an alias, as is the Hong Kong form 賀根咸.
+ - qa-2004 location: 卡達 盧賽爾 -> 卡達 盧塞爾. The file cited CNA, but CNA (cna.com.tw/news/aspt/202211010118) writes 盧塞爾 / 盧塞爾地標體育場; 盧賽爾 is the traditional-character form of mainland 卢赛尔. 盧賽爾 and 卢赛尔 are aliases.
+ - Source notes in comments: Monza zh-tw Wikipedia is 國立蒙札賽車場 (not 蒙扎國家賽車場); Zandvoort zh-tw is 贊德沃特賽道 (not 贊德福特); Estoril zh-tw is 埃斯托里爾賽道 (not 埃什托里爾); Nürburgring zh-tw is 紐柏林賽道, village 紐堡 (not 紐博格林 / 尼爾堡); Spielberg zh-tw is 斯皮爾堡 (not 施皮爾貝格); Lusail city zh-tw is 羅賽爾 (not 路薩爾); Paul Ricard zh-tw is 保羅·理察賽道 (the file claimed Wikipedia agreed with 保羅·里卡爾); Spa: Sports Vision 33257 writes 法蘭科爾尚, 105133 and 19925 write 法蘭柯爾尚.
+ - Aliases added (search only): 國立蒙札賽車場, 埃斯托里爾賽道, 保羅·理察賽道, 保羅理察賽道, 斯皮爾堡, 墨西哥市, 賀根咸, 卢赛尔 (243 -> 251 aliases).
+ - Header search note: treat '‧' (U+2027, the usual Taiwanese keyboard dot), '．' (U+FF0E, Sports Vision), '・', '･' and '•' as '·', and the dashes '–', '—' and '－' as '-'.
+
+== openIssues
+ - Still not wired (UI owner): load js/track-names-zh.js in index.html before js/ui.js, show name / location on the cards, and add name + short + location + aliases to the search key. Plain lower-case substring matching already finds 鈴鹿, 铃鹿, 霍肯海姆, 霍根海姆, 盧塞爾 and the other test queries. Treating the other dot and dash characters as '·' and '-' is optional.
+ - Kept on purpose although other Taiwanese forms exist: mx-1962 墨西哥城 (Taiwanese F1 coverage — Sports Vision, UDN, LightsOut — and zh-tw Wikipedia all write 墨西哥城; CNA's general 墨西哥市 is now an alias), at-1969 斯皮爾伯格 (Sports Vision; Wikipedia's 斯皮爾堡 is an alias), fr-1969 保羅·里卡爾 (Sports Vision; Wikipedia's 保羅·理察 is an alias), br-1940 英特拉哥斯 and it-1914 穆傑羅 (Sports Vision; the Wikipedia forms are aliases).
+ - Taiwan has no established form for ar-1952, fr-1960 or us-1956, so their names are zh-tw Wikipedia forms, as before. br-1977 still rests on a single Sports Vision mention.
+ - Not verified one by one: the mainland / Hong Kong aliases the first agent wrote from general knowledge (e.g. 凯拉米赛道, 巴库城市赛道, 吉达街道赛道). They are search-only, so an error can only cause an extra or missed match.
+ - The extended validator lives only in the session scratchpad (scratchpad/check-zh.js), not in the repo. Nothing was committed.

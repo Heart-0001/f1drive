@@ -348,6 +348,11 @@
       trackData = data;
       track = F1.buildTrack(data);
       scene.add(track.group);
+      // The pit lane's light curtains mark its entry / exit for the cars coming up to them. Just behind a car that has
+      // driven through one, a curtain filled every mirror (the HUD's and the cockpit's) with amber / green for about a
+      // second - at the exit just when the car merges into the traffic: the mirrors leave them out.
+      var curtains = track.group.getObjectByName ? track.group.getObjectByName('pitCurtains') : null;
+      if (curtains) curtains.userData.mirror = false;
       pitBox = pitBounds();
       if (typeof F1.buildScenery === 'function') {
         try {
@@ -975,11 +980,25 @@
       hudMirrors = F1.createHudMirrors(renderer, scene, { exclude: [cockpit.group], elements: l && r ? [l, r] : undefined });
       hudMirrors.setVisible(mirrorsOn);
     } catch (err) {
-      // decoration: never block driving because of it
-      hudMirrors = null;
-      if (ui.setMirrors) ui.setMirrors({ available: false });
-      if (window.console) console.error(err);
+      mirrorsFailed(err);
     }
+  }
+
+  // Once per frame, right after the main render. Decoration: a failure here switches them off for good (the switch of
+  // 設定 says 無法顯示), never the game.
+  function renderMirrors(dt) {
+    try {
+      hudMirrors.render(car.state, dt);
+    } catch (err) {
+      mirrorsFailed(err);
+    }
+  }
+  function mirrorsFailed(err) {
+    var hm = hudMirrors;
+    hudMirrors = null;
+    if (hm) { try { hm.setVisible(false); hm.dispose(); } catch (e) { /* already broken */ } }
+    if (ui.setMirrors) ui.setMirrors({ available: false });
+    if (window.console) console.error(err);
   }
 
   // The 後照鏡 switch of 設定 (on) / the V key (toggle).
@@ -1277,7 +1296,7 @@
       beepLights = lamps; beepGo = lightsGo;
       pushHUD();
       renderer.render(scene, camera);
-      if (hudMirrors) hudMirrors.render(car.state, dt);   // into the HUD's two mirror frames, over the main image
+      if (hudMirrors) renderMirrors(dt);       // into the HUD's two mirror frames, over the main image
     } catch (err) {
       running = false;
       cancelAnimationFrame(rafId); rafId = 0;

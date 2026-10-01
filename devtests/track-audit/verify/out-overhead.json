@@ -1,0 +1,883 @@
+[
+ {
+  "id": "ca-1978",
+  "s": [
+   2080,
+   2170
+  ],
+  "label": "Montreal: bridge underpass before T8 (Pont de la Concorde)",
+  "found": [
+   {
+    "way": 135527655,
+    "tags": {
+     "highway": "unclassified",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     2114
+    ]
+   },
+   {
+    "way": 164863796,
+    "tags": {
+     "name": "Pont des Iles",
+     "highway": "cycleway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     2134
+    ]
+   },
+   {
+    "way": 413000974,
+    "tags": {
+     "highway": "unclassified",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     2130
+    ]
+   },
+   {
+    "way": 814256358,
+    "tags": {
+     "highway": "footway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     2126
+    ]
+   },
+   {
+    "way": 1427698141,
+    "tags": {
+     "name": "Avenue Pierre-Dupuy",
+     "highway": "tertiary",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     2120
+    ]
+   }
+  ]
+ },
+ {
+  "id": "sg-2008",
+  "s": [
+   150,
+   320
+  ],
+  "label": "Marina Bay: T1 under the ECP viaduct",
+  "found": [
+   {
+    "way": 74722808,
+    "tags": {
+     "name": "East Coast Parkway",
+     "highway": "motorway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     224
+    ]
+   },
+   {
+    "way": 99007260,
+    "tags": {
+     "highway": "motorway_link",
+     "bridge": "yes",
+     "layer": "1",
+     "note": "Yahoo aerial map"
+    },
+    "crossesLapAt": [
+     202
+    ]
+   },
+   {
+    "way": 121906574,
+    "tags": {
+     "highway": "motorway_link",
+     "bridge": "yes",
+     "layer": "1",
+     "note": "Certain parts are estimated ???"
+    },
+    "crossesLapAt": [
+     256
+    ]
+   },
+   {
+    "way": 122067627,
+    "tags": {
+     "name": "East Coast Parkway",
+     "highway": "motorway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     238
+    ]
+   },
+   {
+    "way": 1314036589,
+    "tags": {
+     "highway": "footway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     194
+    ]
+   }
+  ]
+ },
+ {
+  "id": "sg-2008",
+  "s": [
+   480,
+   1060
+  ],
+  "label": "Marina Bay: T3-T5 under the ECP / Sheares ramps",
+  "found": [
+   {
+    "way": 21697558,
+    "tags": {
+     "name": "East Coast Parkway",
+     "highway": "trunk_link",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     1020
+    ]
+   },
+   {
+    "way": 21786033,
+    "tags": {
+     "highway": "trunk_link",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     904
+    ]
+   },
+   {
+    "way": 99007260,
+    "tags": {
+     "highway": "motorway_link",
+     "bridge": "yes",
+     "layer": "1",
+     "note": "Yahoo aerial map"
+    },
+    "crossesLapAt": [
+     706
+    ]
+   },
+   {
+    "way": 121906574,
+    "tags": {
+     "highway": "motorway_link",
+     "bridge": "yes",
+     "layer": "1",
+     "note": "Certain parts are estimated ???"
+    },
+    "crossesLapAt": [
+     530
+    ]
+   },
+   {
+    "way": 122067629,
+    "tags": {
+     "name": "East Coast Parkway",
+     "highway": "motorway",
+     "bridge": "yes",
+     "layer": "2"
+    },
+    "crossesLapAt": [
+     656,
+     970
+    ]
+   },
+   {
+    "way": 122067630,
+    "tags": {
+     "name": "East Coast Parkway",
+     "highway": "motorway",
+     "bridge": "yes",
+     "layer": "2"
+    },
+    "crossesLapAt": [
+     980,
+     642
+    ]
+   },
+   {
+    "way": 140918628,
+    "tags": {
+     "name": "Circle Line Extension (CE)",
+     "railway": "subway",
+     "tunnel": "yes",
+     "layer": "-3"
+    },
+    "crossesLapAt": [
+     1042
+    ]
+   },
+   {
+    "way": 740112301,
+    "tags": {
+     "highway": "footway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     898
+    ]
+   },
+   {
+    "way": 740112303,
+    "tags": {
+     "highway": "footway",
+     "bridge": "yes",
+     "layer": "2"
+    },
+    "crossesLapAt": [
+     1028
+    ]
+   },
+   {
+    "way": 741164882,
+    "tags": {
+     "highway": "footway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     522
+    ]
+   },
+   {
+    "way": 1314036589,
+    "tags": {
+     "highway": "footway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     714
+    ]
+   },
+   {
+    "way": 1387290970,
+    "tags": {
+     "name": "Circle Line Extension (CE)",
+     "railway": "subway",
+     "tunnel": "yes",
+     "layer": "-4"
+    },
+    "crossesLapAt": [
+     1044
+    ]
+   }
+  ]
+ },
+ {
+  "id": "sg-2008",
+  "s": [
+   1200,
+   1290
+  ],
+  "label": "Marina Bay: Raffles Boulevard building passage",
+  "found": [
+   {
+    "way": 393090492,
+    "tags": {
+     "building": "yes",
+     "layer": "1",
+     "level": "1",
+     "min_height": "4.5",
+     "height": "6"
+    },
+    "crossesLapAt": [
+     1234,
+     1258
+    ]
+   },
+   {
+    "way": 429052425,
+    "tags": {
+     "highway": "service",
+     "tunnel": "building_passage",
+     "level": "-1;0"
+    },
+    "crossesLapAt": [
+     1246
+    ]
+   },
+   {
+    "way": 1313175993,
+    "tags": {
+     "highway": "service",
+     "tunnel": "yes",
+     "layer": "-2"
+    },
+    "crossesLapAt": [
+     1214
+    ]
+   },
+   {
+    "way": 1387293931,
+    "tags": {
+     "name": "Circle Line",
+     "railway": "subway",
+     "tunnel": "yes",
+     "layer": "-3"
+    },
+    "crossesLapAt": [
+     1274
+    ]
+   }
+  ]
+ },
+ {
+  "id": "sg-2008",
+  "s": [
+   4240,
+   4380
+  ],
+  "label": "Marina Bay: before the line, under the Benjamin Sheares Bridge",
+  "found": [
+   {
+    "way": 21697558,
+    "tags": {
+     "name": "East Coast Parkway",
+     "highway": "trunk_link",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     4286
+    ]
+   },
+   {
+    "way": 39961203,
+    "tags": {
+     "name": "East Coast Parkway",
+     "highway": "motorway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     4300
+    ]
+   },
+   {
+    "way": 122067631,
+    "tags": {
+     "name": "East Coast Parkway",
+     "highway": "motorway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     4316
+    ]
+   },
+   {
+    "way": 635253783,
+    "tags": {
+     "highway": "trunk_link",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     4328
+    ]
+   },
+   {
+    "way": 740112301,
+    "tags": {
+     "highway": "footway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     4334
+    ]
+   },
+   {
+    "way": 740112303,
+    "tags": {
+     "highway": "footway",
+     "bridge": "yes",
+     "layer": "2"
+    },
+    "crossesLapAt": [
+     4278
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ae-2009",
+  "s": [
+   4380,
+   4480
+  ],
+  "label": "Yas Marina: under the W hotel link",
+  "found": [
+   {
+    "way": 520939917,
+    "tags": {
+     "highway": "footway",
+     "tunnel": "building_passage",
+     "layer": "-1"
+    },
+    "crossesLapAt": [
+     4412
+    ]
+   },
+   {
+    "way": 1255169704,
+    "lap": true,
+    "tags": {
+     "name": "Yas Marina Circuit",
+     "highway": "raceway",
+     "covered": "yes"
+    },
+    "s": [
+     4408,
+     4437
+    ]
+   },
+   {
+    "way": 1387292013,
+    "tags": {
+     "building:part": "yes",
+     "min_height": "9",
+     "height": "18"
+    },
+    "crossesLapAt": [
+     4436,
+     4408
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ae-2009",
+  "s": [
+   180,
+   340
+  ],
+  "label": "Yas Marina: pit exit tunnel under T1",
+  "found": [
+   {
+    "way": 176695255,
+    "lap": true,
+    "tags": {
+     "name": "Pit Lane",
+     "highway": "raceway",
+     "tunnel": "yes",
+     "layer": "-1"
+    },
+    "s": [
+     278,
+     291
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mc-1929",
+  "s": [
+   1380,
+   1900
+  ],
+  "label": "Monaco: Portier underpass + Fairmont tunnel",
+  "found": [
+   {
+    "way": 4230891,
+    "tags": {
+     "name": "Boulevard Louis II",
+     "highway": "secondary",
+     "tunnel": "yes",
+     "layer": "-1",
+     "maxheight": "default"
+    },
+    "crossesLapAt": [
+     1592,
+     1526
+    ]
+   },
+   {
+    "way": 92627405,
+    "tags": {
+     "name": "Boulevard du Larvotto",
+     "highway": "primary",
+     "railway": "abandoned",
+     "bridge": "yes",
+     "layer": "1",
+     "maxheight": "4.3"
+    },
+    "crossesLapAt": [
+     1410
+    ]
+   },
+   {
+    "way": 156188777,
+    "tags": {
+     "highway": "footway",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     1650,
+     1720
+    ]
+   },
+   {
+    "way": 176085755,
+    "tags": {
+     "highway": "primary_link",
+     "tunnel": "yes",
+     "layer": "-1",
+     "maxheight": "4.3"
+    },
+    "crossesLapAt": [
+     1422
+    ]
+   },
+   {
+    "way": 450334964,
+    "tags": {
+     "highway": "footway",
+     "tunnel": "yes",
+     "layer": "-1"
+    },
+    "crossesLapAt": [
+     1770,
+     1802
+    ]
+   },
+   {
+    "way": 585654715,
+    "tags": {
+     "highway": "service",
+     "tunnel": "building_passage",
+     "layer": "-1",
+     "level": "0"
+    },
+    "crossesLapAt": [
+     1780
+    ]
+   },
+   {
+    "way": 742495236,
+    "tags": {
+     "highway": "footway",
+     "tunnel": "yes",
+     "layer": "-2"
+    },
+    "crossesLapAt": [
+     1880
+    ]
+   },
+   {
+    "way": 1005539536,
+    "tags": {
+     "highway": "footway",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     1784,
+     1850
+    ]
+   },
+   {
+    "way": 1311077638,
+    "tags": {
+     "highway": "footway",
+     "tunnel": "yes"
+    },
+    "crossesLapAt": [
+     1526
+    ]
+   },
+   {
+    "way": 1365041486,
+    "tags": {
+     "highway": "service",
+     "tunnel": "yes",
+     "layer": "-1"
+    },
+    "crossesLapAt": [
+     1734
+    ]
+   },
+   {
+    "way": 1420851241,
+    "tags": {
+     "building:part": "yes",
+     "height": "8"
+    },
+    "crossesLapAt": [
+     1768
+    ]
+   },
+   {
+    "way": 1420851246,
+    "tags": {
+     "building:part": "yes",
+     "height": "12.5"
+    },
+    "crossesLapAt": [
+     1738
+    ]
+   },
+   {
+    "way": 1420851247,
+    "tags": {
+     "building:part": "yes",
+     "height": "12.5"
+    },
+    "crossesLapAt": [
+     1768,
+     1766,
+     1738,
+     1734
+    ]
+   },
+   {
+    "way": 1470365900,
+    "tags": {
+     "name": "Boulevard Louis II",
+     "highway": "secondary",
+     "tunnel": "yes",
+     "layer": "-1"
+    },
+    "crossesLapAt": [
+     1432
+    ]
+   },
+   {
+    "way": 1470365907,
+    "lap": true,
+    "tags": {
+     "name": "Circuit de Monaco",
+     "highway": "raceway",
+     "tunnel": "yes",
+     "layer": "-1"
+    },
+    "s": [
+     1418,
+     1436
+    ]
+   },
+   {
+    "way": 1525443697,
+    "tags": {
+     "highway": "footway",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     1416
+    ]
+   },
+   {
+    "way": 1531374857,
+    "tags": {
+     "highway": "footway",
+     "tunnel": "yes",
+     "layer": "-1"
+    },
+    "crossesLapAt": [
+     1502
+    ]
+   }
+  ]
+ },
+ {
+  "id": "es-2026",
+  "s": [
+   1330,
+   1480
+  ],
+  "label": "Madring: tunnel 1",
+  "found": [
+   {
+    "way": 87096566,
+    "tags": {
+     "highway": "residential",
+     "tunnel": "yes",
+     "layer": "-1"
+    },
+    "crossesLapAt": [
+     1438
+    ]
+   }
+  ]
+ },
+ {
+  "id": "es-2026",
+  "s": [
+   3840,
+   4030
+  ],
+  "label": "Madring: Valdebebas - IFEMA tunnel",
+  "found": [
+   {
+    "way": 34049818,
+    "tags": {
+     "highway": "trunk_link",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     3912
+    ]
+   },
+   {
+    "way": 516431587,
+    "tags": {
+     "highway": "footway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     3998
+    ]
+   },
+   {
+    "way": 827423914,
+    "tags": {
+     "highway": "service",
+     "tunnel": "yes"
+    },
+    "crossesLapAt": [
+     3922,
+     3934
+    ]
+   }
+  ]
+ },
+ {
+  "id": "jp-1962",
+  "s": [
+   2290,
+   2350
+  ],
+  "label": "Suzuka: crossover (lower road)",
+  "found": [
+   {
+    "way": 175231434,
+    "lap": true,
+    "tags": {
+     "highway": "raceway",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "s": [
+     4675,
+     4711
+    ]
+   }
+  ]
+ },
+ {
+  "id": "us-2022",
+  "s": [
+   3340,
+   3530
+  ],
+  "label": "Miami: Turnpike ramps over T13-T16",
+  "found": [
+   {
+    "way": 39361952,
+    "tags": {
+     "highway": "motorway_link",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     3368
+    ]
+   },
+   {
+    "way": 39361975,
+    "tags": {
+     "highway": "motorway_link",
+     "bridge": "yes",
+     "layer": "2"
+    },
+    "crossesLapAt": [
+     3422
+    ]
+   },
+   {
+    "way": 39362012,
+    "tags": {
+     "highway": "motorway_link",
+     "bridge": "yes",
+     "layer": "1"
+    },
+    "crossesLapAt": [
+     3500
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cn-2004",
+  "s": [
+   5000,
+   5430
+  ],
+  "label": "Shanghai: grandstand wings over the straight",
+  "found": [
+   {
+    "way": 107371135,
+    "tags": {
+     "name": "A看台",
+     "building": "grandstand",
+     "layer": "1",
+     "height": "35"
+    },
+    "crossesLapAt": [
+     5378,
+     5048,
+     5018,
+     5410
+    ]
+   },
+   {
+    "way": 1371942059,
+    "tags": {
+     "building:part": "yes",
+     "min_height": "24.5",
+     "height": "35"
+    },
+    "crossesLapAt": [
+     5018,
+     5048
+    ]
+   },
+   {
+    "way": 1371942060,
+    "tags": {
+     "building:part": "yes",
+     "min_height": "24.5",
+     "height": "35"
+    },
+    "crossesLapAt": [
+     5410,
+     5378
+    ]
+   }
+  ]
+ }
+]
