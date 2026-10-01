@@ -1,5 +1,5 @@
 const assert = require('assert');
-const P = 'C:/Users/user/Desktop/f1drive/js/';
+const P = require('path').resolve(__dirname, '..', '..') + '/js/';
 let T = 0; const ok = (n, f) => { f(); T++; console.log('ok  ' + n); };
 const near = (a, b, e = 1e-9) => assert(Math.abs(a - b) <= e, a + ' !~ ' + b);
 function load(file) { delete require.cache[require.resolve(P + file)]; require(P + file); }
@@ -13,7 +13,9 @@ let G = global.F1.gamepad;
 ok('no API: poll is safe, not connected', () => {
   const s = G.poll(); assert.strictEqual(s.connected, false); assert.strictEqual(G.active, false);
   assert.strictEqual(G.rumble(1, 100), false);
-  const o = G.mergeInput({ up: true }, {}); assert.deepStrictEqual(o, { up: true, down: false, left: false, right: false, throttle: null, brake: null, steerAxis: null });
+  const o = G.mergeInput({ up: true }, {}); assert.deepStrictEqual(o, { up: true, down: false, left: false, right: false, throttle: null, brake: null, steerAxis: null, boost: false, limiter: false });
+  assert.deepStrictEqual(G.mergeInput({ boost: true, limiter: true }, {}), { up: false, down: false, left: false, right: false, throttle: null, brake: null, steerAxis: null, boost: true, limiter: true });
+  assert.deepStrictEqual(G.state.pressed, { reset: false, line: false, menu: false, recentre: false, limiter: false, compound: false });
 });
 
 // --- 2. stubbed standard pad
@@ -64,10 +66,32 @@ ok('buttons are edge-triggered', () => {
   for (const [i, k] of [[0, 'reset'], [3, 'reset'], [2, 'line'], [9, 'menu'], [11, 'recentre']]) {
     press(i, true); assert.strictEqual(tick().pressed[k], true, k + ' down'); assert.strictEqual(tick().pressed[k], false, k + ' held');
     assert.strictEqual(tick().pressed[k], false); press(i, false); assert.strictEqual(tick().pressed[k], false, k + ' up');
-    for (const o of ['reset', 'line', 'menu', 'recentre']) assert.strictEqual(G.state.pressed[o], false);
+    for (const o of ['reset', 'line', 'menu', 'recentre', 'limiter', 'compound']) assert.strictEqual(G.state.pressed[o], false);
   }
   press(0, true); tick(); press(3, true); assert.strictEqual(tick().pressed.reset, false, 'Y while A held is not a second press'); press(0, false); press(3, false); tick();
   press(1, true); const s = tick(); assert(!s.pressed.reset && !s.pressed.line && !s.pressed.menu); press(1, false); tick();
+});
+ok('v6: RB or B held = boost; LB = pressed.limiter, Back/View = pressed.compound (edges); mergeInput merges boost, passes limiter', () => {
+  const press = (i, v) => { pad.buttons[i].pressed = v; pad.buttons[i].value = v ? 1 : 0; };
+  for (const i of [5, 1]) {
+    press(i, true); assert.strictEqual(tick().boost, true, 'button ' + i); assert.strictEqual(tick().boost, true, 'held: still on');
+    assert(!G.state.pressed.limiter && !G.state.pressed.compound && !G.state.pressed.reset);
+    const o = G.mergeInput({ up: true, limiter: true }, {}); assert.strictEqual(o.boost, true); assert.strictEqual(o.limiter, true);
+    press(i, false); assert.strictEqual(tick().boost, false);
+    assert.strictEqual(G.mergeInput({ boost: true }, {}).boost, true, 'E key alone'); assert.strictEqual(G.mergeInput({}, {}).boost, false);
+  }
+  for (const [i, k] of [[4, 'limiter'], [8, 'compound']]) {
+    press(i, true); assert.strictEqual(tick().pressed[k], true, k + ' down'); assert.strictEqual(tick().pressed[k], false, k + ' held');
+    assert.strictEqual(G.state.boost, false);
+    press(i, false); assert.strictEqual(tick().pressed[k], false, k + ' up');
+    press(i, true); assert.strictEqual(tick().pressed[k], true, k + ' again'); press(i, false); tick();
+  }
+  // the pad never toggles the limiter itself: out.limiter is only what main.js keeps in keys.limiter
+  press(4, true); tick(); assert.strictEqual(G.mergeInput({}, {}).limiter, false); press(4, false); tick();
+  // a held LB / Back while polling was suspended is not a press
+  press(4, true); press(8, true); clock += 3000; const s = G.poll(); assert(!s.pressed.limiter && !s.pressed.compound); press(4, false); press(8, false); tick();
+  // active
+  clock += 5000; G.poll(); assert.strictEqual(G.active, false); press(5, true); tick(); assert.strictEqual(G.active, true); press(5, false); tick();
 });
 ok('button held while polling was suspended (menu) is not a press', () => {
   pad.buttons[0].pressed = true; pad.buttons[0].value = 1; clock += 3000; assert.strictEqual(G.poll().pressed.reset, false);
@@ -89,7 +113,7 @@ ok('active: true on input, expires after the hold time', () => {
 ok('mergeInput: pad at rest -> nulls (keyboard applies); pad input -> analog fields', () => {
   const keys = { up: true, down: false, left: false, right: false }, out = {};
   assert.strictEqual(G.mergeInput(keys, out), out);
-  assert.deepStrictEqual(out, { up: true, down: false, left: false, right: false, throttle: null, brake: null, steerAxis: null });
+  assert.deepStrictEqual(out, { up: true, down: false, left: false, right: false, throttle: null, brake: null, steerAxis: null, boost: false, limiter: false });
   pad.buttons[7].value = 0.52; pad.buttons[6].value = 1; pad.axes[0] = -1; tick(); G.mergeInput(keys, out);
   near(out.throttle, 0.5); near(out.brake, 1); near(out.steerAxis, 1); assert.strictEqual(keys.throttle, undefined);
   pad.buttons[7].value = pad.buttons[6].value = 0; pad.axes[0] = 0; tick();
@@ -104,9 +128,11 @@ ok('rumble: uses vibrationActuator, clamps, throttles weaker repeats, survives r
   delete pad.vibrationActuator; clock += 1000; assert.strictEqual(G.rumble(1, 100), false);
 });
 ok('disconnect by polling: state zeroed, onChange fired', () => {
-  pad.buttons[7].value = 1; pad.axes[0] = -1; pad.axes[2] = 1; tick(); assert(G.state.throttle > 0);
+  pad.buttons[7].value = 1; pad.axes[0] = -1; pad.axes[2] = 1; pad.buttons[5].pressed = true; tick(); assert(G.state.throttle > 0 && G.state.boost);
+  pad.buttons[5].pressed = false;
   pads[0] = null; const s = tick();
   assert.strictEqual(s.connected, false); assert.strictEqual(s.id, ''); assert.strictEqual(s.throttle, 0); assert.strictEqual(s.steer, 0); assert.strictEqual(s.lookX, 0);
+  assert.strictEqual(s.boost, false);
   assert.strictEqual(G.active, false); assert.deepStrictEqual(changes[changes.length - 1], [false, '']);
   const o = G.mergeInput({ left: true }, {}); assert.strictEqual(o.throttle, null); assert.strictEqual(o.left, true);
   assert.strictEqual(G.rumble(1, 100), false);
@@ -144,6 +170,11 @@ ok('non-standard fallback: triggers on axes 2/5 (rest -1), right stick on 3/4, h
   b[7].pressed = true; assert.strictEqual(tick().pressed.menu, true); b[7].pressed = false;
   b[2].pressed = true; assert.strictEqual(tick().pressed.line, true); b[2].pressed = false;
   b[10].pressed = true; assert.strictEqual(tick().pressed.recentre, true); b[10].pressed = false;
+  // v6 on the raw layout: RB (5) or B (1) boost, LB (4) limiter, Back (6) compound
+  b[5].pressed = true; assert.strictEqual(tick().boost, true); b[5].pressed = false; assert.strictEqual(tick().boost, false);
+  b[1].pressed = true; assert.strictEqual(tick().boost, true); b[1].pressed = false; tick();
+  b[4].pressed = true; assert.strictEqual(tick().pressed.limiter, true); assert.strictEqual(tick().pressed.limiter, false); b[4].pressed = false; tick();
+  b[6].pressed = true; assert.strictEqual(tick().pressed.compound, true); assert.strictEqual(tick().pressed.compound, false); b[6].pressed = false; tick();
   pads[0] = null; tick();
 });
 ok('unmapped 4-axis pad: treated as standard layout; garbage values are safe', () => {

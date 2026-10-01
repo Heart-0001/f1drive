@@ -1,4 +1,4 @@
-const path = require('path');const ROOT = 'C:/Users/user/Desktop/f1drive';
+const path = require('path');const ROOT = path.resolve(__dirname, '..', '..');
 global.window = global;global.THREE = require(path.join(ROOT, 'lib/three.min.js'));
 require(path.join(ROOT, 'tracks-data.js'));require(path.join(ROOT, 'js/track.js'));require(path.join(ROOT, 'js/car.js'));require(path.join(ROOT, 'js/raceline.js'));
 const td = F1_TRACKS.find(t => new RegExp(process.argv[2], 'i').test(t.name)), c = +process.argv[3];

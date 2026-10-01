@@ -1,0 +1,1414 @@
+{
+  "span": "2010-2017",
+  "entries": {
+    "2010-red-bull": {
+      "colour": "#20306a",
+      "colour2": "#ffc906",
+      "teamZh": "紅牛",
+      "note": "車隊首座車隊冠軍、Vettel 首座車手冠軍；19 站拿下 15 次桿位。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Red_Bull_RB6",
+        "https://commons.wikimedia.org/wiki/File:Vettel_Bahrain_2010_(cropped).jpg",
+        "https://en.wikipedia.org/wiki/Red_Bull_RB8",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2010-mclaren": {
+      "colour": "#aeb2b6",
+      "colour2": "#e2231a",
+      "teamZh": "麥拉倫",
+      "note": "首創 F-duct：車手用左腿蓋住座艙內的小孔，讓尾翼在直線上失速以降低阻力。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/McLaren_MP4-25",
+        "https://commons.wikimedia.org/wiki/File:Jenson_Button_Bahrain_2010_cropped.jpg",
+        "https://sports.ltn.com.tw/news/breakingnews/5270934",
+        "https://zh.wikipedia.org/zh-tw/%E9%BA%A5%E6%8B%89%E5%80%AB%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2010-ferrari": {
+      "colour": "#d40000",
+      "colour2": "#ffffff",
+      "teamZh": "法拉利",
+      "note": "Alonso 加盟首戰巴林站即奪冠，全年 5 勝。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ferrari_F10",
+        "https://commons.wikimedia.org/wiki/File:Ferrari_Bahrain_2010.jpg",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E6%B3%95%E6%8B%89%E5%88%A9%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2010-mercedes": {
+      "colour": "#c3c7cb",
+      "colour2": "#00a19c",
+      "teamZh": "賓士",
+      "note": "賓士 1955 年後首度以廠隊回歸（前身為 Brawn），Schumacher 復出；Rosberg 3 度登台。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mercedes_MGP_W01",
+        "https://commons.wikimedia.org/wiki/File:Nico_Rosberg_2010_Bahrain.jpg",
+        "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+        "https://sports.ltn.com.tw/news/breakingnews/3904928",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2010-renault": {
+      "colour": "#ffcd00",
+      "colour2": "#141414",
+      "teamZh": "雷諾",
+      "note": "重回 Renault 早年的經典黃黑配色；Kubica 3 度登上頒獎台。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Renault_R30",
+        "https://commons.wikimedia.org/wiki/File:Kubica_Bahrain_Grand_Prix_2010_(cropped).jpg",
+        "https://sports.ltn.com.tw/news/breakingnews/3221381",
+        "https://tw.sports.yahoo.com/news/%E9%9B%B7%E8%AB%BE%E6%94%B6%E8%B3%BC%E8%93%AE%E8%8A%B1%E8%BB%8A%E9%9A%8A-2016%E9%87%8D%E8%BF%94f1%E8%B3%BD%E8%BB%8A-022200274--finance.html"
+      ],
+      "confidence": "high"
+    },
+    "2010-williams": {
+      "colour": "#0b1e4b",
+      "colour2": "#ffffff",
+      "teamZh": "威廉斯",
+      "note": "Hülkenberg 在巴西站以 1.049 秒的差距拿下生涯首個桿位。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Williams_FW32",
+        "https://commons.wikimedia.org/wiki/File:Barrichello_Malaysian_GP_2010_(cropped).jpg",
+        "https://en.wikipedia.org/wiki/Williams_FW33",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E5%A8%81%E5%BB%89%E5%A7%86%E6%96%AF%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2010-force-india": {
+      "colour": "#f5f5f5",
+      "colour2": "#f58220",
+      "teamZh": "印度力量",
+      "note": null,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Force_India_VJM03",
+        "https://commons.wikimedia.org/wiki/File:Liuzzi_Bahrain_2010_(cropped).jpg",
+        "https://en.wikipedia.org/wiki/Force_India",
+        "https://news.tvbs.com.tw/world/828962",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2010-sauber": {
+      "colour": "#f5f5f5",
+      "colour2": "#1c1c1c",
+      "teamZh": "索伯",
+      "note": "BMW 退出後仍以「BMW Sauber」名義參賽，開季車身幾乎沒有贊助商。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sauber_C29",
+        "https://commons.wikimedia.org/wiki/File:Sauber_Bahrain_2010.jpg",
+        "https://en.wikipedia.org/wiki/Sauber_Motorsport",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2010-toro-rosso": {
+      "colour": "#122251",
+      "colour2": "#e4002b",
+      "teamZh": "紅牛二隊",
+      "note": "車隊第一輛在 Faenza 自行設計製造的底盤（先前與紅牛共用設計）。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Toro_Rosso_STR5",
+        "https://commons.wikimedia.org/wiki/File:Toro_Rosso_STR5_Bahrain_2010_(cropped).jpg",
+        "https://teamcolorcodes.com/scuderia-toro-rosso-color-codes/",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E7%AC%AC%E4%BA%8C%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2010-lotus-racing": {
+      "colour": "#0e5b3f",
+      "colour2": "#f2c100",
+      "teamZh": "蓮花",
+      "note": "採用 Lotus 傳統的綠金配色；三支新車隊中排名最高（第 10）。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Lotus_T127",
+        "https://commons.wikimedia.org/wiki/File:Lotus_in_Bahrain_(cropped)_2010.jpg",
+        "https://github.com/f1db/f1db",
+        "https://zh.wikipedia.org/zh-tw/%E8%93%AE%E8%8A%B1%E8%BB%8A%E9%9A%8A%20(2010%E5%B9%B4)"
+      ],
+      "confidence": "high"
+    },
+    "2010-hrt": {
+      "colour": "#3d4045",
+      "colour2": "#ffffff",
+      "teamZh": null,
+      "note": "Dallara 設計製造，整季從未升級；最佳成績第 14 名。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Hispania_F110",
+        "https://commons.wikimedia.org/wiki/File:Bruno_Senna_2010_Bahrain_(cropped).jpg"
+      ],
+      "confidence": "high"
+    },
+    "2010-virgin": {
+      "colour": "#ee3a24",
+      "colour2": "#141414",
+      "teamZh": "維珍",
+      "note": "F1 首輛完全以 CFD 模擬設計、不用風洞的賽車；油箱容量不足，後來被迫重新設計。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Virgin_VR-01",
+        "https://commons.wikimedia.org/wiki/File:Virgin_Bahrain_2010_(cropped).jpg",
+        "https://www.racefans.net/2010/02/03/virgin-racing-launch-vr-01/",
+        "https://en.wikipedia.org/wiki/Virgin_MVR-02",
+        "https://zh.wikipedia.org/zh-tw/%E7%BB%B4%E7%8F%8D%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2011-red-bull": {
+      "colour": "#20306a",
+      "colour2": "#ffc906",
+      "teamZh": "紅牛",
+      "note": "排氣吹拂擴散器稱霸，19 站 12 勝、18 次桿位，Vettel 衛冕。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Red_Bull_RB7",
+        "https://commons.wikimedia.org/wiki/File:Sebastian_Vettel_(6195669861).jpg",
+        "https://en.wikipedia.org/wiki/Red_Bull_RB8",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2011-mclaren": {
+      "colour": "#aeb2b6",
+      "colour2": "#e2231a",
+      "teamZh": "麥拉倫",
+      "note": "獨特的 L 形側箱設計；全年 6 勝。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/McLaren_MP4-26",
+        "https://commons.wikimedia.org/wiki/File:Jenson_Button_(6182466841).jpg",
+        "https://github.com/f1db/f1db",
+        "https://sports.ltn.com.tw/news/breakingnews/5270934",
+        "https://zh.wikipedia.org/zh-tw/%E9%BA%A5%E6%8B%89%E5%80%AB%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2011-ferrari": {
+      "colour": "#d40000",
+      "colour2": "#ffffff",
+      "teamZh": "法拉利",
+      "note": "以義大利統一 150 週年命名（原名 F150，因 Ford 商標抗議而改名）；全年僅 1 勝。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ferrari_150%C2%BA_Italia",
+        "https://commons.wikimedia.org/wiki/File:Fernando_Alonso_(6195537247).jpg",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E6%B3%95%E6%8B%89%E5%88%A9%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2011-mercedes": {
+      "colour": "#c3c7cb",
+      "colour2": "#00a19c",
+      "teamZh": "賓士",
+      "note": "整季未登頒獎台，最佳成績是 Schumacher 加拿大站第四。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mercedes_MGP_W02",
+        "https://commons.wikimedia.org/wiki/File:Michael_Schumacher_(6182900110).jpg",
+        "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+        "https://sports.ltn.com.tw/news/breakingnews/3904928",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2011-renault": {
+      "colour": "#141414",
+      "colour2": "#c6a15b",
+      "teamZh": "雷諾",
+      "note": "以 Lotus Renault GP 名義參賽，黑金塗裝致敬 JPS Lotus；前置排氣被設計者自承是「失敗的實驗」。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Renault_R31",
+        "https://commons.wikimedia.org/wiki/File:Vitaly_Petrov_(6196175970).jpg",
+        "https://en.wikipedia.org/wiki/Renault_in_Formula_One",
+        "https://sports.ltn.com.tw/news/breakingnews/3221381",
+        "https://tw.sports.yahoo.com/news/%E9%9B%B7%E8%AB%BE%E6%94%B6%E8%B3%BC%E8%93%AE%E8%8A%B1%E8%BB%8A%E9%9A%8A-2016%E9%87%8D%E8%BF%94f1%E8%B3%BD%E8%BB%8A-022200274--finance.html",
+        "https://www.autosport.com/f1/news/renault-admits-its-2011-car-and-exhaust-concept-was-a-bold-failure-4451279/4451279/"
+      ],
+      "confidence": "high"
+    },
+    "2011-force-india": {
+      "colour": "#f5f5f5",
+      "colour2": "#f58220",
+      "teamZh": "印度力量",
+      "note": "以 69 分排名年度第六。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Force_India_VJM04",
+        "https://commons.wikimedia.org/wiki/File:Paul_Di_Resta_(6182439125).jpg",
+        "https://en.wikipedia.org/wiki/Force_India",
+        "https://news.tvbs.com.tw/world/828962",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2011-sauber": {
+      "colour": "#f5f5f5",
+      "colour2": "#1c1c1c",
+      "teamZh": "索伯",
+      "note": "澳洲開幕戰兩車因尾翼不合規定被取消成績。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sauber_C30",
+        "https://commons.wikimedia.org/wiki/File:Kamui_Kobayashi_(6195664211).jpg",
+        "https://en.wikipedia.org/wiki/Sauber_Motorsport",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2011-toro-rosso": {
+      "colour": "#122251",
+      "colour2": "#e4002b",
+      "teamZh": "紅牛二隊",
+      "note": null,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Toro_Rosso_STR6",
+        "https://commons.wikimedia.org/wiki/File:Jaime_Alguersuari_(6196188624).jpg",
+        "https://teamcolorcodes.com/scuderia-toro-rosso-color-codes/",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E7%AC%AC%E4%BA%8C%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2011-williams": {
+      "colour": "#0b1e4b",
+      "colour2": "#ffffff",
+      "teamZh": "威廉斯",
+      "note": "全季僅 5 分、年度第九，是車隊 1978 年首季以來最差名次。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Williams_FW33",
+        "https://commons.wikimedia.org/wiki/File:Rubens_Barrichello_(6196180836).jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E5%A8%81%E5%BB%89%E5%A7%86%E6%96%AF%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2011-lotus-racing": {
+      "colour": "#0e5b3f",
+      "colour2": "#f2c100",
+      "teamZh": "蓮花",
+      "note": "改用 Renault 引擎與 Red Bull Technology 變速箱；英國站起加上 Caterham 標誌。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Lotus_T128_(Formula_One_car)",
+        "https://commons.wikimedia.org/wiki/File:Jarno_Trulli_(6195686029).jpg",
+        "https://en.wikipedia.org/wiki/Team_Lotus_(2010%E2%80%932011)",
+        "https://zh.wikipedia.org/zh-tw/%E8%93%AE%E8%8A%B1%E8%BB%8A%E9%9A%8A%20(2010%E5%B9%B4)"
+      ],
+      "confidence": "high"
+    },
+    "2011-hrt": {
+      "colour": "#f5f5f5",
+      "colour2": "#d7262e",
+      "teamZh": null,
+      "note": "塗裝由 Daniel Simon 設計；澳洲開幕戰未達 107% 門檻，無法起跑。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Hispania_F111",
+        "https://commons.wikimedia.org/wiki/File:Ricciardo_2010_italian_gp.jpg"
+      ],
+      "confidence": "high"
+    },
+    "2011-virgin": {
+      "colour": "#ee3a24",
+      "colour2": "#141414",
+      "teamZh": "維珍",
+      "note": "延續純 CFD 設計、不裝 KERS；季中與設計公司 Wirth Research 分手。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Virgin_MVR-02",
+        "https://commons.wikimedia.org/wiki/File:Jerome_d'Ambrosio_(6147965715).jpg",
+        "https://zh.wikipedia.org/zh-tw/%E7%BB%B4%E7%8F%8D%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "medium"
+    },
+    "2012-red-bull": {
+      "colour": "#20306a",
+      "colour2": "#ffc906",
+      "teamZh": "紅牛",
+      "note": "Vettel 與車隊三連霸，全年 7 勝。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Red_Bull_RB8",
+        "https://commons.wikimedia.org/wiki/File:Sebastian_Vettel_2012_Malaysia_FP1.jpg",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2012-ferrari": {
+      "colour": "#d40000",
+      "colour2": "#ffffff",
+      "teamZh": "法拉利",
+      "note": "Alonso 全年 3 勝，最後僅以 3 分之差輸掉車手冠軍。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ferrari_F2012",
+        "https://commons.wikimedia.org/wiki/File:Fernando_Alonso_2012_Malaysia_FP1.jpg",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E6%B3%95%E6%8B%89%E5%88%A9%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2012-mclaren": {
+      "colour": "#aeb2b6",
+      "colour2": "#e2231a",
+      "teamZh": "麥拉倫",
+      "note": "全年 7 勝、8 次桿位；Hamilton 效力麥拉倫的最後一年。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/McLaren_MP4-27",
+        "https://commons.wikimedia.org/wiki/File:Lewis_Hamilton_2012_Malaysia_FP1.jpg",
+        "https://sports.ltn.com.tw/news/breakingnews/5270934",
+        "https://zh.wikipedia.org/zh-tw/%E9%BA%A5%E6%8B%89%E5%80%AB%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2012-lotus-f1": {
+      "colour": "#141414",
+      "colour2": "#c6a15b",
+      "teamZh": "蓮花",
+      "note": "Räikkönen 復出首年在阿布達比站奪冠；原本設計的反應式車身高度系統季前遭禁。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Lotus_E20",
+        "https://commons.wikimedia.org/wiki/File:Kimi_Raikkonen_2012_Malaysia_FP1.jpg",
+        "https://en.wikipedia.org/wiki/Lotus_F1",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E8%B7%AF%E7%89%B9%E6%96%AFF1%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2012-mercedes": {
+      "colour": "#c3c7cb",
+      "colour2": "#00a19c",
+      "teamZh": "賓士",
+      "note": "Rosberg 中國站拿下賓士車隊 1955 年以來首個桿位與分站冠軍；Schumacher 最後一季。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mercedes_F1_W03",
+        "https://commons.wikimedia.org/wiki/File:Nico_Rosberg_2012_Malaysia_FP1.jpg",
+        "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+        "https://sports.ltn.com.tw/news/breakingnews/3904928",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2012-sauber": {
+      "colour": "#f5f5f5",
+      "colour2": "#1c1c1c",
+      "teamZh": "索伯",
+      "note": "全年 4 度登上頒獎台（馬來西亞、加拿大、義大利、日本）。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sauber_C31",
+        "https://commons.wikimedia.org/wiki/File:Sergio_Perez_2012_Malaysia_FP1.jpg",
+        "https://en.wikipedia.org/wiki/Sauber_Motorsport",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2012-force-india": {
+      "colour": "#f58220",
+      "colour2": "#f5f5f5",
+      "teamZh": "印度力量",
+      "note": "Hülkenberg 比利時站、di Resta 新加坡站都拿下第四。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Force_India_VJM05",
+        "https://commons.wikimedia.org/wiki/File:Nico_Hulkenberg_2012_Malaysia_FP1.jpg",
+        "https://en.wikipedia.org/wiki/Force_India",
+        "https://news.tvbs.com.tw/world/828962",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "medium"
+    },
+    "2012-williams": {
+      "colour": "#0b1e4b",
+      "colour2": "#ffffff",
+      "teamZh": "威廉斯",
+      "note": "Maldonado 西班牙站桿位起跑奪冠，是威廉斯 2004 年以來首勝。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Williams_FW34",
+        "https://commons.wikimedia.org/wiki/File:Pastor_Maldonado_2012_Malaysia_FP1.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E5%A8%81%E5%BB%89%E5%A7%86%E6%96%AF%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2012-toro-rosso": {
+      "colour": "#122251",
+      "colour2": "#e4002b",
+      "teamZh": "紅牛二隊",
+      "note": null,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Toro_Rosso_STR7",
+        "https://commons.wikimedia.org/wiki/File:Jean-Eric_Vergne_2012_Malaysia_FP1.jpg",
+        "https://teamcolorcodes.com/scuderia-toro-rosso-color-codes/",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E7%AC%AC%E4%BA%8C%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2012-caterham": {
+      "colour": "#0e5b3f",
+      "colour2": "#f2c100",
+      "teamZh": "卡特漢",
+      "note": "由 Team Lotus 更名後的第一輛車，也是車隊首輛配備 KERS 的賽車。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Caterham_CT01",
+        "https://commons.wikimedia.org/wiki/File:Vitaly_Petrov_2012_Malaysia_FP1.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E5%8D%A1%E7%89%B9%E6%B1%89%E5%A7%86%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2012-marussia": {
+      "colour": "#e4322b",
+      "colour2": "#141414",
+      "teamZh": "瑪魯西亞",
+      "note": "季前未通過撞擊測試，錯過最後一次季前測試。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Marussia_MR01",
+        "https://commons.wikimedia.org/wiki/File:Timo_Glock_2012_Malaysia_FP1.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%8E%9B%E9%B2%81%E8%A5%BF%E4%BA%9A%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2012-hrt": {
+      "colour": "#f5f5f5",
+      "colour2": "#b8913a",
+      "teamZh": null,
+      "note": "HRT 最後一輛 F1 賽車；澳洲開幕戰再度未達 107% 門檻，無法起跑。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/HRT_F112",
+        "https://commons.wikimedia.org/wiki/File:Pedro_de_la_Rosa_2012_Malaysia_FP1.jpg"
+      ],
+      "confidence": "medium"
+    },
+    "2013-red-bull": {
+      "colour": "#20306a",
+      "colour2": "#5b2c83",
+      "teamZh": "紅牛",
+      "note": "Vettel 四連霸並在下半季創下 9 連勝；V8 自然進氣時代最後一輛冠軍車。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Red_Bull_RB9",
+        "https://commons.wikimedia.org/wiki/File:Sebastian_Vettel_2013_Malaysia_FP2.jpg",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2013-mercedes": {
+      "colour": "#c3c7cb",
+      "colour2": "#00a19c",
+      "teamZh": "賓士",
+      "note": "8 次桿位、3 勝，但輪胎磨耗嚴重；Rosberg 摩納哥站奪冠。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mercedes_F1_W04",
+        "https://commons.wikimedia.org/wiki/File:Lewis_Hamilton_2013_Malaysia_FP2_1.jpg",
+        "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+        "https://github.com/f1db/f1db",
+        "https://sports.ltn.com.tw/news/breakingnews/3904928",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2013-ferrari": {
+      "colour": "#d40000",
+      "colour2": "#ffffff",
+      "teamZh": "法拉利",
+      "note": "名稱代表 2013 年與 V8 引擎的最後一季；全年 2 勝。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ferrari_F138",
+        "https://commons.wikimedia.org/wiki/File:Fernando_Alonso_2013_Malaysia_FP2.jpg",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E6%B3%95%E6%8B%89%E5%88%A9%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2013-lotus-f1": {
+      "colour": "#141414",
+      "colour2": "#c6a15b",
+      "teamZh": "蓮花",
+      "note": "Räikkönen 澳洲開幕戰奪冠，全年 14 次登上頒獎台。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Lotus_E21",
+        "https://commons.wikimedia.org/wiki/File:Kimi_Raikkonen_2013_Malaysia_FP2.jpg",
+        "https://en.wikipedia.org/wiki/Lotus_F1",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E8%B7%AF%E7%89%B9%E6%96%AFF1%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2013-mclaren": {
+      "colour": "#aeb2b6",
+      "colour2": "#e2231a",
+      "teamZh": "麥拉倫",
+      "note": "麥拉倫 1980 年以來首度整季無人登上頒獎台。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/McLaren_MP4-28",
+        "https://commons.wikimedia.org/wiki/File:Jenson_Button_2013_Malaysia_FP2_1.jpg",
+        "https://sports.ltn.com.tw/news/breakingnews/5270934",
+        "https://zh.wikipedia.org/zh-tw/%E9%BA%A5%E6%8B%89%E5%80%AB%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2013-force-india": {
+      "colour": "#f58220",
+      "colour2": "#f5f5f5",
+      "teamZh": "印度力量",
+      "note": "Sutil 在澳洲開幕戰一度領跑；全年 77 分、年度第六。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Force_India_VJM06",
+        "https://commons.wikimedia.org/wiki/File:Adrian_Sutil_2013_Malaysia_FP2.jpg",
+        "https://en.wikipedia.org/wiki/Force_India",
+        "https://news.tvbs.com.tw/world/828962",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "medium"
+    },
+    "2013-sauber": {
+      "colour": "#4a4e54",
+      "colour2": "#ffffff",
+      "teamZh": "索伯",
+      "note": "改用灰色塗裝；窄側箱的靈感來自 Pérez 2011 年摩納哥的撞車。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sauber_C32",
+        "https://commons.wikimedia.org/wiki/File:Nico_Hulkenberg_2013_Malaysia_FP2.jpg",
+        "https://en.wikipedia.org/wiki/Sauber_Motorsport",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2013-toro-rosso": {
+      "colour": "#122251",
+      "colour2": "#e4002b",
+      "teamZh": "紅牛二隊",
+      "note": "Toro Rosso 最後一輛使用法拉利 V8 引擎的賽車。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Toro_Rosso_STR8",
+        "https://commons.wikimedia.org/wiki/File:Jean-Eric_Vergne_2013_Malaysia_FP2.jpg",
+        "https://teamcolorcodes.com/scuderia-toro-rosso-color-codes/",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E7%AC%AC%E4%BA%8C%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2013-williams": {
+      "colour": "#0b1e4b",
+      "colour2": "#ffffff",
+      "teamZh": "威廉斯",
+      "note": "Bottas 出道年；全季僅 5 分，追平車隊最差紀錄。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Williams_FW35",
+        "https://commons.wikimedia.org/wiki/File:Pastor_Maldonado_2013_Malaysia_FP2_1.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E5%A8%81%E5%BB%89%E5%A7%86%E6%96%AF%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2013-marussia": {
+      "colour": "#e4322b",
+      "colour2": "#141414",
+      "teamZh": "瑪魯西亞",
+      "note": "至 2026 年為止，F1 最後一輛搭載 Cosworth 引擎的賽車。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Marussia_MR02",
+        "https://commons.wikimedia.org/wiki/File:Jules_Bianchi_2013_Malaysia_FP2.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%8E%9B%E9%B2%81%E8%A5%BF%E4%BA%9A%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2013-caterham": {
+      "colour": "#1b9a4b",
+      "colour2": "#f2c100",
+      "teamZh": "卡特漢",
+      "note": "改用較亮的綠色；全季未得分，排名第 11。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Caterham_CT03",
+        "https://commons.wikimedia.org/wiki/File:Charles_Pic_2013_Malaysia_FP2.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E5%8D%A1%E7%89%B9%E6%B1%89%E5%A7%86%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2014-mercedes": {
+      "colour": "#c3c7cb",
+      "colour2": "#00a19c",
+      "teamZh": "賓士",
+      "note": "渦輪混合動力首年，19 站 16 勝、18 次桿位；渦輪與壓縮機分置引擎兩端。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mercedes_F1_W05_Hybrid",
+        "https://commons.wikimedia.org/wiki/File:Mercedes_F1_W05_Hybrid_(Lewis_Hamilton).jpg",
+        "https://github.com/f1db/f1db",
+        "https://sports.ltn.com.tw/news/breakingnews/3904928",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2014-red-bull": {
+      "colour": "#20306a",
+      "colour2": "#5b2c83",
+      "teamZh": "紅牛",
+      "note": "Ricciardo 在加拿大站拿下生涯首勝，全年 3 勝是賓士以外僅有的勝場。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Red_Bull_RB10",
+        "https://commons.wikimedia.org/wiki/File:Sebastian_Vettel_2014_China_Race_(cropped).jpg",
+        "https://en.wikipedia.org/wiki/Red_Bull_RB9",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2014-williams": {
+      "colour": "#f4f4f4",
+      "colour2": "#0f2b5b",
+      "teamZh": "威廉斯",
+      "note": "首年換上 Martini Racing 塗裝；Massa 奧地利站桿位，全年 9 度登台、年度第三。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Williams_FW36",
+        "https://commons.wikimedia.org/wiki/File:Felipe_Massa_2014_Singapore_FP1.jpg",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E5%A8%81%E5%BB%89%E5%A7%86%E6%96%AF%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2014-ferrari": {
+      "colour": "#d40000",
+      "colour2": "#ffffff",
+      "teamZh": "法拉利",
+      "note": "名稱由車迷投票選出；1993 年以來第一輛整季沒贏下任何一站的法拉利。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ferrari_F14_T",
+        "https://commons.wikimedia.org/wiki/File:Fernando_Alonso_2014_British_GP_002_(cropped).jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E6%B3%95%E6%8B%89%E5%88%A9%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "medium"
+    },
+    "2014-mclaren": {
+      "colour": "#aeb2b6",
+      "colour2": "#141414",
+      "teamZh": "麥拉倫",
+      "note": "澳洲開幕戰雙車登台（新人 Magnussen 第二），也是麥拉倫到 2019 年前最後一次登台。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/McLaren_MP4-29",
+        "https://commons.wikimedia.org/wiki/File:Mclaren_MP4-29_Jenson_Button_2014_F1_Chinese_GP.jpg",
+        "https://sports.ltn.com.tw/news/breakingnews/5270934",
+        "https://zh.wikipedia.org/zh-tw/%E9%BA%A5%E6%8B%89%E5%80%AB%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2014-force-india": {
+      "colour": "#161616",
+      "colour2": "#f58220",
+      "teamZh": "印度力量",
+      "note": "Pérez 巴林站季軍，是車隊四年多來首座頒獎台。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Force_India_VJM07",
+        "https://commons.wikimedia.org/wiki/File:F1_-_Force_India_-_Nico_H%C3%BClkenberg_(14428318228).jpg",
+        "https://en.wikipedia.org/wiki/Force_India",
+        "https://news.tvbs.com.tw/world/828962",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "medium"
+    },
+    "2014-toro-rosso": {
+      "colour": "#122251",
+      "colour2": "#e4002b",
+      "teamZh": "紅牛二隊",
+      "note": "Toro Rosso 第一輛搭載 Renault 引擎的賽車。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Toro_Rosso_STR9",
+        "https://commons.wikimedia.org/wiki/File:Daniil_Kvyat_2014_British_GP_002_(cropped).jpg",
+        "https://teamcolorcodes.com/scuderia-toro-rosso-color-codes/",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E7%AC%AC%E4%BA%8C%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2014-lotus-f1": {
+      "colour": "#141414",
+      "colour2": "#c6a15b",
+      "teamZh": "蓮花",
+      "note": "左短右長的不對稱雙叉「象牙」鼻錐；全年只拿 10 分。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Lotus_E22",
+        "https://commons.wikimedia.org/wiki/File:Lotus_E22_Maldonado_Silverstone_2014_(3).jpg",
+        "https://en.wikipedia.org/wiki/Lotus_F1",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E8%B7%AF%E7%89%B9%E6%96%AFF1%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2014-marussia": {
+      "colour": "#e4322b",
+      "colour2": "#141414",
+      "teamZh": "瑪魯西亞",
+      "note": "Bianchi 在摩納哥站拿下第九，為車隊首度得分。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Marussia_MR03",
+        "https://commons.wikimedia.org/wiki/File:Jules_Bianchi_Bahre%C3%AFn_2014.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%8E%9B%E9%B2%81%E8%A5%BF%E4%BA%9A%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2014-sauber": {
+      "colour": "#3d4148",
+      "colour2": "#ffffff",
+      "teamZh": "索伯",
+      "note": "開季車身嚴重過重；Sauber 史上首次整季零分。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sauber_C33",
+        "https://commons.wikimedia.org/wiki/File:Adrian_Sutil_2014_Singapore_FP1.jpg",
+        "https://en.wikipedia.org/wiki/Sauber_Motorsport",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "medium"
+    },
+    "2014-caterham": {
+      "colour": "#13a04a",
+      "colour2": "#ffffff",
+      "teamZh": "卡特漢",
+      "note": "車隊最後一輛車；財務困難缺席兩站，最終站靠募資回到賽場。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Caterham_CT05",
+        "https://commons.wikimedia.org/wiki/File:Marcus_Ericsson_2014_British_GP_001.jpg",
+        "https://zh.wikipedia.org/zh-tw/%E5%8D%A1%E7%89%B9%E6%B1%89%E5%A7%86%E8%BD%A6%E9%98%9F",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://www.cnn.com/2014/11/11/sport/motorsport/f1-caterham-crowd-funding-abu-dhabi"
+      ],
+      "confidence": "high"
+    },
+    "2015-mercedes": {
+      "colour": "#c3c7cb",
+      "colour2": "#00a19c",
+      "teamZh": "賓士",
+      "note": "全年 16 勝、18 次桿位，12 次包辦冠亞軍。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mercedes_F1_W06_Hybrid",
+        "https://commons.wikimedia.org/wiki/File:Lewis_Hamilton_2015_Malaysia_FP2_1.jpg",
+        "https://sports.ltn.com.tw/news/breakingnews/3904928",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2015-ferrari": {
+      "colour": "#d40000",
+      "colour2": "#ffffff",
+      "teamZh": "法拉利",
+      "note": "Vettel 加盟首年 3 勝，第二站馬來西亞就拿下首勝。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ferrari_SF15-T",
+        "https://commons.wikimedia.org/wiki/File:Sebastian_Vettel_2015_Malaysia_FP2_3.jpg",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E6%B3%95%E6%8B%89%E5%88%A9%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2015-williams": {
+      "colour": "#f4f4f4",
+      "colour2": "#0f2b5b",
+      "teamZh": "威廉斯",
+      "note": "4 度登上頒獎台，連續第二年拿下年度第三。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Williams_FW37",
+        "https://commons.wikimedia.org/wiki/File:Felipe_Massa_2015_Malaysia_FP3.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E5%A8%81%E5%BB%89%E5%A7%86%E6%96%AF%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2015-red-bull": {
+      "colour": "#20306a",
+      "colour2": "#5b2c83",
+      "teamZh": "紅牛",
+      "note": "2008 年以來首度整季無勝；季前以黑白迷彩塗裝測試。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Red_Bull_RB11",
+        "https://commons.wikimedia.org/wiki/File:Daniel_Ricciardo_b.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2015-force-india": {
+      "colour": "#161616",
+      "colour2": "#a8adb2",
+      "teamZh": "印度力量",
+      "note": "英國站起換上短鼻 B 規格；Pérez 俄羅斯站季軍，年度第五創當時隊史最佳。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Force_India_VJM08",
+        "https://commons.wikimedia.org/wiki/File:H%C3%BClkenberg_Japan_2015.jpg",
+        "https://en.wikipedia.org/wiki/Force_India",
+        "https://news.tvbs.com.tw/world/828962",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2015-lotus-f1": {
+      "colour": "#141414",
+      "colour2": "#c6a15b",
+      "teamZh": "蓮花",
+      "note": "Enstone 車隊首度改用賓士動力，隔年即換回 Renault；Grosjean 比利時站季軍是 Lotus 之名最後一次登上頒獎台。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Lotus_E23_Hybrid",
+        "https://commons.wikimedia.org/wiki/File:Romain_Grosjean_2015_Malaysia_FP1.jpg",
+        "https://en.wikipedia.org/wiki/Lotus_F1",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E8%B7%AF%E7%89%B9%E6%96%AFF1%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "high"
+    },
+    "2015-toro-rosso": {
+      "colour": "#122251",
+      "colour2": "#e4002b",
+      "teamZh": "紅牛二隊",
+      "note": "Verstappen 出道年，匈牙利站與美國站兩度拿下第四。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Toro_Rosso_STR10",
+        "https://commons.wikimedia.org/wiki/File:Carlos_Sainz_Jr_2015_Malaysia_FP3_1.jpg",
+        "https://teamcolorcodes.com/scuderia-toro-rosso-color-codes/",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E7%AC%AC%E4%BA%8C%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2015-sauber": {
+      "colour": "#0b4da2",
+      "colour2": "#ffd700",
+      "teamZh": "索伯",
+      "note": "隨 Nasr 帶來 Banco do Brasil 贊助換上藍色新塗裝；Nasr 出道戰澳洲站就拿下第五。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sauber_C34",
+        "https://commons.wikimedia.org/wiki/File:Raffaele_Marciello_2015_Malaysia_FP1_1.jpg",
+        "https://www.kingautos.net/19198",
+        "https://en.wikipedia.org/wiki/Sauber_Motorsport",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "medium"
+    },
+    "2015-mclaren": {
+      "colour": "#3a3d41",
+      "colour2": "#f24a26",
+      "teamZh": "麥拉倫",
+      "note": "Honda 回歸；追求「零尺寸」的緊湊車尾，全季僅 27 分、排名第九。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/McLaren_MP4-30",
+        "https://commons.wikimedia.org/wiki/File:Jenson_Button_2015_Malaysia_FP2_1.jpg",
+        "https://www.grandprix.com/news/mclaren-confirms-graphite-grey-livery-change.html",
+        "https://commons.wikimedia.org/wiki/File:Fernando_Alonso_Qual_Hungary_2015.jpg",
+        "https://sports.ltn.com.tw/news/breakingnews/5270934",
+        "https://zh.wikipedia.org/zh-tw/%E9%BA%A5%E6%8B%89%E5%80%AB%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2015-marussia": {
+      "colour": "#e4322b",
+      "colour2": "#2a56a5",
+      "teamZh": "瑪魯西亞",
+      "note": "車隊破產重組後，以 2014 年的 MR03 改裝參賽，全季零分。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Marussia_MR03",
+        "https://commons.wikimedia.org/wiki/File:Will_Stevens_driving_the_Manor_F1_MR03B_at_the_British_GP.jpg",
+        "https://commons.wikimedia.org/wiki/File:Roberto_Merhi_Belgium_2015.jpg",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%8E%9B%E9%B2%81%E8%A5%BF%E4%BA%9A%E8%BD%A6%E9%98%9F"
+      ],
+      "confidence": "medium"
+    },
+    "2016-mercedes": {
+      "colour": "#c3c7cb",
+      "colour2": "#00a19c",
+      "teamZh": "賓士",
+      "note": "21 站 19 勝、20 次桿位；Rosberg 奪冠後隨即退休。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mercedes_F1_W07_Hybrid",
+        "https://commons.wikimedia.org/wiki/File:Nico_Rosberg_2016_Malaysia_FP2.jpg",
+        "https://sports.ltn.com.tw/news/breakingnews/3904928",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2016-red-bull": {
+      "colour": "#1e2548",
+      "colour2": "#ffc906",
+      "teamZh": "紅牛",
+      "note": "Verstappen 升上紅牛首戰西班牙站即奪冠，成為 F1 史上最年輕的分站冠軍。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Red_Bull_RB12",
+        "https://commons.wikimedia.org/wiki/File:Max_Verstappen_2016_Malaysia_FP2.jpg",
+        "https://en.wikipedia.org/wiki/Red_Bull_RB8",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2016-ferrari": {
+      "colour": "#d40000",
+      "colour2": "#ffffff",
+      "teamZh": "法拉利",
+      "note": "整季沒有任何分站冠軍，也沒拿到桿位。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ferrari_SF16-H",
+        "https://commons.wikimedia.org/wiki/File:Sebastian_Vettel_2016_Malaysia_FP2_1.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E6%B3%95%E6%8B%89%E5%88%A9%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2016-force-india": {
+      "colour": "#161616",
+      "colour2": "#a8adb2",
+      "teamZh": "印度力量",
+      "note": "Pérez 摩納哥站季軍；年度第四是隊史最佳。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Force_India_VJM09",
+        "https://commons.wikimedia.org/wiki/File:Sergio_Perez_2016_Malaysia_FP2_1.jpg",
+        "https://en.wikipedia.org/wiki/Force_India",
+        "https://commons.wikimedia.org/wiki/File:F1_-_Force_India_-_Nico_Hulkenburg_(28582692985).jpg",
+        "https://news.tvbs.com.tw/world/828962",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "medium"
+    },
+    "2016-williams": {
+      "colour": "#f4f4f4",
+      "colour2": "#0f2b5b",
+      "teamZh": "威廉斯",
+      "note": "據 Williams 車隊數據，Bottas 在歐洲站（巴庫）排位賽跑出 378 km/h，是 F1 非官方的最高速紀錄。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Williams_FW38",
+        "https://commons.wikimedia.org/wiki/File:Felipe_Massa_2016_Malaysia_FP2.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E5%A8%81%E5%BB%89%E5%A7%86%E6%96%AF%E8%BD%A6%E9%98%9F",
+        "https://www.racefans.net/2016/06/20/2016-european-grand-prix-stats-and-facts/",
+        "https://www.grandprix247.com/2016/06/22/bottas-sets-f1-top-speed-record-in-baku/"
+      ],
+      "confidence": "high"
+    },
+    "2016-mclaren": {
+      "colour": "#2c2e31",
+      "colour2": "#f24a26",
+      "teamZh": "麥拉倫",
+      "note": "最後一輛以「MP4」命名的麥拉倫；年度第六。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/McLaren_MP4-31",
+        "https://commons.wikimedia.org/wiki/File:Fernando_Alonso_2016_Malaysia_FP2_1.jpg",
+        "https://www.racefans.net/2016/02/20/mclaren-mp4-31-first-pictures-revealed/",
+        "https://www.skysports.com/f1/news/12479/10126640/mclaren-have-revealed-their-2016-f1-car-the-mp4-31",
+        "https://sports.ltn.com.tw/news/breakingnews/5270934",
+        "https://zh.wikipedia.org/zh-tw/%E9%BA%A5%E6%8B%89%E5%80%AB%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2016-toro-rosso": {
+      "colour": "#122251",
+      "colour2": "#e4002b",
+      "teamZh": "紅牛二隊",
+      "note": "改用法拉利 2015 年規格的 060 動力單元；Verstappen 開季在此跑了 4 站才升上紅牛。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Toro_Rosso_STR11",
+        "https://commons.wikimedia.org/wiki/File:Carlos_Sainz_Jr_2016_Malaysia_FP2_1.jpg",
+        "https://teamcolorcodes.com/scuderia-toro-rosso-color-codes/",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E7%AC%AC%E4%BA%8C%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2016-haas": {
+      "colour": "#caccce",
+      "colour2": "#d0142c",
+      "teamZh": "哈斯",
+      "note": "美國哈斯車隊首輛賽車（Dallara 製造）；Grosjean 首戰澳洲站就拿下第六。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Haas_VF-16",
+        "https://commons.wikimedia.org/wiki/File:Romain_Grosjean_2016_Malaysia_FP2_1.jpg",
+        "https://www.racefans.net/2016/02/21/haas-vf16-first-pictures-revealed/",
+        "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+      ],
+      "confidence": "high"
+    },
+    "2016-renault": {
+      "colour": "#ffd30a",
+      "colour2": "#141414",
+      "teamZh": "雷諾",
+      "note": "Renault 買回 Lotus 車隊後以廠隊身分回歸；全年只拿 8 分。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Renault_R.S.16",
+        "https://commons.wikimedia.org/wiki/File:Jolyon_Palmer_2016_Malaysia_FP2_1.jpg",
+        "https://www.racefans.net/2016/03/16/renault-reveals-yellow-race-livery-rs16/",
+        "https://sports.ltn.com.tw/news/breakingnews/3221381",
+        "https://tw.sports.yahoo.com/news/%E9%9B%B7%E8%AB%BE%E6%94%B6%E8%B3%BC%E8%93%AE%E8%8A%B1%E8%BB%8A%E9%9A%8A-2016%E9%87%8D%E8%BF%94f1%E8%B3%BD%E8%BB%8A-022200274--finance.html"
+      ],
+      "confidence": "high"
+    },
+    "2016-sauber": {
+      "colour": "#0b4da2",
+      "colour2": "#ffd700",
+      "teamZh": "索伯",
+      "note": "全季唯一積分來自雨戰巴西站，靠這 2 分超越 Manor。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sauber_C35",
+        "https://commons.wikimedia.org/wiki/File:Marcus_Ericsson_2016_Malaysia_FP2_1.jpg",
+        "https://en.wikipedia.org/wiki/Manor_MRT05",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "medium"
+    },
+    "2016-manor": {
+      "colour": "#1c6db4",
+      "colour2": "#f05a28",
+      "teamZh": null,
+      "note": "Wehrlein 奧地利站第十，拿下車隊唯一 1 分；車隊在隔年初倒閉。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Manor_MRT05",
+        "https://commons.wikimedia.org/wiki/File:Pascal_Wehrlein_2016_Malaysia_FP2_1.jpg",
+        "https://en.wikipedia.org/wiki/Manor_Racing",
+        "https://github.com/f1db/f1db"
+      ],
+      "confidence": "high"
+    },
+    "2017-mercedes": {
+      "colour": "#c3c7cb",
+      "colour2": "#00a19c",
+      "teamZh": "賓士",
+      "note": "12 勝、15 次桿位，賓士車隊四連霸。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mercedes_AMG_F1_W08_EQ_Power%2B",
+        "https://commons.wikimedia.org/wiki/File:Lewis_Hamilton_2017_Malaysia_FP2.jpg",
+        "https://sports.ltn.com.tw/news/breakingnews/3904928",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2017-ferrari": {
+      "colour": "#d40000",
+      "colour2": "#ffffff",
+      "teamZh": "法拉利",
+      "note": "以法拉利 70 週年命名；Vettel 澳洲開幕戰奪冠，全年 5 勝。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ferrari_SF70H",
+        "https://commons.wikimedia.org/wiki/File:Sebastian_Vettel_2017_Malaysia_FP1_1.jpg",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E6%B3%95%E6%8B%89%E5%88%A9%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2017-red-bull": {
+      "colour": "#1e2548",
+      "colour2": "#ffc906",
+      "teamZh": "紅牛",
+      "note": "全年 3 勝；Ricciardo 在亞塞拜然站一度掉到第 17，最後仍逆轉奪冠。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Red_Bull_RB13",
+        "https://commons.wikimedia.org/wiki/File:Daniel_Ricciardo_2017_Malaysia_FP1.jpg",
+        "https://en.wikipedia.org/wiki/Red_Bull_RB12",
+        "https://github.com/f1db/f1db",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2017-force-india": {
+      "colour": "#f59dc9",
+      "colour2": "#ffffff",
+      "teamZh": "印度力量",
+      "note": "BWT 贊助讓車身從季前測試的銀灰色改成全粉紅塗裝；連續兩年年度第四。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Force_India_VJM10",
+        "https://commons.wikimedia.org/wiki/File:Esteban_Ocon_2017_Malaysia_FP2_2.jpg",
+        "https://en.wikipedia.org/wiki/Force_India",
+        "https://github.com/f1db/f1db",
+        "https://news.tvbs.com.tw/world/828962",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    },
+    "2017-williams": {
+      "colour": "#f4f4f4",
+      "colour2": "#0f2b5b",
+      "teamZh": "威廉斯",
+      "note": "車名紀念車隊 40 週年；Stroll 亞塞拜然站季軍，成為當時史上第二年輕的登台車手。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Williams_FW40",
+        "https://commons.wikimedia.org/wiki/File:Felipe_Massa_2017_Malaysia_FP2_2.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E5%A8%81%E5%BB%89%E5%A7%86%E6%96%AF%E8%BD%A6%E9%98%9F",
+        "https://www.autosport.com/f1/news/f1-azerbaijan-gp-17-retro-how-stroll-came-within-11-days-of-verstappens-f1-record-4982112/4982112/"
+      ],
+      "confidence": "high"
+    },
+    "2017-renault": {
+      "colour": "#ffcd00",
+      "colour2": "#141414",
+      "teamZh": "雷諾",
+      "note": "全年 57 分、年度第六，比前一年的 8 分大幅進步。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Renault_R.S.17",
+        "https://commons.wikimedia.org/wiki/File:Nico_Hulkenberg_2017_Malaysia_FP2_2.jpg",
+        "https://en.wikipedia.org/wiki/Renault_R.S.16",
+        "https://sports.ltn.com.tw/news/breakingnews/3221381",
+        "https://tw.sports.yahoo.com/news/%E9%9B%B7%E8%AB%BE%E6%94%B6%E8%B3%BC%E8%93%AE%E8%8A%B1%E8%BB%8A%E9%9A%8A-2016%E9%87%8D%E8%BF%94f1%E8%B3%BD%E8%BB%8A-022200274--finance.html"
+      ],
+      "confidence": "high"
+    },
+    "2017-toro-rosso": {
+      "colour": "#2446b5",
+      "colour2": "#e4002b",
+      "teamZh": "紅牛二隊",
+      "note": "改穿皇家藍新塗裝；搭載以 Toro Rosso 為名的 Renault 引擎。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Toro_Rosso_STR12",
+        "https://commons.wikimedia.org/wiki/File:Carlos_Sainz_Jr_2017_Malaysia_FP2_2.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+        "https://zh.wikipedia.org/zh-tw/%E7%B4%85%E7%89%9B%E7%AC%AC%E4%BA%8C%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2017-haas": {
+      "colour": "#5c6065",
+      "colour2": "#d6d8da",
+      "teamZh": "哈斯",
+      "note": "摩納哥站起把紅色區塊改成淺灰，同站拿下隊史首次雙車得分。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Haas_VF-17",
+        "https://commons.wikimedia.org/wiki/File:Kevin_Magnussen_2017_Malaysia_FP2_2.jpg",
+        "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+      ],
+      "confidence": "medium"
+    },
+    "2017-mclaren": {
+      "colour": "#f57b20",
+      "colour2": "#141414",
+      "teamZh": "麥拉倫",
+      "note": "橘色塗裝回歸；最後一輛搭載 Honda 引擎的麥拉倫，可靠度問題不斷。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/McLaren_MCL32",
+        "https://commons.wikimedia.org/wiki/File:Fernando_Alonso_2017_Malaysia_FP2_1.jpg",
+        "https://www.formula1.com/en/latest/article/mclaren-revive-orange-livery-with-mcl32.3QawYu13Wwo8smG6GeAyi2",
+        "https://racer.com/2017/02/24/mclaren-unveils-orange-and-black-mcl32",
+        "https://sports.ltn.com.tw/news/breakingnews/5270934",
+        "https://zh.wikipedia.org/zh-tw/%E9%BA%A5%E6%8B%89%E5%80%AB%E8%BB%8A%E9%9A%8A"
+      ],
+      "confidence": "high"
+    },
+    "2017-sauber": {
+      "colour": "#1d3c8f",
+      "colour2": "#ffffff",
+      "teamZh": "索伯",
+      "note": "藍白金 25 週年塗裝；使用前一年規格的法拉利動力單元。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sauber_C36",
+        "https://commons.wikimedia.org/wiki/File:Pascal_Wehrlein_2017_Malaysia_FP2_2.jpg",
+        "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+      ],
+      "confidence": "high"
+    }
+  },
+  "meta": {
+    "generated": "2026-10-01",
+    "method": [
+      "colour / colour2 are nominal paint values chosen by the researcher from on-track photographs (the lead photo of each car's English Wikipedia article, on Wikimedia Commons, plus extra Commons photos where the livery changed) and the livery descriptions in the listed articles and launch reports. They are NOT official colour codes; photos are shaded, so values were set to the unshaded paint colour.",
+      "colour = dominant body colour, colour2 = main secondary colour, as the car looked for most of the season. Where two liveries of the same season were close, the primary was kept true and the secondary chosen to separate them; every such choice is listed in meta.remarks.",
+      "note: one Traditional Chinese line per car, facts verified in the first listed source (the car's Wikipedia article) or, for counts of wins/poles/podiums/points, in F1DB via tools/seasons-raw.json; null when nothing notable was found.",
+      "teamZh: Taiwanese usage verified in Taiwanese media (Liberty Times / 自由時報, TVBS, CNA / 中央社, isCar via Yahoo奇摩) and zh-tw Wikipedia; see meta.teamZh. null = no established Chinese form found (the name is written in Latin letters)."
+    ],
+    "teamZh": {
+      "紅牛 (Red Bull)": "isCar/Yahoo 2014 standings table; zh-tw Wikipedia 紅牛車隊.",
+      "麥拉倫 (McLaren)": "自由時報 2025 headline; zh-tw Wikipedia title. isCar 2014 used the variant 麥凱倫.",
+      "法拉利 (Ferrari)": "isCar/Yahoo 2014; zh-tw Wikipedia 法拉利車隊.",
+      "賓士 (Mercedes)": "自由時報 (賓士老闆...); isCar/Yahoo 2014 (賓士車隊). zh-tw Wikipedia uses 梅賽德斯AMG車隊, Taiwanese media use 賓士.",
+      "雷諾 (Renault)": "自由時報 (攜手雷諾車隊); Yahoo奇摩 (雷諾收購蓮花車隊).",
+      "威廉斯 (Williams)": "isCar/Yahoo 2014; zh-tw Wikipedia 威廉斯車隊.",
+      "印度力量 (Force India)": "TVBS 2017 (「印度力量」車隊); isCar/Yahoo 2014. zh-tw Wikipedia and 運動視界 use the variant 印度威力.",
+      "索伯 (Sauber)": "isCar/Yahoo 2014 standings. zh-tw Wikipedia converts to 薩伯; many Taiwanese car sites write \"Sauber\". Medium confidence.",
+      "紅牛二隊 (Toro Rosso)": "isCar/Yahoo 2014; zh-tw Wikipedia 紅牛第二車隊 (簡稱紅牛二隊; also 小紅牛).",
+      "蓮花 (Lotus Racing / Team Lotus 2010-11, Lotus F1 2012-15)": "isCar/Yahoo 2014 (Lotus F1); zh-tw Wikipedia 蓮花車隊 for both teams.",
+      "卡特漢 (Caterham)": "isCar/Yahoo 2014 standings. zh-tw Wikipedia uses 卡特漢姆. Medium confidence.",
+      "瑪魯西亞 (Marussia)": "isCar/Yahoo 2014; zh-tw Wikipedia 瑪魯西亞車隊.",
+      "維珍 (Virgin)": "Only zh-tw Wikipedia 維珍車隊 found (no Taiwanese news article about the F1 team located); 維珍 is the standard Taiwanese form of the Virgin brand. Medium confidence.",
+      "哈斯 (Haas)": "中央社 CNA 2022 (F1哈斯車隊); 自由時報.",
+      "HRT": "null: no established form. zh-tw Wikipedia titles it \"HRT車隊\" (older 伊斯巴尼亞車隊); Taiwanese media write HRT.",
+      "Manor": "null: no established form found in Taiwanese media (mainland sources use 馬諾)."
+    },
+    "remarks": {
+      "2010-red-bull": "Secondary yellow (nose, airbox sun disc; Wikipedia RB8: \"blue with yellow inserts\") instead of red, because Toro Rosso raced the same navy with red.",
+      "2010-force-india": "White top with saffron orange and green (Indian flag); orange chosen as the second colour.",
+      "2010-toro-rosso": "Navy with the red charging bull; red kept (true) while Red Bull takes its yellow.",
+      "2010-hrt": "Dark grey with a white/yellow/red stripe along the sidepods; white chosen as the second colour.",
+      "2010-virgin": "Launch report: \"black and red\"; the day-glo red covers the upper body, black the sides.",
+      "2011-red-bull": "Secondary yellow instead of red, as in 2010 (Toro Rosso navy/red).",
+      "2011-mclaren": "HRT is white/red this year; McLaren's darker chrome primary keeps the two apart.",
+      "2011-williams": "Rothmans-inspired dark blue with white, silver and red (Wikipedia FW33); white chosen as the second colour.",
+      "2011-hrt": "White with red inserts bordered in black (Wikipedia F111); red chosen because Sauber is white/black this year.",
+      "2011-virgin": "Red upper body and black sides; the 2011 car shows more black than the 2010 one, red kept as primary as seen from above.",
+      "2012-red-bull": "Secondary yellow (Wikipedia RB8 livery: \"blue with yellow inserts\"); Toro Rosso keeps navy/red.",
+      "2012-force-india": "Wikipedia VJM05: \"the colours were flipped over\": orange now covers the nose and upper body, white the sidepods (green stripe); orange chosen as primary.",
+      "2012-hrt": "White, gold and red (Wikipedia F112); gold chosen as the second colour (Sauber is white/black, McLaren chrome/red).",
+      "2013-red-bull": "Infiniti purple on the sidepods (Wikipedia RB9: \"dark blue and purple\").",
+      "2013-force-india": "Same scheme as 2012 (orange upper body, white sidepods, green stripe).",
+      "2013-sauber": "Grey with black, red and white accents (Wikipedia C32); white chosen. Williams is also X/white but navy, not grey.",
+      "2014-williams": "White with the Martini light-blue / dark-blue / red stripes; dark blue chosen as the second colour.",
+      "2014-ferrari": "Wikipedia notes more black on the F14 T (rear and lower body), but the car also carried white panels (engine cover, rear sidepod, wing end plates: see photo). White chosen because Marussia is red/black this year.",
+      "2014-force-india": "Wikipedia VJM07: black took over the sides from the Spanish GP (round 5); nose stayed white with orange/green. Orange chosen over white because Sauber is dark grey/white.",
+      "2014-marussia": "Red upper body, black lower half, thin white stripe. Ferrari takes white as its second colour this year to stay apart.",
+      "2014-sauber": "Dark grey (continuation of the 2013 grey scheme) with white accents, judged from photographs.",
+      "2014-caterham": "Wikipedia CT05: \"bold metallic green set off with flashes of white, yellow and black\"; white chosen.",
+      "2015-force-india": "Wikipedia VJM08: white removed, \"black and silver livery\" with orange stripes.",
+      "2015-sauber": "Wikipedia calls the C34 livery \"blue and white\"; the large yellow Banco do Brasil panel on the sidepods is the most visible second colour in photographs, so yellow was chosen.",
+      "2015-mclaren": "Chrome/black with red trim for rounds 1-4; from the Spanish GP (round 5 of 19) graphite grey with dayglo \"Speedmarks\" (grandprix.com). The later livery is used.",
+      "2015-marussia": "Red and white early in the season; from the Canadian/British GPs (Airbnb, Flex-Box) the sidepods turned blue for the rest of the year (Wikipedia MR03). Blue chosen: it covers most races and Ferrari is red/white.",
+      "2016-red-bull": "Matte navy (Wikipedia RB12); yellow second colour (nose, sun disc) because Toro Rosso is navy/red.",
+      "2016-force-india": "Black and silver as in 2015 (silver nose and front, black rear, orange/green stripe); silver and black cover similar areas.",
+      "2016-mclaren": "Dark graphite/black with dayglo red-orange Speedmarks, carried over from the late-2015 livery.",
+      "2016-haas": "Light grey, dark grey and red; light grey is close to Mercedes silver, red (vs teal) keeps them apart.",
+      "2016-renault": "Black test livery until the Australian GP; raced in yellow with black wings (RaceFans).",
+      "2016-sauber": "Unchanged from 2015 (blue with the yellow Banco do Brasil panel).",
+      "2016-manor": "Wikipedia: \"predominantly red and blue livery with flashes of white\"; the red is an orange-red.",
+      "2017-red-bull": "Same matte navy scheme as 2016; yellow kept for continuity (red \"Red Bull\" lettering is equally prominent).",
+      "2017-toro-rosso": "Wikipedia STR12: \"royal blue livery with red accents\"; the silver/white is a third colour.",
+      "2017-haas": "Darker grey than 2016. Red areas replaced by light grey from Monaco (round 6 of 20); a thin red outline returned from Belgium. Light grey chosen as the second colour.",
+      "2017-mclaren": "\"Tarocco Orange\" with black (formula1.com / RACER); nominal orange value.",
+      "2017-sauber": "Blue, white and gold (Wikipedia C36); white chosen. Toro Rosso is a brighter royal blue with red."
+    },
+    "factCheck": {
+      "date": "2026-10-01",
+      "by": "independent fact-check pass (second agent)",
+      "scope": "all 89 entries of 2010-2017: colour / colour2 against the Commons lead photo of each car's English Wikipedia article (plus the extra mid-season photos), every note against the car article text and web sources, every teamZh against Taiwanese media, ids against tools/seasons-raw.json, and pairwise CIEDE2000 distances of body and accent colour inside each season.",
+      "result": "ids: 89/89 match tools/seasons-raw.json. Colours: no value contradicted by the photographs; no pair indistinguishable (closest pairs listed in closestPairs, all differ clearly in body or accent). teamZh: all confirmed in Taiwanese usage (isCar 2014 standings table: 賓士 印度力量 紅牛 法拉利 威廉斯 紅牛二隊 蓮花 索伯 瑪魯西亞 卡特漢; 台視 索伯車隊; TVBS 印度力量; 自由時報 瑪魯西亞; 中央社 威廉斯車隊, 哈斯; 麥拉倫 as in 自由時報 / TVBS). Notes: 8 rewritten, 3 kept with an added source; details in corrections.",
+      "closestPairs": [
+        "2014 Force India (black / orange) ~ Lotus (black / gold): same black body, accents orange vs gold (dE2000 17.7). Both true; the black Force India also has a white nose, but white would clash with Sauber (dark grey / white).",
+        "2011 McLaren (chrome / red) ~ HRT (white / red): body dE 16, accent dE 5. Both true to photos.",
+        "2016 Red Bull (matte navy / yellow) ~ Sauber (royal blue / yellow): body dE 18. Red Bull cannot take red (Toro Rosso is navy / red); the Sauber yellow is its Banco do Brasil panel.",
+        "2015 and 2016 McLaren (graphite / orange-red) ~ Toro Rosso (navy / red): body dE 17-18, accent dE 11.",
+        "2010 Williams (navy / white) ~ HRT (dark grey / white) and 2013 Sauber (grey / white) ~ Williams (navy / white): body dE 19-21, same white accent."
+      ],
+      "corrections": [
+        {
+          "id": "2015-lotus-f1",
+          "field": "note",
+          "old": "Enstone 車隊唯一一輛賓士動力賽車；Grosjean 比利時站登台是 Lotus 之名最後一次上頒獎台。",
+          "new": "Enstone 車隊首度改用賓士動力，隔年即換回 Renault；Grosjean 比利時站季軍是 Lotus 之名最後一次登上頒獎台。",
+          "reason": "No longer true: the same Enstone team (Alpine) runs customer Mercedes power units from 2026 (Wikipedia Lotus E23 Hybrid: \"only car to use Mercedes engine\" was true only at the time; the article adds the 2026 switch).",
+          "sources": [
+            "https://en.wikipedia.org/wiki/Lotus_E23_Hybrid"
+          ]
+        },
+        {
+          "id": "2016-williams",
+          "field": "note",
+          "old": "Bottas 在歐洲站排位賽跑出 378 km/h，是 F1 正式賽事中測得的最高速度。",
+          "new": "據 Williams 車隊數據，Bottas 在歐洲站（巴庫）排位賽跑出 378 km/h，是 F1 非官方的最高速紀錄。",
+          "reason": "Overstated: 378 km/h comes from Williams telemetry after the speed gun (official trap 366.1 km/h); RaceFans calls it \"unofficially the highest speed ever seen during an official F1 session\".",
+          "sources": [
+            "https://www.racefans.net/2016/06/20/2016-european-grand-prix-stats-and-facts/",
+            "https://www.grandprix247.com/2016/06/22/bottas-sets-f1-top-speed-record-in-baku/"
+          ]
+        },
+        {
+          "id": "2016-toro-rosso",
+          "field": "note",
+          "old": "使用 2015 年規格的法拉利動力單元；最後一輛畫有衝鋒公牛的 Toro Rosso。",
+          "new": "改用法拉利 2015 年規格的 060 動力單元；Verstappen 開季在此跑了 4 站才升上紅牛。",
+          "reason": "Second clause unverifiable and contradicted by photos: the 2017 STR12 still carries the large charging bull on its engine cover (Commons lead photo of Wikipedia Toro Rosso STR12). Replaced with a fact from Wikipedia Toro Rosso STR11 (\"drove the car in the first four Grands Prix\", promoted after the Russian GP).",
+          "sources": [
+            "https://en.wikipedia.org/wiki/Toro_Rosso_STR11"
+          ]
+        },
+        {
+          "id": "2017-force-india",
+          "field": "note",
+          "old": "BWT 贊助改成粉紅塗裝，被暱稱「粉紅豹」；連續兩年年度第四。",
+          "new": "BWT 贊助讓車身從季前測試的銀灰色改成全粉紅塗裝；連續兩年年度第四。",
+          "reason": "「粉紅豹」 is the mainland-China name of the Pink Panther (Taiwan: 頑皮豹), and the nickname only traces to an Ocon tweet; replaced with the pre-season grey-silver to pink change (Wikipedia Force India VJM10).",
+          "sources": [
+            "https://en.wikipedia.org/wiki/Force_India_VJM10"
+          ]
+        },
+        {
+          "id": "2014-sauber",
+          "field": "note",
+          "old": "受車身過重拖累，成為 Sauber 史上首次整季零分。",
+          "new": "開季車身嚴重過重；Sauber 史上首次整季零分。",
+          "reason": "Causal claim softened to what Wikipedia Sauber C33 states: \"plagued by weight issues early in the season\" and \"failed to score points for the first time in their history\".",
+          "sources": [
+            "https://en.wikipedia.org/wiki/Sauber_C33"
+          ]
+        },
+        {
+          "id": "2013-force-india",
+          "field": "note",
+          "old": "Sutil 澳洲開幕戰一度領跑；車隊最後一年以白色為底色。",
+          "new": "Sutil 在澳洲開幕戰一度領跑；全年 77 分、年度第六。",
+          "reason": "Dropped the \"last year with a white base\" clause: the 2014 VJM07 still raced with a white front half (Commons photos; Wikipedia VJM07 says only that \"large parts of the white paint were now black\"). 77 points / 6th from Wikipedia VJM06 and F1DB.",
+          "sources": [
+            "https://en.wikipedia.org/wiki/Force_India_VJM06"
+          ]
+        },
+        {
+          "id": "2015-sauber",
+          "field": "note",
+          "old": "改穿 Banco do Brasil 藍黃新塗裝；Nasr 出道戰澳洲站就拿下第五。",
+          "new": "隨 Nasr 帶來 Banco do Brasil 贊助換上藍色新塗裝；Nasr 出道戰澳洲站就拿下第五。",
+          "reason": "Wikipedia Sauber C34 calls the livery \"blue and white\" with the Banco do Brasil sponsorship \"resulting from Nasr joining the team\"; the yellow is the sponsor panel, so the note no longer names the livery blue-yellow (colour2 stays yellow, it is the most visible accent in photos).",
+          "sources": [
+            "https://en.wikipedia.org/wiki/Sauber_C34"
+          ]
+        },
+        {
+          "id": "2014-williams",
+          "field": "note",
+          "old": "Martini 塗裝回歸；Massa 奧地利站桿位，全年 9 度登台、年度第三。",
+          "new": "首年換上 Martini Racing 塗裝；Massa 奧地利站桿位，全年 9 度登台、年度第三。",
+          "reason": "Wikipedia Williams FW36 confirms the Martini Racing livery (title sponsorship) but not a \"return\"; reworded to what the source states.",
+          "sources": [
+            "https://en.wikipedia.org/wiki/Williams_FW36"
+          ]
+        },
+        {
+          "id": "2011-renault",
+          "field": "sources",
+          "old": null,
+          "new": "https://www.autosport.com/f1/news/renault-admits-its-2011-car-and-exhaust-concept-was-a-bold-failure-4451279/4451279/",
+          "reason": "The \"failed experiment\" admission is not in the listed Wikipedia article; Autosport / Sky Sports quote James Allison: \"a bold, but ultimately failed experiment\". Note kept.",
+          "sources": [
+            "https://www.autosport.com/f1/news/renault-admits-its-2011-car-and-exhaust-concept-was-a-bold-failure-4451279/4451279/"
+          ]
+        },
+        {
+          "id": "2014-caterham",
+          "field": "sources",
+          "old": null,
+          "new": "https://www.cnn.com/2014/11/11/sport/motorsport/f1-caterham-crowd-funding-abu-dhabi",
+          "reason": "Crowdfunding for the Abu Dhabi return is not stated in the listed Wikipedia article; confirmed by CNN / Sky Sports. Note kept.",
+          "sources": [
+            "https://www.cnn.com/2014/11/11/sport/motorsport/f1-caterham-crowd-funding-abu-dhabi"
+          ]
+        },
+        {
+          "id": "2017-williams",
+          "field": "sources",
+          "old": null,
+          "new": "https://www.autosport.com/f1/news/f1-azerbaijan-gp-17-retro-how-stroll-came-within-11-days-of-verstappens-f1-record-4982112/4982112/",
+          "reason": "Second-youngest podium (18y 239d, 11 days older than Verstappen) confirmed; still true in 2026. Note kept.",
+          "sources": [
+            "https://www.autosport.com/f1/news/f1-azerbaijan-gp-17-retro-how-stroll-came-within-11-days-of-verstappens-f1-record-4982112/4982112/"
+          ]
+        }
+      ]
+    }
+  }
+}

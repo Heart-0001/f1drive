@@ -1,5 +1,5 @@
 global.window = global;
-require('C:/Users/user/Desktop/f1drive/js/car.js');
+require(require('path').resolve(__dirname, '..', '..') + '/js/car.js');
 const F1 = global.F1, P = F1.CAR_PERF, DT = 1 / 120, D2R = Math.PI / 180;
 // straight track along +z with a height profile y(z) and a constant bank
 function strip(yFn, bank, len) {

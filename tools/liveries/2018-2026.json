@@ -1,0 +1,1334 @@
+{
+ "span": "2018-2026",
+ "entries": {
+  "2018-mercedes": {
+   "colour": "#c3c7cb",
+   "colour2": "#00a19b",
+   "teamZh": "賓士",
+   "note": "車隊冠軍五連霸，Hamilton 奪第五座車手冠軍",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_AMG_F1_W09_EQ_Power+",
+    "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2018_Nr._44_Hamilton.jpg",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007"
+   ],
+   "confidence": "high"
+  },
+  "2018-ferrari": {
+   "colour": "#d40000",
+   "colour2": "#1c1c1c",
+   "teamZh": "法拉利",
+   "note": "6 勝、車隊第 2；日本站起車身加上 Mission Winnow 標誌",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF71H",
+    "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2018_Nr._5_Vettel.jpg",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2018-red-bull": {
+   "colour": "#1e2548",
+   "colour2": "#e3202b",
+   "teamZh": "紅牛",
+   "note": "4 勝；最後一輛使用雷諾（TAG Heuer 冠名）動力的紅牛",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing_RB14",
+    "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2018_Nr._33_Verstappen.jpg",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2018-renault": {
+   "colour": "#fcec1a",
+   "colour2": "#121212",
+   "teamZh": "雷諾",
+   "note": "車隊第 4，2016 年重返 F1 後最佳",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_R.S.18",
+    "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2018_Nr._27_H%C3%BClkenberg.jpg",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3221381"
+   ],
+   "confidence": "medium"
+  },
+  "2018-haas": {
+   "colour": "#dcdee0",
+   "colour2": "#262628",
+   "teamZh": "哈斯",
+   "note": "93 分、車隊第 5，至今仍是哈斯最成功的賽車",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Haas_VF-18",
+    "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2018_Nr._8_Grosjean.jpg",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+   ],
+   "confidence": "medium"
+  },
+  "2018-mclaren": {
+   "colour": "#ff8000",
+   "colour2": "#2350b0",
+   "teamZh": "麥拉倫",
+   "note": "與本田分手後改用雷諾客戶動力，重拾木瓜橘塗裝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MCL33",
+    "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2018_Nr._14_Alonso.jpg",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2018-force-india": {
+   "colour": "#f59fc8",
+   "colour2": "#f4f4f4",
+   "teamZh": "印度力量",
+   "note": "季中進入破產管理，比利時站起改由新車隊 Racing Point Force India 參賽，前 12 站的車隊積分作廢",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Force_India_VJM11",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+   ],
+   "confidence": "high"
+  },
+  "2018-sauber": {
+   "colour": "#f2f2f2",
+   "colour2": "#9e1b32",
+   "teamZh": "索伯",
+   "note": "Alfa Romeo 冠名，Leclerc 的新秀年",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Sauber_C37",
+    "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2018_Nr._9_Ericsson.jpg",
+    "https://tw.sports.yahoo.com/news/f1-%E4%B8%AD%E5%9C%8B%E8%BB%8A%E6%89%8B%E5%91%A8%E5%86%A0%E5%AE%87%E5%B0%87%E9%9B%A2%E9%96%8B%E7%B4%A2%E4%BC%AF%E8%BB%8A%E9%9A%8A-%E4%B8%8B-%E6%AD%A5%E6%9C%AA%E5%AE%9A-100723830.html"
+   ],
+   "confidence": "high"
+  },
+  "2018-toro-rosso": {
+   "colour": "#102e9a",
+   "colour2": "#c9ced6",
+   "teamZh": "紅牛二隊",
+   "note": "與本田合作的第一年；Gasly 巴林站第 4 為全季最佳",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Scuderia_Toro_Rosso_STR13",
+    "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2018_Nr._10_Gasly.jpg",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/4993724",
+    "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+   ],
+   "confidence": "medium"
+  },
+  "2018-williams": {
+   "colour": "#f5f6f7",
+   "colour2": "#0e2d6d",
+   "teamZh": "威廉斯",
+   "note": "車隊第 10、只拿 7 分，是當時車隊史上最低名次；Martini 贊助的最後一年",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Williams_FW41",
+    "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2018_Nr._18_Stroll.jpg",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026",
+    "https://www.cna.com.tw/postwrite/chi/394200"
+   ],
+   "confidence": "high"
+  },
+  "2019-mercedes": {
+   "colour": "#c6cacd",
+   "colour2": "#00a19b",
+   "teamZh": "賓士",
+   "note": "15 勝，追平紀錄的車隊冠軍六連霸；Hamilton 第六座車手冠軍",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_AMG_F1_W10_EQ_Power+",
+    "https://media.formula1.com/content/dam/fom-website/teams/2019/mercedes.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007"
+   ],
+   "confidence": "high"
+  },
+  "2019-ferrari": {
+   "colour": "#c80d0d",
+   "colour2": "#1a1a1a",
+   "teamZh": "法拉利",
+   "note": "改用霧面漆減重；Leclerc 比利時站奪生涯首勝、蒙札再勝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF90",
+    "https://media.formula1.com/content/dam/fom-website/teams/2019/ferrari.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2019-red-bull": {
+   "colour": "#1e2548",
+   "colour2": "#e3202b",
+   "teamZh": "紅牛",
+   "note": "改用本田動力；Verstappen 奧地利站奪勝，是本田 2006 年以來首勝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing_RB15",
+    "https://media.formula1.com/content/dam/fom-website/teams/2019/red-bull-racing.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2019-mclaren": {
+   "colour": "#ff8000",
+   "colour2": "#1f5fd6",
+   "teamZh": "麥拉倫",
+   "note": "Sainz 巴西站季軍，車隊 2014 年以來首座頒獎台",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MCL34",
+    "https://media.formula1.com/content/dam/fom-website/teams/2019/mclaren.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2019-renault": {
+   "colour": "#fcec1e",
+   "colour2": "#121212",
+   "teamZh": "雷諾",
+   "note": "日本站因自動調整煞車比例的裝置違規，兩車成績取消",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_R.S.19",
+    "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2019_Nr._3_Ricciardo_1.jpg",
+    "https://media.formula1.com/content/dam/fom-website/teams/2019/renault.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3221381"
+   ],
+   "confidence": "medium"
+  },
+  "2019-toro-rosso": {
+   "colour": "#0f2e9e",
+   "colour2": "#c9ced6",
+   "teamZh": "紅牛二隊",
+   "note": "Kvyat 德國站季軍、Gasly 巴西站亞軍；最後一年以 Toro Rosso 為名",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Scuderia_Toro_Rosso_STR14",
+    "https://media.formula1.com/content/dam/fom-website/teams/2019/toro-rosso.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/4993724",
+    "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+   ],
+   "confidence": "medium"
+  },
+  "2019-racing-point": {
+   "colour": "#f4a6ca",
+   "colour2": "#0b2a78",
+   "teamZh": null,
+   "note": "Racing Point 接手 Force India 資產後打造的第一輛賽車",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Racing_Point_RP19",
+    "https://media.formula1.com/content/dam/fom-website/teams/2019/racing-point.png",
+    "https://sports.ltn.com.tw/news/breakingnews/3318006"
+   ],
+   "confidence": "high"
+  },
+  "2019-alfa-romeo": {
+   "colour": "#a0112e",
+   "colour2": "#f0f2f4",
+   "teamZh": "愛快羅密歐",
+   "note": "Sauber 以 Alfa Romeo Racing 名義參賽的第一年",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alfa_Romeo_Racing_C38",
+    "https://media.formula1.com/content/dam/fom-website/teams/2019/alfa-romeo-racing.png",
+    "https://sports.ettoday.net/news/2125415"
+   ],
+   "confidence": "medium"
+  },
+  "2019-haas": {
+   "colour": "#111111",
+   "colour2": "#c6a15b",
+   "teamZh": "哈斯",
+   "note": "Rich Energy 黑金塗裝；冠名合約在義大利站終止，新加坡站起撤下標誌",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Haas_VF-19",
+    "https://media.formula1.com/content/dam/fom-website/teams/2019/haas-f1-team.png",
+    "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+   ],
+   "confidence": "high"
+  },
+  "2019-williams": {
+   "colour": "#f0f4f6",
+   "colour2": "#4aa3df",
+   "teamZh": "威廉斯",
+   "note": "趕不及季前測試（缺席兩天半），全季只有 Kubica 德國站拿 1 分",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Williams_FW42",
+    "https://media.formula1.com/content/dam/fom-website/teams/2019/williams.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026",
+    "https://www.cna.com.tw/postwrite/chi/394200"
+   ],
+   "confidence": "high"
+  },
+  "2020-mercedes": {
+   "colour": "#151618",
+   "colour2": "#00a19b",
+   "teamZh": "賓士",
+   "note": "改漆黑色支持反種族歧視；搭載 DAS 雙軸轉向，車隊冠軍七連霸",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes-AMG_F1_W11_EQ_Performance",
+    "https://media.formula1.com/content/dam/fom-website/teams/2020/mercedes.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007"
+   ],
+   "confidence": "high"
+  },
+  "2020-red-bull": {
+   "colour": "#1e2548",
+   "colour2": "#e3202b",
+   "teamZh": "紅牛",
+   "note": "2 勝（70 週年大獎賽、阿布達比）",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing_RB16",
+    "https://media.formula1.com/content/dam/fom-website/teams/2020/red-bull-racing.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2020-mclaren": {
+   "colour": "#ff8000",
+   "colour2": "#0b55c4",
+   "teamZh": "麥拉倫",
+   "note": "車隊第 3，2012 年以來最佳；雷諾動力的最後一年",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MCL35",
+    "https://media.formula1.com/content/dam/fom-website/teams/2020/mclaren.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2020-racing-point": {
+   "colour": "#f29cc8",
+   "colour2": "#1c3d96",
+   "teamZh": null,
+   "note": "外號「粉紅賓士」；煞車導流罩被判抄襲 W10、扣 15 分，Pérez 薩基爾站奪勝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Racing_Point_RP20",
+    "https://media.formula1.com/content/dam/fom-website/teams/2020/racing-point.png",
+    "https://sports.ltn.com.tw/news/breakingnews/3318006",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1"
+   ],
+   "confidence": "high"
+  },
+  "2020-renault": {
+   "colour": "#f8e82a",
+   "colour2": "#121212",
+   "teamZh": "雷諾",
+   "note": "Ricciardo 艾菲爾站季軍，是重返 F1 後首座頒獎台；以雷諾之名的最後一年",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Renault_R.S.20",
+    "https://commons.wikimedia.org/wiki/File:Daniel_Ricciardo_2020_Tuscan_Grand_Prix_2_(cropped).jpg",
+    "https://www.the-race.com/formula-1/renault-reveals-2020-f1-livery-and-new-title-sponsor/",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3221381"
+   ],
+   "confidence": "medium"
+  },
+  "2020-ferrari": {
+   "colour": "#cc1419",
+   "colour2": "#1a1a1a",
+   "teamZh": "法拉利",
+   "note": "托斯卡尼站迎來車隊第 1000 場大獎賽；車隊第 6，1980 年以來最差",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF1000",
+    "https://media.formula1.com/content/dam/fom-website/teams/2020/ferrari.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2020-alphatauri": {
+   "colour": "#ededed",
+   "colour2": "#1b2a45",
+   "teamZh": "紅牛二隊",
+   "note": "Gasly 蒙札站奪勝，AlphaTauri 名下唯一一場勝利",
+   "sources": [
+    "https://en.wikipedia.org/wiki/AlphaTauri_AT01",
+    "https://media.formula1.com/content/dam/fom-website/teams/2020/alphatauri.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+    "https://sports.ltn.com.tw/news/breakingnews/4993724"
+   ],
+   "confidence": "high"
+  },
+  "2020-alfa-romeo": {
+   "colour": "#a0112e",
+   "colour2": "#f0f2f4",
+   "teamZh": "愛快羅密歐",
+   "note": null,
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alfa_Romeo_Racing_C39",
+    "https://media.formula1.com/content/dam/fom-website/teams/2020/alfa-romeo-racing.png",
+    "https://sports.ettoday.net/news/2125415"
+   ],
+   "confidence": "medium"
+  },
+  "2020-haas": {
+   "colour": "#e4e8ec",
+   "colour2": "#d0142a",
+   "teamZh": "哈斯",
+   "note": "Grosjean 巴林站嚴重事故，最後兩站由 Fittipaldi 代打",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Haas_VF-20",
+    "https://media.formula1.com/content/dam/fom-website/teams/2020/haas-f1-team.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+   ],
+   "confidence": "medium"
+  },
+  "2020-williams": {
+   "colour": "#d5dce2",
+   "colour2": "#2fa7e0",
+   "teamZh": "威廉斯",
+   "note": "全季零分；創辦人 Frank Williams 在義大利站後離開車隊",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Williams_FW43",
+    "https://media.formula1.com/content/dam/fom-website/teams/2020/williams.png",
+    "https://www.racefans.net/2020/06/26/williams-reveals-new-livery-after-split-from-rokit/",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026",
+    "https://www.cna.com.tw/postwrite/chi/394200"
+   ],
+   "confidence": "medium"
+  },
+  "2021-mercedes": {
+   "colour": "#16171a",
+   "colour2": "#00a19b",
+   "teamZh": "賓士",
+   "note": "車隊冠軍八連霸，但 Hamilton 以 8 分之差輸掉車手冠軍",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_W12",
+    "https://media.formula1.com/content/dam/fom-website/teams/2021/mercedes.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007"
+   ],
+   "confidence": "high"
+  },
+  "2021-red-bull": {
+   "colour": "#1e2548",
+   "colour2": "#e3202b",
+   "teamZh": "紅牛",
+   "note": "Verstappen 奪生涯首座車手冠軍；本田正式退出 F1 前的最後一季",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing_RB16B",
+    "https://media.formula1.com/content/dam/fom-website/teams/2021/red-bull-racing.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2021-ferrari": {
+   "colour": "#ce1318",
+   "colour2": "#7b1621",
+   "teamZh": "法拉利",
+   "note": "Leclerc 在摩納哥、亞塞拜然兩度奪桿，全季未勝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF21",
+    "https://media.formula1.com/content/dam/fom-website/teams/2021/ferrari.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "medium"
+  },
+  "2021-mclaren": {
+   "colour": "#ff8000",
+   "colour2": "#0b55c4",
+   "teamZh": "麥拉倫",
+   "note": "Ricciardo 領軍蒙札一二名，車隊 2012 年以來首勝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MCL35M",
+    "https://media.formula1.com/content/dam/fom-website/teams/2021/mclaren.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2021-alpine": {
+   "colour": "#1b8fe0",
+   "colour2": "#e1322d",
+   "teamZh": null,
+   "note": "以 Alpine 之名的第一年；Ocon 匈牙利站奪勝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alpine_A521",
+    "https://media.formula1.com/content/dam/fom-website/teams/2021/alpine.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://autos.udn.com/autos/story/8324/4847137"
+   ],
+   "confidence": "high"
+  },
+  "2021-alphatauri": {
+   "colour": "#e6e6e6",
+   "colour2": "#1a2b3e",
+   "teamZh": "紅牛二隊",
+   "note": "Gasly 亞塞拜然站季軍；142 分為這支車隊單季最高分",
+   "sources": [
+    "https://en.wikipedia.org/wiki/AlphaTauri_AT02",
+    "https://media.formula1.com/content/dam/fom-website/teams/2021/alphatauri.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+    "https://sports.ltn.com.tw/news/breakingnews/4993724"
+   ],
+   "confidence": "medium"
+  },
+  "2021-aston-martin": {
+   "colour": "#00594f",
+   "colour2": "#f37fb8",
+   "teamZh": "奧斯頓馬丁",
+   "note": "Aston Martin 重返 F1 的第一輛車；Vettel 亞塞拜然站亞軍",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Aston_Martin_AMR21",
+    "https://media.formula1.com/content/dam/fom-website/teams/2021/aston-martin.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2021-williams": {
+   "colour": "#121b55",
+   "colour2": "#3cc2f0",
+   "teamZh": "威廉斯",
+   "note": "Russell 比利時站拿下亞軍",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Williams_FW43B",
+    "https://media.formula1.com/content/dam/fom-website/teams/2021/williams.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026",
+    "https://www.cna.com.tw/postwrite/chi/394200"
+   ],
+   "confidence": "medium"
+  },
+  "2021-alfa-romeo": {
+   "colour": "#a0112e",
+   "colour2": "#f0f2f4",
+   "teamZh": "愛快羅密歐",
+   "note": "Räikkönen 的 F1 生涯最後一季",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alfa_Romeo_Racing_C41",
+    "https://media.formula1.com/content/dam/fom-website/teams/2021/alfa-romeo-racing.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/2125415"
+   ],
+   "confidence": "medium"
+  },
+  "2021-haas": {
+   "colour": "#f6f5f2",
+   "colour2": "#d0142a",
+   "teamZh": "哈斯",
+   "note": "全季零分，是唯一沒有大改前一年賽車的車隊",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Haas_VF-21",
+    "https://media.formula1.com/content/dam/fom-website/teams/2021/haas-f1-team.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+   ],
+   "confidence": "medium"
+  },
+  "2022-red-bull": {
+   "colour": "#1e2a50",
+   "colour2": "#e3202b",
+   "teamZh": "紅牛",
+   "note": "地面效應新規首年，17 勝奪下車手、車隊雙冠",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing_RB18",
+    "https://media.formula1.com/content/dam/fom-website/teams/2022/red-bull-racing.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2022-ferrari": {
+   "colour": "#c4121e",
+   "colour2": "#161616",
+   "teamZh": "法拉利",
+   "note": "12 次桿位只換到 4 勝；Sainz 英國站奪生涯首勝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_F1-75",
+    "https://media.formula1.com/content/dam/fom-website/teams/2022/ferrari.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2022-mercedes": {
+   "colour": "#bfc3c6",
+   "colour2": "#00a19b",
+   "teamZh": "賓士",
+   "note": "近乎無側箱的設計，飽受海豚跳之苦；Russell 巴西站奪生涯首勝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_W13",
+    "https://media.formula1.com/content/dam/fom-website/teams/2022/mercedes.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007"
+   ],
+   "confidence": "high"
+  },
+  "2022-alpine": {
+   "colour": "#0a6fd0",
+   "colour2": "#f5a0cf",
+   "teamZh": null,
+   "note": "車隊第 4，2018 年以來最佳",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alpine_A522",
+    "https://media.formula1.com/content/dam/fom-website/teams/2022/alpine.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://autos.udn.com/autos/story/8324/4847137"
+   ],
+   "confidence": "high"
+  },
+  "2022-mclaren": {
+   "colour": "#ff8000",
+   "colour2": "#47c7fc",
+   "teamZh": "麥拉倫",
+   "note": "Norris 伊莫拉站季軍，全隊唯一頒獎台",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MCL36",
+    "https://media.formula1.com/content/dam/fom-website/teams/2022/mclaren.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2022-alfa-romeo": {
+   "colour": "#9e1b2e",
+   "colour2": "#ededed",
+   "teamZh": "愛快羅密歐",
+   "note": "周冠宇的新秀年，他是首位中國籍 F1 正式車手",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alfa_Romeo_C42",
+    "https://media.formula1.com/content/dam/fom-website/teams/2022/alfa-romeo.png",
+    "https://sports.ettoday.net/news/2125415"
+   ],
+   "confidence": "medium"
+  },
+  "2022-aston-martin": {
+   "colour": "#0a5f57",
+   "colour2": "#cedc00",
+   "teamZh": "奧斯頓馬丁",
+   "note": "Vettel 的 F1 生涯最後一季",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Aston_Martin_AMR22",
+    "https://media.formula1.com/content/dam/fom-website/teams/2022/aston-martin.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2022-haas": {
+   "colour": "#f2f2f2",
+   "colour2": "#d40c03",
+   "teamZh": "哈斯",
+   "note": "Magnussen 巴西站奪下哈斯史上第一個桿位",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Haas_VF-22",
+    "https://media.formula1.com/content/dam/fom-website/teams/2022/haas-f1-team.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+   ],
+   "confidence": "high"
+  },
+  "2022-alphatauri": {
+   "colour": "#232c3f",
+   "colour2": "#e8ecf2",
+   "teamZh": "紅牛二隊",
+   "note": "車隊第 9；Gasly 季後轉投 Alpine",
+   "sources": [
+    "https://en.wikipedia.org/wiki/AlphaTauri_AT03",
+    "https://media.formula1.com/content/dam/fom-website/teams/2022/alphatauri.png",
+    "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+    "https://sports.ltn.com.tw/news/breakingnews/4993724"
+   ],
+   "confidence": "medium"
+  },
+  "2022-williams": {
+   "colour": "#12285a",
+   "colour2": "#5a9be6",
+   "teamZh": "威廉斯",
+   "note": "de Vries 在蒙札替補 Albon，首戰拿到第 9",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Williams_FW44",
+    "https://media.formula1.com/content/dam/fom-website/teams/2022/williams.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026",
+    "https://www.cna.com.tw/postwrite/chi/394200"
+   ],
+   "confidence": "medium"
+  },
+  "2023-red-bull": {
+   "colour": "#1e2a50",
+   "colour2": "#e3202b",
+   "teamZh": "紅牛",
+   "note": "22 站贏 21 站，勝率創 F1 紀錄",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing_RB19",
+    "https://media.formula1.com/content/dam/fom-website/teams/2023/red-bull-racing.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2023-mercedes": {
+   "colour": "#141515",
+   "colour2": "#00a19b",
+   "teamZh": "賓士",
+   "note": "開季沿用無側箱設計，摩納哥站起改回傳統側箱",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_W14",
+    "https://media.formula1.com/content/dam/fom-website/teams/2023/mercedes.png",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007"
+   ],
+   "confidence": "high"
+  },
+  "2023-ferrari": {
+   "colour": "#d0101b",
+   "colour2": "#161616",
+   "teamZh": "法拉利",
+   "note": "Sainz 新加坡站奪勝，是全季唯一不是紅牛贏的正賽",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF-23",
+    "https://media.formula1.com/content/dam/fom-website/teams/2023/ferrari.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2023-mclaren": {
+   "colour": "#ff8000",
+   "colour2": "#2e2e30",
+   "teamZh": "麥拉倫",
+   "note": "開季落後，奧地利站大升級後躍居前段，全季 9 次頒獎台",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MCL60",
+    "https://media.formula1.com/content/dam/fom-website/teams/2023/mclaren.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "medium"
+  },
+  "2023-aston-martin": {
+   "colour": "#00605a",
+   "colour2": "#cedc00",
+   "teamZh": "奧斯頓馬丁",
+   "note": "Alonso 開季 8 站 6 上頒獎台，全季 8 座",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Aston_Martin_AMR23",
+    "https://media.formula1.com/content/dam/fom-website/teams/2023/aston-martin.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2023-alpine": {
+   "colour": "#0b63c0",
+   "colour2": "#f28cc2",
+   "teamZh": null,
+   "note": "Ocon 摩納哥站、Gasly 荷蘭站各拿一座季軍",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alpine_A523",
+    "https://media.formula1.com/content/dam/fom-website/teams/2023/alpine.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://autos.udn.com/autos/story/8324/4847137"
+   ],
+   "confidence": "high"
+  },
+  "2023-williams": {
+   "colour": "#0d2a6f",
+   "colour2": "#1c6bd0",
+   "teamZh": "威廉斯",
+   "note": "車隊第 7，2017 年以來最佳",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Williams_FW45",
+    "https://media.formula1.com/content/dam/fom-website/teams/2023/williams.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026",
+    "https://www.cna.com.tw/postwrite/chi/394200"
+   ],
+   "confidence": "medium"
+  },
+  "2023-alphatauri": {
+   "colour": "#e8ecf2",
+   "colour2": "#1b2536",
+   "teamZh": "紅牛二隊",
+   "note": "以 AlphaTauri 之名的最後一年，全季先後 4 位車手上陣",
+   "sources": [
+    "https://en.wikipedia.org/wiki/AlphaTauri_AT04",
+    "https://media.formula1.com/content/dam/fom-website/teams/2023/alphatauri.png",
+    "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html",
+    "https://sports.ltn.com.tw/news/breakingnews/4993724"
+   ],
+   "confidence": "medium"
+  },
+  "2023-alfa-romeo": {
+   "colour": "#161616",
+   "colour2": "#b3182b",
+   "teamZh": "愛快羅密歐",
+   "note": "以 Alfa Romeo 冠名的最後一年",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alfa_Romeo_C43",
+    "https://media.formula1.com/content/dam/fom-website/teams/2023/alfa-romeo.png",
+    "https://sports.ettoday.net/news/2125415"
+   ],
+   "confidence": "medium"
+  },
+  "2023-haas": {
+   "colour": "#151515",
+   "colour2": "#f2f2f2",
+   "teamZh": "哈斯",
+   "note": "MoneyGram 冠名首年，VF-19 之後首度以深色為主；車隊墊底",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Haas_VF-23",
+    "https://media.formula1.com/content/dam/fom-website/teams/2023/haas-f1-team.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+   ],
+   "confidence": "medium"
+  },
+  "2024-mclaren": {
+   "colour": "#ff8000",
+   "colour2": "#2a2a2c",
+   "teamZh": "麥拉倫",
+   "note": "奪下 1998 年以來首座車隊冠軍；Norris、Piastri 都拿下生涯首勝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MCL38",
+    "https://media.formula1.com/content/dam/fom-website/teams/2024/mclaren.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2024-ferrari": {
+   "colour": "#d11a1f",
+   "colour2": "#f2f2f2",
+   "teamZh": "法拉利",
+   "note": "Leclerc 摩納哥主場奪勝；車隊以 14 分之差屈居第 2",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF-24",
+    "https://media.formula1.com/content/dam/fom-website/teams/2024/ferrari.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "medium"
+  },
+  "2024-red-bull": {
+   "colour": "#1e2a50",
+   "colour2": "#e3202b",
+   "teamZh": "紅牛",
+   "note": "Verstappen 奪第四座車手冠軍，車隊卻只拿第 3",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing_RB20",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2024-mercedes": {
+   "colour": "#161718",
+   "colour2": "#00a19b",
+   "teamZh": "賓士",
+   "note": "Hamilton 在賓士的最後一季，英國、比利時兩勝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_W15",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007"
+   ],
+   "confidence": "medium"
+  },
+  "2024-aston-martin": {
+   "colour": "#075550",
+   "colour2": "#cedc00",
+   "teamZh": "奧斯頓馬丁",
+   "note": "全季沒有頒獎台，仍保住車隊第 5",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Aston_Martin_AMR24",
+    "https://media.formula1.com/content/dam/fom-website/teams/2024/aston-martin.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2024-alpine": {
+   "colour": "#141518",
+   "colour2": "#ee7dbe",
+   "teamZh": null,
+   "note": "巴西站雨戰 Ocon 亞軍、Gasly 季軍",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alpine_A524",
+    "https://media.formula1.com/content/dam/fom-website/teams/2024/alpine.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://autos.udn.com/autos/story/8324/4847137"
+   ],
+   "confidence": "medium"
+  },
+  "2024-haas": {
+   "colour": "#1c1c1d",
+   "colour2": "#eeeeee",
+   "teamZh": "哈斯",
+   "note": "小松禮雄接任領隊的第一年，車隊第 7",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Haas_VF-24",
+    "https://media.formula1.com/content/dam/fom-website/teams/2024/haas-f1-team.png",
+    "https://en.wikipedia.org/wiki/Ayao_Komatsu",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+   ],
+   "confidence": "high"
+  },
+  "2024-rb": {
+   "colour": "#1f2fb0",
+   "colour2": "#eeeef0",
+   "teamZh": "紅牛二隊",
+   "note": "以 Visa Cash App RB 之名的第一年；藍色塗裝被車迷比作 Toro Rosso",
+   "sources": [
+    "https://en.wikipedia.org/wiki/RB_VCARB_01",
+    "https://media.formula1.com/content/dam/fom-website/teams/2024/rb.png",
+    "https://sports.ltn.com.tw/news/breakingnews/4993724",
+    "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+   ],
+   "confidence": "high"
+  },
+  "2024-williams": {
+   "colour": "#0b2d5e",
+   "colour2": "#0c62c8",
+   "teamZh": "威廉斯",
+   "note": "季中由 Colapinto 接替 Sargeant 跑最後 9 站",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Williams_FW46",
+    "https://media.formula1.com/content/dam/fom-website/teams/2024/williams.png",
+    "https://sports.ettoday.net/news/3156026",
+    "https://www.cna.com.tw/postwrite/chi/394200"
+   ],
+   "confidence": "medium"
+  },
+  "2024-kick-sauber": {
+   "colour": "#3ccb3c",
+   "colour2": "#111311",
+   "teamZh": "索伯",
+   "note": "開季新款輕量輪圈螺帽會和氣動扳手卡牙，進站一度慢到 30 秒以上；全季只拿 4 分墊底",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kick_Sauber_C44",
+    "https://media.formula1.com/content/dam/fom-website/teams/2024/kick-sauber.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://tw.sports.yahoo.com/news/f1-%E4%B8%AD%E5%9C%8B%E8%BB%8A%E6%89%8B%E5%91%A8%E5%86%A0%E5%AE%87%E5%B0%87%E9%9B%A2%E9%96%8B%E7%B4%A2%E4%BC%AF%E8%BB%8A%E9%9A%8A-%E4%B8%8B-%E6%AD%A5%E6%9C%AA%E5%AE%9A-100723830.html"
+   ],
+   "confidence": "medium"
+  },
+  "2025-mclaren": {
+   "colour": "#ff8000",
+   "colour2": "#2a2a2c",
+   "teamZh": "麥拉倫",
+   "note": "連兩年車隊冠軍，Norris 以 2 分之差奪生涯首座車手冠軍",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MCL39",
+    "https://media.formula1.com/content/dam/fom-website/teams/2025/mclaren.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2025-mercedes": {
+   "colour": "#131416",
+   "colour2": "#c9cdd2",
+   "teamZh": "賓士",
+   "note": "Russell 加拿大、新加坡兩勝；Antonelli 的新秀年",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_W16",
+    "https://media.formula1.com/content/dam/fom-website/teams/2025/mercedes.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007"
+   ],
+   "confidence": "high"
+  },
+  "2025-red-bull": {
+   "colour": "#1e2a50",
+   "colour2": "#e3202b",
+   "teamZh": "紅牛",
+   "note": "Verstappen 8 勝，最終以 2 分之差錯失車手冠軍",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing_RB21",
+    "https://media.formula1.com/content/dam/fom-website/teams/2025/red-bull-racing.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2025-ferrari": {
+   "colour": "#b0101c",
+   "colour2": "#efefef",
+   "teamZh": "法拉利",
+   "note": "Hamilton 加盟首年；全季未贏正賽，只拿下中國站衝刺賽",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF-25",
+    "https://media.formula1.com/content/dam/fom-website/teams/2025/ferrari.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2025-williams": {
+   "colour": "#0b4fd6",
+   "colour2": "#0a1a5c",
+   "teamZh": "威廉斯",
+   "note": "Sainz 在亞塞拜然、卡達兩度拿下正賽季軍，車隊第 5 為 2017 年以來最佳",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Williams_FW47",
+    "https://media.formula1.com/content/dam/fom-website/teams/2025/williams.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026",
+    "https://www.cna.com.tw/postwrite/chi/394200"
+   ],
+   "confidence": "medium"
+  },
+  "2025-racing-bulls": {
+   "colour": "#eceef4",
+   "colour2": "#1a2e8c",
+   "teamZh": "紅牛二隊",
+   "note": "改用全白塗裝；Hadjar 荷蘭站季軍，生涯首座頒獎台",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Racing_Bulls_VCARB_02",
+    "https://media.formula1.com/content/dam/fom-website/teams/2025/racing-bulls.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/4993724",
+    "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+   ],
+   "confidence": "high"
+  },
+  "2025-aston-martin": {
+   "colour": "#0a5a52",
+   "colour2": "#cedc00",
+   "teamZh": "奧斯頓馬丁",
+   "note": null,
+   "sources": [
+    "https://en.wikipedia.org/wiki/Aston_Martin_AMR25",
+    "https://media.formula1.com/content/dam/fom-website/teams/2025/aston-martin.png",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2025-haas": {
+   "colour": "#e9ecf2",
+   "colour2": "#17171a",
+   "teamZh": "哈斯",
+   "note": null,
+   "sources": [
+    "https://en.wikipedia.org/wiki/Haas_VF-25",
+    "https://media.formula1.com/content/dam/fom-website/teams/2025/haas-f1-team.png",
+    "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+   ],
+   "confidence": "medium"
+  },
+  "2025-kick-sauber": {
+   "colour": "#121412",
+   "colour2": "#3dbe3d",
+   "teamZh": "索伯",
+   "note": "Hülkenberg 英國站季軍，出賽 239 場後首登頒獎台",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Kick_Sauber_C45",
+    "https://media.formula1.com/content/dam/fom-website/teams/2025/kick-sauber.png",
+    "https://autos.udn.com/autos/story/8324/8855232",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://tw.sports.yahoo.com/news/f1-%E4%B8%AD%E5%9C%8B%E8%BB%8A%E6%89%8B%E5%91%A8%E5%86%A0%E5%AE%87%E5%B0%87%E9%9B%A2%E9%96%8B%E7%B4%A2%E4%BC%AF%E8%BB%8A%E9%9A%8A-%E4%B8%8B-%E6%AD%A5%E6%9C%AA%E5%AE%9A-100723830.html"
+   ],
+   "confidence": "medium"
+  },
+  "2025-alpine": {
+   "colour": "#2e86e8",
+   "colour2": "#e667b3",
+   "teamZh": null,
+   "note": "車隊墊底；雷諾動力單元的最後一年",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alpine_A525",
+    "https://media.formula1.com/content/dam/fom-website/teams/2025/alpine.png",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://autos.udn.com/autos/story/8324/4847137"
+   ],
+   "confidence": "high"
+  },
+  "2026-mercedes": {
+   "colour": "#0f100f",
+   "colour2": "#bdbcba",
+   "teamZh": "賓士",
+   "note": "新規首年領跑：截至第 15 站 11 勝、11 次桿位",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Mercedes_W17",
+    "https://www.formula1.com/en/teams",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007"
+   ],
+   "confidence": "high"
+  },
+  "2026-ferrari": {
+   "colour": "#bb1320",
+   "colour2": "#dddddc",
+   "teamZh": "法拉利",
+   "note": "Hamilton 巴塞隆納站拿下加盟法拉利後首場正賽勝利",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Ferrari_SF-26",
+    "https://www.formula1.com/en/teams",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2026-mclaren": {
+   "colour": "#f4872c",
+   "colour2": "#141212",
+   "teamZh": "麥拉倫",
+   "note": "Norris 在匈牙利、荷蘭連續奪勝（截至第 15 站 2 勝）",
+   "sources": [
+    "https://en.wikipedia.org/wiki/McLaren_MCL40",
+    "https://www.formula1.com/en/teams",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2026-red-bull": {
+   "colour": "#051f94",
+   "colour2": "#d9131c",
+   "teamZh": "紅牛",
+   "note": "首度使用自家 Red Bull Ford 動力，是 2018 年後第一輛非本田動力的紅牛",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Red_Bull_Racing_RB22",
+    "https://www.formula1.com/en/teams",
+    "https://sports.ltn.com.tw/news/breakingnews/3219007",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2026-racing-bulls": {
+   "colour": "#d6d6d5",
+   "colour2": "#08419e",
+   "teamZh": "紅牛二隊",
+   "note": "Lindblad 新秀年；2017 年後第一輛不用本田動力的 Faenza 賽車",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Racing_Bulls_VCARB_03",
+    "https://www.formula1.com/en/teams",
+    "https://udn.com/news/story/7005/9178721",
+    "https://sports.ltn.com.tw/news/breakingnews/4993724",
+    "https://tw.news.yahoo.com/%E8%B3%93%E5%A3%AB%E7%81%AB%E6%98%9F%E8%BB%8A%E5%86%8D%E7%8F%BE-hamilton%E5%8A%9B%E5%A3%93%E9%9A%8A%E5%8F%8B%E4%BA%8C%E9%80%A3%E5%8B%9D-080836394.html"
+   ],
+   "confidence": "high"
+  },
+  "2026-alpine": {
+   "colour": "#3190d5",
+   "colour2": "#ec6eaf",
+   "teamZh": null,
+   "note": "改用賓士動力；Gasly 在蒙札奪下生涯首個桿位",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Alpine_A526",
+    "https://www.formula1.com/en/teams",
+    "https://www.formula1.com/en/latest/article/gasly-charges-to-sensational-maiden-f1-pole-at-monza-over-russell-and-piastri.4CKkkbvgmqL04ijMNBfuXF",
+    "https://github.com/f1db/f1db/releases/tag/v2026.15.1",
+    "https://autos.udn.com/autos/story/8324/4847137"
+   ],
+   "confidence": "high"
+  },
+  "2026-haas": {
+   "colour": "#d0d0cf",
+   "colour2": "#e51112",
+   "teamZh": "哈斯",
+   "note": "Toyota Gazoo Racing（TGR）擴大冠名，改為白紅塗裝",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Haas_VF-26",
+    "https://www.formula1.com/en/teams",
+    "https://www.cna.com.tw/news/aopl/202203050222.aspx"
+   ],
+   "confidence": "high"
+  },
+  "2026-audi": {
+   "colour": "#8f8881",
+   "colour2": "#ea0f06",
+   "teamZh": "奧迪",
+   "note": "奧迪接手 Sauber 後的第一輛原廠賽車，搭配自製動力單元",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Audi_R26",
+    "https://www.formula1.com/en/teams",
+    "https://www.cna.com.tw/news/aopl/202201140025.aspx"
+   ],
+   "confidence": "medium"
+  },
+  "2026-williams": {
+   "colour": "#0b33f2",
+   "colour2": "#27a3cf",
+   "teamZh": "威廉斯",
+   "note": "生產延誤缺席 1 月巴塞隆納閉門測試；亞塞拜然站推出 B 規格",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Williams_FW48",
+    "https://www.formula1.com/en/teams",
+    "https://sports.ettoday.net/news/3156026",
+    "https://www.cna.com.tw/postwrite/chi/394200"
+   ],
+   "confidence": "high"
+  },
+  "2026-aston-martin": {
+   "colour": "#0c5f49",
+   "colour2": "#d1ce48",
+   "teamZh": "奧斯頓馬丁",
+   "note": "Newey 為奧斯頓馬丁設計的第一輛車，改用本田原廠動力",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Aston_Martin_AMR26",
+    "https://www.formula1.com/en/teams",
+    "https://sports.ettoday.net/news/3156026"
+   ],
+   "confidence": "high"
+  },
+  "2026-cadillac": {
+   "colour": "#dbdddb",
+   "colour2": "#232327",
+   "teamZh": "凱迪拉克",
+   "note": "F1 第 11 支車隊；2016 年哈斯之後第一支新車隊",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Cadillac_MAC-26",
+    "https://www.formula1.com/en/teams",
+    "https://en.wikipedia.org/wiki/2026_Formula_One_World_Championship",
+    "https://www.cna.com.tw/news/acn/202603100243.aspx"
+   ],
+   "confidence": "medium"
+  }
+ },
+ "meta": {
+  "generated": "2026-10-01",
+  "method": [
+   "主色（colour）= 該季大部分比賽時車身最主要的顏色，副色（colour2）= 第二主要的顏色。同一季兩車太像時，主色保持真實，改取真正能區分彼此的副色；每個取捨與判讀依據寫在 meta.remarks。",
+   "2019–2025 對照 formula1.com 官方側面圖（media.formula1.com/content/dam/fom-website/teams/<年>/<車隊>.png，k-means 與色階取樣後依陰影手動校正）；2018 與 Renault 2019/2020 對照 Wikimedia Commons 照片；塗裝描述與改色時點以各車的英文 Wikipedia 條目為準。不採用的官方圖：2024 Mercedes / Red Bull（伺服器回傳的是 2023 年車）、2020 Renault（季前黑色測試塗裝）、2023 McLaren（英國站鍍鉻特別塗裝，只作參考）。",
+   "2026 的色碼沿用 devtests/cars-data/inputs.js（官方圖與 2026 奧地利站照片取樣），兩份資料一致。",
+   "色碼是依圖片估計的顯示用顏色，不是車隊公布的漆號。",
+   "note：只寫查證過的事實，來源為該車 Wikipedia 條目、F1DB v2026.15.1 成績（https://github.com/f1db/f1db/releases/tag/v2026.15.1，經 tools/seasons-raw.json）與列出的媒體報導；沒有值得一提的事則為 null。2026 賽季進行中（23 站已賽 15 站），2026 的 note 以第 15 站後為準。",
+   "驗證（2026-10-01 事實查核後重算）：每季兩兩比較 CIEDE2000 色差。車身主色差 < 10 且副色差 < 20，或主、副色差都 < 12，視為無法分辨。修正後全數通過；各季最接近的一組：2018 哈斯／威廉斯（主 5.2、副 21.4）、2019 賓士／威廉斯（主 9.4、副 23.1）、2021 賓士／威廉斯（主 19.5、副 20.5）、2023 紅牛／愛快羅密歐（主 18.4、副 10.8，深藍對黑，兩車副色都是紅，與實車相同，沒有更真實的替代色）、2026 哈斯／奧迪（主 20.8、副 1.8）。",
+   "事實查核（2026-10-01，獨立於原作者）：顏色逐季對照 formula1.com 官方側面圖（2019–2026）與 Wikimedia Commons 2018 奧地利站照片；note 逐條對照各車英文 Wikipedia 條目與 2026 賽季條目（15 站成績）；teamZh 對照台灣媒體原文。修正紀錄見 meta.factCheck。"
+  ],
+  "teamZh": {
+   "賓士 (Mercedes)": "自由時報 2020-07-05「賓士車隊博塔斯…」；ETtoday 2026 則寫「梅賽德斯車隊」。",
+   "法拉利 (Ferrari)": "自由時報 2020-07-05、ETtoday 2026-04-27。",
+   "紅牛 (Red Bull)": "自由時報 2020-07-05、ETtoday 2026-04-27。",
+   "麥拉倫 (McLaren)": "ETtoday 2026-04-27「麥拉倫車隊」（自由時報 2020 一篇誤植為「麥拉輪」）。",
+   "雷諾 (Renault)": "自由時報「攜手雷諾車隊 阿隆索2021年重返F1賽場」。",
+   "哈斯 (Haas)": "中央社 2022-03-05「F1哈斯車隊停止與俄國車手及贊助商合作」。",
+   "威廉斯 (Williams)": "ETtoday 2026-04-27；中央社新聞稿「Atlassian威廉斯車隊」。",
+   "印度力量 (Force India)": "Yahoo奇摩新聞（isCar）2014-04-07 積分表「印度力量」；與 tools/liveries/2010-2017.json 一致。",
+   "索伯 (Sauber / Kick Sauber)": "Yahoo 奇摩運動「周冠宇將離開索伯車隊」。",
+   "愛快羅密歐 (Alfa Romeo)": "ETtoday「周冠宇加盟愛快羅密歐車隊」。",
+   "紅牛二隊 (Toro Rosso / AlphaTauri / RB / Racing Bulls)": "Yahoo奇摩新聞（isCar）2014-04-07 積分表「紅牛二隊」（Toro Rosso 時期）；自由時報 2025-03-27「紅牛二隊的Racing Bulls車隊」。與 tools/liveries/2010-2017.json 的 Toro Rosso 同名，整條 Faenza 車隊譜系用同一個名稱。聯合報 2025-12-03「加盟小紅牛」顯示「小紅牛」也是台灣常見叫法；原引用的聯合報 2021「小紅牛王」連結已失效（404），已移除。",
+   "奧斯頓馬丁 (Aston Martin)": "ETtoday 2026-04-27「奧斯頓馬丁車隊」；中央社 2023 寫「阿斯頓馬丁車隊」。",
+   "奧迪 (Audi)": "中央社 2022-01-14「奧迪與保時捷將進軍一級方程式賽車」（台灣通行的品牌譯名）。",
+   "凱迪拉克 (Cadillac)": "中央社 2026-03-10「凱迪拉克車隊儲備車手」。",
+   "null: Racing Point": "自由時報報導直接寫「Racing Point」（RP20 另有外號「粉紅賓士」）；「賽點車隊」只見於中文維基。",
+   "null: Alpine": "聯合報等直接寫「Alpine」；台灣車迷站 f-1.tw 用「阿爾派」，未見主流媒體採用。"
+  },
+  "remarks": {
+   "2018-mercedes": "銀色車身、黑色下半部；副色取 Petronas 青綠飾條",
+   "2018-ferrari": "Santander 撤出後幾乎全紅、白色極少（Wikipedia）；副色取黑（底板、翼片）",
+   "2018-red-bull": "霧面深藍，紅色 Red Bull 字樣與牛標",
+   "2018-renault": "黃黑約各半（Wikipedia：black and yellow），主色取黃（車鼻、引擎蓋頂）",
+   "2018-haas": "白 / 淺灰為主，黑色下半部與紅色 HAAS 字樣（照片判讀）；副色取黑",
+   "2018-mclaren": "Wikipedia：致敬早年車款的橘配藍（藍在引擎蓋鰭與尾翼）",
+   "2018-force-india": "Wikipedia：白色底、粉紅塗裝（BWT）；未取樣，色值為估計",
+   "2018-sauber": "Wikipedia：大部分白色，引擎蓋上方三分之二為紅（Alfa Romeo）",
+   "2018-toro-rosso": "金屬藍配紅色腰線與銀色牛標；紅色會和紅牛（深藍＋紅）混淆，副色改取銀",
+   "2018-williams": "Martini 白底配深藍 / 淺藍 / 紅條紋；副色取深藍（與 Sauber 的白＋紅區隔）",
+   "2019-mercedes": "銀色車身；副色取 Petronas 青綠",
+   "2019-ferrari": "Wikipedia：霧面（satin）紅配黑色點綴",
+   "2019-mclaren": "Wikipedia：木瓜橘配引擎蓋藍色三角圖案",
+   "2019-renault": "Wikipedia：與 2018 相近；照片黑色面積較大，主色仍取黃以便辨識",
+   "2019-toro-rosso": "同 2018：藍配紅線與銀；副色取銀以和紅牛區隔",
+   "2019-racing-point": "Wikipedia：白與粉紅，加上冠名 SportPesa 的深藍 / 紫",
+   "2019-alfa-romeo": "紅（車尾、引擎蓋）與白（車頭、側箱）約各半，主色取 Alfa 紅",
+   "2019-haas": "Wikipedia：冠名 Rich Energy 的黑金塗裝",
+   "2019-williams": "Wikipedia：白色底配藍色花紋（ROKiT 冠名）",
+   "2020-mercedes": "Wikipedia：為支持反種族歧視改以黑色為主色",
+   "2020-mclaren": "Wikipedia：木瓜橘配藍，改用霧面貼膜、黑色面積增加",
+   "2020-racing-point": "BWT 粉紅為主，藍色 BWT 字樣",
+   "2020-renault": "正賽塗裝黃黑、與 2019 相近（The Race）；formula1.com 圖為季前黑色測試塗裝，未採用",
+   "2020-ferrari": "紅配黑；托斯卡尼站一次性改用酒紅色",
+   "2020-alphatauri": "白色為主、深藍為輔",
+   "2020-alfa-romeo": "與 2019 相同的紅白配置，主色取 Alfa 紅（與同為白底的哈斯、AlphaTauri、威廉斯區隔）",
+   "2020-haas": "白 / 灰為主，下半部黑、紅色 HAAS 字樣；副色取紅（黑會和 AlphaTauri 的深藍混淆）",
+   "2020-williams": "ROKiT 撤資後改為白色為主、淺藍與深藍點綴（RaceFans）；副色取淺藍，以和 AlphaTauri 的白＋深藍區隔",
+   "2021-mercedes": "延續 2020 的黑色",
+   "2021-ferrari": "紅色車身、車尾漸層為酒紅（官方圖判讀）",
+   "2021-mclaren": "Wikipedia：MCL35M 塗裝與 2020 大致相同",
+   "2021-alpine": "Wikipedia：法國藍，車尾為法國國旗圖樣；副色取紅",
+   "2021-alphatauri": "白與深藍約各半，主色取白",
+   "2021-aston-martin": "Wikipedia：英國賽車綠，保留 BWT 粉紅條紋",
+   "2021-williams": "深藍配淺藍斜紋（官方圖）；和紅牛同為深藍，副色淺藍作區隔",
+   "2021-alfa-romeo": "紅白配置同前兩年，主色取 Alfa 紅（白底車已有哈斯、AlphaTauri）",
+   "2021-haas": "白底配類似俄羅斯國旗的藍紅條紋（Wikipedia）；官方圖中紅色 HAAS 字樣與紅條面積大於藍色，副色取紅（查核時由藍改紅：藍色會和同為白底的 AlphaTauri 深藍副色撞色，CIEDE2000 主 3.5、副 17.9）",
+   "2022-ferrari": "紅色車身，側箱下緣、翼片為黑（官方圖）",
+   "2022-mercedes": "Wikipedia：恢復傳統銀色",
+   "2022-alpine": "藍配 BWT 粉紅；開季前兩站全車粉紅（Wikipedia）",
+   "2022-mclaren": "Wikipedia：更鮮豔的螢光木瓜橘與藍",
+   "2022-alfa-romeo": "紅、白、黑，主色取紅（哈斯是白底紅字，兩者主副色相反）",
+   "2022-aston-martin": "Wikipedia：BWT 轉投 Alpine，粉紅條紋改為萊姆綠",
+   "2022-haas": "撤下 Uralkali 後改為白、紅、黑（Wikipedia）",
+   "2022-alphatauri": "深藍為主、白為輔；和紅牛同為深藍，副色白作區隔",
+   "2022-williams": "Wikipedia：改為較深的藍；和紅牛、AlphaTauri 同為深藍，副色取淺藍花紋作區隔",
+   "2023-mercedes": "Wikipedia：裸碳纖維加霧黑的黑色塗裝",
+   "2023-mclaren": "Wikipedia：延續 MCL36 但裸碳更多；副色取碳黑（仍有少量藍）。formula1.com 圖為英國站鍍鉻特別塗裝",
+   "2023-aston-martin": "Wikipedia：與 2022 大致相同，綠色色調微調",
+   "2023-alpine": "藍配粉紅與黑；開季前三站粉紅塗裝（Wikipedia）",
+   "2023-williams": "深藍配較亮的藍；副色亮藍以和紅牛、AlphaTauri 區隔",
+   "2023-alphatauri": "官方圖深藍面積其實大於白色（引擎蓋白色大 AT 標誌、側箱下緣白）；主色取白是取捨：若取深藍，會和黑＋白的哈斯幾乎相同",
+   "2023-alfa-romeo": "Wikipedia：紅黑塗裝（Stake 冠名）；官方圖黑色面積較大，主色取黑（紅會和法拉利撞色），紅色作副色。與紅牛（深藍＋紅）是本檔最接近的一組（CIEDE2000 主 18.4、副 10.8），實車也同樣是深色車身配紅",
+   "2023-haas": "Wikipedia：紅白黑、以深色為主；副色取白（紅已給愛快羅密歐）",
+   "2024-mclaren": "Wikipedia：木瓜橘與裸碳（anthracite），不再有藍",
+   "2024-ferrari": "紅底配黃、白細節（Wikipedia）；伊莫拉站起加上 HP 白色標誌，副色取白",
+   "2024-red-bull": "formula1.com 2024 圖仍是 2023 車，未採用；塗裝與 2023 相同",
+   "2024-mercedes": "Wikipedia：以裸碳與黑為主，車鼻銀色、Petronas 青綠點綴；副色取青綠（銀會和哈斯的白撞色）",
+   "2024-aston-martin": "Wikipedia：與 2022–2023 相近，裸碳更多",
+   "2024-alpine": "Wikipedia：大部分裸碳，藍、粉紅線條；多站改用 BWT 粉紅塗裝。副色取粉紅（藍會和威廉斯撞色）",
+   "2024-haas": "Wikipedia：延續黑白塗裝（紅色只是點綴）；副色取白",
+   "2024-rb": "Wikipedia：以藍為主，白色條紋上有紅色細線",
+   "2024-williams": "Wikipedia：與 FW44、FW45 相近的深藍配亮藍",
+   "2024-kick-sauber": "螢光綠與黑（官方圖綠色面積較大）",
+   "2025-mclaren": "Wikipedia：與 MCL38 幾乎相同",
+   "2025-mercedes": "Wikipedia：與 W15 相近，車鼻銀色段更長",
+   "2025-ferrari": "Wikipedia：較深的紅，引擎蓋 HP 標誌處有大片白",
+   "2025-williams": "Atlassian 亮藍配深藍（官方圖）",
+   "2025-racing-bulls": "Wikipedia：改為全白，車尾有藍色牛紋",
+   "2025-aston-martin": "Wikipedia：延續前一年，變化極小",
+   "2025-haas": "Wikipedia：白色比 VF-24 多；黑白約各半，主色取白",
+   "2025-kick-sauber": "Wikipedia：延續 Stake 的綠與黑；官方圖黑色面積較大",
+   "2025-alpine": "Wikipedia：法國藍（Bleu de France）配 BWT 粉紅",
+   "2026-mercedes": "沿用 devtests/cars-data/inputs.js（黑、銀；Petronas 青綠飾條）",
+   "2026-ferrari": "沿用 inputs.js（亮面紅、引擎蓋白）；Wikipedia：回到較淺的亮面紅",
+   "2026-mclaren": "沿用 inputs.js（木瓜橘、黑）",
+   "2026-red-bull": "沿用 inputs.js；Wikipedia：由霧面深藍改為亮面藍黑",
+   "2026-racing-bulls": "沿用 inputs.js（白、藍）",
+   "2026-alpine": "沿用 inputs.js（Alpine 藍、BWT 粉紅）",
+   "2026-haas": "沿用 inputs.js；Wikipedia：TGR 冠名的白紅塗裝",
+   "2026-audi": "沿用 inputs.js（鈦灰、Audi 紅）；主色比哈斯的白暗很多，但副色同為紅",
+   "2026-williams": "沿用 inputs.js（亮藍、淺藍）",
+   "2026-aston-martin": "沿用 inputs.js（賽車綠、萊姆黃）",
+   "2026-cadillac": "沿用 inputs.js；開季為一側黑、一側白的不對稱塗裝，奧地利站（第 8 站）起改為白色為主（Wikipedia）"
+  },
+  "factCheck": [
+   "2021-haas colour2 #1d4fb0 -> #d0142a：與同為白底配藍的 2021 AlphaTauri 無法分辨（CIEDE2000 主 3.5、副 17.9）；VF-21 紅色 HAAS 字樣與紅條面積大於藍色（https://media.formula1.com/content/dam/fom-website/teams/2021/haas-f1-team.png）。",
+   "2018-force-india teamZh null -> 印度力量：台灣用法（Yahoo奇摩新聞 isCar 2014-04-07 積分表），並與 2010–2017 檔一致。",
+   "Toro Rosso／AlphaTauri／RB／Racing Bulls（2018–2026 共 9 筆）teamZh 小紅牛 -> 紅牛二隊：2010–2017 檔的 Toro Rosso 用「紅牛二隊」，同一車隊在選單上不該換名；台灣用例：Yahoo奇摩新聞 2014-04-07、自由時報 2025-03-27（https://sports.ltn.com.tw/news/breakingnews/4993724）。移除已失效（404）的 https://udn.com/news/story/7005/6414821。",
+   "2018-williams note：原寫「車隊史上最差」，但 2019（1 分）、2020（0 分）更差；改為「當時車隊史上最低名次」（Williams FW41 條目：finished 10th and last ... their lowest ever position）。",
+   "2018-force-india note：「前 12 站積分作廢」只作廢車隊積分，車手積分保留；改寫（Force India VJM11 條目）。",
+   "2021-red-bull note：「本田原廠動力的最後一年」不精確（2023–2025 引擎仍由本田 HRC 供應、掛 Honda RBPT）；改為「本田正式退出 F1 前的最後一季」（Red Bull RB16 條目：its final official season）。",
+   "2024-kick-sauber note：「輪胎槍問題」不精確，實為新款輕量輪圈螺帽與氣動扳手卡牙（Kick Sauber C44 條目）。",
+   "2025-williams note：「兩上頒獎台」改寫為兩場正賽季軍（亞塞拜然、卡達），另有一次衝刺賽頒獎台未計（Williams FW47 條目）。",
+   "查核後維持不變：其餘 note 皆對照來源確認（2026 的賓士 11 勝 11 桿、Hamilton 巴塞隆納、Norris 匈牙利與荷蘭、Gasly 蒙札桿位、Williams 缺席 1 月巴塞隆納測試與亞塞拜然 B 規格、Cadillac 奧地利站改白色塗裝，皆見 https://en.wikipedia.org/wiki/2026_Formula_One_World_Championship 與各車條目）；2019–2026 色碼與官方側面圖相符。"
+  ]
+ }
+}

@@ -1,4 +1,5 @@
-/* F1Drive - dynamic racing line (green / yellow / red). Classic script; exposes F1.buildRaceLine(track).
+/* F1Drive - dynamic racing line (green / yellow / red). Classic script; exposes F1.buildRaceLine(track, perf?)
+   (perf = F1.carPerf(spec) of the car it is built for; default F1.CAR_PERF).
    See js/README-interfaces.md. Works with flat v1 tracks and with v2 tracks (y, bank, halfW, surfaceY). */
 (function (global) {
   'use strict';
@@ -50,8 +51,9 @@
   }
   var maxLatAccel = fbMaxLat, maxAccel = fbMaxAccel, maxDecel = fbMaxDecel;
 
-  function syncCarPerf() {
-    var p = F1.CAR_PERF;
+  // perf: the limits of the car the line is built for (F1.carPerf(spec)); default F1.CAR_PERF (the reference car)
+  function syncCarPerf(perf) {
+    var p = perf && typeof perf === 'object' ? perf : F1.CAR_PERF;
     maxLatAccel = fbMaxLat; maxAccel = fbMaxAccel; maxDecel = fbMaxDecel;
     if (!p) return;
     function pick(v, fb) { return typeof v === 'number' && v === v ? v : fb; }
@@ -249,9 +251,13 @@
 
   // ------------------------------------------------------------------ build
 
-  F1.buildRaceLine = function (track) {
+  // perf (optional): F1.carPerf(spec) of the car that drives it (v6); without it the reference car's F1.CAR_PERF.
+  F1.buildRaceLine = function (track, perf) {
     var THREE = global.THREE;
-    syncCarPerf();
+    syncCarPerf(perf);
+    // this line's car, kept for update(): building another line (another car) must not change this one's advice
+    var L_TOP = TOP_SPEED, L_LAT_MAX = LAT_MAX, L_ROLL = ROLL, L_DRAG_K = DRAG_K;
+    var lMaxAccel = maxAccel, lMaxDecel = maxDecel;
     var S = track.samples, N = S.length, i, j;
     var hasSurf = typeof track.surfaceY === 'function';
     var ds = track.length / N;
@@ -449,7 +455,7 @@
       if (!(k0 >= 0)) k0 = 0;
       k0 %= N;
       var p = Math.abs(+carState.speed) || 0;
-      if (p > TOP_SPEED * 1.2) p = TOP_SPEED * 1.2;
+      if (p > L_TOP * 1.2) p = L_TOP * 1.2;
       var m, i, j, lv, a0, a1, acc, dec, co, br, la, bk, pt, kp;
 
       // predict: full throttle until the allowed profile would be exceeded, then whatever it takes
@@ -458,31 +464,31 @@
         j = i + 1; if (j >= N) j = 0;
         a0 = vAllow[i]; a1 = vAllow[j];
         bk = bankA[i]; pt = pitchA[i]; kp = kv[i];
-        la = p * p * curv[i]; la = la > LAT_MAX ? -LAT_MAX : (la < -LAT_MAX ? LAT_MAX : -la);   // towards the left
+        la = p * p * curv[i]; la = la > L_LAT_MAX ? -L_LAT_MAX : (la < -L_LAT_MAX ? L_LAT_MAX : -la);   // towards the left
         if (p > a0 * 1.004) {
           // already too fast here: brake flat out
           lv = 0.62 + (p / a0 - 1) * 4.75;       // 8 % over -> full red
           if (lv > 1) lv = 1;
-          dec = maxDecel(p, bk, pt, kp, la);
+          dec = lMaxDecel(p, bk, pt, kp, la);
           if (dec < 0.5) dec = 0.5;
           p = p * p - 2 * dec * seg[i];
           p = p > 1 ? Math.sqrt(p) : 1;
         } else {
-          acc = maxAccel(p, bk, pt, kp, la);
+          acc = lMaxAccel(p, bk, pt, kp, la);
           var pa = p * p + 2 * acc * seg[i];
           if (pa <= a1 * a1) {
             lv = 0;
             p = pa > 1 ? Math.sqrt(pa) : 1;
           } else {
             dec = (p * p - a1 * a1) / (2 * seg[i]);  // deceleration needed to meet the next target
-            co = ROLL + DRAG_K * p * p + gsin[i];
+            co = L_ROLL + L_DRAG_K * p * p + gsin[i];
             if (dec <= 0) {
               lv = acc > 0.01 ? 0.5 * (1 + dec / acc) : 0.5;   // part throttle
               if (lv < 0) lv = 0;
             } else if (dec <= co || co <= 0 && dec <= 0.5) {
               lv = co > 0 ? 0.5 + 0.08 * dec / co : 0.55;      // lifting is enough
             } else {
-              br = maxDecel(p, bk, pt, kp, la) - co;
+              br = lMaxDecel(p, bk, pt, kp, la) - co;
               if (br < 0.5) br = 0.5;
               lv = 0.58 + 0.42 * (dec - (co > 0 ? co : 0)) / (0.4 * br);
               if (lv > 1) lv = 1;

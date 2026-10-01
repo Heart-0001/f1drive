@@ -1,5 +1,5 @@
 global.window = global;
-require('C:/Users/user/Desktop/f1drive/js/car.js');
+require(require('path').resolve(__dirname, '..', '..') + '/js/car.js');
 const F1 = global.F1;
 const KMH = 3.6;
 
@@ -187,4 +187,30 @@ for (const R of [20, 50, 120, 300]) {
   const t2 = straight(4000, false), c2 = F1.createCar(); c2.reset(t2, 20); c2.state.heading += 0.5; c2.state.speed = 80;
   for (let i = 0; i < 120; i++) c2.update(DT, none, t2);
   console.log('no wall flags: d after 2 s = %s (passes through), hit=%s', c2.state.d.toFixed(1), c2.state.hit);
+}
+// --- v6: battery (ERS), pit limiter, gears, a puncture (the rest above is the v5 car, unchanged by v6)
+{
+  const t = straight(40000, false), E = F1.REF_SPEC.ers;
+  const car = F1.createCar(); car.reset(t, 0); car.setBattery(1);
+  let time = 0, t100 = null, t200 = null, t300 = null, empty = null;
+  while (time < 60) {
+    car.update(DT, { up: true, boost: true }, t); time += DT;
+    const k = car.state.speed * KMH;
+    if (t100 === null && k >= 100) t100 = time;
+    if (t200 === null && k >= 200) t200 = time;
+    if (t300 === null && k >= 300) t300 = time;
+    if (empty === null && car.state.battery === 0) empty = { time, kmh: k };
+  }
+  console.log('ERS power %s W/kg, store %s J/kg (%s s), harvest up to %s W/kg', E.power.toFixed(1), E.store.toFixed(0), (E.store / E.power).toFixed(1), E.harvest);
+  console.log('boost from standstill, full battery: 0-100 %ss  0-200 %ss  0-300 %ss, %s km/h after 60 s (perf.topSpeedBoost %s), empty after %ss at %s km/h',
+    t100.toFixed(2), t200.toFixed(2), t300.toFixed(2), (Math.max(car.state.speed, 0) * KMH).toFixed(1), (car.perf.topSpeedBoost * KMH).toFixed(1), empty.time.toFixed(1), empty.kmh.toFixed(1));
+  const c2 = F1.createCar(); c2.reset(t, 0); c2.setBattery(0); c2.state.speed = 300 / KMH;
+  while (c2.state.speed > 0.1) c2.update(DT, { down: true }, t);
+  console.log('braking from 300 to a stop harvests %s %% of the store', (c2.state.battery * 100).toFixed(1));
+  const c3 = F1.createCar(); c3.reset(t, 0); let max = 0;
+  for (let i = 0; i < 600; i++) { c3.update(DT, { up: true, limiter: true }, t); max = Math.max(max, c3.state.speed * KMH); }
+  console.log('pit limiter (80 km/h without a pit lane): max %s, holding %s km/h', max.toFixed(2), (c3.state.speed * KMH).toFixed(2));
+  const c4 = F1.createCar(); c4.reset(t, 0); const shifts = [];
+  for (let i = 0; i < 60 * 30; i++) { const g = c4.state.gear; c4.update(DT, { up: true }, t); if (c4.state.gear !== g) shifts.push(c4.state.gear + '@' + (c4.state.speed * KMH).toFixed(0)); }
+  console.log('gears on a full-throttle launch: %s, rpm at 330 km/h %s', shifts.join(' '), c4.state.rpm.toFixed(0));
 }

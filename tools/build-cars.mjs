@@ -1,0 +1,697 @@
+// Builds js/seasons-data.js (window.F1_SEASONS): the seasons 2010..2026 of the Grand Prix year selector, each with its
+// STANDARD car (the era physics, every multiplier 1) and every real team's car of that year (multipliers on the era).
+//
+//   node tools/build-cars.mjs            write js/seasons-data.js (and devtests/seasons-calib/entries.json, the solve log)
+//   node tools/build-cars.mjs --check    compute and compare with the files on disk; exit code 1 when they differ
+//   node tools/build-cars.mjs --dry      compute and print, write nothing
+//   node tools/build-cars.mjs --quiet    no per-season tables
+// Takes about 40 s (builds the calibration circuits = all 40 of tracks-data.js and their racing lines, then solves one
+// level per car).
+//
+// Inputs (all committed, nothing is downloaded; the same inputs always give byte-identical output):
+//   tools/seasons-raw.json          F1DB (CC BY 4.0) seasons, entries, qualifying pace, character, era pace index
+//   tools/eras.json                 regulation periods: power-to-weight, top speeds, grip notes, ERS, rpm, gears
+//   tools/liveries/*.json           colours, Traditional Chinese team names and notes per entry
+//   js/cars-data.js                 the hand-researched 2026 grid (multipliers, notes, colours take precedence)
+//   devtests/seasons-calib/calibration.json   the DRIVEN calibration of every season's standard car (the era grip
+//                                   scale and the ERS harvest of the KERS / 2026 seasons), written by
+//                                   node devtests/seasons-calib/calibrate.mjs with the real js/car.js + autopilot;
+//                                   refused when its fingerprint of the other inputs no longer matches
+//   js/car.js, js/raceline.js, js/track.js, tracks-data.js   the real physics (F1.REF_SPEC is the 2025 anchor)
+//
+// METHOD (docs/seasons-data.md, section "遊戲資料與校正", repeats it in Traditional Chinese)
+//  A. Era physics = F1.REF_SPEC (the v5 car, = the 2025 standard car, bit for bit) times factors from tools/eras.json,
+//     each factor the ratio of the season's figure to 2025's:
+//       power      <- race-trim power-to-weight (combustion + the electric power the energy rules sustain)
+//       traction   <- power-to-weight in the acceleration zones (the peak with ERS 2014-2026, race trim before):
+//                     in the game model the car is traction-limited up to ~317 km/h, so this IS its acceleration
+//       dragK      <- the top speed without DRS (typical Monza figure minus the FIA's DRS gain), so that the
+//                     standard car reaches 330 km/h x (V_season / V_2025) at full throttle
+//       latBase, brakeBase <- mechanical grip: (mean tyre tread width ratio)^0.3 (wider = more grip, less than
+//                     proportionally: tyre load sensitivity) x the grip scale
+//       latMax     <- peak lateral g (the tyre saturation cap)
+//       downforce  <- peak lateral g / mechanical grip (fast corners: grip x downforce) x the grip scale
+//       grip scale <- CALIBRATED (devtests/seasons-calib): the value that makes the standard car, driven by the node
+//                     autopilot with the real js/car.js on the racing line built for it, lap the calibration
+//                     circuits (every circuit of the game) in (median) era index x the 2025 standard car's time. Aero and grip are the one free
+//                     number: where the index and the eras.json figures disagree they move, not the power. (Downforce
+//                     alone would have to swing from x0.49 (2026) to x1.27 (2020): lap times are not very sensitive to it.)
+//       drivetrain <- gears (7 to 2013, 8 from 2014), rpm (eras.json; V6 max 15 000 except the anchor 2025, which
+//                     keeps F1.REF_SPEC's 12 500), shift sound time, cylinders / aspiration, cockpit style
+//       ers        <- null 2010; KERS 2011-2013 (60 kW, a 400 kJ store); F1.REF_SPEC.ers 2014-2025; 2026 350 kW with
+//                     a 4 MJ store; power and store scaled per kg against the reference (120 kW, 4 MJ, 805 kg), the
+//                     harvest of KERS / 2026 CALIBRATED so that a lap recovers the rules' budget (KERS: 400 kJ = one
+//                     store per lap; 2026: 8.5 MJ = 2.1 stores per lap through the 4 MJ window).
+//  B. Cars of a season (not 2026): lap-time target = K x (qualifying gap - median gap), K = SPREAD / (max - min gap)
+//     (the real order and proportions, compressed to SPREAD % between the fastest and the slowest car; the standard
+//     car sits where the median team is). Engine: the teams of one engine maker (F1DB engineBuiltBy: TAG Heuer and
+//     Toro Rosso 2016-2018 are Renault, BWT Mercedes is Mercedes) share power = 1 + ENGINE_GAIN x (median fast-circuit
+//     lean of the group, %) / 100, and ENGINE_TRACTION of that on traction. Wing level: drag = downforce = 1 - TRIM_GAIN
+//     x (the team's own lean minus its engine group's) / 100 (a fast-circuit car runs less wing). Chassis level L:
+//     grip, brake, traction and downforce + L (as js/cars-data.js's method), solved (profile model = js/raceline.js's
+//     speed profile on the calibration circuits, mean lap delta) so that the lap-time target is hit. ERS multipliers 1
+//     (no documented source). 2026: js/cars-data.js as it is.
+//  C. Ratings 0..100 (50 = the season's standard car), the formula of js/cars-data.js (devtests/cars-data/derive.js).
+'use strict';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { dirname, resolve, join, relative } from 'node:path';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+export const ROOT = resolve(HERE, '..');
+const require = createRequire(import.meta.url);
+const P = (...a) => join(ROOT, ...a);
+
+export const OUT_JS = P('js', 'seasons-data.js');
+export const CALIB_FILE = P('devtests', 'seasons-calib', 'calibration.json');
+export const ENTRIES_FILE = P('devtests', 'seasons-calib', 'entries.json');
+
+// ---- configuration ------------------------------------------------------------------------------------------------
+export const CFG = {
+  FIRST: 2010, LAST: 2026, ANCHOR: 2025, CURRENT: 2026,
+  // calibration circuits: 'all' = every circuit of tracks-data.js (the room can race any of them); the era index is
+  // matched by the MEDIAN over them, the cars' targets by the MEAN. (Until the independent check of 2026-10-01 this was
+  // a hand-picked 12: Monza, Spa, Silverstone, Suzuka, Red Bull Ring, Montreal, Interlagos, Hungaroring, Bahrain,
+  // Barcelona, Monaco, Singapore. A season's lap ratio differs from circuit to circuit - the low-downforce seasons 2010,
+  // 2014-2016, 2022 and 2026 lose most on fast-corner circuits, least on Monza, Monaco and the street circuits - and those 12
+  // held five of the circuits where those seasons look fastest, so 2014 / 2015 came out 0.7 % too slow over the whole
+  // game and 1.0 % too slow on Sepang, COTA, Jeddah and Zandvoort: devtests/seasons-calib/check-drive.js.)
+  TRACKS: 'all',
+  GRIP_WIDTH_EXP: 0.3,          // mechanical grip ~ (tread width ratio)^0.3
+  SPREAD: 1.25,                 // % lap time between the fastest and the slowest car of a season (like 2026)
+  ENGINE_GAIN: 8,               // power % per % of the engine group's fast-circuit lean ...
+  ENGINE_TRACTION: 0.25,        //   ... and this share of it on traction (the drivetrain's part of the acceleration)
+  ENGINE_SINGLE: 0.5,           // an engine used by one team only: this share of its lean is the engine's
+  TRIM_GAIN: 5,                 // drag and downforce % per % of the team's own lean beyond its engine group's
+  MIN: 0.95, MAX: 1.05, DECIMALS: 4,
+  SIG: 6                        // significant digits of the era physics (the 2025 anchor is written unrounded)
+};
+// rating = 50 + gain * x, rounded, 0..100; x = 0 for the season's standard car (js/cars-data.js's formula)
+export const RATING = {
+  topSpeed: { gain: 11, x: '極速（不含電池）與標準車的差，km/h' },
+  accel: { gain: 12, x: '0–300 km/h（乘以該年標準車極速 / 330 km/h）所需時間比標準車少的百分比' },
+  cornering: { gain: 23, x: '半徑 30 / 60 / 120 m 平地彎的過彎速度，比標準車高的百分比（三者平均）' },
+  braking: { gain: 20, x: '300→80 km/h 煞車距離比標準車短的百分比' },
+  ers: { gain: 13, x: '(ersPower − 1) 與 (ersHarvest − 1) 的平均，%' }
+};
+export const MULT_KEYS = ['power', 'drag', 'downforce', 'grip', 'brake', 'traction', 'ersPower', 'ersHarvest'];
+const ONES = { power: 1, drag: 1, downforce: 1, grip: 1, brake: 1, traction: 1, ersPower: 1, ersHarvest: 1 };
+const CORNER_RADII = [30, 60, 120];
+
+// ---- documented display overrides (applied here; tools/seasons-raw.json itself is never edited) --------------------
+// Team names as the championship classified them where F1DB files the entry under another name.
+export const TEAM_NAMES = {
+  '2010-sauber': { value: 'BMW Sauber', f1db: 'Sauber', why: 'entered and classified as "BMW Sauber-Ferrari" (BMW Sauber F1 Team) although BMW had left', source: 'https://en.wikipedia.org/wiki/2010_Formula_One_World_Championship' },
+  '2011-lotus-racing': { value: 'Lotus', f1db: 'Lotus Racing', why: 'championship constructor "Lotus" (Lotus-Renault), entrant Team Lotus', source: 'https://en.wikipedia.org/wiki/2011_Formula_One_World_Championship' }
+};
+// Full chassis names where F1DB uses the short form.
+export const CHASSIS_NAMES = {
+  '2014-mercedes': 'F1 W05 Hybrid', '2015-mercedes': 'F1 W06 Hybrid', '2016-mercedes': 'F1 W07 Hybrid',
+  '2017-mercedes': 'F1 W08 EQ Power+', '2018-mercedes': 'F1 W09 EQ Power+', '2019-mercedes': 'F1 W10 EQ Power+',
+  '2020-mercedes': 'F1 W11 EQ Performance', '2021-mercedes': 'F1 W12 E Performance', '2022-mercedes': 'F1 W13 E Performance',
+  '2023-mercedes': 'F1 W14 E Performance', '2024-mercedes': 'F1 W15 E Performance', '2025-mercedes': 'F1 W16 E Performance',
+  '2026-mercedes': 'F1 W17 E Performance',            // js/cars-data.js and F1DB: 'W17' / 'F1 W17'
+  '2015-lotus-f1': 'E23 Hybrid'
+};
+export const CHASSIS_SOURCE = 'https://en.wikipedia.org/wiki/Mercedes-Benz_in_Formula_One (car names), https://en.wikipedia.org/wiki/Mercedes_W17 ("Mercedes-AMG F1 W17 E Performance"), https://en.wikipedia.org/wiki/Lotus_E23_Hybrid';
+// Engine designations F1DB only has as a badge: the rebadged Mercedes units of Racing Point.
+export const ENGINE_DESIGNATIONS = {
+  '2019-racing-point': { value: 'M10 EQ Power+', f1db: 'BWT Mercedes (badge only)', source: 'https://en.wikipedia.org/wiki/Racing_Point_RP19' },
+  '2020-racing-point': { value: 'M11 EQ Performance', f1db: 'BWT Mercedes (badge only)', source: 'https://en.wikipedia.org/wiki/Racing_Point_RP20' }
+};
+
+// ---- inputs -------------------------------------------------------------------------------------------------------
+const readJson = f => JSON.parse(readFileSync(f, 'utf8'));
+export function loadInputs() {
+  const raw = readJson(P('tools', 'seasons-raw.json'));
+  const eras = readJson(P('tools', 'eras.json'));
+  const liveries = {};
+  for (const f of ['2010-2017.json', '2018-2026.json']) Object.assign(liveries, readJson(P('tools', 'liveries', f)).entries);
+  const cars2026 = require(P('js', 'cars-data.js'));
+  return { raw, eras, liveries, cars2026 };
+}
+
+// ---- the real game modules (node: window = global) ------------------------------------------------------------------
+let F1 = null;
+export function loadGame() {
+  if (F1) return F1;
+  globalThis.window = globalThis;
+  globalThis.THREE = require(P('lib', 'three.min.js'));
+  require(P('tracks-data.js'));
+  require(P('js', 'track.js'));
+  require(P('js', 'car.js'));
+  require(P('js', 'raceline.js'));
+  F1 = globalThis.F1;
+  return F1;
+}
+// the calibration circuits (tracks-data.js ids, in the file's order)
+export function trackIds() {
+  if (Array.isArray(CFG.TRACKS)) return CFG.TRACKS.slice();
+  loadGame();
+  return globalThis.F1_TRACKS.map(t => t.id);
+}
+
+// ---- helpers --------------------------------------------------------------------------------------------------------
+export const clamp = (v, lo, hi) => v < lo ? lo : (v > hi ? hi : v);
+export const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+export const median = a => { const s = a.slice().sort((x, y) => x - y), n = s.length; return n % 2 ? s[(n - 1) / 2] : 0.5 * (s[n / 2 - 1] + s[n / 2]); };
+export const round = (v, d) => { const f = Math.pow(10, d); return Math.round(v * f) / f; };
+export const sig = v => Number(v.toPrecision(CFG.SIG));
+const V = f => (f && typeof f === 'object' && 'v' in f) ? f.v : undefined;
+const KMH = 1 / 3.6;
+
+// ---- A. era physics ---------------------------------------------------------------------------------------------------
+// The eras.json figures the physics is derived from (every value is read from the file; see METHOD above).
+export function eraInputs(eras, year) {
+  const p = eras.periods.find(q => year >= q.years[0] && year <= q.years[1]);
+  const s = eras.seasons[String(year)];
+  if (!p || !s) throw new Error('tools/eras.json has no period / season for ' + year);
+  const ersType = p.ers.type;
+  const pwRace = V(s.powerToWeight.qualifyingRaceTrim), pwPeak = V(s.powerToWeight.qualifyingPeak);
+  const drs = V(p.topSpeed.drs) === true;
+  const inp = {
+    year, period: p.id, label: p.label, engineDisplay: p.engineDisplay,
+    ersType, pwRace, pwPeak,
+    pwAccel: ersType === 'ERS' || ersType === 'ERS-2026' ? pwPeak : pwRace,
+    topNoDrs: V(p.topSpeed.typicalTopKmh) - (drs ? V(p.topSpeed.drsGain) : 0),
+    front: V(p.grip.tyres.frontWidth), rear: V(p.grip.tyres.rearWidth),
+    latG: V(p.grip.lateralGPeak), brakeG: V(p.grip.brakingGPeak),
+    mass: V(s.qualifyingMass),
+    ersKw: ersType === 'none' ? 0 : V(p.ers.power), ersStoreMJ: ersType === 'none' ? 0 : V(p.ers.storeWindow),
+    ersHarvestMJ: ersType === 'none' ? 0 : V(p.ers.harvestPerLap),
+    gears: V(p.gearbox.forwardGears), shiftTime: V(p.gearbox.gameShiftTime),
+    cylinders: V(p.engine.cylinders), aspiration: V(p.engine.aspiration) === 'na' ? 'na' : 'hybrid',
+    rpmIdle: V(p.engine.rpmIdle), rpmShift: V(p.engine.rpmShiftRaceTrim), rpmLimit: V(p.engine.revLimitRegulation),
+    cockpit: s.cockpit
+  };
+  for (const k of Object.keys(inp)) if (inp[k] === undefined || (typeof inp[k] === 'number' && !isFinite(inp[k]))) throw new Error('tools/eras.json ' + year + ': ' + k + ' missing');
+  return inp;
+}
+
+// Factors against the anchor (2025): each is the same expression evaluated for the season and for 2025, so every
+// factor of 2025 is exactly 1 and its physics is F1.REF_SPEC's, bit for bit.
+export function eraFactors(eras, year) {
+  const G = loadGame(), R = G.REF_SPEC, CP = G.CAR_PERF;
+  const inp = eraInputs(eras, year), a = eraInputs(eras, CFG.ANCHOR);
+  const P = inp.pwRace / a.pwRace, A = inp.pwAccel / a.pwAccel;
+  const vRef = CP.topSpeed;                                     // 330 km/h: the reference's top speed
+  const vTop = vRef * inp.topNoDrs / a.topNoDrs;
+  // drag that balances the drive at the target top speed (the drive is the lower of traction and power / v)
+  const dragFor = (Pw, Tr, v) => (Math.min(Tr, Pw / v) - CP.roll) / (v * v);
+  const fDrag = dragFor(R.power * P, R.traction * A, vTop) / dragFor(R.power, R.traction, vRef);
+  const wr = 0.5 * (inp.front / a.front + inp.rear / a.rear);
+  const mech = Math.pow(wr, CFG.GRIP_WIDTH_EXP);
+  const latMax = inp.latG / a.latG;
+  return {
+    inputs: inp, power: P, traction: A, drag: fDrag, topKmh: vTop / KMH, tyreWidth: wr, mech: mech,
+    latMax: latMax,
+    // downforce before calibration: the peak lateral g not explained by the tyres (fast corners: mu x downforce)
+    downforce: latMax / mech,
+    ersPower: inp.ersKw && a.ersKw ? (inp.ersKw / inp.mass) / (a.ersKw / a.mass) : 0,
+    ersStore: inp.ersStoreMJ && a.ersStoreMJ ? (inp.ersStoreMJ / inp.mass) / (a.ersStoreMJ / a.mass) : 0
+  };
+}
+
+// The era part of a CarSpec (physics / drivetrain / ers / cockpit) for a grip scale (the calibrated number: it
+// multiplies the downforce, the mechanical lateral grip and the braking grip) and an ERS harvest (W/kg; only used
+// where the season's ERS is not the reference's). The anchor year returns F1.REF_SPEC's own values.
+export function eraSpec(eras, year, gripScale, ersHarvest) {
+  const G = loadGame(), R = G.REF_SPEC;
+  const f = eraFactors(eras, year), inp = f.inputs, anchor = year === CFG.ANCHOR;
+  const num = (ref, k) => anchor ? ref * 1 : sig(ref * k);
+  const e = {
+    power: num(R.power, f.power),
+    dragK: num(R.dragK, f.drag),
+    downforce: num(R.downforce, f.downforce * gripScale),
+    latBase: num(R.latBase, f.mech * gripScale),
+    latMax: num(R.latMax, f.latMax),
+    brakeBase: num(R.brakeBase, f.mech * gripScale),
+    traction: num(R.traction, f.traction)
+  };
+  const ers = inp.ersType === 'none' ? null : (inp.ersType === 'ERS' ? { store: R.ers.store, power: R.ers.power, harvest: R.ers.harvest } :
+    { store: sig(R.ers.store * f.ersStore), power: sig(R.ers.power * f.ersPower), harvest: sig(ersHarvest) });
+  // drivetrain: top gear reaches rpmShift at the top speed deploying the battery, at most the reference's ratio of
+  // 345 / 330 km/h above the top speed without it (the reference: 345 km/h, its boost top speed is 346), in 5 km/h
+  // steps: the V8 of 2010 revs to its limit at top speed, the 2026 car (boost top 381 km/h) keeps 345
+  const perf = G.carPerf(Object.assign({}, R, e, { ers }));
+  const top = perf.topSpeed / KMH, ratio = R.topKmh / (G.CAR_PERF.topSpeed / KMH);
+  const topKmh = anchor ? R.topKmh : 5 * Math.round(Math.max(top, Math.min(perf.topSpeedBoost / KMH, top * ratio)) / 5);
+  let gearKmh;
+  if (anchor) gearKmh = R.gearKmh.slice();
+  else if (inp.gears === R.gearKmh.length + 1) gearKmh = R.gearKmh.map(g => Math.round(g * topKmh / R.topKmh));
+  else {
+    // other gear counts: the reference's first and last upshift ratios, evenly in between
+    const n = inp.gears - 1, lo = R.gearKmh[0] / R.topKmh, hi = R.gearKmh[R.gearKmh.length - 1] / R.topKmh;
+    gearKmh = [];
+    for (let i = 0; i < n; i++) gearKmh.push(Math.round(topKmh * (lo + (hi - lo) * i / (n - 1))));
+  }
+  e.gearKmh = gearKmh;
+  e.topKmh = topKmh;
+  e.rpmIdle = anchor ? R.rpmIdle : inp.rpmIdle;
+  e.rpmShift = anchor ? R.rpmShift : inp.rpmShift;
+  // V8: the 18 000 rpm regulation limit; V6: 15 000 (the regulation / the 2026 gear check), the anchor keeps REF's
+  e.rpmMax = anchor ? R.rpmMax : (inp.rpmLimit || 15000);
+  // shift sound: eras.json's game value for the V8s (0.04 s); the turbo-hybrids keep the reference's 0.05 s
+  e.shiftTime = anchor ? R.shiftTime : (inp.aspiration === 'na' ? inp.shiftTime : R.shiftTime);
+  e.cylinders = inp.cylinders;
+  e.aspiration = inp.aspiration;
+  e.ers = ers;
+  e.cockpit = inp.cockpit;
+  return e;
+}
+export const ersCalibrated = (eras, year) => { const t = eraInputs(eras, year).ersType; return t === 'KERS' || t === 'ERS-2026'; };
+// store refills per lap the rules allow: KERS 0.4 MJ harvested / 0.4 MJ store; 2026 8.5 MJ / 4 MJ
+export const ersLapTarget = (eras, year) => { const i = eraInputs(eras, year); return i.ersStoreMJ ? i.ersHarvestMJ / i.ersStoreMJ : 0; };
+
+// A fingerprint of everything the driven calibration depends on except the calibrated numbers themselves: the
+// config, F1.REF_SPEC, every season's era physics before calibration, the pace index and the reference car's
+// racing-line lap on each calibration circuit (which changes with the tracks, the line or the car physics).
+export function priorsFingerprint(eras, raw) {
+  const G = loadGame();
+  const out = { cfg: { TRACKS: trackIds(), GRIP_WIDTH_EXP: CFG.GRIP_WIDTH_EXP, SIG: CFG.SIG, ANCHOR: CFG.ANCHOR }, ref: G.REF_SPEC, years: {},
+    refLaps: geometries().map(g => [g.id, g.N, g.refLapTime]) };
+  for (let y = CFG.FIRST; y <= CFG.LAST; y++) {
+    const e = eraSpec(eras, y, 1, 100);
+    const s = raw.seasons.find(q => q.year === y);
+    out.years[y] = { e, index: s ? s.eraIndex : null, ersLap: ersLapTarget(eras, y) };
+  }
+  return createHash('sha256').update(JSON.stringify(out)).digest('hex').slice(0, 16);
+}
+
+// ---- profile model: the speed profile of js/raceline.js on a stored line geometry -------------------------------------
+// (a copy of devtests/cars-data/model.js lineGeometry / lap, with the perf of F1.carPerf; checked against
+// F1.buildRaceLine(track, perf).lapTime at start-up)
+const GRIP_MARGIN = 0.86, STEER_MARGIN = 1.22, BRAKE_MARGIN = 0.80, CREST_SPAN = 3, MIN_SPEED = 7;
+function cornerSpeed(p, k, bank, pitch, kappaV, turnSign) {
+  k = Math.abs(k);
+  if (k < 1e-6) return p.topSpeed;
+  let v = p.topSpeed;
+  if (GRIP_MARGIN * p.maxLatAccel(v, bank, pitch, kappaV, turnSign) < v * v * k) {
+    let lo = MIN_SPEED, hi = p.topSpeed;
+    if (GRIP_MARGIN * p.maxLatAccel(lo, bank, pitch, kappaV, turnSign) < lo * lo * k) v = lo;
+    else {
+      for (let it = 0; it < 18; it++) {
+        const mid = 0.5 * (lo + hi);
+        if (GRIP_MARGIN * p.maxLatAccel(mid, bank, pitch, kappaV, turnSign) >= mid * mid * k) lo = mid; else hi = mid;
+      }
+      v = lo;
+    }
+  }
+  const x = Math.atan(p.wheelbase * k * STEER_MARGIN);
+  if (x >= p.steerLock) v = MIN_SPEED;
+  else v = Math.min(v, p.steerSpeedRef * Math.sqrt(p.steerLock / x - 1));
+  return Math.max(MIN_SPEED, Math.min(p.topSpeed, v));
+}
+function lineGeometry(track, line, grav) {
+  const S = track.samples, N = S.length, Pt = line.points;
+  const seg = new Float64Array(N), slope = new Float64Array(N), curv = new Float64Array(N);
+  const bank = new Float64Array(N), pitch = new Float64Array(N), gsin = new Float64Array(N);
+  const kv = new Float64Array(N), kvSafe = new Float64Array(N), latSign = new Float64Array(N);
+  let i, j;
+  for (i = 0; i < N; i++) {
+    j = (i + 1) % N;
+    let sl = Math.hypot(Pt[j].x - Pt[i].x, Pt[j].z - Pt[i].z);
+    if (sl < 0.05) sl = 0.05;
+    seg[i] = sl; curv[i] = Pt[i].curvature;
+  }
+  for (i = 0; i < N; i++) {
+    const i3 = (i + 3) % N, im3 = (i - 3 + N) % N;
+    let run = 0;
+    for (j = 0; j < 6; j++) run += seg[(im3 + j) % N];
+    const rise = Pt[i3].y - Pt[im3].y;
+    slope[i] = rise / Math.hypot(run, rise);
+  }
+  for (i = 0; i < N; i++) {
+    const sp = S[(i - 1 + N) % N], sc = S[i], sq = S[(i + 1) % N];
+    const gp = Math.hypot(sc.x - sp.x, sc.z - sp.z), gq = Math.hypot(sq.x - sc.x, sq.z - sc.z);
+    let k0 = 0;
+    if (typeof sc.y === 'number' && typeof sp.y === 'number' && typeof sq.y === 'number' && gp > 1e-6 && gq > 1e-6 && gp <= 10 && gq <= 10) {
+      k0 = -((sq.y - sc.y) / gq - (sc.y - sp.y) / gp) / (0.5 * (gp + gq));
+    }
+    kv[i] = isFinite(k0) ? k0 : 0;
+    bank[i] = +sc.bank || 0;
+    pitch[i] = Math.asin(slope[i]);
+    gsin[i] = grav * slope[i];
+    latSign[i] = curv[i] < 0 ? 1 : -1;
+  }
+  for (i = 0; i < N; i++) {
+    let km = kv[i];
+    for (j = -CREST_SPAN; j <= CREST_SPAN; j++) { const kq = kv[((i + j) % N + N) % N]; if (kq > km) km = kq; }
+    kvSafe[i] = km;
+  }
+  return { N, seg, curv, bank, pitch, gsin, kvSafe, latSign };
+}
+export function profileLap(geo, p) {
+  const N = geo.N, seg = geo.seg, curv = geo.curv, bank = geo.bank, pitch = geo.pitch, gsin = geo.gsin;
+  const kvSafe = geo.kvSafe, latSign = geo.latSign;
+  const vAllow = new Float64Array(N), vT = new Float64Array(N);
+  let i, j, m, iMin = 0;
+  for (i = 0; i < N; i++) {
+    const k = Math.max(Math.abs(curv[i]), Math.abs(curv[(i + 1) % N]), Math.abs(curv[(i - 1 + N) % N]));
+    vAllow[i] = cornerSpeed(p, k, bank[i], pitch[i], kvSafe[i], latSign[i]);
+    if (vAllow[i] < vAllow[iMin]) iMin = i;
+  }
+  const latAt = (idx, v) => { let a = v * v * Math.abs(curv[idx]); if (a > p.latMax) a = p.latMax; return a * latSign[idx]; };
+  for (m = 0; m < 2 * N; m++) {
+    i = ((iMin - 1 - m) % N + N) % N; j = (i + 1) % N;
+    const v1 = vAllow[j], coast = p.roll + p.dragK * v1 * v1 + gsin[i];
+    let dec = p.maxDecel(v1, bank[i], pitch[i], kvSafe[i], latAt(i, v1)) - coast;
+    dec = BRAKE_MARGIN * dec + coast;
+    if (dec < 1) dec = 1;
+    const vb = Math.sqrt(v1 * v1 + 2 * dec * seg[i]);
+    if (vb < vAllow[i]) vAllow[i] = vb;
+  }
+  for (i = 0; i < N; i++) vT[i] = vAllow[i];
+  for (m = 0; m < 2 * N; m++) {
+    i = (iMin + m) % N; j = (i + 1) % N;
+    const v1 = vT[i], acc = p.maxAccel(v1, bank[i], pitch[i], kvSafe[i], latAt(i, v1));
+    const v2 = v1 * v1 + 2 * acc * seg[i];
+    const vf = v2 > MIN_SPEED * MIN_SPEED ? Math.sqrt(v2) : MIN_SPEED;
+    if (vf < vT[j]) vT[j] = vf;
+  }
+  let t = 0, vmax = 0;
+  for (i = 0; i < N; i++) { t += seg[i] / (0.5 * (vT[i] + vT[(i + 1) % N])); if (vT[i] > vmax) vmax = vT[i]; }
+  return t;
+}
+// The calibration circuits: car-independent line geometry + the reference lap of the real module (self-check)
+let GEOS = null;
+export function geometries() {
+  if (GEOS) return GEOS;
+  const G = loadGame();
+  GEOS = trackIds().map(id => {
+    const td = globalThis.F1_TRACKS.find(t => t.id === id);
+    if (!td) throw new Error('tracks-data.js has no track ' + id);
+    const track = G.buildTrack(td), line = G.buildRaceLine(track);
+    const geo = lineGeometry(track, line, G.CAR_PERF.gravity);
+    geo.id = id; geo.name = td.name; geo.refLapTime = line.lapTime;
+    const own = profileLap(geo, G.CAR_PERF);
+    if (Math.abs(own - line.lapTime) > 1e-6) throw new Error('profile model differs from js/raceline.js on ' + id + ': ' + own + ' vs ' + line.lapTime);
+    line.dispose(); track.dispose();
+    return geo;
+  });
+  return GEOS;
+}
+
+// ---- CarSpec from the era + multipliers (the same arithmetic as js/cars.js) ------------------------------------------
+export function applyMult(era, m) {
+  const s = {
+    power: era.power * m.power, dragK: era.dragK * m.drag, downforce: era.downforce * m.downforce,
+    latBase: era.latBase * m.grip, latMax: era.latMax * m.grip, brakeBase: era.brakeBase * m.brake,
+    traction: era.traction * m.traction,
+    gearKmh: era.gearKmh.slice(), topKmh: era.topKmh, rpmIdle: era.rpmIdle, rpmShift: era.rpmShift, rpmMax: era.rpmMax,
+    shiftTime: era.shiftTime, cylinders: era.cylinders, aspiration: era.aspiration,
+    ers: era.ers ? { store: era.ers.store, power: era.ers.power * m.ersPower, harvest: era.ers.harvest * m.ersHarvest } : null,
+    cockpit: era.cockpit
+  };
+  return s;
+}
+
+// flat-road figures of a perf (menu ratings, documentation). The standing start runs to accelKmh: 300 km/h scaled
+// with the season's standard top speed (300 x top / 330: exactly 300 for 2025 / 2026, js/cars-data.js's formula;
+// 289 for the 318 km/h V8 + KERS cars, whose 0-300 time would be dominated by the drag near their top speed).
+export function metrics(perf, accelKmh) {
+  const dv = 0.05;
+  let t = 0, d = 0, v;
+  for (v = 0.5; v < accelKmh * KMH; v += dv) { const a = perf.maxAccel(v, 0, 0, 0, 0); if (!(a > 0.01)) { t = Infinity; break; } t += dv / a; }
+  for (v = 300 * KMH; v > 80 * KMH; v -= dv) d += v * dv / perf.maxDecel(v, 0, 0, 0, 0);
+  const corner = R => {
+    let lo = 5, hi = 130;
+    for (let i = 0; i < 50; i++) { const x = 0.5 * (lo + hi); if (perf.maxLatAccel(x, 0, 0, 0, 1) >= x * x / R) lo = x; else hi = x; }
+    return 0.5 * (lo + hi) / KMH;
+  };
+  return { topKmh: perf.topSpeed / KMH, topBoostKmh: perf.topSpeedBoost / KMH, t0to300: t, accelKmh: accelKmh, brake300to80: d, corner: CORNER_RADII.map(corner) };
+}
+export function ratingsFor(met, stdMet, m) {
+  const x = {
+    topSpeed: met.topKmh - stdMet.topKmh,
+    accel: (1 - met.t0to300 / stdMet.t0to300) * 100,
+    cornering: mean(met.corner.map((c, i) => (c / stdMet.corner[i] - 1) * 100)),
+    braking: (1 - met.brake300to80 / stdMet.brake300to80) * 100,
+    ers: 0.5 * ((m.ersPower - 1) + (m.ersHarvest - 1)) * 100
+  };
+  const r = {};
+  for (const k of Object.keys(RATING)) r[k] = clamp(Math.round(50 + RATING[k].gain * x[k]), 0, 100);
+  return { ratings: r, x };
+}
+
+// ---- display strings ------------------------------------------------------------------------------------------------
+const spacedL = s => s.replace(/(\d)L\b/g, '$1 L');
+function engineDisplay(e) {
+  const fix = ENGINE_DESIGNATIONS[e.id];
+  let s = fix ? e.engineManufacturer + ' ' + fix.value : String(e.engine.fullName).replace(/\s+\d+(\.\d+)?\s+V\d+.*$/, '').trim();
+  const maker = String(e.engineBuiltBy || '').split(' ')[0];
+  if (maker && s.indexOf(maker) < 0) s += ' (' + e.engineBuiltBy + ')';
+  return s;
+}
+
+// ---- the whole build ------------------------------------------------------------------------------------------------
+export function build(opts) {
+  opts = opts || {};
+  const G = loadGame(), R = G.REF_SPEC;
+  const { raw, eras, liveries, cars2026 } = loadInputs();
+  const problems = [];
+  if (!existsSync(CALIB_FILE)) throw new Error('missing ' + relative(ROOT, CALIB_FILE) + ': run node devtests/seasons-calib/calibrate.mjs');
+  const calib = readJson(CALIB_FILE);
+  const fp = priorsFingerprint(eras, raw);
+  if (calib.fingerprint !== fp) problems.push('devtests/seasons-calib/calibration.json is stale (fingerprint ' + calib.fingerprint + ', inputs now ' + fp + '): run node devtests/seasons-calib/calibrate.mjs');
+  const geos = geometries();
+  const lapsOf = spec => { const p = G.carPerf(spec); return geos.map(g => profileLap(g, p)); };
+
+  const seasons = [], log = { cfg: CFG, rating: RATING, seasons: [] };
+  for (let year = CFG.FIRST; year <= CFG.LAST; year++) {
+    const rs = raw.seasons.find(s => s.year === year);
+    if (!rs) { problems.push('no raw season ' + year); continue; }
+    const cal = calib.seasons && calib.seasons[year];
+    if (!cal) { problems.push('no calibration for ' + year); continue; }
+    const inp = eraInputs(eras, year);
+    const era = eraSpec(eras, year, cal.gripScale, cal.ersHarvest);
+    const std = Object.assign({}, R, era);
+    const stdPerf = G.carPerf(std), accelKmh = 300 * stdPerf.topSpeed / G.CAR_PERF.topSpeed;
+    const stdMet = metrics(stdPerf, accelKmh), stdLaps = lapsOf(std);
+    const lapDeltas = spec => lapsOf(spec).map((t, i) => (t / stdLaps[i] - 1) * 100);
+    const stdEngine = spacedL(inp.engineDisplay);
+    const stdCar = {
+      id: year + '-standard', lineage: 'standard', team: R.team, teamZh: R.teamZh, car: R.car,
+      engine: year === CFG.ANCHOR ? R.engine : stdEngine, cylinders: era.cylinders, aspiration: era.aspiration,
+      colour: R.colour, colour2: R.colour2, ratings: Object.assign({}, R.ratings),
+      perf: Object.assign({}, ONES), note: '', est: { lapPct: 0, topKmh: round(stdMet.topKmh, 1) }
+    };
+    if (year === CFG.ANCHOR && stdCar.engine !== stdEngine) problems.push('the anchor standard engine "' + R.engine + '" differs from eras.json "' + stdEngine + '"');
+    const cars = [stdCar];
+    const slog = { year, index: rs.eraIndex, era, stdTopKmh: stdMet.topKmh, accelKmh, cars: [] };
+
+    // ---- entries
+    const E = rs.entries.map(e => ({ src: e, id: e.id }));
+    const liv = id => liveries[id] || null;
+    for (const e of E) if (!liv(e.id)) problems.push('no livery for ' + e.id);
+    if (year === CFG.CURRENT) {
+      // the hand-researched grid: multipliers, notes, colours, names as they are
+      for (const e of E) {
+        const c = cars2026.find(x => '2026-' + x.id === e.id);
+        if (!c) { problems.push('js/cars-data.js has no car for ' + e.id); continue; }
+        e.mult = Object.assign({}, c.perf); e.exact = Object.assign({}, c.perf);
+        // multipliers, notes and colours of js/cars-data.js take precedence; the Chinese team name is the fact-checked
+        // one of tools/liveries (Taiwan usage, one name per lineage: 紅牛二隊 for Toro Rosso .. Racing Bulls, where
+        // js/cars-data.js says 小紅牛), the chassis name the documented full name (CHASSIS_NAMES)
+        const lv = liv(e.id) || {};
+        e.display = { team: c.teamEn, teamZh: lv.teamZh || c.teamZh, car: CHASSIS_NAMES[e.id] || c.car, engine: c.engine, colour: c.colour, colour2: c.colour2, note: c.note };
+        e.target = null;
+      }
+      for (const c of cars2026) if (c.id !== 'standard' && !E.find(e => e.id === '2026-' + c.id)) problems.push('js/cars-data.js car ' + c.id + ' is not in the 2026 raw season');
+    } else {
+      const gaps = E.map(e => e.src.pace.medianGapPct);
+      const gMin = Math.min(...gaps), gMax = Math.max(...gaps), gMed = median(gaps), K = CFG.SPREAD / (gMax - gMin);
+      slog.K = K; slog.gapMedian = gMed;
+      // engine groups by the real maker
+      const groups = new Map();
+      for (const e of E) {
+        const k = e.src.engineBuiltBy;
+        if (!groups.has(k)) groups.set(k, []);
+        groups.get(k).push(e);
+      }
+      const gLean = new Map();
+      for (const [k, list] of groups) {
+        const leans = list.map(e => e.src.character.vsFieldPct);
+        gLean.set(k, list.length > 1 ? median(leans) : CFG.ENGINE_SINGLE * leans[0]);
+      }
+      slog.engineGroups = [...groups.keys()].map(k => ({ builtBy: k, entries: groups.get(k).map(e => e.id), leanPct: gLean.get(k), power: 1 + CFG.ENGINE_GAIN * gLean.get(k) / 100 }));
+      for (const e of E) {
+        const lean = e.src.character.vsFieldPct, gl = gLean.get(e.src.engineBuiltBy);
+        e.target = K * (e.src.pace.medianGapPct - gMed);
+        e.engine = 1 + CFG.ENGINE_GAIN * gl / 100;
+        e.trim = 1 - CFG.TRIM_GAIN * (lean - gl) / 100;
+        e.leanOwn = lean - gl;
+        const multFor = L => ({ power: e.engine, traction: 1 + L + CFG.ENGINE_TRACTION * (e.engine - 1), drag: e.trim, downforce: e.trim + L,
+          grip: 1 + L, brake: 1 + L, ersPower: 1, ersHarvest: 1 });
+        const f = L => mean(lapDeltas(applyWith(std, multFor(L)))) - e.target;
+        // secant on L (lap delta falls monotonically with L), bracketed
+        let a = -0.02, b = 0.02, fa = f(a), fb = f(b), L = 0;
+        for (let it = 0; it < 40; it++) {
+          L = b - fb * (b - a) / (fb - fa);
+          if (!isFinite(L)) L = 0.5 * (a + b);
+          const fl = f(L);
+          if (Math.abs(fl) < 1e-5) break;
+          a = b; fa = fb; b = L; fb = fl;
+        }
+        e.L = L;
+        e.exact = multFor(L);
+        e.mult = {};
+        for (const k of MULT_KEYS) e.mult[k] = round(e.exact[k], CFG.DECIMALS);
+        const s = e.src, lv = liv(e.id) || {};
+        const team = TEAM_NAMES[e.id] ? TEAM_NAMES[e.id].value : s.constructor;
+        e.display = {
+          team, teamZh: lv.teamZh || team, car: CHASSIS_NAMES[e.id] || s.chassis, engine: engineDisplay(s),
+          colour: lv.colour, colour2: lv.colour2, note: lv.note || ''
+        };
+      }
+    }
+    // ---- rounded multipliers -> reported figures, ratings, checks
+    for (const e of E) {
+      if (!e.mult) continue;
+      const spec = applyWith(std, e.mult), perf = G.carPerf(spec), met = metrics(perf, accelKmh);
+      // js/car.js must take the car as it is (F1.sanitizeSpec replaces out-of-range values with the reference's)
+      const san = G.sanitizeSpec(spec);
+      for (const k of ['power', 'dragK', 'downforce', 'latBase', 'latMax', 'brakeBase', 'traction', 'topKmh', 'rpmIdle', 'rpmShift', 'rpmMax', 'shiftTime', 'cylinders'])
+        if (!Object.is(san[k], spec[k])) problems.push(e.id + ': F1.sanitizeSpec changes ' + k + ' ' + spec[k] + ' -> ' + san[k]);
+      if (JSON.stringify(san.ers) !== JSON.stringify(spec.ers) || JSON.stringify(san.gearKmh) !== JSON.stringify(spec.gearKmh)) problems.push(e.id + ': F1.sanitizeSpec changes the ERS or the gears');
+      e.perTrack = lapDeltas(spec);
+      e.lapPct = mean(e.perTrack);
+      e.met = met;
+      const rr = ratingsFor(met, stdMet, e.mult);
+      e.ratings = rr.ratings; e.ratingX = rr.x;
+      for (const k of MULT_KEYS) if (!(e.exact[k] >= CFG.MIN && e.exact[k] <= CFG.MAX)) problems.push(e.id + '.' + k + ' out of range: ' + e.exact[k]);
+      if (e.target !== null && Math.abs(e.lapPct - e.target) > 0.01) problems.push(e.id + ': lap delta ' + e.lapPct.toFixed(4) + ' % misses the target ' + e.target.toFixed(4) + ' %');
+      const s = e.src, d = e.display;
+      cars.push({
+        id: e.id, lineage: s.lineage, team: d.team, teamZh: d.teamZh, car: d.car, engine: d.engine,
+        cylinders: s.engine.cylinders, aspiration: /^(na|naturally)/i.test(s.engine.aspiration) ? 'na' : 'hybrid',
+        colour: d.colour, colour2: d.colour2, ratings: e.ratings, perf: e.mult, note: d.note,
+        est: { lapPct: round(e.lapPct, 3), topKmh: round(met.topKmh, 1) }
+      });
+      slog.cars.push({ id: e.id, gapPct: s.pace.medianGapPct, rank: s.pace.rank, leanPct: s.character.vsFieldPct, targetPct: e.target === null ? null : round(e.target, 4),
+        lapPct: round(e.lapPct, 4), levelPct: e.L === undefined ? null : round(e.L * 100, 3), perf: e.mult, perTrackPct: e.perTrack.map(v => round(v, 3)),
+        topKmh: round(met.topKmh, 2), t0to300: round(met.t0to300, 3), brake300to80: round(met.brake300to80, 2), cornerKmh: met.corner.map(v => round(v, 2)),
+        ratingX: Object.fromEntries(Object.keys(e.ratingX).map(k => [k, round(e.ratingX[k], 3)])), ratings: e.ratings });
+    }
+    // checks inside the season
+    const ids = new Set(), lineages = new Set();
+    cars.forEach((c, i) => {
+      if (!/^[a-z0-9-]{1,40}$/.test(c.id) || ids.has(c.id)) problems.push('bad or duplicate id ' + c.id);
+      ids.add(c.id);
+      if (lineages.has(c.lineage)) problems.push(year + ': two cars of lineage ' + c.lineage);
+      lineages.add(c.lineage);
+      for (const k of ['colour', 'colour2']) if (!/^#[0-9a-fA-F]{6}$/.test(c[k])) problems.push(c.id + '.' + k + ' is not #rrggbb: ' + c[k]);
+      for (const k of MULT_KEYS) if (!(c.perf[k] >= CFG.MIN && c.perf[k] <= CFG.MAX) || (i === 0 && c.perf[k] !== 1)) problems.push(c.id + '.perf.' + k + ' = ' + c.perf[k]);
+      for (const k of Object.keys(RATING)) if (!(c.ratings[k] >= 0 && c.ratings[k] <= 100) || (i === 0 && c.ratings[k] !== 50)) problems.push(c.id + ' rating ' + k + ' = ' + c.ratings[k]);
+      for (const k of ['team', 'teamZh', 'car', 'engine']) if (typeof c[k] !== 'string' || !c[k]) problems.push(c.id + '.' + k + ' empty');
+    });
+    const teamsOnly = cars.slice(1);
+    slog.spreadPct = Math.max(...teamsOnly.map(c => c.est.lapPct)) - Math.min(...teamsOnly.map(c => c.est.lapPct));
+    seasons.push({
+      year, label: year + ' · ' + inp.label, engine: year === CFG.ANCHOR ? R.engine : stdEngine, paceIndex: rs.eraIndex,
+      era, cars
+    });
+    log.seasons.push(slog);
+  }
+  // the anchor: its standard car must BE F1.REF_SPEC
+  const a = seasons.find(s => s.year === CFG.ANCHOR);
+  if (a) {
+    const e = a.era;
+    for (const k of ['power', 'dragK', 'downforce', 'latBase', 'latMax', 'brakeBase', 'traction', 'topKmh', 'rpmIdle', 'rpmShift', 'rpmMax', 'shiftTime', 'cylinders', 'aspiration', 'cockpit']) {
+      if (!Object.is(e[k], R[k])) problems.push('anchor ' + k + ' ' + e[k] + ' != F1.REF_SPEC ' + R[k]);
+    }
+    if (JSON.stringify(e.gearKmh) !== JSON.stringify(R.gearKmh) || JSON.stringify(e.ers) !== JSON.stringify(R.ers)) problems.push('anchor gears / ers differ from F1.REF_SPEC');
+  }
+  return { seasons, log, problems, calib, raw, fingerprint: fp };
+}
+const applyWith = (std, m) => Object.assign({}, std, applyMult(std, m));
+
+// ---- output -----------------------------------------------------------------------------------------------------------
+export function seasonsJs(b) {
+  const src = b.raw.source;
+  const info = {
+    generatedBy: 'tools/build-cars.mjs',
+    f1db: { name: src.name, url: src.url, release: src.release, licence: src.licence, licenceUrl: src.licenceUrl },
+    attribution: src.attribution,
+    attributionShort: src.attributionShort,
+    sources2026: '2026 cars: estimates from public data (FIA, formula1.com, OpenF1, Jolpica-F1, Autosport, team releases), see docs/cars-data-sources.md',
+    disclaimer: '車輛數據是依公開資料推估的遊戲數值，並非官方規格。'
+  };
+  const L = [];
+  L.push('// GENERATED by tools/build-cars.mjs - do not edit by hand (node tools/build-cars.mjs; --check verifies it).');
+  L.push('// F1Drive - the seasons 2010..2026 of the Grand Prix year selector and the cars of each year: the season\'s');
+  L.push('// standard car (the era physics, every multiplier 1) first, then every team as the constructors\' championship');
+  L.push('// classified it. ESTIMATES derived from public data for a game, NOT official specifications.');
+  L.push('// Sources: ' + src.attributionShort + ' (' + src.url + ', ' + src.release + '); tools/eras.json; tools/liveries/*.json;');
+  L.push('// the 2026 grid from js/cars-data.js. Method and calibration: docs/seasons-data.md.');
+  L.push('//');
+  L.push('// window.F1_SEASONS = [{ year, label, engine, paceIndex (real pole-time index, 2025 = 1),');
+  L.push('//   era: { power, dragK, downforce, latBase, latMax, brakeBase, traction, gearKmh, topKmh, rpmIdle, rpmShift, rpmMax,');
+  L.push('//          shiftTime, cylinders, aspiration, ers: null | { store, power, harvest }, cockpit }   (absolute CarSpec values)');
+  L.push('//   cars: [{ id, lineage, team, teamZh, car, engine, cylinders, aspiration, colour, colour2,');
+  L.push('//            ratings: { topSpeed, accel, cornering, braking, ers },   0..100, 50 = the season\'s standard car');
+  L.push('//            perf: { power, drag, downforce, grip, brake, traction, ersPower, ersHarvest },   multipliers on the era');
+  L.push('//            note, est: { lapPct, topKmh } }] }]      est = profile-model lap time vs the standard car (%), top speed');
+  L.push('// window.F1_SEASONS_INFO = { attribution, attributionShort, sources2026, disclaimer, f1db }');
+  L.push('(function (root) {');
+  L.push("  'use strict';");
+  L.push('  var SEASONS = [');
+  b.seasons.forEach((s, si) => {
+    L.push('    {');
+    L.push('      year: ' + s.year + ', label: ' + JSON.stringify(s.label) + ', engine: ' + JSON.stringify(s.engine) + ', paceIndex: ' + s.paceIndex + ',');
+    L.push('      era: ' + JSON.stringify(s.era) + ',');
+    L.push('      cars: [');
+    s.cars.forEach((c, i) => L.push('        ' + JSON.stringify(c) + (i < s.cars.length - 1 ? ',' : '')));
+    L.push('      ]');
+    L.push('    }' + (si < b.seasons.length - 1 ? ',' : ''));
+  });
+  L.push('  ];');
+  L.push('  var INFO = ' + JSON.stringify(info) + ';');
+  L.push('  root.F1_SEASONS = SEASONS;');
+  L.push('  root.F1_SEASONS_INFO = INFO;');
+  L.push("  if (typeof module !== 'undefined' && module.exports) module.exports = SEASONS;");
+  L.push("})(typeof window !== 'undefined' ? window : globalThis);");
+  return L.join('\n') + '\n';
+}
+
+function entriesJson(b) {
+  return JSON.stringify({ generatedBy: 'tools/build-cars.mjs', fingerprint: b.fingerprint, seasons: b.log.seasons.map(s => ({
+    year: s.year, index: s.index, K: s.K === undefined ? null : round(s.K, 5), gapMedianPct: s.gapMedian === undefined ? null : s.gapMedian,
+    spreadPct: round(s.spreadPct, 4), stdTopKmh: round(s.stdTopKmh, 2), engineGroups: s.engineGroups || null, cars: s.cars
+  })) }, null, 1) + '\n';
+}
+
+// ---- main -----------------------------------------------------------------------------------------------------------
+async function main() {
+  const args = process.argv.slice(2);
+  const CHECK = args.includes('--check'), DRY = args.includes('--dry'), QUIET = args.includes('--quiet');
+  const t0 = Date.now();
+  const b = build();
+  if (!QUIET) {
+    for (const s of b.log.seasons) {
+      console.log('== ' + s.year + ' index ' + s.index + '  std top ' + s.stdTopKmh.toFixed(1) + ' km/h  spread ' + s.spreadPct.toFixed(3) + ' %' + (s.K ? '  K ' + s.K.toFixed(4) : ''));
+      for (const c of s.cars) {
+        console.log('  ' + c.id.padEnd(22) + (c.gapPct === undefined ? '' : String(c.gapPct).padStart(6)) + (c.targetPct === null ? '       -' : c.targetPct.toFixed(3).padStart(8)) + c.lapPct.toFixed(3).padStart(8) +
+          (c.levelPct === null ? '      -' : c.levelPct.toFixed(2).padStart(7)) + '  ' + MULT_KEYS.map(k => c.perf[k].toFixed(4)).join(' ') + '  ' + c.topKmh.toFixed(1) + ' | ' +
+          Object.keys(RATING).map(k => String(c.ratings[k]).padStart(3)).join(' '));
+      }
+    }
+  }
+  const outputs = [[OUT_JS, seasonsJs(b)], [ENTRIES_FILE, entriesJson(b)]];
+  if (b.problems.length) { console.log('PROBLEMS (nothing written):\n  ' + b.problems.join('\n  ')); process.exitCode = 1; }
+  else if (CHECK) {
+    for (const [file, text] of outputs) {
+      const same = existsSync(file) && readFileSync(file, 'utf8') === text;
+      console.log((same ? 'up to date  ' : 'DIFFERS     ') + relative(ROOT, file).replace(/\\/g, '/'));
+      if (!same) process.exitCode = 1;
+    }
+  } else if (DRY) console.log('checks passed (--dry: nothing written)');
+  else {
+    for (const [file, text] of outputs) { writeFileSync(file, text); console.log('wrote ' + relative(ROOT, file).replace(/\\/g, '/')); }
+    console.log('checks passed');
+  }
+  console.log('(' + ((Date.now() - t0) / 1000).toFixed(1) + ' s)');
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) main().catch(e => { console.error(e && e.stack || e); process.exit(1); });

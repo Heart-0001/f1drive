@@ -1,6 +1,8 @@
 // focused diagnostic: B records its view of A each frame while A accelerates
 const { app, BrowserWindow, ipcMain } = require('electron');
-const ROOT = 'C:/Users/user/Desktop/f1drive';
+const ROOT = require('path').resolve(__dirname, '..', '..');
+require('../electron-userdata')(app, 'int-smooth2');
+const PORT = Number(process.env.PORT || 24741);
 const host = require(ROOT + '/net/host');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 function win(tag) {
@@ -16,14 +18,14 @@ app.whenReady().then(async () => {
   const A = win('A'), B = win('B');
   await A.loadFile(ROOT + '/index.html'); await B.loadFile(ROOT + '/index.html');
   await sleep(500);
-  await A.js("document.getElementById('mp-addr').value='127.0.0.1:24741'; document.getElementById('mp-join').click()");
+  await A.js("document.getElementById('mp-addr').value='127.0.0.1:" + PORT + "'; document.getElementById('mp-join').click()");
   await sleep(800);
-  await B.js("document.getElementById('mp-addr').value='127.0.0.1:24741'; document.getElementById('mp-join').click()");
+  await B.js("document.getElementById('mp-addr').value='127.0.0.1:" + PORT + "'; document.getElementById('mp-join').click()");
   await sleep(800);
   await A.js("[].slice.call(document.querySelectorAll('.card')).filter(function(n){return /monza/i.test(n.textContent)})[0].click()");
   await sleep(4000);
   await B.js("window.__rec=[]; (function loop(){ if(!window.__rec) return; var p=F1.net.players[0]; if(p&&p.active) window.__rec.push([performance.now(),p.state.x,p.state.z,p.state.speed,performance.now()-p._recv,p._buf.length,p._off]); requestAnimationFrame(loop); })(); 1");
-  const WS=require(ROOT+'/node_modules/ws'); const obs=new WS('ws://127.0.0.1:24741'); const arr=[]; obs.on('open',()=>obs.send(JSON.stringify({t:'hello',v:1,name:'obs'}))); const cnt={}; obs.on('message',d=>{const m=JSON.parse(d); cnt[m.t]=(cnt[m.t]||0)+1; if(m.t==='snap') for(const e of m.p) if(e[0]===1) arr.push([Date.now(), e[1]]);});
+  const WS=require(ROOT+'/node_modules/ws'); const obs=new WS('ws://127.0.0.1:'+PORT); const arr=[]; obs.on('open',()=>obs.send(JSON.stringify({t:'hello',v:1,name:'obs'}))); const cnt={}; obs.on('message',d=>{const m=JSON.parse(d); cnt[m.t]=(cnt[m.t]||0)+1; if(m.t==='snap') for(const e of m.p) if(e[0]===1) arr.push([Date.now(), e[1]]);});
   await A.js('window.__ft=[]; (function loop(t){ if(!window.__ft) return; window.__ft.push(performance.now()); requestAnimationFrame(loop); })(); 1');
   await A.js('window.__sent={}; (function(){var o=WebSocket.prototype.send; WebSocket.prototype.send=function(d){try{var t=JSON.parse(d).t; window.__sent[t]=(window.__sent[t]||0)+1;}catch(e){} return o.apply(this,arguments);};})(); 1');
   A.key('W', true);

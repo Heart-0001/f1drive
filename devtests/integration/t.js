@@ -1,4 +1,4 @@
-const P='C:/Users/user/Desktop/f1drive/';
+const P=require('path').resolve(__dirname, '..', '..')+'/';
 const fs=require('fs');
 let raf=null, keyH={};
 const noop=()=>{};

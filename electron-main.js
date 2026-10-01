@@ -17,6 +17,9 @@ function createWindow() {
       backgroundThrottling: false
     }
   });
+  // backgroundThrottling:false keeps the page 'visible' while minimised / hidden (js/audio.js cannot tell): mute it here
+  const syncMute = () => { if (!win.isDestroyed()) win.webContents.setAudioMuted(win.isMinimized() || !win.isVisible()); };
+  win.on('minimize', syncMute); win.on('restore', syncMute); win.on('hide', syncMute); win.on('show', syncMute);
   win.setMenuBarVisibility(false);
   win.maximize();
   win.webContents.on('before-input-event', (event, input) => {
@@ -32,6 +35,8 @@ function createWindow() {
   win.loadFile(path.join(__dirname, 'index.html'));
 }
 
+// the engine sound (js/audio.js, Web Audio) starts with the game, not only after the first click / key
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 // no default menu: its accelerators (Ctrl+R reload, Ctrl+W close) would interrupt a lap
 Menu.setApplicationMenu(null);
 host.register(ipcMain);

@@ -1,4 +1,4 @@
-const P = 'C:/Users/user/Desktop/f1drive';
+const P = require('path').resolve(__dirname, '..', '..');
 global.window = global;
 global.THREE = require(P + '/lib/three.min.js');
 require(P + '/tracks-data.js');

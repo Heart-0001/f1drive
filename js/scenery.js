@@ -14,6 +14,7 @@
   var CLEAR = 1.5;          // nothing within (wall distance + CLEAR) of the centreline
   var SLACK = 0.3;          // extra room used when objects are fitted against the corridor
   var GANTRY_CLEAR_H = 6.5; // underside of anything spanning the road
+  var GANTRY_CURTAIN_H = 8.6; // ... and of the start gantry over a pit light curtain within 15 m (7.5 m + its columns)
 
   // ---- budgets
   var MAX_TREES = 4600;
@@ -830,6 +831,110 @@
       for (i = 0; i < N; i++) { j = (i + 1) % N; a += X[i] * Z[j] - X[j] * Z[i]; }
       return a > 0 ? -1 : 1;
     })();
+    // The pit lane of js/track.js (track.pit; null: no pit lane, the procedural pit of old is built). Over its samples
+    // from..to (pitMask) the corridor on its side (wallPosDist / wallNegDist, LP / LN here) reaches out to the lane's
+    // outer wall, which is the 6 m garage face along the boxes (unwrapped samples pitG0..pitG1).
+    var PIT = (track.pit && isFinite(track.pit.from) && isFinite(track.pit.to)) ? track.pit : null;
+    var pitSide = PIT ? (PIT.side > 0 ? 1 : -1) : insideSign;
+    var pitMask = null, pitG0 = 0, pitG1 = -1;
+    if (PIT) (function () {
+      var K = wrap(PIT.to - PIT.from), i0 = PIT.from > N / 2 ? PIT.from - N : PIT.from, k, w;
+      pitMask = new Uint8Array(N);
+      for (k = 0; k <= K; k++) pitMask[wrap(i0 + k)] = 1;
+      // the garage face: half a box pitch beyond the first and the last box ...
+      var bx = Array.isArray(PIT.boxes) ? PIT.boxes : [], kmin = Infinity, kmax = -Infinity, nb = 0;
+      for (k = 0; k < bx.length; k++) {
+        if (!bx[k] || !isFinite(bx[k].index)) continue;
+        var kb = wrap(bx[k].index - PIT.from);
+        if (kb > K) continue;
+        nb++;
+        if (kb < kmin) kmin = kb;
+        if (kb > kmax) kmax = kb;
+      }
+      var g0 = 0, g1 = K;
+      if (nb >= 2 && kmax > kmin) {
+        var half = (kmax - kmin) / (nb - 1) / 2;
+        g0 = Math.max(0, Math.ceil(kmin - half)); g1 = Math.min(K, Math.floor(kmax + half));
+      }
+      // ... where the outer wall stands at its full distance (trims the ends, or finds it without boxes)
+      var wmax = 0;
+      for (k = g0; k <= g1; k++) { w = wrap(i0 + k); wmax = Math.max(wmax, pitSide > 0 ? WP[w] : WN[w]); }
+      while (g0 < g1 && (pitSide > 0 ? WP[wrap(i0 + g0)] : WN[wrap(i0 + g0)]) < wmax - 0.3) g0++;
+      while (g1 > g0 && (pitSide > 0 ? WP[wrap(i0 + g1)] : WN[wrap(i0 + g1)]) < wmax - 0.3) g1--;
+      pitG0 = i0 + g0; pitG1 = i0 + g1;
+    })();
+    // trackside furniture (fence, boards, marshal posts, poles) is not put behind the pit lane
+    function pitBehind(idx, side) { return !!pitMask && side === pitSide && pitMask[wrap(idx)] === 1; }
+    // the pit building: its front this far behind the corridor edge (= the garage face), its height above the lane
+    var PIT_FRONT = CLEAR + 0.25, PIT_H = 10.5;
+    // Least distance behind the corridor edge (garage face) of a footprint's outline along the garage face on the pit
+    // side; Infinity if it is not there.
+    function behindFace(p) {
+      var best = Infinity;
+      if (!pitMask || pitG1 < pitG0) return best;
+      for (var a = 0, n = p.length; a < n; a++) {
+        var u = p[a], v = p[(a + 1) % n], st = Math.max(1, Math.ceil(Math.hypot(v[0] - u[0], v[1] - u[1]) / 2));
+        for (var q = 0; q < st; q++) {
+          var x = u[0] + (v[0] - u[0]) * q / st, z = u[1] + (v[1] - u[1]) * q / st, s = nearest(x, z, maxLim + 30);
+          if (s < 0 || wrap(s - pitG0) > pitG1 - pitG0) continue;
+          if ((((x - X[s]) * NX[s] + (z - Z[s]) * NZ[s]) >= 0 ? 1 : -1) !== pitSide) continue;
+          best = Math.min(best, lastD - lim(s, pitSide));
+        }
+      }
+      return best;
+    }
+    // Sight lines to the pit entry light curtain from the approach (the centreline 20..130 m before the entry line) to
+    // three points across it: kept clear of procedural objects and trees (real buildings stay), so that nothing is put
+    // in front of the curtain where the track bends towards the pit side before it.
+    var sight = [], sx0 = Infinity, sx1 = -Infinity, sz0 = Infinity, sz1 = -Infinity;
+    if (PIT && isFinite(PIT.entry)) (function () {
+      var e = wrap(PIT.entry), wd = typeof PIT.wallD === 'function' ? Math.abs(PIT.wallD(e)) : NaN;
+      var ld = typeof PIT.laneD === 'function' ? Math.abs(PIT.laneD(e)) : NaN, lh = PIT.laneHalfW || 3.5;
+      var a = isFinite(wd) ? wd + (PIT.wallHalfT || 0.4) : (isFinite(ld) ? ld - lh : lim(e, pitSide) - 2 * lh);
+      var b = lim(e, pitSide);
+      if (!(b > a)) return;
+      for (var m = 20; m <= 130; m += 10) {
+        var ei = wrap(e - Math.round(m / ds));
+        for (var q = 0; q < 3; q++) {
+          var t = offPt(e, pitSide * (a + (b - a) * (q + 0.5) / 3));
+          sight.push([X[ei], Z[ei], t[0], t[1]]);
+          sx0 = Math.min(sx0, X[ei], t[0]); sx1 = Math.max(sx1, X[ei], t[0]);
+          sz0 = Math.min(sz0, Z[ei], t[1]); sz1 = Math.max(sz1, Z[ei], t[1]);
+        }
+      }
+    })();
+    function inSight(x, z, r) {        // a point within r of a sight line
+      if (!sight.length || x < sx0 - r || x > sx1 + r || z < sz0 - r || z > sz1 + r) return false;
+      for (var a = 0; a < sight.length; a++) {
+        var g = sight[a];
+        if (segDist2(x, z, g[0], g[1], g[2], g[3]) < r * r) return true;
+      }
+      return false;
+    }
+    function polyInSight(p) {          // a footprint crossing (or within 1 m of) a sight line
+      if (!sight.length) return false;
+      var x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity, a, c;
+      for (a = 0; a < p.length; a++) {
+        x0 = Math.min(x0, p[a][0]); x1 = Math.max(x1, p[a][0]); z0 = Math.min(z0, p[a][1]); z1 = Math.max(z1, p[a][1]);
+      }
+      if (x1 < sx0 - 1 || x0 > sx1 + 1 || z1 < sz0 - 1 || z0 > sz1 + 1) return false;
+      for (a = 0; a < p.length; a++) if (inSight(p[a][0], p[a][1], 1)) return true;
+      for (c = 0; c < sight.length; c++) {
+        var g = sight[c], A = [g[0], g[1]], B = [g[2], g[3]];
+        if (pointInPoly(g[2], g[3], p)) return true;
+        for (a = 0; a < p.length; a++) if (segsCross(A, B, p[a], p[(a + 1) % p.length])) return true;
+      }
+      return false;
+    }
+    function polysOverlap(p, q) {
+      var a, b, n = p.length, m = q.length;
+      for (a = 0; a < n; a++) if (pointInPoly(p[a][0], p[a][1], q)) return true;
+      for (b = 0; b < m; b++) if (pointInPoly(q[b][0], q[b][1], p)) return true;
+      for (a = 0; a < n; a++) {
+        for (b = 0; b < m; b++) if (segsCross(p[a], p[(a + 1) % n], q[b], q[(b + 1) % m])) return true;
+      }
+      return false;
+    }
 
     // ---------------------------------------------------------------- buffers
     var solid = new Buf(false), patch = new Buf(false);
@@ -858,8 +963,9 @@
       return f;
     }
 
-    // ---- generic extruded building
-    function addBuilding(p, kind, h, hs) {
+    // ---- generic extruded building. yRef (optional): measure the height from this level instead of the lowest ground
+    //      under the footprint: the pit lane surface for a building behind the garage face (a pit facade: see below)
+    function addBuilding(p, kind, h, hs, yRef) {
       var n = p.length, a, g, gmin = Infinity, gmax = -Infinity, cx = 0, cz = 0;
       for (a = 0; a < n; a++) {
         g = gY(p[a][0], p[a][1]);
@@ -875,7 +981,24 @@
       h = clamp(isFinite(h) ? h : 8, 2.5, 400);
       // a footprint straddling a steep bank (roads at different heights close together) is left out
       if (kind !== 'pit' && gmax - gmin > Math.max(5, 0.6 * h)) { counts.dropped++; return false; }
-      var base = gmin - 1.5, top = Math.max(gmin + h, gmax + 2.5);
+      // A pit facade measured from the lane (yRef) is textured from the lane surface at the garage face abeam of each
+      // wall vertex (rv; edges split to 4 m at most), not from one level for the whole footprint: where the lane slopes
+      // its garage and fascia rows then stay behind the 6 m face of js/track.js along the whole building and only the
+      // glazed floor shows above the face (one level put them above the face at the downhill end). The roof is flat, h
+      // above the highest of yRef and rv; above the glazing the wall takes the texture's plain top row.
+      var base = gmin - 1.5, top = Math.max(gmin + h, gmax + 2.5), ref = gmin, pw = p, rv = null;
+      if (yRef === yRef && isFinite(yRef)) {
+        var rlo = yRef, rhi = yRef;
+        if (kind === 'pit') {
+          pw = densify(p, 4); rv = new Array(pw.length);
+          for (a = 0; a < pw.length; a++) {
+            g = faceLaneY(pw[a][0], pw[a][1]);
+            rv[a] = g === g ? g : yRef;
+            if (rv[a] < rlo) rlo = rv[a]; if (rv[a] > rhi) rhi = rv[a];
+          }
+        }
+        ref = yRef; base = Math.min(gmin, rlo) - 1.5; top = Math.max(rhi + h, gmax + 2.5);
+      }
       var area = Math.abs(polyArea(p));
       var r1 = h01(hs), r2 = h01(hs + 17), r3 = h01(hs + 31), r4 = h01(hs + 47);
       var style = kind === 'pit' ? 2 :
@@ -886,13 +1009,16 @@
       var FH = style === 1 ? 3.6 : 3.2;
       var nf = Math.max(1, Math.round((top - gmin) / FH));
       var vb, vt, uo = Math.floor(r4 * 4) / 4, vo = Math.floor(r3 * 4) / 4, acc = 0;
-      if (style === 2) { vb = (base - gmin) / 10; vt = (top - gmin) / 10; }
+      if (style === 2) { vb = (base - ref) / 10; vt = (top - ref) / 10; }
       else { vt = vo + nf / 4; vb = vo + (base - gmin) / ((top - gmin) / nf) / 4; }
-      for (a = 0; a < n; a++) {
-        var u = p[a], v = p[(a + 1) % n], len = Math.hypot(v[0] - u[0], v[1] - u[1]), u0, u1;
+      for (a = 0; a < pw.length; a++) {
+        var b = (a + 1) % pw.length, u = pw[a], v = pw[b], len = Math.hypot(v[0] - u[0], v[1] - u[1]), u0, u1;
         if (style === 2) { u0 = acc / 12; u1 = (acc + len) / 12; acc += len; }
         else { var nb = Math.round(len / FH); u0 = uo; u1 = uo + nb / 4; }
-        wall(buf, u[0], u[1], v[0], v[1], base, base, top, top, col, u0, u1, vb, vt);
+        if (rv) {
+          quad(buf, [u[0], base, u[1]], [v[0], base, v[1]], [v[0], top, v[1]], [u[0], top, u[1]], col,
+               [u0, (base - rv[a]) / 10], [u1, (base - rv[b]) / 10], [u1, (top - rv[b]) / 10], [u0, (top - rv[a]) / 10]);
+        } else wall(buf, u[0], u[1], v[0], v[1], base, base, top, top, col, u0, u1, vb, vt);
       }
       var roofCol = (prof.med && style === 0 && h < 17 && r4 < 0.7) ? shade(C(0xa85c3c), 0.85 + r3 * 0.3) :
         shade(C(PAL_ROOF[Math.floor(r4 * PAL_ROOF.length)]), 0.9 + r3 * 0.2);
@@ -903,6 +1029,7 @@
       }
       counts.buildings++;
       if (DEBUG) foot.push({ k: kind, p: p });
+      return true;
     }
 
     // ---- grandstand: raked seating rising away from the track, optional roof
@@ -1059,6 +1186,39 @@
 
     // ================================================================ 1. real data: buildings
     var dataStandsNear = 0, dataPit = false, dataNearBuildings = 0;
+    var dataFeet = [];        // with track.pit: the real buildings that stand, [polygon, x0, x1, z0, z1]
+    var pitLater = [];        // with track.pit: the real pit buildings next to the garage face (placed last)
+    // A real pit building next to the pit lane (the corridor may have clipped its front to the garage face): the
+    // lane surface there, so that it is measured from the lane and rises above the garage face; NaN if it is not.
+    function pitRefY(p) {
+      var y = NaN;
+      for (var a = 0; a < p.length; a++) {
+        var s = nearest(p[a][0], p[a][1], maxLim + 40);
+        if (s < 0 || !pitMask[s]) continue;
+        if ((((p[a][0] - X[s]) * NX[s] + (p[a][1] - Z[s]) * NZ[s]) >= 0 ? 1 : -1) !== pitSide) continue;
+        if (lastD - lim(s, pitSide) > 30) continue;
+        var v = sY(s, pitSide * wallD(s, pitSide));
+        if (!(v <= y)) y = v;
+      }
+      return y;
+    }
+    // The lane surface at the garage face (the pit-side corridor edge) abeam of (x, z), interpolated between samples;
+    // beyond the ends of the lane (up to 40 m) the lane at its end; NaN where (x, z) is not beside the pit lane.
+    // (the texture level of a pit facade's wall vertex, see addBuilding)
+    function faceLaneY(x, z) {
+      if (!pitMask) return NaN;
+      var s = nearest(x, z, maxLim + 80);
+      if (s < 0 || (((x - X[s]) * NX[s] + (z - Z[s]) * NZ[s]) >= 0 ? 1 : -1) !== pitSide) return NaN;
+      if (!pitMask[s]) {
+        var kf = wrap(PIT.from - s), kt = wrap(s - PIT.to);
+        if (Math.min(kf, kt) * ds > 40) return NaN;
+        s = wrap(kf < kt ? PIT.from : PIT.to);
+      }
+      var al = (x - X[s]) * TX[s] + (z - Z[s]) * TZ[s], o = wrap(al >= 0 ? s + 1 : s - 1);
+      var y = sY(s, pitSide * wallD(s, pitSide));
+      if (pitMask[o]) y += (sY(o, pitSide * wallD(o, pitSide)) - y) * Math.min(1, Math.abs(al) / ds);
+      return y;
+    }
     (function () {
       var list = [], a, b, p;
       for (a = 0; a < dBuildings.length; a++) {
@@ -1086,19 +1246,85 @@
         var fitted = fitPoly(p);
         if (!fitted) { counts.dropped++; continue; }
         if (fitted !== p) { counts.fitted++; p = orient(fitted); }
-        var hs = (seed + it.idx * 2654435761) | 0;
+        var hs = (seed + it.idx * 2654435761) | 0, built;
         if (kind === 'grandstand') {
-          if (addStand(p, it.h, h01(hs + 5) < 0.45 || Math.abs(polyArea(p)) > 1500, hs)) {
+          if ((built = addStand(p, it.h, h01(hs + 5) < 0.45 || Math.abs(polyArea(p)) > 1500, hs))) {
             if (it.d < 120) dataStandsNear++;
-          } else addBuilding(p, 'building', Math.min(it.h, 12), hs);
+          } else built = addBuilding(p, 'building', Math.min(it.h, 12), hs);
         } else {
-          addBuilding(p, kind, it.h, hs);
+          // with track.pit: a real pit building next to the garage face is handled below, once all the real buildings
+          // are known; a plain building standing right against the face is the pit building there (pit facade, at
+          // least PIT_H - 0.5 above the lane)
+          var yr = (kind === 'pit' || kind === 'building') && PIT ? pitRefY(p) : NaN, bf = yr === yr ? behindFace(p) : Infinity;
           if (kind === 'pit') dataPit = true;
           if (it.d < 200) dataNearBuildings++;
+          if (kind === 'pit' && bf < 15) { pitLater.push({ p: p, h: it.h, hs: hs, y: yr }); continue; }
+          if (kind === 'building' && bf <= PIT_FRONT + 2.5) built = addBuilding(p, 'pit', Math.max(it.h, PIT_H - 0.5), hs, yr);
+          else if (kind === 'pit' && yr === yr) built = addBuilding(p, kind, Math.max(it.h, 9), hs, yr);
+          else built = addBuilding(p, kind, it.h, hs);
         }
         stampPoly(p, BIT_B);
+        if (PIT && built) dataFeet.push(footBox(p));
+      }
+      // The real pit buildings next to the garage face: the lane of js/track.js is laid out, not mapped, so a real pit
+      // building often stands a few metres back from the face, or at a slant. Its front (the edges facing the track
+      // along the face) is brought forward to the face, unless that would run into another real building; it gets the
+      // pit facade and is at least PIT_H - 0.5 tall above the lane.
+      for (a = 0; a < pitLater.length; a++) {
+        var pl = pitLater[a], sp = snapToFace(pl.p);
+        if (sp) {
+          var fb = footBox(sp), clash = false;
+          for (q = 0; q < dataFeet.length && !clash; q++) {
+            var e = dataFeet[q];
+            if (e[2] < fb[1] || e[1] > fb[2] || e[4] < fb[3] || e[3] > fb[4]) continue;
+            if (polysOverlap(sp, e[0])) clash = true;
+          }
+          if (!clash) { pl.p = sp; counts.fitted++; }
+        }
+        if (addBuilding(pl.p, 'pit', Math.max(pl.h, PIT_H - 0.5), pl.hs, pl.y)) dataFeet.push(footBox(pl.p));
+        stampPoly(pl.p, BIT_B);
       }
     })();
+    function footBox(p) {
+      var x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+      for (var q = 0; q < p.length; q++) {
+        x0 = Math.min(x0, p[q][0]); x1 = Math.max(x1, p[q][0]); z0 = Math.min(z0, p[q][1]); z1 = Math.max(z1, p[q][1]);
+      }
+      return [p, x0, x1, z0, z1];
+    }
+    // the front edges of a footprint (outward normal towards the track, midpoint along the garage face) moved forward to
+    // PIT_FRONT + 0.3 behind the corridor edge; null if nothing moves or the result is not valid
+    function snapToFace(p0) {
+      var p = densify(p0, 4), n = p.length, q = p.map(function (v) { return [v[0], v[1]]; }), front = new Uint8Array(n);
+      var a, s, moved = 0;
+      if (polyArea(p) > 0) return null;
+      for (a = 0; a < n; a++) {
+        var u = p[a], v = p[(a + 1) % n], l = Math.hypot(v[0] - u[0], v[1] - u[1]);
+        if (l < 0.3) continue;
+        var ox = -(v[1] - u[1]) / l, oz = (v[0] - u[0]) / l, mx = (u[0] + v[0]) / 2, mz = (u[1] + v[1]) / 2;
+        s = nearest(mx, mz, maxLim + 40);
+        if (s < 0 || wrap(s - pitG0) > pitG1 - pitG0) continue;
+        if ((((mx - X[s]) * NX[s] + (mz - Z[s]) * NZ[s]) >= 0 ? 1 : -1) !== pitSide) continue;
+        if (-(ox * NX[s] + oz * NZ[s]) * pitSide < 0.6) continue;
+        front[a] = 1; front[(a + 1) % n] = 1;
+      }
+      for (a = 0; a < n; a++) {
+        if (!front[a]) continue;
+        s = nearest(p[a][0], p[a][1], maxLim + 40);
+        if (s < 0) continue;
+        var dx = p[a][0] - X[s], dz = p[a][1] - Z[s], along = dx * TX[s] + dz * TZ[s];
+        var L = lim(s, pitSide) + PIT_FRONT + 0.3;
+        if ((dx * NX[s] + dz * NZ[s]) * pitSide <= L) continue;
+        q[a] = [X[s] + TX[s] * along + NX[s] * pitSide * L, Z[s] + TZ[s] * along + NZ[s] * pitSide * L];
+        moved++;
+      }
+      if (!moved) return null;
+      q = simplify(q);
+      if (!q || selfIntersects(q)) return null;
+      q = orient(q);
+      if (polyClearance(q) < CLEAR || Math.abs(polyArea(q)) < Math.abs(polyArea(p0))) return null;
+      return q;
+    }
 
     mark('dataBuildings');
     // ================================================================ 2. real data: areas -> raster
@@ -1121,7 +1347,7 @@
     function lim(idx, side) { return side > 0 ? LP[idx] : LN[idx]; }
     function wallD(idx, side) { return side > 0 ? WP[idx] : WN[idx]; }
     function canPlace(p) {
-      return !selfIntersects(p) && polyClearance(p) >= CLEAR + 0.1 && !polyHitsOcc(p, BIT_B);
+      return !selfIntersects(p) && polyClearance(p) >= CLEAR + 0.1 && !polyHitsOcc(p, BIT_B) && !polyInSight(p);
     }
     // footprint following the track between samples i0..i1 (i1 > i0, unwrapped) on one side
     function stripPoly(i0, i1, side, off0, off1) {
@@ -1148,22 +1374,37 @@
     (function () {
       var g = wrap(Math.round(6 / ds));
       var tx = TX[g], tz = TZ[g], ok = false, dP, dN, ext;
+      // Beside the pit lane (track.pit) the gantry is cantilevered from the far side: nothing of it stands in or spans
+      // the lane; its pit-side end hangs over the pit wall, or over the road edge where the wall is open there or where
+      // a light curtain stands within 15 m (the entry / exit line next to the start line: the beam keeps clear of it, and
+      // goes over its top, so that a driver arriving sees the whole curtain under the beam, not its top behind it).
+      var cant = pitMask && pitMask[g] ? pitSide : 0, reach = 0, lw = cant ? 0.42 : 0.3, nearC = false;
+      if (cant) {
+        var wdg = typeof PIT.wallD === 'function' ? Math.abs(PIT.wallD(g)) : NaN;
+        var hwg = isFinite(S[g].halfW) ? S[g].halfW : nomHalf;
+        [PIT.entry, PIT.exit].forEach(function (c) {
+          if (isFinite(c) && Math.abs(((wrap(c - g) + N / 2) % N) - N / 2) * ds < 15) nearC = true;
+        });
+        reach = wdg > hwg && !nearC ? wdg : hwg - 0.2;
+      }
       for (ext = 0; ext < 6 && !ok; ext++) {
-        dP = LP[g] + CLEAR + 0.45 + ext; dN = LN[g] + CLEAR + 0.45 + ext;
+        dP = cant > 0 ? reach - 0.3 : LP[g] + CLEAR + 0.45 + ext;
+        dN = cant < 0 ? reach - 0.3 : LN[g] + CLEAR + 0.45 + ext;
         ok = true;
         for (var s = -1; s <= 1 && ok; s += 2) {
+          if (s === cant) continue;
           var c = offPt(g, s > 0 ? dP : -dN);
           for (var q = 0; q < 4; q++) {
-            if (!isClear(c[0] + ((q & 1) ? 0.3 : -0.3), c[1] + ((q & 2) ? 0.3 : -0.3), CLEAR)) ok = false;
+            if (!isClear(c[0] + ((q & 1) ? lw : -lw), c[1] + ((q & 2) ? lw : -lw), CLEAR)) ok = false;
           }
         }
       }
       if (!ok) return;
-      var y0 = Math.max(sY(g, 0), sY(g, WP[g]), sY(g, -WN[g]));
-      var yb = y0 + GANTRY_CLEAR_H, yt = yb + 1.5;
+      var y0 = Math.max(sY(g, 0), sY(g, cant > 0 ? reach : WP[g]), sY(g, cant < 0 ? -reach : -WN[g]));
+      var yb = y0 + (nearC ? GANTRY_CURTAIN_H : GANTRY_CLEAR_H), yt = yb + 1.5;
       var a = offPt(g, dP), b = offPt(g, -dN);
-      box(solid, a[0], a[1], gY(a[0], a[1]) - 1.5, yt, tx, tz, 0.3, 0.3, COL_STEEL);
-      box(solid, b[0], b[1], gY(b[0], b[1]) - 1.5, yt, tx, tz, 0.3, 0.3, COL_STEEL);
+      if (cant <= 0) box(solid, a[0], a[1], gY(a[0], a[1]) - 1.5, yt, tx, tz, lw, lw, COL_STEEL);
+      if (cant >= 0) box(solid, b[0], b[1], gY(b[0], b[1]) - 1.5, yt, tx, tz, lw, lw, COL_STEEL);
       var mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2, halfSpan = (dP + dN) / 2 + 0.3;
       box(solid, mx, mz, yb, yt, NX[g], NZ[g], halfSpan, 0.45, COL_DARK);
       // faces towards the cars arriving (-t): driver's left is +n, so u runs from +n to -n
@@ -1180,17 +1421,121 @@
       if (halfSpan - 0.4 - (cen + 1.5) > 3) face(halfSpan - 0.4, cen + 1.5, bannerUV(bi));
       if ((cen - 1.5) - (-halfSpan + 0.4) > 3) face(cen - 1.5, -halfSpan + 0.4, bannerUV((bi + 2) % BANNERS.length));
       if (DEBUG) {
-        foot.push({ k: 'gantry-leg', p: [[a[0] - 0.3, a[1] - 0.3], [a[0] + 0.3, a[1] - 0.3], [a[0] + 0.3, a[1] + 0.3], [a[0] - 0.3, a[1] + 0.3]] });
-        foot.push({ k: 'gantry-leg', p: [[b[0] - 0.3, b[1] - 0.3], [b[0] + 0.3, b[1] - 0.3], [b[0] + 0.3, b[1] + 0.3], [b[0] - 0.3, b[1] + 0.3]] });
+        if (cant <= 0) foot.push({ k: 'gantry-leg', p: [[a[0] - lw, a[1] - lw], [a[0] + lw, a[1] - lw], [a[0] + lw, a[1] + lw], [a[0] - lw, a[1] + lw]] });
+        if (cant >= 0) foot.push({ k: 'gantry-leg', p: [[b[0] - lw, b[1] - lw], [b[0] + lw, b[1] - lw], [b[0] + lw, b[1] + lw], [b[0] - lw, b[1] + lw]] });
         foot.push({ k: 'gantry-beam', sample: g, minY: yb });
       }
     })();
 
-    // ---- pit building + control tower + pit wall stands
-    var pitSide = insideSign;
+    // ---- with track.pit: the pit building right behind the garage face of js/track.js.
+    //      The lane, its pit wall, the boxes, the garage face (6 m) and the light curtains are track.js's, inside the
+    //      corridor. Behind the garage face (outside corridor + CLEAR) stands the pit building, along it, facing the lane
+    //      and rising above it: the real one (OSM 'pit', its front possibly clipped to the corridor by fitPoly) where the
+    //      data has a building there, a procedural one (the pit texture: its garages are hidden by the face, the glazed
+    //      floor shows above it) over the rest; then the control tower beyond its downstream end and the paddock
+    //      (asphalt) behind it. No lane asphalt and no pit wall stands (the lane and the pit wall are track.js's).
+    function pitBuilding() {
+      if (pitG1 < pitG0) return;
+      var FRONT = PIT_FRONT, DEPTH = 16, H = PIT_H, n = pitG1 - pitG0 + 1, a, q;
+      function inData(x, z) {
+        for (var f = 0; f < dataFeet.length; f++) {
+          var e = dataFeet[f];
+          if (x >= e[1] && x <= e[2] && z >= e[3] && z <= e[4] && pointInPoly(x, z, e[0])) return true;
+        }
+        return false;
+      }
+      function hitsData(p) {        // exact (the occupancy raster is too coarse to fit a block in front of a building)
+        var x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity, b;
+        for (b = 0; b < p.length; b++) {
+          x0 = Math.min(x0, p[b][0]); x1 = Math.max(x1, p[b][0]); z0 = Math.min(z0, p[b][1]); z1 = Math.max(z1, p[b][1]);
+        }
+        for (b = 0; b < dataFeet.length; b++) {
+          var e = dataFeet[b];
+          if (e[2] < x0 || e[1] > x1 || e[4] < z0 || e[3] > z1) continue;
+          if (polysOverlap(p, e[0])) return true;
+        }
+        return false;
+      }
+      // footprint along the garage face from unwrapped sample a0 to a1, off0..off1 behind the corridor edge;
+      // .y = the lane surface at the face (the building's height is measured from it)
+      function slab(a0, a1, off0, off1) {
+        var stp = Math.max(1, Math.round(4 / ds)), fr = [], bk = [], y = -Infinity;
+        for (var b = a0; ; b += stp) {
+          if (b > a1) b = a1;
+          var w = wrap(b), L = lim(w, pitSide);
+          fr.push(offPt(w, pitSide * (L + off0))); bk.push(offPt(w, pitSide * (L + off1)));
+          y = Math.max(y, sY(w, pitSide * wallD(w, pitSide)));
+          if (b === a1) break;
+        }
+        var p = orient(fr.concat(bk.reverse()));
+        p.y = y; p.a0 = a0; p.a1 = a1;
+        return p;
+      }
+      // samples of the garage face with a real building standing right against it (it is the pit building there)
+      var cov = new Uint8Array(n);
+      for (a = 0; a < n; a++) {
+        var w = wrap(pitG0 + a), pt = offPt(w, pitSide * (lim(w, pitSide) + FRONT + 1.5));
+        if (inData(pt[0], pt[1])) cov[a] = 1;
+      }
+      // procedural blocks over the rest, about 30 m each (the roof steps where the lane climbs); in front of a real
+      // building standing further back a block is made shallower, where even that does not fit it is halved. All are
+      // checked before any is stamped (neighbours touch).
+      var blocks = [], minLen = Math.max(2, Math.round(9 / ds)), segLen = Math.max(minLen, Math.round(30 / ds));
+      var DEPTHS = [DEPTH, 12, 9, 6.5, 4.5, 3], TRIMS = [[0, 0], [1, 0], [0, 1], [1, 1], [2, 0], [0, 2], [2, 2]];
+      function fit(a0, a1) {
+        if (a1 - a0 < minLen) return;
+        for (var t = 0; t < DEPTHS.length; t++) {
+          var p = slab(a0, a1, FRONT, FRONT + DEPTHS[t]);
+          if (selfIntersects(p) || polyClearance(p) < CLEAR + 0.1 || polyInSight(p)) break;
+          for (var r = 0; r < TRIMS.length; r++) {        // shortened a little where it meets a real building's end
+            var b0 = a0 + TRIMS[r][0], b1 = a1 - TRIMS[r][1];
+            if (b1 - b0 < minLen || hitsData(slab(b0, b1, FRONT - 0.2, FRONT + DEPTHS[t] + 0.4))) continue;
+            var pb = r ? slab(b0, b1, FRONT, FRONT + DEPTHS[t]) : p;
+            pb.depth = DEPTHS[t];
+            blocks.push(pb);
+            return;
+          }
+        }
+        var m = Math.floor((a0 + a1) / 2);
+        fit(a0, m); fit(m, a1);
+      }
+      for (a = 0; a < n;) {
+        if (cov[a]) { a++; continue; }
+        var r0 = a;
+        while (a < n && !cov[a]) a++;
+        var nSeg = Math.max(1, Math.round((a - 1 - r0) / segLen));
+        for (q = 0; q < nSeg; q++) {
+          fit(pitG0 + r0 + Math.round((a - 1 - r0) * q / nSeg), pitG0 + r0 + Math.round((a - 1 - r0) * (q + 1) / nSeg));
+        }
+      }
+      for (a = 0; a < blocks.length; a++) {
+        addBuilding(blocks[a], 'pit', H, seed + 101, blocks[a].y);
+        if (blocks[a].depth === DEPTH) fillPoly(slab(blocks[a].a0, blocks[a].a1, FRONT + DEPTH, FRONT + DEPTH + 26), BIT_ASPH);   // paddock
+      }
+      for (a = 0; a < blocks.length; a++) stampPoly(blocks[a], BIT_B);
+      counts.pitBlocks = blocks.length;
+      // control tower beyond the downstream end (where the track has no pit building of its own)
+      if (dataPit || !blocks.length) return;
+      var tries = [[10, 0], [16, 0], [10, 6], [24, 0], [16, 8], [32, 4]], sp = Math.round(6 / ds);
+      for (var t = 0; t < tries.length; t++) {
+        var ti = pitG1 + Math.round(tries[t][0] / ds), wi = wrap(ti), Lt = 0;
+        for (q = -sp; q <= sp; q++) Lt = Math.max(Lt, lim(wrap(ti + q), pitSide));
+        var tc = offPt(wi, pitSide * (Lt + CLEAR + 1.5 + 4.5 + tries[t][1]));
+        var tp = rectPoly(tc[0], tc[1], TX[wi], TZ[wi], 4.5, 4.5);
+        if (!canPlace(tp)) continue;
+        var ty = sY(wi, pitSide * wallD(wi, pitSide));
+        addBuilding(tp, 'tower', 24, seed + 103, ty);
+        stampPoly(tp, BIT_B);
+        box(solid, tc[0], tc[1], ty + 24, ty + 25.6, TX[wi], TZ[wi], 5.6, 5.6, COL_DARK, C(0x8a8c90));
+        break;
+      }
+    }
+
+    // ---- pit building + control tower + pit wall stands (the procedural pit of a track without track.pit)
     (function () {
       var mSpan = Math.round(40 / ds);
       markFence(0, 1, Math.max(mainBack, mainFwd)); markFence(0, -1, Math.max(mainBack, mainFwd));
+      if (PIT) { pitBuilding(); return; }
       if (dataPit) return;
       var back = Math.min(mainBack, Math.round(230 / ds)), fwd = Math.min(mainFwd, Math.round(70 / ds));
       var tries = [[pitSide, 1], [-pitSide, 1], [pitSide, 0.6], [-pitSide, 0.6]], p = null, side = pitSide, i0 = 0, i1 = 0;
@@ -1317,7 +1662,7 @@
         if (isCityBuild && r > 1.15 - d / 900) continue;       // denser near the circuit
         var w = 16 + r2 * 30, dp = 16 + r3 * 26, ang = r4 * Math.PI;
         var p = rectPoly(x, z, Math.cos(ang), Math.sin(ang), w / 2, dp / 2);
-        if (polyHitsOcc(p, BIT_B | BIT_WATER) || polyClearance(p) < CLEAR + 3) continue;
+        if (polyHitsOcc(p, BIT_B | BIT_WATER) || polyClearance(p) < CLEAR + 3 || polyInSight(p)) continue;
         var h = cityHeight(true) * (d > 300 ? 1.5 : 1);
         if (!isCityBuild) h = 45 + rnd() * 130;
         addBuilding(p, h > 60 ? 'tower' : 'building', h, (seed + t * 104729) | 0);
@@ -1334,6 +1679,7 @@
       var stp = Math.max(1, Math.round(8 / ds)), made = 0;
       for (var a = i0; a + stp <= i1; a += stp) {
         var ia = wrap(a), ib = wrap(a + stp);
+        if (pitBehind(ia, side) || pitBehind(ib, side)) continue;
         var pa = offPt(ia, side * (lim(ia, side) + CLEAR + 0.45)), pb = offPt(ib, side * (lim(ib, side) + CLEAR + 0.45));
         if (!segClear(pa, pb, CLEAR + 0.03)) continue;
         var mx = (pa[0] + pb[0]) / 2, mz = (pa[1] + pb[1]) / 2;
@@ -1359,6 +1705,7 @@
     }
     function distanceBoard(idx, side, which) {
       idx = wrap(idx);
+      if (pitBehind(idx, side)) return;
       var l0 = lim(idx, side) + CLEAR + 0.4, l1 = l0 + 2.0;
       var pa = offPt(idx, side * l0), pb = offPt(idx, side * l1);
       if (!segClear(pa, pb, CLEAR + 0.03)) return;
@@ -1400,7 +1747,7 @@
         var side = sd ? 1 : -1, flags = fenceFlag[sd];
         var prevOK = false, pp = null, py = 0, pg = 0;
         for (var a = 0; a <= N; a += stp) {
-          var ia = wrap(a), on = prof.city || flags[ia];
+          var ia = wrap(a), on = (prof.city || flags[ia]) && !pitBehind(ia, side);
           var ok = false, pt = null, y = 0, g = 0;
           if (on) {
             pt = offPt(ia, side * (lim(ia, side) + CLEAR + 0.18));
@@ -1425,6 +1772,7 @@
       var every = Math.round(340 / ds), n = 0, a, q;
       for (a = Math.round(120 / ds); a < N; a += every, n++) {
         var side = (n & 1) ? -1 : 1, ia = wrap(a);
+        if (pitBehind(ia, side)) continue;
         var c = offPt(ia, side * (lim(ia, side) + CLEAR + 1.5));
         var hb = rectPoly(c[0], c[1], TX[ia], TZ[ia], 1.3, 0.95), ok = true;
         for (q = 0; q < 4; q++) if (!isClear(hb[q][0], hb[q][1], CLEAR + 0.05)) ok = false;
@@ -1438,6 +1786,7 @@
         n = 0;
         for (a = Math.round(40 / ds); a < N; a += ev2, n++) {
           var sd2 = (n & 1) ? 1 : -1, ib = wrap(a);
+          if (pitBehind(ib, sd2)) continue;
           var c2 = offPt(ib, sd2 * (lim(ib, sd2) + CLEAR + 0.9));
           var ok2 = true;
           for (q = 0; q < 4; q++) if (!isClear(c2[0] + ((q & 1) ? 0.25 : -0.25), c2[1] + ((q & 2) ? 0.25 : -0.25), CLEAR + 0.05)) ok2 = false;
@@ -1471,7 +1820,16 @@
         if (d < 120 && !isClear(x, z, CLEAR + rad)) return;
         if ((occAt(x + 7, z) | occAt(x - 7, z) | occAt(x, z + 7) | occAt(x, z - 7)) & BIT_B) return;
         var h = kind === 0 ? 7 + rnd() * 6.5 : (kind === 1 ? 8 + rnd() * 7 : 7 + rnd() * 5);
-        trees.push({ x: x, z: z, h: h, kind: kind, tint: rnd(), w: w + rnd() * 140, s: 0.82 + rnd() * 0.36, rot: rnd() * 6.283 });
+        var t = { x: x, z: z, h: h, kind: kind, tint: rnd(), w: w + rnd() * 140, s: 0.82 + rnd() * 0.36, rot: rnd() * 6.283 };
+        // next to the pit lane the crown must not reach over it (radius per unit tree: see treeGeometry), nor stand in
+        // the sight lines to the entry curtain. Decided after the random draws, so that every other tree stays put.
+        if (pitMask && d < 200) {
+          var crown = t.h * t.s * (kind === 0 ? 0.39 : (kind === 1 ? 0.21 : 0.35)), ps = nearest(x, z, maxLim + 30);
+          if (ps >= 0 && pitMask[ps] && ((x - X[ps]) * NX[ps] + (z - Z[ps]) * NZ[ps] >= 0 ? 1 : -1) === pitSide &&
+              !isClear(x, z, crown + 0.2)) return;
+          if (inSight(x, z, crown + 0.5)) return;
+        }
+        trees.push(t);
       }
       for (a = 0; a < dTrees.length; a++) {
         var t = dTrees[a];

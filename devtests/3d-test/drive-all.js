@@ -1,6 +1,6 @@
 // Drive one full lap on each track with a centreline follower using real track.js + car.js;
 // replicate main.js lap timing. Report: stuck, max |d|, wall hits, lap counted, lap time, wall-on-road.
-const { F1, TRACKS } = require('C:/Users/user/AppData/Local/Temp/f1drive-3d-test/load');
+const { F1, TRACKS } = require('./load');
 const only = process.argv[2];
 const DT = 1 / 120;
 function wrapPi(a) { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; }

@@ -1,0 +1,40 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>hidden-window audio probe</title></head>
+<body style="background:#222;color:#eee">
+<script src="../../../js/audio.js"></script>
+<script>
+// A game-like loop: requestAnimationFrame -> F1.audio.update, exactly as a main.js glue would call it.
+// The Electron side minimises / hides the REAL window; this page reports what the page itself saw.
+window.P = {
+  frames: 0, visEvents: [], an: null, buf: null,
+  start: async function () {
+    var a = F1.audio;
+    var ok = await a.init();
+    a.setActive(true);
+    var st = { speed: 60, gear: 5, rpm: 9000, throttle: 1, brake: 0, x: 0, y: 0, z: 0, heading: 0 };
+    var L = { x: 0, y: 0.8, z: 0, heading: 0 };
+    var last = 0;
+    function loop(t) {
+      requestAnimationFrame(loop);
+      var dt = last ? (t - last) / 1000 : 0; last = t;
+      P.frames++;
+      st.z += 1;
+      a.update(dt, st, L, []);
+    }
+    requestAnimationFrame(loop);
+    document.addEventListener('visibilitychange', function () { P.visEvents.push(document.visibilityState); });
+    var ctx = a.debug.context;
+    P.an = ctx.createAnalyser(); P.an.fftSize = 4096; a.debug.output.connect(P.an);
+    P.buf = new Float32Array(P.an.fftSize);
+    return { init: ok, backend: a.debug.backend, ctx: ctx.state };
+  },
+  sample: function () {
+    var a = F1.audio, rms = 0, q;
+    P.an.getFloatTimeDomainData(P.buf);
+    for (q = 0; q < P.buf.length; q++) rms += P.buf[q] * P.buf[q];
+    return { frames: P.frames, audioFrames: a.debug.frames, hidden: document.hidden, vis: document.visibilityState, visEvents: P.visEvents.slice(),
+      stalled: a.debug.stalled, ctx: a.debug.context.state, rmsDb: Math.round(10 * Math.log10(rms / P.buf.length + 1e-20) * 10) / 10 };
+  }
+};
+</script>
+</body></html>

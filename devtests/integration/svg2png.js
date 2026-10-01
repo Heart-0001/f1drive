@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require('electron');
+require('../electron-userdata')(app, 'svg2png');
 const fs = require('fs'), path = require('path'), url = require('url');
 app.disableHardwareAcceleration();
 app.whenReady().then(async () => {

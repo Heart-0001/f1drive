@@ -50,9 +50,12 @@ for (const td of TRACKS) {
           if (staleRun * DT > 1.0) { stale++; if (ex.length < 5) ex.push({ what: 'stale', mode, start, idx: st.sampleIndex, near: g.j, dl: +dl.toFixed(1), gd: +g.d.toFixed(1) }); staleRun = 0; }
         }
       }
-      // final state must be on/inside the track
-      const g = nearest(st.x, st.z);
-      if (g.d > 13) { outside++; if (ex.length < 5) ex.push({ what: 'endsOutside', mode, start, idx: st.sampleIndex, gd: +g.d.toFixed(1) }); }
+      // final state must be on/inside the track (v6: beside the pit lane, track.pit, the walls on its side stand further
+      // out: the lane, the boxes and the garage face)
+      const g = nearest(st.x, st.z), pit = track.pit;
+      const inPit = !!pit && Number.isFinite(pit.laneD(g.j)) && Math.sign(st.d) === pit.side &&
+        g.d <= (pit.side > 0 ? S[g.j].wallPosDist : S[g.j].wallNegDist);
+      if (g.d > 13 && !inPit) { outside++; if (ex.length < 5) ex.push({ what: 'endsOutside', mode, start, idx: st.sampleIndex, gd: +g.d.toFixed(1) }); }
     }
   }
   tot.through += through; tot.stale += stale; tot.outside += outside;

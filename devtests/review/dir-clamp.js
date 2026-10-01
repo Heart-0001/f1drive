@@ -1,11 +1,13 @@
 const { F1, TRACKS } = require('./load');
 // 1) racing direction: signed area in (east, north) = (x, -z). positive => anticlockwise.
+// za-1961 (Kyalami, today's 4.5 km layout) and us-2022 (Miami) were listed as clockwise here; both run
+// anticlockwise, so the two "MISMATCH" lines this script used to print were errors in this table, not in the data.
 const KNOWN = { // true = clockwise
   'au-1953': true, 'pt-1972': true, 'it-1953': false, 'mx-1962': true, 'pt-2008': true, 'br-1977': false, 'it-1914': true,
   'br-1940': false, 'it-1922': true, 'ar-1952': true, 'bh-2002': true, 'az-2016': false, 'es-1991': true, 'mc-1929': true,
   'fr-1960': true, 'be-1925': true, 'ca-1978': true, 'us-2012': false, 'fr-1969': true, 'nl-1948': true, 'de-1932': true,
-  'hu-1986': true, 'us-1909': true, 'tr-2005': false, 'sa-2021': false, 'za-1961': true, 'us-2023': false, 'qa-2004': true,
-  'sg-2008': false, 'us-2022': true, 'de-1927': true, 'at-1969': true, 'my-1999': true, 'cn-2004': true, 'gb-1948': true,
+  'hu-1986': true, 'us-1909': true, 'tr-2005': false, 'sa-2021': false, 'za-1961': false, 'us-2023': false, 'qa-2004': true,
+  'sg-2008': false, 'us-2022': false, 'de-1927': true, 'at-1969': true, 'my-1999': true, 'cn-2004': true, 'gb-1948': true,
   'ru-2014': true, 'us-1956': true, 'ae-2009': false
 };
 for (const td of TRACKS) {

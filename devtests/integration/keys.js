@@ -1,9 +1,10 @@
 const { app, BrowserWindow } = require('electron');
+require('../electron-userdata')(app, 'int-keys');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 app.whenReady().then(async () => {
   const w = new BrowserWindow({ width: 800, height: 450, show: false, webPreferences: { offscreen: true } });
   w.webContents.setFrameRate(60);
-  await w.loadFile('C:/Users/user/Desktop/f1drive/index.html');
+  await w.loadFile(require('path').resolve(__dirname, '..', '..', 'index.html'));
   await sleep(500);
   await w.webContents.executeJavaScript("window.__k=[]; ['keydown','keyup','blur'].forEach(function(n){window.addEventListener(n,function(e){window.__k.push(n+':'+(e.code||''))},true)}); [].slice.call(document.querySelectorAll('.card')).filter(function(n){return /monza/i.test(n.textContent)})[0].click()");
   await sleep(1500);

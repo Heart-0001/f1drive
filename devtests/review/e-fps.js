@@ -1,11 +1,12 @@
 // Measure rAF rate and physics progression in an Electron window (visible, so rAF runs at display rate).
 const { app, BrowserWindow } = require('electron');
+require('../electron-userdata')(app, 'review-fps');
 const fs = require('fs');
 const path = require('path');
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 app.whenReady().then(async () => {
   const win = new BrowserWindow({ width: 1600, height: 900, show: true, webPreferences: { contextIsolation: true, nodeIntegration: false } });
-  await win.loadFile('C:/Users/user/Desktop/f1drive/index.html');
+  await win.loadFile(require('path').resolve(__dirname, '..', '..', 'index.html'));
   await sleep(1000);
   const js = (code) => win.webContents.executeJavaScript(code, true);
   await js(`(function(){var cards=[...document.querySelectorAll('.card')];var c=cards.find(x=>x.textContent.includes('Monza'));c.click();})()`);

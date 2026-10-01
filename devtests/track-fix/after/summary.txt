@@ -1,0 +1,14 @@
+track-test rc=0 8s
+3d-build rc=0 23s
+raceline-build rc=0 3s
+raceline-drive rc=0 7s
+laps-drive rc=0 25s
+laps-grid rc=0 2s
+pit-check rc=1 55s
+pit-drive rc=0 2s
+car-test rc=0 2s
+laps-test rc=0 0s
+done
+pit-check-adapted rc=0
+bank-check rc=0
+probes-done

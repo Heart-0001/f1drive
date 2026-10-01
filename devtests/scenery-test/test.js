@@ -1,4 +1,4 @@
-const path='C:/Users/user/Desktop/f1drive/';
+const path=require('path').resolve(__dirname, '..', '..')+'/';
 global.window=global; global.THREE=require(path+'lib/three.min.js');
 require(path+'tracks-data.js');
 try{require(path+'scenery-data.js');}catch(e){console.log('no scenery data');}

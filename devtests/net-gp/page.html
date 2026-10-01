@@ -1,0 +1,14 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>net-gp harness page</title>
+<!-- Only the network layer: the real net/session.js + js/net.js in a real Chromium, no game. -->
+<script src="../../net/session.js"></script>
+<script src="../../js/net.js"></script>
+<script>
+  window.__ev = [];
+  window.__err = [];
+  window.addEventListener('error', function (e) { window.__err.push(String(e.message)); });
+  ['connected', 'disconnected', 'gp', 'lapRejected', 'track', 'players'].forEach(function (n) {
+    F1.net.on(n, function (a) { window.__ev.push([n, n === 'gp' ? { phase: a.phase, sid: a.sid, at: F1.net.serverNow() } : a]); });
+  });
+</script>

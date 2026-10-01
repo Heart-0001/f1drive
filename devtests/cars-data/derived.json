@@ -1,0 +1,1002 @@
+{
+ "generatedBy": "devtests/cars-data/derive.js",
+ "season": {
+  "year": 2026,
+  "asOf": "2026-09-30",
+  "lastRound": 15,
+  "lastRace": "2026-09-26 的亞塞拜然大獎賽",
+  "roundsHeld": [
+   "AUS",
+   "CHN",
+   "JPN",
+   "MIA",
+   "CAN",
+   "MON",
+   "BCN",
+   "AUT",
+   "GBR",
+   "BEL",
+   "HUN",
+   "NED",
+   "ITA",
+   "MAD",
+   "AZE"
+  ],
+  "trackIds": [
+   "au-1953",
+   "cn-2004",
+   "jp-1962",
+   "us-2022",
+   "ca-1978",
+   "mc-1929",
+   "es-1991",
+   "at-1969",
+   "gb-1948",
+   "be-1925",
+   "hu-1986",
+   "nl-1948",
+   "it-1922",
+   "es-2026",
+   "az-2016"
+  ]
+ },
+ "cfg": {
+  "SPREAD": 1.25,
+  "W_QUALI": 0.5,
+  "W_RACE": 0.3,
+  "W_AUTOSPORT": 0.2,
+  "GAIN": 0.5,
+  "ICE_SHARE": 0.5333333333333333,
+  "POWER_FROM": "speed",
+  "COLOUR_MIN_PAIR_DE": 15,
+  "V_REF": 330,
+  "E_GAIN": 1,
+  "E_STEP": 0.01,
+  "W_MEDIUM": 13,
+  "W_FAST": 7,
+  "W_TRACTION_ZONE": 0.5,
+  "MIN": 0.95,
+  "MAX": 1.05,
+  "DECIMALS": 4
+ },
+ "rating": {
+  "topSpeed": {
+   "gain": 11,
+   "x": "極速（不含電池）與標準車的差，km/h"
+  },
+  "accel": {
+   "gain": 12,
+   "x": "0–300 km/h 所需時間比標準車少的百分比"
+  },
+  "cornering": {
+   "gain": 23,
+   "x": "半徑 30 / 60 / 120 m 平地彎的過彎速度，比標準車高的百分比（三者平均）"
+  },
+  "braking": {
+   "gain": 20,
+   "x": "300→80 km/h 煞車距離比標準車短的百分比"
+  },
+  "ers": {
+   "gain": 13,
+   "x": "(ersPower − 1) 與 (ersHarvest − 1) 的平均，%"
+  }
+ },
+ "lapTimeSensitivityPctPerPct": {
+  "power": -0.0052,
+  "drag": 0.0901,
+  "downforce": -0.0621,
+  "grip": -0.1853,
+  "brake": -0.0425,
+  "traction": -0.231
+ },
+ "dragComp": 0.3899,
+ "paceCompression": 0.2869,
+ "paceMedianPct": 1.6863,
+ "standard": {
+  "topKmh": 330,
+  "topBatteryKmh": 347.27,
+  "t0to300": 12.656,
+  "brake300to80": 122.4,
+  "cornerKmh": [
+   94.81,
+   145.96,
+   260.03
+  ],
+  "batteryAllLapPct": -0.0115,
+  "laps": [
+   {
+    "id": "au-1953",
+    "name": "Albert Park Circuit",
+    "seconds": 88.276
+   },
+   {
+    "id": "cn-2004",
+    "name": "Shanghai International Circuit",
+    "seconds": 98.463
+   },
+   {
+    "id": "jp-1962",
+    "name": "Suzuka International Racing Course",
+    "seconds": 96.224
+   },
+   {
+    "id": "us-2022",
+    "name": "Miami International Autodrome",
+    "seconds": 92.865
+   },
+   {
+    "id": "ca-1978",
+    "name": "Circuit Gilles-Villeneuve",
+    "seconds": 75.12
+   },
+   {
+    "id": "mc-1929",
+    "name": "Circuit de Monaco",
+    "seconds": 82.518
+   },
+   {
+    "id": "es-1991",
+    "name": "Circuit de Barcelona-Catalunya",
+    "seconds": 78.671
+   },
+   {
+    "id": "at-1969",
+    "name": "Red Bull Ring",
+    "seconds": 72.369
+   },
+   {
+    "id": "gb-1948",
+    "name": "Silverstone Circuit",
+    "seconds": 93.675
+   },
+   {
+    "id": "be-1925",
+    "name": "Circuit de Spa-Francorchamps",
+    "seconds": 109.846
+   },
+   {
+    "id": "hu-1986",
+    "name": "Hungaroring",
+    "seconds": 81.558
+   },
+   {
+    "id": "nl-1948",
+    "name": "Circuit Zandvoort",
+    "seconds": 76.468
+   },
+   {
+    "id": "it-1922",
+    "name": "Autodromo Nazionale Monza",
+    "seconds": 84.987
+   },
+   {
+    "id": "es-2026",
+    "name": "Circuito de Madring",
+    "seconds": 103.637
+   },
+   {
+    "id": "az-2016",
+    "name": "Baku City Circuit",
+    "seconds": 99.845
+   }
+  ]
+ },
+ "powerUnits": [
+  {
+   "id": "mercedes",
+   "teams": [
+    "mercedes",
+    "mclaren",
+    "alpine",
+    "williams"
+   ],
+   "aduoIcePct": -3,
+   "speedIndexKmh": 1.25,
+   "powerFromAduo": 1,
+   "powerFromSpeed": 1.0055,
+   "usesSpeed": true,
+   "power": 1.0055
+  },
+  {
+   "id": "ferrari",
+   "teams": [
+    "ferrari",
+    "haas",
+    "cadillac"
+   ],
+   "aduoIcePct": -5,
+   "speedIndexKmh": -0.5,
+   "powerFromAduo": 0.9947,
+   "powerFromSpeed": 0.9978,
+   "usesSpeed": true,
+   "power": 0.9978
+  },
+  {
+   "id": "redbullford",
+   "teams": [
+    "red-bull",
+    "racing-bulls"
+   ],
+   "aduoIcePct": 0,
+   "speedIndexKmh": 0.425,
+   "powerFromAduo": 1.008,
+   "powerFromSpeed": 1.0019,
+   "usesSpeed": true,
+   "power": 1.0019
+  },
+  {
+   "id": "audi",
+   "teams": [
+    "audi"
+   ],
+   "aduoIcePct": -5,
+   "speedIndexKmh": 0.35,
+   "powerFromAduo": 0.9947,
+   "powerFromSpeed": 1.0015,
+   "usesSpeed": true,
+   "power": 1.0015
+  },
+  {
+   "id": "honda",
+   "teams": [
+    "aston-martin"
+   ],
+   "aduoIcePct": -5,
+   "speedIndexKmh": -7.2,
+   "powerFromAduo": 0.9947,
+   "powerFromSpeed": 0.9686,
+   "usesSpeed": true,
+   "power": 0.9686
+  }
+ ],
+ "cars": [
+  {
+   "id": "mercedes",
+   "pacePct": 0.0195,
+   "autosportGapPct": 0,
+   "targetPct": -0.4782,
+   "speedIndexKmh": 2.1,
+   "familyResidualKmh": 0.85,
+   "ersRank": 2,
+   "zone": {
+    "grip": -1.57,
+    "downforce": -2.6805,
+    "brake": -1.88,
+    "traction": -1.125
+   },
+   "levelPct": 0.1605,
+   "perf": {
+    "power": 1.0055,
+    "drag": 0.9961,
+    "downforce": 1.015,
+    "grip": 1.0095,
+    "brake": 1.011,
+    "traction": 1.0057,
+    "ersPower": 1.009,
+    "ersHarvest": 1.02
+   },
+   "lapPct": -0.4787,
+   "lapBatteryPct": -0.4932,
+   "perTrackPct": [
+    -0.462,
+    -0.461,
+    -0.548,
+    -0.491,
+    -0.457,
+    -0.319,
+    -0.548,
+    -0.412,
+    -0.488,
+    -0.481,
+    -0.602,
+    -0.67,
+    -0.472,
+    -0.422,
+    -0.346
+   ],
+   "topKmh": 331.05,
+   "topBatteryKmh": 348.43,
+   "t0to300": 12.458,
+   "brake300to80": 120.87,
+   "cornerKmh": [
+    95.45,
+    147.32,
+    262.83
+   ],
+   "ratingX": {
+    "topSpeed": 1.047,
+    "accel": 1.565,
+    "cornering": 0.892,
+    "braking": 1.252,
+    "ers": 1.45
+   },
+   "ratings": {
+    "topSpeed": 62,
+    "accel": 69,
+    "cornering": 71,
+    "braking": 75,
+    "ers": 69
+   }
+  },
+  {
+   "id": "ferrari",
+   "pacePct": 0.404,
+   "autosportGapPct": 0.5005,
+   "targetPct": -0.3679,
+   "speedIndexKmh": 0.55,
+   "familyResidualKmh": 1.05,
+   "ersRank": -1,
+   "zone": {
+    "grip": -1.95,
+    "downforce": -2.699,
+    "brake": -1.76,
+    "traction": -0.635
+   },
+   "levelPct": 0.0039,
+   "perf": {
+    "power": 0.9978,
+    "drag": 0.9952,
+    "downforce": 1.0135,
+    "grip": 1.0098,
+    "brake": 1.0088,
+    "traction": 1.0014,
+    "ersPower": 0.9957,
+    "ersHarvest": 0.99
+   },
+   "lapPct": -0.3691,
+   "lapBatteryPct": -0.3848,
+   "perTrackPct": [
+    -0.345,
+    -0.361,
+    -0.442,
+    -0.364,
+    -0.34,
+    -0.213,
+    -0.453,
+    -0.28,
+    -0.395,
+    -0.375,
+    -0.518,
+    -0.583,
+    -0.334,
+    -0.314,
+    -0.22
+   ],
+   "topKmh": 330.27,
+   "topBatteryKmh": 347.52,
+   "t0to300": 12.558,
+   "brake300to80": 121.14,
+   "cornerKmh": [
+    95.45,
+    147.31,
+    262.87
+   ],
+   "ratingX": {
+    "topSpeed": 0.271,
+    "accel": 0.773,
+    "cornering": 0.897,
+    "braking": 1.025,
+    "ers": -0.715
+   },
+   "ratings": {
+    "topSpeed": 53,
+    "accel": 59,
+    "cornering": 71,
+    "braking": 71,
+    "ers": 41
+   }
+  },
+  {
+   "id": "mclaren",
+   "pacePct": 0.4822,
+   "autosportGapPct": 0.4857,
+   "targetPct": -0.3455,
+   "speedIndexKmh": -1.2,
+   "familyResidualKmh": -2.45,
+   "ersRank": 1,
+   "zone": {
+    "grip": -1.28,
+    "downforce": -2.35,
+    "brake": -1.58,
+    "traction": -0.63
+   },
+   "levelPct": 0.0875,
+   "perf": {
+    "power": 1.0055,
+    "drag": 1.0111,
+    "downforce": 1.0126,
+    "grip": 1.0073,
+    "brake": 1.0088,
+    "traction": 1.0084,
+    "ersPower": 0.9957,
+    "ersHarvest": 1.01
+   },
+   "lapPct": -0.347,
+   "lapBatteryPct": -0.3605,
+   "perTrackPct": [
+    -0.33,
+    -0.336,
+    -0.391,
+    -0.341,
+    -0.334,
+    -0.288,
+    -0.404,
+    -0.301,
+    -0.334,
+    -0.317,
+    -0.473,
+    -0.518,
+    -0.27,
+    -0.344,
+    -0.225
+   ],
+   "topKmh": 329.43,
+   "topBatteryKmh": 346.5,
+   "t0to300": 12.575,
+   "brake300to80": 120.93,
+   "cornerKmh": [
+    95.31,
+    147.04,
+    262.54
+   ],
+   "ratingX": {
+    "topSpeed": -0.571,
+    "accel": 0.641,
+    "cornering": 0.741,
+    "braking": 1.202,
+    "ers": 0.285
+   },
+   "ratings": {
+    "topSpeed": 44,
+    "accel": 58,
+    "cornering": 67,
+    "braking": 74,
+    "ers": 54
+   }
+  },
+  {
+   "id": "red-bull",
+   "pacePct": 0.6745,
+   "autosportGapPct": 0.8451,
+   "targetPct": -0.2903,
+   "speedIndexKmh": 0,
+   "familyResidualKmh": -0.425,
+   "ersRank": 0,
+   "zone": {
+    "grip": -1.24,
+    "downforce": -1.442,
+    "brake": -1.51,
+    "traction": -0.56
+   },
+   "levelPct": 0.0612,
+   "perf": {
+    "power": 1.0019,
+    "drag": 1.0019,
+    "downforce": 1.0078,
+    "grip": 1.0068,
+    "brake": 1.0082,
+    "traction": 1.0042,
+    "ersPower": 1.0047,
+    "ersHarvest": 1
+   },
+   "lapPct": -0.2912,
+   "lapBatteryPct": -0.3052,
+   "perTrackPct": [
+    -0.276,
+    -0.284,
+    -0.33,
+    -0.291,
+    -0.28,
+    -0.211,
+    -0.343,
+    -0.245,
+    -0.295,
+    -0.28,
+    -0.389,
+    -0.431,
+    -0.253,
+    -0.267,
+    -0.193
+   ],
+   "topKmh": 330.01,
+   "topBatteryKmh": 347.32,
+   "t0to300": 12.569,
+   "brake300to80": 121.3,
+   "cornerKmh": [
+    95.24,
+    146.85,
+    262.48
+   ],
+   "ratingX": {
+    "topSpeed": 0.01,
+    "accel": 0.689,
+    "cornering": 0.669,
+    "braking": 0.899,
+    "ers": 0.235
+   },
+   "ratings": {
+    "topSpeed": 50,
+    "accel": 58,
+    "cornering": 65,
+    "braking": 68,
+    "ers": 53
+   }
+  },
+  {
+   "id": "racing-bulls",
+   "pacePct": 1.6096,
+   "autosportGapPct": 1.5713,
+   "targetPct": -0.022,
+   "speedIndexKmh": 0.85,
+   "familyResidualKmh": 0.425,
+   "ersRank": 0,
+   "zone": {
+    "grip": -0.23,
+    "downforce": 0.178,
+    "brake": -0.78,
+    "traction": -0.07
+   },
+   "levelPct": -0.0384,
+   "perf": {
+    "power": 1.0019,
+    "drag": 0.9981,
+    "downforce": 0.9987,
+    "grip": 1.0008,
+    "brake": 1.0035,
+    "traction": 0.9992,
+    "ersPower": 1.0052,
+    "ersHarvest": 1
+   },
+   "lapPct": -0.0219,
+   "lapBatteryPct": -0.032,
+   "perTrackPct": [
+    -0.022,
+    -0.024,
+    -0.021,
+    -0.028,
+    -0.023,
+    -0.015,
+    -0.022,
+    -0.016,
+    -0.018,
+    -0.021,
+    -0.023,
+    -0.024,
+    -0.028,
+    -0.021,
+    -0.022
+   ],
+   "topKmh": 330.42,
+   "topBatteryKmh": 347.77,
+   "t0to300": 12.653,
+   "brake300to80": 122.14,
+   "cornerKmh": [
+    94.85,
+    146,
+    260.06
+   ],
+   "ratingX": {
+    "topSpeed": 0.422,
+    "accel": 0.024,
+    "cornering": 0.026,
+    "braking": 0.214,
+    "ers": 0.26
+   },
+   "ratings": {
+    "topSpeed": 55,
+    "accel": 50,
+    "cornering": 51,
+    "braking": 54,
+    "ers": 53
+   }
+  },
+  {
+   "id": "alpine",
+   "pacePct": 1.6863,
+   "autosportGapPct": 1.9011,
+   "targetPct": 0,
+   "speedIndexKmh": 3.65,
+   "familyResidualKmh": 2.4,
+   "ersRank": 1,
+   "zone": {
+    "grip": 0.33,
+    "downforce": 0.799,
+    "brake": 0.36,
+    "traction": -0.03
+   },
+   "levelPct": 0.1127,
+   "perf": {
+    "power": 1.0055,
+    "drag": 0.9891,
+    "downforce": 0.9971,
+    "grip": 0.9995,
+    "brake": 0.9993,
+    "traction": 0.997,
+    "ersPower": 1.0028,
+    "ersHarvest": 1.01
+   },
+   "lapPct": 0.0005,
+   "lapBatteryPct": -0.0076,
+   "perTrackPct": [
+    -0.004,
+    0.002,
+    0.001,
+    -0.018,
+    0.003,
+    0.045,
+    0.014,
+    -0.002,
+    -0.01,
+    -0.026,
+    0.041,
+    0.035,
+    -0.068,
+    0.034,
+    -0.039
+   ],
+   "topKmh": 331.81,
+   "topBatteryKmh": 349.13,
+   "t0to300": 12.597,
+   "brake300to80": 122.75,
+   "cornerKmh": [
+    94.76,
+    145.83,
+    259.45
+   ],
+   "ratingX": {
+    "topSpeed": 1.814,
+    "accel": 0.465,
+    "cornering": -0.121,
+    "braking": -0.284,
+    "ers": 0.64
+   },
+   "ratings": {
+    "topSpeed": 70,
+    "accel": 56,
+    "cornering": 47,
+    "braking": 44,
+    "ers": 58
+   }
+  },
+  {
+   "id": "audi",
+   "pacePct": 1.8633,
+   "autosportGapPct": 1.8855,
+   "targetPct": 0.0508,
+   "speedIndexKmh": 0.35,
+   "familyResidualKmh": null,
+   "ersRank": -2,
+   "zone": {
+    "grip": 0.18,
+    "downforce": -0.6325,
+    "brake": 0.41,
+    "traction": 0.185
+   },
+   "levelPct": -0.0433,
+   "perf": {
+    "power": 1.0015,
+    "drag": 1,
+    "downforce": 1.0027,
+    "grip": 0.9987,
+    "brake": 0.9975,
+    "traction": 0.9986,
+    "ersPower": 0.9995,
+    "ersHarvest": 0.98
+   },
+   "lapPct": 0.0514,
+   "lapBatteryPct": 0.042,
+   "perTrackPct": [
+    0.056,
+    0.049,
+    0.053,
+    0.056,
+    0.057,
+    0.047,
+    0.05,
+    0.058,
+    0.048,
+    0.045,
+    0.054,
+    0.054,
+    0.052,
+    0.05,
+    0.042
+   ],
+   "topKmh": 330.17,
+   "topBatteryKmh": 347.41,
+   "t0to300": 12.693,
+   "brake300to80": 122.54,
+   "cornerKmh": [
+    94.76,
+    145.9,
+    260.08
+   ],
+   "ratingX": {
+    "topSpeed": 0.17,
+    "accel": -0.297,
+    "cornering": -0.025,
+    "braking": -0.12,
+    "ers": -1.025
+   },
+   "ratings": {
+    "topSpeed": 52,
+    "accel": 46,
+    "cornering": 49,
+    "braking": 48,
+    "ers": 37
+   }
+  },
+  {
+   "id": "haas",
+   "pacePct": 2.3157,
+   "autosportGapPct": 2.4306,
+   "targetPct": 0.1806,
+   "speedIndexKmh": -0.35,
+   "familyResidualKmh": 0.15,
+   "ersRank": -1,
+   "zone": {
+    "grip": 1.1,
+    "downforce": 1.377,
+    "brake": 1.91,
+    "traction": 0.47
+   },
+   "levelPct": 0.13,
+   "perf": {
+    "power": 0.9978,
+    "drag": 0.9993,
+    "downforce": 0.9944,
+    "grip": 0.9958,
+    "brake": 0.9917,
+    "traction": 0.9987,
+    "ersPower": 0.9994,
+    "ersHarvest": 0.99
+   },
+   "lapPct": 0.1803,
+   "lapBatteryPct": 0.1687,
+   "perTrackPct": [
+    0.164,
+    0.184,
+    0.197,
+    0.181,
+    0.174,
+    0.135,
+    0.224,
+    0.139,
+    0.182,
+    0.169,
+    0.248,
+    0.266,
+    0.149,
+    0.175,
+    0.12
+   ],
+   "topKmh": 329.83,
+   "topBatteryKmh": 347.11,
+   "t0to300": 12.682,
+   "brake300to80": 123.42,
+   "cornerKmh": [
+    94.54,
+    145.39,
+    258.01
+   ],
+   "ratingX": {
+    "topSpeed": -0.174,
+    "accel": -0.204,
+    "cornering": -0.485,
+    "braking": -0.838,
+    "ers": -0.53
+   },
+   "ratings": {
+    "topSpeed": 48,
+    "accel": 48,
+    "cornering": 39,
+    "braking": 33,
+    "ers": 43
+   }
+  },
+  {
+   "id": "williams",
+   "pacePct": 2.8356,
+   "autosportGapPct": 3.2506,
+   "targetPct": 0.3297,
+   "speedIndexKmh": 0.45,
+   "familyResidualKmh": -0.8,
+   "ersRank": 1,
+   "zone": {
+    "grip": 1.79,
+    "downforce": 2.0575,
+    "brake": 2.17,
+    "traction": 0.395
+   },
+   "levelPct": 0.0162,
+   "perf": {
+    "power": 1.0055,
+    "drag": 1.0036,
+    "downforce": 0.9899,
+    "grip": 0.9912,
+    "brake": 0.9893,
+    "traction": 0.9996,
+    "ersPower": 1.0055,
+    "ersHarvest": 1.01
+   },
+   "lapPct": 0.3297,
+   "lapBatteryPct": 0.3223,
+   "perTrackPct": [
+    0.289,
+    0.335,
+    0.37,
+    0.315,
+    0.316,
+    0.207,
+    0.438,
+    0.234,
+    0.363,
+    0.325,
+    0.475,
+    0.512,
+    0.288,
+    0.287,
+    0.191
+   ],
+   "topKmh": 330.23,
+   "topBatteryKmh": 347.51,
+   "t0to300": 12.713,
+   "brake300to80": 123.75,
+   "cornerKmh": [
+    94.26,
+    144.81,
+    256.07
+   ],
+   "ratingX": {
+    "topSpeed": 0.234,
+    "accel": -0.454,
+    "cornering": -0.965,
+    "braking": -1.108,
+    "ers": 0.775
+   },
+   "ratings": {
+    "topSpeed": 53,
+    "accel": 45,
+    "cornering": 28,
+    "braking": 28,
+    "ers": 60
+   }
+  },
+  {
+   "id": "cadillac",
+   "pacePct": 4.1486,
+   "autosportGapPct": 4.4749,
+   "targetPct": 0.7064,
+   "speedIndexKmh": -1.7,
+   "familyResidualKmh": -1.2,
+   "ersRank": -1,
+   "zone": {
+    "grip": 3.1,
+    "downforce": 4.615,
+    "brake": 3.59,
+    "traction": 1.695
+   },
+   "levelPct": 0.0992,
+   "perf": {
+    "power": 0.9978,
+    "drag": 1.0055,
+    "downforce": 0.9779,
+    "grip": 0.9855,
+    "brake": 0.983,
+    "traction": 0.9946,
+    "ersPower": 0.9939,
+    "ersHarvest": 0.99
+   },
+   "lapPct": 0.708,
+   "lapBatteryPct": 0.701,
+   "perTrackPct": [
+    0.626,
+    0.713,
+    0.764,
+    0.687,
+    0.697,
+    0.477,
+    0.904,
+    0.547,
+    0.776,
+    0.695,
+    0.939,
+    0.999,
+    0.695,
+    0.62,
+    0.479
+   ],
+   "topKmh": 329.16,
+   "topBatteryKmh": 346.32,
+   "t0to300": 12.877,
+   "brake300to80": 124.79,
+   "cornerKmh": [
+    93.86,
+    143.93,
+    252.81
+   ],
+   "ratingX": {
+    "topSpeed": -0.843,
+    "accel": -1.744,
+    "cornering": -1.724,
+    "braking": -1.954,
+    "ers": -0.805
+   },
+   "ratings": {
+    "topSpeed": 41,
+    "accel": 29,
+    "cornering": 10,
+    "braking": 11,
+    "ers": 40
+   }
+  },
+  {
+   "id": "aston-martin",
+   "pacePct": 4.3763,
+   "autosportGapPct": 4.3931,
+   "targetPct": 0.7718,
+   "speedIndexKmh": -7.2,
+   "familyResidualKmh": null,
+   "ersRank": -3,
+   "zone": {
+    "grip": 1.79,
+    "downforce": 2.9615,
+    "brake": 1.97,
+    "traction": 2.565
+   },
+   "levelPct": -0.2175,
+   "perf": {
+    "power": 0.9686,
+    "drag": 1,
+    "downforce": 0.983,
+    "grip": 0.9889,
+    "brake": 0.988,
+    "traction": 0.985,
+    "ersPower": 0.9708,
+    "ersHarvest": 0.97
+   },
+   "lapPct": 0.7713,
+   "lapBatteryPct": 0.7534,
+   "perTrackPct": [
+    0.727,
+    0.752,
+    0.816,
+    0.798,
+    0.768,
+    0.566,
+    0.887,
+    0.697,
+    0.782,
+    0.763,
+    0.889,
+    0.946,
+    0.847,
+    0.675,
+    0.656
+   ],
+   "topKmh": 326.4,
+   "topBatteryKmh": 343.52,
+   "t0to300": 13.074,
+   "brake300to80": 124.19,
+   "cornerKmh": [
+    94.08,
+    144.4,
+    254.45
+   ],
+   "ratingX": {
+    "topSpeed": -3.605,
+    "accel": -3.303,
+    "cornering": -1.328,
+    "braking": -1.468,
+    "ers": -2.96
+   },
+   "ratings": {
+    "topSpeed": 10,
+    "accel": 10,
+    "cornering": 19,
+    "braking": 21,
+    "ers": 12
+   }
+  }
+ ]
+}

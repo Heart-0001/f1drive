@@ -1,14 +1,20 @@
 const assert = require('assert');
-const P = 'C:/Users/user/Desktop/f1drive/';
+const P = require('path').resolve(__dirname, '..', '..') + '/';
 global.window = global; global.THREE = require(P + 'lib/three.min.js');
 require(P + 'js/cockpit.js'); const NEWC = global.F1.createCockpit, L = global.F1.COCKPIT_LOOK;
-delete global.F1; require(__dirname + '/cockpit.orig.js'); const OLDC = global.F1.createCockpit;
+// cockpit.orig.js = js/cockpit.js from before head-look was added (baseline of the "identical when centred" check).
+// It is not in the repo; without it the v5 cockpit frozen in devtests/cockpit-test/cockpit-v5.js is the baseline
+// (same camera: the v6 cockpit only changed the model around it), and without that too the comparison is skipped.
+const fs = require('fs'), ORIG = [__dirname + '/cockpit.orig.js', P + 'devtests/cockpit-test/cockpit-v5.js'].filter(f => fs.existsSync(f))[0];
+const HAVE_OLD = !!ORIG;
+let OLDC = null; if (HAVE_OLD) { delete global.F1; require(ORIG); OLDC = global.F1.createCockpit; }
 const D = 180 / Math.PI, cam = () => new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000);
 const st = { x: 3, y: 1, z: -7, heading: 0.4, speed: 50, steer: 0.2, pitch: 0.02, roll: -0.03, onGrass: false, hit: 0 };
 
 assert(Math.abs(L.maxYaw * D - 55) < 1e-9 && Math.abs(L.maxPitchUp * D - 12) < 1e-9 && Math.abs(L.maxPitchDown * D - 10) < 1e-9);
 // no look input: camera exactly as before
-{ const a = cam(), b = cam(), ca = OLDC(a), cb = NEWC(b);
+if (!HAVE_OLD) console.log('SKIP centred view identical to the old cockpit camera (cockpit.orig.js missing)');
+else { const a = cam(), b = cam(), ca = OLDC(a), cb = NEWC(b);
   for (let i = 0; i < 120; i++) { st.heading += 0.003; ca.update(st, 1 / 60); cb.update(st, 1 / 60); if (i % 3 === 0) cb.setLook(0, 0);
     ca.group.updateMatrixWorld(true); cb.group.updateMatrixWorld(true);
     for (let k = 0; k < 16; k++) assert(Object.is(a.matrixWorld.elements[k], b.matrixWorld.elements[k]) || a.matrixWorld.elements[k] === b.matrixWorld.elements[k], 'frame ' + i); }

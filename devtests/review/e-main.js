@@ -1,5 +1,6 @@
 // Electron harness: load the real index.html, screenshot menu + cockpit, exercise keys, capture console errors.
 const { app, BrowserWindow } = require('electron');
+require('../electron-userdata')(app, 'review-main');
 const fs = require('fs');
 const path = require('path');
 const OUT = __dirname;
@@ -10,7 +11,7 @@ app.whenReady().then(async () => {
   const logs = [];
   win.webContents.on('console-message', (e, level, msg, line, src) => logs.push(`[${level}] ${msg} (${path.basename(src || '')}:${line})`));
   win.webContents.setFrameRate(60);
-  await win.loadFile('C:/Users/user/Desktop/f1drive/index.html');
+  await win.loadFile(require('path').resolve(__dirname, '..', '..', 'index.html'));
   await sleep(1500);
   const js = (code) => win.webContents.executeJavaScript(code, true);
   async function shot(name) { const img = await win.webContents.capturePage(); fs.writeFileSync(path.join(OUT, name + '.png'), img.toPNG()); }

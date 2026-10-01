@@ -1,0 +1,14 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>pit.js in the browser</title></head>
+<body>
+<script>window.__errors = []; window.addEventListener('error', function (e) { window.__errors.push(String(e.message) + ' @ ' + e.filename + ':' + e.lineno); });</script>
+<!-- the game's own load order (index.html, contract "Final script order"), up to js/pit.js, as classic scripts -->
+<script src="../../lib/three.min.js"></script>
+<script src="../../tracks-data.js"></script>
+<script src="../../js/track.js"></script>
+<script src="../../scenery-data.js"></script>
+<script src="../../js/laps.js"></script>
+<script src="../../js/pit.js"></script>
+<script src="../../net/session.js"></script>
+<script src="drive-lane.js"></script>
+</body></html>

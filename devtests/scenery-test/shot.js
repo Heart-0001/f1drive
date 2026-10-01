@@ -1,4 +1,6 @@
 const {app,BrowserWindow}=require('electron'); const fs=require('fs');
+const VIEW=require('url').pathToFileURL(require('path').join(__dirname,'view.html')).href;
+require('../electron-userdata')(app, 'scenery-shot');
 app.disableHardwareAcceleration();
 app.whenReady().then(async()=>{
   const shots=(process.env.SHOTS||'').split(',').filter(Boolean).map(s=>[s.slice(0,s.indexOf(':')),s.slice(s.indexOf(':')+1)]);
@@ -6,7 +8,7 @@ app.whenReady().then(async()=>{
   w.webContents.on('console-message',(e,l,m)=>{ if(l>=2) console.log('CONSOLE',m); });
   for(const [n,qs] of shots){
     try{
-    await w.loadURL('file:///C:/Users/user/AppData/Local/Temp/f1drive-scenery-test/view.html'+qs);
+    await w.loadURL(VIEW+qs);
     for(let k=0;k<60;k++){ await new Promise(r=>setTimeout(r,250)); if(/^(done|ERR)/.test(w.getTitle())) break; }
     await new Promise(r=>setTimeout(r,300));
     const img=await w.webContents.capturePage();

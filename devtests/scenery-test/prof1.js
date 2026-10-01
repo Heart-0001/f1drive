@@ -1,4 +1,4 @@
-const path='C:/Users/user/Desktop/f1drive/';
+const path=require('path').resolve(__dirname, '..', '..')+'/';
 global.window=global; global.THREE=require(path+'lib/three.min.js');
 require(path+'tracks-data.js'); require(path+'js/track.js'); require(path+'js/scenery.js');
 const td=F1_TRACKS.find(t=>t.id===process.argv[2]);const tr=F1.buildTrack(td);

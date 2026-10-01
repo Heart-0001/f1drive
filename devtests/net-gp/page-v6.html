@@ -1,0 +1,19 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>net-gp v6 harness page</title>
+<!-- The network layer and the Grand Prix controller as the game loads them (classic scripts, contract order), no game. -->
+<script src="../../net/session.js"></script>
+<script src="../../js/net.js"></script>
+<script src="../../js/gp.js"></script>
+<script>
+  window.__ev = [];
+  window.__err = [];
+  window.addEventListener('error', function (e) { window.__err.push(String(e.message)); });
+  ['connected', 'disconnected', 'year', 'track', 'players', 'gp'].forEach(function (n) {
+    F1.net.on(n, function (a) {
+      window.__ev.push([n, n === 'year' || n === 'track' ? a : n === 'gp' ? a.phase + ' ' + a.year + ' ' + a.wear : null]);
+    });
+  });
+  F1.gp.init({ net: F1.net, getProfile: function () { return { name: 'Offline', colour: '#35d07f' }; } });
+  F1.gp.on('phase', function (p, prev) { window.__ev.push(['gp.phase', prev + '>' + p]); });
+</script>

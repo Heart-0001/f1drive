@@ -1,6 +1,6 @@
 // node test.js [build|drive] [delay]
 const path = require('path');
-const ROOT = 'C:/Users/user/Desktop/f1drive';
+const ROOT = path.resolve(__dirname, '..', '..');
 global.window = global;
 global.THREE = require(path.join(ROOT, 'lib/three.min.js'));
 require(path.join(ROOT, 'tracks-data.js'));

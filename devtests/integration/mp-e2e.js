@@ -2,10 +2,12 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
-const ROOT = 'C:/Users/user/Desktop/f1drive';
+const ROOT = path.resolve(__dirname, '..', '..');
+require('../electron-userdata')(app, 'mp-e2e');
 const host = require(ROOT + '/net/host');
 const OUT = path.join(__dirname, 'mp');
 const PORT = Number(process.env.PORT || 24731);
+const DEAD_PORT = Number(process.env.DEAD_PORT || 24999);   // a port nobody listens on (failed-join check)
 const TRACK = (process.env.TRACK || 'monza').toLowerCase();
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const results = [];
@@ -42,6 +44,11 @@ function makeWin(tag, withPreload) {
 const setField = (id, v) => `(function(){var e=document.getElementById(${JSON.stringify(id)}); e.value=${JSON.stringify(v)};
   e.dispatchEvent(new Event('input',{bubbles:true})); e.dispatchEvent(new Event('change',{bubbles:true})); return e.value;})()`;
 const CAR = `(function(){var s=F1.game.car.state; return {x:s.x,y:s.y||0,z:s.z,h:s.heading,v:s.speed,i:s.sampleIndex,d:s.d,hit:s.hit};})()`;
+// the car measured in the frame of grid box slot + 1 (js/track.js paints it: front bar (slot + 1) * 8 m behind the line, 3 m
+// left / right): nose = metres from the front of the bar back to the car's nose, off = metres off the box centreline
+const BOX = slot => `(function(slot){var tr=F1.game.track,S=tr.samples,n=S.length,k=slot+1,c=F1.game.car.state;
+  var s=S[((n-Math.round(k*8/(tr.length/n)))%n+n)%n], lat=k%2?3:-3, nx=c.x+Math.sin(c.heading)*2.8, nz=c.z+Math.cos(c.heading)*2.8, t=c.heading-Math.atan2(s.tx,s.tz);
+  return {nose:-((nx-s.x)*s.tx+(nz-s.z)*s.tz), off:(nx-s.x)*s.nx+(nz-s.z)*s.nz-lat, turn:Math.atan2(Math.sin(t),Math.cos(t))};})(${slot})`;
 const REMOTE = `(function(){var p=F1.net.players[0]; if(!p) return null; var s=p.state; return {name:p.name,colour:p.colour,active:p.active,x:s.x,y:s.y,z:s.z,h:s.heading,v:s.speed};})()`;
 
 app.whenReady().then(async () => {
@@ -95,11 +102,20 @@ app.whenReady().then(async () => {
     const okB = await B.until(`F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id`, 15000, 'B loads track');
     const ids = [await A.js(`F1.game.trackData && F1.game.trackData.id`), await B.js(`F1.game.trackData && F1.game.trackData.id`)];
     check('both loaded the same track and are driving', okA && okB && ids[0] === ids[1], ids);
+    // the room has a track now: the host is no longer asked to pick one, the guest no longer waits for one
+    const texts = { host: await A.js(`document.getElementById('mp-status').textContent`), guest: await B.js(`document.getElementById('track-lock').textContent`) };
+    check('room texts once the track is picked: host status without "選一條賽道", guest banner without "等待房主選擇賽道"', texts.host === '房間已建立，你是房主。' &&
+      texts.guest === '賽道由房主選擇；房主換賽道時，所有人會一起載入。' && await B.js(`document.getElementById('track-grid').classList.contains('locked')`), texts);
     await sleep(1200);
     const a0 = await A.js(CAR), b0 = await B.js(CAR);
     console.log('A car', a0, '\nB car', b0);
     const gap = Math.hypot(a0.x - b0.x, a0.z - b0.z);
-    check('different grid slots (~8 m apart along, opposite sides)', gap > 7 && gap < 12 && a0.d * b0.d < 0, { gap, dA: a0.d, dB: b0.d });
+    // room slots 0 and 1 = the painted grid boxes 1 and 2: front bars 8 and 16 m behind the line, 3 m left / right of the
+    // centreline (10 m between the two cars), the nose at the rear edge of the bar (0.25 m behind its front)
+    const boxA = await A.js(BOX(0)), boxB = await B.js(BOX(1));
+    const inBox = b => Math.abs(b.nose - 0.25) < 0.02 && Math.abs(b.off) < 0.02 && Math.abs(b.turn) < 1e-6;
+    check('different grid slots (8 m apart along, 6 m across, opposite sides)', gap > 9.7 && gap < 10.3 && a0.d > 0 && b0.d < 0, { gap, dA: a0.d, dB: b0.d });
+    check('each car stands in its painted grid box (A in box 1, B in box 2), standing still', inBox(boxA) && inBox(boxB) && a0.v === 0 && b0.v === 0, { boxA, boxB });
     const rB = await B.js(REMOTE), rA = await A.js(REMOTE);
     console.log('B sees', rB, '\nA sees', rA);
     check('B sees Alice at A\'s position', rB && rB.active && rB.name === 'Alice' && Math.hypot(rB.x - a0.x, rB.z - a0.z) < 0.05 && Math.abs(rB.y - a0.y) < 0.05, rB);
@@ -221,7 +237,7 @@ app.whenReady().then(async () => {
       await C.js(`document.getElementById('mp-create-note').textContent`));
     await C.shot('12-browser-mode');
     // joining an address nobody listens on -> readable error, UI usable again
-    await C.js(setField('mp-addr', '127.0.0.1:24999'));
+    await C.js(setField('mp-addr', '127.0.0.1:' + DEAD_PORT));
     await C.js(`document.getElementById('mp-join').click()`);
     await C.until(`/無法連線|逾時/.test(document.getElementById('mp-status').textContent)`, 10000, 'join failure message');
     check('failed join shows an error and re-enables the buttons', await C.js(`/無法連線|逾時/.test(document.getElementById('mp-status').textContent) && !document.getElementById('mp-join').disabled`), await C.js(`document.getElementById('mp-status').textContent`));

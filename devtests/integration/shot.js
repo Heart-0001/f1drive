@@ -2,6 +2,9 @@
 // env TRACK = substring of track name, STEPS = "W:4000,WA:1500,:500" (keys:ms), OUT = prefix
 const { app, BrowserWindow } = require('electron');
 const fs = require('fs');
+const path = require('path');
+const ROOT = path.resolve(__dirname, '..', '..');
+require('../electron-userdata')(app, 'int-shot');
 const out = __dirname + '/' + (process.env.OUT || 'g');
 const trackName = (process.env.TRACK || 'Monza').toLowerCase();
 const steps = (process.env.STEPS || 'W:4000,WA:1200,:300').split(',').map(s => s.split(':'));
@@ -12,7 +15,7 @@ app.whenReady().then(async () => {
   w.webContents.on('console-message', (e, level, msg, line, src) => console.log('[console ' + level + ']', msg, src + ':' + line));
   const shot = async n => fs.writeFileSync(out + '-' + n + '.png', (await w.webContents.capturePage()).toPNG());
   try {
-    await w.loadURL('file:///C:/Users/user/Desktop/f1drive/index.html');
+    await w.loadFile(path.join(ROOT, 'index.html'));
     await sleep(800);
     await shot('menu');
     const clicked = await w.webContents.executeJavaScript(`(function(){

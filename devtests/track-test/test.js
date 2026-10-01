@@ -1,5 +1,5 @@
 const path = require('path');
-const root = 'C:/Users/user/Desktop/f1drive';
+const root = path.resolve(__dirname, '..', '..');
 global.window = global;
 global.THREE = require(path.join(root, 'lib/three.min.js'));
 require(path.join(root, 'tracks-data.js'));
@@ -23,8 +23,11 @@ for (const td of window.F1_TRACKS) {
     }
     check(Number.isFinite(m.geometry.boundingSphere.radius), 'bsphere ' + m.name);
     const p = m.geometry.attributes.position.array; verts += p.length / 3;
-    if (m.name !== 'walls') for (let i = 0; i < p.length; i += 9) {
-      const ny = (p[i+5]-p[i+2])*(p[i+6]-p[i]) - (p[i+3]-p[i])*(p[i+8]-p[i+2]);
+    // walk real triangles: the ground mesh is indexed since the terrain was added (v3)
+    const ix = m.geometry.index ? m.geometry.index.array : null, nI = ix ? ix.length : p.length / 3;
+    if (m.name !== 'walls') for (let t = 0; t < nI; t += 3) {
+      const i = (ix ? ix[t] : t) * 3, j = (ix ? ix[t + 1] : t + 1) * 3, k = (ix ? ix[t + 2] : t + 2) * 3;
+      const ny = (p[j+2]-p[i+2])*(p[k]-p[i]) - (p[j]-p[i])*(p[k+2]-p[i+2]);
       if (ny < -1e-6) downTris++;
     }
   }
@@ -65,16 +68,19 @@ for (const td of window.F1_TRACKS) {
   for (let i = 0; i < N; i++) {
     const a = S[i];
     if (!a.wallPos) lostP++; if (!a.wallNeg) lostN++;
-    for (const [flag, sg] of [[a.wallPos, 1], [a.wallNeg, -1]]) {
+    // per-sample wall offsets and road half widths (v3: close parallel roads share a pulled-in mid wall);
+    // tr.wallDist / tr.halfWidth are only the nominal values
+    for (const [flag, sg, wd] of [[a.wallPos, 1, a.wallPosDist ?? tr.wallDist], [a.wallNeg, -1, a.wallNegDist ?? tr.wallDist]]) {
       if (!flag) continue;
-      const wx = a.x + a.nx * sg * tr.wallDist, wz = a.z + a.nz * sg * tr.wallDist;
+      const wx = a.x + a.nx * sg * wd, wz = a.z + a.nz * sg * wd;
       for (let j = 0; j < N; j++) {
         let sep = Math.abs(S[j].s - a.s); sep = Math.min(sep, tr.length - sep);
         if (sep <= 60) continue;
         const d = Math.hypot(S[j].x - wx, S[j].z - wz);
         if (d < minClear) minClear = d;
-        if (d < tr.halfWidth + 0.3) { onRoad++; break; }
-        if (d < tr.halfWidth + 1.5) near++;
+        const hw = S[j].halfW ?? tr.halfWidth;
+        if (d < hw + 0.3) { onRoad++; break; }
+        if (d < hw + 1.5) near++;
       }
     }
   }

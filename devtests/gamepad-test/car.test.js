@@ -3,8 +3,14 @@ const assert = require('assert');
 const vm = require('vm'), fs = require('fs');
 let T = 0; const ok = (n, f) => { f(); T++; console.log('ok  ' + n); };
 function loadCar(file) { const g = { Math, Infinity, NaN }; g.globalThis = g; vm.runInNewContext(fs.readFileSync(file, 'utf8'), g); return g.F1; }
-const NEW = loadCar('C:/Users/user/Desktop/f1drive/js/car.js');
-const OLD = loadCar(__dirname + '/car.orig.js');
+const NEW = loadCar(require('path').resolve(__dirname, '..', '..') + '/js/car.js');
+// car.orig.js = js/car.js from before analog input was added (baseline of the bit-for-bit regression). It is not in
+// the repo; without it the baseline is the v5 car (devtests/car-v6/car-v5.js, with analog input: boolean input
+// behaves as before it), which v6's js/car.js must still match exactly (the golden rule).
+const ORIG = fs.existsSync(__dirname + '/car.orig.js') ? __dirname + '/car.orig.js' : require('path').resolve(__dirname, '..', 'car-v6', 'car-v5.js');
+const HAVE_OLD = fs.existsSync(ORIG);
+const OLD = HAVE_OLD ? loadCar(ORIG) : null;
+const okOld = (n, f) => HAVE_OLD ? ok(n, f) : console.log('SKIP ' + n + ' (no baseline car.js)');
 const DT = 1 / 120;
 
 // flat, wide, straight strip (no walls) and a real-ish oval with walls, elevation and banking
@@ -24,13 +30,14 @@ function run(F1, track, steps, inputFn, each) {
   return car.state;
 }
 
-ok('F1.CAR_PERF unchanged', () => {
+okOld('F1.CAR_PERF unchanged', () => {
   for (const k of Object.keys(OLD.CAR_PERF)) {
     if (typeof OLD.CAR_PERF[k] === 'function') for (const v of [0, 20, 50, 90]) for (const b of [-0.1, 0, 0.1])
       assert.strictEqual(NEW.CAR_PERF[k](v, b, 0.03, 0.001, 1), OLD.CAR_PERF[k](v, b, 0.03, 0.001, 1), k);
     else assert.strictEqual(NEW.CAR_PERF[k], OLD.CAR_PERF[k], k);
   }
-  assert.deepStrictEqual(Object.keys(NEW.CAR_PERF), Object.keys(OLD.CAR_PERF));
+  // v6 adds fields (gearFor, rpmFor, ...) after the old ones
+  assert.deepStrictEqual(Object.keys(NEW.CAR_PERF).slice(0, Object.keys(OLD.CAR_PERF).length), Object.keys(OLD.CAR_PERF));
 });
 
 // pseudo-random boolean key sequences (incl. both keys at once, reversing, walls, grass)
@@ -41,7 +48,7 @@ function keyScript(seed) {
       cur = { up: u < 0.62 || u > 0.95, down: u > 0.80, left: s < 0.35 || s > 0.97, right: s > 0.62 };
       if (r() < 0.12) { left = 500 + Math.floor(r() * 500); cur.up = false; cur.down = true; } } return cur; };
 }
-ok('boolean input: trajectories bit-for-bit identical to the old car.js (strip + walled banked oval, 12 x 60 s)', () => {
+okOld('boolean input: trajectories bit-for-bit identical to the old car.js (strip + walled banked oval, 12 x 60 s)', () => {
   let cmp = 0;
   for (const mk of [strip, oval]) for (let seed = 1; seed <= 6; seed++) {
     const tr = mk(), a = OLD.createCar(), b = NEW.createCar(); a.reset(tr, 0); b.reset(tr, 0);
@@ -80,8 +87,8 @@ ok('flat-track performance numbers: 330 km/h, 0-100 in 2.73 s, 4.38 g peak braki
   }
   for (const full of [{ down: true }, { brake: 1 }]) {
     const tr = strip(), car = NEW.createCar(); car.reset(tr, 0); car.state.speed = 300 / 3.6;
-    const old = OLD.createCar(); old.reset(tr, 0); old.state.speed = 300 / 3.6; old.update(DT, { down: true }, tr);
-    const v0 = 300 / 3.6; car.update(DT, full, tr); assert.strictEqual(car.state.speed, old.state.speed);
+    const old = HAVE_OLD ? OLD.createCar() : null; if (old) { old.reset(tr, 0); old.state.speed = 300 / 3.6; old.update(DT, { down: true }, tr); }
+    const v0 = 300 / 3.6; car.update(DT, full, tr); if (old) assert.strictEqual(car.state.speed, old.state.speed);
     const g = (v0 - car.state.speed) / DT / 9.81; assert(Math.abs(g - 4.38) < 0.03, 'peak g from 300 km/h ' + g);
   }
 });

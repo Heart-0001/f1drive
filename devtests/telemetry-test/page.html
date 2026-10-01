@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>telemetry test</title>
+<style>
+  :root {
+    --num-font: "Bahnschrift", "DIN Alternate", "Segoe UI", "Microsoft JhengHei", system-ui, sans-serif;
+  }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d10; }
+  /* a screenshot of the real game (devtests/gp-smoke/out/a2-driving.png, copied to bg.png by shots.js) when there
+     is one, else a sky / track gradient */
+  #bg {
+    position: fixed; inset: 0;
+    background: linear-gradient(#5a8fd0 0%, #9cc2ea 44%, #6f7680 45%, #3a3e45 70%, #2b2d31 100%);
+    background-size: cover; background-position: center;
+  }
+  /* the size proposed to the UI owner: 520 x 156 at 1280 wide, growing with the window up to 780 x 234 */
+  #hud-telemetry {
+    position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%);
+    width: clamp(520px, 40.625vw, 780px); aspect-ratio: 520 / 156; height: auto;
+    pointer-events: none; z-index: 5;
+  }
+  body.box #hud-telemetry { outline: 1px dashed rgba(255, 0, 255, .7); }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<canvas id="hud-telemetry"></canvas>
+<script src="../../js/telemetry.js"></script>
+<script>
+(function () {
+  'use strict';
+  var tel = F1.telemetry, cv = document.getElementById('hud-telemetry');
+  var q = new URLSearchParams(location.search);
+  if (q.get('bg')) document.getElementById('bg').style.backgroundImage = 'url("' + q.get('bg') + '")';
+  if (q.get('box')) document.body.classList.add('box');
+  var realClock = tel.clock, fakeNow = 0;
+  window.__errors = [];
+  window.addEventListener('error', function (e) { window.__errors.push(String(e.message)); });
+  var warn = console.warn;
+  console.warn = function () { window.__errors.push('warn: ' + Array.prototype.join.call(arguments, ' ')); warn.apply(console, arguments); };
+
+  window.__init = function () { return tel.init(cv); };
+  // draw a state as the game would over `frames` frames of 1/60 s on a fake clock ending at `end` (default 14000 ms:
+  // a multiple of 3500, where the module's flashing and strobing are both in their 'on' phase; +250 = flash 'off')
+  window.__show = function (state, opts) {
+    opts = opts || {};
+    var frames = opts.frames || 30, end = opts.end === undefined ? 14000 : opts.end, t0 = end - (frames - 1) * 1000 / 60;
+    tel.clock = function () { return fakeNow; };
+    fakeNow = t0;
+    if (!opts.keep) tel.reset();
+    for (var i = 0; i < frames; i++) { fakeNow = t0 + i * 1000 / 60; tel.draw(state); }
+    return { w: cv.width, h: cv.height, cssW: cv.getBoundingClientRect().width, cssH: cv.getBoundingClientRect().height,
+      dpr: window.devicePixelRatio, rect: rect() };
+  };
+  function rect() {
+    var r = cv.getBoundingClientRect();
+    return { x: Math.floor(r.left), y: Math.floor(r.top), width: Math.ceil(r.width), height: Math.ceil(r.height) };
+  }
+  window.__rect = rect;
+
+  // pedal response: step the throttle 0 -> 1 on the fake clock, report the drawn (smoothed) value after 50 ms by
+  // reading back the arc's pixels is overkill: the module's smoothing is exponential, so sample it through a probe
+  window.__step = function (from, to, ms) {
+    tel.clock = function () { return fakeNow; };
+    tel.reset();
+    fakeNow = 20000;
+    tel.draw(from);
+    var n = Math.round(ms / (1000 / 60));
+    for (var i = 1; i <= n; i++) { fakeNow = 20000 + i * 1000 / 60; tel.draw(to); }
+    return true;
+  };
+
+  // cost of draw(): n frames with states that change every frame (pedals, rpm, speed, battery, tyres, flashing)
+  window.__bench = function (n, raf) {
+    tel.clock = realClock;
+    tel.reset();
+    var st = {
+      speedKmh: 0, gear: 1, rpm: 4000, rpmIdle: 4000, rpmShift: 11800, rpmMax: 12500, throttle: 0, brake: 0,
+      battery: 0.5, deploy: 0, harvest: 0, limiter: false, inPit: false, limitKmh: 80,
+      tyres: { compound: 'M', wear: [0.1, 0.2, 0.3, 0.4], flat: [0, 0.5, 0, 0], puncture: -1 },
+      nextCompound: 'S', team: 'McLaren', car: 'MCL40', colour: '#ff8000'
+    };
+    var times = new Float64Array(n), i = 0;
+    function step() {
+      var f = i / 97;
+      st.speedKmh = 170 + 170 * Math.sin(f);
+      st.gear = 1 + (i >> 4) % 8;
+      st.rpm = 6000 + 6200 * (0.5 + 0.5 * Math.sin(f * 3.1));
+      st.throttle = (i >> 3) % 3 === 0 ? 0 : 1;
+      st.brake = (i >> 3) % 3 === 0 ? 0.9 : 0;
+      st.battery = 0.5 + 0.5 * Math.sin(f * 0.3);
+      st.deploy = (i >> 5) % 2 ? 1 : 0;
+      st.harvest = st.deploy ? 0 : 0.8;
+      st.limiter = (i >> 7) % 4 === 1;
+      st.inPit = (i >> 7) % 4 === 2;
+      st.tyres.puncture = (i >> 8) % 3 === 1 ? 3 : -1;
+      st.tyres.wear[1] = (i % 1000) / 1000;
+    }
+    function one() {
+      step();
+      var t0 = performance.now();
+      tel.draw(st);
+      times[i] = performance.now() - t0;
+      i++;
+    }
+    if (!raf) {
+      // back to back, timed in batches of 100 (performance.now() is only 0.1 ms fine here): per-call average of
+      // every batch, plus the single calls (coarse)
+      var B = 100, batches = [], k, j;
+      for (k = 0; k < n; k += B) {
+        var tb = performance.now();
+        for (j = 0; j < B && i < n; j++) { step(); tel.draw(st); times[i] = 0; i++; }
+        batches.push((performance.now() - tb) / j);
+      }
+      var sb = summary(batches);
+      i = 0;
+      for (k = 0; k < n; k++) one();
+      var single = summary(times);
+      return { n: n, avg: sb.avg, worstBatchAvg: sb.max, p99Batch: sb.p99, singleAvg: single.avg, singleP99: single.p99,
+        singleP999: single.p999, singleMax: single.max, first: single.first };
+    }
+    return new Promise(function (res) {
+      function loop() { one(); if (i < n) requestAnimationFrame(loop); else res(summary(times)); }
+      requestAnimationFrame(loop);
+    });
+  };
+  function summary(times) {
+    var a = Array.prototype.slice.call(times).sort(function (x, y) { return x - y; }), s = 0;
+    for (var i = 0; i < a.length; i++) s += a[i];
+    return { n: a.length, avg: s / a.length, p50: a[a.length >> 1], p99: a[Math.floor(a.length * 0.99)],
+      p999: a[Math.floor(a.length * 0.999)], max: a[a.length - 1], first: times[0] };
+  }
+
+  // contact sheet: crops (data URLs) laid out in a grid with captions, returned as a PNG data URL
+  window.__sheet = function (items, cols, scale) {
+    return Promise.all(items.map(function (it) {
+      return new Promise(function (res) { var im = new Image(); im.onload = function () { res(im); }; im.src = it.url; });
+    })).then(function (imgs) {
+      scale = scale || 1;
+      var cw = 0, ch = 0;
+      imgs.forEach(function (im) { cw = Math.max(cw, im.width * scale); ch = Math.max(ch, im.height * scale); });
+      var cap = 22, pad = 8, rows = Math.ceil(imgs.length / cols);
+      var sheet = document.createElement('canvas');
+      sheet.width = cols * (cw + pad) + pad; sheet.height = rows * (ch + cap + pad) + pad;
+      var c = sheet.getContext('2d');
+      c.fillStyle = '#202329'; c.fillRect(0, 0, sheet.width, sheet.height);
+      imgs.forEach(function (im, i) {
+        var x = pad + (i % cols) * (cw + pad), y = pad + Math.floor(i / cols) * (ch + cap + pad);
+        c.fillStyle = '#fff'; c.font = '600 14px Segoe UI, Microsoft JhengHei, sans-serif';
+        c.fillText(items[i].label, x + 2, y + 15);
+        c.imageSmoothingQuality = 'high';
+        c.drawImage(im, x, y + cap, im.width * scale, im.height * scale);
+      });
+      return sheet.toDataURL('image/png');
+    });
+  };
+})();
+</script>
+</body>
+</html>

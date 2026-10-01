@@ -13,6 +13,25 @@
 
   var shared = null;   // geometries / materials shared by every car
 
+  // Halo: the centre line of the first-person car's hoop (F1.COCKPIT_HALO, js/cockpit.js; the same numbers here for
+  // when that file is not loaded), so a car looks the same from outside as from its own cockpit. Drawn as four
+  // straight tubes a side, their ends at these fractions of the hoop's length (within 4.2 cm of the curve).
+  var HALO_LINE = { hoop: [[0.44, 0.66, -1.02], [0.45, 0.80, -0.98], [0.48, 1.02, -0.55], [0.47, 1.18, -0.10], [0.38, 1.29, 0.30], [0.20, 1.325, 0.56], [0.08, 1.33, 0.625]],
+                    apex: [0, 1.332, 0.645], pillar: [0, 1.325, 0.64] };
+  var HALO_AT = [0, 0.05, 0.29, 0.42, 0.5], HALO_FOOT = [0, 0.58, 0.95];   // pillar foot: on the cowl
+  var haloPts = null;
+  function haloPoints(THREE) {
+    if (haloPts) return haloPts;
+    var L = F1.COCKPIT_HALO && F1.COCKPIT_HALO.hoop ? F1.COCKPIT_HALO : HALO_LINE, c = [], i;
+    for (i = 0; i < L.hoop.length; i++) c.push(new THREE.Vector3(L.hoop[i][0], L.hoop[i][1], L.hoop[i][2]));
+    c.push(new THREE.Vector3(L.apex[0], L.apex[1], L.apex[2]));
+    for (i = L.hoop.length - 1; i >= 0; i--) c.push(new THREE.Vector3(-L.hoop[i][0], L.hoop[i][1], L.hoop[i][2]));
+    var curve = new THREE.CatmullRomCurve3(c, false, 'catmullrom', 0.5);
+    haloPts = { hoop: [], pillar: L.pillar };
+    for (i = 0; i < HALO_AT.length; i++) haloPts.hoop.push(curve.getPointAt(HALO_AT[i]).toArray());
+    return haloPts;
+  }
+
   function parseColour(THREE, c) {
     var col = new THREE.Color(0xff7a14);
     try {
@@ -26,18 +45,21 @@
   function Merger(THREE) {
     this.THREE = THREE; this.pos = []; this.nor = []; this.col = []; this.paint = [];
   }
-  // colour: hex number, or null for "body colour" (filled in later, recolourable)
+  // livery slots (filled in later, recolourable): null = body colour, B2 = second livery colour, B3 = the player's accent
+  var B2 = 'colour2', B3 = 'accent', SLOT = { colour2: 2, accent: 3 };
+  // colour: hex number, or a livery slot
   Merger.prototype.add = function (geo, colour, matrix) {
     var THREE = this.THREE;
     var g = geo.index ? geo.toNonIndexed() : geo;
     if (matrix) g.applyMatrix4(matrix);
     g.computeVertexNormals();
-    var p = g.attributes.position.array, n = g.attributes.normal.array, c = new THREE.Color(colour == null ? 0xffffff : colour);
+    var slot = colour == null ? 1 : (SLOT[colour] || 0);
+    var p = g.attributes.position.array, n = g.attributes.normal.array, c = new THREE.Color(slot ? 0xffffff : colour);
     for (var i = 0; i < p.length; i += 3) {
       this.pos.push(p[i], p[i + 1], p[i + 2]);
       this.nor.push(n[i], n[i + 1], n[i + 2]);
       this.col.push(c.r, c.g, c.b);
-      this.paint.push(colour == null ? 1 : 0);
+      this.paint.push(slot);
     }
     if (g !== geo) g.dispose();
     geo.dispose();
@@ -102,7 +124,7 @@
     m.taper(B, 0, -1.00, 0.80, 0.50, 0.11, 0.45, 0.80, 0.50, 0.11);
     m.taper(B, 0, 0.45, 0.80, 0.50, 0.11, 0.95, 0.62, 0.40, 0.18);
     m.taper(B, 0, 0.95, 0.62, 0.40, 0.18, 2.35, 0.26, 0.22, 0.22);
-    m.taper(B, 0, 2.35, 0.26, 0.22, 0.22, 2.80, 0.16, 0.14, 0.26);
+    m.taper(B3, 0, 2.35, 0.26, 0.22, 0.22, 2.80, 0.16, 0.14, 0.26);          // nose tip: the player's accent
     // cockpit opening, driver's helmet
     m.box(DARK, 0.46, 0.02, 0.85, 0, 0.615, -0.30);
     var helmet = new THREE.SphereGeometry(0.15, 8, 6);
@@ -121,31 +143,32 @@
     m.taper(CARBON, 0, -2.10, 0.03, 0.22, 0.48, -1.10, 0.03, 0.10, 0.90);
     // front wing: main plane, two flaps, endplates, pylons
     m.box(CARBON, 1.90, 0.025, 0.42, 0, 0.11, 2.60);
-    m.box(B, 1.84, 0.02, 0.20, 0, 0.19, 2.50, -0.35);
+    m.box(B2, 1.84, 0.02, 0.20, 0, 0.19, 2.50, -0.35);
     m.box(CARBON, 1.84, 0.02, 0.14, 0, 0.26, 2.40, -0.55);
     for (sx = -1; sx <= 1; sx += 2) {
-      m.box(B, 0.02, 0.26, 0.50, sx * 0.95, 0.20, 2.56);
+      m.box(B2, 0.02, 0.26, 0.50, sx * 0.95, 0.20, 2.56);
       m.box(CARBON, 0.02, 0.16, 0.20, sx * 0.06, 0.19, 2.62);
     }
     // rear wing: endplates, main plane + flap, beam wing, pylon, rain light
     for (sx = -1; sx <= 1; sx += 2) m.box(CARBON, 0.025, 0.62, 0.62, sx * 0.50, 0.70, -2.42);
-    m.box(B, 0.98, 0.035, 0.34, 0, 0.93, -2.40, 0.18);
+    m.box(B2, 0.98, 0.035, 0.34, 0, 0.93, -2.40, 0.18);
     m.box(CARBON, 0.98, 0.03, 0.16, 0, 1.00, -2.60, 0.55);
     m.box(CARBON, 0.98, 0.03, 0.22, 0, 0.44, -2.42);
     m.box(CARBON, 0.04, 0.50, 0.22, 0, 0.66, -2.36);
     m.box(0xe0202a, 0.08, 0.10, 0.03, 0, 0.30, -2.44);
     // diffuser
     m.taper(CARBON, 0, -2.45, 1.00, 0.20, 0.10, -2.05, 1.00, 0.04, 0.10);
-    // halo: hoop as a few straight tubes + the centre pillar
-    var hp = [[0.40, 0.66, -0.95], [0.43, 0.88, -0.45], [0.36, 0.93, 0.10], [0.16, 0.92, 0.42], [0, 0.91, 0.47]];
+    // halo: the cockpit's hoop as a few straight tubes + the centre pillar (vertices [halo0, halo1) of the body)
+    var H = haloPoints(THREE), hp = H.hoop, halo0 = m.pos.length / 3;
     for (sx = -1; sx <= 1; sx += 2) {
       for (i = 0; i + 1 < hp.length; i++) {
         m.rod(CARBON, sx * hp[i][0], hp[i][1], hp[i][2], sx * hp[i + 1][0], hp[i + 1][1], hp[i + 1][2], 0.03);
       }
     }
-    m.rod(CARBON, 0, 0.91, 0.47, 0, 0.58, 0.72, 0.028);
+    m.rod(CARBON, H.pillar[0], H.pillar[1], H.pillar[2], HALO_FOOT[0], HALO_FOOT[1], HALO_FOOT[2], 0.028);
+    var halo1 = m.pos.length / 3;
     // mirrors
-    for (sx = -1; sx <= 1; sx += 2) m.box(B, 0.14, 0.06, 0.05, sx * 0.56, 0.70, 0.30);
+    for (sx = -1; sx <= 1; sx += 2) m.box(B2, 0.14, 0.06, 0.05, sx * 0.56, 0.70, 0.30);
     // suspension: two wishbones per corner
     for (sx = -1; sx <= 1; sx += 2) {
       var fo = sx * (FRONT_X - FRONT_W / 2), ro = sx * (REAR_X - REAR_W / 2);
@@ -158,7 +181,7 @@
       m.rod(CARBON, sx * 0.22, 0.20, -1.35, ro, 0.22, REAR_Z, 0.018);
       m.rod(CARBON, sx * 0.12, 0.20, -2.10, ro, 0.22, REAR_Z, 0.018);
     }
-    return { geo: m.build(), paint: m.paint };
+    return { geo: m.build(), paint: m.paint, halo: [halo0, halo1] };
   }
 
   function drawTag(ctx, w, h, name, colour) {
@@ -188,8 +211,10 @@
    *   group,                        // THREE.Group, add to the scene
    *   update(state, dt, eye),       // state: {x, y?, z, heading, pitch?, roll?, speed, steer}; eye: optional
    *                                 //   world position {x, y, z} of the viewer (name tag range / size)
-   *   setColour(colour), setName(name), dispose()
-   * }   colour: '#rrggbb' or a hex number
+   *   setColour(colour), setName(name), dispose(),
+   *   setLivery(colour, colour2, accent)   // body / secondary parts / the player's accent (nose tip, name tag)
+   *   setHalo(on)                   // false for a car without a halo (CarSpec.cockpit 'modern'); default on
+   * }   colour: '#rrggbb' or a hex number; setColour(c) = setLivery(c, c, c)
    */
   F1.createCarModel = function (colour, name) {
     var THREE = root.THREE;
@@ -227,9 +252,10 @@
     tag.position.set(0, 1.75, -0.3);
     tag.scale.set(3.2, 0.6, 1);
     tag.renderOrder = 5;
+    tag.userData.mirror = false;       // not in the cockpit's mirrors (they show the world, not the labels)
     group.add(tag);
 
-    var curColour = '', curName = null, wheelAngle = 0, ghost = false;
+    var curColour = '', curLivery = '', curName = null, wheelAngle = 0, ghost = false;
 
     function setGhost(on) {
       on = !!on;
@@ -240,14 +266,38 @@
       tagMat.opacity = on ? 0.6 : 1;
     }
 
-    function setColour(c) {
-      var col = parseColour(THREE, c), key = '#' + col.getHexString();
-      if (key === curColour) return;
-      curColour = key;
+    // Livery: the body in colour, the secondary parts (front wing flap and endplates, rear wing, mirrors) in colour2,
+    // the player's accent on the nose tip and the name tag. colour2 / accent default to colour (= the old one-colour car).
+    function setLivery(colour, colour2, accent) {
+      var c1 = parseColour(THREE, colour), key1 = '#' + c1.getHexString();
+      var c2 = colour2 == null || colour2 === '' ? c1 : parseColour(THREE, colour2);
+      var c3 = accent == null || accent === '' ? c1 : parseColour(THREE, accent);
+      var key = key1 + '#' + c2.getHexString() + '#' + c3.getHexString();
+      if (key === curLivery) return;
+      curLivery = key;
+      var byslot = [null, c1, c2, c3];
       var a = bodyGeo.attributes.color;
-      for (var k = 0; k < paint.length; k++) if (paint[k]) a.setXYZ(k, col.r, col.g, col.b);
+      for (var k = 0; k < paint.length; k++) { var cl = byslot[paint[k]]; if (cl) a.setXYZ(k, cl.r, cl.g, cl.b); }
       a.needsUpdate = true;
-      if (curName !== null) { drawTag(ctx, canvas.width, canvas.height, curName, curColour); tex.needsUpdate = true; }
+      var tagKey = '#' + c3.getHexString();
+      if (tagKey !== curColour) {
+        curColour = tagKey;
+        if (curName !== null) { drawTag(ctx, canvas.width, canvas.height, curName, curColour); tex.needsUpdate = true; }
+      }
+    }
+    function setColour(c) { setLivery(c, null, null); }
+    // Halo on / off (the cockpit has none before 2018: CarSpec.cockpit 'modern'). Off collapses the halo's triangles
+    // into the helmet: same geometry, same draw call.
+    var haloOn = true, haloPos = null;
+    function setHalo(on) {
+      on = on !== false;
+      if (on === haloOn) return;
+      haloOn = on;
+      var p = bodyGeo.attributes.position, a = built.halo[0] * 3, b = built.halo[1] * 3;
+      if (!haloPos) haloPos = p.array.slice(a, b);
+      if (on) p.array.set(haloPos, a);
+      else for (var k = a; k < b; k += 3) { p.array[k] = 0; p.array[k + 1] = 0.74; p.array[k + 2] = -0.38; }
+      p.needsUpdate = true;
     }
     function setName(n) {
       n = String(n == null ? '' : n);
@@ -293,6 +343,6 @@
 
     setColour(colour);
     setName(name || '');
-    return { group: group, update: update, setColour: setColour, setName: setName, setGhost: setGhost, dispose: dispose };
+    return { group: group, update: update, setColour: setColour, setLivery: setLivery, setName: setName, setGhost: setGhost, setHalo: setHalo, dispose: dispose };
   };
 })(typeof window !== 'undefined' ? window : globalThis);

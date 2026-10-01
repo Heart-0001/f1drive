@@ -16,16 +16,18 @@ async function stopServer() {
 
 /** Register the IPC handlers (call once). */
 function register(ipcMain) {
-  ipcMain.handle('f1:startServer', async (event, port) => {
+  // opts: { password } ('' / missing = an open room); the server cleans it the way js/net.js does
+  ipcMain.handle('f1:startServer', async (event, port, opts) => {
     if (busy) return { ok: false, error: 'busy' };
     busy = true;
     try {
       port = Number(port);
       if (!Number.isInteger(port) || port < 1024 || port > 65535) return { ok: false, error: 'badport' };
+      const password = opts && typeof opts.password === 'string' ? opts.password.slice(0, 256) : '';
       await stopServer();
       // only the page that created the room gets this token, and only its holder is the host
       const token = crypto.randomBytes(16).toString('hex');
-      server = await relay.createServer({ port: port, hostToken: token });
+      server = await relay.createServer({ port: port, hostToken: token, password: password });
       serverOwner = event.sender.id;
       return { ok: true, port: server.port, addresses: relay.lanAddresses(), token: token };
     } catch (err) {

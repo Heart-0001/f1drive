@@ -10,15 +10,18 @@
 //     lookX   -1..1   right stick X, +1 = look LEFT
 //     lookY   -1..1   right stick Y, +1 = look UP
 //     up, down, left, right   D-pad as digital keys (OR them with the keyboard booleans)
-//     pressed: { reset, line, menu, recentre }   true only on the frame the button goes down
+//     boost    bool   RB or B held: deploy the battery (E)
+//     pressed: { reset, line, menu, recentre, limiter, compound }   true only on the frame the button goes down
 //   }
 //   F1.gamepad.active            true while the pad has given non-zero input in the last ACTIVE_HOLD_MS
-//   F1.gamepad.mergeInput(keys, out) -> out   keyboard booleans + pad -> the object for car.update()
+//   F1.gamepad.mergeInput(keys, out) -> out   keyboard booleans + pad -> the object for car.update() (boost merged,
+//                                             limiter passed through from keys: main.js owns the toggle)
 //   F1.gamepad.rumble(strength 0..1, ms)      no-op where unsupported
 //   F1.gamepad.onChange = function (connected, id) {}   optional, called when a pad appears / goes away
 //
 // Buttons (standard mapping): A or Y = reset to track (R), X = racing line (L), Start/Menu = menu (Esc),
-// right-stick click = recentre view, D-pad = digital steer / throttle / brake.
+// right-stick click = recentre view, D-pad = digital steer / throttle / brake, RB or B (held) = battery (E),
+// LB = pit limiter toggle (Q, pressed.limiter), Back/View = next tyre compound (T, pressed.compound).
 (function (root) {
   'use strict';
   var F1 = root.F1 = root.F1 || {};
@@ -35,16 +38,16 @@
   var RUMBLE_MIN_GAP_MS = 60;    // weaker rumbles requested sooner than this after a stronger one are dropped
 
   // standard-mapping indices (https://w3c.github.io/gamepad/#remapping)
-  var B_A = 0, B_X = 2, B_Y = 3, B_LT = 6, B_RT = 7, B_START = 9, B_RS = 11,
+  var B_A = 0, B_B = 1, B_X = 2, B_Y = 3, B_LB = 4, B_RB = 5, B_LT = 6, B_RT = 7, B_BACK = 8, B_START = 9, B_RS = 11,
       B_DUP = 12, B_DDOWN = 13, B_DLEFT = 14, B_DRIGHT = 15;
 
   var state = {
     connected: false, id: '',
     throttle: 0, brake: 0, steer: 0, lookX: 0, lookY: 0,
-    up: false, down: false, left: false, right: false,
-    pressed: { reset: false, line: false, menu: false, recentre: false }
+    up: false, down: false, left: false, right: false, boost: false,
+    pressed: { reset: false, line: false, menu: false, recentre: false, limiter: false, compound: false }
   };
-  var held = { reset: false, line: false, menu: false, recentre: false };
+  var held = { reset: false, line: false, menu: false, recentre: false, limiter: false, compound: false };
   var stick = { x: 0, y: 0 };            // scratch for deadzone()
   var padIndex = -1, lastPoll = -1e9, lastInput = -1e9;
   var trigSeen = [false, false];         // non-standard pads: trigger axis has moved off its bogus initial 0
@@ -115,9 +118,9 @@
 
   function clearState() {
     state.throttle = state.brake = state.steer = state.lookX = state.lookY = 0;
-    state.up = state.down = state.left = state.right = false;
+    state.up = state.down = state.left = state.right = state.boost = false;
     var p = state.pressed;
-    p.reset = p.line = p.menu = p.recentre = false;
+    p.reset = p.line = p.menu = p.recentre = p.limiter = p.compound = false;
   }
   function setConnected(pad) {
     var was = state.connected, wasId = state.id;
@@ -125,7 +128,7 @@
     state.id = pad ? String(pad.id || '') : '';
     if (!pad) {
       padIndex = -1;
-      held.reset = held.line = held.menu = held.recentre = false;
+      held.reset = held.line = held.menu = held.recentre = held.limiter = held.compound = false;
       clearState();
       gp.active = false;
     }
@@ -170,7 +173,7 @@
     }
 
     var cfg = gp.config;
-    var lx, ly, rx, ry, thr, brk, dU, dD, dL, dR, bReset, bLine, bMenu, bRe;
+    var lx, ly, rx, ry, thr, brk, dU, dD, dL, dR, bReset, bLine, bMenu, bRe, bBoost, bLim, bComp;
     var nAxes = pad.axes ? pad.axes.length : 0;
     if (pad.mapping === 'standard' || nAxes < 6) {
       // standard layout (also assumed for unmapped pads with 4-5 axes: triggers are buttons 6 / 7)
@@ -181,6 +184,9 @@
       bLine = btnDown(pad, B_X);
       bMenu = btnDown(pad, B_START);
       bRe = btnDown(pad, B_RS);
+      bBoost = btnDown(pad, B_RB) || btnDown(pad, B_B);
+      bLim = btnDown(pad, B_LB);
+      bComp = btnDown(pad, B_BACK);
     } else {
       // raw XInput-style layout (Firefox / Linux, no mapping): axes = LX LY LT RX RY RT [hatX hatY],
       // buttons = A B X Y LB RB Back Start Guide LS RS
@@ -192,6 +198,9 @@
       bLine = btnDown(pad, 2);
       bMenu = btnDown(pad, 7);
       bRe = btnDown(pad, 10);
+      bBoost = btnDown(pad, 5) || btnDown(pad, 1);
+      bLim = btnDown(pad, 4);
+      bComp = btnDown(pad, 6);
     }
 
     deadzone(lx, ly);
@@ -202,24 +211,29 @@
     state.throttle = trigger(thr);
     state.brake = trigger(brk);
     state.up = dU; state.down = dD; state.left = dL; state.right = dR;
+    state.boost = bBoost;
 
     var p = state.pressed;
     p.reset = bReset && !held.reset && !fresh;
     p.line = bLine && !held.line && !fresh;
     p.menu = bMenu && !held.menu && !fresh;
     p.recentre = bRe && !held.recentre && !fresh;
+    p.limiter = bLim && !held.limiter && !fresh;
+    p.compound = bComp && !held.compound && !fresh;
     held.reset = bReset; held.line = bLine; held.menu = bMenu; held.recentre = bRe;
+    held.limiter = bLim; held.compound = bComp;
 
     if (state.throttle > 0 || state.brake > 0 || state.steer !== 0 || state.lookX !== 0 || state.lookY !== 0 ||
-        dU || dD || dL || dR || bReset || bLine || bMenu || bRe) lastInput = t;
+        dU || dD || dL || dR || bReset || bLine || bMenu || bRe || bBoost || bLim || bComp) lastInput = t;
     gp.active = t - lastInput <= cfg.activeHoldMs;
     return state;
   }
 
-  // Keyboard + pad -> the input object for car.update(). `keys` = {up, down, left, right} booleans (not
-  // modified), `out` is filled in and returned. Per axis, whichever device has input wins: the analog
+  // Keyboard + pad -> the input object for car.update(). `keys` = {up, down, left, right, boost, limiter} booleans
+  // (not modified), `out` is filled in and returned. Per axis, whichever device has input wins: the analog
   // fields are null while the pad is at rest, so car.js falls back to the booleans exactly as without a
-  // pad; when both are used at once car.js takes the larger magnitude.
+  // pad; when both are used at once car.js takes the larger magnitude. boost = E key or RB / B held;
+  // limiter = keys.limiter as it is (the toggle state main.js keeps: Q or pressed.limiter flip it).
   function mergeInput(keys, out) {
     out = out || {};
     keys = keys || {};
@@ -231,6 +245,8 @@
     out.throttle = on && state.throttle > 0 ? state.throttle : null;
     out.brake = on && state.brake > 0 ? state.brake : null;
     out.steerAxis = on && state.steer !== 0 ? state.steer : null;
+    out.boost = !!keys.boost || (on && state.boost);
+    out.limiter = !!keys.limiter;
     return out;
   }
 

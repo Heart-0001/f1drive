@@ -1,0 +1,47 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>audio probe</title></head>
+<body>
+<script src="../../../js/audio.js"></script>
+<script>
+// helpers used by probe-audio.js through executeJavaScript
+window.P = {
+  hiddenNow: false,
+  run: async function () {
+    var out = {};
+    var a = F1.audio;
+    out.supported = a.supported;
+    out.ready = await a.init();
+    out.backend = a.debug.backend;
+    a.setActive(true);
+    var st = { speed: 60, gear: 5, rpm: 9000, throttle: 1, brake: 0, x: 0, y: 0, z: 0, heading: 0 };
+    var L = { x: 0, y: 0.8, z: 0, heading: 0 };
+    // the game loop keeps running while the window is hidden (electron-main.js: backgroundThrottling false)
+    for (var i = 0; i < 30; i++) { st.z += 1; a.update(1 / 60, st, L, []); await new Promise(function (r) { setTimeout(r, 16); }); }
+    var ctx = a.debug.context;
+    out.stateBefore = ctx.state;
+    // hide the page the way Chromium reports it: document.hidden -> true + visibilitychange
+    Object.defineProperty(document, 'hidden', { configurable: true, get: function () { return P.hiddenNow; } });
+    P.hiddenNow = true;
+    document.dispatchEvent(new Event('visibilitychange'));
+    out.stalledRightAfterHide = a.debug.stalled;
+    // one more frame of the still-running loop
+    st.z += 1; a.update(1 / 60, st, L, []);
+    out.stalledAfterNextUpdate = a.debug.stalled;
+    for (var j = 0; j < 60; j++) { st.z += 1; a.update(1 / 60, st, L, []); await new Promise(function (r) { setTimeout(r, 16); }); }
+    out.stalledAfter1s = a.debug.stalled;
+    out.activeGainAfter1sHidden = a.debug.output ? null : null;
+    // read the 'act' gain through the graph: dbg.output is the master; the active gain is not exposed, so
+    // measure the output level instead with an analyser on the master gain
+    var an = ctx.createAnalyser(); an.fftSize = 2048; a.debug.output.connect(an);
+    var buf = new Float32Array(an.fftSize);
+    await new Promise(function (r) { setTimeout(r, 200); });
+    for (var k = 0; k < 10; k++) { st.z += 1; a.update(1 / 60, st, L, []); await new Promise(function (r) { setTimeout(r, 16); }); }
+    an.getFloatTimeDomainData(buf);
+    var rms = 0; for (var q = 0; q < buf.length; q++) rms += buf[q] * buf[q];
+    out.rmsDbWhileHidden = 10 * Math.log10(rms / buf.length + 1e-20);
+    out.ctxStateWhileHidden = ctx.state;
+    return out;
+  }
+};
+</script>
+</body></html>

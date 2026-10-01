@@ -1,4 +1,15 @@
 node_modules/
 dist/
 tools/scenery-cache/
+tools/seasons-cache/
 *.log
+# devtests: screenshots and reports written by the Electron harnesses
+devtests/**/*.png
+devtests/review/e-report.json
+tools/watchdog-out/
+devtests/audio-test/out/
+# generated harness output folders (screenshots, logs, contact sheets)
+devtests/*/out/
+# reviewers' scratch: packaged app copies and data caches
+devtests/*/package/
+**/seasons-cache/
