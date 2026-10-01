@@ -27,16 +27,18 @@ function check(name, ok, detail) {
   console.log((ok ? 'PASS ' : 'FAIL ') + name + (detail !== undefined ? '  ' + (typeof detail === 'string' ? detail : J(detail)) : ''));
 }
 
-// (v6.1: js/hudmirrors.js after js/cockpit.js - the HUD rear-view mirrors)
-const CONTRACT_ORDER = ['js/boot.js', 'lib/three.min.js', 'tracks-data.js', 'js/seasons-data.js', 'js/cars.js', 'js/track.js', 'js/tyres.js', 'js/car.js',
-  'js/cockpit.js', 'js/hudmirrors.js', 'js/gamepad.js', 'js/audio.js', 'js/raceline.js', 'scenery-data.js', 'js/scenery.js', 'js/collide.js',
+// (v6.1: js/hudmirrors.js after js/cockpit.js - the HUD rear-view mirrors; v6.2: js/track-names-zh.js after tracks-data.js - the
+// Chinese circuit names of the cards and the search -, js/tunnels.js after js/scenery.js - Monaco's tunnel)
+const CONTRACT_ORDER = ['js/boot.js', 'lib/three.min.js', 'tracks-data.js', 'js/track-names-zh.js', 'js/seasons-data.js', 'js/cars.js', 'js/track.js', 'js/tyres.js', 'js/car.js',
+  'js/cockpit.js', 'js/hudmirrors.js', 'js/gamepad.js', 'js/audio.js', 'js/raceline.js', 'scenery-data.js', 'js/scenery.js', 'js/tunnels.js', 'js/collide.js',
   'js/carmodel.js', 'js/laps.js', 'js/pit.js', 'net/session.js', 'js/net.js', 'js/gp.js', 'js/telemetry.js', 'js/ui.js', 'js/main.js'];
 // every id the v6 UI adds (reported to the integrator / end-to-end tests); v6.1: the HUD mirror frames and their switch
 const NEW_IDS = ['hud-telemetry', 'hud-pit', 'hud-pit-limit', 'hud-pit-lim', 'hud-pit-warn', 'hud-pit-box', 'hud-pit-pending', 'hud-pit-svc',
   'hud-pit-svc-label', 'hud-pit-svc-time', 'hud-pit-bar', 'hud-pit-pen', 'hud-gp-year', 'menu-tabs', 'tab-car', 'tab-gp', 'tab-mp', 'tab-set',
   'tab-car-chip', 'tab-gp-dot', 'tab-mp-dot', 'car-panel', 'car-year', 'car-season', 'car-lock', 'car-list', 'car-empty', 'gp-panel', 'gp-car',
   'gp-year', 'gp-car-name', 'gp-car-change', 'gp-wear', 'gp-wear-note', 'mp-section', 'set-panel', 'set-volume', 'set-volume-val', 'set-mute',
-  'set-mute-text', 'keys-kb', 'keys-pad', 'pad-status', 'hud-mirror-l', 'hud-mirror-r', 'set-mirrors', 'set-mirrors-text'];
+  'set-mute-text', 'keys-kb', 'keys-pad', 'pad-status', 'hud-mirror-l', 'hud-mirror-r', 'set-mirrors', 'set-mirrors-text',
+  'set-fov', 'set-fov-val', 'set-fov-note', 'gp-tyre-row', 'gp-tyre', 'gp-tyre-label', 'gp-tyre-note', 'hud-pit-next'];   // (v6.2)
 // the HUD mirror frames (index.html; js/hudmirrors.js draws into them): nothing of the HUD may cover them
 const MIRRORS = ['hud-mirror-l', 'hud-mirror-r'];
 const NEAR_MIRRORS = ['hud-timing', 'hud-map', 'hud-hint', 'hud-gp', 'hud-players', 'gp-results', 'hud-lights', 'hud-pit', 'hud-menu-btn', 'hud-telemetry', 'hud-toast'];
@@ -99,6 +101,8 @@ const PAGE_LIB = `(function () {
       onCar: function (id) { __calls.push(['car', id]); },
       onAudio: function (a) { __calls.push(['audio', a]); },
       onMirrors: function (on) { __calls.push(['mirrors', on]); },
+      onFov: function (d) { __calls.push(['fov', d]); },
+      onCompound: function (c) { __calls.push(['compound', c]); },
       onProfile: function () {}
     });
     F1.ui.showMenu(window.F1_TRACKS);
@@ -178,7 +182,7 @@ app.whenReady().then(async () => {
 
     const bootErr = await load();
     check('test page boots without the error overlay', !bootErr, bootErr || undefined);
-    check('ui API: v6 functions present (v6.1: getMirrors / setMirrors)', await js(`['setCars','getCar','getYear','getAudio','setAudio','setPit','setGp','setNet','setLights','setPad','updateHUD','toast','getMirrors','setMirrors'].every(function (k) { return typeof F1.ui[k] === 'function'; })`));
+    check('ui API: v6 functions present (v6.1: getMirrors / setMirrors; v6.2: getFov / setCompound)', await js(`['setCars','getCar','getYear','getAudio','setAudio','setPit','setGp','setNet','setLights','setPad','updateHUD','toast','getMirrors','setMirrors','getFov','setCompound'].every(function (k) { return typeof F1.ui[k] === 'function'; })`));
 
     /* ================= menu ================= */
     if (part('menu')) {
@@ -442,10 +446,19 @@ app.whenReady().then(async () => {
           if (name === 'serviceTyres') { want = '換胎中 2.3 s'; ok = ok && /換胎中 2\.3 s/.test(s.text) && !/罰停/.test(s.text) && !/維修格/.test(s.text); }
           if (name === 'servicePenalty') { want = '罰停中 6.5 s + 罰停 +5 s'; ok = ok && /罰停中 6\.5 s/.test(s.text) && /罰停 \+5 s/.test(s.text); }
           if (name === 'serviceAfterPenalty') { want = '換胎中 1.4 s + 罰停 +5 s'; ok = ok && /換胎中 1\.4 s/.test(s.text) && /罰停 \+5 s/.test(s.text); }
+          // v6.2: wherever the strip is up, the next set and its keys (keyboard: T first)
+          const ZHC = { S: '軟胎', M: '中性胎', H: '硬胎' };
+          if (name !== 'off') { want += ' + 下一組：' + ZHC[p.next] + '（T / X 切換）'; ok = ok && s.text.indexOf('下一組：' + ZHC[p.next] + '（T / X 切換）') >= 0; }
           check(tag + ' pit ' + name + ': ' + (want || 'hidden') + '; inside the window, clear of the telemetry / hint / timing box', ok, { text: s.text, strip: s.strip.x + ',' + s.strip.y + ' ' + s.strip.w + 'x' + s.strip.h });
         }
         await js(`F1.ui.setPad(true, 'Pad'); F1.ui.setPit(${J(M.PIT.laneNoLimiter)})`);
-        check(tag + ' pit: with a controller the limiter hint names B (v6.1 layout)', /請開啟限速器（B）/.test(await js(`__text('hud-pit')`)));
+        const padPit = await js(`__text('hud-pit')`);
+        check(tag + ' pit: with a controller the limiter hint names B (v6.1 layout) and the next set X first (v6.2: 下一組：軟胎（X / T 切換）)',
+          /請開啟限速器（B）/.test(padPit) && padPit.indexOf('下一組：軟胎（X / T 切換）') >= 0, padPit);
+        if (tag === '1280') await shot('pit-1280-laneNoLimiter-pad');
+        const noNext = Object.assign({}, M.PIT.laneAhead); delete noNext.next;
+        await js(`F1.ui.setPad(false, ''); F1.ui.setPit(${J(noNext)})`);
+        check(tag + ' pit: without `next` (an older main.js) no next-set line', !/下一組/.test(await js(`__text('hud-pit')`)) && !(await js(`__rect('hud-pit-next').shown`)));
         await js(`F1.ui.setPad(false, ''); F1.ui.setPit(null)`);
       }
       await size(1280, 720);
@@ -574,6 +587,116 @@ app.whenReady().then(async () => {
       await load();
       st = await js(`({ car: F1.ui.getCar(), audio: JSON.stringify(F1.ui.getAudio()), wear: document.querySelector('#gp-wear .on').getAttribute('data-w'), mirrors: F1.ui.getMirrors() })`);
       check('reload with corrupt storage: defaults', st.car === null && st.audio === '{"volume":0.8,"muted":false}' && st.wear === '1' && st.mirrors === true, st);
+    }
+
+    /* ================= v6.2: Chinese track cards + search, 視野 (FOV), the starting compound ================= */
+    if (part('v62')) {
+      await size(1280, 720);
+      await load();
+      await setNet(M.NET.off); await setGp(M.V.freeTrack); await setCars(cars(L26));
+      // the cards: the Chinese name, the English one under it (smaller), the Chinese location; F1_TRACKS order kept
+      let st = await js(`(function () { var c = [].slice.call(document.querySelectorAll('#track-grid .card')), Z = window.F1_TRACK_NAMES_ZH || {};
+        var bad = c.map(function (n, i) { var t = F1_TRACKS[i], z = Z[t.id] || {}, nm = n.querySelector('.card-name'), en = n.querySelector('.card-en'), loc = n.querySelector('.card-meta span');
+          return Number(n.getAttribute('data-i')) === i && nm.textContent === z.name && en && en.textContent === t.name && loc.textContent === z.location &&
+            parseFloat(getComputedStyle(en).fontSize) < parseFloat(getComputedStyle(nm).fontSize) ? null : [i, t.id, nm.textContent, en && en.textContent, loc.textContent]; }).filter(Boolean);
+        var i = F1_TRACKS.findIndex(function (t) { return t.id === 'jp-1962'; }), s = c[i];
+        return { n: c.length, bad: bad, suzuka: s ? s.querySelector('.card-info').innerText.replace(/\\s+/g, ' ') : null, cut: c.filter(function (n) { return n.scrollWidth > n.clientWidth + 1; }).length }; })()`);
+      check('v6.2 cards: all 40 show the Chinese name (js/track-names-zh.js), the English name smaller under it and the Chinese location, in F1_TRACKS order',
+        st.n === 40 && !st.bad.length && /鈴鹿賽道/.test(st.suzuka) && /Suzuka International Racing Course/.test(st.suzuka) && /日本 鈴鹿/.test(st.suzuka) && st.cut === 0, st);
+      await shot('v62-menu-cards');
+      // the search: real keys for Latin text, the input event for Chinese (an IME's commit)
+      const typeQ = async q => {
+        await js(`(function () { var s = document.getElementById('track-search'); s.value = ''; s.focus(); s.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+        if (/^[a-z ]+$/.test(q)) { for (const ch of q) w.webContents.sendInputEvent({ type: 'char', keyCode: ch }); await sleep(120); }
+        else await js(`(function () { var s = document.getElementById('track-search'); s.value = ${J(q)}; s.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+        return js(`({ value: document.getElementById('track-search').value, ids: [].slice.call(document.querySelectorAll('#track-grid .card')).filter(function (n) { return !n.classList.contains('hidden'); })
+          .map(function (n) { return F1_TRACKS[Number(n.getAttribute('data-i'))].id; }), count: __text('track-count'), empty: __rect('track-empty').shown })`);
+      };
+      const usIds = await js(`F1_TRACKS.filter(function (t) { return /^us-/.test(t.id); }).map(function (t) { return t.id; })`);
+      const Q = [['japan', ['jp-1962']], ['suzuka', ['jp-1962']], ['日本', ['jp-1962']], ['鈴鹿', ['jp-1962']], ['铃鹿', ['jp-1962']], ['japanese gp', ['jp-1962']],
+        ['usa', usIds], ['us', usIds], ['美國', usIds], ['uk', ['gb-1948']], ['britain', ['gb-1948']], ['英國', ['gb-1948']], ['italy', null], ['義大利', null],
+        ['uae', ['ae-2009']], ['阿布達比', ['ae-2009']], ['nurburgring', ['de-1927']], ['吉爾‧維倫紐夫', ['ca-1978']], ['蒙扎', ['it-1922']], ['xyzzy', []]];
+      const bad = [];
+      for (const [q, want] of Q) {
+        const r = await typeQ(q);
+        const ok = r.value === q && (want === null ? r.ids.length === 3 && r.ids.every(id => /^it-/.test(id)) : J(r.ids) === J(want)) &&
+          r.count === r.ids.length + ' / 40 條賽道' && r.empty === (r.ids.length === 0);
+        if (!ok) bad.push({ q, got: r.ids, count: r.count, value: r.value });
+        if (q === 'japan') await shot('v62-search-japan');
+        if (q === '鈴鹿') await shot('v62-search-suzuka-zh');
+      }
+      check('v6.2 search: japan / suzuka / 日本 / 鈴鹿 / 铃鹿 / japanese gp find Suzuka only; usa / us / 美國 the 5 US circuits; uk / britain / 英國 Silverstone; italy / 義大利 the 3 Italian; uae, 阿布達比, nurburgring, 吉爾‧維倫紐夫 (the IME dot), 蒙扎 (an alias); nonsense: none, the empty note',
+        bad.length === 0, bad);
+      await js(`(function () { var s = document.getElementById('track-search'); s.value = ''; s.dispatchEvent(new Event('input', { bubbles: true })); s.blur(); })()`);
+      check('v6.2 search cleared: all 40 again', (await js(`__text('track-count')`)) === '40 條賽道');
+
+      // 設定 → 視野: the range of F1.COCKPIT_FOV, the default, real keys on the slider, remembered
+      await tab('set');
+      st = await js(`({ min: document.getElementById('set-fov').min, max: document.getElementById('set-fov').max, val: document.getElementById('set-fov').value, txt: __text('set-fov-val'),
+        get: F1.ui.getFov(), def: F1.COCKPIT_FOV ? F1.COCKPIT_FOV.def : null, store: localStorage.getItem('f1drive.fov'), note: __text('set-fov-note'), row: __rect('set-fov-val'), panel: __rect('set-panel') })`);
+      check('v6.2 設定 視野: slider 50..75 (F1.COCKPIT_FOV), default 60 (60°), nothing stored yet, inside the panel', st.min === '50' && st.max === '75' && st.val === '60' && st.txt === '60°' &&
+        st.get === 60 && st.def === 60 && st.store === null && /60°/.test(st.note) && st.row.r <= st.panel.r, st);
+      await shot('v62-settings-fov');
+      await js(`__calls.length = 0`);
+      await mouseClick('#set-fov');
+      const fovClick = JSON.parse(await calls());
+      await js(`__calls.length = 0; document.getElementById('set-fov').focus()`);
+      for (let k = 0; k < 4; k++) { w.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Right' }); w.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'Right' }); await sleep(60); }
+      const before = await js(`F1.ui.getFov()`);
+      st = await js(`({ calls: JSON.stringify(__calls), get: F1.ui.getFov(), txt: __text('set-fov-val'), store: localStorage.getItem('f1drive.fov') })`);
+      const v0 = fovClick.length ? fovClick[fovClick.length - 1][1] : 60;
+      check('v6.2 視野 (real mouse, then 4 x Right on the slider): onFov per whole degree, getFov, the label and f1drive.fov follow',
+        fovClick.every(c => c[0] === 'fov' && Number.isInteger(c[1]) && c[1] >= 50 && c[1] <= 75) && JSON.parse(st.calls).map(c => c[1]).join() === [1, 2, 3, 4].map(k => Math.min(75, v0 + k)).join() &&
+        st.get === Math.min(75, v0 + 4) && st.txt === st.get + '°' && st.store === J({ fov: st.get }), { fovClick, st, before });
+      await js(`(function () { var s = document.getElementById('set-fov'); s.value = '72'; s.dispatchEvent(new Event('input', { bubbles: true })); s.blur(); })()`);
+      await load();
+      st = await js(`({ get: F1.ui.getFov(), val: document.getElementById('set-fov').value, txt: __text('set-fov-val') })`);
+      check('v6.2 視野: reload restores 72', st.get === 72 && st.val === '72' && st.txt === '72°', st);
+      await js(`localStorage.setItem('f1drive.fov', '{"fov":99}')`); await load();
+      const hi = await js(`F1.ui.getFov()`);
+      await js(`localStorage.setItem('f1drive.fov', '{"fov":"70"}')`); await load();
+      const str = await js(`F1.ui.getFov()`);
+      await js(`localStorage.setItem('f1drive.fov', 'not json')`); await load();
+      const junk = await js(`F1.ui.getFov()`);
+      check('v6.2 視野: stored 99 -> 75, a string -> the default 60, corrupt -> 60', hi === 75 && str === 60 && junk === 60, { hi, str, junk });
+      await js(`localStorage.removeItem('f1drive.fov')`);
+
+      // 大獎賽 → 起跑輪胎 (= main.js's next set): real mouse, setCompound, the label / note by phase, guests too
+      await load();
+      await setNet(M.NET.off); await setGp(M.V.freeTrack); await setCars(cars(L26));
+      await tab('gp');
+      const tyre = () => js(`({ on: [].slice.call(document.querySelectorAll('#gp-tyre button')).map(function (b) { return b.textContent + (b.classList.contains('on') ? '*' : ''); }).join(' '),
+        aria: [].slice.call(document.querySelectorAll('#gp-tyre button')).map(function (b) { return b.getAttribute('aria-checked'); }).join(' '),
+        label: __text('gp-tyre-label'), note: __text('gp-tyre-note'), row: __rect('gp-tyre-row'), panel: __rect('mp-panel'), start: __rect('gp-start'), calls: JSON.stringify(__calls) })`);
+      st = await tyre();
+      check('v6.2 大獎賽: 起跑輪胎 軟 / 中 / 硬 with 中 marked (the default set), the note names T and the controller\'s X, the start button still above the fold',
+        st.on === '軟 中* 硬' && st.aria === 'false true false' && st.label === '起跑輪胎' && /T/.test(st.note) && /X/.test(st.note) && st.row.shown && st.start.b <= st.panel.b, st);
+      await shot('v62-gp-tyre-free');
+      const storage = () => js(`JSON.stringify(Object.keys(localStorage).sort().map(function (k) { return [k, localStorage.getItem(k)]; }))`);
+      const store0 = await storage();
+      await js(`__calls.length = 0`);
+      await mouseClick('#gp-tyre button[data-c="S"]');
+      st = await tyre();
+      const store1 = await storage();
+      check('v6.2 大獎賽: 軟 clicked (real mouse) -> onCompound(S), marked at once; nothing stored (main.js owns the next set)', st.calls === '[["compound","S"]]' && st.on === '軟* 中 硬' &&
+        store1 === store0, { st, store0, store1 });
+      await js(`__calls.length = 0; F1.ui.setCompound('H'); F1.ui.setCompound('Z'); F1.ui.setCompound(null); F1.ui.setCompound(7)`);
+      st = await tyre();
+      check('v6.2 setCompound (T / X while driving): H marked, junk ignored, no onCompound', st.on === '軟 中 硬*' && st.calls === '[]', st);
+      await setGp(M.V.quali3({}));
+      st = await tyre();
+      check('v6.2 大獎賽 in qualifying: the row says 下一組輪胎 (the grid and the next stop)', st.label === '下一組輪胎' && /正賽起跑/.test(st.note) && st.row.shown && st.on === '軟 中 硬*', st);
+      await shot('v62-gp-tyre-quali');
+      await setGp(M.V.freeTrack);
+      await setNet(M.NET.guest(3)); await setGp(M.V.freeGuest);
+      st = await tyre();
+      check('v6.2 大獎賽 as a guest (no setup of the room): the tyre row is there (every driver picks his own set)', st.row.shown && st.label === '起跑輪胎', st);
+      await setNet(M.NET.off); await setGp(M.V.freeTrack);
+      await size(700, 720);
+      st = await tyre();
+      const cutTyre = await js(`document.getElementById('gp-tyre-row').scrollWidth <= document.getElementById('gp-tyre-row').clientWidth + 1`);
+      check('v6.2 大獎賽 700 px: the tyre row fits', cutTyre && st.row.shown, st.row);
+      await size(1280, 720);
     }
 
     /* ================= the real game (v5 main.js until v6 is wired) ================= */

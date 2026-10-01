@@ -16,6 +16,11 @@
 //                                          fallback: the boxes V8 makes for the numbers handed to setTargetAtTime)
 //   F1.audio.beep('light' | 'go')
 //   F1.audio.play(kind, strength)          one-shots: 'pitgun', 'jack', 'limiterOn', 'limiterOff'; strength 0..1 (1)
+//   F1.audio.setTunnel(k, width?, height?) (v6.2) how far the listener is inside a tunnel, 0..1: js/tunnels.js
+//                                          tun.inTunnel(car.state.sampleIndex), once per frame (0 where there is none).
+//                                          width / height (m, optional): that tunnel's size for its reverb (default
+//                                          25 x 6.8, Monaco); a new size is taken at the next quiet moment. own.tunnel
+//                                          (a number) given to update() does the same. Allocates nothing itself.
 //   F1.audio.dispose()
 //
 // What sounds:
@@ -31,6 +36,14 @@
 //             drivetrain formula (its own spec, else the own car's), throttle guessed from its acceleration, level by
 //             distance (gone at D_MAX), left / right panning, Doppler shift from the two velocities along the line
 //             between the cars (speed and heading smoothed over 0.1 s: the network delivers them as 20 Hz steps)
+//   tunnel    (setTunnel k > 0) the whole mix through a convolution reverb of the tunnel's impulse response
+//             (F1.tunnelImpulse of js/tunnels.js: road / soffit flutter, side-wall echoes, RT60 1.4 s) at T.tunWet * k
+//             beside the dry mix, a mid boost (+T.tunMidDb * k dB around 450 Hz, a band added to the dry mix), the
+//             own engine +T.tunEngDb * k dB (0: the reverb is its reflections) and the wind / road roar +T.tunRoarDb *
+//             k dB, all ramped
+//             (T.tunTau). The reverb and the mid band are only connected while in use (disconnected T.tunOff s after k
+//             fell to 0), so at k = 0 the sound is exactly what it is without a tunnel. Without js/tunnels.js there is
+//             no reverb (the rest still works).
 // Fields missing from `own` (rpm, gear, shiftT, throttle, brake, harvest, slip) are derived from the speed and its
 // change, so any car state works.
 // While active, a game loop that stops calling update() for 0.5 s fades the sound out (no engine left droning at a
@@ -44,7 +57,9 @@
 //   'worklet'  one AudioWorkletProcessor (loaded from a Blob URL: no files, works from file:// and inside an asar)
 //              that accumulates phase per sample and sums the partials, so pitch glides without zipper noise
 //   'nodes'    plain OscillatorNode / BiquadFilterNode / looped noise buffers, used when AudioWorklet is unavailable
-// Both feed: mix -> subsonic high-pass -> active fade -> compressor -> soft clip (ceiling -1.1 dBFS) -> master volume.
+// Both feed: mix -> subsonic high-pass -> active fade -> compressor -> soft clip (ceiling -1.1 dBFS) -> master volume;
+// in a tunnel the high-pass also feeds the active fade through the reverb (convolver -> wet gain) and the mid band
+// (band-pass -> gain), in parallel with the dry path.
 //
 // Tests: F1.createAudio({ context, worklet, mask }) renders the same graph into an OfflineAudioContext
 // (context), forces the fallback (worklet: false) and solos sources (mask, see M_* below). devtests/audio-test/.
@@ -135,8 +150,18 @@
     compThreshold: -10, compKnee: 8, compRatio: 8, compAttack: 0.004, compRelease: 0.2,
     compTrim: 0.662,     // undoes the compressor's built-in make-up gain, so the mix passes at unity below the threshold
     clipKnee: 0.7, clipRange: 0.2,     // soft clip: linear up to clipKnee, ceiling clipKnee + clipRange * tanh(1.5) = 0.881
-    nodesEngTrim: 1.0, nodesVoiceTrim: 1.0     // fallback graph: level match with the worklet (measured)
+    nodesEngTrim: 1.0, nodesVoiceTrim: 1.0,    // fallback graph: level match with the worklet (measured)
+    // tunnel at k = 1 (setTunnel): reverb wet gain (the convolver normalises the impulse), mid band (Hz, Q, dB at its
+    // centre), engine / roar reflections (dB), ramp time constant (s), s at k = 0 before the reverb is disconnected,
+    // default size (m) and reverb time (s) of the impulse response (js/tunnels.js F1.tunnelImpulse; Monaco).
+    // Measured (devtests/audio-test/tunnel.js, 290 km/h flat out): the tunnel report's 0.45 / +4 dB / engine +2.5 dB /
+    // roar +3 dB drove the master compressor to 4.3 dB (the mix keeps it under 3 dB: ears.js); the reverb already is the
+    // engine's reflections, so there is no dry engine boost, and a stronger wet (0.6) costs no level. These: 2.6 dB at
+    // 290 km/h (0.3 dB outside), the 355..560 Hz band +4.7 dB, a reverb tail -26 dB 0.2 s after a sound stops.
+    tunWet: 0.6, tunMidHz: 450, tunMidQ: 0.8, tunMidDb: 3, tunEngDb: 0, tunRoarDb: 2, tunTau: 0.05, tunOff: 2,
+    tunWidth: 25, tunHeight: 6.8, tunRt60: 1.4
   };
+  var LN10_20 = Math.LN10 / 20;     // dB -> gain: Math.exp(dB * LN10_20)
   // timbre sets as arrays (worklet and fallback read them by index)
   var TB_KEYS = ['tiltOff', 'tiltOn', 'alphaOff', 'alphaOn', 'halfOff', 'halfOn', 'crankOff', 'crankOn', 'exOff', 'exOn', 'idleOpen', 'gain', 'exF0', 'exF1', 'sigOn', 'sigOff'];
   function timbreSet(na) { return TB_KEYS.map(function (k) { return na && typeof T.na[k] === 'number' ? T.na[k] : T[k]; }); }
@@ -247,8 +272,8 @@
 
   // ---- control vector: what the control layer hands to a back end each frame ----
   var C_RPM = 0, C_LOAD = 1, C_UP = 2, C_DN = 3, C_LIM = 4, C_SPD = 5, C_TUR = 6, C_DEP = 7, C_HAR = 8, C_SLIP = 9, C_GRASS = 10,
-      C_VIB = 11, C_CYL = 12, C_ASP = 13, C_RIDLE = 14, C_RMAX = 15, C_STIME = 16,
-      C_V0 = 17, V_STRIDE = 5;       // per voice: firing Hz (Doppler included), load, gain, pan, brightness
+      C_VIB = 11, C_CYL = 12, C_ASP = 13, C_RIDLE = 14, C_RMAX = 15, C_STIME = 16, C_TUN = 17,   // tunnel 0..1 (setTunnel)
+      C_V0 = 18, V_STRIDE = 5;       // per voice: firing Hz (Doppler included), load, gain, pan, brightness
   var NCTL = C_V0 + V_STRIDE * MAX_VOICES;
   // [name, default, min, max, scale] of the worklet's AudioParams, in control vector order. A parameter carries
   // value * scale rounded to a whole number: V8 hands a whole number to the AudioParam setter as it is, anything else
@@ -256,7 +281,8 @@
   function paramTable() {
     var p = [['rpm', 4000, 300, 30000, 64], ['load', 0, 0, 1, 1024], ['up', 0, 0, 1048575, 1], ['dn', 0, 0, 1048575, 1], ['lim', 0, 0, 2, 1],
       ['spd', 0, 0, 200, 64], ['tur', 0, 0, 1, 1024], ['dep', 0, 0, 1, 1024], ['har', 0, 0, 1, 1024], ['slip', 0, 0, 1, 1024], ['grass', 0, 0, 1, 1],
-      ['vib', 0, 0, 1, 1024], ['cyl', 6, 2, 16, 1], ['asp', 1, 0, 1, 1], ['ridle', 4000, 300, 30000, 1], ['rmax', 12500, 300, 30000, 1], ['stime', 50, 5, 250, 1]], v;
+      ['vib', 0, 0, 1, 1024], ['cyl', 6, 2, 16, 1], ['asp', 1, 0, 1, 1], ['ridle', 4000, 300, 30000, 1], ['rmax', 12500, 300, 30000, 1], ['stime', 50, 5, 250, 1],
+      ['tun', 0, 0, 1, 1024]], v;
     for (v = 0; v < MAX_VOICES; v++) p.push(['f' + v, 200, 20, 4000, 1024], ['l' + v, 0, 0, 1, 1024], ['g' + v, 0, 0, 2, 65536], ['p' + v, 0, -1, 1, 16384], ['b' + v, 1, 0, 1, 1024]);
     return p;
   }
@@ -331,14 +357,16 @@
     // parameters arrive as value * scale (see paramTable): the factors that undo it
     var INV = {};
     CFG.params.forEach(function (p) { INV[p[0]] = 1 / p[4]; });
-    var iRpm = INV.rpm, iLoad = INV.load, iSpd = INV.spd, iTur = INV.tur, iDep = INV.dep, iHar = INV.har, iSlip = INV.slip, iVib = INV.vib;
+    var iRpm = INV.rpm, iLoad = INV.load, iSpd = INV.spd, iTur = INV.tur, iDep = INV.dep, iHar = INV.har, iSlip = INV.slip, iVib = INV.vib, iTun = INV.tun;
+    var DB_K = Math.LN10 / 20;            // dB -> gain: Math.exp(dB * DB_K)
     var iVF = INV.f0, iVL = INV.l0, iVG = INV.g0, iVP = INV.p0, iVB = INV.b0;
 
     // own-car state (ST)
     var R1 = 0, R2 = 1, THE = 2, FG = 3, FGT = 4, CS = 5, GS = 6, LPH = 7, LOAD = 8, BLIP = 9, JIT = 10, POPT = 11, POPE = 12, EA = 13,
         TUR = 14, TPH = 15, TA = 16, TJ = 17, SPD = 18, DEP = 19, HAR = 20, DPH = 21, HPH = 22, HPH2 = 23, WA = 24, RA = 25, GUST = 26,
         SLIP = 27, TYA = 28, WAN = 29, GRASS = 30, GA = 31, BUMP = 32, BUMP2 = 33, ASP = 34, UPS = 35, DNS = 36, CUTN = 37, BLN = 38,
-        CRK = 39, CRKT = 40, CRL = 41, LPR = 42, VBA = 43, WPH = 44, VBE = 45, VBP = 46, VLP = 47, VBT = 48, CRKD = 49, CRKS = 50, NST = 51;
+        CRK = 39, CRKT = 40, CRL = 41, LPR = 42, VBA = 43, WPH = 44, VBE = 45, VBP = 46, VLP = 47, VBT = 48, CRKD = 49, CRKS = 50,
+        TUN = 51, TUNG = 52, NST = 53;      // tunnel 0..1 (smoothed), the engine's reflection gain at the end of the last block
     // per-voice state (VS, VSTR numbers per voice)
     var VGN = 0, VF1 = 1, VF2 = 2, VTH = 3, VPAN = 4, VLD = 5, VBR = 6, VGL = 7, VGR = 8, VWOB = 9, VNZ = 10, VNA = 11, VSTR = 12;
 
@@ -353,7 +381,7 @@
         this.alive = true;
         this.port.onmessage = function (e) { if (e.data === 'stop') self.alive = false; };
         this.ST = new Float64Array(NST);
-        this.ST[R1] = 4000; this.ST[R2] = 4000; this.ST[FG] = 1; this.ST[FGT] = 1; this.ST[GS] = 1; this.ST[ASP] = 1; this.ST[LPR] = 1;
+        this.ST[R1] = 4000; this.ST[R2] = 4000; this.ST[FG] = 1; this.ST[FGT] = 1; this.ST[GS] = 1; this.ST[ASP] = 1; this.ST[LPR] = 1; this.ST[TUNG] = 1;
         this.ST[UPS] = NaN; this.ST[DNS] = NaN;             // the first block only takes the counters over
         this.IS = new Int32Array(1);                        // index of the last cylinder that fired
         this.FB = new Float64Array(NFILT * 6);
@@ -389,7 +417,7 @@
         this.N = n;
         this.TH = new Float64Array(n); this.ENG = new Float64Array(n); this.G = new Float64Array(n); this.VB = new Float64Array(n); this.MONO = new Float32Array(n);
         var kb = function (tau) { return 1 - Math.exp(-n / (tau * SR)); };      // one-pole coefficient for a whole block
-        this.kb15 = kb(0.015); this.kb30 = kb(0.03); this.kb40 = kb(0.04); this.kb60 = kb(0.06);
+        this.kb15 = kb(0.015); this.kb30 = kb(0.03); this.kb40 = kb(0.04); this.kb60 = kb(0.06); this.kbTun = kb(T.tunTau);
         // ... and per sample
         this.kR = 1 - Math.exp(-1 / (0.010 * SR)); this.kC = 1 - Math.exp(-1 / (0.004 * SR)); this.kG = 1 - Math.exp(-1 / (0.0025 * SR));
         this.kV = 1 - Math.exp(-1 / (0.012 * SR)); this.kPa = 1 - Math.exp(-1 / (0.001 * SR)); this.kPd = Math.exp(-1 / (0.012 * SR));
@@ -410,6 +438,8 @@
         // ======================= own car =======================
         ST[SPD] += (P.spd[0] * iSpd - ST[SPD]) * this.kb60;
         var spd = ST[SPD];
+        ST[TUN] += (P.tun[0] * iTun - ST[TUN]) * this.kbTun;
+        var tun = ST[TUN];                   // (0 outside a tunnel: the reflection gains below are then exactly 1)
 
         if (mask & 1) {
           var cyl = P.cyl[0] | 0;
@@ -557,7 +587,10 @@
             ST[TPH] = tph;
           }
           ST[TA] = taT;
-          for (i = 0; i < N; i++) { L[i] += ENG[i]; R[i] += ENG[i]; }
+          // in a tunnel the walls reflect the engine back: louder, ramped over the block
+          var ge = ST[TUNG], geT = Math.exp(tun * T.tunEngDb * DB_K), dge = (geT - ge) * invN;
+          for (i = 0; i < N; i++) { ge += dge; y = ENG[i] * ge; L[i] += y; R[i] += y; }
+          ST[TUNG] = geT;
         }
 
         // --- ERS whine: deploy (higher, brighter) and harvest (lower, two detuned tones) ---
@@ -588,7 +621,8 @@
         if (mask & 2) {
           sd = (Math.imul(sd, 1664525) + 1013904223) | 0; ST[GUST] += (sd * RS - ST[GUST]) * 0.012;
           var vr = Math.min(spd, 120) / T.vRef, gu = Math.min(1.4, Math.max(0.6, 1 + 2.2 * ST[GUST]));
-          var waT = T.windFull * Math.pow(vr, T.windExp) * gu, raT = T.roadFull * Math.pow(vr, T.roadExp), wa = ST[WA], ra = ST[RA];
+          var tr = Math.exp(tun * T.tunRoarDb * DB_K);                                 // (the tunnel's reflections)
+          var waT = T.windFull * Math.pow(vr, T.windExp) * gu * tr, raT = T.roadFull * Math.pow(vr, T.roadExp) * tr, wa = ST[WA], ra = ST[RA];
           if (wa > 1e-6 || waT > 1e-6 || ra > 1e-6 || raT > 1e-6) {
             var f1 = 180 + 6 * spd, f2 = 700 + 26 * spd, f3 = 60 + 1.3 * spd;
             ARG[0] = f1; ARG[1] = 0.7; svfSet(FB, F_WL);                                 // (the right channel's filters have the same corners)
@@ -776,6 +810,9 @@
     var stalled = false, pageHidden = false, stallTimer = 0, visHandler = null, seenFrame = -1, stillTicks = 0;
     var ctl = new Float32Array(NCTL), frame = 0, warned = false;
     var fadeT0 = 0, fadeT1 = 0, fadeV0 = 0, fadeV1 = 0;        // the fade scheduled on the active gain (we are the only one who schedules it)
+    // tunnel (setTunnel): the graph's tap (the high-pass), the mid band (band-pass -> gain) and the reverb (convolver ->
+    // wet gain), whether their inputs are connected, the size the convolver's impulse response was made for
+    var tunIn = null, tunBand = null, tunMid = null, tunConv = null, tunWet = null, tunOn = false, tunIrW = 0, tunIrH = 0;
 
     // ---- own car: what is remembered between frames, what the functions of the control layer hand each other and
     //      their scratch values. Every non-integer number of the per-frame path lives in this typed array (or in the
@@ -792,9 +829,11 @@
         S_ET = 15, S_EB = 16, S_RPM = 17,                                              // results of pedals() and revs()
         S_NX = 18, S_NY = 19, S_NZ = 20,                                               // the listener's new position
         S_PITT = 21, S_BLIP = 22,                                                      // s since the throttle was open with the pit limiter on; blip on (the fallback's)
-        S_0 = 24, S_1 = 25, S_2 = 26, S_3 = 27, S_4 = 28, S_5 = 29, S_6 = 30, S_7 = 31; // scratch
+        S_0 = 24, S_1 = 25, S_2 = 26, S_3 = 27, S_4 = 28, S_5 = 29, S_6 = 30, S_7 = 31, // scratch
+        S_TUN = 32, S_TUNQ = 33, S_TUNZ = 34, S_TUNW = 35, S_TUNH = 36;                 // tunnel: k asked for, k sent to the graph, s at k = 0, size asked for
     var first = true, gearD = 0, prevGear = 0, shiftDir = 0, inContact = false, haveL = false, upN = 0, dnN = 0;
-    S[S_SHIFT] = 9; S[S_GAP] = 9; S[S_PITT] = 9;
+    function initS() { S.fill(0); S[S_SHIFT] = 9; S[S_GAP] = 9; S[S_PITT] = 9; S[S_TUNQ] = -1; S[S_TUNZ] = 9; S[S_TUNW] = T.tunWidth; S[S_TUNH] = T.tunHeight; }
+    initS();
     // ---- engines: the own car's (setEngine), one per voice for the remote cars ----
     var OWN = new Engine(), ownSpec = null, ownGen = 0;
     var vEng = [];
@@ -815,12 +854,15 @@
       backend: 'none', ready: false, context: null, output: null, compressor: null, frames: 0, errors: 0, lastError: null,
       rpm: OWN.idle, gear: 0, throttle: 0, brake: 0, cut: 0, blip: 0, limiter: 0, speed: 0, deploy: 0, harvest: 0, slip: 0, turbo: 0, vib: 0,
       upshifts: 0, downshifts: 0, stalled: false, thumps: 0, beeps: 0, shots: 0, voices: 0, voiceStarts: 0, steals: 0, paramWrites: 0, voiceId: vId, voiceState: vState,
-      voiceDist: new Float32Array(MAX_VOICES), voiceRpm: new Float32Array(MAX_VOICES), voiceDoppler: new Float32Array(MAX_VOICES), ctl: ctl, engine: OWN
+      voiceDist: new Float32Array(MAX_VOICES), voiceRpm: new Float32Array(MAX_VOICES), voiceDoppler: new Float32Array(MAX_VOICES), ctl: ctl, engine: OWN,
+      tunnel: 0, reverb: false, reverbBuilds: 0,     // tunnel k sent to the graph, reverb connected, impulse responses made,
+      tunnelWet: null, tunnelMid: null               //   the reverb's wet gain and the mid band's gain (AudioParams; tests)
     };
     var api = {
       supported: !!(opts.context || AC),
       volume: 1, muted: false, active: false,
       init: init, setVolume: setVolume, setMuted: setMuted, setActive: setActive, setEngine: setEngine, update: update, beep: beep, play: play, dispose: dispose,
+      setTunnel: setTunnel,
       MAX_VOICES: MAX_VOICES, C_SOUND: C_SOUND, D_REF: D_REF, D_EXP: D_EXP, D_FADE: D_FADE, D_MAX: D_MAX, tuning: T,
       attenuation: attenuation,
       gearFor: function (v) { return gearOf(OWN, +v); },                  // the own engine's drivetrain (no hysteresis)
@@ -850,6 +892,55 @@
         ownGen++; applyOwn();
         gearD = prevGear = 0; first = true;
       } catch (e) { fail(e); }
+    }
+
+    // ---------------------------------------------------------------- tunnel
+    // k 0..1 (NaN / junk: 0); width / height in metres, kept when missing or absurd. Only stores numbers (the next
+    // update() applies them), so it can be called every frame without allocating.
+    function setTunnel(k, width, height) {
+      S[S_TUN] = typeof k === 'number' && k > 0 ? (k < 1 ? k : 1) : 0;
+      if (typeof width === 'number' && width >= 2 && width <= 200) S[S_TUNW] = width;
+      if (typeof height === 'number' && height >= 2 && height <= 60) S[S_TUNH] = height;
+    }
+    // The impulse response for the size asked for (rare: the first tunnel, or one of another size; allocates).
+    function tunImpulse() {
+      var mk = F1.tunnelImpulse, ir, buf, sr;
+      if (typeof mk !== 'function' || !tunConv) return;
+      try {
+        sr = ctx.sampleRate;
+        ir = mk(sr, { width: S[S_TUNW], height: S[S_TUNH], rt60: T.tunRt60 });
+        buf = ctx.createBuffer(2, ir.left.length, sr);
+        buf.getChannelData(0).set(ir.left); buf.getChannelData(1).set(ir.right);
+        tunConv.buffer = buf;
+        tunIrW = S[S_TUNW]; tunIrH = S[S_TUNH];
+        dbg.reverbBuilds++;
+      } catch (e) { fail(e); }
+    }
+    // Once per update(), after ctl[C_TUN] and S[S_TUNZ]: connects the reverb and the mid band while in use (and
+    // disconnects them T.tunOff s after k fell to 0: no CPU outside tunnels), ramps their gains to k.
+    function tunnelGraph() {
+      var k = ctl[C_TUN], sized = tunIrW === S[S_TUNW] && tunIrH === S[S_TUNH];
+      if (k > 0 && !tunOn) {
+        if (!tunConv.buffer || !sized) tunImpulse();
+        try { tunIn.connect(tunBand); if (tunConv.buffer) tunIn.connect(tunConv); } catch (e) { fail(e); }
+        tunOn = true;
+      } else if (tunOn && k === 0 && S[S_TUNZ] > T.tunOff) {
+        try { tunIn.disconnect(tunBand); } catch (e) {}
+        try { tunIn.disconnect(tunConv); } catch (e) {}
+        tunOn = false;
+      } else if (tunOn && !sized && k === 0 && S[S_TUNZ] > 0.4 && typeof F1.tunnelImpulse === 'function') {
+        // another size asked for while the reverb is still connected but silent (its wet gain long at 0)
+        try { tunIn.disconnect(tunConv); } catch (e) {}
+        tunImpulse();
+        try { if (tunConv.buffer) tunIn.connect(tunConv); } catch (e) { fail(e); }
+      }
+      if (k !== S[S_TUNQ]) {
+        S[S_TUNQ] = k;
+        tunWet.gain.setTargetAtTime(T.tunWet * k, 0, T.tunTau);
+        tunMid.gain.setTargetAtTime(Math.exp(T.tunMidDb * k * LN10_20) - 1, 0, T.tunTau);
+        dbg.paramWrites += 2;
+      }
+      dbg.tunnel = k; dbg.reverb = tunOn && !!tunConv.buffer;
     }
 
     // ---------------------------------------------------------------- start up
@@ -976,7 +1067,16 @@
       shaper = ctx.createWaveShaper(); shaper.curve = softClipCurve();
       master = ctx.createGain(); master.gain.value = api.muted ? 0 : api.volume * api.volume;
       mix.connect(hp); hp.connect(act); act.connect(comp); comp.connect(trim); trim.connect(shaper); shaper.connect(master); master.connect(ctx.destination);
-      chain = [mix, hp, act, comp, trim, shaper, master];
+      // tunnel (setTunnel): hp -> band-pass -> mid gain -> act and hp -> convolver -> wet gain -> act beside the dry
+      // path; their inputs (hp -> ...) are connected by tunnelGraph() only while a tunnel is near (the impulse response
+      // is made there too, the first time)
+      tunBand = ctx.createBiquadFilter(); tunBand.type = 'bandpass'; tunBand.frequency.value = T.tunMidHz; tunBand.Q.value = T.tunMidQ;   // (linear Q for a band-pass)
+      tunMid = ctx.createGain(); tunMid.gain.value = 0;
+      tunConv = ctx.createConvolver(); tunConv.normalize = true;
+      tunWet = ctx.createGain(); tunWet.gain.value = 0;
+      tunBand.connect(tunMid); tunMid.connect(act); tunConv.connect(tunWet); tunWet.connect(act);
+      tunIn = hp; tunOn = false; tunIrW = tunIrH = 0; S[S_TUNQ] = -1; dbg.tunnelWet = tunWet.gain; dbg.tunnelMid = tunMid.gain;
+      chain = [mix, hp, tunBand, tunMid, tunConv, tunWet, act, comp, trim, shaper, master];
       dbg.output = master; dbg.compressor = comp;
       thumpBuf = makeThump(); shots = makeShots();
 
@@ -1173,6 +1273,10 @@
           N_RDF = reg(rLo.frequency, 0.06), N_RDG = reg(gRoad.gain, 0.06), N_TYG = reg(gTyre.gain, 0.04), N_GRG = reg(gGrass.gain, 0.06),
           N_VBF = reg(oVib.frequency, 0.05), N_VBG = reg(gVib.gain, 0.05), N_V = np.length;
       for (v = 0; v < MAX_VOICES; v++) { reg(vo[v].frequency, 0.02); reg(vlp[v].frequency, 0.05); reg(vg[v].gain, 0.04); reg(vp[v].pan, 0.04); }
+      // a tunnel's reflections (engine, wind / road): these two gains are automated only from the first tunnel on, so
+      // until then they stay plain constants and the sound is bit-identical to the module without tunnels (an
+      // automated gain, even one held at 1, takes another path in the browser: 1..3 LSB of difference)
+      var tunG = new Float64Array(3);                   // [0] automated yet (0 / 1), [1] / [2] engine / roar gain last sent
       nsent = new Float32Array(np.length);
       for (i = 0; i < nsent.length; i++) nsent[i] = NaN;
       // targets of this frame; the loop at the end of push() sends the ones that changed
@@ -1248,6 +1352,14 @@
           nt[N_TYG] = T.tyreFull * ctl[C_SLIP] * (spd < 22 ? spd / 22 : 1);
           nt[N_GRG] = T.grassFull * ctl[C_GRASS] * (spd < 25 ? spd / 25 : 1);
           nt[N_VBF] = Math.max(1, spd / (Math.PI * WHEEL_D)); nt[N_VBG] = T.vibAmp * T.vibNodes * ctl[C_VIB] * (spd < 8 ? spd / 8 : 1);
+          x = ctl[C_TUN];
+          if (x > 0) tunG[0] = 1;
+          if (tunG[0] === 1) {
+            g = T.nodesEngTrim * Math.exp(x * T.tunEngDb * LN10_20);
+            if (g !== tunG[1]) { tunG[1] = g; eOut.gain.setTargetAtTime(g, 0, T.tunTau); dbg.paramWrites++; }
+            g = Math.exp(x * T.tunRoarDb * LN10_20);
+            if (g !== tunG[2]) { tunG[2] = g; aero.gain.setTargetAtTime(g, 0, T.tunTau); dbg.paramWrites++; }
+          }
           for (j = 0; j < MAX_VOICES; j++) {
             base = C_V0 + j * V_STRIDE; b = N_V + j * 4; gT = ctl[base + 2];
             if (gT <= 0) { nt[b + 2] = 0; continue; }
@@ -1600,7 +1712,8 @@
         t = o.steer;
         if (av >= 5 && typeof t === 'number' && t > -BIG && t < BIG) {
           r = av / PH.steerSpeedRef;
-          req = av * av * Math.abs(Math.tan(t * PH.steerLock / (1 + r * r))) / PH.wheelbase;
+          r = F1.CAR_PERF && typeof F1.CAR_PERF.steerLockAt === 'function' ? F1.CAR_PERF.steerLockAt(av, 0, t) : PH.steerLock / (1 + r * r);
+          req = av * av * Math.abs(Math.tan(t * r)) / PH.wheelbase;
           cap = Math.min(PH.latBase + PH.latAero * av * av, PH.latMax) * (grass ? 0.45 : 1);
           S[S_3] = Math.min(1, Math.max(0, (req / cap - 1) / 0.6));
         }
@@ -1621,6 +1734,10 @@
       ctl[C_TUR] = Math.round(spool * 128) / 128;
       ctl[C_DEP] = Math.round(dep * 128) / 128; ctl[C_HAR] = Math.round(har * 128) / 128; ctl[C_SLIP] = Math.round(slip * 128) / 128;
       ctl[C_GRASS] = grass ? 1 : 0; ctl[C_VIB] = Math.round(S[S_4] * 128) / 128;
+      // tunnel: own.tunnel (a number) or the last setTunnel(k); the time at k = 0 decides when the reverb is disconnected
+      t = o.tunnel; if (typeof t === 'number' && t > -BIG && t < BIG) S[S_TUN] = t > 0 ? (t < 1 ? t : 1) : 0;
+      ctl[C_TUN] = Math.round(S[S_TUN] * 64) / 64;
+      if (ctl[C_TUN] > 0) S[S_TUNZ] = 0; else S[S_TUNZ] += dt;
       dbg.rpm = rpm; dbg.gear = gear; dbg.throttle = thr; dbg.brake = brk; dbg.cut = cut; dbg.blip = blip; dbg.limiter = limiter;
       dbg.speed = v; dbg.deploy = dep; dbg.harvest = har; dbg.slip = slip; dbg.turbo = spool; dbg.vib = S[S_4];
 
@@ -1661,6 +1778,7 @@
 
       voices(others, jumped);
 
+      if (tunWet) tunnelGraph();
       if (backend && (offline || ctx.state === 'running')) { everRan = true; backend.push(); }
     }
     var EMPTY = {};
@@ -1680,9 +1798,10 @@
       for (i = 0; i < chain.length; i++) try { chain[i].disconnect(); } catch (e) {}
       if (ctx && ownCtx && ctx.close && ctx.state !== 'closed') { try { var p = ctx.close(); if (p && p.then) p.then(null, function () {}); } catch (e) {} }
       backend = null; mix = act = master = null; chain = []; thumpBuf = null; shots = null; ctx = null; ownCtx = false; offline = false;
+      tunIn = tunBand = tunMid = tunConv = tunWet = null; tunOn = false; tunIrW = tunIrH = 0; dbg.tunnel = 0; dbg.reverb = false; dbg.tunnelWet = dbg.tunnelMid = null;
       ready = false; building = false; everRan = false; stalled = false; dbg.stalled = false;
       for (i = 0; i < MAX_VOICES; i++) { vState[i] = 0; vId[i] = null; ctl[C_V0 + i * V_STRIDE + 2] = 0; }
-      first = true; haveL = false; inContact = false; S.fill(0); S[S_SHIFT] = 9; S[S_GAP] = 9; S[S_PITT] = 9; gearD = prevGear = shiftDir = 0;
+      first = true; haveL = false; inContact = false; initS(); gearD = prevGear = shiftDir = 0;
       dbg.backend = 'none'; dbg.ready = false; dbg.context = null; dbg.output = null; dbg.compressor = null; dbg.voices = 0;
     }
     function dispose() {

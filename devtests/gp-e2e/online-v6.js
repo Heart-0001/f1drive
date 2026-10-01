@@ -438,7 +438,7 @@ async function scenario() {
   const stopLap = ABC.map((w, k) => { const l = rl[k], s2 = l[1], others = (l[0] + l[2]) / 2; return { stopLap: r3(s2), otherLaps: r3(others), extra: r3(s2 - l[2]), service: svc[k] }; });
   check('the stop is in the race time: the lap with the stop (lap 2) is longer than the last lap by more than the service time', stopLap.every(s => s.extra > s.service + 2), stopLap);
   const table = v.rows.map((r, i) => [String(i + 1), r.name, '3', hudTime(r.time), i === 0 ? '' : hudGap(r.gap), hudTime(r.best)]);
-  const sub = 'Circuit de Monaco ‧ ' + YEAR + ' 賽季 ‧ 排位 1 圈 ‧ 正賽 3 圈 ‧ 輪胎損耗 ×3';
+  const sub = '摩納哥賽道 ‧ ' + YEAR + ' 賽季 ‧ 排位 1 圈 ‧ 正賽 3 圈 ‧ 輪胎損耗 ×3';
   check('results overlay identical on every window (' + ALL.map(w => w.tag).join(', ') + '): classification, race times, gaps, best laps; subtitle "' + sub + '"',
     ag.ok && res.every(r => r.shown && J(r.rows.map(x => [x.pos, x.name, x.laps, x.time, x.gap, x.best])) === J(table) && r.sub === sub), { table, sub: res.map(r => r.sub), rows: res[0].rows });
   timings.results = v.rows.map(r => [r.name, r.time, r.gap, r.best]);

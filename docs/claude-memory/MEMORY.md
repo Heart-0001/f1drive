@@ -1,3 +1,4 @@
 - [F1Drive resume state](f1drive-resume-state.md) — repo Heart-0001/f1drive, user moves between machines, full handoff lives in repo CLAUDE.md
 - [F1Drive autonomous runs](f1drive-autonomous-runs.md) — user sleeps while work runs: don't stop or ask, plan in docs/v6-plan.md, watchdog tools
 - [F1Drive workflow preferences](f1drive-workflow-preferences.md) — many Opus subagents, then a Fable agent review at the end
+- [F1Drive GitHub releases](f1drive-github-release.md) — push verified rounds + publish a release with the exe (user plays on a laptop)

@@ -68,9 +68,9 @@
     ],
     'es-2026': [
       { name: 'Tunnel 1 (under the motorway)', kind: 'tunnel', facade: 'plain',
-        from: [40.472201, -3.624061], to: [40.472797, -3.624293], fFrom: 0.25146, fTo: 0.26412 },
+        from: [40.472198, -3.62406], to: [40.472797, -3.624293], fFrom: 0.25135, fTo: 0.26408 },
       { name: 'Tunnel 2 (under the motorway)', kind: 'tunnel', facade: 'plain',
-        from: [40.472714, -3.618774], to: [40.471681, -3.617988], fFrom: 0.70592, fTo: 0.73043 }
+        from: [40.472717, -3.618777], to: [40.471681, -3.617988], fFrom: 0.70585, fTo: 0.73042 }
     ],
     'sg-2008': [
       { name: 'Raffles Boulevard link', kind: 'underpass', facade: 'plain', ceil: 4.5, deck: 6, wings: false,

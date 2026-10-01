@@ -28,7 +28,7 @@
   };
   var sp = F1.ui.setPit;
   if (sp) F1.ui.setPit = function (p) {
-    V.pit = p ? { inLane: p.inLane, limiter: p.limiter, speeding: p.speeding, limitKmh: p.limitKmh, boxAhead: p.boxAhead, slot: p.slot, pending: p.pending,
+    V.pit = p ? { inLane: p.inLane, limiter: p.limiter, speeding: p.speeding, limitKmh: p.limitKmh, boxAhead: p.boxAhead, slot: p.slot, pending: p.pending, next: p.next,
       service: p.service ? { total: p.service.total, left: p.service.left, penalty: p.service.penalty } : null } : null;
     V.pitN++;
     return sp.apply(this, arguments);

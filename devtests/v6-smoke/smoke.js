@@ -245,6 +245,27 @@ async function partBoot() {
   const menu2 = await r.js(CAR_TAB);
   check('車輛 tab: 年份 2025 of 17 seasons, the 2025 cars, the standard car highlighted, both enabled', menu2.year === '2025' && menu2.years === 17 && !menu2.disabled && menu2.cards === 11 && menu2.on === '2025-standard' &&
     !menu2.locked && !menu2.lock, menu2);
+  // v6.2: 設定 → 視野 (the cockpit's FOV, js/cockpit.js setFov): 60 by default, the slider (real keys) moves the camera at once,
+  // remembered; the still behind the menu and the drive after it use it
+  check('視野: Monza loads', await r.pickTrack('it-1922'));
+  await sleep(300);
+  const f0 = await r.js(`({ fov: F1.game.camera.fov, get: F1.ui.getFov(), v: F1.game.car.state.speed, store: localStorage.getItem('f1drive.fov') })`);
+  check('視野: the cockpit starts at the default 60 deg standing still (F1.COCKPIT_FOV.def), nothing stored', f0.fov === 60 && f0.get === 60 && f0.v === 0 && f0.store === null, f0);
+  await r.click('#hud-menu-btn');
+  await r.click('#tab-set');
+  await r.js(`document.getElementById('set-fov').focus(); true`);
+  for (let k = 0; k < 5; k++) await r.tap('Right');
+  const f1 = await r.js(`({ fov: F1.game.camera.fov, get: F1.ui.getFov(), txt: __t.text('set-fov-val'), store: localStorage.getItem('f1drive.fov'), running: F1.game.running,
+    info: F1.game.cockpit && F1.game.cockpit.info ? F1.game.cockpit.info().fov : null })`);
+  check('視野: 5 x Right on the slider (menu open): the camera 65 deg at once, 65°, remembered (f1drive.fov)', f1.fov === 65 && f1.get === 65 && f1.txt === '65°' &&
+    f1.store === '{"fov":65}' && !f1.running && (!f1.info || f1.info.setting === 65), f1);
+  await r.shot('boot-3-fov65-menu');
+  await r.js(`document.getElementById('set-fov').blur(); true`);
+  await r.tap('Escape');
+  await sleep(400);
+  const f2 = await r.js(`({ fov: F1.game.camera.fov, running: F1.game.running })`);
+  check('視野: back in the car (Esc): still 65 deg standing', f2.running && Math.abs(f2.fov - 65) < 1e-9, f2);
+  await r.shot('boot-4-fov65-drive');
   await r.noErrors();
   r.destroy();
 }
@@ -463,7 +484,9 @@ async function pitVisit(w, name, o) {
   // in the lane, the strip counting down to the box
   await w.pump(`F1.game.pit.state.inLane && F1.game.pit.state.boxAhead !== null && F1.game.pit.state.boxAhead < 60 && !F1.game.pit.state.service`, 60, 'box ahead');
   const strip = await w.js(`({ box: __t.text('hud-pit-box'), limit: __t.text('hud-pit-limit'), lim: __t.text('hud-pit-lim'), warn: __t.shown('hud-pit-warn') ? __t.text('hud-pit-warn') : '',
-    shown: __t.shown('hud-pit'), pit: __v.pit, hudLimiter: __v.hud.limiter, hudInPit: __v.hud.inPit, speeding: F1.game.pit.state.speeding })`);
+    shown: __t.shown('hud-pit'), pit: __v.pit, hudLimiter: __v.hud.limiter, hudInPit: __v.hud.inPit, speeding: F1.game.pit.state.speeding,
+    next: __t.shown('hud-pit-next') ? __t.text('hud-pit-next') : '', keys: __v.hud.nextKeys, nextC: F1.game.nextCompound, pad: !!(F1.gamepad && F1.gamepad.state.connected),
+    toasts: __v.toasts.map(function (t) { return t.text; }).filter(function (t) { return /選擇輪胎/.test(t); }) })`);
   shots.lane = name + '-2-lane'; await w.shot(shots.lane, true);
   // the stop
   const svc = await w.pump(`!!F1.game.pit.state.service`, 60, 'service');
@@ -496,6 +519,12 @@ async function pitScenario(trackId, tag, second) {
   console.log(tag + ' visit 1: ' + J({ stopped: v1.info.stopped, rec: r, strip: v1.strip }));
   check(tag + ': Q engaged the limiter; the strip shows the limit and 限速器 開; the telemetry knows', v1.strip.shown && v1.strip.hudLimiter === true && /限速器 開/.test(v1.strip.lim) &&
     new RegExp('限速\\s*' + P.limit).test(v1.strip.limit), v1.strip);
+  // v6.2: the next set is picked here: a prompt on entering the lane, the strip and the telemetry name it and its keys (this car is
+  // driven through the fake controller: the controller's button first)
+  const kx = v1.strip.pad ? ['按 X（鍵盤 T）', 'X / T'] : ['按 T（手把 X）', 'T / X'];
+  check(tag + ': entering the lane: the prompt ' + kx[0] + '選擇輪胎：軟 / 中 / 硬（下一組：硬胎）; the strip 下一組：硬胎（' + kx[1] + ' 切換）; the telemetry\'s keys ' + kx[1],
+    v1.strip.toasts.indexOf(kx[0] + '選擇輪胎：軟 / 中 / 硬（下一組：硬胎）') >= 0 && v1.strip.next === '下一組：硬胎（' + kx[1] + ' 切換）' && v1.strip.pit.next === 'H' &&
+    v1.strip.keys === kx[1], { pad: v1.strip.pad, toasts: v1.strip.toasts, next: v1.strip.next, pitNext: v1.strip.pit.next, keys: v1.strip.keys });
   check(tag + ': in the lane the speed is capped at the limit (max ' + r.maxLaneKmh.toFixed(2) + ' km/h, limit ' + P.limit + '), the limiter holds it (' + r.cruiseKmh.toFixed(1) + ')',
     r.maxLaneKmh <= P.limit + 0.5 && r.cruiseKmh >= P.limit - 2.5, { max: r.maxLaneKmh, cruise: r.cruiseKmh });
   check(tag + ': the pit strip counts down to our box (維修格 1 號：前方 N m)', /維修格 1 號：前方 \d+ m/.test(v1.strip.box) && v1.strip.pit.boxAhead > 0 && v1.strip.pit.slot === 0 && v1.strip.hudInPit, v1.strip.box);

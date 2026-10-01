@@ -1,7 +1,10 @@
 <!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas>
 <script src="../../lib/three.min.js"></script>
 <script src="../../tracks-data.js"></script>
-<script src="../../scenery-data.js" onerror="void 0"></script>
+<script>
+// sd=<path relative to this page>: another scenery-data file (e.g. out/scenery-data.before.js for a before / after pair)
+document.write('<script src="' + (new URLSearchParams(location.search).get('sd') || '../../scenery-data.js') + '" onerror="void 0"><\/script>');
+</script>
 <script src="../../js/track.js"></script>
 <script src="../../js/scenery.js"></script>
 <script>

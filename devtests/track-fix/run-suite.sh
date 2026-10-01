@@ -16,4 +16,8 @@ run pit-check node devtests/pit-test/check.js
 run pit-drive node devtests/pit-test/drive.js
 run car-test node test/car.test.js
 run laps-test node test/laps.test.js
+run track-unit node test/track.test.js
+run v62-checks node devtests/track-fix/check-v62.js
+run bridge-check node devtests/track-fix/bridge-check.js
+run bank-check node devtests/track-fix/bank-check.js
 echo done >> "$OUT/summary.txt"

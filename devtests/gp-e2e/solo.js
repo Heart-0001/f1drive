@@ -50,8 +50,11 @@
 // The v6 Grand Prix (years, cars, battery, tyre wear, pit stops) is devtests/gp-e2e/solo-v6.js.
 //   monaco  Esc on the grid with 4 lights on (back with 繼續駕駛); a lap after the flag (nothing counts any more); 結束 on
 //           the overlay + a free-practice lap
-//   suzuka  a deliberately cut lap through the crossover in qualifying; after the results 關閉, 再來一場 / 跳過排位 from the
-//           menu and a race whose first lap is cut (total = session clock); 再來一場, 結束大獎賽 during the race (DNF)
+//   suzuka  after the results 關閉, 再來一場 / 跳過排位 from the menu and a second race (total = session clock); 再來一場,
+//           結束大獎賽 during the race (DNF). Until v6.1 a lap was cut through the crossover in qualifying and in the second
+//           race (the two roads met at one level there); since v6.2 the crossover is a BRIDGE (js/track.js, the roads 6.2 m
+//           apart): it cannot be cut, the laps go under and over it and must be clean (the lap counter's void laps are
+//           test/laps.test.js's)
 //   spa     started with Enter in the lap field; Esc on the grid, a frame 1 s late on the grid (dt clamp); 再來一場, skip,
 //           and quitting to another track in the middle of the race; a new Grand Prix there, ended while the lights are on
 'use strict';
@@ -70,7 +73,7 @@ const PAGE_LIB = fs.readFileSync(path.join(__dirname, 'solo-page.js'), 'utf8');
 const FRAME_MS = Number(process.env.FRAME_MS) || 1000 / 60, JITTER = !!process.env.JITTER;
 const Q = 2, R = 3, STEP = 1 / 120, CLOCK_BASE = 1000000;
 const FRAME = (JITTER ? 35 : FRAME_MS) / 1000;                       // the longest warped frame, s
-// ending: what happens after the results (see the header). cut: a shortcut through the crossover in qualifying.
+// ending: what happens after the results (see the header). bridge: the crossover is a bridge (v6.2; it was cut until v6.1).
 // gridPause: Esc to the menu with 4 start lights on, back with the 繼續駕駛 button / with Esc. startWith: 'enter' = the
 // Grand Prix is started with Enter in the 正賽圈數 field instead of a click on 開始大獎賽. coolDown: one more lap after
 // the flag. upset: at the very end the autopilot is thrown off twice to see it recover. stall: one frame on the grid
@@ -78,7 +81,7 @@ const FRAME = (JITTER ? 35 : FRAME_MS) / 1000;                       // the long
 const TRACKS = {
   monza: { id: 'it-1922', ending: 'again', upset: true },
   monaco: { id: 'mc-1929', ending: 'end', gridPause: 'button', coolDown: true },
-  suzuka: { id: 'jp-1962', ending: 'close', cut: true },
+  suzuka: { id: 'jp-1962', ending: 'close', bridge: true },
   spa: { id: 'be-1925', ending: 'quit', quitTo: 'it-1922', gridPause: 'esc', startWith: 'enter', stall: true }
 };
 
@@ -346,35 +349,11 @@ async function scenario(w, cfg, rep) {
   check('timing starts at the first crossing of the line (lap 1, nothing reported)', s.lap.started && s.lap.n === 1 && s.lap.time < 2 * FRAME + 0.07 && s.hud.lap === '1 / ' + Q && s.hud.cur === fmtFloor(s.lap.time) &&
     w.evs('lapDone').length === d0 && s.me.qLaps === 0 && s.car.v > 10, { lap: s.lap, hud: [s.hud.lap, s.hud.cur], v: s.car.v });
 
-  /* ---------- Suzuka: a deliberately cut lap through the crossover ---------- */
-  if (cfg.cut) {
-    const crs = meta.crossings;
-    check('the crossover is in the track data', Array.isArray(crs) && crs.length === 1, crs);
-    const lo = Math.min(crs[0][0], crs[0][1]), hi = Math.max(crs[0][0], crs[0][1]);
-    from = w.log.length;
-    await w.js(`__e.ap.cutPlan = { a: ${lo}, b: ${hi} }; true`);
-    ok = await w.pump(`E.n['ap-cut'] >= 1`, 200, 'the autopilot reaches the crossover');
-    s = await w.snap();
-    check('cut lap: the autopilot slows down and turns off road ' + lo + ' onto road ' + hi + ' at the crossover (' + ((hi - lo) / N * 100).toFixed(0) + ' % of the lap skipped)', ok && s.ap.mode === 'cut' && s.car.v < 11, { ap: s.ap, car: s.car, truth: s.truth });
-    await w.pump(`E.truth.idx >= ${hi + 8}`, 30, 'a few metres onto the other road');
-    await w.shot('cut-at-the-crossover');
-    ok = await w.pump(`E.n['ap-cut-done'] >= 1`, 120, 'onto the other road');
-    s = await w.snap();
-    const voidOn = w.evs('void', from).filter(v => v.on);
-    check('cut lap: the car really drives on along the later road; the lap counter marks the lap void', ok && Math.abs(s.car.i - s.truth.idx) <= 2 && s.car.i > hi + 90 && s.lap.void === true && s.lap.behind === true && voidOn.length === 1 &&
-      s.lap.n === 1 && s.lap.jumps >= 1, { car: s.car.i, truth: s.truth.idx, lap: s.lap, voidOn });
-    info('cut: void set when car.state.sampleIndex was ' + (voidOn[0] ? voidOn[0].idx : '?') + ' (crossing ' + lo + ' / ' + hi + ')');
-    ok = await w.pump(`E.n.cross >= ${c0 + 2}`, 200, 'the line after the cut');
-    await w.frames(1);
-    s = await w.snap();
-    const crossCut = lastOf(w.evs('cross'));
-    check('cut lap: crossing the line after the shortcut counts NOTHING: no lap reported, session laps 0, lap 1 still, no time', ok && crossCut.cut === true && w.evs('lapDone').length === d0 &&
-      s.me.qLaps === 0 && s.me.qBest === null && s.lap.n === 1 && s.lap.last === null && s.lap.best === null && s.gp.lap === 0, { cross: crossCut, me: s.me, lap: s.lap });
-    check('cut lap: HUD unchanged (lap "1 / ' + Q + '", 上一圈 --, 完成圈數 "0 / ' + Q + '", standings --)', s.hud.lap === '1 / ' + Q && s.hud.last === '--' && s.hud.best === '--' && s.hud.gpLap === '0 / ' + Q && s.hud.rows[0].val === '--' && s.hud.rows[0].sub === '0/' + Q, s.hud);
-    check('cut lap: the lap is valid again from the line and the clock restarted there', s.lap.void === false && s.lap.behind === false && s.lap.started && s.lap.time < 2 * FRAME + 0.02 && crossCut.lapTime > 20 &&
-      w.evs('void', from).length === 2, { lap: s.lap, atLine: crossCut.lapTime, voids: w.evs('void', from) });
-    rep.notes.push('cut lap through the crossover ' + lo + ' -> ' + hi + ': ' + crossCut.lapTime.toFixed(1) + ' s on the lap clock at the line, not counted');
-    c0 += 1;                                                              // the timed laps start at this crossing
+  /* ---------- Suzuka: the crossover is a bridge (v6.2) ---------- */
+  if (cfg.bridge) {
+    const crs = meta.crossings, br = await w.js(`(F1.game.track.bridges || []).map(function (b) { return { up: b.up, lo: b.lo, sep: b.separation, clear: b.clearance }; })`);
+    check('the crossover is a bridge (v6.2: js/track.js track.bridges, the two roads ' + (br[0] ? br[0].sep.toFixed(2) : '?') + ' m apart): no shortcut, the laps below go under and over it',
+      Array.isArray(crs) && crs.length === 1 && br.length === 1 && br[0].sep >= 3 && [br[0].up, br[0].lo].sort((a, b) => a - b).join() === crs[0].slice().sort((a, b) => a - b).join(), { crs, br });
   }
 
   /* ---------- timed lap 1 ---------- */
@@ -392,13 +371,13 @@ async function scenario(w, cfg, rep) {
   const q1 = e.time, q1truth = (cr[c0 + 1].steps - cr[c0].steps) * STEP;
   check('quali lap 1 completed and reported: ' + fmt(q1) + ' = physics steps between the two line crossings', ok && near(q1, q1truth, 1e-9) && e.phase === 'quali' && e.sid === sid, { time: q1, truth: q1truth });
   check('quali lap 1 accepted: session qLaps 1, qBest = the lap to the millisecond, still qualifying', e.me && e.me.qLaps === 1 && e.me.qBest === r3(q1) && !e.me.qDone && e.phaseAfter === 'quali' && w.evs('lapRejected', from).length === 0, e.me);
-  check('quali lap 1 plausible: ' + fmt(q1) + ' against the line\'s prediction ' + fmt(ctx.pred) + (cfg.cut ? ' (flying: straight after the cut lap)' : ' (from a standing start 20 m before the line)'),
+  check('quali lap 1 plausible: ' + fmt(q1) + ' against the line\'s prediction ' + fmt(ctx.pred) + ' (from a standing start 20 m before the line)',
     q1 > meta.minLap && q1 > ctx.pred * 0.98 && q1 < ctx.pred * 1.12 + 3, { q1, pred: ctx.pred });
   check('quali lap 1: lap counter (last = best = the lap, now on lap 2)', e.lapAfter && e.lapAfter.n === 2 && e.lapAfter.last === q1 && e.lapAfter.best === q1 && e.lapAfter.started, e.lapAfter);
   check('quali lap 1: HUD timing box: lap "2 / ' + Q + '", 上一圈 = 最快圈 = ' + fmt(q1), e.hud && e.hud.lap === '2 / ' + Q && e.hud.last === fmt(q1) && e.hud.best === fmt(q1), e.hud && [e.hud.lap, e.hud.last, e.hud.best]);
   check('quali lap 1: session box: 完成圈數 "1 / ' + Q + '", standings row 1/' + Q + ' with the same ' + fmt(q1) + ', P1 / 1', e.hud && e.hud.gpLap === '1 / ' + Q && lapRow(e).val === fmt(q1) && lapRow(e).sub === '1/' + Q && e.hud.gpPos === 'P1/1' && e.hud.gpTitle === '排位賽', e.hud);
   check('quali lap 1: driven cleanly (no grass, no wall, no recovery)', clean(cr[c0 + 1].stats), cr[c0 + 1].stats);
-  rep.laps.push([cfg.cut ? 'quali 1 (flying, straight after the cut lap)' : 'quali 1 (from a standing start 20 m before the line)', q1, cr[c0 + 1].stats]);
+  rep.laps.push(['quali 1 (from a standing start 20 m before the line)', q1, cr[c0 + 1].stats]);
 
   /* ---------- timed lap 2, with an R reset in the middle ---------- */
   ok = await w.pump(`E.frac() >= 0.5`, ctx.pred, 'half of timed lap 2');
@@ -892,7 +871,7 @@ async function endOverlayEnd(w, ctx, rep, res) {
   await w.shot('free-practice-lap');
 }
 
-/* ---------- suzuka: 關閉; 再來一場 + 跳過排位 from the menu and a race with a cut lap; 再來一場, 結束大獎賽 in the race (DNF), 結束 ---------- */
+/* ---------- suzuka: 關閉; 再來一場 + 跳過排位 from the menu and a second race (through the bridge); 再來一場, 結束大獎賽 in the race (DNF), 結束 ---------- */
 async function endClose(w, ctx, rep, res) {
   let from = w.log.length, s;
   check('關閉 (results overlay) clicked', await w.click('#gp-close'));
@@ -912,39 +891,33 @@ async function endClose(w, ctx, rep, res) {
   await checkNewQuali(w, res, from, '再來一場 (menu)');
   await skipToGrid(w, 'second session');
 
-  // ---- a race whose first lap is cut through the crossover: the lap does not count, its time stays in the race ----
-  const lo = Math.min(res.crossings[0][0], res.crossings[0][1]), hi = Math.max(res.crossings[0][0], res.crossings[0][1]);
+  // ---- a second race (v6.2: through the crossover, now a bridge - until v6.1 its first lap was cut there): every lap counts,
+  // each = physics steps between its crossings (lap 1 from lights out), clean under and over the bridge, total = session clock
   let g0 = w.evs('go').length, c0 = w.evs('cross').length;
   const dC = w.evs('lapDone').length;
   from = w.log.length;
-  await w.js(`__e.ap.on = true; __e.ap.mode = 'line'; __e.ap.cutPlan = { a: ${lo}, b: ${hi} }; true`);
-  check('cut race: lights out, over the line', await w.pump(`E.n.go >= ${g0 + 1} && E.n.cross >= ${c0 + 1}`, 60, 'second race under way'));
+  await w.js(`__e.ap.on = true; __e.ap.mode = 'line'; true`);
+  check('second race: lights out, over the line', await w.pump(`E.n.go >= ${g0 + 1} && E.n.cross >= ${c0 + 1}`, 60, 'second race under way'));
   const go = w.evs('go')[g0], goAt = (await w.snap()).snapshot.goAt;
-  let ok = await w.pump(`E.n.cross >= ${c0 + 2}`, 300, 'the line after the cut');
-  await w.frames(1);
-  s = await w.snap();
-  const cut = lastOf(w.evs('cross')), cutTime = go.sinceGo + (cut.steps - go.steps) * STEP;
-  check('cut race: the first lap is cut through the crossover; at the line (' + cutTime.toFixed(1) + ' s after lights out) nothing is counted: no lap reported, rLaps 0, still lap "1 / ' + R + '", the lap clock restarts',
-    ok && cut.cut === true && w.evs('lapDone').length === dC && s.me.rLaps === 0 && s.me.rTime === 0 && s.lap.n === 1 && s.lap.last === null && !s.lap.void && s.lap.time < 2 * FRAME + 0.02 && s.hud.lap === '1 / ' + R &&
-    s.hud.gpLap === '0 / ' + R && s.hud.last === '--' && w.evs('void', from).length === 2 && cutTime > 30, { cut, me: s.me, lap: s.lap, hud: [s.hud.lap, s.hud.gpLap, s.hud.last] });
   const times = [];
-  let e = {}, prevTime = 0;
+  let e = {}, prevTime = 0, ok;
   for (let k = 1; k <= R; k++) {
-    ok = await w.pump(`E.n.lapDone >= ${dC + k}`, ctx.pred * 1.6 + 60, 'cut race: counted lap ' + k);
+    ok = await w.pump(`E.n.lapDone >= ${dC + k}`, ctx.pred * 1.6 + 60, 'second race: lap ' + k);
     e = w.evs('lapDone')[dC + k - 1] || {};
-    const cr = w.evs('cross'), truth = (cr[c0 + 1 + k].steps - cr[c0 + k].steps) * STEP, clock = (e.gpNow - goAt) / 1000;
+    const cr = w.evs('cross'), clock = (e.gpNow - goAt) / 1000;
+    const truth = k === 1 ? go.sinceGo + (cr[c0 + 1].steps - go.steps) * STEP : (cr[c0 + k].steps - cr[c0 + k - 1].steps) * STEP;
     times.push(e.time);
     if (k === 1) {
-      check('cut race: the first lap that counts is the one after the cut: ' + fmt(e.time) + ' = physics steps between the crossings, accepted as lap 1', ok && near(e.time, truth, 1e-9) && e.me.rLaps === 1 && e.me.rBest === r3(e.time) &&
-        e.hud.lap === '2 / ' + R && e.hud.last === fmt(e.time) && e.hud.gpLap === '1 / ' + R, { time: e.time, truth, me: e.me, hud: [e.hud.lap, e.hud.last, e.hud.gpLap] });
-      check('cut race: the race time after it is the SESSION CLOCK since lights out (' + clock.toFixed(3) + ' s: the cut lap + this lap), not the sum of counted laps', e.me.rTime === r3(clock) && clock - e.time > 30 &&
-        clock - (cutTime + e.time) > -1e-9 && clock - (cutTime + e.time) < FRAME + 2 * STEP + 1e-6, { rTime: e.me.rTime, clock, cutTime, lap: e.time });
+      check('second race lap 1: ' + fmt(e.time) + ' = from lights out to the second crossing (time since go + physics steps), accepted; race time = the lap', ok && near(e.time, truth, 1e-9) && e.me.rLaps === 1 &&
+        e.me.rTime === r3(e.time) && e.me.rBest === r3(e.time) && e.hud.lap === '2 / ' + R && e.hud.last === fmt(e.time) && e.hud.gpLap === '1 / ' + R &&
+        clock - e.time > -1e-9 && clock - e.time < FRAME + STEP + 1e-9, { time: e.time, truth, clock, me: e.me, hud: [e.hud.lap, e.hud.last, e.hud.gpLap] });
     } else {
-      check('cut race: counted lap ' + k + ' ' + fmt(e.time) + ' accepted; race time = previous + the lap, in step with the session clock', ok && near(e.time, truth, 1e-9) && e.me.rLaps === k && near(e.me.rTime, prevTime + r3(e.time), 0.0011) &&
+      check('second race lap ' + k + ' ' + fmt(e.time) + ' accepted; race time = previous + the lap, in step with the session clock', ok && near(e.time, truth, 1e-9) && e.me.rLaps === k && near(e.me.rTime, prevTime + r3(e.time), 0.0011) &&
         Math.abs(clock - e.me.rTime) < FRAME + 2 * STEP + 0.002, { time: e.time, truth, rTime: e.me.rTime, clock });
     }
+    check('second race lap ' + k + ': driven cleanly under and over the bridge (no grass, no wall, no recovery)', clean(cr[c0 + k].stats), cr[c0 + k].stats);
     prevTime = e.me ? e.me.rTime : 0;
-    rep.laps.push(['cut race: counted lap ' + k + (k === 1 ? ' (from the line, after the shortcut)' : ' (flying)'), e.time, cr[c0 + 1 + k].stats]);
+    rep.laps.push(['second race: lap ' + k + (k === 1 ? ' (from the grid)' : ' (flying)'), e.time, cr[c0 + k].stats]);
   }
   const total2 = e.me.rTime, sum2 = times[0] + times[1] + times[2], best2 = Math.min(times[0], times[1], times[2]);
   await w.js(`__e.ap.mode = 'stop'; true`);
@@ -952,13 +925,13 @@ async function endClose(w, ctx, rep, res) {
   await w.frames(3);
   s = await w.snap();
   let rr = s.dom.res.rows[0] || { cells: [] };
-  check('cut race: finished after ' + R + ' counted laps; total ' + fmt(total2) + ' = session clock from lights out to the finish = the cut lap (' + cutTime.toFixed(1) + ' s) + the three laps (' + sum2.toFixed(1) + ' s)',
-    e.phaseAfter === 'results' && e.me.fin && e.me.rLaps === R && Math.abs((e.gpNow - goAt) / 1000 - total2) < FRAME + 2 * STEP + 0.002 && near(total2 - sum2, cutTime, 0.08) && e.me.rBest === r3(best2),
-    { total2, sum2, cutTime, clock: (e.gpNow - goAt) / 1000 });
-  check('cut race: results table: ' + R + ' laps, total ' + fmt(total2) + ', best ' + fmt(best2) + '; standings and toast agree', s.dom.results && rr.cells[2] === String(R) && rr.cells[3] === fmt(total2) && rr.cells[4] === '' &&
+  check('second race: finished after ' + R + ' laps; total ' + fmt(total2) + ' = session clock from lights out to the finish = the three laps (' + sum2.toFixed(3) + ' s)',
+    e.phaseAfter === 'results' && e.me.fin && e.me.rLaps === R && Math.abs((e.gpNow - goAt) / 1000 - total2) < FRAME + 2 * STEP + 0.002 && near(total2, sum2, 0.004) && e.me.rBest === r3(best2),
+    { total2, sum2, clock: (e.gpNow - goAt) / 1000 });
+  check('second race: results table: ' + R + ' laps, total ' + fmt(total2) + ', best ' + fmt(best2) + '; standings and toast agree', s.dom.results && rr.cells[2] === String(R) && rr.cells[3] === fmt(total2) && rr.cells[4] === '' &&
     rr.cells[5] === fmt(best2) && s.hud.rows[0].val === fmt(total2) && s.hud.best === fmt(best2) && hasToast(w, from, '正賽結束：你是第 1 名（共 1 位車手）'), { rr, hud: s.hud });
-  rep.notes.push('race with a cut first lap: ' + cutTime.toFixed(1) + ' s to the line through the shortcut (not counted), then ' + times.map(fmt).join(' ') + '; total ' + fmt(total2) + ' (session clock)');
-  await w.shot('results-after-cut-race');
+  rep.notes.push('second race through the bridge: ' + times.map(fmt).join(' ') + '; total ' + fmt(total2) + ' (session clock)');
+  await w.shot('results-second-race');
 
   // ---- once more: ended by hand in the middle of the race (not classified) ----
   from = w.log.length;

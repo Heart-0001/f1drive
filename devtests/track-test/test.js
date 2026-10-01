@@ -76,6 +76,8 @@ for (const td of window.F1_TRACKS) {
       for (let j = 0; j < N; j++) {
         let sep = Math.abs(S[j].s - a.s); sep = Math.min(sep, tr.length - sep);
         if (sep <= 60) continue;
+        // a road on another level (a bridge: Suzuka's crossover since 2026-10-01) is not in the wall's way
+        if (Math.abs(S[j].y - tr.surfaceY(i, sg * wd)) > 3) continue;
         const d = Math.hypot(S[j].x - wx, S[j].z - wz);
         if (d < minClear) minClear = d;
         const hw = S[j].halfW ?? tr.halfWidth;

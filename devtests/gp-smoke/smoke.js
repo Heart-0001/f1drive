@@ -645,15 +645,18 @@ async function partSuzuka() {
   await put(at, 0);
   await w.js(`F1.game.lap.reset(${at}); true`);
   await sleep(250);
-  // beyond the road edge at the crossing car.js locates the car on the OTHER road; the lap counter does not believe it
-  let found = null;
+  // v6.2: the crossover is a BRIDGE (js/track.js: the roads 6.2 m apart; js/car.js locates with the car's height): beyond the
+  // road edge at the crossing the car stays on the road it is on - the index never jumps to the other road, so the lap counter
+  // never has to wait (until v6.1 the roads met at one level there and car.js put the car on the other one: 'jumping')
+  const seen = [];
   for (const d of [9, -9, 8, -8, 10, -10]) {
     await put(at, d);
     await sleep(250);
-    const r = await w.js(`({ i: F1.game.car.state.sampleIndex, jumping: F1.game.lap.jumping, prev: F1.game.lap.prevIdx })`);
-    if (r.jumping && Math.abs(r.i - hi) < 40) { found = Object.assign({ d }, r); break; }
+    const r = await w.js(`({ i: F1.game.car.state.sampleIndex, jumping: F1.game.lap.jumping, bridges: (F1.game.track.bridges || []).length })`);
+    seen.push(Object.assign({ d }, r));
   }
-  check('off the road at the crossing: sampleIndex is on the other road, the lap counter waits (jumping) and keeps its own position', found && Math.abs(found.prev - at) < 5, found);
+  check('off the road at the crossing (8..10 m either side): the bridge keeps the car on its own road (index near ' + at + ', never near ' + hi + '), the lap counter never waits',
+    seen.every(r => r.bridges === 1 && Math.abs(r.i - at) < 15 && !r.jumping), seen);
   await w.tap('R');
   await sleep(150);
   const s = await w.state();

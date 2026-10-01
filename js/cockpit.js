@@ -10,12 +10,43 @@
   var F1 = root.F1 = root.F1 || {};
 
   var EYE_Y = 0.80, EYE_Z = -0.35;
+  // Vertical field of view: a base value at a standstill that widens with speed, by (FOV_MAX - FOV_MIN) / FOV_MIN of it
+  // at V_TOP (v5..v6.1: 70 -> 82 deg). v6.2: the base defaults to FOV_DEFAULT (track audit: at 70-82 deg on an ordinary
+  // screen every angle shows at about 0.3x, so a 15 % climb read like 4-5 %); setFov(deg) picks it in
+  // FOV_SET_MIN..FOV_SET_MAX (the 設定 tab). The widening stays proportional: 60 -> 70.3 deg, 70 -> 82 exactly as v5.
   var FOV_MIN = 70, FOV_MAX = 82, V_TOP = 330 / 3.6;
+  var FOV_DEFAULT = 60, FOV_SET_MIN = 50, FOV_SET_MAX = 75;
+  // Framing: a narrower FOV alone would push the steering-wheel display down under the HUD's telemetry graphic (at 60
+  // deg its lower edge fell from 83 % to 91 % of the picture's height). A vertical lens shift in the projection (the
+  // picture moves, the view does not tilt, verticals stay vertical) keeps the point FRAME_TAN below the line of sight
+  // (the display's lower edge, 25 deg) at the height v5's camera showed it at the same speed. FOV setting 70: none (v5's
+  // camera); narrower: the picture moves up (60: the horizon at 43 % of the height, more road); wider: down.
+  var FRAME_TAN = Math.tan(25 * Math.PI / 180);
   var WHEEL_X = 0.80, AXLE_Z = 1.9;
   var WHEEL_STEER_VIS = 0.30;      // rad of visible front-wheel steer at steer = 1
   var HANDWHEEL_VIS = 1.0;         // rad of steering-wheel rotation at steer = 1
   var DISPLAY_DT = 1 / 15;         // the wheel display is redrawn at most this often (and only when it changes)
   var BLUR_SPEED = 7;              // m/s: above this the sidewall lettering is drawn motion-blurred
+  // ---- road shape cues (v6.2) ----
+  // The camera used to follow the car 1:1, so a banked road stayed level on screen and only the scenery leaned
+  // (Zandvoort / Madring "not felt"), and a steady climb looked exactly like a flat road (Spa "not felt"). The head now
+  // - keeps HEAD_ROLL_KEEP of the car's roll out, following the roll HEAD_ROLL_TAU later: the banking reads as the road
+  //   and the cockpit tilting;
+  // - takes out HEAD_PITCH_KEEP of the car's pitch, slowly (HEAD_PITCH_TAU): a change of slope still swings the view at
+  //   first, then the head settles and a steady climb shows as the nose and the road rising against the horizon (a
+  //   descent: falling away);
+  // - sinks and nods under the road's compression: car.state.compress in g (banking, dips > 0, crests < 0), or else
+  //   state.seatG - 1 (the seat load in g); neither: nothing.
+  // Both counter-rotations turn about the CAR's axes whatever the head look (added to the YXZ look angles: roll
+  // x -= a sin(yaw), z += a cos(yaw); pitch x -= b cos(yaw), z -= b sin(yaw)), so camera.rotation.y stays PI + yaw,
+  // which main.js's audio listener reads. On a level road with no compression all of it is exactly 0.
+  var HEAD_ROLL_KEEP = 0.45;       // share of the car's roll the head takes out (0 = the v6.1 camera)
+  var HEAD_ROLL_TAU = 0.25;        // s: the neck follows the car's roll this much later
+  var HEAD_PITCH_KEEP = 0.5;       // share of the car's pitch the head takes out once settled
+  var HEAD_PITCH_TAU = 0.6;        // s: slow, so a crest / dip still swings the view before the head catches it
+  var COMPRESS_EYE = 0.012;        // m the eye sinks per g of compression
+  var COMPRESS_NOD = 0.004;        // rad the head nods down per g
+  var COMPRESS_MIN = -1, COMPRESS_MAX = 2.5, COMPRESS_TAU = 0.08;   // g, g, s
 
   // ---- driver head look (right stick) ---------------------------------------
   // Limits follow what a real F1 driver can do. The helmet is boxed in by the headrest surround and
@@ -37,6 +68,13 @@
   // radians
   F1.COCKPIT_LOOK = { maxYaw: LOOK_MAX_YAW, maxPitchUp: LOOK_MAX_PITCH_UP, maxPitchDown: LOOK_MAX_PITCH_DOWN,
                       headYaw: LOOK_HEAD_YAW, smoothTime: LOOK_SMOOTH };
+  // the FOV setting (deg, vertical, at a standstill): its default and range for the UI; widen = the share it grows by
+  // at top speed
+  F1.COCKPIT_FOV = { def: FOV_DEFAULT, min: FOV_SET_MIN, max: FOV_SET_MAX, widen: (FOV_MAX - FOV_MIN) / FOV_MIN };
+  // the road shape cues (see above): shares, time constants (s), eye drop (m / g), nod (rad / g)
+  F1.COCKPIT_HEAD = { rollKeep: HEAD_ROLL_KEEP, rollTau: HEAD_ROLL_TAU, pitchKeep: HEAD_PITCH_KEEP, pitchTau: HEAD_PITCH_TAU,
+                      compressEye: COMPRESS_EYE, compressNod: COMPRESS_NOD, compressMin: COMPRESS_MIN, compressMax: COMPRESS_MAX,
+                      compressTau: COMPRESS_TAU };
 
   // ---- live mirrors -------------------------------------------------------------
   // Both glasses show one small render target, one half each, drawn by a rear-facing camera at each glass. The pass
@@ -1226,9 +1264,30 @@
     }
 
     // ---- camera rig ----
+    var fovBase = FOV_DEFAULT;      // the FOV setting (deg at a standstill)
+    var shift = 0;                  // the framing lens shift in the projection now (share of the picture's height, + = up)
+    // The cockpit's projection: camera.fov plus the framing shift (FRAME_TAN). v5's FOV at the same speed is
+    // camera.fov * FOV_MIN / fovBase; the point FRAME_TAN below the line of sight is drawn as high as v5 drew it. The
+    // shift goes into the projection matrix only (no camera.view), so it is rebuilt by update() every frame while there
+    // is one: an outside camera.updateProjectionMatrix() (main.js on a resize; a test harness borrowing the camera for an
+    // overview) gets a plain centred projection.
+    function project() {
+      camera.updateProjectionMatrix();
+      var s = 0;
+      if (fovBase !== FOV_MIN) {
+        var ref = camera.fov * FOV_MIN / fovBase;
+        s = FRAME_TAN / 2 * (1 / Math.tan(camera.fov * DEG / 2) - 1 / Math.tan(ref * DEG / 2));
+        if (!isFinite(s)) s = 0;
+      }
+      if (s !== 0) {                // the frustum's top and bottom both move down by 2 s of its half height
+        camera.projectionMatrix.elements[9] -= 2 * s;
+        camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+      }
+      shift = s;
+    }
     camera.near = Math.min(camera.near, 0.06);
-    camera.fov = FOV_MIN;
-    camera.updateProjectionMatrix();
+    camera.fov = FOV_DEFAULT;
+    project();
     camera.position.set(0, EYE_Y, EYE_Z);
     camera.rotation.order = 'YXZ';
     camera.rotation.set(0, Math.PI, 0);                  // look along local +Z
@@ -1325,7 +1384,8 @@
     };
 
     // ---- animation state ----
-    var lastHeading = null, latG = 0, shake = 0, time = 0, fov = FOV_MIN, wheelAngle = 0, vibPhase = 0;
+    var lastHeading = null, latG = 0, shake = 0, time = 0, fov = FOV_DEFAULT, wheelAngle = 0, vibPhase = 0;
+    var headRoll = 0, headPitch = 0, comp = 0;   // v6.2: the roll / pitch the head follows (smoothed, rad), compression (g)
     // head look: target (from setLook) and the smoothed value + its rate, in radians
     var lookYawT = 0, lookPitchT = 0, lookYaw = 0, lookPitch = 0, lookYawV = 0, lookPitchV = 0;
     // display
@@ -1348,6 +1408,20 @@
     function centreLook() {
       lookYawT = lookPitchT = lookYaw = lookPitch = lookYawV = lookPitchV = 0;
     }
+    // The FOV setting: the vertical field of view at a standstill in degrees (the 設定 tab), clamped to
+    // F1.COCKPIT_FOV.min..max (50..75); a numeric string is taken, anything else not a finite number gives the default
+    // (60). The speed widening scales with it. Applied at once (no easing). -> the value now in use
+    function setFov(deg) {
+      var v = typeof deg === 'number' ? deg : (typeof deg === 'string' && deg.trim() ? +deg : NaN);
+      v = isFinite(v) ? (v < FOV_SET_MIN ? FOV_SET_MIN : (v > FOV_SET_MAX ? FOV_SET_MAX : v)) : FOV_DEFAULT;
+      if (v !== fovBase) {
+        fov = fov * v / fovBase;    // keeps the share of the speed widening the view has right now
+        fovBase = v;
+        camera.fov = fov;
+        project();
+      }
+      return v;
+    }
     // critically damped spring towards the target (exact for any dt, never overshoots)
     function followLook(dt) {
       if (!(dt > 0)) return;
@@ -1361,6 +1435,7 @@
     }
 
     function num(v) { return typeof v === 'number' && v === v; }
+    function fin(v) { return typeof v === 'number' && isFinite(v) ? v : 0; }
     function tyreState(state) {
       var t = state.tyres || (sources.car && sources.car.tyres) || null;
       if (t && t.state && typeof t.state === 'object') t = t.state;
@@ -1485,14 +1560,15 @@
       }
       updateDisplay(state, av, tys);
 
-      // FOV widens gently with speed
+      // FOV widens gently with speed (by the same share of the setting as v5's 70 -> 82)
       var t = Math.min(1, av / V_TOP);
-      var target = FOV_MIN + (FOV_MAX - FOV_MIN) * t * t * (3 - 2 * t);
+      var widen = fovBase * (FOV_MAX - FOV_MIN) / FOV_MIN;
+      var target = fovBase + widen * t * t * (3 - 2 * t);
       fov += (target - fov) * Math.min(1, dt * 3);
       if (Math.abs(fov - camera.fov) > 0.02) {
         camera.fov = fov;
-        camera.updateProjectionMatrix();
-      }
+        project();
+      } else if (fovBase !== FOV_MIN) project();     // the framing shift, kept in place every frame (see project)
 
       // lateral g estimate from yaw rate (positive = turning left), smoothed
       var yawRate = 0;
@@ -1542,9 +1618,21 @@
       var headYaw = lookYaw * (LOOK_HEAD_YAW / LOOK_MAX_YAW);
       var hx = LOOK_NECK * Math.sin(headYaw), hz = LOOK_NECK * (Math.cos(headYaw) - 1);
 
+      // road shape (v6.2, see HEAD_ROLL_KEEP): the roll / pitch the head follows and the compression, smoothed (dt 0:
+      // at once, as after a track load); the counter-rotations about the car's forward / lateral axes
+      var kR = dt > 0 ? 1 - Math.exp(-dt / HEAD_ROLL_TAU) : 1, kP = dt > 0 ? 1 - Math.exp(-dt / HEAD_PITCH_TAU) : 1;
+      var kC = dt > 0 ? 1 - Math.exp(-dt / COMPRESS_TAU) : 1;
+      headRoll += (fin(state.roll) - headRoll) * kR;
+      headPitch += (fin(state.pitch) - headPitch) * kP;
+      var cg = num(state.compress) ? state.compress : (num(state.seatG) ? state.seatG - 1 : 0);
+      cg = cg > COMPRESS_MIN ? (cg < COMPRESS_MAX ? cg : COMPRESS_MAX) : COMPRESS_MIN;
+      comp += (cg - comp) * kC;
+      var hr = HEAD_ROLL_KEEP * headRoll, hp = HEAD_PITCH_KEEP * headPitch, ly = Math.sin(lookYaw), lc = Math.cos(lookYaw);
+
       // head leans slightly into the corner
-      camera.position.set(latG * 0.006 + ox + hx, EYE_Y + oy, EYE_Z + hz);
-      camera.rotation.set(rx + lookPitch, Math.PI + lookYaw, latG * 0.005 + rz);
+      camera.position.set(latG * 0.006 + ox + hx, EYE_Y + oy - COMPRESS_EYE * comp, EYE_Z + hz);
+      camera.rotation.set(rx + lookPitch - COMPRESS_NOD * comp - hr * ly - hp * lc, Math.PI + lookYaw,
+        latG * 0.005 + rz + hr * lc - hp * ly);
     }
 
     // Everything the cockpit created (call when the cockpit is thrown away; the camera is left alone).
@@ -1557,7 +1645,9 @@
       mirror.on = false;
     }
 
-    // what is built (tests / debugging): style, year, wheel kind, rim size, halo, triangles, draw calls
+    // what is built (tests / debugging): style, year, wheel kind, rim size, halo, triangles, draw calls, mirrors, the FOV
+    // (setting and the current value, deg; shift: the framing lens shift, share of the height), the head's road-shape
+    // counter-roll / counter-pitch (rad) and compression (g)
     function info() {
       var tris = 0, draws = 0;
       group.traverse(function (o) {
@@ -1568,13 +1658,15 @@
       return { style: cur.style, year: cur.year, wheel: cur.classic ? 'classic' : 'big', rim: cur.style === 'halo18' ? 18 : 13,
                halo: cur.style !== 'modern', tyreWidth: cur.W, triangles: Math.round(tris), drawCalls: draws,
                livery: { colour: liv.c1, colour2: liv.c2, accent: liv.acc, number: liv.num }, displayDraws: displayDraws,
-               mirrors: { live: mirror.on, passes: mirror.passes, size: [MIRROR_W, MIRROR_H], hfov: MIRROR_HFOV / DEG } };
+               mirrors: { live: mirror.on, passes: mirror.passes, size: [MIRROR_W, MIRROR_H], hfov: MIRROR_HFOV / DEG },
+               fov: { setting: fovBase, now: camera.fov, shift: shift },
+               head: { roll: HEAD_ROLL_KEEP * headRoll, pitch: HEAD_PITCH_KEEP * headPitch, compress: comp } };
     }
 
     setCar(null, null);                                // default: 2022-on car in the default colours
     paintTyres('M');
     setMirrors(true);
     return { group: group, update: update, setLook: setLook, centreLook: centreLook, setCar: setCar, setSources: setSources,
-             setMirrors: setMirrors, dispose: dispose, info: info };
+             setMirrors: setMirrors, setFov: setFov, dispose: dispose, info: info };
   };
 })(typeof window !== 'undefined' ? window : globalThis);

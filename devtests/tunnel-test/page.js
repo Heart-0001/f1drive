@@ -1,6 +1,8 @@
 // Lives in the PAGE of the real game (injected by devtests/tunnel-test/run.js with executeJavaScript). Nothing in the
-// project is edited: js/tunnels.js is loaded into the running page with a <script> element, built for the current track
-// (F1.game.track / trackData) and its group added to the scene main.js renders.
+// project is edited. Since v6.2 index.html loads js/tunnels.js and main.js builds it with the track (F1.game.tunnels) and
+// dims its lights inside (F1.game.lights): this page then uses the GAME's tunnels (T.gameTun) and, in the cockpit view,
+// only reads what main.js did. Without that wiring (an older main.js) it loads js/tunnels.js itself, builds it for the
+// current track (F1.game.track / trackData), adds its group to the scene and plays main.js's part (the prototype).
 // window.__tn:
 //   - renderer: taken from the scene's onBeforeRender (three.js hands it over); renderer.render is wrapped so that right
 //     before each main render (main camera, no render target) the tunnel gets update(t, viewIndex) and, in mode 'rec',
@@ -13,7 +15,7 @@
   'use strict';
   if (window.__tn) return 'already';
   var T = window.__tn = { errs: [], renderer: null, scene: null, tun: null, mode: 'off', lights: null, extSpec: null,
-    mainRenders: 0, viewIdx: null, applied: null };
+    mainRenders: 0, viewIdx: null, applied: null, gameTun: false, maxDev: 0, devN: 0 };
   window.addEventListener('error', function (e) { T.errs.push(String(e && (e.message || e.type))); });
   window.addEventListener('unhandledrejection', function (e) { T.errs.push('rejection: ' + String(e && e.reason)); });
 
@@ -61,6 +63,8 @@
 
   // ---- loading and building the module ----
   T.load = function (src) {
+    // (v6.2: already loaded by index.html and built by main.js: nothing to add)
+    if (typeof F1.buildTunnels === 'function' && F1.game && F1.game.tunnels) return Promise.resolve('index');
     return new Promise(function (res) {
       var s = document.createElement('script');
       s.src = src + (src.indexOf('?') < 0 ? '?t=' + Date.now() : '');
@@ -70,18 +74,31 @@
     });
   };
   T.build = function (data) {
-    if (T.tun) { T.tun.dispose(); T.tun = null; }
-    var t0 = performance.now();
-    T.tun = F1.buildTunnels(F1.game.track, F1.game.trackData, data);
-    var ms = performance.now() - t0;
-    T.scene.add(T.tun.group);
+    var ms;
+    if (data === undefined && F1.game && F1.game.tunnels) {
+      // main.js's own (built with the track, in the scene, driven every frame)
+      if (T.tun && !T.gameTun) T.tun.dispose();
+      T.tun = F1.game.tunnels; T.gameTun = true;
+      ms = T.tun.stats.ms;
+    } else {
+      if (T.tun && !T.gameTun) T.tun.dispose();
+      var t0 = performance.now();
+      T.tun = F1.buildTunnels(F1.game.track, F1.game.trackData, data);
+      ms = performance.now() - t0;
+      T.gameTun = false;
+      T.scene.add(T.tun.group);
+    }
     T.findLights();
-    return { ms: +ms.toFixed(1), stats: T.tun.stats, tunnels: T.tun.tunnels, children: T.tun.group.children.map(function (m) {
+    return { ms: +ms.toFixed(1), game: T.gameTun, inScene: !!T.tun.group.parent, stats: T.tun.stats, tunnels: T.tun.tunnels, children: T.tun.group.children.map(function (m) {
       return { name: m.name, tris: m.geometry ? m.geometry.attributes.position.count / 3 : 0, order: m.renderOrder, type: m.material && m.material.type };
     }) };
   };
   T.findLights = function () {
-    var L = T.lights;
+    var L = T.lights, gl = F1.game && F1.game.lights;
+    if (!L && gl && gl.hemi && gl.sun) {
+      // main.js's two lights with their daylight intensities (they may be dimmed right now)
+      L = T.lights = { hemi: [{ o: gl.hemi, base: gl.hemi0 }], sun: [{ o: gl.sun, base: gl.sun0 }] };
+    }
     if (!L) {
       L = { hemi: [], sun: [] };
       T.scene.traverse(function (o) {
@@ -93,27 +110,37 @@
     return { hemi: L.hemi.map(function (h) { return h.base; }), sun: L.sun.map(function (h) { return h.base; }) };
   };
 
-  // ---- the integration prototype, run right before each main render ----
+  // ---- right before each main render ----
   // The view's sample: the car's (cockpit), or the outside camera's spec (viewIdx; null = outside any tunnel).
+  // The game's tunnels in the cockpit view (mode 'rec'): main.js has set the lights and the tunnel's view for this render
+  // (tunnelView): only read them, and how far they are from tunnels.sceneLight at the car's sample (T.maxDev). Otherwise
+  // (an outside camera, mode 'off', or no wiring in main.js) this page sets them for its view, as main.js would.
   T.beforeMain = function () {
     var tun = T.tun, car = F1.game.car;
     if (!tun || !car) return;
     var idx = T.extSpec ? T.extSpec.viewIdx : car.state.sampleIndex;
     if (idx === undefined) idx = null;
     T.viewIdx = idx;
-    tun.update(performance.now() / 1000, idx, T.mode === 'rec');   // (off: main.js does not scale its lights)
     var L = T.lights, hemiF = 1, sunF = 1;
-    if (T.mode === 'rec' && idx !== null) {
-      // what main.js would do (see the report): the module says how much of the scene light reaches this sample
-      if (typeof tun.sceneLight === 'function') {
-        hemiF = tun.sceneLight(idx, 'hemi'); sunF = tun.sceneLight(idx, 'sun');
-      } else {
-        var l = tun.lightAt(idx); hemiF = l; sunF = l;
+    if (T.gameTun && T.mode === 'rec' && !T.extSpec && L && L.hemi.length && L.sun.length) {
+      hemiF = L.hemi[0].o.intensity / L.hemi[0].base; sunF = L.sun[0].o.intensity / L.sun[0].base;
+      var dev = Math.abs(hemiF - tun.sceneLight(idx, 'hemi')) + Math.abs(sunF - tun.sceneLight(idx, 'sun'));
+      if (dev > T.maxDev) T.maxDev = dev;
+      T.devN++;
+    } else {
+      tun.update(performance.now() / 1000, idx, T.mode === 'rec');   // (off: the scene lights stay as they are)
+      if (T.mode === 'rec' && idx !== null) {
+        // what main.js does: the module says how much of the scene light reaches this sample
+        if (typeof tun.sceneLight === 'function') {
+          hemiF = tun.sceneLight(idx, 'hemi'); sunF = tun.sceneLight(idx, 'sun');
+        } else {
+          var l = tun.lightAt(idx); hemiF = l; sunF = l;
+        }
       }
-    }
-    if (L) {
-      L.hemi.forEach(function (h) { h.o.intensity = h.base * hemiF; });
-      L.sun.forEach(function (h) { h.o.intensity = h.base * sunF; });
+      if (L) {
+        L.hemi.forEach(function (h) { h.o.intensity = h.base * hemiF; });
+        L.sun.forEach(function (h) { h.o.intensity = h.base * sunF; });
+      }
     }
     T.applied = { idx: idx, hemi: +hemiF.toFixed(3), sun: +sunF.toFixed(3) };
     if (T.minApplied) { T.minApplied.hemi = Math.min(T.minApplied.hemi, T.applied.hemi); T.minApplied.sun = Math.min(T.minApplied.sun, T.applied.sun); T.minApplied.frames++; }

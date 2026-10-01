@@ -7,9 +7,16 @@
 //           display (the wheel display at several states: close-ups + the canvas itself), remote (a remote car with a
 //           livery beside us; its halo from the side), mirror (live mirrors: remote cars behind us seen from the seat, the
 //           glasses close up, head look towards them, mirrors off / on), ext (outside views of the cockpit model),
-//           perf (triangles, draw calls, textures, frame time; the live mirrors' cost per frame -> perf-mirrors.json)
-// The page is a copy of index.html (out/index-ck.html, <base> = project root) with one extra script before js/main.js that
-// keeps the renderer and the cockpit main.js creates (window.__renderer, window.__ck): main.js is not changed.
+//           perf (triangles, draw calls, textures, frame time; the live mirrors' cost per frame -> perf-mirrors.json),
+//           shape (v6.2 road-shape cues: Spa's Eau Rouge dip and Raidillon climb, Zandvoort T3, Madring's La Monumental,
+//           a flat corner, Monza's straight at speed; the camera's world pitch / roll, the car's, the FOV -> shape.json)
+//       APP_ROOT=<folder> (the game to load, default the project: e.g. a `git archive HEAD` copy, so that a before / after
+//       pair is not disturbed by other edits of the tree)   FOV=<deg> (cockpit.setFov(deg) after the track loads, if the
+//       cockpit has it)   SHAPE_WAIT=<ms> (settling time before each shape shot, default 3000: the head's slow pitch)
+//       HUD=1 (keep the HUD on: by default it is hidden)
+// The page is a copy of index.html (out/index-ck.html, <base> = the project or APP_ROOT) with one extra script before
+// js/main.js (out/ck-hook.js: a file, the page's CSP blocks inline scripts) that keeps the renderer and the cockpit main.js
+// creates (window.__renderer, window.__ck): main.js is not changed.
 // Works against the old cockpit too: TAG=before COCKPIT=devtests/cockpit-test/cockpit-v5.js loads that file in place of
 // js/cockpit.js (what the old one does not have, setCar and the styles, is skipped; its shots are named *-old).
 // Also in this folder: api.test.js (node: the API, setCar / dispose, display budget, camera and remote car against v5),
@@ -17,6 +24,7 @@
 const { app, BrowserWindow } = require('electron');
 const fs = require('fs'), path = require('path'), url = require('url');
 const ROOT = path.resolve(__dirname, '..', '..');
+const APP = path.resolve(process.env.APP_ROOT || ROOT);
 require('../electron-userdata')(app, 'cockpit-test');
 const TAG = process.env.TAG || 'after';
 const OUT = path.join(__dirname, 'out', TAG);
@@ -28,24 +36,26 @@ fs.mkdirSync(OUT, { recursive: true });
 
 // ---- the page: index.html + a hook script before main.js ----
 function pageFile() {
-  let html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  let html = fs.readFileSync(path.join(APP, 'index.html'), 'utf8');
   const mainTag = '<script src="js/main.js"></script>';
   if (html.indexOf(mainTag) < 0) throw new Error('index.html: main.js tag not found');
-  const hook = `<script>(function () {
+  // (a file of its own: index.html's Content-Security-Policy blocks inline scripts since the final v6 review)
+  const hookFile = path.join(__dirname, 'out', 'ck-hook.js');
+  fs.writeFileSync(hookFile, `(function () {
     var R = THREE.WebGLRenderer;
     THREE.WebGLRenderer = function (p) { var r = new R(p); window.__renderer = r; return r; };
     THREE.WebGLRenderer.prototype = R.prototype;
     var C = F1.createCockpit;
     F1.createCockpit = function (cam) { var c = C(cam); window.__ck = c; return c; };
-  })();</script>`;
-  html = html.replace(mainTag, hook + '\n' + mainTag);
+  })();\n`);
+  html = html.replace(mainTag, '<script src="' + url.pathToFileURL(hookFile).href + '"></script>\n' + mainTag);
   if (process.env.COCKPIT) {
     const tag = '<script src="js/cockpit.js"></script>';
     if (html.indexOf(tag) < 0) throw new Error('index.html: cockpit.js tag not found');
     html = html.replace(tag, '<script src="' + url.pathToFileURL(path.resolve(process.env.COCKPIT)).href + '"></script>');
   }
   const file = path.join(__dirname, 'out', 'index-ck.html');
-  fs.writeFileSync(file, html.replace('<head>', '<head><base href="' + url.pathToFileURL(ROOT + path.sep).href + '">'));
+  fs.writeFileSync(file, html.replace('<head>', '<head><base href="' + url.pathToFileURL(APP + path.sep).href + '">'));
   return file;
 }
 
@@ -77,6 +87,10 @@ const PAGE_LIB = `(function () {
     if (at === 'dip') {              // Spa: bottom of Eau Rouge, the lowest point in the first 1.6 km
       var ds = tr.length / n; bv = Infinity;
       for (i = Math.round(300 / ds); i < Math.round(1600 / ds); i++) if ((S[i].y || 0) < bv) { bv = S[i].y || 0; best = i; }
+      return best;
+    }
+    if (at === 'maxbank') {          // the first sample of the steepest banking (Zandvoort T3, Madring La Monumental)
+      for (i = 0; i < n; i++) if (Math.abs(S[i].bank || 0) > bv + 1e-9) { bv = Math.abs(S[i].bank || 0); best = i; }
       return best;
     }
     if (at === 'bridge') {           // a bridge deck over the road (scenery data), else the start gantry
@@ -254,6 +268,23 @@ const PAGE_LIB = `(function () {
         p90On: t.mirOn.slice().sort(function (x, y) { return x - y; })[Math.floor(t.mirOn.length * 0.9)],
         medianScenery: t.mirScen.length ? med(t.mirScen) : null, meanScenery: t.mirScen.length ? mean(t.mirScen) : null } : null };
   };
+  // the view against the world and against the car: pitch = elevation of the line of sight (deg, + up), roll = how far
+  // the view's right edge is raised (deg); the car's (the cockpit group's) the same way; the eye's height above the seat
+  // frame's origin; the FOV
+  cx.pose = function () {
+    var cam = F1.game.camera, g = window.__ck.group, D = 180 / Math.PI;
+    g.updateMatrixWorld(true);
+    function att(m, fwdSign) {
+      var e = m.elements, fx = -e[8] * fwdSign, fy = -e[9] * fwdSign, fz = -e[10] * fwdSign;
+      var rx = e[0], ry = e[1], rz = e[2], ux = e[4], uy = e[5], uz = e[6];
+      if (fwdSign < 0) { rx = -rx; ry = -ry; rz = -rz; }     // the car's +X is its LEFT: its right is -X
+      return { pitch: Math.asin(Math.max(-1, Math.min(1, fy / Math.hypot(fx, fy, fz)))) * D, roll: Math.atan2(ry, uy) * D };
+    }
+    var c = att(cam.matrixWorld, 1), k = att(g.matrixWorld, -1), s = F1.game.car.state;
+    return { camPitch: +c.pitch.toFixed(2), camRoll: +c.roll.toFixed(2), carPitch: +k.pitch.toFixed(2), carRoll: +k.roll.toFixed(2),
+      viewVsCarPitch: +(c.pitch - k.pitch).toFixed(2), viewVsCarRoll: +(c.roll - k.roll).toFixed(2),
+      eyeY: +cam.position.y.toFixed(4), fov: +cam.fov.toFixed(2), kmh: +(s.speed * 3.6).toFixed(0), compress: s.compress };
+  };
   // the steering-wheel display canvas as a data URL (if the cockpit exposes one)
   cx.displayPng = function () {
     var found = null;
@@ -304,8 +335,9 @@ async function main() {
     await sleep(500);
     console.log('track', picked);
     curTrack = name;
-    await js(`__cx.hookLook(); __cx.hud(false); true`);
+    await js(`__cx.hookLook(); __cx.hud(${process.env.HUD === "1"}); true`);
     if (process.env.MIRRORS === '0') await js(`window.__ck && window.__ck.setMirrors && window.__ck.setMirrors(false), true`);
+    if (process.env.FOV) console.log('setFov', await js(`window.__ck && window.__ck.setFov ? window.__ck.setFov(${+process.env.FOV}) : 'n/a'`));
   }
   const canSetCar = async () => js(`!!(window.__ck && window.__ck.setCar)`);
   async function setCar(spec, accent) { if (await canSetCar()) return js(`window.__ck.setCar(${J(spec)}, ${J(accent)}), true`); return false; }
@@ -470,6 +502,37 @@ async function main() {
       await view('eye-nose-' + st, { at: 'start', back: 25, v: 0, ext: { p: [0.0, 0.80, -0.35], t: [0, 0.42, 2.2], fov: 26 } }, 700);
     }
     await js(`__cx.ext(null), true`);
+  }
+  // ---------- road shape (v6.2): slope and banking as the driver sees them ----------
+  // The car is frozen at each spot (no physics), so the road-shape load car.js computes while driving (state.compress, g)
+  // is set by hand to what devtests/handling-test/compress.js measured there (0 where nothing was measured). Each shot
+  // waits SHAPE_WAIT ms so that the head's slow pitch / roll / compression have settled; shape.json has the poses.
+  if (want('shape')) {
+    const rows = [], WAIT = +(process.env.SHAPE_WAIT || 3000);
+    const SH = [
+      // (samples are 2 m apart; positions relative to features so that they survive a rebuild of the track data)
+      ['spa-dip', 'francorchamps', { at: 'dip', v: 80 }, 1.57],                 // the bottom of Eau Rouge, the climb ahead
+      ['spa-raidillon', 'francorchamps', { at: 'dip', back: -105, v: 80 }, 0.3], // 210 m on: Raidillon
+      ['zandvoort-t3', 'zandvoort', { at: 'maxbank', back: -28, v: 37, turn: 0.35 }, 1.81],   // Hugenholtz (19 deg), mid-corner
+      ['madring-monumental', 'madring', { at: 'maxbank', back: -99, v: 60, turn: 0.15 }, 1.26], // La Monumental (13.5 deg), 200 m in
+      ['monza-corner', 'monza', { at: 'corner', back: 7, v: 14, turn: 0.55 }, 0],  // an ordinary corner on a flat track
+      ['monza-straight', 'monza', { at: 'start', back: -40, v: 85 }, 0]  // flat straight at speed
+    ];
+    for (const [name, card, o, comp] of SH) {
+      await track(card);
+      if (await canSetCar()) await setCar(SPECS.halo18, '#19C8E6');
+      const p = Object.assign({}, o, { state: { compress: comp } });
+      if (o.turn) {     // steer towards the corner (the sign as in the 'tracks' group's Monaco corner)
+        const sign = await js(`(function () { var S = F1.game.track.samples, n = S.length, i = (__cx.find(${J(o.at)}) - ${o.back || 0} + n) % n, a = S[(i - 4 + n) % n], b = S[(i + 4) % n]; return Math.sign(a.tx * b.tz - a.tz * b.tx); })()`);
+        p.steer = -sign * o.turn;
+      }
+      const pl = await view('shape-' + name, p, WAIT);
+      const pose = await js(`__cx.pose()`);
+      rows.push(Object.assign({ name, sample: pl.i }, pose));
+      console.log('shape', name, J(pose));
+    }
+    console.table(rows);
+    fs.writeFileSync(path.join(OUT, 'shape.json'), J(rows));
   }
   // ---------- performance ----------
   if (want('perf') && process.env.PERF !== '0') {

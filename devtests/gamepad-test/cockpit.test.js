@@ -9,7 +9,8 @@ const fs = require('fs'), ORIG = [__dirname + '/cockpit.orig.js', P + 'devtests/
 const HAVE_OLD = !!ORIG;
 let OLDC = null; if (HAVE_OLD) { delete global.F1; require(ORIG); OLDC = global.F1.createCockpit; }
 const D = 180 / Math.PI, cam = () => new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000);
-const st = { x: 3, y: 1, z: -7, heading: 0.4, speed: 50, steer: 0.2, pitch: 0.02, roll: -0.03, onGrass: false, hit: 0 };
+// (v6.2: on a level road - js/cockpit.js now takes part of the roll / pitch out of the head, so only there is the centred view v5's)
+const st = { x: 3, y: 1, z: -7, heading: 0.4, speed: 50, steer: 0.2, pitch: 0, roll: 0, onGrass: false, hit: 0 };
 
 assert(Math.abs(L.maxYaw * D - 55) < 1e-9 && Math.abs(L.maxPitchUp * D - 12) < 1e-9 && Math.abs(L.maxPitchDown * D - 10) < 1e-9);
 // no look input: camera exactly as before

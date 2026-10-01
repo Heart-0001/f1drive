@@ -1,6 +1,9 @@
 /* main.js — renderer/scene/camera/lights, input (keyboard + controller), main loop, lap timing, track switching,
    multiplayer and Grand Prix glue; v6: seasons and cars, battery, pit limiter, tyres and pit stops, sound, telemetry;
-   v6.1: the HUD rear-view mirrors (js/hudmirrors.js, key V), 2026 as the default season. */
+   v6.1: the HUD rear-view mirrors (js/hudmirrors.js, key V), 2026 as the default season;
+   v6.2: the covered stretches of js/tunnels.js (Monaco's tunnel: built with the track, the scene lights dimmed inside,
+   the reverb of js/audio.js), the cockpit's FOV setting (設定 → 視野), the next set of tyres shown and picked in the
+   大獎賽 tab / the pit strip / the telemetry (a prompt on entering the pit lane), the pit speed limit of the season. */
 (function () {
   'use strict';
   var F1 = (window.F1 = window.F1 || {});
@@ -38,6 +41,10 @@
   var canvas, renderer, scene, camera;
   var track = null, trackData = null, car = null, cockpit = null;
   var hudMirrors = null;                     // F1.createHudMirrors(): the two rear-view mirrors of the HUD (with the cockpit)
+  var tunnels = null;                        // F1.buildTunnels(): this track's covered stretches (js/tunnels.js), optional
+  var hemiLight = null, sunLight = null;     // the scene lights (dimmed inside a tunnel: tunnels.sceneLight)
+  var HEMI0 = 0.85, SUN0 = 0.9;              // their intensities in daylight
+  var pitRebind = false;                     // the season's pit limit changed during a pit visit: js/pit.js rebinds after it
   var mirrorsOn = true;                      // their setting (設定 / V; remembered by ui.js)
   var raceLine = null, lineOn = true;
   var scenery = null, sky = null;
@@ -54,9 +61,9 @@
   var hud = {
     speedKmh: 0, gear: 0, lap: 0, lapTotal: null, curTime: null, lastTime: null, bestTime: null, x: 0, z: 0, heading: 0, others: null,
     rpm: 0, rpmIdle: 4000, rpmShift: 11800, rpmMax: 12500, throttle: 0, brake: 0, battery: null, deploy: 0, harvest: 0,
-    limiter: false, inPit: false, limitKmh: 80, tyres: null, nextCompound: 'M', team: '', car: '', colour: '#888888', colour2: '#888888'
+    limiter: false, inPit: false, limitKmh: 80, tyres: null, nextCompound: 'M', nextKeys: 'T / X', team: '', car: '', colour: '#888888', colour2: '#888888'
   };
-  var pitView = { inLane: false, limiter: false, speeding: false, service: null, limitKmh: 80, boxAhead: null, slot: -1, pending: 0, served: false };
+  var pitView = { inLane: false, limiter: false, speeding: false, service: null, limitKmh: 80, boxAhead: null, slot: -1, pending: 0, served: false, next: 'M' };
   var pitOpt = { slot: 0, limiter: false };
   var pitBox = null;                         // bounding box of the pit complex of this track (+ PIT_REACH), or null
   var listener = { x: 0, y: 0, z: 0, heading: 0 };   // where the driver's ears are, for F1.audio
@@ -140,10 +147,11 @@
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / Math.max(window.innerHeight, 1), 0.1, 4000);
     camera.position.set(0, 1, 0);
 
-    scene.add(new THREE.HemisphereLight(0xdcebff, 0x556644, 0.85));
-    var sun = new THREE.DirectionalLight(0xffffff, 0.9);
-    sun.position.set(300, 600, 200);
-    scene.add(sun);
+    hemiLight = new THREE.HemisphereLight(0xdcebff, 0x556644, HEMI0);
+    scene.add(hemiLight);
+    sunLight = new THREE.DirectionalLight(0xffffff, SUN0);
+    sunLight.position.set(300, 600, 200);
+    scene.add(sunLight);
 
     if (typeof F1.createSky === 'function') {
       sky = F1.createSky();
@@ -159,7 +167,41 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    if (!running) renderer.render(scene, camera);
+    renderStill();
+  }
+
+  /* ---------- tunnels (js/tunnels.js) ---------- */
+
+  // Right before every render of the cockpit view (the game loop and the still behind the menu): the light the eye gets
+  // at the car's sample - inside a tunnel the sun goes out and the sky light dims to what an adapted eye sees
+  // (tunnels.sceneLight) - and the tunnel's view-dependent parts (interior exposure, the road shade seen from outside,
+  // the glare of the exits). The HUD mirrors render after it with the same lights (the car's place too). t in s.
+  function tunnelView(t) {
+    if (!tunnels || !car) return;
+    var vi = car.state.sampleIndex;
+    hemiLight.intensity = HEMI0 * tunnels.sceneLight(vi, 'hemi');
+    sunLight.intensity = SUN0 * tunnels.sceneLight(vi, 'sun');
+    tunnels.update(t, vi);
+  }
+
+  function disposeTunnels() {
+    if (tunnels) {
+      scene.remove(tunnels.group);
+      tunnels.dispose();
+      tunnels = null;
+    }
+    if (hemiLight) hemiLight.intensity = HEMI0;   // daylight again
+    if (sunLight) sunLight.intensity = SUN0;
+  }
+
+  // The covered stretch the sample lies in (its width / height size the reverb), or null.
+  function tunnelAt(i) {
+    var L = tunnels ? tunnels.tunnels : null, n = track ? track.samples.length : 0;
+    for (var j = 0; L && n && j < L.length; j++) {
+      var a = L[j].from, b = L[j].to;
+      if ((((i - a) % n) + n) % n <= (((b - a) % n) + n) % n) return L[j];
+    }
+    return null;
   }
 
   /* ---------- seasons and cars ---------- */
@@ -192,8 +234,9 @@
   }
 
   // Our car: the player's pick resolved into the active season (the same team, or that season's standard car).
-  // -> true when the car changed.
+  // -> true when the car changed. (Also the pit lane limit of that season.)
   function applyCar() {
+    syncPitYear();
     if (!cars || !car) { pushCars(); return false; }
     var spec = cars.resolve(ui.getCar ? ui.getCar() : null, activeYear());
     var changed = !car.spec || car.spec.id !== spec.id;
@@ -256,7 +299,12 @@
     scene.add(raceLine.group);
   }
 
-  function renderStill() { if (renderer && !running) renderer.render(scene, camera); }
+  // The still frame behind the menu (the game loop draws nothing while it is open).
+  function renderStill() {
+    if (!renderer || running) return;
+    tunnelView(performance.now() / 1000);
+    renderer.render(scene, camera);
+  }
 
   /* ---------- track switching ---------- */
 
@@ -309,6 +357,7 @@
     }
     limiterOn = false;
     if (pit) pit.reset();
+    pitRebind = false;                        // (bound afresh, with the season's limit)
   }
 
   // Bounding box of the pit complex (+ PIT_REACH): only a remote car inside it is looked up in the pit lane.
@@ -340,14 +389,17 @@
         scenery.dispose();
         scenery = null;
       }
+      disposeTunnels();
       if (track) {
         scene.remove(track.group);
         if (track.dispose) track.dispose();
         track = null;
       }
       trackData = data;
-      track = F1.buildTrack(data);
+      // the season's pit lane limit (Zandvoort / Singapore: 60 km/h up to 2024) and its painted signs
+      track = F1.buildTrack(data, { year: activeYear() });
       scene.add(track.group);
+      syncPitYear();
       // The pit lane's light curtains mark its entry / exit for the cars coming up to them. Just behind a car that has
       // driven through one, a curtain filled every mirror (the HUD's and the cockpit's) with amber / green for about a
       // second - at the exit just when the car merges into the traffic: the mirrors leave them out.
@@ -364,11 +416,22 @@
           if (window.console) console.error(err);
         }
       }
+      // the covered stretches (Monaco's tunnel ...): after the scenery, whose buildings over the road they complete
+      if (typeof F1.buildTunnels === 'function') {
+        try {
+          tunnels = F1.buildTunnels(track, data);
+          scene.add(tunnels.group);
+        } catch (err) {
+          disposeTunnels();                   // (decoration too)
+          if (window.console) console.error(err);
+        }
+      }
       buildLine();
 
       if (!cockpit) {
         cockpit = F1.createCockpit(camera);
         scene.add(cockpit.group);
+        if (cockpit.setFov && ui.getFov) cockpit.setFov(ui.getFov());   // 設定 → 視野
         if (cockpit.setCar) cockpit.setCar(car.spec, profileColour());
         initMirrors();                        // (they leave our own car out: they need the cockpit)
       }
@@ -446,7 +509,7 @@
     // multiplayer: our car stays where it is, visible and solid for the others, reported as standing still
     if (net && net.connected) net.park();
     ui.showMenu(tracks);
-    if (renderer) renderer.render(scene, camera); // static frame behind the menu
+    renderStill();                            // static frame behind the menu
   }
 
   /* ---------- multiplayer ---------- */
@@ -704,7 +767,7 @@
       if (!left && ui.toast) ui.toast((reason || '連線中斷') + '，已回到單人模式', 6000);
       refreshNetUi();
       applyCar();                             // back to our own season
-      if (!running && renderer) renderer.render(scene, camera);
+      renderStill();
     });
     refreshNetUi();
   }
@@ -887,7 +950,11 @@
   }
 
   function onPitEvent(ev) {
-    if (ev === 'serviceStart') {
+    if (ev === 'enter') {
+      // the next set is picked here, before the box (the user did not find the controller's compound button)
+      toast((padOn() ? '按 X（鍵盤 T）' : '按 T（手把 X）') + '選擇輪胎：軟 / 中 / 硬（下一組：' +
+        (COMPOUND_NAME[nextCompound] || nextCompound) + '）', 5000);
+    } else if (ev === 'serviceStart') {
       car.state.speed = 0;                    // held in the box from here on (frame())
       if (audio) { audio.play('jack'); audio.play('pitgun'); }
     } else if (ev === 'penaltyStart') {
@@ -907,7 +974,7 @@
         (pit.state.served ? '在出口線罰停 5 秒' : '停站時罰停 5 秒（不停站就在出口線）'), 5000);
     } else if (ev === 'exit' && limiterOn) {
       // (the limiter does not switch itself off: a car still held at the lane speed on the track looks broken)
-      toast('已離開維修區：按 ' + (pad && pad.state.connected ? 'B' : 'Q') + ' 關閉限速器', 4000);
+      toast('已離開維修區：按 ' + (padOn() ? 'B' : 'Q') + ' 關閉限速器', 4000);
     }
   }
 
@@ -918,6 +985,27 @@
     if (pn === puncture) return;
     puncture = pn;
     if (pn >= 0) toast((WHEEL_NAME[pn] || '輪胎') + '爆胎！開進維修區，停在你的維修格換胎', 6000);
+  }
+
+  function padOn() { return !!(pad && pad.state && pad.state.connected); }
+
+  // The pit lane speed limit of the active season (track.pit.setYear; Zandvoort and Singapore 60 km/h up to 2024, 80
+  // from 2025) and its painted signs. js/pit.js takes the limit when it binds the lane, so it is rebound (pit.reset)
+  // when the limit changed - at once, or, during a pit visit or service, once the car has left the pit stretch (a hold
+  // still pending from an earlier visit is dropped with it: the year only changes in free practice).
+  function syncPitYear() {
+    var P = track && track.pit;
+    if (!P || typeof P.setYear !== 'function') return;
+    var y = activeYear();
+    if (P.year !== y) P.setYear(y);
+    if (pit && pit.state && pit.state.limitKmh !== P.limitKmh) {
+      if (pitBusy()) pitRebind = true;
+      else { pit.reset(); pitRebind = false; }
+    }
+  }
+  function pitBusy() {
+    var st = pit ? pit.state : null;
+    return !!(st && (st.inLane || st.visit || st.service));
   }
 
   // the pit lane speed limit of this track (km/h; 80 where there is no pit lane, as the limiter of js/car.js)
@@ -938,6 +1026,7 @@
     pitView.slot = st ? st.slot : -1;
     pitView.pending = st ? st.pending : 0;
     pitView.served = !!(st && st.served);       // the visit has had its stop: a pending hold waits for the exit line
+    pitView.next = nextCompound;               // 下一組：中性胎（T / X 切換）
     ui.setPit(pitView);
   }
 
@@ -957,8 +1046,14 @@
 
   // T / X: the compound of the next set (fitted at the next stop in the pit box, or at the next start).
   function cycleCompound() {
-    nextCompound = F1.Tyres && F1.Tyres.nextCompound ? F1.Tyres.nextCompound(nextCompound) : ({ S: 'M', M: 'H', H: 'S' })[nextCompound] || 'M';
+    setCompound(F1.Tyres && F1.Tyres.nextCompound ? F1.Tyres.nextCompound(nextCompound) : ({ S: 'M', M: 'H', H: 'S' })[nextCompound] || 'M');
     toast('下一組輪胎：' + (COMPOUND_NAME[nextCompound] || nextCompound) + '（進站換胎時裝上）', 2000);
+  }
+  // The next set (also the 大獎賽 tab's 起跑輪胎 / 下一組輪胎 row: ui.setCompound, onCompound).
+  function setCompound(c) {
+    if (!COMPOUND_NAME[c]) return;
+    nextCompound = c;
+    if (ui.setCompound) ui.setCompound(c);
   }
 
   function toggleMute() {
@@ -1191,6 +1286,7 @@
     hud.limitKmh = pitLimit();
     hud.tyres = car.tyres ? car.tyres.state : null;
     hud.nextCompound = nextCompound;
+    hud.nextKeys = padOn() ? 'X / T' : 'T / X';   // (under the telemetry's 下一組 badge: '... 切換')
     hud.team = spec.team; hud.car = spec.car; hud.colour = spec.colour; hud.colour2 = spec.colour2;
     ui.updateHUD(hud);
     pushPit();
@@ -1201,6 +1297,11 @@
     var s = car.state;
     listener.x = s.x; listener.y = (s.y || 0) + 0.8; listener.z = s.z;
     listener.heading = s.heading + (camera.rotation.y - Math.PI);    // the camera's yaw in the cockpit = the head look
+    if (audio.setTunnel) {                    // how deep in a tunnel (0..1): reverb, reflections; sized to that tunnel
+      var k = tunnels ? tunnels.inTunnel(s.sampleIndex) : 0, tn = k > 0 ? tunnelAt(s.sampleIndex) : null;
+      if (tn) audio.setTunnel(k, tn.width, tn.height);
+      else audio.setTunnel(k);
+    }
     audio.update(dt, s, listener, audioOthers);
   }
 
@@ -1273,6 +1374,7 @@
         } else netHit = hit;
       }
       if (mp) collectContacts(performance.now());
+      if (pitRebind && !pitBusy()) { pit.reset(); pitRebind = false; }   // (the season's limit, see syncPitYear)
       checkTyres();
       cockpit.update(car.state, dt);
       gp.setProgress(lap.progress(car.state.sampleIndex));   // race distance, rides along with the state
@@ -1295,6 +1397,7 @@
       }
       beepLights = lamps; beepGo = lightsGo;
       pushHUD();
+      tunnelView(t / 1000);                    // the light at the car's place in a tunnel
       renderer.render(scene, camera);
       if (hudMirrors) renderMirrors(dt);       // into the HUD's two mirror frames, over the main image
     } catch (err) {
@@ -1351,8 +1454,13 @@
       onYear: onPickYear,
       onCar: onPickCar,
       onAudio: function (a) { if (audio && a) { audio.setVolume(a.volume); audio.setMuted(a.muted); } },
-      onMirrors: setMirrors
+      onMirrors: setMirrors,
+      onFov: function (deg) {                 // 設定 → 視野 (the still behind the menu shows it at once)
+        if (cockpit && cockpit.setFov) { cockpit.setFov(deg); renderStill(); }
+      },
+      onCompound: setCompound                 // 大獎賽 → 起跑輪胎 / 下一組輪胎
     });
+    if (ui.setCompound) ui.setCompound(nextCompound);
     mirrorsOn = ui.getMirrors ? ui.getMirrors() !== false : true;
     initCars();
     if (typeof F1.createPit === 'function') pit = F1.createPit();
@@ -1377,7 +1485,8 @@
     get cockpit() { return cockpit; }, get pit() { return pit; }, get tyres() { return car ? car.tyres : null; },
     get spec() { return car ? car.spec : null; }, get audio() { return audio; },
     get limiter() { return limiterOn; }, get boost() { return boostKey; }, get nextCompound() { return nextCompound; },
-    get remoteCars() { return remoteCars; }, get hudMirrors() { return hudMirrors; }, get mirrors() { return mirrorsOn; }
+    get remoteCars() { return remoteCars; }, get hudMirrors() { return hudMirrors; }, get mirrors() { return mirrorsOn; },
+    get tunnels() { return tunnels; }, get lights() { return { hemi: hemiLight, sun: sunLight, hemi0: HEMI0, sun0: SUN0 }; }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

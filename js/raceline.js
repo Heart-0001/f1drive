@@ -1,6 +1,9 @@
 /* F1Drive - dynamic racing line (green / yellow / red). Classic script; exposes F1.buildRaceLine(track, perf?)
    (perf = F1.carPerf(spec) of the car it is built for; default F1.CAR_PERF).
-   See js/README-interfaces.md. Works with flat v1 tracks and with v2 tracks (y, bank, halfW, surfaceY). */
+   See js/README-interfaces.md. Works with flat v1 tracks and with v2 tracks (y, bank, halfW, surfaceY).
+   v6.2: the steering-lock limit of cornerSpeed is the car's own law, perf.steerLockAt(v, bank, turnSign) (js/car.js),
+   when the perf has it (else the v5 formula); a path tighter than full lock targets the top of the full-lock range
+   (~52 km/h on the reference car) instead of MIN_SPEED. tools/build-cars.mjs keeps an identical copy of cornerSpeed. */
 (function (global) {
   'use strict';
 
@@ -50,11 +53,12 @@
            GRAV * Math.sin(pitch);
   }
   var maxLatAccel = fbMaxLat, maxAccel = fbMaxAccel, maxDecel = fbMaxDecel;
+  var steerLockAt = null;     // perf.steerLockAt (js/car.js) when present: the car's own lock law (speed, banking)
 
   // perf: the limits of the car the line is built for (F1.carPerf(spec)); default F1.CAR_PERF (the reference car)
   function syncCarPerf(perf) {
     var p = perf && typeof perf === 'object' ? perf : F1.CAR_PERF;
-    maxLatAccel = fbMaxLat; maxAccel = fbMaxAccel; maxDecel = fbMaxDecel;
+    maxLatAccel = fbMaxLat; maxAccel = fbMaxAccel; maxDecel = fbMaxDecel; steerLockAt = null;
     if (!p) return;
     function pick(v, fb) { return typeof v === 'number' && v === v ? v : fb; }
     TOP_SPEED = pick(p.topSpeed, TOP_SPEED); DRAG_K = pick(p.dragK, DRAG_K); ROLL = pick(p.roll, ROLL);
@@ -68,6 +72,7 @@
     if (typeof p.maxLatAccel === 'function' && typeof p.maxAccel === 'function' && typeof p.maxDecel === 'function') {
       maxLatAccel = p.maxLatAccel; maxAccel = p.maxAccel; maxDecel = p.maxDecel;
     }
+    if (typeof p.steerLockAt === 'function') steerLockAt = p.steerLockAt;
   }
 
   // ---- line / safety tuning ----
@@ -112,9 +117,21 @@
         v = lo;
       }
     }
-    // steering lock: tan(STEER_LOCK / (1 + (v/ref)^2)) / WHEELBASE >= k * margin
+    // steering lock: tan(lock(v)) / WHEELBASE >= k * margin
     var x = Math.atan(WHEELBASE * k * STEER_MARGIN);
-    if (x >= STEER_LOCK) v = MIN_SPEED;
+    if (steerLockAt) {
+      // the car's own law (js/car.js perf.steerLockAt: speed, banking), falling with speed: the fastest speed whose lock
+      // is enough. A path tighter than full lock with the margin cannot be followed any better slower (below ~52 km/h
+      // the radius at full lock does not shrink any more): the car turns its tightest, so the target is the top of the
+      // full-lock range (or the grip speed below it), not a crawl.
+      var lk0 = steerLockAt(MIN_SPEED, bank, turnSign);
+      if (lk0 < x) x = lk0;
+      if (steerLockAt(v, bank, turnSign) < x) {
+        var a = MIN_SPEED, b = v, c;
+        for (var n = 0; n < 24; n++) { c = 0.5 * (a + b); if (steerLockAt(c, bank, turnSign) >= x) a = c; else b = c; }
+        v = a;
+      }
+    } else if (x >= STEER_LOCK) v = MIN_SPEED;
     else v = Math.min(v, STEER_SPEED_REF * Math.sqrt(STEER_LOCK / x - 1));
     return Math.max(MIN_SPEED, Math.min(TOP_SPEED, v));
   }

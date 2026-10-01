@@ -2,7 +2,12 @@
    HUD mirrors)) + HUD (lap times, minimap, player list, Grand Prix session box, start lights, results, pit lane strip;
    speed, gear, pedals, battery and tyres are the telemetry graphic of js/telemetry.js, drawn from updateHUD; the two
    HUD rear-view mirrors are drawn by js/hudmirrors.js into the frames #hud-mirror-l / -r, laid out by index.html).
-   Classic script; uses F1.telemetry when it is loaded, F1.cars.ersNote for the battery line of the car cards. */
+   v6.2: the track cards show the Chinese name (window.F1_TRACK_NAMES_ZH, js/track-names-zh.js) with the English one
+   under it, and the search also matches the Chinese names / aliases and the country in English and Chinese (COUNTRY
+   below); 設定 has the 視野 (FOV) slider (onFov, getFov; 'f1drive.fov'); the 大獎賽 tab the starting compound
+   (setCompound / onCompound: main.js's next set); the pit strip names the next set and its key (setPit p.next).
+   Classic script; uses F1.telemetry when it is loaded, F1.cars.ersNote for the battery line of the car cards,
+   F1.COCKPIT_FOV for the range of the FOV slider. */
 (function () {
   'use strict';
   var F1 = (window.F1 = window.F1 || {});
@@ -12,7 +17,8 @@
     onSelectTrack: null, onExitToMenu: null,
     onCreateRoom: null, onJoinRoom: null, onLeaveRoom: null, onProfile: null,
     onGpStart: null, onGpAction: null,
-    onYear: null, onCar: null, onAudio: null, onMirrors: null
+    onYear: null, onCar: null, onAudio: null, onMirrors: null,
+    onFov: null, onCompound: null
   };
   var inited = false;
   var tele = null;          // F1.telemetry once init() found it and its canvas
@@ -44,9 +50,21 @@
   var VIEW_STORE_KEY = 'f1drive.hud';
   var view = { mirrors: true, available: true };
 
+  // 設定: the cockpit's field of view (deg, vertical, at a standstill; js/cockpit.js setFov). Range and default from
+  // F1.COCKPIT_FOV when js/cockpit.js is loaded; remembered in 'f1drive.fov' only once the slider was moved.
+  var FOV_STORE_KEY = 'f1drive.fov';
+  var FOV_FALLBACK = { def: 60, min: 50, max: 75 };
+  var fovSet = null;        // the stored setting (whole degrees), null = the default
+
+  // 大獎賽: the compound of the next set (main.js owns it: setCompound / onCompound). It is the set fitted at the start of
+  // qualifying, on the grid and at a pit stop; T / X cycle it while driving. Not stored (a new session of the game
+  // starts on mediums, the reference).
+  var COMPOUNDS = { S: '軟胎', M: '中性胎', H: '硬胎' };
+  var nextCmp = 'M';
+
   // pit strip: the last input, in the units shown (setPit is called every frame)
   var pitC = { shown: false, inLane: false, limiter: false, speeding: false, limit: 0, slot: -1, box: 0,
-    tenths: -1, frac: -1, pen: -1, penNow: false, pending: -1, served: false, pad: false };
+    tenths: -1, frac: -1, pen: -1, penNow: false, pending: -1, served: false, pad: false, next: '' };
   var PIT_NONE = {};
   var PIT_BOX_HIDDEN = -99999;
 
@@ -54,6 +72,7 @@
   var builtFor = null;      // tracks array the grid was built for
   var cards = [];           // [{node, key}]
   var trackById = {};
+  var zhByName = {};        // English track name -> Chinese name (the loading note gets the English one from main.js)
 
   // minimap state
   var MAP_CSS = 190, MAP_PAD = 14;
@@ -193,34 +212,133 @@
     return isFinite(n) ? n.toFixed(3) + ' km' : '';
   }
 
+  // Search only (never shown): the country of each circuit in English (+ the usual short forms, the adjective of its
+  // Grand Prix) and in Chinese (Taiwan usage first, then mainland / Hong Kong forms), by the country code that starts
+  // every track id ('jp-1962' -> jp). js/track-names-zh.js has the Chinese circuit / place names; this adds the country
+  // so 'japan', '日本', 'usa', 'uk', '英國' ... find their circuits. EXTRA: Grand Prix names a circuit carried that are
+  // not its country's, and a few regions.
+  var COUNTRY = {
+    ae: 'United Arab Emirates|UAE|Emirates|Emirati|Abu Dhabi|阿聯|阿聯酋|阿拉伯聯合大公國|阿拉伯联合酋长国|阿联酋',
+    ar: 'Argentina|Argentine|Argentinian|ARG|阿根廷',
+    at: 'Austria|Austrian|Österreich|AUT|奧地利|奥地利',
+    au: 'Australia|Australian|AUS|澳洲|澳大利亞|澳大利亚',
+    az: 'Azerbaijan|Azerbaijani|AZE|亞塞拜然|阿塞拜疆',
+    be: 'Belgium|Belgian|BEL|比利時|比利时',
+    bh: 'Bahrain|Bahraini|BRN|BHR|巴林',
+    br: 'Brazil|Brasil|Brazilian|BRA|巴西',
+    ca: 'Canada|Canadian|CAN|加拿大',
+    cn: 'China|Chinese|CHN|PRC|中國|中国|中國大陸',
+    de: 'Germany|German|Deutschland|GER|DEU|德國|德国',
+    es: 'Spain|Spanish|España|ESP|西班牙',
+    fr: 'France|French|FRA|法國|法国',
+    gb: 'United Kingdom|UK|Great Britain|Britain|British|England|English|GB|GBR|英國|英国|英格蘭|英格兰|大不列顛',
+    hu: 'Hungary|Hungarian|HUN|匈牙利',
+    it: 'Italy|Italian|Italia|ITA|義大利|意大利',
+    jp: 'Japan|Japanese|Nippon|JPN|日本',
+    mc: 'Monaco|Monegasque|Monte Carlo|MON|MCO|摩納哥|摩纳哥',
+    mx: 'Mexico|Mexican|México|MEX|墨西哥',
+    my: 'Malaysia|Malaysian|MAS|MYS|馬來西亞|马来西亚|大馬',
+    nl: 'Netherlands|The Netherlands|Holland|Dutch|NED|NLD|荷蘭|荷兰|尼德蘭',
+    pt: 'Portugal|Portuguese|POR|PRT|葡萄牙',
+    qa: 'Qatar|Qatari|QAT|卡達|卡塔爾|卡塔尔',
+    ru: 'Russia|Russian|RUS|俄羅斯|俄罗斯|俄國',
+    sa: 'Saudi Arabia|Saudi|KSA|沙烏地阿拉伯|沙烏地|沙特阿拉伯|沙特',
+    sg: 'Singapore|Singaporean|SGP|SIN|新加坡|星國',
+    tr: 'Turkey|Turkish|Türkiye|TUR|土耳其',
+    us: 'United States|United States of America|USA|US|America|American|美國|美国',
+    za: 'South Africa|South African|RSA|南非'
+  };
+  var EXTRA = {
+    'it-1953': 'San Marino|Emilia-Romagna|Emilia Romagna|聖馬利諾|艾米利亞-羅馬涅',
+    'it-1914': 'Tuscan|Tuscany|Toscana|托斯卡尼',
+    'at-1969': 'Styrian|Styria|施泰爾馬克',
+    'de-1927': 'Eifel|European|Luxembourg|艾菲爾|歐洲|盧森堡',
+    'gb-1948': '70th Anniversary|七十週年',
+    'bh-2002': 'Sakhir|薩基爾',
+    'es-1991': 'Catalunya|Catalonia|Montmelo|加泰隆尼亞',
+    'us-1909': 'Indy|印地',
+    'us-2012': 'Austin|Texas|COTA|德州',
+    'us-2022': 'Florida|佛羅里達',
+    'us-2023': 'Nevada|內華達',
+    'us-1956': 'New York|紐約'
+  };
+
+  // The search key / query in one form: lower case, accents off (Nürburgring = nurburgring, São Paulo = sao paulo), every
+  // middle dot as '·' and every dash as '-' (js/track-names-zh.js: the dots Taiwanese IMEs and media use), runs of
+  // spaces and separators as one space.
+  function searchForm(s) {
+    s = String(s == null ? '' : s).toLowerCase();
+    if (s.normalize) s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return s.replace(/[\u2027\uff0e\u30fb\uff65\u2022]/g, '\u00b7').replace(/[\u2013\u2014\uff0d]/g, '-')
+      .replace(/[\s,;:()\uff08\uff09\u3001\uff0c|\/]+/g, ' ').trim();
+  }
+
+  // Everything a card is found by: the English name, location and id, the Chinese name / short / location / aliases,
+  // the country (English + short forms, Chinese), the Grand Prix names ('japanese gp' finds Suzuka). Kept as
+  // ' ' + words + ' ', once more with '-' as a word break (for the whole-word test of short terms: 'us' in 'us-2012').
+  function searchKey(t, zh) {
+    var parts = [t.name, t.location, t.id, 'GP Grand Prix 大獎賽'], cc = String(t.id || '').split('-')[0];
+    if (zh) {
+      parts.push(zh.name, zh.short, zh.location);
+      if (Array.isArray(zh.aliases)) parts = parts.concat(zh.aliases);
+    }
+    if (Object.prototype.hasOwnProperty.call(COUNTRY, cc)) parts.push(COUNTRY[cc]);
+    if (Object.prototype.hasOwnProperty.call(EXTRA, t.id)) parts.push(EXTRA[t.id]);
+    var k = searchForm(parts.join(' '));
+    return ' ' + k + ' ' + k.replace(/-/g, ' ') + ' ';
+  }
+
+  // The Chinese names of a track (js/track-names-zh.js), or null.
+  function zhOf(t) {
+    var Z = window.F1_TRACK_NAMES_ZH;
+    var z = Z && t && typeof t.id === 'string' && Object.prototype.hasOwnProperty.call(Z, t.id) ? Z[t.id] : null;
+    return z && typeof z.name === 'string' && z.name ? z : null;
+  }
+  // What the HUD, the results and the loading note call a track: its Chinese name, else the English one.
+  function trackLabel(t) { var z = zhOf(t); return z ? z.name : (t && typeof t.name === 'string' ? t.name : ''); }
+
+  // The cards keep the order of window.F1_TRACKS (by English name): the card at index i is tracks[i] (data-i).
   function buildGrid(tracks) {
     builtFor = tracks;
     cards = [];
     trackById = {};
+    zhByName = {};
     var html = '';
     for (var i = 0; i < tracks.length; i++) {
-      var t = tracks[i];
-      html += '<button type="button" class="card" data-i="' + i + '">' + thumbSvg(t.points) +
-        '<div class="card-info"><div class="card-name">' + esc(t.name) + '</div>' +
-        '<div class="card-meta"><span>' + esc(t.location) + '</span><b>' + fmtKm(t.lengthKm) + '</b></div></div></button>';
+      var t = tracks[i], z = zhOf(t);
+      if (z && typeof t.name === 'string') zhByName[t.name] = z.name;
+      // (trackData.layout: a note on the layout the game builds, e.g. Estoril's post-2000 one: the card's tooltip, in
+      //  Chinese where js/track-names-zh.js has it)
+      var lay = t.layout && z && typeof z.layout === 'string' && z.layout ? z.layout : t.layout;
+      html += '<button type="button" class="card" data-i="' + i + '"' + (typeof lay === 'string' && lay ? ' title="' + esc(lay) + '"' : '') + '>' + thumbSvg(t.points) +
+        '<div class="card-info"><div class="card-name">' + esc(z ? z.name : t.name) + '</div>' +
+        (z ? '<div class="card-en" lang="en">' + esc(t.name) + '</div>' : '') +
+        '<div class="card-meta"><span>' + esc(z && z.location ? z.location : t.location) + '</span><b>' + fmtKm(t.lengthKm) + '</b></div></div></button>';
     }
     el.grid.innerHTML = html;
     var nodes = el.grid.children;
     for (var j = 0; j < nodes.length; j++) {
       var tr = tracks[j];
-      cards.push({ node: nodes[j], key: ((tr.name || '') + ' ' + (tr.location || '') + ' ' + (tr.id || '')).toLowerCase() });
+      cards.push({ node: nodes[j], key: searchKey(tr, zhOf(tr)) });
     }
     applyFilter();
   }
 
+  // A term of the query. 1..3 Latin letters / digits must start a word ('us', 'uk', 'gb', 'it', 'spa': else 'us' would
+  // find Austria, Russia, Australia ...); anything longer, and Chinese, matches anywhere in the key.
+  function termMatch(key, term) {
+    if (/^[a-z0-9]{1,3}$/.test(term)) return key.indexOf(' ' + term) >= 0;
+    return key.indexOf(term) >= 0;
+  }
+
   function applyFilter() {
-    var q = (el.search.value || '').trim().toLowerCase();
-    var terms = q ? q.split(/\s+/) : [];
+    var q = searchForm(el.search.value || '');
+    var terms = q ? q.split(' ') : [];
     var shown = 0;
     for (var i = 0; i < cards.length; i++) {
       var ok = true;
       for (var k = 0; k < terms.length; k++) {
-        if (cards[i].key.indexOf(terms[k]) < 0) { ok = false; break; }
+        if (!termMatch(cards[i].key, terms[k])) { ok = false; break; }
       }
       cards[i].node.classList.toggle('hidden', !ok);
       if (ok) shown++;
@@ -585,6 +703,7 @@
     }
     setShown('tabgp', el.tabGpDot, on);
     renderGpCar();
+    renderTyre();
 
     /* menu panel */
     setShown('gpsetup', el.gpSetup, !on && ctl);
@@ -708,6 +827,23 @@
     setShown('gpcarchange', el.gpCarChange, gpPhase === 'free' && canPick.car);
   }
 
+  // The 大獎賽 tab's tyre row: before a Grand Prix the starting compound (fitted at the start of qualifying and on the
+  // grid), during one the next set (the grid, a pit stop). Both are main.js's next set (setCompound / onCompound), the
+  // one T / X cycle while driving.
+  function renderTyre() {
+    if (!inited || !el.gpTyre) return;
+    var on = gpPhase !== 'free', b = el.gpTyre.children;
+    for (var i = 0; i < b.length; i++) {
+      var sel = b[i].getAttribute('data-c') === nextCmp;
+      b[i].classList.toggle('on', sel);
+      if (b[i].getAttribute('aria-checked') !== String(sel)) b[i].setAttribute('aria-checked', String(sel));
+    }
+    setText('gptyrelabel', el.gpTyreLabel, on ? '下一組輪胎' : '起跑輪胎');
+    setHtml('gptyrenote', el.gpTyreNote, on
+      ? (gpPhase === 'quali' ? '正賽起跑和下次進站換胎時裝上。' : '下次進站停在維修格時裝上。') + '開車時按 <kbd>T</kbd>（手把 <kbd>X</kbd>）也能換。'
+      : '排位賽和正賽起跑時裝上這組新胎。開車時按 <kbd>T</kbd>（手把 <kbd>X</kbd>）換下一組，進站停在維修格時裝上。');
+  }
+
   function initGpPanel() {
     loadGpStore();
     el.gpQ.value = String(gpCfg.q);
@@ -735,6 +871,15 @@
       saveGpStore();
     });
     el.gpCarChange.addEventListener('click', function () { el.gpCarChange.blur(); setTab('car', true); });
+    // 起跑輪胎 / 下一組輪胎: main.js decides (setCompound comes back), the button is marked at once
+    if (el.gpTyre) el.gpTyre.addEventListener('click', function (e) {
+      var c = e.target && e.target.getAttribute ? e.target.getAttribute('data-c') : null;
+      if (!c || !Object.prototype.hasOwnProperty.call(COMPOUNDS, c)) return;
+      if (e.target.blur) e.target.blur();
+      nextCmp = c;
+      renderTyre();
+      if (callbacks.onCompound) callbacks.onCompound(c);
+    });
     var action = function (btn, a) {
       btn.addEventListener('click', function () {
         btn.blur();                          // a focused button would take Space / Enter while driving
@@ -1031,7 +1176,59 @@
       changed();
     });
     renderAudio();
+    initFovSetting();
     initMirrorSetting();
+  }
+
+  /* ---------- 設定: the cockpit's field of view ---------- */
+
+  function fovLimits() {
+    var c = F1.COCKPIT_FOV;
+    if (c && typeof c === 'object' && isFinite(c.min) && isFinite(c.max) && isFinite(c.def) && c.min < c.max && c.def >= c.min && c.def <= c.max) {
+      return { def: Math.round(c.def), min: Math.ceil(c.min), max: Math.floor(c.max) };
+    }
+    return FOV_FALLBACK;
+  }
+
+  // a FOV in whole degrees inside the range, else null (only numbers: a string from storage is not taken)
+  function cleanFov(v) {
+    var L = fovLimits(), n = typeof v === 'number' ? Math.round(v) : NaN;
+    return isFinite(n) ? (n < L.min ? L.min : n > L.max ? L.max : n) : null;
+  }
+
+  function fovNow() { return fovSet !== null ? fovSet : fovLimits().def; }
+
+  function loadFovStore() {
+    try {
+      var o = JSON.parse(window.localStorage.getItem(FOV_STORE_KEY) || 'null');
+      if (o && typeof o === 'object') fovSet = cleanFov(o.fov);
+    } catch (err) { /* storage unavailable or corrupt: the default */ }
+  }
+
+  function saveFovStore() {
+    try { window.localStorage.setItem(FOV_STORE_KEY, JSON.stringify({ fov: fovSet })); } catch (err) { /* ignore */ }
+  }
+
+  function renderFov() {
+    if (!inited || !el.setFov) return;
+    var L = fovLimits(), v = fovNow();
+    if (el.setFov.min !== String(L.min)) el.setFov.min = String(L.min);
+    if (el.setFov.max !== String(L.max)) el.setFov.max = String(L.max);
+    if (el.setFov.value !== String(v)) el.setFov.value = String(v);
+    setText('fov', el.setFovVal, v + '°');
+  }
+
+  function initFovSetting() {
+    loadFovStore();
+    if (el.setFov) el.setFov.addEventListener('input', function () {
+      var v = cleanFov(Number(el.setFov.value));
+      if (v === null || v === fovNow()) return;
+      fovSet = v;
+      saveFovStore();
+      renderFov();
+      if (callbacks.onFov) callbacks.onFov(v);
+    });
+    renderFov();
   }
 
   /* ---------- 設定: HUD rear-view mirrors ---------- */
@@ -1099,6 +1296,11 @@
     var pend = c.pending > 0 && !c.speeding && c.tenths < 0 ? (c.served ? '出口線罰停 +' : '下次停站罰停 +') + fmtSec(c.pending / 10) + ' s' : '';
     setText('pitpend', el.pitPending, pend);
     setShown('pitpendon', el.pitPending, pend);
+    // the next set and how to change it (v6.2): 下一組：中性胎（X / T 切換） (the controller's button first with a pad)
+    var nxt = c.next ? '下一組：<b class="c-' + c.next + '">' + COMPOUNDS[c.next] + '</b>（' +
+      (c.pad ? '<kbd>X</kbd> / <kbd>T</kbd>' : '<kbd>T</kbd> / <kbd>X</kbd>') + ' 切換）' : '';
+    setHtml('pitnext', el.pitNext, nxt);
+    setShown('pitnexton', el.pitNext, nxt);
     var svc = c.tenths >= 0;
     setShown('pitsvc', el.pitSvc, svc);
     if (!svc) return;
@@ -1207,12 +1409,13 @@
     el.setVolume = $('set-volume'); el.setVolumeVal = $('set-volume-val');
     el.setMute = $('set-mute'); el.setMuteText = $('set-mute-text');
     el.setMirrors = $('set-mirrors'); el.setMirrorsText = $('set-mirrors-text');   // HUD rear-view mirrors
+    el.setFov = $('set-fov'); el.setFovVal = $('set-fov-val');                        // v6.2: the cockpit's FOV
     el.credits = $('credits'); el.setCredits = $('set-credits');   // credits line -> 資料來源與授權
     // HUD pit strip
     el.pit = $('hud-pit'); el.pitLimit = $('hud-pit-limit'); el.pitLim = $('hud-pit-lim'); el.pitWarn = $('hud-pit-warn');
     el.pitBox = $('hud-pit-box'); el.pitPending = $('hud-pit-pending'); el.pitSvc = $('hud-pit-svc');
     el.pitSvcLabel = $('hud-pit-svc-label'); el.pitSvcTime = $('hud-pit-svc-time'); el.pitBar = $('hud-pit-bar');
-    el.pitPen = $('hud-pit-pen');
+    el.pitPen = $('hud-pit-pen'); el.pitNext = $('hud-pit-next');
     // multiplayer panel, HUD roster box
     el.mpName = $('mp-name'); el.mpColours = $('mp-colours');
     el.mpOffline = $('mp-offline'); el.mpOnline = $('mp-online');
@@ -1230,6 +1433,7 @@
     el.gpStandings = $('gp-standings'); el.gpSpec = $('gp-spec');
     el.gpWear = $('gp-wear'); el.gpCar = $('gp-car'); el.gpYear = $('gp-year'); el.gpCarName = $('gp-car-name');
     el.gpCarChange = $('gp-car-change');
+    el.gpTyre = $('gp-tyre'); el.gpTyreLabel = $('gp-tyre-label'); el.gpTyreNote = $('gp-tyre-note');   // v6.2
     el.hudGp = $('hud-gp'); el.hudGpTitle = $('hud-gp-title'); el.hudGpPos = $('hud-gp-pos'); el.hudGpYear = $('hud-gp-year');
     el.hudGpLapRow = $('hud-gp-laprow'); el.hudGpLap = $('hud-gp-lap'); el.hudGpNote = $('hud-gp-note');
     el.hudGpEnds = $('hud-gp-ends'); el.hudGpRows = $('hud-gp-rows'); el.hudGpSpec = $('hud-gp-spec');
@@ -1258,6 +1462,8 @@
       callbacks.onCar = opts.onCar || null;              // (id): the player picked a car of the list
       callbacks.onAudio = opts.onAudio || null;          // ({volume, muted}): slider / mute switch moved
       callbacks.onMirrors = opts.onMirrors || null;      // (on): the 後照鏡 switch of 設定 flipped
+      callbacks.onFov = opts.onFov || null;              // (deg): the 視野 slider of 設定 moved (whole degrees)
+      callbacks.onCompound = opts.onCompound || null;    // ('S' | 'M' | 'H'): the 起跑輪胎 / 下一組輪胎 row of 大獎賽
       if (inited) return;
       findElements();
       inited = true;                         // from here on setNet / setGp / setLights / setPad / setCars render
@@ -1381,6 +1587,20 @@
       renderAudio();
     },
 
+    /** The 視野 setting of 設定: the cockpit's vertical FOV in degrees (F1.COCKPIT_FOV.def until the slider is moved;
+     *  remembered in localStorage 'f1drive.fov'). */
+    getFov: function () { return fovNow(); },
+
+    /**
+     * The next set of tyres changed (main.js: T / X, a start): 'S' | 'M' | 'H'. The 大獎賽 tab's 起跑輪胎 /
+     * 下一組輪胎 row shows it. Anything else is ignored. Does not call onCompound.
+     */
+    setCompound: function (c) {
+      if (typeof c !== 'string' || !Object.prototype.hasOwnProperty.call(COMPOUNDS, c) || c === nextCmp) return;
+      nextCmp = c;
+      renderTyre();
+    },
+
     /** The HUD rear-view mirrors setting of 設定 (on by default, remembered in localStorage 'f1drive.hud'). */
     getMirrors: function () { return view.mirrors; },
 
@@ -1402,7 +1622,8 @@
      * service: null | {left, total, penalty} (s; the penalty part is served first), limitKmh, boxAhead (m to our
      * box along the lane, + ahead / - passed, null: unknown), slot (our box index, -1: none; shown as slot + 1),
      * pending (optional: s of hold waiting for the next stop), served (optional: true = this visit has had its stop, so
-     * the pending hold is served at the exit line) }. Shown while in the lane, while the limiter is on
+     * the pending hold is served at the exit line), next (optional, v6.2: 'S' | 'M' | 'H', the set fitted at the stop:
+     * the line 下一組：中性胎（T / X 切換）) }. Shown while in the lane, while the limiter is on
      * and during a service; hidden otherwise (setPit(null) hides it). Only touches the DOM when what it shows changes.
      */
     setPit: function (p) {
@@ -1420,6 +1641,7 @@
         box = ahead > 2.5 ? Math.min(99999, Math.round(ahead)) : ahead < -2.5 ? -1 : 0;
       }
       var tenths = -1, frac = -1, pen = -1, penNow = false, pending = -1, served = p.served === true;
+      var next = typeof p.next === 'string' && Object.prototype.hasOwnProperty.call(COMPOUNDS, p.next) ? p.next : '';
       if (s) {
         var total = Math.max(0, pitNum(s.total, 0)), left = Math.min(Math.max(0, pitNum(s.left, 0)), 999);
         var penalty = Math.max(0, pitNum(s.penalty, 0));
@@ -1432,9 +1654,10 @@
       var c = pitC;
       if (c.shown === shown && c.inLane === inLane && c.limiter === limiter && c.speeding === speeding && c.limit === limit &&
           c.slot === slot && c.box === box && c.tenths === tenths && c.frac === frac && c.pen === pen && c.penNow === penNow &&
-          c.pending === pending && c.served === served && c.pad === padOn) return;
+          c.pending === pending && c.served === served && c.pad === padOn && c.next === next) return;
       c.shown = shown; c.inLane = inLane; c.limiter = limiter; c.speeding = speeding; c.limit = limit; c.slot = slot;
       c.box = box; c.tenths = tenths; c.frac = frac; c.pen = pen; c.penNow = penNow; c.pending = pending; c.served = served; c.pad = padOn;
+      c.next = next;
       renderPit();
     },
 
@@ -1454,7 +1677,8 @@
     setLoading: function (name) {
       if (!inited || !el.loading) return;
       var on = typeof name === 'string';
-      setText('loadname', el.loadingName, on ? name : '');
+      // (main.js hands the English name: the note shows the card's Chinese one)
+      setText('loadname', el.loadingName, on ? (Object.prototype.hasOwnProperty.call(zhByName, name) ? zhByName[name] : name) : '');
       setShown('loading', el.loading, on);
     },
 
@@ -1480,7 +1704,7 @@
 
     setTrack: function (trackData) {
       trackData = trackData || {};
-      setText('track', el.track, trackData.name || '');
+      setText('track', el.track, trackLabel(trackData));   // (v6.2: the Chinese name; the results subtitle uses it too)
       prepareMap(trackData.points);
       if (trackData.points && trackData.points.length) {
         drawMap(trackData.points[0][0], trackData.points[0][1], 0);

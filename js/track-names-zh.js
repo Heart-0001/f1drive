@@ -10,6 +10,8 @@
 //                              other spellings seen in Taiwanese media, mainland China / Hong Kong forms (in
 //                              simplified and / or traditional characters), and a few ASCII forms of names whose
 //                              English spelling has diacritics (Portimao, Nurburgring ...)
+//       layout                 (optional) the card's tooltip where tracks-data.js has a `layout` note (the layout the
+//                              game builds is not the one the name suggests: Estoril), in Chinese
 //     }, ...
 //   }
 //
@@ -40,7 +42,8 @@
     },
     'pt-1972': { // Autódromo do Estoril. name: SV 78452 (艾斯托利爾賽道); WP 埃斯托里爾賽道 (WP zh-hans 埃什托里尔赛道)
       name: '艾斯托利爾賽道', short: '艾斯托利爾', location: '葡萄牙 艾斯托利爾',
-      aliases: ['埃斯托里爾賽道', '埃什托里爾賽道', '埃斯托利爾', '埃什托里尔赛道', '埃斯托里尔赛道', '卡斯凱什']
+      aliases: ['埃斯托里爾賽道', '埃什托里爾賽道', '埃斯托利爾', '埃什托里尔赛道', '埃斯托里尔赛道', '卡斯凱什'],
+      layout: '2000 年改建後的賽道佈局（F1 在 1984–96 年用的是舊佈局）'   // tracks-data.js trackData.layout in Chinese
     },
     'it-1953': { // Autodromo Enzo e Dino Ferrari. name: SV 78617 (伊莫拉賽道 / 恩佐與帝諾．法拉利賽道); WP 安佐與迪諾·法拉利賽道
       name: '伊莫拉賽道', short: '伊莫拉', location: '義大利 伊莫拉',

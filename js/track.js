@@ -64,20 +64,37 @@
 
   // ---- elevation / banking
   var Y_SMOOTH_PASSES = 40;  // extra [1,2,1]/4 passes on the height profile (sigma ~9 m)
-  var BANK_MAX = 6 * Math.PI / 180;  // cap
-  var BANK_GAIN = 5.0;       // rad of bank per unit curvature (1/m): radius 100 m -> ~2.7 deg
+  // Cap of the banking derived from curvature (degrees); trackData.bankMaxDeg overrides it (1.5 on street circuits).
+  // 2.5 since 2026-10-01 (was 6): lidar cross-slopes at 14 circuits measure 0-2.4 deg in hairpins and chicanes, and the
+  // real banked / cambered corners come as trackData.bankOverrides (docs/track-audit.md).
+  var BANK_MAX_DEG = 2.5;
+  var BANK_GAIN = 5.0;       // rad of bank per unit curvature (1/m): radius 100 m -> ~2 deg (saturating at the cap)
   var BANK_SMOOTH_PASSES = 32; // sigma ~8 m, i.e. transitions spread over ~35 m
   // Real banked corners (trackData.bankOverrides, from tools/build-tracks.mjs): the full angle between the lap fractions
   // `from` and `to`, eased in / out from the derived banking over BANK_RAMP metres outside them (C2 ease).
   var BANK_RAMP = 35;
   var BANK_OVERRIDE_MAX = 30 * Math.PI / 180;   // sanity cap on the data
 
-  // ---- self-crossing (Suzuka): both roads are blended to one flat height around the crossing
+  // ---- self-crossing (Suzuka). Where the two roads are at about the same height (a junction) both are blended to one
+  //      flat height around the crossing; where one passes over the other (trackData heights CROSS_SEP_MIN or more
+  //      apart: Suzuka's crossover, 6.2 m) both keep their heights, the upper road is a bridge (deck, parapets = its
+  //      walls, abutments beside the lower road) and locate / nearest / groundY take the level closest to a given y.
   var CROSS_DIST = 2.5;      // two non-adjacent samples this close = the centreline crosses itself
   var CROSS_MIN_SEP = 60;    // samples; "non-adjacent"
   var CROSS_ZONE = 40;       // samples each side of the crossing treated as the crossing zone
   var CROSS_FLAT_R = 26;     // m of arc each side that is exactly level
   var CROSS_BLEND_R = 240;   // m of arc over which the height eases back to the real profile
+  var CROSS_SEP_MIN = 3.0;   // m: two roads this far apart in height at the crossing = a bridge, not a junction
+  var BRIDGE_SEP = 6.0;      // m: the upper road is raised (smoothly) where it is less than this above the lower one
+  var BRIDGE_DECK_T = 0.9;   // deck thickness under the road surface (clearance = separation - this)
+  var BRIDGE_GAP = 0.6;      // the deck is drawn where the terrain is more than this below the road
+  var ABUT_GAP = 0.6, ABUT_T = 1.0;   // abutment walls: this far behind the lower road's walls, this thick
+
+  // ---- narrow stretches (trackData.widthOverrides: Baku's castle section): road half width capped, walls moved in
+  var WIDTH_RAMP = 40;       // m over which the road widens back to normal past each end (< 0.35 m per 2 m sample)
+  var WIDTH_WALL_RAMP = 50;  // m over which the walls move back out (< 0.6 m per sample, like the other walls)
+  var WIDTH_WALL_GAP = WALL_ROAD_MARGIN;   // wall inner face this far outside the road edge (as everywhere: the car's
+                             // centre can use the road's whole width, 7.6 m at Baku's castle, walls 9.6 m apart)
 
   // ---- terrain
   var SKIRT_W = 16;          // verge outside the walls that eases down to the terrain
@@ -272,10 +289,30 @@
 
   // ---------------------------------------------------------------- build
 
-  F1.buildTrack = function (trackData) {
+  // The real pit lane speed limit of trackData in season `year` (km/h): trackData.pitLimits [{from?, to?, kmh}] (season
+  // years, inclusive) where one matches, else trackData.pitLimitKmh (the current layout's), else 80. A year that is not
+  // a number gives the current one.
+  function realPitLimit(trackData, year) {
+    var def = trackData && +trackData.pitLimitKmh > 0 ? +trackData.pitLimitKmh : 80;
+    var list = trackData && trackData.pitLimits, y = +year;
+    if (!Array.isArray(list) || year === null || year === undefined || !isFinite(y)) return def;
+    for (var i = 0; i < list.length; i++) {
+      var e = list[i];
+      if (!e || !(+e.kmh > 0)) continue;
+      if ((e.from === undefined || y >= +e.from) && (e.to === undefined || y <= +e.to)) return +e.kmh;
+    }
+    return def;
+  }
+  F1.pitLimitFor = realPitLimit;   // (trackData, year) -> km/h, before the lane geometry's own cap (see track.pit.limitFor)
+
+  // opts (optional): { year } = the session's season (the pit lane limit and its painted signs are that season's;
+  // track.pit.setYear changes it later).
+  F1.buildTrack = function (trackData, opts) {
     var THREE = global.THREE;
     var pts = cleanPoints((trackData && trackData.points) || [], trackData && trackData.elev);
     if (pts.length < 3) throw new Error('F1.buildTrack: track needs at least 3 distinct points');
+    var BANK_MAX = (trackData && +trackData.bankMaxDeg > 0 ? Math.min(+trackData.bankMaxDeg, 10) : BANK_MAX_DEG) * Math.PI / 180;
+    var buildYear = opts && opts.year !== undefined && opts.year !== null && isFinite(+opts.year) ? +opts.year : null;
 
     // --- smooth + resample (x, z and height together)
     var dense = catmullRomClosed(pts);
@@ -387,11 +424,27 @@
     })();
     var PARTNER_SPAN = CROSS_ZONE + 20;
 
-    // level both roads to a common height around each crossing so the two surfaces coincide
-    var flatW = new Float64Array(N);
+    // A crossing where the two roads are CROSS_SEP_MIN or more apart in height is a bridge: both keep their heights (the
+    // upper one raised smoothly to BRIDGE_SEP above the lower one where the data has less). sepP[i] = 1 on both branches
+    // of such a crossing (where partner[i] is set); bridges = [{up, lo}] (sample of each road at the crossing point).
+    // Any other crossing: level both roads to a common height around it so the two surfaces coincide.
+    var flatW = new Float64Array(N), sepP = new Uint8Array(N), bridges = [];
     for (k = 0; k < crossings.length; k++) {
-      var hc = 0.5 * (py[crossings[k][0]] + py[crossings[k][1]]);
+      var dyc = py[crossings[k][0]] - py[crossings[k][1]];
       var span = Math.min((N >> 1) - 1, Math.ceil((CROSS_FLAT_R + CROSS_BLEND_R) / ds));
+      if (Math.abs(dyc) >= CROSS_SEP_MIN) {
+        var bUp = dyc > 0 ? crossings[k][0] : crossings[k][1], bLo = dyc > 0 ? crossings[k][1] : crossings[k][0];
+        var lift = BRIDGE_SEP - Math.abs(dyc);
+        if (lift > 0) {
+          for (q = -span; q <= span; q++) {
+            py[(bUp + q + N) % N] += lift * (1 - smoothstep((Math.abs(q) * ds - CROSS_FLAT_R) / CROSS_BLEND_R));
+          }
+        }
+        for (var w0 = -CROSS_ZONE; w0 <= CROSS_ZONE; w0++) { sepP[(bUp + w0 + N) % N] = 1; sepP[(bLo + w0 + N) % N] = 1; }
+        bridges.push({ up: bUp, lo: bLo, sep: Math.abs(dyc) + Math.max(0, lift) });
+        continue;
+      }
+      var hc = 0.5 * (py[crossings[k][0]] + py[crossings[k][1]]);
       for (var br = 0; br < 2; br++) {
         for (q = -span; q <= span; q++) {
           i = (crossings[k][br] + q + N) % N;
@@ -400,6 +453,31 @@
           if (wgt > flatW[i]) flatW[i] = wgt;
         }
       }
+    }
+
+    // The sample at fraction f of the input polyline's arc length (trackData's bankOverrides / widthOverrides are given
+    // so): that point, then the nearest sample in a window around the same fraction of the samples.
+    var cumP = null;
+    function sampleAtFrac(f) {
+      var np = pts.length, u;
+      if (!cumP) {
+        cumP = [0];
+        for (u = 0; u < np; u++) {
+          var pa = pts[u], pb = pts[(u + 1) % np];
+          cumP.push(cumP[u] + Math.hypot(pb[0] - pa[0], pb[1] - pa[1]));
+        }
+      }
+      f = f - Math.floor(f);
+      var s = f * cumP[np], a = 0;
+      while (a < np - 1 && cumP[a + 1] <= s) a++;
+      var p0 = pts[a], p1 = pts[(a + 1) % np], t = (s - cumP[a]) / ((cumP[a + 1] - cumP[a]) || 1);
+      var x = p0[0] + (p1[0] - p0[0]) * t, z = p0[1] + (p1[1] - p0[1]) * t;
+      var hint = Math.round(f * N), win = Math.max(40, Math.round(N * 0.03)), best = hint % N, bd = Infinity;
+      for (var q2 = -win; q2 <= win; q2++) {
+        var c = ((hint + q2) % N + N) % N, ex = px[c] - x, ez = pz[c] - z, dd = ex * ex + ez * ez;
+        if (dd < bd) { bd = dd; best = c; }
+      }
+      return best;
     }
 
     // --- grade (dy/ds) and banking (derived from curvature: inside of the corner lower)
@@ -421,24 +499,7 @@
     // negative bank), then bank = derived * (1 - w) + full * w with w = 1 on the section and a C2 ease outside it.
     function applyBankOverrides(list) {
       if (!Array.isArray(list) || !list.length) return;
-      var cumP = [0], np = pts.length, u, v;
-      for (u = 0; u < np; u++) {
-        var pa = pts[u], pb = pts[(u + 1) % np];
-        cumP.push(cumP[u] + Math.hypot(pb[0] - pa[0], pb[1] - pa[1]));
-      }
-      function sampleAt(f) {
-        f = f - Math.floor(f);
-        var s = f * cumP[np], a = 0;
-        while (a < np - 1 && cumP[a + 1] <= s) a++;
-        var p0 = pts[a], p1 = pts[(a + 1) % np], t = (s - cumP[a]) / ((cumP[a + 1] - cumP[a]) || 1);
-        var x = p0[0] + (p1[0] - p0[0]) * t, z = p0[1] + (p1[1] - p0[1]) * t;
-        var hint = Math.round(f * N), win = Math.max(40, Math.round(N * 0.03)), best = hint % N, bd = Infinity;
-        for (var q = -win; q <= win; q++) {
-          var c = ((hint + q) % N + N) % N, ex = px[c] - x, ez = pz[c] - z, dd = ex * ex + ez * ez;
-          if (dd < bd) { bd = dd; best = c; }
-        }
-        return best;
-      }
+      var u, v, sampleAt = sampleAtFrac;
       var w = new Float64Array(N), full = new Float64Array(N), rampN = Math.ceil(BANK_RAMP / ds);
       for (u = 0; u < list.length; u++) {
         var o = list[u], deg = o ? +o.deg : NaN;
@@ -503,6 +564,34 @@
       var wmin = Math.min(wallOff[0][i], wallOff[1][i]) - WALL_ROAD_MARGIN;
       halfW[i] = wmin > HALF_WIDTH ? HALF_WIDTH : (wmin < HALF_WIDTH_MIN ? HALF_WIDTH_MIN : wmin);
     }
+    // Narrow stretches (trackData.widthOverrides [{name, from, to, halfW}], lap fractions): the road's half width is
+    // capped at halfW from `from` to `to` and eases back out over WIDTH_RAMP; the walls stand WIDTH_WALL_GAP outside the
+    // road edge there and ease back out over WIDTH_WALL_RAMP (never inside the road edge on the way).
+    var capWall = null, capHW = null;
+    (function (list) {
+      if (!Array.isArray(list) || !list.length) return;
+      for (var u = 0; u < list.length; u++) {
+        var o = list[u], hw = o ? +o.halfW : NaN;
+        if (!o || !isFinite(o.from) || !isFinite(o.to) || !(hw > 0)) continue;
+        hw = Math.max(HALF_WIDTH_MIN, Math.min(HALF_WIDTH, hw));
+        var ia = sampleAtFrac(+o.from), ib = sampleAtFrac(+o.to), len = ((ib - ia) % N + N) % N;
+        if (len < 1 || len > N / 2) continue;
+        if (!capWall) { capWall = new Float64Array(N).fill(Infinity); capHW = new Float64Array(N).fill(Infinity); }
+        var rw = Math.ceil(WIDTH_WALL_RAMP / ds);
+        for (var v = -rw; v <= len + rw; v++) {
+          var kk = ((ia + v) % N + N) % N, d = v < 0 ? -v * ds : (v > len ? (v - len) * ds : 0);
+          var c = hw + (HALF_WIDTH - hw) * smootherstep(d / WIDTH_RAMP);
+          var cw = Math.max(c + WIDTH_WALL_GAP, hw + WIDTH_WALL_GAP + (WALL_DIST - hw - WIDTH_WALL_GAP) * smootherstep(d / WIDTH_WALL_RAMP));
+          if (c < capHW[kk]) capHW[kk] = c;
+          if (cw < capWall[kk]) capWall[kk] = cw;
+        }
+      }
+      if (!capWall) return;
+      for (var i2 = 0; i2 < N; i2++) {
+        if (capHW[i2] < halfW[i2]) halfW[i2] = capHW[i2];
+        for (var s2 = 0; s2 < 2; s2++) if (capWall[i2] < wallOff[s2][i2]) wallOff[s2][i2] = capWall[i2];
+      }
+    })(trackData && trackData.widthOverrides);
     for (side = 0; side < 2; side++) {
       var sg = side ? 1 : -1, wo = wallOff[side], fl = wallFlag[side];
       wallOuter[side] = new Float64Array(N);
@@ -510,9 +599,11 @@
         var th = roomRoad[side][i] - 0.05 - wo[i];
         th = th > WALL_THICK ? WALL_THICK : (th < 0.2 ? 0.2 : th);
         wallOuter[side][i] = Math.max(wo[i] + th, halfW[i]);
-        fl[i] = wo[i] >= WALL_MIN ? 1 : 0;
-        // crossing: no wall across the other road (it stops where it meets that road's own wall)
-        if (fl[i] && partner[i] >= 0) {
+        // (a narrow stretch keeps its walls although they stand closer than WALL_MIN)
+        fl[i] = wo[i] >= (capWall && capWall[i] < Infinity ? Math.min(WALL_MIN, halfW[i] + 0.3) : WALL_MIN) ? 1 : 0;
+        // crossing: no wall across the other road (it stops where it meets that road's own wall); a bridge keeps the
+        // walls of both roads (the upper road's are its parapets, the lower road's run on under the deck)
+        if (fl[i] && partner[i] >= 0 && !sepP[i]) {
           var wx = px[i] + nx[i] * sg * wo[i], wz = pz[i] + nz[i] * sg * wo[i];
           var lim2 = (WALL_DIST + WALL_THICK) * (WALL_DIST + WALL_THICK);
           for (q = -PARTNER_SPAN; q <= PARTNER_SPAN; q++) {
@@ -548,12 +639,20 @@
     var wallIn = [line(-1, wallOff[0]), line(1, wallOff[1])];
     var wallOut = [line(-1, wallOuter[0]), line(1, wallOuter[1])];
 
-    // --- paint masks (edge lines / kerbs are not drawn across another piece of road)
+    // --- paint masks (edge lines / kerbs are not drawn across another piece of road; at a bridge the other road is on
+    //     another level and does not count)
     function clearMask(sign, off, margin) {
       var m = new Uint8Array(N);
       for (var u = 0; u < N; u++) {
-        var o = off[u] * sign, c = halfW[u] + margin;
-        m[u] = nearestD2(px[u] + nx[u] * o, pz[u] + nz[u] * o) >= c * c ? 1 : 0;
+        var o = off[u] * sign, c = halfW[u] + margin, x = px[u] + nx[u] * o, z = pz[u] + nz[u] * o;
+        if (!sepP[u]) { m[u] = nearestD2(x, z) >= c * c ? 1 : 0; continue; }
+        var best = Infinity, pu = partner[u];
+        forNear(x, z, 1, function (s) {
+          if (cyc(s, pu) <= PARTNER_SPAN) return;
+          var ddx = px[s] - x, ddz = pz[s] - z, dd = ddx * ddx + ddz * ddz;
+          if (dd < best) best = dd;
+        });
+        m[u] = best >= c * c ? 1 : 0;
       }
       return m;
     }
@@ -633,8 +732,10 @@
       if (pref) for (v = 0; v < opts.length; v++) tries.push([-first, opts[v][0], opts[v][1], false]);
       tries.push([first, 2, 60, true], [-first, 2, 60, true]);
       for (t = 0; t < tries.length && !pitL; t++) pitL = layout(tries[t][0], tries[t][1], tries[t][2], tries[t][3]);
-      var realLim = trackData ? +trackData.pitLimitKmh : NaN;
-      if (pitL && realLim > 0 && realLim < pitL.limit) pitL.limit = realLim;
+      if (pitL) {
+        pitL.layoutLimit = pitL.limit;             // what the lane's geometry can be driven at (80 or 60)
+        pitL.limit = Math.min(pitL.layoutLimit, realPitLimit(trackData, buildYear));
+      }
 
       function why(side, vi, limit, msg) {       // F1.PIT_DEBUG = [] collects why a layout was not taken
         if (dbg) dbg.push((trackData && trackData.id) + ' side ' + side + ' variant ' + vi + ' ' + limit + ': ' + msg);
@@ -701,15 +802,17 @@
         if (!usable(0)) return why(side, vi, limit, 'no wall at the line');
         while (qa > -span && usable(qa - 1)) qa--;
         while (qb < span && usable(qb + 1)) qb++;
-        // a short lane gets shorter tapers, so that the boxes still fit
+        // a short lane gets shorter tapers, so that the boxes still fit (and, since 2026-10-01, so that its entry line
+        // still comes before the start line: Silverstone's line at the Wing is ~90 m after Club)
         for (var Tcap = PIT_TAPER; Tcap >= tMin(PIT_VARIANTS[vi]) - 1e-9; Tcap -= 4) {
           var r = fit(side, vi, limit, late, Math.max(qa, -reach), Math.min(qb, reach), Tcap);
-          if (r !== 'boxes') return r;
+          if (r !== 'boxes' && r !== 'short') return r;
         }
         return null;
       }
 
-      // One try: -> the layout, null, or 'boxes' (the lane fits but the boxes do not: a shorter taper may help).
+      // One try: -> the layout, null, 'boxes' (the lane fits but the boxes do not) or 'short' (the stretch is too short
+      // for this taper): a shorter taper may help.
       function fit(side, vi, limit, late, from, to, Tcap) {
         var sd = side > 0 ? 1 : 0, V = PIT_VARIANTS[vi], P = null, k;
         var cMax = (limit > 60 ? PIT_LAT_MAX : PIT_LAT_MAX_60) / ((limit / 3.6) * (limit / 3.6));  // at the limit
@@ -717,7 +820,7 @@
         // shrink the lane from either end until the complex fits and the lane can be driven at the limit everywhere
         for (var it = 0; it < 200 && !P; it++) {
           P = profile(sd, from, to, V, Tcap, null, late);
-          if (!P) return why(side, vi, limit, 'too short: ' + where());
+          if (!P) { why(side, vi, limit, 'too short: ' + where()); return 'short'; }
           var cv = laneCurv(side, from, P), vNeg = null, vPos = null;
           for (k = 0; k <= P.L; k++) {
             if (!P.bad(k) && cv[k] <= cMax) continue;
@@ -859,7 +962,7 @@
     // --- pit lane geometry: asphalt, paint, pit wall, garage face (all merged into the meshes above) and the light
     //     curtains (a mesh of their own). pit = the exported description, boxes included.
     var wallDraw = [wallFlag[0], wallFlag[1]];    // where buildWall draws the plain barrier (not under the garage face)
-    var curtainBuf = null, pit = null;
+    var curtainBuf = null, pit = null, signBufs = null;
     if (pitL) (function () {
       var L = pitL, P = L.P, sd = L.sd, sg = L.side, K = P.L, from = L.from, k, u, i;
       var bw = L.bdp - 0.6;                       // painted box width (across)
@@ -888,15 +991,16 @@
         f -= j;
         return py[a] + la * tanB[a] + (py[b] + la * tanB[b] - py[a] - la * tanB[a]) * f;
       }
-      // paint triangle in the frame of sample idx; points [lat, lon] (signed lat), turned to face up
+      // paint triangle in the frame of sample idx; points [lat, lon] (signed lat), turned to face up (into paintTo)
+      var paintTo = paintBuf;
       function ptri(idx, A, B, Cc, lift, c) {
         if ((B[1] - A[1]) * (Cc[0] - A[0]) - (B[0] - A[0]) * (Cc[1] - A[1]) < 0) { var tmp = B; B = Cc; Cc = tmp; }
         var pts = [A, B, Cc];
         for (var v = 0; v < 3; v++) {
           var la = pts[v][0], lo = pts[v][1];
-          paintBuf.pos.push(px[idx] + nx[idx] * la + tx[idx] * lo, hAt(idx, la, lo) + lift, pz[idx] + nz[idx] * la + tz[idx] * lo);
-          paintBuf.nrm.push(ux[idx], uy[idx], uz[idx]);
-          paintBuf.col.push(c[0], c[1], c[2]);
+          paintTo.pos.push(px[idx] + nx[idx] * la + tx[idx] * lo, hAt(idx, la, lo) + lift, pz[idx] + nz[idx] * la + tz[idx] * lo);
+          paintTo.nrm.push(ux[idx], uy[idx], uz[idx]);
+          paintTo.col.push(c[0], c[1], c[2]);
         }
       }
       // paint rectangle in the frame of sample idx: signed lateral lat0..lat1, lon0..lon1 along
@@ -947,14 +1051,29 @@
       prect(eI, P.wof, P.ao[P.kEn], -0.25, 0.25, Y_PAINT, C_WHITE);
       prect(xI, P.wof, P.ao[P.kEx], -0.25, 0.25, Y_PAINT, C_WHITE);
       var ra = L.lh - 0.9, rl = 2.1 * ra, dW = 0.42 * ra, dH = 1.55 * ra;
-      var sI = si(P.kEn + Math.round(10 / ds));
+      var sI = si(P.kEn + Math.round(10 / ds)), xs = si(P.kEx - Math.round(12 / ds)), C_GREY = hexRGB(0x8c8c8c);
       ellipse(sI, sg * dL, 0, ra, rl, 0.8, Y_START, C_RED);
       ellipse(sI, sg * dL, 0, ra * 0.8, rl * 0.8, 0, Y_START, C_WHITE);
-      digits(sI, lim, sg * dL, 0, dW, dH, 0.12 * dW / 0.5, 0.18 * dH / 2.2, 0.3 * dW, Y_START + 0.015, C_BLACK);
-      var xs = si(P.kEx - Math.round(12 / ds)), C_GREY = hexRGB(0x8c8c8c);
       ellipse(xs, sg * dL, 0, ra, rl, 0.93, Y_START, C_BLACK);
       ellipse(xs, sg * dL, 0, ra * 0.93, rl * 0.93, 0, Y_START, C_WHITE);
-      digits(xs, lim, sg * dL, 0, dW, dH, 0.12 * dW / 0.5, 0.18 * dH / 2.2, 0.3 * dW, Y_START + 0.015, C_GREY);
+      // the painted limit: one value -> part of the paint mesh; a track whose limit changed over the seasons
+      // (trackData.pitLimits) gets the digits of each value in a buffer of their own, appended to the paint mesh as a
+      // material group shown for the current limit only (see "meshes" below, pit.setYear)
+      var limVals = [L.limit], pl = trackData && trackData.pitLimits;
+      if (Array.isArray(pl)) {
+        limVals.push(Math.min(L.layoutLimit, realPitLimit(trackData, null)));
+        for (var e2 = 0; e2 < pl.length; e2++) if (pl[e2] && +pl[e2].kmh > 0) limVals.push(Math.min(L.layoutLimit, +pl[e2].kmh));
+      }
+      limVals = limVals.filter(function (v, ix) { return limVals.indexOf(v) === ix; });
+      signBufs = {};
+      for (var lv = 0; lv < limVals.length; lv++) {
+        var lstr = String(limVals[lv]);
+        if (limVals.length > 1) paintTo = signBufs[lstr] = newBuf(true, true);
+        digits(sI, lstr, sg * dL, 0, dW, dH, 0.12 * dW / 0.5, 0.18 * dH / 2.2, 0.3 * dW, Y_START + 0.015, C_BLACK);
+        digits(xs, lstr, sg * dL, 0, dW, dH, 0.12 * dW / 0.5, 0.18 * dH / 2.2, 0.3 * dW, Y_START + 0.015, C_GREY);
+      }
+      paintTo = paintBuf;
+      if (limVals.length < 2) signBufs = null;
       var bH = 0.16 * ra, bA = [sg * dL + 0.75 * ra, -0.75 * rl], bB = [sg * dL - 0.75 * ra, 0.75 * rl];  // the diagonal bar
       ptri(xs, [bA[0] + bH, bA[1]], [bA[0] - bH, bA[1]], [bB[0] - bH, bB[1]], Y_START + 0.025, C_BLACK);
       ptri(xs, [bA[0] + bH, bA[1]], [bB[0] - bH, bB[1]], [bB[0] + bH, bB[1]], Y_START + 0.025, C_BLACK);
@@ -1078,7 +1197,9 @@
       pit = {
         side: sg, limitKmh: L.limit, from: si(0), to: si(K), entry: eI, exit: xI,
         laneHalfW: L.lh, wallHalfT: PIT_WALL_HALF_T, boxes: boxes,
-        length: K * ds, boxLen: PIT_BOX_LEN, boxW: bw
+        length: K * ds, boxLen: PIT_BOX_LEN, boxW: bw,
+        layoutLimitKmh: L.layoutLimit,   // what the lane's geometry allows (the real limit is never above it)
+        year: buildYear                  // the season limitKmh is for (null: the current layout's rule)
       };
     })();
 
@@ -1230,6 +1351,89 @@
       }
     }
 
+    // --- bridges (grade-separated crossings): under the upper road a deck slab BRIDGE_DECK_T thick, from wall foot to
+    //     wall foot, wherever the terrain falls away more than BRIDGE_GAP under it (the cutting the lower road runs in),
+    //     and on both sides of the lower road, ABUT_GAP behind its walls, abutment walls up to the deck's underside.
+    //     The upper road's walls are the parapets. Everything goes into the walls mesh (vertex colours, double sided).
+    var bridgeOut = [];
+    function deckRange(B) {           // [q0, q1]: deck samples up + q0 .. up + q1, or null
+      var q0 = null, q1 = null;
+      for (var q = -CROSS_ZONE; q <= CROSS_ZONE; q++) {
+        var u = (B.up + q + N) % N, lo = -wallOuter[0][u], hi = wallOuter[1][u], gap = 0;
+        for (var t = 0; t <= 16; t++) {
+          var d = lo + (hi - lo) * t / 16, g = py[u] + d * tanB[u] - terrainAt(px[u] + nx[u] * d, pz[u] + nz[u] * d);
+          if (g > gap) gap = g;
+        }
+        if (gap > BRIDGE_GAP) { if (q0 === null) q0 = q; q1 = q; }
+      }
+      return q0 === null ? null : [Math.max(-CROSS_ZONE, q0 - 1), Math.min(CROSS_ZONE, q1 + 1)];
+    }
+    for (var bI = 0; bI < bridges.length; bI++) (function (B) {
+      var R = deckRange(B);
+      if (!R) return;
+      var C_SIDE = hexRGB(0xa9a9a4), C_UNDER = hexRGB(0x5f605c), C_ABUT = hexRGB(0x9d9d97), C_ABUT_TOP = hexRGB(0x7d7d79);
+      var T = BRIDGE_DECK_T, A0 = wallOut[0], A1 = wallOut[1], q, u, w;
+      function V(Ln, uu, h) { return [Ln.x[uu], Ln.y[uu] + h, Ln.z[uu]]; }
+      for (q = R[0]; q < R[1]; q++) {
+        u = (B.up + q + N) % N; w = (u + 1) % N;
+        quad(wallBuf, V(A0, u, -T), V(A1, u, -T), V(A0, w, -T), V(A1, w, -T), C_UNDER);     // underside
+        quad(wallBuf, V(A0, u, -T), V(A0, w, -T), V(A0, u, 0), V(A0, w, 0), C_SIDE);        // side faces (the walls'
+        quad(wallBuf, V(A1, u, -T), V(A1, w, -T), V(A1, u, 0), V(A1, w, 0), C_SIDE);        //  outer faces go on up)
+      }
+      [R[0], R[1]].forEach(function (qe) {       // end faces
+        var ue = (B.up + qe + N) % N;
+        quad(wallBuf, V(A0, ue, -T), V(A1, ue, -T), V(A0, ue, 0), V(A1, ue, 0), C_SIDE);
+      });
+      // underside of the deck at (x, z), NaN where (x, z) is not under it
+      function deckBottom(x, z) {
+        var best = -1, bd = Infinity;
+        for (var qq = R[0]; qq <= R[1]; qq++) {
+          var s = (B.up + qq + N) % N, ex = px[s] - x, ez = pz[s] - z, dd = ex * ex + ez * ez;
+          if (dd < bd) { bd = dd; best = s; }
+        }
+        var dl = (x - px[best]) * nx[best] + (z - pz[best]) * nz[best], al = (x - px[best]) * tx[best] + (z - pz[best]) * tz[best];
+        if (dl < -wallOuter[0][best] - 0.05 || dl > wallOuter[1][best] + 0.05 || Math.abs(al) > ds) return NaN;
+        return py[best] + dl * tanB[best] + al * grade[best] - T;
+      }
+      var abut = 0;
+      for (var sd = 0; sd < 2; sd++) {
+        var sgn = sd ? 1 : -1, prev = null;
+        for (q = -CROSS_ZONE; q <= CROSS_ZONE; q++) {
+          u = (B.lo + q + N) % N;
+          var a = wallOuter[sd][u] + ABUT_GAP, b = a + ABUT_T, m = (a + b) / 2;
+          var cx = px[u] + nx[u] * sgn * m, cz = pz[u] + nz[u] * sgn * m, top = deckBottom(cx, cz);
+          var cur = null;
+          if (isFinite(top)) {
+            var foot = Math.min(py[u] + sgn * a * tanB[u], terrainAt(cx, cz)) - 0.5;
+            cur = { u: u, top: top, foot: foot,
+              ia: [px[u] + nx[u] * sgn * a, pz[u] + nz[u] * sgn * a], ib: [px[u] + nx[u] * sgn * b, pz[u] + nz[u] * sgn * b] };
+          }
+          if (cur && prev) {
+            var P0 = function (c, p, h) { return [c[p][0], h, c[p][1]]; };
+            quad(wallBuf, P0(prev, 'ia', prev.foot), P0(cur, 'ia', cur.foot), P0(prev, 'ia', prev.top), P0(cur, 'ia', cur.top), C_ABUT);
+            quad(wallBuf, P0(prev, 'ib', prev.foot), P0(cur, 'ib', cur.foot), P0(prev, 'ib', prev.top), P0(cur, 'ib', cur.top), C_ABUT);
+            quad(wallBuf, P0(prev, 'ia', prev.top), P0(cur, 'ia', cur.top), P0(prev, 'ib', prev.top), P0(cur, 'ib', cur.top), C_ABUT_TOP);
+            abut++;
+          }
+          if ((cur && !prev) || (!cur && prev)) {   // end face of a run
+            var E = cur || prev;
+            quad(wallBuf, [E.ia[0], E.foot, E.ia[1]], [E.ib[0], E.foot, E.ib[1]], [E.ia[0], E.top, E.ia[1]], [E.ib[0], E.top, E.ib[1]], C_ABUT);
+          }
+          prev = cur;
+        }
+      }
+      var minClear = Infinity;              // lowest deck underside above the lower road's surface (car's path)
+      for (q = -CROSS_ZONE; q <= CROSS_ZONE; q++) {
+        u = (B.lo + q + N) % N;
+        for (var t2 = -1; t2 <= 1; t2 += 0.25) {
+          var dd2 = t2 * wallOff[t2 > 0 ? 1 : 0][u], h2 = deckBottom(px[u] + nx[u] * dd2, pz[u] + nz[u] * dd2);
+          if (isFinite(h2)) minClear = Math.min(minClear, h2 - (py[u] + dd2 * tanB[u]));
+        }
+      }
+      bridgeOut.push({ up: B.up, lo: B.lo, separation: py[B.up] - py[B.lo], deckFrom: (B.up + R[0] + N) % N,
+        deckTo: (B.up + R[1] + N) % N, deckLength: (R[1] - R[0]) * ds, clearance: minClear, abutmentSegments: abut });
+    })(bridges[bI]);
+
     // --- meshes
     var group = new THREE.Group();
     group.name = 'track';
@@ -1265,8 +1469,36 @@
     addMesh('runoff', makeGeometry(runoffBuf),
       { color: 0x6d7268, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 }, 1);
     addMesh('road', makeGeometry(roadBuf), { color: 0x2b2b2e }, 2);
-    addMesh('paint', makeGeometry(paintBuf),
-      { vertexColors: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }, 3);
+    // The pit lane's painted limit where it changed over the seasons (trackData.pitLimits): the digits of each value
+    // are appended to the paint mesh as a group of their own with its own material ('pitSign' + km/h), visible for the
+    // current limit only (pit.setYear); the paint mesh then carries an array of materials. Otherwise one material.
+    var PAINT_OPTS = { vertexColors: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 };
+    var signMats = {};
+    if (signBufs) {
+      var baseCount = paintBuf.pos.length / 3, groups = [[0, baseCount, 'paint']];
+      for (var sKey in signBufs) {
+        if (!Object.prototype.hasOwnProperty.call(signBufs, sKey) || !signBufs[sKey].pos.length) continue;
+        var sb = signBufs[sKey], at = paintBuf.pos.length / 3;
+        Array.prototype.push.apply(paintBuf.pos, sb.pos);
+        Array.prototype.push.apply(paintBuf.col, sb.col);
+        Array.prototype.push.apply(paintBuf.nrm, sb.nrm);
+        groups.push([at, sb.pos.length / 3, sKey]);
+      }
+      var pMesh = addMesh('paint', makeGeometry(paintBuf), PAINT_OPTS, 3), mats = [pMesh.material];
+      pMesh.material.name = 'paint';
+      for (var gk = 0; gk < groups.length; gk++) {
+        pMesh.geometry.addGroup(groups[gk][0], groups[gk][1], gk);
+        if (!gk) continue;
+        var sMat = new THREE.MeshLambertMaterial(PAINT_OPTS);
+        sMat.name = 'pitSign' + groups[gk][2];
+        sMat.visible = pit ? String(pit.limitKmh) === groups[gk][2] : false;
+        signMats[groups[gk][2]] = sMat;
+        mats.push(sMat);
+      }
+      pMesh.material = mats;
+    } else {
+      addMesh('paint', makeGeometry(paintBuf), PAINT_OPTS, 3);
+    }
     addMesh('walls', makeGeometry(wallBuf), { vertexColors: true, side: THREE.DoubleSide }, 4);
     // light curtains: translucent (per-vertex opacity; not additive, which washes the colours out to white against a
     // daytime sky), never blinding when driven through, no depth writes, no fog (they read from across the circuit)
@@ -1300,8 +1532,34 @@
       return py[index] + d * tanB[index];
     }
 
+    // --- two levels (bridges): at a grade-separated crossing a point can be on either road. otherLevel -> the nearest
+    //     sample of the other road (around partner[idx]), or -1; pickLevel -> idx or that sample, whichever's surface at
+    //     (x, z) is closer to the height y (the other road only when (x, z) is inside its corridor).
+    function otherLevel(x, z, idx) {
+      if (idx < 0 || !sepP[idx]) return -1;
+      var p = partner[idx], best = -1, bd = Infinity;
+      for (var q = -PARTNER_SPAN; q <= PARTNER_SPAN; q++) {
+        var s = (p + q + N) % N, ex = px[s] - x, ez = pz[s] - z, dd = ex * ex + ez * ez;
+        if (dd < bd) { bd = dd; best = s; }
+      }
+      return best;
+    }
+    function inOwnCorridor(x, z, s, margin) {
+      var d = (x - px[s]) * nx[s] + (z - pz[s]) * nz[s], a = (x - px[s]) * tx[s] + (z - pz[s]) * tz[s];
+      return Math.abs(a) <= ds && Math.abs(d) <= wallOuter[d > 0 ? 1 : 0][s] + (margin || 0);
+    }
+    function pickLevel(x, z, idx, y) {
+      if (typeof y !== 'number' || !isFinite(y)) return idx;
+      var o = otherLevel(x, z, idx);
+      if (o < 0 || !inOwnCorridor(x, z, o, 1)) return idx;
+      var dI = (x - px[idx]) * nx[idx] + (z - pz[idx]) * nz[idx], dO = (x - px[o]) * nx[o] + (z - pz[o]) * nz[o];
+      return Math.abs(py[o] + dO * tanB[o] - y) < Math.abs(py[idx] + dI * tanB[idx] - y) ? o : idx;
+    }
+
     // Nearest centreline sample to any world point (global): {index, dist, d}. d = signed lateral offset.
-    function nearest(x, z) {
+    // y (optional): at a bridge, the road whose surface is closest to that height (see pickLevel); without it the
+    // nearest sample in plan.
+    function nearest(x, z, y) {
       var best = -1, bd = Infinity;
       for (var reach = 1; reach <= 3 && best < 0; reach += 2) {
         forNear(x, z, reach, function (s) {
@@ -1317,20 +1575,27 @@
           if (dd < bd) { bd = dd; best = u; }
         }
       }
+      if (y !== undefined && sepP[best]) {
+        var lv = pickLevel(x, z, best, y);
+        if (lv !== best) { best = lv; bd = (px[best] - x) * (px[best] - x) + (pz[best] - z) * (pz[best] - z); }
+      }
       return { index: best, dist: Math.sqrt(bd), d: (x - px[best]) * nx[best] + (z - pz[best]) * nz[best] };
     }
 
     // True if (x, z) is inside the track corridor (road + runoff + walls of any part of the track),
-    // grown by `margin` metres. Scenery must keep out of it.
+    // grown by `margin` metres. Scenery must keep out of it. (At a bridge: inside either road's corridor.)
     function inCorridor(x, z, margin) {
       var n = nearest(x, z);
-      return n.dist <= wallOuter[n.d > 0 ? 1 : 0][n.index] + (margin || 0);
+      if (n.dist <= wallOuter[n.d > 0 ? 1 : 0][n.index] + (margin || 0)) return true;
+      var o = otherLevel(x, z, n.index);
+      return o >= 0 && inOwnCorridor(x, z, o, margin || 0);
     }
 
     // Height of the rendered ground at any world point: the track surface inside the corridor,
-    // the verge outside the walls, the terrain everywhere else.
-    function groundY(x, z) {
-      var n = nearest(x, z);
+    // the verge outside the walls, the terrain everywhere else. y (optional): at a bridge, the level closest to it
+    // (without y: the road nearest in plan, as everywhere else).
+    function groundY(x, z, y) {
+      var n = nearest(x, z, y);
       if (n.dist > gyReach + 2) return terrainAt(x, z);   // (beyond every verge: plain terrain)
       var sd = n.d > 0 ? 1 : 0, ad = Math.abs(n.d), u = n.index;
       if (ad <= skO[sd][u] + 1e-6) return py[u] + n.d * tanB[u];
@@ -1342,7 +1607,9 @@
       return v > t ? v : t;
     }
 
-    function locate(x, z, hintIndex) {
+    // y (optional): at a bridge, the road whose surface at (x, z) is closest to that height (the car's own y: the
+    // physics stays on its level); without it as before (the hinted window, else the nearest sample in plan).
+    function locate(x, z, hintIndex, y) {
       var best = 0, bestD = Infinity, u, dxx, dzz, dd;
       if (hintIndex >= 0 && hintIndex < N && 2 * LOCATE_WINDOW + 1 < N) {
         var start = (hintIndex | 0) - LOCATE_WINDOW;
@@ -1358,6 +1625,7 @@
           if (dd < bestD) { bestD = dd; best = u; }
         }
       }
+      if (y !== undefined && sepP[best]) best = pickLevel(x, z, best, y);
       return { index: best, d: (x - px[best]) * nx[best] + (z - pz[best]) * nz[best] };
     }
 
@@ -1388,6 +1656,18 @@
         return k >= 0 && a >= P.ai[k] && a <= P.ao[k] && a > halfW[lo + k < N ? lo + k : lo + k - N];
       };
       pit.contains = function (x, z) { var n = nearest(x, z); return pit.paved(n.index, n.d); };
+      // Per-season limit (trackData.pitLimits: Zandvoort and Singapore 60 up to 2024, 80 from 2025): the limit in
+      // season `year`, never above what the lane's geometry allows. setYear(year) makes it pit.limitKmh (car.js,
+      // pit.js and main.js read that) and shows the matching painted signs; -> the limit. A year that is not a number
+      // gives the current layout's rule.
+      pit.limitFor = function (year) { return Math.min(L.layoutLimit, realPitLimit(trackData, year)); };
+      pit.setYear = function (year) {
+        var v = pit.limitFor(year);
+        pit.limitKmh = v;
+        pit.year = year === null || year === undefined || year === '' || !isFinite(+year) ? null : +year;
+        for (var key in signMats) if (Object.prototype.hasOwnProperty.call(signMats, key)) signMats[key].visible = key === String(v);
+        return v;
+      };
     })();
 
     // Optional, e.g. once per frame: t in seconds (any clock). The light curtains pulse slowly.
@@ -1416,6 +1696,9 @@
       halfWidth: HALF_WIDTH,
       wallDist: WALL_DIST,
       crossings: crossings,
+      // grade-separated crossings: [{up, lo (sample of the upper / lower road at the crossing), separation (m), deckFrom,
+      // deckTo (upper-road samples the deck spans), deckLength, clearance (deck underside above the lower road), ...}]
+      bridges: bridgeOut,
       grid: grid,            // [{index, d, x, z, heading}] per grid slot (0 = pole): see "Grid" above
       pit: pit,              // pit lane (null if there is no room for one): see "pit lane" / "pit API" above
       update: update,

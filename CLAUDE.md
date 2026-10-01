@@ -27,7 +27,9 @@ The user writes Traditional Chinese; UI text is Traditional Chinese (Taiwan usag
 - Delegate freely to Opus subagents / workflows (any number), one owner per file, contract in `js/README-interfaces.md`.
 - After a round of work, have Fable agents do an independent review (code + requirements, not conclusions), verify
   each finding with a second agent, fix what is confirmed, re-run everything, repackage.
-- Commit locally when asked; do NOT push (the user said "commit 就好" — they still want to change things).
+- GitHub: since 2026-10-01 ~22:00 the user wants each finished, verified round PUSHED to origin main and published as a
+  GitHub release with the portable exe ("最後好了幫我丟github吧 讓我筆電可以玩"); v6.1 = tag v6.1, prerelease, asset
+  F1Drive-v6.1.exe. Never push unverified WIP; build release exes from a clean worktree of the commit.
 - The user leaves work running unattended (overnight / while out): keep going, take sensible defaults, record them
   in docs/v6-plan.md; `node tools/watchdog.mjs` + `tools/keepawake.ps1` exist for that.
 

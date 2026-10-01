@@ -652,7 +652,9 @@
     });
     return {
       f: E.gameFrames, clock: E.clock, gpNow: gp.now(), running: g.running, queued: queue.length, fatal: E.fatal,
-      trackId: g.trackData ? g.trackData.id : null, trackName: g.trackData ? g.trackData.name : null, trackLen: g.track ? g.track.length : 0,
+      // (v6.2: the HUD timing box and the results name the track by its Chinese name, js/track-names-zh.js)
+      trackId: g.trackData ? g.trackData.id : null, trackLen: g.track ? g.track.length : 0,
+      trackName: g.trackData ? ((window.F1_TRACK_NAMES_ZH || {})[g.trackData.id] || g.trackData).name : null,
       car: st ? { x: st.x, z: st.z, h: st.heading, v: st.speed, i: st.sampleIndex, d: st.d, steer: st.steer, grass: st.onGrass, hit: st.hit, n: n } : null,
       gp: { phase: gp.phase, sid: gp.sid, online: gp.online, taking: gp.taking, canControl: gp.canControl, locked: gp.inputLocked, lights: gp.lights,
         goFlash: gp.goFlash, sinceGo: gp.sinceGo, gridSlot: gp.gridSlot, lap: gp.lap, lapTotal: gp.lapTotal },

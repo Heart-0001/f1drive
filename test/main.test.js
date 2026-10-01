@@ -7,6 +7,10 @@
 //   D5     the Grand Prix tyre wear option also ran in qualifying (x5: a puncture within a 3-lap run).
 //   G3/D6  a Grand Prix ending while the car is held for its service dropped the service: released on the old set.
 //   PKG-5  the track build (0.2..0.6 s) held the page with nothing on screen: now a note first, the build after it.
+// v6.2 glue: the pit lane limit of the season (track.pit.setYear: Zandvoort 60 km/h up to 2024; js/pit.js rebound, during a
+//   visit only after it), Monaco's tunnel (js/tunnels.js built / disposed with the track, the scene lights dimmed inside,
+//   F1.audio.setTunnel with the tunnel's size), the next set of tyres (ui.setCompound / onCompound, the pit strip's
+//   next, the telemetry's nextKeys, the prompt on entering the pit lane).
 //
 //   node test/main.test.js        -> exit code 1 on any failed check (about 1 s)
 //   MAIN=<another main.js> runs the checks against it (e.g. the one from before the fixes: they must fail)
@@ -33,17 +37,23 @@ global.THREE = Object.assign({}, THREE_REAL, { WebGLRenderer: function () { this
 
 /* ---------- the real modules (index.html's order, minus DOM / WebGL ones) ---------- */
 for (const f of ['tracks-data.js', 'js/seasons-data.js', 'js/cars.js', 'js/track.js', 'js/tyres.js', 'js/car.js', 'js/raceline.js',
-  'js/collide.js', 'js/laps.js', 'js/pit.js', 'net/session.js', 'js/gp.js']) require(path.join(ROOT, f));
+  'js/tunnels.js', 'js/collide.js', 'js/laps.js', 'js/pit.js', 'net/session.js', 'js/gp.js']) require(path.join(ROOT, f));
 const F1 = global.F1;
 let builds = 0;
 const buildTrack = F1.buildTrack;
 F1.buildTrack = d => { builds++; return buildTrack(d); };
 F1.createCockpit = () => ({ group: new THREE.Group(), update() {}, setCar() {}, setSources() {}, centreLook() {}, setLook() {} });
-const U = { opts: null, toasts: [], loading: [] };
+const U = { opts: null, toasts: [], loading: [], year: 2025, compound: null, pit: null, hud: null, tunnel: [] };
 F1.ui = {
-  init(o) { U.opts = o; }, setTrack() {}, showMenu() {}, hideMenu() {}, updateHUD() {}, setPit() {}, setGp() {}, setCars() {},
+  init(o) { U.opts = o; }, setTrack() {}, showMenu() {}, hideMenu() {}, updateHUD(h) { U.hud = h; }, setPit(p) { U.pit = p; }, setGp() {}, setCars() {},
   setLights() {}, setResumeHandler() {}, toast(t) { U.toasts.push(t); }, setLoading(n) { U.loading.push(n); },
-  getProfile: () => ({ name: 'T', colour: '#ff0000' }), getCar: () => null, getYear: () => 2025, getAudio: () => ({ volume: 0, muted: true })
+  setCompound(c) { U.compound = c; },
+  getProfile: () => ({ name: 'T', colour: '#ff0000' }), getCar: () => null, getYear: () => U.year, getAudio: () => ({ volume: 0, muted: true })
+};
+// a silent F1.audio: what main.js asks of it for the tunnel (setTunnel once per frame)
+F1.audio = {
+  supported: true, muted: true, init() {}, setVolume() {}, setMuted() {}, setEngine() {}, setActive() {}, beep() {}, play() {},
+  update() {}, setTunnel(k, w, h) { U.tunnel.push([k, w, h]); if (U.tunnel.length > 50) U.tunnel.shift(); }
 };
 require(process.env.MAIN ? path.resolve(process.env.MAIN) : path.join(ROOT, 'js/main.js'));   // boots (readyState 'complete')
 const g = F1.game;
@@ -245,6 +255,96 @@ function stopInBox(slot) {
   check('G3: a session ending during a penalty hold (work 0): no tyres fitted, the plain toast, the hold dropped',
     g.nextCompound !== comp2 && g.tyres.state.compound === comp2 && !g.pit.state.service && U.toasts.slice(from).indexOf('大獎賽已結束，回到自由練習') >= 0,
     { was: comp2, now: g.tyres.state.compound, toasts: U.toasts.slice(from) });
+
+  /* ================= v6.2: the next set of tyres ================= */
+  await load('it-1922');
+  check('v6.2: the 大獎賽 tab shows the next set (ui.setCompound) and T keeps it current', (tap('KeyT'), U.compound === g.nextCompound),
+    { ui: U.compound, next: g.nextCompound });
+  U.opts.onCompound('S');
+  frames(1);
+  check('v6.2: 起跑輪胎 picked in the tab (onCompound S): the next set, the pit strip\'s next, the telemetry\'s keys T / X',
+    g.nextCompound === 'S' && U.pit && U.pit.next === 'S' && U.hud && U.hud.nextKeys === 'T / X', { next: g.nextCompound, pit: U.pit && U.pit.next, keys: U.hud && U.hud.nextKeys });
+  U.opts.onCompound('X');
+  check('v6.2: junk from the tab is ignored', g.nextCompound === 'S');
+  U.opts.onGpStart({ q: 3, r: 5, wear: 1 });
+  frames(2);
+  check('v6.2: a Grand Prix starts on it (qualifying: a new set of softs)', g.gp.phase === 'quali' && g.tyres.state.compound === 'S', { phase: g.gp.phase, c: g.tyres.state.compound });
+  g.gp.action('skip');
+  frames(2);
+  check('v6.2: ... and the grid too', g.gp.phase === 'grid' && g.tyres.state.compound === 'S', { phase: g.gp.phase, c: g.tyres.state.compound });
+  g.gp.action('end'); frames(2); g.gp.action('end'); frames(2);
+  {
+    const P = g.track.pit, N = g.track.samples.length;
+    let from = U.toasts.length;
+    g.car.reset(g.track, ((P.entry - 30) % N + N) % N);
+    g.car.state.speed = 20;
+    putInLane(((P.entry + 6) % N + N) % N, 15);
+    frames(3);
+    check('v6.2: entering the pit lane: the prompt (keyboard) with the next set', g.pit.state.inLane &&
+      U.toasts.slice(from).indexOf('按 T（手把 X）選擇輪胎：軟 / 中 / 硬（下一組：軟胎）') >= 0, U.toasts.slice(from));
+    g.car.reset(g.track, (P.exit + Math.floor(N / 2)) % N);
+    frames(80);
+  }
+
+  /* ================= v6.2: the pit lane limit of the season ================= */
+  U.year = 2024;
+  U.opts.onYear(2024);
+  await load('nl-1948');
+  frames(2);
+  check('v6.2: Zandvoort in 2024: built for the season (limit 60), js/pit.js judges by 60',
+    g.track.pit.limitKmh === 60 && g.track.pit.year === 2024 && g.pit.state.limitKmh === 60, { lim: g.track.pit.limitKmh, year: g.track.pit.year, pit: g.pit.state.limitKmh });
+  U.year = 2025;
+  U.opts.onYear(2025);
+  frames(2);
+  check('v6.2: 2025 picked in the menu: 80 at once (track and js/pit.js)', g.track.pit.limitKmh === 80 && g.track.pit.year === 2025 && g.pit.state.limitKmh === 80,
+    { lim: g.track.pit.limitKmh, pit: g.pit.state.limitKmh });
+  {
+    const P = g.track.pit, N = g.track.samples.length;
+    putInLane(((P.entry + 10) % N + N) % N, 10);
+    frames(3);
+    U.year = 2024;
+    U.opts.onYear(2024);
+    frames(2);
+    check('v6.2: changed during a pit visit: the track says 60 at once, the visit is judged by 80 to its end',
+      g.pit.state.visit && g.track.pit.limitKmh === 60 && g.pit.state.limitKmh === 80, { visit: g.pit.state.visit, lim: g.track.pit.limitKmh, pit: g.pit.state.limitKmh });
+    g.car.reset(g.track, (P.exit + Math.floor(N / 2)) % N);
+    pumpUntil(() => !g.pit.state.visit, 120);
+    frames(2);
+    check('v6.2: ... then js/pit.js is rebound to 60', !g.pit.state.visit && g.pit.state.limitKmh === 60, { visit: g.pit.state.visit, pit: g.pit.state.limitKmh });
+  }
+  U.year = 2025;
+  U.opts.onYear(2025);
+
+  /* ================= v6.2: Monaco's tunnel ================= */
+  await load('mc-1929');
+  {
+    const tn = g.tunnels, N = g.track.samples.length, L = g.lights;
+    const T0 = tn && tn.tunnels.find(t => t.kind === 'tunnel');
+    check('v6.2: Monaco: the covered stretches built with the track and in the scene (the tunnel ' + (T0 && T0.length) + ' m)',
+      !!(tn && tn.group.parent && T0 && T0.length > 300 && tn.tunnels.length >= 2), tn && tn.tunnels.map(t => t.name + ' ' + t.length));
+    const mid = (T0.from + Math.round((((T0.to - T0.from) % N) + N) % N / 2)) % N;
+    g.car.reset(g.track, mid);
+    frames(3);
+    const i = g.car.state.sampleIndex, k = tn.inTunnel(i), last = U.tunnel[U.tunnel.length - 1];
+    check('v6.2: mid-tunnel (beside the sea-side openings): the sun out, the sky light as tunnels.sceneLight says',
+      L.sun.intensity === L.sun0 * tn.sceneLight(i, 'sun') && L.sun.intensity < 0.05 && L.hemi.intensity === L.hemi0 * tn.sceneLight(i, 'hemi'),
+      { sun: L.sun.intensity, hemi: L.hemi.intensity });
+    check('v6.2: mid-tunnel: the reverb asked for at full depth with the tunnel\'s size', k === 1 && last && last[0] === 1 && last[1] === T0.width && last[2] === T0.height, { k, last, w: T0.width, h: T0.height });
+    g.car.reset(g.track, ((T0.to - 30) % N + N) % N);   // the enclosed end, 60 m before the exit
+    frames(3);
+    const j = g.car.state.sampleIndex;
+    check('v6.2: in the enclosed end: the sun out, the sky light dimmed (' + L.hemi.intensity.toFixed(3) + ')',
+      L.sun.intensity < 0.05 && L.hemi.intensity === L.hemi0 * tn.sceneLight(j, 'hemi') && L.hemi.intensity < L.hemi0, { sun: L.sun.intensity, hemi: L.hemi.intensity });
+    g.car.reset(g.track, (T0.to + 40) % N);
+    frames(3);
+    const out = U.tunnel[U.tunnel.length - 1];
+    check('v6.2: out of the tunnel: daylight, no reverb', L.sun.intensity === L.sun0 && L.hemi.intensity === L.hemi0 && out[0] === 0, { sun: L.sun.intensity, hemi: L.hemi.intensity, out });
+    g.car.reset(g.track, mid);
+    frames(2);
+    await load('it-1922');
+    check('v6.2: another track: Monaco\'s tunnels gone from the scene, daylight', !tn.group.parent && g.tunnels !== tn && L.sun.intensity === L.sun0 && L.hemi.intensity === L.hemi0,
+      { parent: !!tn.group.parent, sun: L.sun.intensity });
+  }
 
   console.log('\n' + passed + ' / ' + (passed + failed) + ' checks passed' + (failed ? '' : ': all main tests passed'));
   process.exit(failed ? 1 : 0);

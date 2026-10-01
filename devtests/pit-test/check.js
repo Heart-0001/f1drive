@@ -29,6 +29,15 @@
 //                   lane's asphalt now is) are taken out, and every triangle taken out must be such a kerb triangle.
 //              And where HEAD's own lane is elsewhere (tracks-data.js pitSide: Monaco's lane on the harbour side), HEAD's
 //              widening of its pit side's wall inside its lane is allowed for too.
+//              v6.2 (2026-10-01, track audit) adds three more deliberate changes:
+//                3. the curvature-derived banking is capped at 2.5 deg (trackData.bankMaxDeg: 1.5 on street circuits)
+//                   instead of 6: HEAD and v5 are built with that cap patched into their source (where they still have
+//                   the fixed BANK_MAX), so the comparison still isolates the pit lane;
+//                4. narrow stretches (trackData.widthOverrides, Baku's castle): handled like the bankOverrides (compared
+//                   without them; with them only halfW / the walls differ, only on their sections +- the ramps);
+//                5. a grade-separated crossing (track.bridges: Suzuka): the old builds level both roads there; y / grade /
+//                   bank / the wall flags are not compared within the levelling span of each branch, the v5 road / paint
+//                   prefix test is skipped for such a track and the queries are compared outside those spans only.
 //   time       build time (median of 3) against HEAD
 // Exit code 1 when a check fails. Warnings are printed and counted but do not fail.
 'use strict';
@@ -43,6 +52,14 @@ const TRACKS = window.F1_TRACKS, SCENERY = window.F1_SCENERY;
 function loadBuild(src, file, scenery) {
   const win = { THREE: global.THREE };
   if (scenery) win.F1_SCENERY = SCENERY;
+  // (change 3 above) an old source with the fixed 6 deg cap: give it the new per-track cap
+  const FIXED = /var BANK_MAX = 6 \* Math\.PI \/ 180;/;
+  if (FIXED.test(src)) {
+    src = src.replace(FIXED, 'var BANK_MAX = 6 * Math.PI / 180; /* patched by devtests/pit-test/check.js */')
+      .replace('F1.buildTrack = function (trackData) {', 'F1.buildTrack = function (trackData) { ' +
+        'BANK_MAX = (trackData && +trackData.bankMaxDeg > 0 ? Math.min(+trackData.bankMaxDeg, 10) : 2.5) * Math.PI / 180;');
+    if (!/patched by devtests/.test(src) || !/BANK_MAX = \(trackData/.test(src)) throw new Error(file + ': could not patch the bank cap');
+  }
   vm.runInContext(src, vm.createContext({ window: win, console }), { filename: file });
   return win.F1.buildTrack;
 }
@@ -295,26 +312,37 @@ for (const td of TRACKS) {
 
   // --- nothing else changed: samples against git HEAD, the rest against the v5 baseline
   //     (adapted, see the top: trN = the new js/track.js on the track without its bankOverrides)
-  const tdN = Object.assign({}, td); delete tdN.bankOverrides;
-  const trN = td.bankOverrides ? buildNew(tdN) : tr, SN = trN.samples;
-  if (td.bankOverrides) {
-    // with / without the overrides: only bank, only near the sections
-    const near = new Uint8Array(N), ramp = Math.ceil(36 / ds);
-    for (const o of td.bankOverrides) {
+  const tdN = Object.assign({}, td); delete tdN.bankOverrides; delete tdN.widthOverrides;
+  const trN = td.bankOverrides || td.widthOverrides ? buildNew(tdN) : tr, SN = trN.samples;
+  if (td.bankOverrides || td.widthOverrides) {
+    // with / without the overrides: only bank near the bank sections, only the width / walls near the narrow ones
+    const nearB = new Uint8Array(N), nearW = new Uint8Array(N), ramp = Math.ceil(36 / ds), rampW = Math.ceil(42 / ds);
+    for (const o of td.bankOverrides || []) {
       const a = Math.round(o.from * N), b = Math.round(o.to * N), len = ((b - a) % N + N) % N;
-      for (let q = -ramp - 40; q <= len + ramp + 40; q++) near[wq(a + q)] = 1;   // (+-40 samples: the ends are placed on the samples)
+      for (let q = -ramp - 40; q <= len + ramp + 40; q++) nearB[wq(a + q)] = 1;   // (+-40 samples: the ends are placed on the samples)
     }
-    let other = 0, otherEx = '', banked = 0;
+    for (const o of td.widthOverrides || []) {
+      const a = Math.round(o.from * N), b = Math.round(o.to * N), len = ((b - a) % N + N) % N;
+      for (let q = -rampW - 40; q <= len + rampW + 40; q++) nearW[wq(a + q)] = 1;
+    }
+    const WKEYS = new Set(['halfW', 'wallPosDist', 'wallNegDist', 'wallPos', 'wallNeg']);
+    let other = 0, otherEx = '', banked = 0, narrowed = 0;
     for (let i = 0; i < N; i++) {
       for (const key of Object.keys(S[i])) {
         if (S[i][key] === SN[i][key]) continue;
-        if (key === 'bank' && near[i]) { banked++; continue; }
+        if (key === 'bank' && nearB[i]) { banked++; continue; }
+        if (WKEYS.has(key) && nearW[i]) { narrowed++; continue; }
         other++; if (!otherEx) otherEx = 'sample ' + i + ' ' + key + ' ' + SN[i][key] + ' -> ' + S[i][key];
       }
     }
-    check(banked > 0, id, 'bankOverrides change nothing');
-    check(other === 0, id, other + ' sample fields differ between the builds with / without bankOverrides other than bank on the banked sections, e.g. ' + otherEx);
+    if (td.bankOverrides) check(banked > 0, id, 'bankOverrides change nothing');
+    if (td.widthOverrides) check(narrowed > 0, id, 'widthOverrides change nothing');
+    check(other === 0, id, other + ' sample fields differ between the builds with / without the overrides other than bank / width on their sections, e.g. ' + otherEx);
   }
+  // (change 5) the levelling span of the old builds around a grade-separated crossing
+  const bridgeZone = new Uint8Array(N), isBridge = !!(tr.bridges && tr.bridges.length);
+  for (const B of tr.bridges || []) for (const c of [B.up, B.lo]) for (let q = -Math.ceil(266 / ds) - 2; q <= Math.ceil(266 / ds) + 2; q++) bridgeZone[wq(c + q)] = 1;
+  const BKEYS = new Set(['y', 'grade', 'bank', 'wallPos', 'wallNeg']);
   const head = buildHead(tdN), HS = head.samples;
   check(HS.length === N && head.length === tr.length, id, 'sample count / length changed');
   let fieldDiff = 0, fieldEx = '', wallMoved = 0, keysDiff = 0;
@@ -327,6 +355,7 @@ for (const td of TRACKS) {
     if (Object.keys(a).join() !== Object.keys(b).join()) keysDiff++;
     for (const key of Object.keys(a)) {
       if (a[key] === b[key]) continue;
+      if (bridgeZone[i] && BKEYS.has(key)) continue;
       const pitSide = (sg > 0 && (key === 'wallPosDist' || key === 'wallPos')) || (sg < 0 && (key === 'wallNegDist' || key === 'wallNeg'));
       if (lane && pitSide && (typeof a[key] === 'boolean' ? b[key] === true : b[key] >= a[key])) { if (typeof a[key] === 'number') wallMoved++; continue; }
       const headSide = inH && ((hp.side > 0 && (key === 'wallPosDist' || key === 'wallPos')) || (hp.side < 0 && (key === 'wallNegDist' || key === 'wallNeg')));
@@ -352,7 +381,7 @@ for (const td of TRACKS) {
   }
   const meshOf = (t, n) => t.group.children.find(m => m.name === n);
   const tri = t => t.group.children.reduce((acc, m) => acc + (m.geometry.index ? m.geometry.index.count : m.geometry.attributes.position.count) / 3, 0);
-  for (const name of ['road', 'paint']) {
+  for (const name of isBridge ? [] : ['road', 'paint']) {
     const a = meshOf(v5, name).geometry.attributes, b = meshOf(trN, name).geometry.attributes;
     let diff = 0, removed = 0;
     if (name === 'road') {
@@ -380,6 +409,7 @@ for (const td of TRACKS) {
   const trQ = tr; tr = trN;          // the queries: the build without the bankOverrides against v5
   for (let i = 0; i < N; i += 2) {
     const s = S[i];
+    if (bridgeZone[i]) continue;
     for (const d of [-s.halfW + 0.05, -3.3, 0, 2.2, s.halfW - 0.05]) {
       const x = s.x + s.nx * d + s.tx * 0.7, z = s.z + s.nz * d + s.tz * 0.7;
       const r1 = [tr.locate(x, z, i), tr.locate(x, z, -1), tr.nearest(x, z), tr.surfaceY(i, d), tr.groundY(x, z), tr.inCorridor(x, z, 0)];

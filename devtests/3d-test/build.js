@@ -22,7 +22,7 @@ for (const td of TRACKS) {
   for (const [name, lift] of [['road', 0.012], ['runoff', 0], ['paint', 0.03]]) {
     const p = tr.group.children.find(m => m.name === name).geometry.attributes.position.array;
     for (let i = 0; i < p.length; i += 3) {
-      const loc = tr.locate(p[i], p[i + 2], -1);
+      const loc = tr.locate(p[i], p[i + 2], -1, p[i + 1]);   // (the vertex's height picks the road at a bridge: Suzuka, v6.2)
       const s = S[loc.index];
       if (Math.hypot(p[i] - s.x - s.nx * loc.d, p[i + 2] - s.z - s.nz * loc.d) > 0.05) continue; // not exactly abeam a sample
       const e = Math.abs(p[i + 1] - tr.surfaceY(loc.index, loc.d)) - (name === 'paint' ? 0.04 : lift);
@@ -44,14 +44,19 @@ for (const td of TRACKS) {
   check(minMargin >= 0.99, td.id + ' wall margin ' + minMargin);
   // wall vertices vs any centreline sample: must be >= that sample's halfW + 0.5 away
   const wp = tr.group.children.find(m => m.name === 'walls').geometry.attributes.position.array;
-  let wallInRoad = 0;
+  let wallInRoad = 0, underDeck = 0;
+  const nearBridge = k => (tr.bridges || []).some(B => { const w = q => ((k - q) % N + N) % N; return w(B.deckFrom - 10) <= ((B.deckTo - B.deckFrom + 20) % N + N) % N || Math.min(w(B.lo), N - w(B.lo)) <= 30; });
   for (let i = 0; i < wp.length; i += 9) {
-    const loc = tr.locate(wp[i], wp[i + 2], -1); const s = S[loc.index];
+    const loc = tr.locate(wp[i], wp[i + 2], -1, wp[i + 1]); const s = S[loc.index];   // (height: the level at a bridge)
+    // (v6.2: a bridge's abutment walls stand behind the lower road's walls UNDER the upper road's deck - below its
+    //  surface, not in its way: a wall vertex more than 0.5 m below the road it lies under is not "in the road")
+    if (nearBridge(loc.index) && wp[i + 1] < tr.surfaceY(loc.index, loc.d) - 0.5) { underDeck++; continue; }
     const dist = Math.hypot(wp[i] - s.x, wp[i + 2] - s.z);
     minWallClear = Math.min(minWallClear, dist - s.halfW);
     if (dist < s.halfW + 0.5) wallInRoad++;
   }
   check(wallInRoad === 0, td.id + ' wall verts inside road: ' + wallInRoad + ' minClear ' + minWallClear.toFixed(2));
+  if (underDeck) console.log('  ' + td.id + ': ' + underDeck + ' wall vertices under a bridge deck (abutments), not counted');
   // drawn inner wall face == exported wall distance (collision matches what is drawn)
   { const set = new Set(); for (let i = 0; i < wp.length; i += 3) set.add(Math.round(wp[i] * 50) + ',' + Math.round(wp[i + 2] * 50));
     let miss = 0;

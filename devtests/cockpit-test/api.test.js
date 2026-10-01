@@ -3,6 +3,10 @@
 // display's lap delta with the real lap counter (js/laps.js) across tracks and lap.reset(), the live mirrors (glass
 // texture coordinates, rear-view cameras, the extra pass recorded by a stub renderer, setMirrors), and the remote car
 // against the v5 carmodel (carmodel-v5.js): setColour, and its halo along the cockpit's (F1.COCKPIT_HALO), setHalo.
+// v6.2: the FOV setting (setFov, F1.COCKPIT_FOV, the proportional speed widening, the framing lens shift that keeps the
+// wheel display where v5 drew it) and the road-shape cues (F1.COCKPIT_HEAD: counter-roll, slow counter-pitch, the
+// compression eye-sink / nod, rotation.y = PI + head yaw). The v5 camera comparison changed on purpose: it now runs at
+// setFov(70) on a level road (bit for bit), and on a sloped, banked road only the cockpit model (group) must match v5.
 // A stub canvas (every 2d call is a no-op; fillText records the text) lets the texture code run.
 //   node devtests/cockpit-test/api.test.js          exit code 1 on a failure
 const path = require('path'), fs = require('fs');
@@ -42,8 +46,8 @@ const F1 = global.F1;
 // ---- API ----
 const cam = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000);
 const ck = F1.createCockpit(cam);
-check('createCockpit returns group, update, setLook, centreLook, setCar (+ setSources, info, dispose)',
-  ck.group && ck.group.isGroup && ['update', 'setLook', 'centreLook', 'setCar', 'setSources', 'info', 'dispose'].every(k => typeof ck[k] === 'function'));
+check('createCockpit returns group, update, setLook, centreLook, setCar (+ setSources, setMirrors, setFov, info, dispose)',
+  ck.group && ck.group.isGroup && ['update', 'setLook', 'centreLook', 'setCar', 'setSources', 'setMirrors', 'setFov', 'info', 'dispose'].every(k => typeof ck[k] === 'function'));
 check('F1.COCKPIT_LOOK unchanged (55 / 12 / 10 deg)', Math.abs(F1.COCKPIT_LOOK.maxYaw * 180 / Math.PI - 55) < 1e-9 && Math.abs(F1.COCKPIT_LOOK.maxPitchUp * 180 / Math.PI - 12) < 1e-9);
 check('camera is a child of the group, near <= 0.06', cam.parent === ck.group && cam.near <= 0.06);
 let inf = ck.info();
@@ -230,26 +234,183 @@ check('state.vib = 1 shakes the eye (a few mm), vib = 0 does not', dev > 0.002 &
   mk.dispose(); rc.dispose();
 }
 
+// ---- v6.2: the FOV setting ----
+{
+  const fc = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), fk = F1.createCockpit(fc), FV = F1.COCKPIT_FOV;
+  const projFov = () => 2 * Math.atan(1 / fc.projectionMatrix.elements[5]) * 180 / Math.PI;   // what is really drawn
+  const fs0 = { x: 0, y: 0, z: 0, heading: 0, speed: 0, steer: 0, pitch: 0, roll: 0, onGrass: false, hit: 0 };
+  check('FOV: F1.COCKPIT_FOV = default 60, range 50..75, widening 12/70 (v5: 70 -> 82); a new cockpit draws 60 deg at once',
+    FV && FV.def === 60 && FV.min === 50 && FV.max === 75 && Math.abs(FV.widen - 12 / 70) < 1e-12 && fc.fov === 60 && Math.abs(projFov() - 60) < 1e-9 &&
+    fk.info().fov.setting === 60, { FV, fov: fc.fov, drawn: projFov() });
+  const top = Object.assign({}, fs0, { speed: 330 / 3.6 });
+  for (let i = 0; i < 600; i++) fk.update(top, 1 / 60);
+  const atTop60 = fc.fov;
+  // (camera.fov follows the eased value in steps of 0.02 deg: the projection is only rebuilt when it moved that much)
+  check('FOV: the speed widening stays proportional: 60 -> 70.29 deg at 330 km/h', Math.abs(atTop60 - 60 * 82 / 70) < 0.025, atTop60);
+  const r70 = fk.setFov(70), now70 = fc.fov, drawn70 = projFov();
+  check('FOV: setFov(70) at speed applies at once (no easing), the widening scaled with it: 82 deg, as v5', r70 === 70 && Math.abs(now70 - 82) < 0.01 && Math.abs(drawn70 - now70) < 1e-9,
+    { returned: r70, fov: now70, drawn: drawn70 });
+  for (let i = 0; i < 600; i++) fk.update(fs0, 1 / 60);
+  const still70 = fc.fov;
+  fk.setFov(50); for (let i = 0; i < 600; i++) fk.update(top, 1 / 60);
+  check('FOV: setFov(70) standing = 70; setFov(50) at top speed = 58.57', Math.abs(still70 - 70) < 0.025 && Math.abs(fc.fov - 50 * 82 / 70) < 0.025, { still70, top50: fc.fov });
+  const got = [40, 90, '65', ' 55 ', NaN, null, undefined, 'x', {}, Infinity, -Infinity, true, 62.5].map(v => fk.setFov(v));
+  check('FOV: setFov clamps to 50..75, takes numeric strings, anything else = the default 60',
+    JSON.stringify(got) === JSON.stringify([50, 75, 65, 55, 60, 60, 60, 60, 60, 60, 60, 60, 62.5]) && fk.info().fov.setting === 62.5, got);
+  // framing: the point 25 deg below the line of sight (the wheel display's lower edge) is drawn where v5's camera drew it
+  // at the same speed (a vertical lens shift, no tilt); setting 70 = no shift at all (v5's projection)
+  const T25 = Math.tan(25 * Math.PI / 180), rows = [];
+  let worst = 0;
+  for (const set of [50, 60, 62.5, 70, 75]) for (const v of [0, 40, 330 / 3.6]) {
+    fk.setFov(set); for (let i = 0; i < 400; i++) fk.update(Object.assign({}, fs0, { speed: v }), 1 / 60);
+    const ndc = new THREE.Vector3(0, -T25, -1).applyMatrix4(fc.projectionMatrix).y, fov5 = fc.fov * 70 / set;
+    const want = -T25 / Math.tan(fov5 * Math.PI / 360), hz = new THREE.Vector3(0, 0, -1).applyMatrix4(fc.projectionMatrix).y;
+    worst = Math.max(worst, Math.abs(ndc - want));
+    rows.push({ set, kmh: Math.round(v * 3.6), fov: +fc.fov.toFixed(2), shift: +fk.info().fov.shift.toFixed(4), displayEdgePct: +(50 - 50 * ndc).toFixed(1), horizonPct: +(50 - 50 * hz).toFixed(1) });
+  }
+  const r60 = rows.find(r => r.set === 60 && r.kmh === 0), f70 = rows.filter(r => r.set === 70), r75 = rows.find(r => r.set === 75 && r.kmh === 0);
+  check('framing: the wheel display\'s lower edge stays where v5 drew it (every setting and speed); 70 = no shift; 60: horizon at 43 %; 75: below 50 %',
+    worst < 1e-9 && f70.every(r => r.shift === 0) && Math.abs(r60.horizonPct - 43) < 1 && r75.horizonPct > 50, { worst, rows });
+  // the shift lives in the projection matrix only: an outside updateProjectionMatrix (main.js on a resize, a harness that
+  // borrows the camera for an overview) gets a centred projection; the next cockpit update puts the shift back
+  fk.setFov(60); for (let i = 0; i < 600; i++) fk.update(fs0, 1 / 60);
+  const e9 = () => fc.projectionMatrix.elements[9], shifted = e9();
+  const f0 = fc.fov; fc.fov = 30; fc.updateProjectionMatrix(); const outside = e9(); fc.fov = f0;
+  fk.update(fs0, 1 / 60);
+  const back = e9(), inv = new THREE.Matrix4().multiplyMatrices(fc.projectionMatrix, fc.projectionMatrixInverse).elements;
+  check('framing: the shift is only in the projection matrix (camera.view untouched): an outside updateProjectionMatrix is centred, the next update shifts again',
+    fc.view === null && Math.abs(shifted + 2 * 0.0708) < 0.001 && outside === 0 && back === shifted && inv.every((x, i) => Math.abs(x - (i % 5 === 0 ? 1 : 0)) < 1e-9),
+    { shifted, outside, back });
+  fk.dispose();
+}
+
+// ---- v6.2: road-shape cues (counter-roll, slow counter-pitch, compression) ----
+{
+  const D = 180 / Math.PI, H = F1.COCKPIT_HEAD;
+  const up = c => { const e = c.matrixWorld.elements; return Math.atan2(Math.hypot(e[4], e[6]), e[5]); };   // camera up vs world up
+  const elev = c => { const e = c.matrixWorld.elements; return Math.asin(-e[9] / Math.hypot(e[8], e[9], e[10])); };   // line of sight
+  const run = (k, c, st, n, dt) => { for (let i = 0; i < n; i++) k.update(st, dt === undefined ? 1 / 60 : dt); k.group.updateMatrixWorld(true); };
+  check('F1.COCKPIT_HEAD: roll 45 % (0.25 s), pitch 50 % (0.6 s), 1.2 cm and 0.004 rad per g',
+    H && H.rollKeep === 0.45 && H.rollTau === 0.25 && H.pitchKeep === 0.5 && H.pitchTau === 0.6 && H.compressEye === 0.012 && H.compressNod === 0.004, H);
+  // banking: on a 19 deg bank the view tilts by 55 % of the roll, about the car's forward axis also while looking aside;
+  // the eye sinks 1.2 cm per g of compression
+  {
+    const cc = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), nc = F1.createCockpit(cc);
+    const st = { x: 0, y: 0, z: 0, heading: 0, speed: 50, steer: 0, pitch: 0, roll: -0.33, compress: 1.5, onGrass: false, hit: 0 };
+    run(nc, cc, st, 240);
+    const tilt = up(cc);
+    check('road shape: the view tilts 55 % of a 19 deg bank (the head keeps 45 % out), the eye sinks 1.8 cm at 1.5 g',
+      Math.abs(tilt - 0.55 * 0.33) < 0.005 && Math.abs(cc.position.y - (0.80 - 0.018)) < 0.002, { tiltDeg: tilt * D, eyeY: cc.position.y });
+    nc.setLook(1, 0); run(nc, cc, st, 240);
+    const tilt2 = up(cc);
+    check('road shape: looking aside, the counter-roll stays about the car\'s forward axis (the view tilts no more)', Math.abs(tilt2 - 0.55 * 0.33) < 0.01, { tiltDeg: tilt2 * D });
+    nc.dispose();
+  }
+  // the roll is followed with a lag; dt = 0 (main.js after a track load) takes it at once
+  {
+    const cc = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), nc = F1.createCockpit(cc);
+    const st = { x: 0, y: 0, z: 0, heading: 0, speed: 0, steer: 0, pitch: 0, roll: -0.33, onGrass: false, hit: 0 };
+    run(nc, cc, st, 6);                       // 0.1 s after the bank starts: the head has taken out only part of it
+    const early = up(cc);
+    const c2 = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), n2 = F1.createCockpit(c2);
+    run(n2, c2, st, 1, 0);
+    check('road shape: the counter-roll lags (0.1 s after a bank starts the view still tilts > 80 %), dt 0 settles it at once',
+      early > 0.8 * 0.33 && early < 0.33 && Math.abs(up(c2) - 0.55 * 0.33) < 1e-6, { earlyDeg: early * D, dt0Deg: up(c2) * D });
+    nc.dispose(); n2.dispose();
+  }
+  // slope: a steady 15 % climb ends up with the view pitched 50 % of the car (the nose and the road rise against the
+  // horizon); a change of slope still swings the view at first (slow head)
+  {
+    const cc = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), nc = F1.createCockpit(cc), p = Math.atan(0.15);
+    const st = { x: 0, y: 0, z: 0, heading: 0.7, speed: 0, steer: 0, pitch: 0, roll: 0, onGrass: false, hit: 0 };
+    run(nc, cc, st, 60);
+    st.pitch = p;
+    run(nc, cc, st, 6); const e01 = elev(cc);
+    run(nc, cc, st, 54); const e1 = elev(cc);
+    run(nc, cc, st, 300); const e6 = elev(cc);
+    check('road shape: on a 15 % climb (8.5 deg) the view first follows the car (> 85 % after 0.1 s), then settles at 50 % (6 s)',
+      e01 > 0.85 * p && e1 < 0.75 * p && e1 > 0.55 * p && Math.abs(e6 - 0.5 * p) < 0.002, { carDeg: p * D, after01: e01 * D, after1: e1 * D, after6: e6 * D });
+    // looking aside: the counter-pitch turns about the car's lateral axis = a car pitched only p / 2 (small-angle form)
+    nc.setLook(1, 0.5); run(nc, cc, st, 300);
+    const q = new THREE.Quaternion(); cc.getWorldQuaternion(q);
+    const ref = new THREE.Object3D(); ref.rotation.order = 'YXZ'; ref.rotation.set(-p / 2, st.heading, 0);
+    const rc = new THREE.Object3D(); rc.rotation.order = 'YXZ'; rc.rotation.set(cc.rotation.x + p / 2 * Math.cos(cc.rotation.y - Math.PI), cc.rotation.y, 0);
+    ref.add(rc); ref.updateMatrixWorld(true);
+    const qr = new THREE.Quaternion(); rc.getWorldQuaternion(qr);
+    check('road shape: looking aside (55 deg, up), the counter-pitch still turns about the car\'s lateral axis', q.angleTo(qr) < 0.01, { offDeg: q.angleTo(qr) * D });
+    nc.dispose();
+  }
+  // camera.rotation.y = PI + the head yaw exactly, whatever the cues (main.js's audio listener, gp-smoke's pad checks)
+  {
+    const ca = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), cb = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000);
+    const ka = F1.createCockpit(ca), kb = F1.createCockpit(cb);
+    const sa = { x: 0, y: 0, z: 0, heading: 0, speed: 40, steer: 0, pitch: 0, roll: 0, onGrass: false, hit: 0 };
+    const sb = Object.assign({}, sa);
+    let same = true, moved = 0;
+    for (let i = 0; i < 400; i++) {
+      sb.pitch = 0.12 * Math.sin(i / 40); sb.roll = 0.3 * Math.sin(i / 23); sb.compress = 2 * Math.sin(i / 17);
+      const lx = Math.sin(i / 30), ly = Math.cos(i / 45);
+      ka.setLook(lx, ly); kb.setLook(lx, ly); ka.update(sa, 1 / 60); kb.update(sb, 1 / 60);
+      if (!Object.is(ca.rotation.y, cb.rotation.y)) same = false;
+      moved = Math.max(moved, Math.abs(ca.rotation.x - cb.rotation.x), Math.abs(ca.rotation.z - cb.rotation.z));
+    }
+    check('road shape: camera.rotation.y stays PI + head yaw exactly (as on a level road) while x / z carry the cues', same && moved > 0.05, { same, maxXZ: moved });
+    ka.dispose(); kb.dispose();
+  }
+  // compression: from state.compress, else state.seatG - 1; clamped -1..2.5 g; garbage = none; level + 0 g = exactly v6.1
+  {
+    const cc = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), nc = F1.createCockpit(cc);
+    const base = { x: 0, y: 0, z: 0, heading: 0, speed: 0, steer: 0, pitch: 0, roll: 0, onGrass: false, hit: 0 };
+    const eye = extra => { run(nc, cc, Object.assign({}, base, extra), 120); return cc.position.y; };
+    const r = { seatG: eye({ seatG: 2.5 }), both: eye({ compress: 0.5, seatG: 3 }), big: eye({ compress: 10 }), crest: eye({ compress: -3 }),
+      junk: eye({ compress: 'x', seatG: NaN }), none: eye({}), nod: 0 };
+    run(nc, cc, Object.assign({}, base, { compress: 2 }), 120); r.nod = cc.rotation.x;
+    check('compression: seatG 2.5 -> 1.8 cm down; compress wins over seatG; 10 g clamps to 2.5 (3 cm); a -3 g crest lifts 1.2 cm; garbage = none; 2 g nods 0.008 rad',
+      Math.abs(r.seatG - (0.80 - 0.018)) < 1e-4 && Math.abs(r.both - (0.80 - 0.006)) < 1e-4 && Math.abs(r.big - (0.80 - 0.030)) < 1e-4 &&
+      Math.abs(r.crest - (0.80 + 0.012)) < 1e-4 && Math.abs(r.junk - 0.80) < 1e-9 && Math.abs(r.none - 0.80) < 1e-9 && Math.abs(r.nod + 0.008) < 1e-4, r);
+    nc.dispose();
+    const c2 = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), n2 = F1.createCockpit(c2);
+    run(n2, c2, Object.assign({}, base, { heading: 0.3, compress: 0 }), 120);
+    const h = n2.info().head;
+    check('level road, no compression: the cues are exactly 0 (camera as in v6.1)', c2.position.y === 0.80 && c2.rotation.x === 0 && c2.rotation.z === 0 &&
+      c2.rotation.y === Math.PI && h.roll === 0 && h.pitch === 0 && h.compress === 0, { pos: c2.position.y, rx: c2.rotation.x, rz: c2.rotation.z, head: h });
+    n2.dispose();
+  }
+}
+
 // ---- the camera exactly as the v5 cockpit's (no vib) ----
 if (!OLD) console.log('SKIP camera / carmodel against v5 (cockpit-v5.js / carmodel-v5.js missing)');
 else {
-  const ca = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), cb = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000);
-  const oa = OLD.createCockpit(ca), nb = F1.createCockpit(cb);
-  let seed = 1; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, realRandom = Math.random;
-  let maxd = 0;
-  const s = { x: 3, y: 1, z: -7, heading: 0.4, speed: 0, steer: 0, pitch: 0.02, roll: -0.03, onGrass: false, hit: 0 };
-  for (let i = 0; i < 600; i++) {
-    s.speed = 60 * Math.sin(i / 100) ** 2; s.heading += 0.004 * Math.sin(i / 30); s.steer = Math.sin(i / 25); s.hit = i % 97 === 0 ? 0.8 : 0; s.onGrass = i > 300 && i < 360;
-    const look = i > 400 ? [Math.sin(i / 20), Math.cos(i / 33)] : [0, 0];
-    oa.setLook(look[0], look[1]); nb.setLook(look[0], look[1]);
-    seed = i + 1; Math.random = rnd; oa.update(s, 1 / 60);
-    seed = i + 1; nb.update(s, 1 / 60); Math.random = realRandom;
-    oa.group.updateMatrixWorld(true); nb.group.updateMatrixWorld(true);
-    for (let k = 0; k < 16; k++) maxd = Math.max(maxd, Math.abs(ca.matrixWorld.elements[k] - cb.matrixWorld.elements[k]));
-    maxd = Math.max(maxd, Math.abs(ca.fov - cb.fov));
-  }
-  Math.random = realRandom;
-  check('camera (pose, FOV, shake, look) identical to the v5 cockpit over 600 frames', maxd === 0, { maxDiff: maxd });
+  // v6.2 changed the camera on purpose in two ways: the default FOV (60, was v5's 70 -> 82: setFov(70) gives v5's) and the
+  // road-shape cues (zero on a level road without compression). So: the camera at FOV 70 on a level road, bit for bit;
+  // and on a sloped, banked road the cockpit model itself (the group) still follows the car exactly as v5's
+  const cmp = (pitch, roll, what) => {
+    const ca = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000), cb = new THREE.PerspectiveCamera(70, 16 / 9, 0.1, 4000);
+    const oa = OLD.createCockpit(ca), nb = F1.createCockpit(cb);
+    nb.setFov(70);
+    let seed = 1; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, realRandom = Math.random;
+    let maxd = 0;
+    const s = { x: 3, y: 1, z: -7, heading: 0.4, speed: 0, steer: 0, pitch: pitch, roll: roll, onGrass: false, hit: 0 };
+    for (let i = 0; i < 600; i++) {
+      s.speed = 60 * Math.sin(i / 100) ** 2; s.heading += 0.004 * Math.sin(i / 30); s.steer = Math.sin(i / 25); s.hit = i % 97 === 0 ? 0.8 : 0; s.onGrass = i > 300 && i < 360;
+      const look = i > 400 ? [Math.sin(i / 20), Math.cos(i / 33)] : [0, 0];
+      oa.setLook(look[0], look[1]); nb.setLook(look[0], look[1]);
+      seed = i + 1; Math.random = rnd; oa.update(s, 1 / 60);
+      seed = i + 1; nb.update(s, 1 / 60); Math.random = realRandom;
+      oa.group.updateMatrixWorld(true); nb.group.updateMatrixWorld(true);
+      const A = what === 'group' ? oa.group : ca, B = what === 'group' ? nb.group : cb;
+      for (let k = 0; k < 16; k++) maxd = Math.max(maxd, Math.abs(A.matrixWorld.elements[k] - B.matrixWorld.elements[k]));
+      maxd = Math.max(maxd, Math.abs(ca.fov - cb.fov));
+      for (let k = 0; k < 16; k++) maxd = Math.max(maxd, Math.abs(ca.projectionMatrix.elements[k] - cb.projectionMatrix.elements[k]));   // (no framing shift at 70)
+    }
+    Math.random = realRandom;
+    nb.dispose();
+    return maxd;
+  };
+  const d1 = cmp(0, 0, 'camera'), d2 = cmp(0.02, -0.03, 'group'), d3 = cmp(0.02, -0.03, 'camera');
+  check('camera (pose, FOV, projection, shake, look) identical to the v5 cockpit over 600 frames at setFov(70) on a level road', d1 === 0, { maxDiff: d1 });
+  check('on a sloped, banked road: the cockpit model (group) + FOV identical to v5; only the camera differs (the head\'s counter-roll / -pitch)',
+    d2 === 0 && d3 > 0.005, { group: d2, camera: d3 });
 
   // ---- remote car: setColour exactly as before, setLivery slots ----
   const a = OLD.createCarModel('#3366ff', 'A'), b = F1.createCarModel('#3366ff', 'A');

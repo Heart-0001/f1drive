@@ -7,8 +7,12 @@
 //           slots (arm, drive over the line: nothing is credited; the lap after it counts)
 // The car is put on the grid by js/main.js's own placeOnGrid (main-grid.js takes it from the source): each
 // slot is a painted grid box, (slot + 1) * 8 m behind the line (devtests/laps-test/grid.js checks the boxes).
-//   cross : tracks with a same-level crossing (Suzuka): through the crossover on both roads, both ways,
-//           on and beyond the road edge; a real shortcut; the long way round; R reset in the blind zone
+//   cross : tracks with a crossing (Suzuka): through the crossover on both roads, both ways, on and beyond the road
+//           edge; a real shortcut; the long way round; R reset in the blind zone. Since v6.2 Suzuka's crossing is a
+//           BRIDGE (js/track.js track.bridges: the roads 6.2 m apart, every locate takes the car's height): there the
+//           index must never be on the other road, the shortcut and the long way are impossible (the car stays on its
+//           own road, nothing void) and R beside the road under the deck keeps the car on its road. The same-level
+//           expectations (the index on the other road, a void shortcut ...) stay for a crossing that is not a bridge.
 // The ground truth is the car's own continuous position (track.locate with a local window, never the
 // global re-locate that makes car.state.sampleIndex jump). devtests/laps-test/laps-v0.js is the counter as
 // it was before the review; it is fed the same indices to show what it got wrong.
@@ -364,6 +368,9 @@ function crossover(td) {
     console.log('\n' + td.id + ' ' + td.name + ': crossing of samples ' + pair[0] + ' and ' + pair[1] + ' (N ' + N + ', ' +
       (pair[0] / N).toFixed(3) + ' and ' + (pair[1] / N).toFixed(3) + ' of the lap), roads at ' +
       (Math.acos(Math.abs(a0.tx * b0.tx + a0.tz * b0.tz)) * 180 / Math.PI).toFixed(1) + ' deg, half width ' + a0.halfW + ' m');
+    // a grade-separated crossing (v6.2): the two roads at different heights, the car's height picks its road
+    const bridge = (track.bridges || []).find(b => (b.up === pair[0] && b.lo === pair[1]) || (b.up === pair[1] && b.lo === pair[0])) || null;
+    if (bridge) console.log('  a BRIDGE: road ' + bridge.up + ' over road ' + bridge.lo + ', ' + bridge.separation.toFixed(2) + ' m apart, clearance ' + bridge.clearance.toFixed(2) + ' m');
     console.log('  per run: [offset m: steps car.state.sampleIndex was on the OTHER road (own samples rel. to the crossing -> other road samples)]');
     let runs = 0, mis = 0, maxSteps = 0, maxSpan = 0, maxOther = 0, v0lost = 0, v0void = 0, maxWait = 0;
     for (const c of pair) {
@@ -390,6 +397,7 @@ function crossover(td) {
     console.log('  ' + runs + ' runs, index on the other road in ' + mis + ' (only beyond the road edge): up to ' + maxSteps + ' steps (' +
       (maxSteps * STEP).toFixed(1) + ' s), over up to ' + maxSpan + ' samples of the car\'s own road, moving up to ' + maxOther + ' samples along the other road');
     console.log('  new counter: every lap counted, never void, waited out up to ' + maxWait + ' steps; old counter (v0): void in ' + v0void + ' runs, lap lost in ' + v0lost);
+    if (bridge) check(mis === 0, td.id + ' bridge: the index went onto the other road in ' + mis + ' of ' + runs + ' runs');
 
     const lo = Math.min(pair[0], pair[1]), hi = Math.max(pair[0], pair[1]);
     const short = tr => { const j = tr.findIndex((v, i) => i && Math.abs(wrap(v - tr[i - 1])) > 40); return tr.slice(Math.max(0, j - 3), j + 3).join(' '); };
@@ -410,7 +418,10 @@ function crossover(td) {
         if (run.lines >= 3 && ++after > 120) break;
       }
       const ev = run.events, what = td.id + ' race, wide at the crossover';
-      check(run.offSteps > 100, what + ': the index was on the other road for only ' + run.offSteps + ' steps');
+      // (same level: the wide line puts the index on the other road for a while, which the counter must wait out; a
+      //  bridge: never)
+      if (bridge) check(run.offSteps === 0, what + ' (bridge): the index was on the other road for ' + run.offSteps + ' steps');
+      else check(run.offSteps > 100, what + ': the index was on the other road for only ' + run.offSteps + ' steps');
       check(ev.length === 3 && ev.every((e, i) => e.crossed && e.code === (i ? 2 : 0)), what + ': got ' + JSON.stringify(ev.map(e => [e.step, e.code, e.crossed])));
       check(run.voidSteps === 0 && !lap.void && lap.n === 3, what + ': void steps ' + run.voidSteps + ', lap.n ' + lap.n);
       check(ev.length === 3 && Math.abs(ev[1].last + ev[2].last - (SINCE_GO + ev[2].step * STEP)) < 1e-9, what + ': total time');
@@ -424,6 +435,16 @@ function crossover(td) {
     // a real shortcut (early road -> late road) and the long way round (late -> early)
     let t = turnOnto(track, lo, hi), lap = t.lap, st = t.car.state;
     console.log('  shortcut ' + lo + ' -> ' + hi + ': index each 0.5 s ... ' + short(t.trace) + ' ...; believed ' + t.believedAt + ' samples past the crossing');
+    if (bridge) {
+      // over / under a bridge the other road cannot be reached at the crossing: the car stays on its own road (its
+      // index never on the other one), the counter never void or waiting
+      for (const [from, to, name] of [[lo, hi, 'shortcut'], [hi, lo, 'long way']]) {
+        const tb = name === 'shortcut' ? t : turnOnto(track, from, to);
+        const ownIdx = tb.car.state.sampleIndex, onOwn = Math.abs(wrap(ownIdx - from)) < Math.abs(wrap(ownIdx - to));
+        console.log('  ' + name + ' ' + from + ' -> ' + to + ' at the bridge: car index ' + ownIdx + ', arrived ' + tb.arrived + ', void ' + tb.lap.void + ', jumping ' + tb.lap.jumping + ', jumps ' + tb.lap.jumps);
+        check(!tb.arrived && onOwn && !tb.lap.void && !tb.lap.jumping && tb.lap.jumps === 0, name + ' at the bridge: the car got onto the other road, or the counter saw a jump');
+      }
+    } else {
     check(t.arrived, 'shortcut: the car did not get onto the other road');
     check(lap.void && lap.behind && !lap.jumping && lap.prevIdx === st.sampleIndex, 'shortcut: not void (void ' + lap.void + ', jumping ' + lap.jumping + ')');
     check(Math.abs(lap.progress(st.sampleIndex) - (st.sampleIndex / N - 1)) < 1e-9 && lap.progress(st.sampleIndex) < t.before, 'shortcut: progress ' + lap.progress(st.sampleIndex));
@@ -438,21 +459,24 @@ function crossover(td) {
     check(Math.abs(lap.progress(st.sampleIndex) - st.sampleIndex / N) < 1e-9, 'long way: progress ' + lap.progress(st.sampleIndex));
     check(toLine(lap, N, st.sampleIndex) && lap.n === 2, 'long way: the lap did not count');
     console.log('    -> not void, ground lost, the lap counted at the line');
+    }
 
     // R reset while the index is on the other road (main.js: car.reset(track, car.state.sampleIndex); lap.sync(idx))
+    const rLo = bridge ? bridge.lo : lo;          // (a bridge: beside its LOWER road, under the deck)
     for (const useBelieved of [false, true]) {
       const car = F1.createCar();
       st = car.state;
-      placeAt(track, car, lo - 40, 9, 1, 6);
-      lap = primed(createLapCounter, N, lo - 40);
+      placeAt(track, car, rLo - 40, 9, 1, 6);
+      lap = primed(createLapCounter, N, rLo - 40);
       let own = st.sampleIndex, steps = 0;
       const drive = offsetDriver(track, car, 9, 6, 1, () => own);
-      while (steps++ < 120 * 60 && Math.abs(wrap(st.sampleIndex - own)) < 40) {
+      // (a bridge: until the car is beside the lower road right under the deck - the index never jumps there)
+      while (steps++ < 120 * 60 && Math.abs(wrap(st.sampleIndex - own)) < 40 && !(bridge && wrap(own - rLo) >= 0)) {
         car.update(STEP, drive(), track);
         lap.update(st.sampleIndex, st.speed, STEP);
         own = track.locate(st.x, st.z, own).index;
       }
-      for (let k = 0; k < 30; k++) { car.update(STEP, drive(), track); lap.update(st.sampleIndex, st.speed, STEP); }
+      if (!bridge) for (let k = 0; k < 30; k++) { car.update(STEP, drive(), track); lap.update(st.sampleIndex, st.speed, STEP); }
       const was = st.sampleIndex, believed = lap.prevIdx, jumping = lap.jumping;
       car.reset(track, useBelieved && lap.jumping ? lap.prevIdx : st.sampleIndex);
       lap.sync(st.sampleIndex);
@@ -460,7 +484,9 @@ function crossover(td) {
       console.log('  R reset in the blind zone (car.state.sampleIndex ' + was + ', counter believes ' + believed + ', jumping ' + jumping + '), ' +
         (useBelieved ? 'reset to lap.prevIdx' : 'reset to car.state.sampleIndex (main.js today)') + ': car now at ' + st.sampleIndex +
         ', void ' + lap.void + ', progress ' + lap.progress(st.sampleIndex).toFixed(4));
-      if (useBelieved) check(!lap.void && Math.abs(wrap(st.sampleIndex - lo)) < 30, 'R reset to lap.prevIdx: left the road');
+      if (bridge) check(!lap.void && !jumping && Math.abs(wrap(was - rLo)) < 6 && Math.abs(wrap(st.sampleIndex - rLo)) < 6 && st.y < track.samples[bridge.up].y - 3,
+        'R beside the lower road under the deck (bridge): the car must stay on its own road (index ' + st.sampleIndex + ', y ' + st.y.toFixed(2) + '), nothing void');
+      else if (useBelieved) check(!lap.void && Math.abs(wrap(st.sampleIndex - lo)) < 30, 'R reset to lap.prevIdx: left the road');
       else check(lap.void && Math.abs(wrap(st.sampleIndex - hi)) < 30 && !toLine(lap, N, st.sampleIndex), 'R reset onto the other road must void the lap');
     }
   }

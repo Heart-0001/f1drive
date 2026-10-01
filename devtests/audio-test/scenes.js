@@ -320,6 +320,36 @@
     } };
   } };
 
+  // (o) v6.2 the tunnel (audio.setTunnel(k), k = js/tunnels.js inTunnel): 290 km/h flat out (Monaco's tunnel at its
+  //     exit: the loudest case); in at 2.5 s, k 0 -> 1 over the first 30 m (0.37 s, as inTunnel ramps), out at 6.5 s the
+  //     same way, then 3.1 s outside (the reverb is disconnected 2 s after k reached 0). Columns: k, m_rev (debug.reverb
+  //     after the previous update)
+  function tunnelK(t, a, b, ramp) { return t < a ? 0 : (t < a + ramp ? (t - a) / ramp : (t < b ? 1 : (t < b + ramp ? 1 - (t - b) / ramp : 0))); }
+  SCENES.o_tunnel = { dur: 10, about: 'tunnel: 290 km/h flat out; setTunnel ramps 0 -> 1 at 2.5 s over 30 m, 1 -> 0 at 6.5 s; 3 s outside after it', make: function (audio) {
+    var st = steady(290, 1), L = {}, V = 290 / 3.6, ramp = 30 / V, ev = [];
+    ev.push({ type: 'tunnel', t0: 2.5, t1: 6.5 + ramp });
+    return { events: ev, cols: ['k', 'm_rev'], frame: function (i, t, dt) {
+      var k = tunnelK(t, 2.5, 6.5, ramp);
+      if (i > 0) st.z += V * dt;
+      if (audio.setTunnel) audio.setTunnel(k);
+      return { own: st, listener: head(st, L), others: NONE, truth: { v: V, gear: st.gear, rpm: st.rpm, thr: 1, brk: 0 }, x: [k, audio.debug.reverb ? 1 : 0] };
+    } };
+  } };
+  // (o2) the reverb's tail: standing at idle; the go beep at 1 s outside, setTunnel(1) as a step at 3 s (the module
+  //      ramps it), the go beep at 5 s inside, setTunnel(0) at 8 s (FX stem: the beeps alone, measured for the decay)
+  SCENES.o_tail = { dur: 10, about: 'standing at idle: go beep at 1 s outside, setTunnel(1) at 3 s (a step), go beep at 5 s inside the tunnel, setTunnel(0) at 8 s', make: function (audio) {
+    var st = steady(0, 0), L = {}, ev = [], next = 0, plan = [1, 5];
+    ev.push({ type: 'go', t0: 1, t1: 1 }, { type: 'go', t0: 5, t1: 5 }, { type: 'tunnel', t0: 3, t1: 8 });
+    // (m_wet / m_mid: the rendered values of the reverb's wet gain and the mid band's gain, to see the ramp)
+    return { events: ev, cols: ['k', 'm_rev', 'm_wet', 'm_mid'], frame: function (i, t) {
+      var k = t >= 3 - 1e-9 && t < 8 - 1e-9 ? 1 : 0, D = audio.debug;
+      if (audio.setTunnel) audio.setTunnel(k);
+      while (next < plan.length && t >= plan[next] - 1e-9) { audio.beep('go'); next++; }
+      return { own: st, listener: head(st, L), others: NONE, truth: { v: 0, gear: 0, rpm: IDLE, thr: 0, brk: 0 },
+        x: [k, D.reverb ? 1 : 0, D.tunnelWet ? D.tunnelWet.value : -1, D.tunnelMid ? D.tunnelMid.value : -1] };
+    } };
+  } };
+
   // ---------------------------------------------------------------------------------------------
   function wav16(chs, sr) {
     var n = chs[0].length, nc = chs.length, buf = new ArrayBuffer(44 + n * nc * 2), dv = new DataView(buf), i, c, o = 44, x;

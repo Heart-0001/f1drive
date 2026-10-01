@@ -12,7 +12,9 @@
 //           throttle, brake (0..1 pedals), battery (0..1, or null / missing = the car has no ERS: block left out),
 //           deploy, harvest (0..1), limiter (bool), inPit (bool), limitKmh,
 //           tyres: { compound 'S' | 'M' | 'H', wear: [FL, FR, RL, RR] 0..1, flat: [4] 0..1, puncture -1 | 0..3 },
-//           nextCompound ('S' | 'M' | 'H', default = tyres.compound), team, car, colour ('#rrggbb'),
+//           nextCompound ('S' | 'M' | 'H', default = tyres.compound),
+//           nextKeys (v6.2: the keys that change the next set, shown under its badge as '<keys> 切換'; default 'T / X';
+//           main.js hands 'X / T' while a controller is connected), team, car, colour ('#rrggbb'),
 //           colour2 (optional: the second livery colour, the accent when `colour` is a dark neutral: black, graphite) }
 //   F1.telemetry.reset()        forget the smoothed values (the next frame shows t as it is)
 //   F1.telemetry.W, .H          design size in CSS px (520 x 156): the graphic is scaled uniformly to fit the
@@ -27,7 +29,7 @@
 // Cost: everything that does not move (panel, gauge furniture, labels, team) is a static layer, and every piece of
 // text that changes (digits, gear, percentages, tags, badges, the pit band) plus the lit LED bar and battery bars
 // are pre-rendered into a sprite atlas at device resolution; both are rebuilt only when the size, the team / car /
-// colours, the rpm range, the battery presence or the pit speed limit change. A frame is one static blit, a few
+// colours, the rpm range, the battery presence, the pit speed limit or nextKeys change. A frame is one static blit, a few
 // arcs and paths and a handful of sprite blits at whole device pixels.
 (function (root) {
   'use strict';
@@ -70,6 +72,7 @@
   var F_TAG = '700 11px ' + UIF;
   var F_BAND = '700 15px ' + UIF, F_CHIP = 'italic 800 12px ' + NUM;
   var F_CMP = '800 14px ' + NUM, F_NXT = '800 10px ' + NUM;
+  var F_KEYS = '600 9.5px ' + UIF;              // the keys under the next-compound badge (v6.2)
 
   var C_PANEL = 'rgba(11,13,17,0.87)', C_HUB = 'rgba(4,5,7,0.55)', C_EDGE = 'rgba(255,255,255,0.16)';
   var C_TEXT = '#f2f4f7', C_MUTED = '#9aa4b2', C_DIM = 'rgba(255,255,255,0.10)';
@@ -121,7 +124,8 @@
   var bw = 0, bh = 0, k = 1, ox = 0, oy = 0;    // backing size, device px per design unit, origin of the design box
   var staticDirty = true;
   // static-layer key
-  var sk = { team: null, car: null, colour: null, colour2: null, idle: 0, shift: 0, max: 0, bat: false, lim: 0 };
+  var sk = { team: null, car: null, colour: null, colour2: null, idle: 0, shift: 0, max: 0, bat: false, lim: 0, keys: null };
+  var KEYS_DEFAULT = 'T / X';
   // derived from the key (static layer)
   var leftX = 0, batX = 0;
   var rLo = 0, rHi = 1, rStep = 500, rSegs = 1, rShiftSeg = 0, rWarnSeg = 0;
@@ -306,10 +310,10 @@
   }
 
   // ---- static layer: panel, gauge furniture, labels, team (redrawn on size / team / rpm range / battery change) --
-  function buildStatic(team, car, colour, colour2, idle, shift, max, hasBat, limKmh) {
+  function buildStatic(team, car, colour, colour2, idle, shift, max, hasBat, limKmh, keys) {
     staticDirty = false;
     sk.team = team; sk.car = car; sk.colour = colour; sk.colour2 = colour2;
-    sk.idle = idle; sk.shift = shift; sk.max = max; sk.bat = hasBat; sk.lim = limKmh;
+    sk.idle = idle; sk.shift = shift; sk.max = max; sk.bat = hasBat; sk.lim = limKmh; sk.keys = keys;
     var acc = pickAccent(colour, colour2), accent = rgba(acc, 1);
 
     // rev band range: from half the idle speed (a little of the band is lit at idle) to rpmMax, 500 / 1000 rpm steps
@@ -481,6 +485,9 @@
     c.fillStyle = C_MUTED; c.font = F_LABEL; c.textAlign = 'center';
     c.fillText('輪胎', TY_CX, GEAR_Y + 25);
     c.fillText('下一組', CMP_X, NXT_Y - 16);
+    // how to change it (the user could not find the controller's compound button): 'X / T 切換' under the badge
+    c.font = F_KEYS; c.fillStyle = C_MUTED;
+    c.fillText(keys + ' 切換', CMP_X, NXT_Y + NXT_R + 12);
 
     buildAtlas(limKmh);
   }
@@ -673,11 +680,12 @@
     if (cmp < 0 && ty.compound === undefined) cmp = 1;         // no compound given: medium (the reference)
     var nxt = t.nextCompound === undefined || t.nextCompound === null ? cmp : compIndex(t.nextCompound);
     var team = typeof t.team === 'string' ? t.team : '', car = typeof t.car === 'string' ? t.car : '';
+    var keys = typeof t.nextKeys === 'string' && t.nextKeys ? (t.nextKeys.length <= 12 ? t.nextKeys : t.nextKeys.slice(0, 12)) : KEYS_DEFAULT;
     var col = typeof t.colour === 'string' ? t.colour : '', col2 = typeof t.colour2 === 'string' ? t.colour2 : '';
 
     if (staticDirty || team !== sk.team || car !== sk.car || col !== sk.colour || col2 !== sk.colour2 ||
-        idle !== sk.idle || shift !== sk.shift || max !== sk.max || hasBat !== sk.bat || limKmh !== sk.lim) {
-      buildStatic(team, car, col, col2, idle, shift, max, hasBat, limKmh);
+        idle !== sk.idle || shift !== sk.shift || max !== sk.max || hasBat !== sk.bat || limKmh !== sk.lim || keys !== sk.keys) {
+      buildStatic(team, car, col, col2, idle, shift, max, hasBat, limKmh, keys);
     }
 
     // ---- smoothing (light: a keyboard on / off pedal shows ~80 % of the change within 50 ms)

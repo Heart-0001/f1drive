@@ -309,7 +309,8 @@ test('pace with the battery: every car on its target, the battery effect absorbe
       assert(Math.abs(c.profilePct + c.ersPct - c.lapPct) < 2e-4, c.id + ': lap = profile + battery');
       const fx = k === null ? 0 : EFFECT.seasons[ls.year].combos[k].meanPct;
       assert(Math.abs(c.ersPct - fx) < 1e-4, c.id + ': the driven battery effect of ers-effect.json');
-      assert.strictEqual(d.est.ersPct, Math.round(fx * 1000) / 1000, c.id + ' est.ersPct');
+      // (|| 0: a tiny negative effect rounds to -0, which js/seasons-data.js, JSON, writes as 0: v6.2 2026 Red Bull -0.0005 %)
+      assert.strictEqual(d.est.ersPct, Math.round(fx * 1000) / 1000 || 0, c.id + ' est.ersPct');
       if (k !== null) assert(EFFECT.seasons[ls.year].combos[k].cars.includes(c.id), c.id + ' measured with its own battery');
     }
   }

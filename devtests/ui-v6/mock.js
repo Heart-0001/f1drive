@@ -94,17 +94,18 @@ const TEL = o => Object.assign({ speedKmh: 243, gear: 6, rpm: 11100, rpmIdle: 40
   team: '麥拉倫 McLaren', car: 'MCL40', colour: '#F4872C', colour2: '#141212' }, o);
 
 /* ---------- pit states (what main.js builds from F1.createPit().state) ---------- */
+// (v6.2: main.js always hands `next`, the compound of the next set: the strip's line 下一組：中性胎（T / X 切換）)
 const PIT = {
-  off: { inLane: false, limiter: false, speeding: false, service: null, limitKmh: 80, boxAhead: null, slot: 2 },
-  limiterOnTrack: { inLane: false, limiter: true, speeding: false, service: null, limitKmh: 80, boxAhead: null, slot: 2 },
-  laneAhead: { inLane: true, limiter: true, speeding: false, service: null, limitKmh: 80, boxAhead: 45.3, slot: 2 },
-  laneNoLimiter: { inLane: true, limiter: false, speeding: false, service: null, limitKmh: 80, boxAhead: 120, slot: 2 },
-  speeding: { inLane: true, limiter: false, speeding: true, service: null, limitKmh: 60, boxAhead: 88, slot: 2, pending: 5 },
-  atBox: { inLane: true, limiter: true, speeding: false, service: null, limitKmh: 80, boxAhead: 0.8, slot: 2 },
-  passed: { inLane: true, limiter: true, speeding: false, service: null, limitKmh: 80, boxAhead: -14, slot: 2, pending: 5 },
-  serviceTyres: { inLane: true, limiter: true, speeding: false, service: { total: 3.1, left: 2.26, penalty: 0 }, limitKmh: 80, boxAhead: 0.2, slot: 2 },
-  servicePenalty: { inLane: true, limiter: true, speeding: false, service: { total: 7.8, left: 6.5, penalty: 5 }, limitKmh: 80, boxAhead: 0.2, slot: 2 },
-  serviceAfterPenalty: { inLane: true, limiter: true, speeding: false, service: { total: 7.8, left: 1.34, penalty: 5 }, limitKmh: 80, boxAhead: 0.2, slot: 2 }
+  off: { inLane: false, limiter: false, speeding: false, service: null, limitKmh: 80, boxAhead: null, slot: 2, next: 'M' },
+  limiterOnTrack: { inLane: false, limiter: true, speeding: false, service: null, limitKmh: 80, boxAhead: null, slot: 2, next: 'M' },
+  laneAhead: { inLane: true, limiter: true, speeding: false, service: null, limitKmh: 80, boxAhead: 45.3, slot: 2, next: 'M' },
+  laneNoLimiter: { inLane: true, limiter: false, speeding: false, service: null, limitKmh: 80, boxAhead: 120, slot: 2, next: 'S' },
+  speeding: { inLane: true, limiter: false, speeding: true, service: null, limitKmh: 60, boxAhead: 88, slot: 2, pending: 5, next: 'H' },
+  atBox: { inLane: true, limiter: true, speeding: false, service: null, limitKmh: 80, boxAhead: 0.8, slot: 2, next: 'H' },
+  passed: { inLane: true, limiter: true, speeding: false, service: null, limitKmh: 80, boxAhead: -14, slot: 2, pending: 5, next: 'M' },
+  serviceTyres: { inLane: true, limiter: true, speeding: false, service: { total: 3.1, left: 2.26, penalty: 0 }, limitKmh: 80, boxAhead: 0.2, slot: 2, next: 'M' },
+  servicePenalty: { inLane: true, limiter: true, speeding: false, service: { total: 7.8, left: 6.5, penalty: 5 }, limitKmh: 80, boxAhead: 0.2, slot: 2, next: 'M' },
+  serviceAfterPenalty: { inLane: true, limiter: true, speeding: false, service: { total: 7.8, left: 1.34, penalty: 5 }, limitKmh: 80, boxAhead: 0.2, slot: 2, next: 'H' }
 };
 
 module.exports = { SEASONS, list2026, list2012, V, NET, row, base, TEL, PIT };

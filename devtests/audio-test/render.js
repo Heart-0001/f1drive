@@ -35,7 +35,9 @@ const PLAN = {
   d_pack16: { remote: M.REMOTE },
   l_net20: { remote: M.REMOTE }, l_netlin: { remote: M.REMOTE }, l_netexact: { remote: M.REMOTE },
   m_pit: { engine: M.ENGINE },
-  n_oneshots: { fx: M.FX, surface: M.SURFACE }
+  n_oneshots: { fx: M.FX, surface: M.SURFACE },
+  o_tunnel: { engine: M.ENGINE, aero: M.AERO },        // v6.2 tunnel reverb (node devtests/audio-test/tunnel.js)
+  o_tail: { fx: M.FX }
 };
 const FULL_MIX = { g_mid: false, g_overrun: false, g_idle: false, h_distance: false, i_wind: false, g_v8: false, g_v8over: false, l_net20: false, l_netlin: false, l_netexact: false };      // stems only
 // the launch again with the game running at other frame rates (update() at 30 and 144 Hz)

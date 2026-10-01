@@ -608,7 +608,7 @@ async function scenario() {
     const table = [['1', P[0].name, '2', hudTime(v.rows[0].time), '', hudTime(v.rows[0].best)], ['2', P[1].name, '2', hudTime(v.rows[1].time), hudGap(v.rows[1].gap), hudTime(v.rows[1].best)],
       ['3', P[2].name, '1', hudTime(v.rows[2].time), '+1 圈', hudTime(v.rows[2].best)]];
     check('results overlay on all four windows: identical classification, total times, gaps ("+1 圈" for the lapped car) and best laps', ag.ok && res.every(r => r.shown && J(r.rows.map(x => [x.pos, x.name, x.laps, x.time, x.gap, x.best])) === J(table) &&
-      r.sub === 'Circuit de Monaco ‧ ' + YEAR + ' 賽季 ‧ 排位 1 圈 ‧ 正賽 2 圈' && r.spec === '觀戰：Dave') && res.every((r, i) => r.rows.every(x => x.you === (x.name === ABCD[i].name) && !x.out)), res[3]);
+      r.sub === '摩納哥賽道 ‧ ' + YEAR + ' 賽季 ‧ 排位 1 圈 ‧ 正賽 2 圈' && r.spec === '觀戰：Dave') && res.every((r, i) => r.rows.every(x => x.you === (x.name === ABCD[i].name) && !x.out)), res[3]);
     const flBest = Math.min(...v.rows.map(r => r.best));
     check('results: the fastest race lap is marked, on the same row everywhere', res.every(r => J(r.rows.map(x => x.fl)) === J(v.rows.map(x => x.best === flBest))), res[0].rows.map(x => [x.name, x.best, x.fl]));
     check('results: host has 再來一場 / 結束 / 關閉, the guests and the spectator only 關閉 and a note', res[0].again && res[0].end && res[0].close && res[0].note === '' &&
@@ -821,7 +821,7 @@ async function scenario() {
     const table = [['1', 'Alice', '1', hudTime(v.rows[0].time), '', hudTime(v.rows[0].best), false], ['2', 'Carol', '1', hudTime(v.rows[1].time), hudGap(v.rows[1].gap), hudTime(v.rows[1].best), false],
       ['3', 'Bob', '0', '--', '未完賽 DNF', '--', true], ['4', 'Dave', '0', '--', '離線', '--', true]];
     check('results overlay 2 on the three windows: identical; B "未完賽 DNF" with no time, Dave "離線"; R = 1 in the subtitle; no spectators', ag.ok && ag.vs.every(domMatchesView) &&
-      res.every(r => r.shown && J(r.rows.map(x => [x.pos, x.name, x.laps, x.time, x.gap, x.best, x.out])) === J(table) && r.sub === 'Circuit de Monaco ‧ ' + YEAR + ' 賽季 ‧ 排位 1 圈 ‧ 正賽 1 圈' && r.spec === ''), res[1]);
+      res.every(r => r.shown && J(r.rows.map(x => [x.pos, x.name, x.laps, x.time, x.gap, x.best, x.out])) === J(table) && r.sub === '摩納哥賽道 ‧ ' + YEAR + ' 賽季 ‧ 排位 1 圈 ‧ 正賽 1 圈' && r.spec === ''), res[1]);
     check('results 2: the overlay is open again on B (it closed the one of session 1); host has 再來一場 / 結束, guests only 關閉', res[0].again && res[0].end && res[0].close && !res[1].again && !res[1].end && res[1].close && !res[2].end);
     const toasts = await all(live3, w => w.e('hud().toast'));
     check('results 2: toasts: A first, C second of 4, B "你沒有完賽"', J(toasts) === J(['正賽結束：你是第 1 名（共 4 位車手）', '正賽結束：你沒有完賽', '正賽結束：你是第 2 名（共 4 位車手）']), toasts);

@@ -178,9 +178,10 @@ app.whenReady().then(async () => {
     const bootErr = await load();
     check('page boots without the error overlay', !bootErr, bootErr || undefined);
     const order = await js(`[].slice.call(document.querySelectorAll('script[src]')).map(function (s) { return s.getAttribute('src'); }).join(' ')`);
-    // (v6.1: js/hudmirrors.js, the HUD rear-view mirrors, after js/cockpit.js)
-    check('script order matches the contract', order === 'js/boot.js lib/three.min.js tracks-data.js js/seasons-data.js js/cars.js js/track.js js/tyres.js js/car.js ' +
-      'js/cockpit.js js/hudmirrors.js js/gamepad.js js/audio.js js/raceline.js scenery-data.js js/scenery.js js/collide.js js/carmodel.js js/laps.js js/pit.js ' +
+    // (v6.1: js/hudmirrors.js, the HUD rear-view mirrors, after js/cockpit.js; v6.2: js/track-names-zh.js after tracks-data.js,
+    // js/tunnels.js after js/scenery.js)
+    check('script order matches the contract', order === 'js/boot.js lib/three.min.js tracks-data.js js/track-names-zh.js js/seasons-data.js js/cars.js js/track.js js/tyres.js js/car.js ' +
+      'js/cockpit.js js/hudmirrors.js js/gamepad.js js/audio.js js/raceline.js scenery-data.js js/scenery.js js/tunnels.js js/collide.js js/carmodel.js js/laps.js js/pit.js ' +
       'net/session.js js/net.js js/gp.js js/telemetry.js js/ui.js js/main.js', order);
     check('ui API present', await js(`['setGp','setLights','setPad','updateHUD','setNet','toast','showMenu','hideMenu'].every(function (k) { return typeof F1.ui[k] === 'function'; })`));
 

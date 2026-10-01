@@ -263,6 +263,14 @@
   .seg button:hover { color: #fff; background: var(--panel-2); }
   .seg button.on { color: #fff; background: var(--accent); border-color: var(--accent); }
   #gp-wear-note { margin: 4px 0 0; font-size: 12px; }
+  /* v6.2: the starting compound (= the next set; T / X while driving) */
+  .gp-tyre-row { margin-top: 10px; }
+  .gp-tyre-row label { flex: none; font-size: 13px; color: var(--muted); }
+  #gp-tyre button { font-family: var(--ui-font); }
+  #gp-tyre button.on[data-c="S"] { background: #c8231b; border-color: #c8231b; }
+  #gp-tyre button.on[data-c="M"] { color: #1a1206; background: #f0c419; border-color: #f0c419; }
+  #gp-tyre button.on[data-c="H"] { color: #12151a; background: #e9edf2; border-color: #e9edf2; }
+  #gp-tyre-note { margin: 4px 0 0; font-size: 12px; }
   #gp-start { width: 100%; margin-top: 12px; }
   #gp-state {
     display: flex; align-items: baseline; gap: 10px; padding: 7px 12px;
@@ -303,9 +311,9 @@
   /* ---------- 設定 ---------- */
   #set-panel h3:first-child { margin-top: 0; }
   .set-row label { flex: none; width: 44px; font-size: 13px; color: var(--muted); }
-  #set-volume { flex: 1 1 auto; min-width: 0; height: 24px; margin: 0; cursor: pointer; accent-color: var(--accent-2); }
+  #set-volume, #set-fov { flex: 1 1 auto; min-width: 0; height: 24px; margin: 0; cursor: pointer; accent-color: var(--accent-2); }
   #set-volume:disabled { opacity: .45; }
-  #set-volume-val { flex: none; width: 44px; text-align: right; font: 600 14px var(--num-font); font-variant-numeric: tabular-nums; }
+  #set-volume-val, #set-fov-val { flex: none; width: 44px; text-align: right; font: 600 14px var(--num-font); font-variant-numeric: tabular-nums; }
   .switch {
     -webkit-appearance: none; appearance: none; position: relative; flex: none; width: 42px; height: 24px; margin: 0; cursor: pointer;
     background: var(--panel-2); border: 1px solid #3a4250; border-radius: 12px; transition: background .12s, border-color .12s;
@@ -348,6 +356,8 @@
   .card svg circle { fill: var(--accent-2); }
   .card-info { padding: 10px 14px 12px; border-top: 1px solid var(--line); }
   .card-name { font-size: 15px; font-weight: 600; line-height: 1.3; }
+  /* v6.2: the Chinese name above, the English one smaller under it */
+  .card-en { margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; line-height: 1.35; color: var(--muted); }
   .card-meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; font-size: 12.5px; color: var(--muted); }
   .card-meta b { font: 600 12.5px var(--num-font); color: #c9d1db; white-space: nowrap; font-variant-numeric: tabular-nums; }
   #track-empty { padding: 60px 0; text-align: center; color: var(--muted); }
@@ -545,6 +555,13 @@
   .pit-line { margin-top: 5px; font-size: 14px; font-weight: 600; letter-spacing: .03em; color: #eef1f5; }
   .pit-line b { font: italic 700 18px var(--num-font); color: var(--pit); }
   #hud-pit-pending { color: #ffb4ae; font-size: 13px; }
+  /* v6.2: the next set of tyres and how to change it */
+  #hud-pit-next { font-size: 13px; color: #cfd6df; }
+  #hud-pit-next b { font: 700 14px var(--ui-font); letter-spacing: .03em; }
+  #hud-pit-next b.c-S { color: #ff5a4a; }
+  #hud-pit-next b.c-M { color: #f5cc2a; }
+  #hud-pit-next b.c-H { color: #ffffff; }
+  #hud-pit-next kbd { margin: 0 1px; }
   .pit-svc { margin-top: 4px; }
   .pit-svc-row { display: flex; justify-content: center; align-items: baseline; gap: 14px; }
   #hud-pit-svc-label { font-size: 18px; font-weight: 700; letter-spacing: .14em; color: var(--pit); }
@@ -673,6 +690,7 @@
     <div id="hud-pit-warn" class="pit-warn hidden"></div>
     <div id="hud-pit-box" class="pit-line hidden"></div>
     <div id="hud-pit-pending" class="pit-line hidden"></div>
+    <div id="hud-pit-next" class="pit-line hidden"></div>
     <div id="hud-pit-svc" class="pit-svc hidden">
       <div class="pit-svc-row"><span id="hud-pit-svc-label"></span><b id="hud-pit-svc-time"></b></div>
       <div class="pit-bar"><i id="hud-pit-bar"></i></div>
@@ -693,8 +711,8 @@
   <div id="hud-map" class="hud-box"><canvas id="minimap"></canvas></div>
   <canvas id="hud-telemetry"></canvas>
   <div id="hud-hint">
-    <span id="hud-hint-keys"><span class="hk"><kbd>W</kbd>油門</span> <span class="hk"><kbd>S</kbd>煞車‧倒車</span> <span class="hk"><kbd>A</kbd><kbd>D</kbd>轉向</span> <span class="hk"><kbd>R</kbd>重置</span> <span class="hk"><kbd>L</kbd>行車線</span> <span class="hk"><kbd>Q</kbd>限速器</span> <span class="hk"><kbd>E</kbd>電池（按住）</span> <span class="hk"><kbd>T</kbd>換胎配方</span> <span class="hk"><kbd>M</kbd>靜音</span> <span class="hk"><kbd>V</kbd>後照鏡</span> <span class="hk"><kbd>Esc</kbd>選單</span></span>
-    <span id="hud-hint-pad" class="hidden"><span class="hk"><kbd>RT</kbd>油門</span> <span class="hk"><kbd>LT</kbd>煞車</span> <span class="hk"><kbd>左搖桿</kbd>轉向</span> <span class="hk"><kbd>右搖桿</kbd>視角</span> <span class="hk"><kbd>A</kbd>/<kbd>RB</kbd>電池（按住）</span> <span class="hk"><kbd>B</kbd>/<kbd>LB</kbd>限速器</span> <span class="hk"><kbd>X</kbd>換胎配方</span> <span class="hk"><kbd>Y</kbd>重置</span> <span class="hk"><kbd>View</kbd>行車線</span> <span class="hk"><kbd>Start</kbd>選單</span> <span class="hk"><kbd>V</kbd>後照鏡</span></span>
+    <span id="hud-hint-keys"><span class="hk"><kbd>W</kbd>油門</span> <span class="hk"><kbd>S</kbd>煞車‧倒車</span> <span class="hk"><kbd>A</kbd><kbd>D</kbd>轉向</span> <span class="hk"><kbd>R</kbd>重置</span> <span class="hk"><kbd>L</kbd>行車線</span> <span class="hk"><kbd>Q</kbd>限速器</span> <span class="hk"><kbd>E</kbd>電池（按住）</span> <span class="hk"><kbd>T</kbd>換胎配方（軟／中／硬）</span> <span class="hk"><kbd>M</kbd>靜音</span> <span class="hk"><kbd>V</kbd>後照鏡</span> <span class="hk"><kbd>Esc</kbd>選單</span></span>
+    <span id="hud-hint-pad" class="hidden"><span class="hk"><kbd>RT</kbd>油門</span> <span class="hk"><kbd>LT</kbd>煞車</span> <span class="hk"><kbd>左搖桿</kbd>轉向</span> <span class="hk"><kbd>右搖桿</kbd>視角</span> <span class="hk"><kbd>A</kbd>/<kbd>RB</kbd>電池（按住）</span> <span class="hk"><kbd>B</kbd>/<kbd>LB</kbd>限速器</span> <span class="hk"><kbd>X</kbd>換胎配方（軟／中／硬）</span> <span class="hk"><kbd>Y</kbd>重置</span> <span class="hk"><kbd>View</kbd>行車線</span> <span class="hk"><kbd>Start</kbd>選單</span> <span class="hk"><kbd>V</kbd>後照鏡</span></span>
     <span class="hk"><kbd>F11</kbd>全螢幕</span><button id="hud-menu-btn" type="button" tabindex="-1">選單</button>
   </div>
 </div>
@@ -758,6 +776,13 @@
           <span id="gp-year"></span><span id="gp-car-name"></span>
           <button id="gp-car-change" type="button">換車</button>
         </div>
+        <div id="gp-tyre-row" class="mp-field gp-tyre-row">
+          <label id="gp-tyre-label">起跑輪胎</label>
+          <div id="gp-tyre" class="seg" role="radiogroup" aria-labelledby="gp-tyre-label">
+            <button type="button" role="radio" data-c="S">軟</button><button type="button" role="radio" data-c="M">中</button><button type="button" role="radio" data-c="H">硬</button>
+          </div>
+        </div>
+        <p id="gp-tyre-note" class="mp-note">排位賽和正賽起跑時裝上這組新胎。開車時按 <kbd>T</kbd>（手把 <kbd>X</kbd>）換下一組，進站停在維修格時裝上。</p>
         <div id="gp-setup">
           <div class="mp-field gp-laps">
             <label for="gp-q">排位圈數</label>
@@ -854,6 +879,12 @@
         <p class="mp-note">開車時按 <kbd>M</kbd> 也能切換靜音。</p>
         <h3>畫面</h3>
         <div class="mp-field set-row">
+          <label for="set-fov">視野</label>
+          <input id="set-fov" type="range" min="50" max="75" step="1" value="60">
+          <span id="set-fov-val">60°</span>
+        </div>
+        <p id="set-fov-note" class="mp-note">駕駛艙的垂直視角，預設 60°。數字越大看得越廣，但前方的路看起來越小、越平；車速越快畫面還會自動再拉寬一些。</p>
+        <div class="mp-field set-row">
           <label for="set-mirrors">後照鏡</label>
           <input id="set-mirrors" type="checkbox" role="switch" class="switch" checked>
           <span id="set-mirrors-text">開</span>
@@ -886,6 +917,7 @@
 <script src="js/boot.js"></script>
 <script src="lib/three.min.js"></script>
 <script src="tracks-data.js"></script>
+<script src="js/track-names-zh.js"></script>
 <script src="js/seasons-data.js"></script>
 <script src="js/cars.js"></script>
 <script src="js/track.js"></script>
@@ -898,6 +930,7 @@
 <script src="js/raceline.js"></script>
 <script src="scenery-data.js"></script>
 <script src="js/scenery.js"></script>
+<script src="js/tunnels.js"></script>
 <script src="js/collide.js"></script>
 <script src="js/carmodel.js"></script>
 <script src="js/laps.js"></script>

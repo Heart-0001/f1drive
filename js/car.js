@@ -3,13 +3,25 @@
 // drivetrain (gear / rpm for the sound and the HUD, no torque interruption), a battery (ERS), a pit limiter, the tyres of
 // js/tyres.js (grip multipliers) and knows the pit lane of js/track.js (asphalt, a solid pit wall).
 // Golden rule: the reference car on fresh medium tyres, no boost, no limiter, drives exactly as the v5 car did
-// (bit-identical: test/car.test.js drives it against the v5 file, devtests/car-v6/car-v5.js).
+// (bit-identical: test/car.test.js drives it against the v5 file, devtests/car-v6/car-v5.js), with one deliberate change
+// in v6.2: the steering law perf.steerLockAt below (the oracle has the identical function).
 //
 //   F1.REF_SPEC                       the reference CarSpec (the v5 car: its physics numbers are the constants below)
 //   F1.sanitizeSpec(spec) -> spec     a clean copy with exactly the contract's fields, the reference's where missing / absurd
 //   F1.carPerf(spec) -> perf          F1.CAR_PERF's fields and functions for that spec, plus gearFor(v, gear?),
 //                                     rpmFor(v, gear?), gears, topSpeedBoost, ersDeploy(v), ers, spec. F1.CAR_PERF =
 //                                     the reference's.
+//   perf.steerLockAt(v, bank, turnSign) -> rad   (v6.2) the steering lock at the road wheels for state.steer = +-1 at
+//                                     speed v (m/s) on a road banked `bank` (rad, left higher > 0) turning towards
+//                                     turnSign (+1 left): the v5 law 0.35 / (1 + (v/22)^2), never less than the lock
+//                                     that asks perf.steerLowGrip (1.25) x the mechanical grip, on a real banked corner
+//                                     (> 6 deg, in full from 9) turned into, that much more as the bank holds more;
+//                                     at most perf.steerLockMax (0.40 rad = 23 deg: an 8.5 m radius, a Monaco rack).
+//                                     Full lock up to ~52 km/h, exactly the v5 law above ~85 km/h on flat roads. The
+//                                     racing line (js/raceline.js), tools/build-cars.mjs, the calibration driver and
+//                                     the sound's remote-car scrub use it.
+//   track.locate(x, z, hint, y)       (v6.2) every locate passes the car's height (state.y; on reset the sample's), so
+//                                     at an over / under crossing (Suzuka) the car stays on the road it is on.
 //   F1.createCar(spec?, opts?) -> car opts: {tyres: instance | false, random} (default F1.createTyres({random}) when
 //                                     js/tyres.js is loaded, else null: grip 1)
 //   car = { state, reset(track, i), update(dt, input, track), setSpec(spec), setBattery(v), bump(strength), spec, perf,
@@ -20,6 +32,10 @@
 //                                     the road itself), from..to - the car there is not on the grass
 //   state (v5) x, y, z, heading, speed, steer, pitch, roll, sampleIndex, d, onGrass, hit
 //         (v6) throttle, brake, gear, rpm, shiftT, shiftDir, battery, deploy, harvest, slip, limiter, limitKmh, inPit, vib
+//         (v6.2 cues, read-only, no effect on the path) load: g, the tyres' normal load in the last sub-step (1 standing
+//         on a flat road; + downforce, banking, dips; centripetal part included); compress: g, its share from the
+//         road's shape alone (load - 1 - downforce): > 0 in a banked corner or a dip (T3 ~ +1.8 g, Spa's Eau Rouge
+//         ~ +1.6), < 0 over a crest. For js/cockpit.js's seat / eye cues (seatG = load, compression = compress).
 (function (root) {
   'use strict';
   var F1 = root.F1 = root.F1 || {};
@@ -40,8 +56,17 @@
   var GRASS_DRAG_BASE = 0.8;        // extra decel on grass = base + lin * |v|
   var GRASS_DRAG_LIN = 0.16;        //   -> full throttle settles at ~80 km/h
   var WHEELBASE = 3.6;
-  var STEER_LOCK = 0.35;            // rad at standstill
-  var STEER_SPEED_REF = 22;         // m/s; lock = STEER_LOCK / (1 + (v/ref)^2)
+  var STEER_LOCK = 0.35;            // rad: the v5 lock law at speed, lock = STEER_LOCK / (1 + (v/ref)^2), where full
+  var STEER_SPEED_REF = 22;         //   lock asks about the grip (1.0..1.3 x from ~85 km/h on): the keys stay tame
+  var STEER_LOCK_MAX = 0.40;        // rad (23 deg) at the road wheels at low speed, a Monaco rack. Real: ~14-17 deg,
+                                    //   ~20-22 at Monaco on 3.1-3.3 m wheelbases (kinematic radius 8.1-8.6 m); 23 deg
+                                    //   on this car's 3.6 m gives the same 8.5 m (formula1.com 2015, 2019; Autosport)
+  var STEER_LOW_GRIP = 1.25;        // full lock never asks less than this x the car's mechanical grip (latBase): full
+                                    //   lock up to ~52 km/h, the v5 law from ~85 km/h on
+  var STEER_BANK_FROM = 6 * Math.PI / 180;   // a road banked into the turn by more than js/track.js's derived
+  var STEER_BANK_TO = 9 * Math.PI / 180;     //   banking (at most 2.5 deg since v6.2, 1.5 on street circuits; 6 before)
+                                             //   and its cambers: the lock grows with the extra grip, in full from 9 deg
+                                             //   (the real banked corners, 9.2..19 deg), faded in between
   var LAT_BASE = 20.0;              // m/s^2 mechanical grip
   var LAT_AERO = 0.0045;            // + k * v^2
   var LAT_MAX = 44.0;               // ~4.5 g cap
@@ -233,6 +258,29 @@
       return muBrake * an + brakeDrag * v * v + ROLL + dragK * v * v + GRAVITY * Math.sin(pitch || 0);
     }
 
+    // Steering lock (rad at the road wheels, state.steer = +-1) at speed v on a road banked `bank` (rad, left higher
+    // > 0) turning towards turnSign (+1 left): the v5 law STEER_LOCK / (1 + (v / STEER_SPEED_REF)^2), where full lock
+    // asks about the grip, but never less lock than asks STEER_LOW_GRIP x the mechanical grip (low speed) and, on a real
+    // banked corner turning into the bank, that much more as the bank holds more (maxLatAccel banked / flat); at most
+    // STEER_LOCK_MAX. Exactly the v5 lock above ~85 km/h except on the real banked corners; STEER_LOCK_MAX to ~52 km/h.
+    function steerLockAt(v, bank, turnSign) {
+      var av = v < 0 ? -v : v, r = av / STEER_SPEED_REF, lock = STEER_LOCK / (1 + r * r);
+      if (!(av > 0.5)) return STEER_LOCK_MAX;
+      var t = Math.tan(lock), tl = STEER_LOW_GRIP * s.latBase * WHEELBASE / (av * av), up = false;
+      if (tl > t) { t = tl; up = true; }
+      var ab = bank < 0 ? -bank : (bank || 0);
+      if (ab > STEER_BANK_FROM) {
+        var gb = maxLatAccel(av, bank, 0, 0, turnSign), gf = maxLatAccel(av, 0, 0, 0, turnSign);
+        if (gb > gf && gf > 0) {
+          var w = ab < STEER_BANK_TO ? (ab - STEER_BANK_FROM) / (STEER_BANK_TO - STEER_BANK_FROM) : 1;
+          t *= 1 + (gb / gf - 1) * w; up = true;
+        }
+      }
+      if (!up) return lock;
+      t = Math.atan(t);
+      return t < STEER_LOCK_MAX ? t : STEER_LOCK_MAX;
+    }
+
     // Drivetrain (shared by car.js for the own car and by audio.js for remote cars): the gear by speed against
     // gearKmh; with the current gear `cur` (1..n) the downshift comes GEAR_DOWN_HYST km/h below the upshift speed of
     // the lower gear. -1 reversing, 0 standing (|v| < 0.5 m/s).
@@ -296,6 +344,8 @@
       brakeBase: s.brakeBase, brakeAero: brakeAero, latBase: s.latBase, latAero: latAero, latMax: latMax,
       gravity: GRAVITY, carHalfWidth: CAR_HALF_WIDTH,
       wheelbase: WHEELBASE, steerLock: STEER_LOCK, steerSpeedRef: STEER_SPEED_REF,
+      steerLockMax: STEER_LOCK_MAX, steerLowGrip: STEER_LOW_GRIP,
+      steerLockAt: steerLockAt,        // (v, bank, turnSign) -> rad: the steering lock (state.steer = +-1) there
       muLat: muLat, muTraction: muTraction, muBrake: muBrake, downforce: downforce, brakeDrag: brakeDrag,
       minNormalAccel: AN_MIN,
       bankGrip: 1 + muLat * muLat,     // legacy linearisation: d(maxLat) ~ bankGrip * g * sin(bank into the turn)
@@ -335,7 +385,9 @@
       slip: 0,                        // 0..1 past the lateral grip limit
       limiter: false, limitKmh: LIMITER_KMH,   // pit limiter engaged, its speed
       inPit: false,                   // in the pit lane between the entry and exit lines
-      vib: 0                          // 0..1 flat spots / puncture (js/tyres.js)
+      vib: 0,                         // 0..1 flat spots / puncture (js/tyres.js)
+      load: 1,                        // (v6.2) g: the tyres' normal load (1 standing on a flat road; downforce, banking, dips)
+      compress: 0                     // (v6.2) g: its share from the road's shape: banking, dips (> 0), crests (< 0)
     };
     // unsmoothed slope of the surface under the car, along / across the heading (tan of the angle)
     var slopeFwd = 0, slopeLeft = 0;
@@ -351,7 +403,7 @@
       (typeof F1.createTyres === 'function' ? F1.createTyres({ random: opts.random }) : null);
     // this step: pedals, boost / limiter, energy in and out of the battery (J/kg), slip, puncture drag (0..1)
     var thr = 0, brk = 0, boost = false, limiterOn = false, limitV = LIMITER_KMH / 3.6;
-    var eDep = 0, eHar = 0, stepSlip = 0, punct = 0;
+    var eDep = 0, eHar = 0, stepSlip = 0, punct = 0, stepLoad = GRAVITY, stepComp = 0;
     var load = { speed: 0, lat: 0, brake: 0, drive: 0, slip: 0, onGrass: false, hit: 0 };   // js/tyres.js, every step
     var bumpHit = 0;                  // strongest car.bump since the last update, fed to the next one (then 0)
     // pit wall: its runs of the current track.pit (cache), and where the car was against it after the last step
@@ -403,8 +455,9 @@
       state.d = 0;
       state.onGrass = false;
       state.hit = 0;
-      // make sure the index really is the nearest sample (robust against a stale index)
-      var loc = track.locate(state.x, state.z, -1);
+      // make sure the index really is the nearest sample (robust against a stale index); at an over / under crossing
+      // (Suzuka) the height of the sample the car is put on picks its road, not the other one passing above / below
+      var loc = track.locate(state.x, state.z, -1, typeof s.y === 'number' && s.y - s.y === 0 ? s.y : undefined);
       if (loc && loc.index >= 0) { state.sampleIndex = loc.index; state.d = loc.d; }
       surface(track);
       state.pitch = Math.atan(slopeFwd);
@@ -414,6 +467,7 @@
       state.throttle = state.brake = 0;
       state.gear = 0; state.rpm = K.rpmFor(0, 0); state.shiftT = SHIFT_T_NONE;
       state.deploy = state.harvest = state.slip = 0;
+      state.load = 1; state.compress = 0;
       state.inPit = !!(track.pit && track.pit.inLane(state.sampleIndex, state.d));
       state.vib = tyres ? tyres.state.vib : 0;
       pwOk = false; lastX = state.x; lastZ = state.z;
@@ -467,8 +521,7 @@
       var resist = ROLL + K.dragK * av * av;  // magnitude, always opposes motion
       if (grass) resist += GRASS_DRAG_BASE + GRASS_DRAG_LIN * av;
       if (punct > 0) resist += punct * (PUNCT_ROLL + PUNCT_DRAG * av * av);   // running on a flat tyre
-      var ratio = av / STEER_SPEED_REF;
-      var delta = state.steer * STEER_LOCK / (1 + ratio * ratio);
+      var delta = state.steer === 0 ? 0 : state.steer * K.steerLockAt(av, Math.atan(slopeLeft), state.steer);
       var yaw = v * Math.tan(delta) / WHEELBASE;
       var aLeft = v * yaw;                    // centripetal acceleration asked for, towards the left
       load.lat = 0; stepSlip = 0;
@@ -490,6 +543,7 @@
       }
       var an = A0 - aLeft * sr;               // tyre load incl. the centripetal part
       if (an < AN_MIN) an = AN_MIN;
+      stepLoad = an; stepComp = an - GRAVITY - K.downforce * v * v;
 
       // --- longitudinal (traction and braking scale with the tyre load) ---
       var drive = 0;      // signed acceleration
@@ -664,7 +718,9 @@
     function resolveTrack(track) {
       var S = track.samples;
       var pit = track.pit || null;
-      var loc = track.locate(state.x, state.z, state.sampleIndex);
+      // (state.y: the car's height after the last sub-step, < 1 m of travel ago: at an over / under crossing the road
+      // the car is on wins over the other one, locally and globally, so it never jumps onto the other level)
+      var loc = track.locate(state.x, state.z, state.sampleIndex, state.y);
       var idx = loc.index, d = loc.d;
       var s = S[idx];
       var ad = Math.abs(d);
@@ -681,7 +737,7 @@
       if (far ||
           ad - (wd - CAR_HALF_WIDTH) >= WALL_MAX_OVERSHOOT ||
           (!hasWall && ad > hw)) {
-        var g = track.locate(state.x, state.z, -1);
+        var g = track.locate(state.x, state.z, -1, state.y);
         if (g && g.index >= 0 && S[g.index]) {
           idx = g.index; d = g.d; s = S[idx]; ad = Math.abs(d);
           wd = d > 0 ? num(s.wallPosDist, track.wallDist) : num(s.wallNegDist, track.wallDist);
@@ -786,6 +842,7 @@
       state.harvest = ers ? Math.min(1, eHar / (ers.harvest * dt)) : 0;
       if (!ers) state.battery = 0;
       state.slip = stepSlip;
+      state.load = stepLoad / GRAVITY; state.compress = stepComp / GRAVITY;
       state.limiter = limiterOn; state.limitKmh = lk;
       if (!track) state.inPit = false;
       state.vib = tyres ? tyres.state.vib : 0;

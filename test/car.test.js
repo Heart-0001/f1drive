@@ -835,5 +835,101 @@ test('pit wall: solid from the track, from the lane and at both ends, with the o
   }
 });
 
+// ---- v6.2 ----------------------------------------------------------------------------------------------------------
+test('v6.2 steering law perf.steerLockAt: full lock 0.40 rad (8.5 m) to ~52 km/h, never less than 1.25 x the grip asks, exactly the v5 law from ~85 km/h on, more on a real banked corner', () => {
+  const P = F1.CAR_PERF, P5 = V5.CAR_PERF, v5law = v => 0.35 / (1 + (v / 22) * (v / 22)), WB = P.wheelbase;
+  assert.strictEqual(P.steerLockMax, 0.40); assert.strictEqual(P.steerLowGrip, 1.25);
+  for (const v of [0, 0.3, 20 / KMH, 45 / KMH, 50 / KMH]) assert.strictEqual(P.steerLockAt(v, 0, 1), 0.40, 'full lock at ' + v * KMH + ' km/h');
+  near(WB / Math.tan(P.steerLockAt(45 / KMH, 0, 1)), 8.515, 0.001, 'full-lock radius (3.6 m / tan 0.40)');
+  let prev = Infinity;
+  for (let kmh = 1; kmh <= 340; kmh += 1) {
+    const v = kmh / KMH, a = P.steerLockAt(v, 0, 1), b = P.steerLockAt(v, 0, -1), asked = v * v * Math.tan(a) / WB;
+    assert(a === b && a === P5.steerLockAt(v, 0, 1), 'symmetric on the flat, the oracle has the same law, ' + kmh + ' km/h');
+    assert(a <= prev && a >= v5law(v) && a <= 0.40, 'falls with speed, between the v5 law and 0.40: ' + kmh);
+    if (kmh >= 85) assert.strictEqual(a, v5law(v), 'the v5 law at ' + kmh + ' km/h');
+    else if (a < 0.40) assert(asked >= 1.25 * P.latBase * (1 - 1e-12), 'never asks less than 1.25 x the mechanical grip: ' + kmh);
+    prev = a;
+  }
+  // banking (rad, > 0: left higher): turning right (-1) is into it
+  const v = 130 / KMH, flat = P.steerLockAt(v, 0, -1), deg = d => d * Math.PI / 180;
+  assert(P.steerLockAt(v, deg(19), -1) > flat * 1.15, 'Zandvoort T3 (19 deg) into the bank: more lock');
+  assert.strictEqual(P.steerLockAt(v, deg(19), 1), flat, 'off-camber: no more lock');
+  assert.strictEqual(P.steerLockAt(v, deg(4), -1), flat, 'derived banking (<= 6 deg): no change');
+  assert(P.steerLockAt(v, deg(7.5), -1) > flat && P.steerLockAt(v, deg(7.5), -1) < P.steerLockAt(v, deg(9), -1), '6..9 deg: faded in');
+  // a grippier car may turn tighter at low-mid speed; the law is per spec
+  assert(F1.carPerf(Object.assign({}, F1.REF_SPEC, { latBase: 26 })).steerLockAt(60 / KMH, 0, 1) > P.steerLockAt(60 / KMH, 0, 1), 'per spec');
+  // and the car turns with it: full lock at 20 km/h on the flat = an 8.5 m circle
+  const car = ALONE.createCar(), st = car.state, tr = strip(400);
+  car.reset(tr, 20); st.speed = 20 / KMH;
+  let h0 = 0, R = 0;
+  for (let n = 0; n < 60; n++) { h0 = st.heading; car.update(STEP, { steerAxis: 1, throttle: 0.05 }, tr); R = Math.abs(st.speed) * STEP / (st.heading - h0); }
+  near(R, WB / Math.tan(0.40), 0.05, 'turning radius at full lock, 20 km/h');
+  info('lock 0.40 rad to ' + (() => { let k = 1; while (P.steerLockAt((k + 1) / KMH, 0, 1) === 0.40) k++; return k; })() + ' km/h, the v5 law from 85 km/h; T3 at 130 km/h: ' +
+    (P.steerLockAt(v, deg(19), -1) / flat).toFixed(3) + ' x the flat lock; full-lock circle at 20 km/h ' + R.toFixed(2) + ' m');
+});
+
+test('v6.2 cues state.load / state.compress (g): 1 / 0 standing on the flat, downforce adds to load only, banking into the turn compresses, a crest lightens; no effect on the path', () => {
+  const G = F1.CAR_PERF.gravity, DF = F1.CAR_PERF.downforce;
+  const mk = bankDeg => {
+    const tr = strip(4000), b = bankDeg * Math.PI / 180;
+    for (const s of tr.samples) s.bank = b;
+    return tr;
+  };
+  let car = ALONE.createCar(), st = car.state, tr = mk(0);
+  car.reset(tr, 10);
+  assert(st.load === 1 && st.compress === 0, 'after reset');
+  car.update(STEP, {}, tr);
+  near(st.load, 1, 1e-12, 'standing'); near(st.compress, 0, 1e-12, 'standing');
+  const v0 = 300 / KMH;                       // (the load is the step's: from the speed it started with, one sub-step here)
+  st.speed = v0; car.update(STEP, {}, tr);
+  near(st.load, 1 + DF * v0 * v0 / G, 1e-9, '300 km/h: downforce'); near(st.compress, 0, 1e-9, '300 km/h on the flat');
+  for (let n = 0; n < 30; n++) car.update(STEP, { steerAxis: 0.3 }, tr);
+  near(st.compress, 0, 1e-9, 'cornering on the flat');
+  // a road banked 19 deg (left higher): turning right (into it) compresses, left (off camber) lightens
+  for (const [sx, sign] of [[-0.4, 1], [0.4, -1]]) {
+    car = ALONE.createCar(); st = car.state; tr = mk(19); car.reset(tr, 10); st.speed = 150 / KMH;
+    for (let n = 0; n < 60; n++) car.update(STEP, { steerAxis: sx, throttle: 0.6 }, tr);
+    assert(sign * st.compress > 0.3, (sign > 0 ? 'into' : 'off') + ' the bank: compress ' + st.compress);
+  }
+  // a crest (kappaV > 0): the road falls away, the car lightens
+  car = ALONE.createCar(); st = car.state; tr = strip(4000);
+  tr.samples.forEach((s, i) => { s.y = -0.0005 * (s.z - 600) * (s.z - 600); });
+  car.reset(tr, 250); st.speed = 200 / KMH;
+  let minC = 0, vMax = 0;
+  for (let n = 0; n < 240; n++) { car.update(STEP, { throttle: 0.7 }, tr); if (st.compress < minC) minC = st.compress; vMax = Math.max(vMax, st.speed); }
+  // (v^2 kappaV / g: 0.31 g at 200 km/h on this 1000 m crest, a little more as the car accelerates over it)
+  assert(minC < -0.3 && minC > -(vMax * vMax * 0.001 / G) - 0.05, 'over a crest: ' + minC + ' (v^2 kappa / g at the top speed ' + (vMax * vMax * 0.001 / G) + ')');
+  info('banked 19 deg at 150 km/h: compress > 0.3 g into the turn, < -0.3 g off camber; crest (radius 1000 m) at 200 km/h: ' + minC.toFixed(2) + ' g');
+});
+
+test('v6.2: every track.locate gets the car\'s height (the sample\'s on reset), and Suzuka\'s bridge keeps a car on its level', () => {
+  const tr = strip(2000), seen = [];
+  tr.samples.forEach(s => { s.y = 3.25; });
+  const loc = tr.locate;
+  tr.locate = function (x, z, hint, y) { seen.push([hint, y]); return loc.call(tr, x, z, hint, y); };
+  const car = F1.createCar(), st = car.state;
+  car.reset(tr, 30);
+  assert(seen.length === 1 && seen[0][0] === -1 && seen[0][1] === 3.25, 'reset: ' + JSON.stringify(seen));
+  seen.length = 0;
+  for (let n = 0; n < 10; n++) car.update(STEP, { up: true }, tr);
+  assert(seen.length >= 10 && seen.every(a => a[1] === 3.25), 'update: ' + JSON.stringify(seen.slice(0, 3)));
+  // the real bridge (js/track.js: a crossing whose roads are 3 m or more apart keeps both heights)
+  const { track: su } = track('jp-1962'), B = (su.bridges || [])[0];
+  if (!B) { info('jp-1962 has no bridge in this tracks-data.js / js/track.js: skipped'); return; }
+  for (const [mine, other] of [[B.up, B.lo], [B.lo, B.up]]) {
+    const c = F1.createCar(), s = c.state, N = su.samples.length;
+    c.reset(su, other); c.update(STEP, {}, su);
+    c.reset(su, mine);
+    assert(s.sampleIndex === mine && Math.abs(s.y - su.samples[mine].y) < 1e-9, 'reset onto ' + mine + ': ' + s.sampleIndex + ' y ' + s.y);
+    // put back at the crossing point with a stale index: the global re-locate takes the car's own level
+    c.reset(su, (mine + (N >> 1)) % N);
+    s.x = su.samples[mine].x + su.samples[mine].nx * 2; s.z = su.samples[mine].z + su.samples[mine].nz * 2; s.y = su.surfaceY(mine, 2);
+    c.update(STEP, {}, su);
+    const dd = Math.min(Math.abs(s.sampleIndex - mine), N - Math.abs(s.sampleIndex - mine));
+    assert(dd <= 3, 'placed on ' + mine + ' with a stale index: located at ' + s.sampleIndex);
+  }
+  info('Suzuka bridge: ' + B.up + ' over ' + B.lo + ', ' + (+(B.separation || B.sep)).toFixed(2) + ' m apart; devtests/car-v6/crossing.js drives it');
+});
+
 console.log(failed ? '\n' + failed + ' test(s) FAILED' : '\nall car tests passed');
 process.exit(failed ? 1 : 0);

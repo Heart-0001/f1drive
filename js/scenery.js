@@ -943,7 +943,7 @@
     var phases = {}, tPhase = now();
     function mark(name) { var t = now(); phases[name] = Math.round((t - tPhase) * 10) / 10; tPhase = t; }
     mark('setup');
-    var counts = { buildings: 0, stands: 0, dropped: 0, fitted: 0, trees: 0, boards: 0, procBuildings: 0 };
+    var counts = { buildings: 0, stands: 0, dropped: 0, fitted: 0, trees: 0, boards: 0, procBuildings: 0, decks: 0, decksSkipped: 0 };
 
     var PAL_MASON = prof.med ?
       [0xd9c9a8, 0xe3d2b0, 0xd6b38c, 0xe0bfa0, 0xcfa98a, 0xe8e0d0, 0xd8c0b0, 0xc9b79a, 0xe6d6c2] :
@@ -1138,9 +1138,57 @@
       return true;
     }
 
-    // ---- bridge deck over (or away from) the road
-    function addBridge(p, h) {
+    // ---- samples over which no mapped deck is built (lazily, for addBridge): the upper road of the track's own bridges
+    //      (track.bridges, Suzuka: a bridge outline holding it is the lap's own deck) and the covered stretches of
+    //      js/tunnels.js (F1.TUNNEL_DATA when loaded: the tunnel module builds the structure over them), each +-12 m
+    var noDeck = null;
+    function locateLL(ll, f) {         // a [lat, lon] on the lap (f: lap fraction, the search window) -> sample or -1
+      var g = trackData && trackData.geo, hint = isFinite(f) ? wrap(Math.round((f - Math.floor(f)) * N)) : -1;
+      if (!ll || !g || !isFinite(g.kx) || !isFinite(g.kz)) return hint;
+      var x = (ll[1] - g.lon0) * g.kx, z = (ll[0] - g.lat0) * g.kz, best = -1, bd = Infinity;
+      if (hint >= 0) {
+        for (var q = -Math.max(40, Math.round(N * 0.04)); q <= Math.max(40, Math.round(N * 0.04)); q++) {
+          var s = wrap(hint + q), dx = X[s] - x, dz = Z[s] - z;
+          if (dx * dx + dz * dz < bd) { bd = dx * dx + dz * dz; best = s; }
+        }
+        if (bd < 60 * 60) return best;
+      }
+      return nearest(x, z, 60);
+    }
+    function noDeckAt(s) {
+      if (!noDeck) {
+        noDeck = new Uint8Array(N);
+        var mg = Math.ceil(12 / ds), k, K, a;
+        var br = Array.isArray(track.bridges) ? track.bridges : [];
+        for (a = 0; a < br.length; a++) {
+          if (!br[a] || !isFinite(br[a].deckFrom) || !isFinite(br[a].deckTo)) continue;
+          K = wrap(br[a].deckTo - br[a].deckFrom);
+          if (K > N / 4) continue;
+          for (k = -mg; k <= K + mg; k++) noDeck[wrap(br[a].deckFrom + k)] = 1;
+        }
+        var tl = F1.TUNNEL_DATA && trackData && trackData.id ? F1.TUNNEL_DATA[trackData.id] : null;
+        if (Array.isArray(tl)) {
+          for (a = 0; a < tl.length; a++) {
+            if (!tl[a]) continue;
+            var ia = locateLL(tl[a].from, tl[a].fFrom), ib = locateLL(tl[a].to, tl[a].fTo);
+            if (ia < 0 || ib < 0) continue;
+            K = wrap(ib - ia);
+            if (K > N / 2) continue;
+            for (k = -mg; k <= K + mg; k++) noDeck[wrap(ia + k)] = 1;
+          }
+        }
+      }
+      return noDeck[wrap(s)] === 1;
+    }
+
+    // ---- bridge deck over (or away from) the road. it: the data entry (optional): c = underside above the road (m, at
+    //      least GANTRY_CLEAR_H), t = deck thickness (m, default 1.4; a thick one, a building spanning the road, has no
+    //      parapet), o = OSM way id (debug). Over the road the deck's footprint is stamped: no tree or procedural object
+    //      stands under it.
+    function addBridge(p, h, it) {
       var n = p.length, a, inside = [], gmin = Infinity, top = -Infinity;
+      var T = it && isFinite(it.t) && it.t > 0.3 ? Math.min(+it.t, 40) : 1.4;
+      var clr = it && isFinite(it.c) && it.c > GANTRY_CLEAR_H ? Math.min(+it.c, 120) : GANTRY_CLEAR_H;
       for (a = 0; a < n; a++) gmin = Math.min(gmin, gY(p[a][0], p[a][1]));
       var c = polyClearance(p);
       if (c >= CLEAR) {
@@ -1164,9 +1212,12 @@
           if (near) ymax = Math.max(ymax, Y[a] + Math.max(LP[a], LN[a]) * 0.12);
         }
         if (inside.length * ds > 60 || ymax === -Infinity) return false;   // the road runs along it: leave it out
-        top = Math.max(gmin + h, ymax + GANTRY_CLEAR_H + 1.4);
+        for (a = 0; a < inside.length; a++) {
+          if (noDeckAt(inside[a])) { counts.decksSkipped++; return true; }   // the lap's own deck / a tunnel's job
+        }
+        top = Math.max(gmin + h, ymax + clr + T);
       }
-      var bot = top - 1.4, f = triangulate(p), col = COL_CONC;
+      var bot = top - T, f = triangulate(p), col = COL_CONC, rail = T > 2.5 ? 0 : 1.0;
       for (a = 0; a < f.length; a++) {
         var A = p[f[a][0]], B = p[f[a][1]], D = p[f[a][2]];
         triUp(solid, [A[0], top, A[1]], [B[0], top, B[1]], [D[0], top, D[1]], shade(col, 0.8));
@@ -1174,13 +1225,14 @@
       }
       for (a = 0; a < n; a++) {
         var u = p[a], v = p[(a + 1) % n];
-        wall(solid, u[0], u[1], v[0], v[1], bot, bot, top + 1.0, top + 1.0, col);
+        wall(solid, u[0], u[1], v[0], v[1], bot, bot, top + rail, top + rail, col);
         if (isClear(u[0], u[1], CLEAR + 1.2)) {
           box(solid, u[0], u[1], gY(u[0], u[1]) - 1.5, bot, 1, 0, 0.7, 0.7, shade(col, 0.9));
           if (DEBUG) foot.push({ k: 'pier', p: [[u[0] - 0.7, u[1] - 0.7], [u[0] + 0.7, u[1] - 0.7], [u[0] + 0.7, u[1] + 0.7], [u[0] - 0.7, u[1] + 0.7]] });
         }
       }
-      if (DEBUG) foot.push({ k: 'bridge', p: p, minY: bot, over: c < CLEAR });
+      if (c < CLEAR) { stampPoly(p, BIT_B); counts.decks++; }
+      if (DEBUG) foot.push({ k: 'bridge', p: p, minY: bot, top: top, over: c < CLEAR, src: it ? it.src : -1, o: it && it.o ? it.o : null });
       return true;
     }
 
@@ -1242,7 +1294,10 @@
         var it = list[a], kind = it.b.k || 'building';
         p = orient(it.p);
         if (Math.abs(polyArea(p)) < 6) continue;
-        if (kind === 'bridge') { if (!addBridge(p, it.h)) counts.dropped++; continue; }
+        if (kind === 'bridge') {
+          if (!addBridge(p, it.h, { c: it.b.c, t: it.b.t, o: it.b.o, src: it.idx })) counts.dropped++;
+          continue;
+        }
         var fitted = fitPoly(p);
         if (!fitted) { counts.dropped++; continue; }
         if (fitted !== p) { counts.fitted++; p = orient(fitted); }

@@ -1,6 +1,7 @@
 // Monaco's tunnel (js/tunnels.js) in the REAL game: index.html in an offscreen, MUTED Electron window
-// (devtests/electron-userdata.js). page.js (injected) loads js/tunnels.js into the running page, builds it for the current
-// track through the F1.game peek and adds its group to the scene; nothing in the project is edited.
+// (devtests/electron-userdata.js). Since v6.2 index.html loads js/tunnels.js and main.js builds it with the track and dims
+// its lights inside: page.js (injected) uses the game's tunnels (F1.game.tunnels) and checks main.js's lights against
+// tunnels.sceneLight; with an older main.js it loads / builds the module itself. Nothing in the project is edited.
 //   npx electron devtests/tunnel-test/run.js
 //   env TRACK (default mc-1929)  TAG (output folder out/<TAG>, default 'now')  ONLY=shots|drive|perf (comma list)
 //       MODE=rec|off (the lighting prototype in the cockpit shots; default rec)   WHICH=<n> (the n-th covered stretch;
@@ -87,12 +88,15 @@ async function main() {
     if (!await boot(w)) throw new Error('boot');
     if (!check('track ' + TRACK + ' running', await pickTrack(w, TRACK))) throw new Error('track');
     await sleep(800);
-    check('js/tunnels.js loads into the page', (await w.js(`__tn.load('js/tunnels.js')`)) === 'loaded');
+    // (v6.2: index.html loads it, main.js builds it with the track)
+    check('js/tunnels.js loaded by index.html and built by main.js with the track (F1.game.tunnels)', (await w.js(`__tn.load('js/tunnels.js')`)) === 'index');
     const b = await w.js('__tn.build()');
     results.build = b;
     console.log('build ' + J(b));
+    check('main.js\'s tunnels are in the scene (one copy: no second group built by this page)', b.game && b.inScene &&
+      (await w.js(`(function () { var n = 0; __tn.scene.traverse(function (o) { if (o.name === 'tunnels') n++; }); return n; })()`)) === 1);
     check('built: tunnels', b.tunnels.length > 0, b.tunnels.map(t => t.name + ' ' + t.from + '..' + t.to + ' ' + t.length + ' m').join(', '));
-    check('build time < 60 ms', b.ms < 60, b.ms + ' ms');
+    check('build time < 60 ms (in main.js\'s track load)', b.ms < 60, b.ms + ' ms');
     check('draw calls <= 5', b.stats.drawCalls <= 5, b.stats.drawCalls);
     results.lights = await w.js('__tn.findLights()');
     const T = process.env.WHICH ? b.tunnels[+process.env.WHICH] : (b.tunnels.find(t => t.kind === 'tunnel') || b.tunnels[0]);
@@ -176,8 +180,13 @@ async function main() {
       const ap = results.drive.filter(s => s.applied).map(s => s.applied), mins = await w.js('__tn.minApplied');
       const sunMin = mins.sun, hemiMin = mins.hemi;
       const last = ap[ap.length - 1] || {};
-      check('scene light (prototype of the main.js integration) dips inside and comes back', sunMin < (T.length > 60 ? 0.2 : 0.95) &&
+      check('scene light (main.js) dips inside and comes back', sunMin < (T.length > 60 ? 0.2 : 0.95) &&
         (T.length > 150 ? hemiMin < 0.9 : true) && last.sun === 1 && last.hemi === 1, { sunMin, hemiMin, last });
+      const dev = await w.js('({ max: __tn.maxDev, n: __tn.devN })');
+      check('main.js sets the lights to tunnels.sceneLight at the car\'s sample in every cockpit render', dev.n > 20 && dev.max < 1e-6, dev);
+      // the sound: main.js asks js/audio.js for the reverb inside (muted window: the graph runs, nothing is heard)
+      const au = await w.js('F1.game.audio && F1.game.audio.debug ? { tunnel: F1.game.audio.debug.tunnel, builds: F1.game.audio.debug.reverbBuilds } : null');
+      check('the tunnel reverb was asked for (F1.audio.setTunnel from main.js: the impulse built, k back to 0 out of the tunnel)', !au || (au.builds >= 1 && au.tunnel === 0), au);
       await w.js('__tn.freeze()');
     }
 
