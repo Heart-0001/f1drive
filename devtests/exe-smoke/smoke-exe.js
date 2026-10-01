@@ -101,6 +101,28 @@ function getJson(url) {
       const ab = await js('F1.audio && F1.audio.debug ? F1.audio.debug.backend + "/" + (F1.audio.debug.context && F1.audio.debug.context.state) : "none"');
       check('v6: audio engine running in the packaged app', /^(worklet|nodes)\/running$/.test(ab), ab);
     }
+    // v7 (skipped on older builds): computer drivers, set the way a player does (大獎賽 tab → 電腦車手 5), then a race start
+    if (await js('typeof F1.createAIDriver === "function"')) {
+      await js('F1.gp.action("end"); true');
+      await until('F1.gp.phase === "free"', 5000);
+      if (await js('F1.game.running')) {
+        await send('Input.dispatchKeyEvent', { type: 'keyDown', code: 'Escape', key: 'Escape', windowsVirtualKeyCode: 27 });
+        await send('Input.dispatchKeyEvent', { type: 'keyUp', code: 'Escape', key: 'Escape', windowsVirtualKeyCode: 27 });
+        await until('!F1.game.running', 3000);
+      }
+      await js('var s = document.getElementById("gp-bots"); s.value = "5"; s.dispatchEvent(new Event("change", { bubbles: true })); true');
+      check('v7: 5 computer drivers from the 大獎賽 tab', await until('F1.game.bots && F1.game.bots.length === 5', 15000),
+        await js('JSON.stringify({ bots: F1.game.bots ? F1.game.bots.length : null, cfg: F1.game.botCfg, phase: F1.gp.phase, options: document.getElementById("gp-bots").options.length })'));
+      await js('document.getElementById("gp-q").value="1"; document.getElementById("gp-r").value="1"; document.getElementById("gp-q").dispatchEvent(new Event("input",{bubbles:true})); document.getElementById("gp-r").dispatchEvent(new Event("input",{bubbles:true})); document.getElementById("gp-start").click(); true');
+      await until('F1.gp.phase === "quali"', 5000);
+      await js('F1.gp.action("skip"); true');
+      check('v7: grid with the bots', await until('F1.gp.phase === "grid"', 5000));
+      check('v7: the race starts and the bots drive off', await until('F1.gp.phase === "race" && F1.game.bots.filter(function(b){ return b.car.state.speed > 15; }).length === 5', 25000),
+        await js('F1.game.bots.map(function(b){ return Math.round(b.car.state.speed); })'));
+      await sleep(3000);
+      await shot('5-bots');
+      check('v7: the bots appear in the standings', await js('F1.gp.view().rows.filter(function(r){ return r.bot; }).length === 5'));
+    }
     check('no page errors', logs.length === 0, logs.slice(0, 5));
   } catch (e) {
     check('smoke run completed', false, e.message);
