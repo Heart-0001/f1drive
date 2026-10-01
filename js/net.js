@@ -26,6 +26,12 @@
   var YEAR_MIN = 2010, YEAR_MAX = 2100;   // a room / session year; anything else is "no year" (null)
   var WEAR_MAX = 5;             // tyre wear multiplier of a Grand Prix, 1..5
   var PW_MAX = 64;              // characters of a room password
+  // computer drivers ("bots", simulated by the host's game; see net/server.js)
+  var BOT_LEVELS = { rookie: 1, amateur: 1, pro: 1, legend: 1, mixed: 1 };   // the room's strength setting
+  var BOT_LEVEL_DEFAULT = 'pro';
+  var BOTS_MAX = 16;            // bots in one room at most (the server gives fewer: humans + bots <= 16)
+  var MSG_MAX = 1900;           // bytes we put in one message (the server refuses frames over 2048)
+  var HIT_MIN_MS = 40;          // the server takes one impact report per car per 40 ms
 
   var ws = null;
   var handlers = {};
@@ -45,6 +51,9 @@
   var clockOff = 0, clockRtt = Infinity, pingTimer = 0, pingCount = 0;
   var pings = [];               // send times (localNow) of the pings still waiting for their pong, oldest first
   var progress = null;          // race progress sent along with the car state
+  // our bots (we host the room and simulate them): id -> true, their race progress, the last rows sent (repeated
+  // parked by keepalive while the game loop stands still), the last impact report per bot
+  var myBots = {}, botProg = {}, lastBotRows = null, lastBotSendT = 0, botHitT = {}, botSig = '';
 
   function localNow() { return clockBase + nowMs(); }
 
@@ -102,6 +111,25 @@
     var s = typeof v.normalize === 'function' ? v.normalize('NFC') : v;
     return Array.from(s.trim()).slice(0, PW_MAX).join('');
   }
+  function cleanSkill(v) {                 // a bot's skill 0..1 (3 decimals), else null
+    return isNum(v) ? Math.round(Math.max(0, Math.min(1, v)) * 1000) / 1000 : null;
+  }
+  function cleanLevel(v) { return typeof v === 'string' && BOT_LEVELS[v] === 1 && BOT_LEVELS.hasOwnProperty(v) ? v : null; }
+  function r2(v) { return Math.round(v * 100) / 100; }
+  function r3(v) { return Math.round(v * 1000) / 1000; }
+  function r4(v) { return Math.round(v * 10000) / 10000; }
+  function isMine(id) { return isNum(id) && myBots.hasOwnProperty(id) && myBots[id] === true; }
+  function utf8Bytes(s) {
+    var n = 0;
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c < 0x80) n += 1;
+      else if (c < 0x800) n += 2;
+      else if (c >= 0xd800 && c < 0xdc00 && i + 1 < s.length) { n += 4; i++; }
+      else n += 3;
+    }
+    return n;
+  }
 
   /* ---------- Grand Prix session snapshot: never trusted as it comes off the wire ---------- */
 
@@ -138,6 +166,7 @@
         fin: p.fin === true, dnf: p.dnf === true,
         gap: isNum(p.gap) && p.gap >= 0 ? p.gap : null, down: count(p.down, 999)
       });
+      if (p.bot === true) players[players.length - 1].bot = true;   // a computer driver: only its rows carry the field
     }
     return {
       sid: s.sid, phase: s.phase,
@@ -148,11 +177,11 @@
     };
   }
 
-  function emit(name, a, b) {
+  function emit(name, a, b, c) {
     var list = handlers[name];
     if (!list) return;
     for (var i = 0; i < list.length; i++) {
-      try { list[i](a, b); } catch (err) { if (root.console) console.error(err); }
+      try { list[i](a, b, c); } catch (err) { if (root.console) console.error(err); }
     }
   }
 
@@ -188,6 +217,7 @@
   function makeRemote(id) {
     return {
       id: id, name: 'Player ' + id, colour: '#ff7a14', car: '', slot: 0, last: null, best: null,
+      bot: false, skill: null, owner: 0,   // a computer driver (simulated by player `owner`'s game) and its skill 0..1
       active: false,                // has a recent pose (draw it / collide with it)
       state: { x: 0, y: 0, z: 0, heading: 0, pitch: 0, roll: 0, speed: 0, steer: 0 },
       _buf: [], _off: null, _offS: null, _recv: 0, _ct: -Infinity
@@ -298,36 +328,70 @@
     }
   }
 
+  // The room's computer-driver setting as it rides on welcome / players: {n: bots in the room, skill: level id}.
+  function applyBotInfo(b) {
+    var o = b && typeof b === 'object' ? b : {};
+    net.botSettings = { n: isNum(o.n) && o.n > 0 ? Math.min(Math.floor(o.n), BOTS_MAX) : 0,
+                        skill: cleanLevel(o.skill) || BOT_LEVEL_DEFAULT };
+  }
+
   function applyRoster(m) {
     if (!Array.isArray(m.players)) return;
-    var seen = {}, roster = [], n = Math.min(m.players.length, 32);
+    var seen = {}, roster = [], mine = [], ids = {}, n = Math.min(m.players.length, 32);
     var hostId = isNum(m.host) ? m.host : 0;
     for (var i = 0; i < n; i++) {
       var p = m.players[i];
-      if (!p || !isNum(p.id)) continue;
+      if (!p || !isNum(p.id) || ids[p.id]) continue;          // (an id listed twice: the first row counts)
+      ids[p.id] = true;
+      var bot = p.bot === true && p.id !== net.id;
       var e = {
         id: p.id,
-        name: cleanName(p.name, 'Player ' + p.id),
+        name: cleanName(p.name, (bot ? 'AI ' : 'Player ') + p.id),
         colour: cleanColour(p.colour, '#ff7a14'),
         car: cleanCarId(p.car) || '',
         slot: isNum(p.slot) && p.slot >= 0 ? Math.floor(p.slot) : i,
         last: isNum(p.last) ? p.last : null,
         best: isNum(p.best) ? p.best : null,
         isHost: p.id === hostId,
-        isSelf: p.id === net.id
+        isSelf: p.id === net.id,
+        bot: bot,                                             // a computer driver
+        skill: bot ? cleanSkill(p.skill) : null,              //   its strength 0..1 (null: not told)
+        owner: bot && isNum(p.owner) ? p.owner : 0,           //   whose game simulates it
+        mine: false                                           //   ours (we simulate it: a local car, not a remote)
       };
+      e.mine = bot && !!net.id && e.owner === net.id;
       roster.push(e);
       if (e.isSelf) { net.slot = e.slot; continue; }
+      if (e.mine) {
+        mine.push({ id: e.id, name: e.name, colour: e.colour, car: e.car, slot: e.slot, skill: e.skill,
+                    bi: isNum(p.bi) && p.bi >= 0 ? Math.floor(p.bi) : BOTS_MAX + mine.length, last: e.last, best: e.best });
+        continue;
+      }
       seen[e.id] = true;
       var r = remotes[e.id] || (remotes[e.id] = makeRemote(e.id));
       r.name = e.name; r.colour = e.colour; r.car = e.car; r.slot = e.slot; r.last = e.last; r.best = e.best;
+      r.bot = e.bot; r.skill = e.skill; r.owner = e.owner;
     }
     for (var id in remotes) if (!seen[id]) delete remotes[id];
+    // our own bots, in the order of the list we sent (bi)
+    mine.sort(function (a, b) { return a.bi - b.bi || a.id - b.id; });
+    myBots = {};
+    var sig = [];
+    for (i = 0; i < mine.length; i++) {
+      myBots[mine[i].id] = true;
+      sig.push([mine[i].id, mine[i].name, mine[i].colour, mine[i].car, mine[i].slot, mine[i].skill].join('|'));
+    }
+    for (id in botProg) if (!myBots[id]) delete botProg[id];
+    for (id in botHitT) if (!myBots[id]) delete botHitT[id];
+    net.bots = mine;
+    if (m.bots !== undefined || m.t === 'welcome') applyBotInfo(m.bots);
     net.roster = roster;
     net.hostId = hostId;
     net.isHost = !!net.id && hostId === net.id;
     rebuildPlayers();
     emit('players', roster);
+    sig = sig.join('\n');
+    if (sig !== botSig) { botSig = sig; emit('bots', net.bots); }
   }
 
   function onMessage(ev) {
@@ -371,9 +435,11 @@
         if (snap.phase === 'free' && was !== 'free') resyncCar();
         break;
       }
-      case 'glno': {                              // our lap was not accepted: a short reason code
+      case 'glno': {                              // our lap (or one of our bots', id) was not accepted: a short reason code
         if (!net.connected) return;
-        emit('lapRejected', typeof m.why === 'string' && /^[a-z\-]{1,24}$/.test(m.why) ? m.why : '');
+        var why = typeof m.why === 'string' && /^[a-z\-]{1,24}$/.test(m.why) ? m.why : '';
+        if (m.id === undefined) emit('lapRejected', why);
+        else if (isMine(m.id)) emit('botLapRejected', m.id, why);
         break;
       }
       case 'welcome': {
@@ -410,19 +476,21 @@
         trackSeq = m.seq; net.trackId = m.id;
         lastState = null;                         // our old pose belongs to the old track
         progress = null;                          //   and so does our race distance (a new track ends a Grand Prix)
+        lastBotRows = null; botProg = {};         //   and our bots' poses / distances
         clearPoses();
         emit('track', m.id);
         break;
       }
-      case 'hit': {                               // another player's car hit ours
+      case 'hit': {                               // another car hit ours (bot: or one of our bots)
         if (!net.connected || !Array.isArray(m.i) || !isNum(m.from) || !isNum(m.i[0]) || !isNum(m.i[1])) return;
-        if (!remotes[m.from]) return;
+        if (!remotes[m.from]) return;             // (a player or somebody else's bot; never one of ours)
         var hx = m.i[0], hz = m.i[1], hm = Math.sqrt(hx * hx + hz * hz);
         if (!isNum(hm)) return;
         if (hm > HIT_MAX) {                       // the server clamps; do not count on it
           hx = Math.round(hx / hm * HIT_MAX * 100) / 100; hz = Math.round(hz / hm * HIT_MAX * 100) / 100;
         }
-        emit('hit', m.from, [hx, hz]);
+        if (m.bot === undefined) emit('hit', m.from, [hx, hz]);
+        else if (isMine(m.bot)) emit('botHit', m.bot, m.from, [hx, hz]);
         break;
       }
       case 'error': {
@@ -454,6 +522,11 @@
     net.id = 0; net.hostId = 0; net.slot = 0; net.trackId = null; net.year = null; net.hostInfo = null;
     net.roster = []; net.players = [];
     remotes = {}; lastState = null; trackSeq = 0;
+    // our bots were the room's: they are gone with it
+    var hadBots = botSig !== '';
+    net.bots = []; applyBotInfo(null);
+    myBots = {}; botProg = {}; lastBotRows = null; botHitT = {}; botSig = '';
+    if (hadBots) emit('bots', net.bots);
     if (wasHosting && root.f1host) { try { root.f1host.stopServer(); } catch (err) {} }
     if (pending) { var p = pending; pending = null; p.resolve({ ok: false, error: reason }); }
     if (was) emit('disconnected', reason);
@@ -501,12 +574,37 @@
   }
 
   function keepalive() {
-    if (!net.connected || !lastState) return;
+    if (!net.connected) return;
     var now = nowMs();
-    if (now - lastSendT < KEEPALIVE_MS) return;
-    lastState[6] = 0; lastState[7] = 0;           // the loop is not running: the car is standing still
-    lastSendT = now;
-    send({ t: 's', k: trackSeq, c: Math.round(now), s: lastState });
+    if (lastState && now - lastSendT >= KEEPALIVE_MS) {
+      lastState[6] = 0; lastState[7] = 0;         // the loop is not running: the car is standing still
+      lastSendT = now;
+      send({ t: 's', k: trackSeq, c: Math.round(now), s: lastState });
+    }
+    if (lastBotRows && now - lastBotSendT >= KEEPALIVE_MS) {
+      // our bots stand still with the loop (we simulate them): their last poses, parked, for the others
+      var rows = [];
+      for (var i = 0; i < lastBotRows.length; i++) {
+        var r = lastBotRows[i];
+        if (isMine(r[0])) rows.push([r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0, 0]);
+      }
+      lastBotSendT = now;
+      if (rows.length) sendRows(rows, now); else lastBotRows = null;
+    }
+  }
+
+  // bot state rows -> one 'bs' message, or a few when they do not fit in one (never more than MSG_MAX bytes each)
+  function sendRows(rows, now) {
+    var c = Math.round(now), head = '{"t":"bs","k":' + trackSeq + ',"c":' + c + ',"b":[', part = [], len = head.length + 2;
+    for (var i = 0; i < rows.length; i++) {
+      var s = JSON.stringify(rows[i]);
+      if (part.length && len + s.length + 1 > MSG_MAX) {
+        if (ws && ws.readyState === 1) { try { ws.send(head + part.join(',') + ']}'); } catch (err) {} }
+        part = []; len = head.length + 2;
+      }
+      part.push(s); len += s.length + 1;
+    }
+    if (part.length && ws && ws.readyState === 1) { try { ws.send(head + part.join(',') + ']}'); } catch (err) {} }
   }
 
   var net = {
@@ -522,16 +620,27 @@
     session: null,              // Grand Prix state from the server: a sanitised net/session.js snapshot (every
                                 //   documented field present and of its type), null when not in a room
     hostInfo: null,             // { port, addresses: [LAN IPv4], hasPassword } while we host
-    roster: [],                 // everyone incl. us: [{id, name, colour, car, slot, last, best, isHost, isSelf}]
-    players: [],                // the OTHER players: [{id, name, colour, car, slot, active, state:{x,y,z,heading,pitch,roll,speed,steer}}]
-                                //   car: a CarSpec id or '' (not chosen / unknown)
+    roster: [],                 // everyone incl. us and the bots: [{id, name, colour, car, slot, last, best, isHost, isSelf,
+                                //   bot, skill, owner, mine}]: bot = a computer driver, skill its strength 0..1 (null
+                                //   = not told), owner the id of the player whose game simulates it, mine = ours
+    players: [],                // the OTHER cars to draw: [{id, name, colour, car, slot, bot, skill, owner, active,
+                                //   state:{x,y,z,heading,pitch,roll,speed,steer}}]; car: a CarSpec id or '' (not chosen /
+                                //   unknown). Humans and other players' bots alike; OUR bots are not in it (local cars).
+    bots: [],                   // OUR bots (we host and simulate them), in the order of the list we sent:
+                                //   [{id, name, colour, car, slot, skill, bi, last, best}] (slot = grid column / pit box)
+    botSettings: { n: 0, skill: 'pro' },   // the room's computer drivers as the host set them: n in the room, skill =
+                                //   'rookie' | 'amateur' | 'pro' | 'legend' | 'mixed' (everybody sees it)
 
-    /** on('connected' | 'disconnected' | 'players' | 'track' | 'year' | 'hit' | 'gp' | 'lapRejected', fn)
+    /** on('connected' | 'disconnected' | 'players' | 'track' | 'year' | 'hit' | 'gp' | 'lapRejected' | 'bots' |
+     *     'botHit' | 'botLapRejected', fn)
      *  year: fn(year | null), the room year changed (also once right after 'connected', before 'track', when the
      *  room has one; not on disconnect);  hit: fn(fromId, [ix, iz]);  gp: fn(sessionSnapshot), the object net.session now is;
      *  lapRejected: fn(why): 'too-fast' | 'too-soon' | 'inconsistent' | 'not-driven' (the server did not see the car
      *  cover the lap) | 'no-data' (too few car states reached it during the lap) | 'bad' | 'done' | 'not-racing' |
-     *  'no-session' | '' */
+     *  'no-session' | '';
+     *  bots: fn(net.bots), our bots changed (ids, names, cars, colours, skills, slots; also [] when we leave);
+     *  botHit: fn(botId, fromId, [ix, iz]), another car hit one of our bots (fromId is a remote car);
+     *  botLapRejected: fn(botId, why), a lap of one of our bots was not accepted (reasons as lapRejected) */
     on: function (name, fn) { (handlers[name] = handlers[name] || []).push(fn); },
 
     /** Host a room: starts the server in the Electron main process, then joins it. -> Promise<{ok, error}>
@@ -624,6 +733,78 @@
     /** Race progress (laps completed + fraction of the lap) to send along with the state; null = none. */
     setProgress: function (v) { progress = isNum(v) ? v : null; },
 
+    /** Host only, free practice only: the room's computer drivers. list = [{name, car, colour, skill}] (one entry per
+     *  bot, in a fixed order: entry i is always bot i; name <= 16 characters, car a CarSpec id, colour '#rrggbb',
+     *  skill 0..1 — anything missing or not valid gets the server's default: 'AI n', no car, a palette colour, the
+     *  level's skill), or a number n (n bots with the defaults). skill = the room's level 'rookie' | 'amateur' |
+     *  'pro' | 'legend' | 'mixed' (shown to everybody; anything else keeps the room's). The server gives at most
+     *  16 - humans; bots 0..n-1 that exist keep their ids and slots. -> true when the request was sent; the answer is
+     *  the roster ('players', 'bots' events; net.bots). A human joining a full room in free practice takes the seat
+     *  of the newest bot. When we leave the room our bots go (a running session they race in ends). */
+    setBots: function (list, skill) {
+      if (!net.connected || !net.isHost) return false;
+      if (net.session && net.session.phase !== 'free') return false;
+      var n;
+      if (isNum(list)) { n = list; list = []; }
+      else if (Array.isArray(list)) n = list.length;
+      else return false;
+      if (!(n >= 0)) return false;
+      n = Math.min(Math.floor(n), BOTS_MAX);
+      var out = [];
+      for (var i = 0; i < n && i < list.length; i++) {
+        var e = list[i], o = {};
+        if (e && typeof e === 'object') {
+          var nm = cleanName(e.name, ''), car = cleanCarId(e.car), col = cleanColour(e.colour, ''), sk = cleanSkill(e.skill);
+          if (nm) o.name = nm;
+          if (car) o.car = car;
+          if (col) o.colour = col;
+          if (sk !== null) o.skill = sk;
+        }
+        out.push(o);
+      }
+      var m = { t: 'bots', n: n, list: out }, level = cleanLevel(skill);
+      if (level) m.skill = level;
+      // one frame (16 long names in 4-byte characters would not fit): colours go first (the car's livery is known
+      // from its id), then the names are shortened
+      if (utf8Bytes(JSON.stringify(m)) > MSG_MAX) out.forEach(function (o) { delete o.colour; });
+      if (utf8Bytes(JSON.stringify(m)) > MSG_MAX) out.forEach(function (o) { if (o.name) o.name = Array.from(o.name).slice(0, 6).join(''); });
+      return send(m);
+    },
+
+    /** Host: our bots' car states. list = [{id, state, g?}] with state = car.state of each of OUR bots (ids from
+     *  net.bots; anything else is left out) and g = its race progress (optional; else the one setBotProgress gave).
+     *  Call it every frame like sendState: it sends at most ~20 times a second (force = now) in one 'bs' message
+     *  (or a few when it would not fit in 2 KB). -> true when something was sent. */
+    sendBotStates: function (list, force) {
+      if (!net.connected || !Array.isArray(list) || !list.length || botSig === '') return false;
+      var now = nowMs();
+      if (!force && now - lastBotSendT < SEND_MS) return false;
+      var rows = [], seen = {};
+      for (var i = 0; i < list.length && rows.length < BOTS_MAX; i++) {
+        var e = list[i], s = e && e.state;
+        if (!e || !isMine(e.id) || seen[e.id] || !s || !isNum(s.x) || !isNum(s.z) || !isNum(s.heading)) continue;
+        seen[e.id] = true;
+        var row = [e.id, r2(s.x), r2(isNum(s.y) ? s.y : 0), r2(s.z), r4(s.heading % (Math.PI * 2)), r3(isNum(s.pitch) ? s.pitch : 0),
+          r3(isNum(s.roll) ? s.roll : 0), r2(isNum(s.speed) ? s.speed : 0), r2(isNum(s.steer) ? s.steer : 0)];
+        var g = isNum(e.g) ? e.g : botProg[e.id];
+        if (isNum(g)) row.push(r4(g));
+        rows.push(row);
+      }
+      if (!rows.length) return false;
+      lastBotSendT = now;
+      lastBotRows = rows;
+      sendRows(rows, now);
+      return true;
+    },
+
+    /** Host: race progress of one of our bots (laps + fraction, lapCounter.progress(idx)); null = none. It rides
+     *  along with its next state (sendBotStates). */
+    setBotProgress: function (id, v) {
+      if (!isMine(id)) return false;
+      if (isNum(v)) botProg[id] = v; else delete botProg[id];
+      return true;
+    },
+
     /** Grand Prix, host only: action = 'start' (cfg {q, r, len: track length in m, wear: tyre wear 1..5}) |
      *  'skip' | 'end' | 'again'. The session's year is the room's (net.year), set by the server.
      *  -> true when the request was sent (the answer is the next 'gp' event; a refused one has no answer). */
@@ -644,11 +825,15 @@
      *  at (optional): serverNow() when the car crossed the line: the race time is taken from it, not from when
      *  the report arrives (a report held up on the network costs nothing). The server counts a lap only when
      *  the car states it got from us cover it (sendState during the lap).
-     *  A lap the server does not accept comes back as the 'lapRejected' event. */
-    sendGpLap: function (sid, time, at) {
+     *  A lap the server does not accept comes back as the 'lapRejected' event.
+     *  botId (optional): the lap is one of OUR bots' (its states went out with sendBotStates); a rejection comes back
+     *  as 'botLapRejected' (botId, why). Any other id -> false, nothing sent. */
+    sendGpLap: function (sid, time, at, botId) {
       if (!net.connected || !isNum(sid) || !isNum(time) || !(time > 0)) return false;
+      if (botId !== undefined && botId !== null && !isMine(botId)) return false;
       var m = { t: 'gl', k: trackSeq, sid: sid, time: Math.round(time * 1000) / 1000 };
       if (isNum(at) && at > 0 && at < CLOCK_MAX) m.at = Math.round(at);
+      if (isMine(botId)) m.id = botId;
       return send(m);
     },
 
@@ -659,15 +844,32 @@
     /** The game loop stopped (menu): tell the others right away that the car stands still. */
     park: function () { lastSendT = 0; keepalive(); },
 
-    /** Our car hit player id: (ix, iz) is the velocity change (m/s) their car is owed. */
-    sendHit: function (id, ix, iz) {
-      if (!net.connected || !isNum(id) || !isNum(ix) || !isNum(iz)) return;
-      send({ t: 'hit', k: trackSeq, to: id, i: [Math.round(ix * 100) / 100, Math.round(iz * 100) / 100] });
+    /** Our car hit car id (a player or somebody else's bot): (ix, iz) is the velocity change (m/s) their car is owed.
+     *  fromBotId (optional): it was one of OUR bots that hit them (at most one report per bot per 40 ms goes out, as
+     *  the server takes no more). Contacts among our own cars (our car, our bots) are settled locally: never sent.
+     *  -> true when it was sent. */
+    sendHit: function (id, ix, iz, fromBotId) {
+      if (!net.connected || !isNum(id) || !isNum(ix) || !isNum(iz) || isMine(id) || id === net.id) return false;
+      var m = { t: 'hit', k: trackSeq, to: id, i: [Math.round(ix * 100) / 100, Math.round(iz * 100) / 100] };
+      if (fromBotId !== undefined && fromBotId !== null) {
+        if (!isMine(fromBotId)) return false;
+        var now = nowMs();
+        if (now - (botHitT[fromBotId] || -1e9) < HIT_MIN_MS) return false;
+        botHitT[fromBotId] = now;
+        m.from = fromBotId;
+      }
+      return send(m);
     },
 
-    /** Share lap times (seconds or null) with the room. */
-    sendLap: function (last, best) {
-      if (net.connected) send({ t: 'lap', last: isNum(last) ? last : null, best: isNum(best) ? best : null });
+    /** Share lap times (seconds or null) with the room. botId (optional): one of OUR bots' times. */
+    sendLap: function (last, best, botId) {
+      if (!net.connected) return false;
+      var m = { t: 'lap', last: isNum(last) ? last : null, best: isNum(best) ? best : null };
+      if (botId !== undefined && botId !== null) {
+        if (!isMine(botId)) return false;
+        m.id = botId;
+      }
+      return send(m);
     },
 
     /** Host only: load this track for everyone (also restarts the session on the same track). */

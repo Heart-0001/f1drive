@@ -10,7 +10,8 @@
 // level per car).
 //
 // Inputs (all committed, nothing is downloaded; the same inputs always give byte-identical output):
-//   tools/seasons-raw.json          F1DB (CC BY 4.0) seasons, entries, qualifying pace, character, era pace index
+//   tools/seasons-raw.json          F1DB (CC BY 4.0) seasons, entries, qualifying pace, character, era pace index, and
+//                                   each entry's drivers (cars[].drivers: the names of the computer drivers, DRIVERS below)
 //   tools/eras.json                 regulation periods: power-to-weight, top speeds, grip notes, ERS, rpm, gears
 //   tools/liveries/*.json           colours, Traditional Chinese team names and notes per entry
 //   js/cars-data.js                 the hand-researched 2026 grid (multipliers, notes, colours take precedence)
@@ -157,6 +158,81 @@ export const ENGINE_DESIGNATIONS = {
   '2019-racing-point': { value: 'M10 EQ Power+', f1db: 'BWT Mercedes (badge only)', source: 'https://en.wikipedia.org/wiki/Racing_Point_RP19' },
   '2020-racing-point': { value: 'M11 EQ Performance', f1db: 'BWT Mercedes (badge only)', source: 'https://en.wikipedia.org/wiki/Racing_Point_RP20' }
 };
+
+// ---- the drivers of every car: the names of the computer drivers (cars[].drivers, F1.cars.drivers) ----------------
+// Two per car from the season's F1DB entry (tools/seasons-raw.json entries[].drivers: name, abbreviation, number and
+// the starts in that car): the two with the most starts, the first seat the one with the most (ties keep F1DB's order).
+// A driver who drove two cars of one season belongs to the one he started most often in (ties: the earlier entry), and
+// the other car names its own drivers first (2025: Tsunoda is Red Bull's, 22 starts, not Racing Bulls', 2): no name
+// appears twice in a season (checked, with the abbreviations). Names stay in the Latin alphabet, as F1DB writes them
+// (docs/seasons-data.md, "車手"); abbr = F1DB's three letters; number = the race number, an integer 0..99. The
+// standard car (F1Drive's own) has two invented, neutral names whose names, abbreviations and numbers no real driver of
+// 2010..2026 used (checked).
+export const STANDARD_DRIVERS = [
+  { name: 'Alex Rowan', abbr: 'ROW', number: 90 },
+  { name: 'Sam Ellery', abbr: 'ELL', number: 91 }
+];
+// code points; js/cars.js clamps the same. (The rooms' NAME_MAX is 16: F1.AI.lineup shortens 'Gabriel Bortoleto' to
+// 'G. Bortoleto'.)
+export const DRIVER_NAME_MAX = 40;
+// control and invisible formatting characters (C0, DEL, C1, zero-width / direction marks, line / paragraph separators,
+// direction embeddings, word joiner .. invisible operators, BOM): never in a name (js/cars.js removes the same)
+const HIDDEN = [[0, 0x1f], [0x7f, 0x9f], [0x200b, 0x200f], [0x2028, 0x202e], [0x2060, 0x206f], [0xfeff, 0xfeff]];
+const hiddenChar = s => Array.from(s).some(ch => { const c = ch.codePointAt(0); return HIDDEN.some(r => c >= r[0] && c <= r[1]); });
+// one F1DB driver -> { name, abbr, number } or { error }
+export function cleanDriver(d) {
+  if (!d || typeof d !== 'object') return { error: 'not an object' };
+  const name = typeof d.name === 'string' ? d.name.normalize('NFC').replace(/\s+/g, ' ').trim() : '';
+  if (!name || hiddenChar(name) || Array.from(name).length > DRIVER_NAME_MAX) return { error: 'name ' + JSON.stringify(d.name) };
+  if (typeof d.abbreviation !== 'string' || !/^[A-Z]{3}$/.test(d.abbreviation)) return { error: name + ': abbreviation ' + JSON.stringify(d.abbreviation) };
+  const num = typeof d.number === 'number' ? d.number : (typeof d.number === 'string' && /^\d{1,2}$/.test(d.number) ? +d.number : NaN);
+  if (!(Number.isInteger(num) && num >= 0 && num <= 99)) return { error: name + ': number ' + JSON.stringify(d.number) };
+  return { name, abbr: d.abbreviation, number: num };
+}
+// the drivers of every entry of one raw season: Map entry id -> [{ name, abbr, number }, x2]; problems pushed
+export function seasonDrivers(rs, problems) {
+  const starts = d => d && typeof d.starts === 'number' && isFinite(d.starts) ? d.starts : 0;
+  const key = d => d && typeof d.id === 'string' && d.id ? d.id : JSON.stringify(d && d.name);
+  const owner = new Map();                              // F1DB driver id -> [entry index, starts]
+  rs.entries.forEach((e, ei) => (e.drivers || []).forEach(d => {
+    const o = owner.get(key(d));
+    if (!o || starts(d) > o[1]) owner.set(key(d), [ei, starts(d)]);
+  }));
+  const out = new Map(), names = new Map(), abbrs = new Map();
+  rs.entries.forEach((e, ei) => {
+    const ranked = (e.drivers || []).map((d, i) => ({ d, i })).sort((a, b) => starts(b.d) - starts(a.d) || a.i - b.i).map(x => x.d);
+    const own = ranked.filter(d => owner.get(key(d))[0] === ei), lent = ranked.filter(d => owner.get(key(d))[0] !== ei);
+    const list = [];
+    for (const d of own.concat(lent)) {
+      if (list.length === 2) break;
+      const c = cleanDriver(d);
+      if (c.error) { problems.push(e.id + ': driver ' + c.error + ' (tools/seasons-raw.json)'); continue; }
+      list.push(c);
+    }
+    if (list.length < 2) problems.push(e.id + ': ' + list.length + ' usable driver(s) in tools/seasons-raw.json, two needed');
+    for (const c of list) {
+      if (names.has(c.name)) problems.push(rs.year + ': driver ' + c.name + ' named for both ' + names.get(c.name) + ' and ' + e.id);
+      if (abbrs.has(c.abbr)) problems.push(rs.year + ': abbreviation ' + c.abbr + ' of both ' + abbrs.get(c.abbr) + ' and ' + e.id);
+      names.set(c.name, e.id); abbrs.set(c.abbr, e.id);
+    }
+    out.set(e.id, list);
+  });
+  return out;
+}
+// the invented names must not be anybody's of the data
+export function checkStandardDrivers(raw, problems) {
+  const used = { name: new Set(), abbr: new Set(), number: new Set() };
+  for (const s of raw.seasons) for (const e of s.entries) for (const d of e.drivers || []) {
+    const c = cleanDriver(d);
+    if (!c.error) { used.name.add(c.name); used.abbr.add(c.abbr); used.number.add(c.number); }
+  }
+  STANDARD_DRIVERS.forEach((d, i) => {
+    const c = cleanDriver({ name: d.name, abbreviation: d.abbr, number: d.number });
+    if (c.error || JSON.stringify(c) !== JSON.stringify(d)) problems.push('STANDARD_DRIVERS[' + i + '] is not clean: ' + JSON.stringify(d));
+    for (const k of ['name', 'abbr', 'number']) if (used[k].has(d[k])) problems.push('STANDARD_DRIVERS[' + i + '].' + k + ' ' + d[k] + ' is a real driver\'s');
+  });
+  if (STANDARD_DRIVERS.length !== 2 || STANDARD_DRIVERS[0].name === STANDARD_DRIVERS[1].name || STANDARD_DRIVERS[0].abbr === STANDARD_DRIVERS[1].abbr) problems.push('STANDARD_DRIVERS: two different drivers needed');
+}
 
 // ---- inputs -------------------------------------------------------------------------------------------------------
 const readJson = f => JSON.parse(readFileSync(f, 'utf8'));
@@ -606,8 +682,10 @@ export function build(opts) {
       id: year + '-standard', lineage: 'standard', team: R.team, teamZh: R.teamZh, car: R.car,
       engine: year === CFG.ANCHOR ? R.engine : stdEngine, cylinders: era.cylinders, aspiration: era.aspiration,
       colour: R.colour, colour2: R.colour2, ratings: Object.assign({}, R.ratings, era.ers ? {} : { ers: 0 }),
-      perf: Object.assign({}, ONES), hasErs: !!era.ers, note: '', ersNote: '', est: { lapPct: 0, ersPct: 0, topKmh: round(stdMet.topKmh, 1) }
+      perf: Object.assign({}, ONES), hasErs: !!era.ers, note: '', ersNote: '', drivers: STANDARD_DRIVERS.map(d => Object.assign({}, d)),
+      est: { lapPct: 0, ersPct: 0, topKmh: round(stdMet.topKmh, 1) }
     };
+    const driversOf = seasonDrivers(rs, problems);
     if (year === CFG.ANCHOR && stdCar.engine !== stdEngine) problems.push('the anchor standard engine "' + R.engine + '" differs from eras.json "' + stdEngine + '"');
     const cars = [stdCar];
     const slog = { year, index: rs.eraIndex, era, stdTopKmh: stdMet.topKmh, stdTopBoostKmh: stdMet.topBoostKmh, accelKmh, cars: [] };
@@ -716,6 +794,7 @@ export function build(opts) {
         id: e.id, lineage: s.lineage, team: d.team, teamZh: d.teamZh, car: d.car, engine: d.engine,
         cylinders: s.engine.cylinders, aspiration: /^(na|naturally)/i.test(s.engine.aspiration) ? 'na' : 'hybrid',
         colour: d.colour, colour2: d.colour2, ratings: e.ratings, perf: e.mult, hasErs: e.bat.hasErs, note: d.note, ersNote: e.bat.note,
+        drivers: driversOf.get(e.id) || [],
         est: { lapPct: round(e.lapPct, 3), ersPct: round(e.ersPct, 3), topKmh: round(met.topKmh, 1) }
       });
       const b = e.bat.src;
@@ -742,6 +821,8 @@ export function build(opts) {
       if (!c.hasErs && c.ratings.ers !== 0) problems.push(c.id + ': no battery but an ers rating ' + c.ratings.ers);
       if (typeof c.ersNote !== 'string' || c.ersNote.length > 120 || /[\r\n]/.test(c.ersNote)) problems.push(c.id + '.ersNote is not one line');
       for (const k of ['team', 'teamZh', 'car', 'engine']) if (typeof c[k] !== 'string' || !c[k]) problems.push(c.id + '.' + k + ' empty');
+      // two drivers, each exactly what js/cars.js keeps (the names of the computer drivers)
+      if (!Array.isArray(c.drivers) || c.drivers.length !== 2 || c.drivers.some(d => { const k = cleanDriver({ name: d.name, abbreviation: d.abbr, number: d.number }); return k.error || JSON.stringify(k) !== JSON.stringify(d); })) problems.push(c.id + '.drivers = ' + JSON.stringify(c.drivers));
     });
     const teamsOnly = cars.slice(1);
     slog.spreadPct = Math.max(...teamsOnly.map(c => c.est.lapPct)) - Math.min(...teamsOnly.map(c => c.est.lapPct));
@@ -765,6 +846,7 @@ export function build(opts) {
     const ent = hasOwn(ersData.entries, c.id) ? ersData.entries[c.id] : null;
     if (ent && c.hasErs !== (ent.hasErs !== false)) problems.push(c.id + ': hasErs ' + c.hasErs + ' but tools/ers-data.json says ' + ent.hasErs);
   }
+  checkStandardDrivers(raw, problems);
   return { seasons, log, problems, warnings, notes, calib, raw, fingerprint: fp };
 }
 export const applyWith = (std, m, hasErs) => Object.assign({}, std, applyMult(std, m, hasErs));
@@ -786,7 +868,7 @@ export function seasonsJs(b) {
   L.push('// standard car (the era physics, every multiplier 1) first, then every team as the constructors\' championship');
   L.push('// classified it. ESTIMATES derived from public data for a game, NOT official specifications.');
   L.push('// Sources: ' + src.attributionShort + ' (' + src.url + ', ' + src.release + '); tools/eras.json; tools/liveries/*.json;');
-  L.push('// the 2026 grid from js/cars-data.js; every car\'s battery from tools/ers-data.json (docs/ers-data.md).');
+  L.push('// the 2026 grid from js/cars-data.js; every car\'s battery from tools/ers-data.json (docs/ers-data.md); the drivers from F1DB.');
   L.push('// Method and calibration: docs/seasons-data.md.');
   L.push('//');
   L.push('// window.F1_SEASONS = [{ year, label, engine, paceIndex (real pole-time index, 2025 = 1),');
@@ -800,6 +882,8 @@ export function seasonsJs(b) {
   L.push('//            hasErs,      false: no battery (ers: null) - the era has none (2010) or the car raced without KERS');
   L.push('//            note,        one line, Traditional Chinese, or \'\'');
   L.push('//            ersNote,     one line about the car\'s battery, Traditional Chinese, or \'\' (tools/ers-data.json)');
+  L.push('//            drivers: [{ name, abbr, number }, x2]   the car\'s two real drivers (F1DB; most starts first), the names');
+  L.push('//                         of the computer drivers (F1.cars.drivers); the standard car\'s are invented');
   L.push('//            est: { lapPct, ersPct, topKmh } }] }]   model lap time vs the standard car (%), both deploying the');
   L.push('//                         battery; ersPct = the battery\'s share of it (driven); top speed without the battery');
   L.push('// window.F1_SEASONS_INFO = { attribution, attributionShort, sources2026, disclaimer, f1db }');

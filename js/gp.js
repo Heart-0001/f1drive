@@ -1,8 +1,10 @@
 // F1Drive - Grand Prix controller (F1.gp): the client side of net/session.js. See js/README-interfaces.md.
 // Pure logic: no DOM, no THREE, no timers. One object for both modes:
 //   online  - mirrors the room's session (net.session, delivered by net's 'gp' event); clock = net.serverNow()
-//   offline - owns a local F1.createSession() with one player (id 1); clock = a GAME clock that only advances
-//             in update(dt), so the session stands still while the menu is open
+//   offline - owns a local F1.createSession() with the player (id 1) and his computer drivers (setBots: ids 2..16);
+//             clock = a GAME clock that only advances in update(dt), so the session stands still while the menu is open
+// Computer drivers ("bots") are players of the session like any other; the game that simulates them (offline: this
+// one; in a room: the host's) reports their laps / progress through botLap / botProgress and asks entry(id) / solid().
 // Loadable in node: require('./js/gp.js') -> F1.gp; globalThis.F1.createGp() -> a fresh controller (tests).
 (function (root) {
   'use strict';
@@ -15,12 +17,18 @@
   var LIGHTS = (lib && lib.LIGHTS) || 5;
   var LIGHT_MS = (lib && lib.LIGHT_MS) || 1000;   // one more red light every second
   var GO_FLASH_MS = 1500;                         // "lights out" indicator
+  var LIVE_MS = 500;                              // offline race: live standings refreshed this often (game clock), as a
+                                                  //   room re-sends them (net/server.js GP_LIVE_MS)
   var CLOCK_BASE = 1000000;                       // ms: where the offline game clock starts (any value > 0)
   var SELF_OFFLINE = 1;                           // our id in the local session
   var GREY = '#888888';                           // drivers whose colour we do not know (they left)
   var MAX_PLAYERS = 64, NAME_MAX = 32;
   var PHASES = { free: 1, quali: 1, grid: 1, race: 1, results: 1 };
   var YEAR_MIN = 2010, YEAR_MAX = 2100, WEAR_MAX = 5;
+  // computer drivers: a room holds 16 cars (net/server.js); offline the player is id 1 and his bots 2..16
+  var ROOM_MAX = 16, BOT_ID0 = 2, BOT_NAME_MAX = 16;
+  var LEVEL_SKILL = { rookie: 0, amateur: 0.35, pro: 0.7, legend: 1, mixed: null };   // as F1.AI.LEVELS, + 'mixed'
+  var LEVEL_DEFAULT = 'pro';
 
   function isNum(v) { return typeof v === 'number' && v === v && v !== Infinity && v !== -Infinity; }
   function whole(v) { return isNum(v) && v > 0 ? Math.floor(v) : 0; }
@@ -28,6 +36,22 @@
   function positive(v) { return isNum(v) && v > 0 ? v : 0; }
   function lapTime(v) { return isNum(v) && v > 0 ? v : null; }
   function cleanColour(v) { return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : GREY; }
+  function cleanCar(v) { return typeof v === 'string' && /^[a-z0-9-]{1,40}$/.test(v) ? v : ''; }
+  function cleanSkill(v) { return isNum(v) ? Math.round(Math.max(0, Math.min(1, v)) * 1000) / 1000 : null; }
+  function cleanLevel(v) { return typeof v === 'string' && Object.prototype.hasOwnProperty.call(LEVEL_SKILL, v) ? v : null; }
+  function cleanBotName(v, fallback) {     // as the server cleans a name: no control / formatting characters, <= 16
+    if (typeof v !== 'string') return fallback;
+    var s = '';
+    for (var i = 0; i < v.length; i++) {
+      var c = v.charCodeAt(i);
+      // C0 / C1 controls, zero-width and bidi formatting characters, line separators, BOM
+      if (c < 0x20 || (c >= 0x7f && c <= 0x9f) || (c >= 0x200b && c <= 0x200f) ||
+          (c >= 0x2028 && c <= 0x202e) || (c >= 0x2066 && c <= 0x2069) || c === 0xfeff) continue;
+      s += v.charAt(i);
+    }
+    s = Array.from(s.replace(/\s+/g, ' ').trim()).slice(0, BOT_NAME_MAX).join('').trim();
+    return s || fallback;
+  }
 
   // the ids of `list` that are keys of `ok`, each once
   function cleanIds(list, ok) {
@@ -61,6 +85,7 @@
         fin: p.fin === true, dnf: p.dnf === true,
         gap: isNum(p.gap) ? p.gap : null, down: whole(p.down)
       };
+      if (p.bot === true) o.bot = true;               // a computer driver (only its rows carry the field, as on the wire)
       players.push(o);
       if (!o.spec) racing[o.id] = true;
     }
@@ -85,7 +110,12 @@
     var me = null;                // our own snapshot entry
     var lightsOut = false;        // grid / race and the clock is past goAt
     var goSid = -1;               // the session 'go' was fired for
+    var botGoSid = -1;            // the session 'botsGo' was fired for
+    var liveAt = CLOCK_BASE;      // offline: game clock of the last publish (live standings)
     var progOn = false;           // net holds a race progress of ours
+    // offline computer drivers (in the local session, ids 2..16): [{id, name, colour, car, skill, slot, bi}], and the
+    // strength level they were made at ('rookie' | 'amateur' | 'pro' | 'legend' | 'mixed')
+    var localBots = [], localLevel = LEVEL_DEFAULT;
 
     function emit(name, a, b) {
       var list = handlers[name];
@@ -100,9 +130,33 @@
       try { p = getProfile ? getProfile() : null; } catch (err) { if (root.console) console.error(err); }
       return {
         name: p && typeof p.name === 'string' && p.name ? p.name : 'Player',
-        colour: cleanColour(p && p.colour)
+        colour: cleanColour(p && p.colour),
+        car: cleanCar(p && p.car)
       };
     }
+
+    // OUR computer drivers (the ones this game simulates): offline the local ones, in a room the ones we host
+    function ownBots() {
+      if (!gp.online) return localBots;
+      return net && Array.isArray(net.bots) ? net.bots : [];
+    }
+    function isOwnBot(id) {
+      var list = ownBots();
+      for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return true;
+      return false;
+    }
+    function copyBots() {
+      var list = ownBots(), out = [];
+      for (var i = 0; i < list.length; i++) {
+        var b = list[i];
+        if (!b || !isNum(b.id)) continue;
+        out.push({ id: b.id, name: typeof b.name === 'string' ? b.name : '', colour: cleanColour(b.colour), car: cleanCar(b.car),
+                   skill: cleanSkill(b.skill), slot: isNum(b.slot) ? b.slot : i + 1, bi: isNum(b.bi) ? b.bi : i });
+      }
+      return out;
+    }
+    /** a classified car of the snapshot that is still in it (not a spectator, not gone) */
+    function onTrack(id) { var p = racers[id]; return p && !p.left ? p : null; }
 
     /** Everything that follows from the snapshot and our role (no clock). */
     function derive() {
@@ -147,6 +201,14 @@
     /** We are on track in the race and have not taken the flag: our progress counts. */
     function racing() { return gp.taking && gp.phase === 'race' && !me.fin && !me.dnf; }
 
+    /** Some of our bots are classified in the running session. */
+    function ownBotsTaking() {
+      if (gp.phase === 'free') return false;
+      var list = ownBots();
+      for (var i = 0; i < list.length; i++) if (list[i] && onTrack(list[i].id)) return true;
+      return false;
+    }
+
     /** A new snapshot (or none): refresh the state, then tell the listeners. */
     function apply(snap) {
       var prevPhase = gp.phase, prevSid = gp.sid;
@@ -159,23 +221,32 @@
       emit('change');
     }
 
-    function publish() { apply(local.snapshot()); }
+    function publish() { liveAt = clock; apply(local.snapshot()); }
+    // Offline race: progress reports (ours, our bots') move the live order without a lap; re-publish when it moved.
+    function liveRefresh() {
+      if (clock - liveAt < LIVE_MS) return;
+      liveAt = clock;
+      var s = local.snapshot();
+      if (JSON.stringify(s) !== JSON.stringify(gp.snapshot)) apply(s);
+    }
     function endLocal() { while (local && local.phase !== 'free') local.end(); }
 
     function onConnected() {
       if (gp.online) return;
-      endLocal();                                   // an offline Grand Prix is abandoned
-      gp.online = true; goSid = -1; progOn = false;
+      endLocal();                                   // an offline Grand Prix is abandoned (its bots wait in free practice)
+      gp.online = true; goSid = -1; botGoSid = -1; progOn = false;
       apply(null);
       var s = cleanSnapshot(net.session);           // normally still null: the room's session arrives as 'gp'
       if (s) apply(s);
+      emit('bots', copyBots());                     // ours are now the room's (none until we host and ask)
     }
 
     function onDisconnected() {
       if (!gp.online) return;
-      gp.online = false; goSid = -1; progOn = false;
+      gp.online = false; goSid = -1; botGoSid = -1; progOn = false;
       if (typeof net.setProgress === 'function') net.setProgress(null);
       apply(null);                                  // the local session is idle: it was ended when we connected
+      emit('bots', copyBots());                     // the offline ones again
     }
 
     function hook(n) {
@@ -193,6 +264,12 @@
       });
       n.on('lapRejected', function (why) {
         if (n === net && gp.online) emit('lapRejected', typeof why === 'string' ? why : '');
+      });
+      n.on('bots', function () {                    // the bots we host changed (ids / names / cars / slots)
+        if (n === net && gp.online) emit('bots', copyBots());
+      });
+      n.on('botLapRejected', function (id, why) {
+        if (n === net && gp.online && isNum(id)) emit('botLapRejected', id, typeof why === 'string' ? why : '');
       });
     }
 
@@ -221,7 +298,8 @@
         net = opts.net || null;
         getProfile = typeof opts.getProfile === 'function' ? opts.getProfile : null;
         local = lib ? lib.createSession({ random: opts.random }) : null;
-        clock = CLOCK_BASE; goSid = -1; progOn = false;
+        clock = CLOCK_BASE; goSid = -1; botGoSid = -1; progOn = false; liveAt = clock;
+        localBots = []; localLevel = LEVEL_DEFAULT;            // (a new local session has none)
         if (net && hooked.indexOf(net) < 0) { hooked.push(net); hook(net); }
         gp.online = !!net && net.connected === true;
         gp.snapshot = gp.online ? cleanSnapshot(net.session) : null;
@@ -278,7 +356,9 @@
         if (!gp.online && isNum(dt) && dt > 0) clock += dt * 1000;
         refreshClock();
         if (lightsOut && gp.taking && goSid !== gp.sid) { goSid = gp.sid; emit('go'); }
+        if (lightsOut && botGoSid !== gp.sid && ownBotsTaking()) { botGoSid = gp.sid; emit('botsGo'); }
         if (!gp.online && local && local.tick(clock)) publish();
+        else if (!gp.online && local && local.phase === 'race') liveRefresh();
       },
 
       /** The lap counter completed a timed lap (s). Ignored unless we still have laps to do in quali / race.
@@ -300,6 +380,104 @@
           progOn = racing() && isNum(v);
           net.setProgress(progOn ? v : null);
         } else if (local) local.progress(SELF_OFFLINE, v);      // (the session ignores it outside the race)
+      },
+
+      /* ---------- computer drivers ---------- */
+
+      /**
+       * Our computer drivers, free practice only. list = [{name, car, colour, skill}], entry i = bot i (name <= 16
+       * characters, car a CarSpec id, colour '#rrggbb', skill 0..1; missing / not valid -> 'AI n', '', grey, the
+       * level's); skill = the level they were made at: 'rookie' | 'amateur' | 'pro' | 'legend' | 'mixed' (shown in
+       * view().bots; anything else keeps the previous one). Offline: at most 15 (ids 2..16, room slots 1..15: the
+       * player is id 1, slot 0), applied at once ('bots' fires). In a room: net.setBots (host only; the server gives
+       * ids / slots, at most 16 - humans; 'bots' fires when the roster brings them). -> true when applied / sent.
+       */
+      setBots: function (list, skill) {
+        if (gp.online) return !!(net && typeof net.setBots === 'function' && net.setBots(list, skill));
+        if (!local || local.phase !== 'free') return false;
+        var n;
+        if (isNum(list)) { n = list; list = []; }
+        else if (Array.isArray(list)) n = list.length;
+        else return false;
+        if (!(n >= 0)) return false;
+        n = Math.min(Math.floor(n), ROOM_MAX - 1);
+        var level = cleanLevel(skill) || localLevel, out = [], i, name = profile().name;
+        // the player first: the bots join after him (no-time ties in qualifying go by join order)
+        if (!local.addPlayer(SELF_OFFLINE, name, clock)) local.rename(SELF_OFFLINE, name);
+        for (i = 0; i < n; i++) {
+          var e = list[i] && typeof list[i] === 'object' ? list[i] : {}, id = BOT_ID0 + i, sk = cleanSkill(e.skill);
+          var b = { id: id, name: cleanBotName(e.name, 'AI ' + (i + 1)), colour: cleanColour(e.colour), car: cleanCar(e.car),
+                    skill: sk !== null ? sk : LEVEL_SKILL[level], slot: i + 1, bi: i };
+          if (!local.addPlayer(id, b.name, clock, { bot: true, owner: SELF_OFFLINE })) local.rename(id, b.name);
+          out.push(b);
+        }
+        for (i = n; i < localBots.length; i++) local.removePlayer(localBots[i].id, clock);
+        localBots = out; localLevel = level;
+        emit('bots', copyBots());
+        emit('change');
+        return true;
+      },
+
+      /** -> our bots, a fresh copy: [{id, name, colour, car, skill, slot, bi}] in list order (slot = room slot =
+       *  pit box / grid column outside a session). Online: the room's bots we host (net.bots); offline: ours. */
+      bots: function () { return copyBots(); },
+
+      /**
+       * One of our bots completed a timed lap (s): its lap counter returned 2. -> '' when accepted (offline) / sent
+       * (online; a rejection comes back as 'botLapRejected'), else why not: 'not-ours' | 'not-racing' | 'done' |
+       * 'no-session' | 'not-sent' | a session reason ('too-fast', ...: offline, also fired as 'botLapRejected').
+       */
+      botLap: function (id, time) {
+        if (!isOwnBot(id)) return 'not-ours';
+        var p = onTrack(id);
+        if (!p || gp.phase === 'free') return 'not-racing';
+        if (gp.phase === 'quali') { if (p.qDone) return 'done'; }
+        else if (gp.phase === 'race') { if (p.fin || p.dnf) return 'done'; }
+        else return 'no-session';
+        if (gp.online) return net.sendGpLap(gp.sid, time, gp.now(), id) ? '' : 'not-sent';
+        var why = local.lap(id, time, clock);
+        if (why) emit('botLapRejected', id, why); else publish();
+        return why;
+      },
+
+      /** One of our bots' race distance (its lapCounter.progress(idx)), every frame like setProgress. Online it rides
+       *  along with its next state (net.sendBotStates). */
+      botProgress: function (id, v) {
+        if (!isOwnBot(id)) return;
+        if (gp.online) { if (typeof net.setBotProgress === 'function') net.setBotProgress(id, isNum(v) ? v : null); }
+        else if (local) local.progress(id, v);
+      },
+
+      /**
+       * Where car `id` (ours, a bot, anybody in the snapshot) stands in the session, for its driver / its lap
+       * counter: { id, bot, taking (classified in this session and still in it), lap, lapTotal (qLaps / q in
+       * qualifying, rLaps / r from the grid on, 0 / 0 otherwise), done (quali: its laps are done; race: flag or DNF;
+       * results: true), fin, dnf, gridSlot (index in snapshot.grid, -1), locked (on the grid before lights out: hold
+       * the car) }. out (optional) is filled and returned instead of a new object (no allocation per step).
+       */
+      entry: function (id, out) {
+        var o = out || {}, p = onTrack(id), s = gp.snapshot, row = byId[id];
+        o.id = id; o.bot = !!row && row.bot === true;
+        o.taking = !!p && gp.phase !== 'free';
+        o.lap = 0; o.lapTotal = 0; o.done = false; o.fin = false; o.dnf = false; o.gridSlot = -1; o.locked = false;
+        if (row) { o.fin = row.fin; o.dnf = row.dnf; }
+        if (!o.taking) return o;
+        if (gp.phase === 'quali') { o.lap = p.qLaps; o.lapTotal = s.q; o.done = p.qDone; }
+        else { o.lap = p.rLaps; o.lapTotal = s.r; o.done = gp.phase === 'results' || p.fin || p.dnf; }
+        o.gridSlot = s.grid.indexOf(id);
+        o.locked = (gp.phase === 'grid' || gp.phase === 'race') && !lightsOut;
+        return o;
+      },
+
+      /** May cars a and b touch (collide) now? The session's rule (net/session.js solid()) for any two cars, e.g.
+       *  two bots: always in free practice; never in qualifying, nor on the grid before the lights; otherwise when
+       *  both are classified and still in the session. (Pit-lane ghosts are main.js's.) */
+      solid: function (a, b) {
+        var s = gp.snapshot;
+        if (!s || gp.phase === 'free') return true;
+        if (gp.phase === 'quali') return false;
+        if (gp.phase === 'grid' && !(gp.now() >= s.lightsAt)) return false;
+        return !!onTrack(a) && !!onTrack(b);
       },
 
       /** Draw that remote car translucent and do not collide with it. */
@@ -324,18 +502,37 @@
       view: function () {
         var s = gp.snapshot, on = !!s && gp.phase !== 'free';
         var inRace = gp.phase === 'race' || gp.phase === 'results';
-        var rows = [], spectators = [], colours = {}, pos = 0, i, p;
+        var rows = [], spectators = [], colours = {}, cars = {}, skills = {}, pos = 0, i, p, q, bots;
         if (gp.online) {
-          var roster = Array.isArray(net.roster) ? net.roster : [];
-          for (i = 0; i < roster.length; i++) if (roster[i] && isNum(roster[i].id)) colours[roster[i].id] = cleanColour(roster[i].colour);
-        } else colours[SELF_OFFLINE] = profile().colour;
+          var roster = Array.isArray(net.roster) ? net.roster : [], humans = 0, nb = 0;
+          for (i = 0; i < roster.length; i++) {
+            q = roster[i];
+            if (!q || !isNum(q.id)) continue;
+            colours[q.id] = cleanColour(q.colour); cars[q.id] = cleanCar(q.car);
+            if (q.bot === true) { nb++; skills[q.id] = cleanSkill(q.skill); } else humans++;
+          }
+          var set = net.botSettings && typeof net.botSettings === 'object' ? net.botSettings : {};
+          bots = { count: nb, skill: cleanLevel(set.skill) || LEVEL_DEFAULT, max: Math.max(0, ROOM_MAX - humans),
+                   canEdit: net.isHost === true && gp.phase === 'free' };
+        } else {
+          q = profile();
+          colours[SELF_OFFLINE] = q.colour; cars[SELF_OFFLINE] = q.car;
+          for (i = 0; i < localBots.length; i++) {
+            q = localBots[i];
+            colours[q.id] = q.colour; cars[q.id] = q.car; skills[q.id] = q.skill;
+          }
+          bots = { count: localBots.length, skill: localLevel, max: ROOM_MAX - 1, canEdit: gp.phase === 'free' };
+        }
         if (on) {
           for (i = 0; i < s.order.length; i++) {
             p = racers[s.order[i]];
             if (!p) continue;
             rows.push({
-              pos: rows.length + 1, id: p.id, name: p.name || 'Player ' + p.id, colour: colours[p.id] || GREY,
+              pos: rows.length + 1, id: p.id, name: p.name || (p.bot ? 'AI ' : 'Player ') + p.id, colour: colours[p.id] || GREY,
               isSelf: p === me,
+              bot: p.bot === true,                 // a computer driver (offline rows come straight from the session)
+              skill: p.bot === true && skills[p.id] !== undefined ? skills[p.id] : null,   // its strength 0..1 (null: unknown)
+              car: cars[p.id] || '',               // its CarSpec id ('' unknown)
               laps: inRace ? p.rLaps : p.qLaps,
               best: inRace ? p.rBest : p.qBest,
               time: inRace && p.fin ? p.rTime : null,
@@ -360,7 +557,11 @@
           pos: pos, count: rows.length,
           done: gp.taking && (gp.phase === 'quali' ? me.qDone : me.fin),
           endsInMs: gp.phase === 'race' && s.endsAt > 0 ? Math.max(0, Math.round(s.endsAt - gp.now())) : null,
-          rows: rows, spectators: spectators
+          rows: rows, spectators: spectators,
+          // computer drivers: how many there are (offline ours, in a room all of them), the strength level they were
+          // set to, how many there may be (16 - humans), and whether we may change them now (offline / the host, in
+          // free practice: parc fermé during a session)
+          bots: bots
         };
       }
     };

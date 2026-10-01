@@ -758,5 +758,78 @@ test('race time from the moment of the crossing: a late report costs nothing, a 
   }
 });
 
+/* ---------- computer drivers (bots) ---------- */
+
+test('bots: players like any other (qualify, grid by time, race, DNF when removed); only their rows carry bot: true', () => {
+  const s = createSession({ random: () => 0.5 });
+  let t = 1000000;
+  assert.strictEqual(s.addPlayer(1, 'Human', t), true);
+  assert.strictEqual(s.addPlayer(2, 'Bot A', t, { bot: true, owner: 1 }), true);
+  assert.strictEqual(s.addPlayer(3, 'Bot B', t, { bot: true, owner: 1 }), true);
+  assert.strictEqual(s.addPlayer(2, 'again', t, { bot: true, owner: 1 }), false, 'an id is in the session once');
+  // anything but {bot: true} is a human; a garbage owner is 0
+  s.addPlayer(4, 'not a bot', t, { bot: 'yes', owner: 1 });
+  s.addPlayer(5, 'nor this', t, 'bot');
+  s.addPlayer(6, 'odd owner', t, { bot: true, owner: 'me' });
+  assert.deepStrictEqual([1, 2, 3, 4, 5, 6, 99].map(id => s.isBot(id)), [false, true, true, false, false, true, false]);
+  let g = s.snapshot();
+  assert.deepStrictEqual(g.players.map(p => p.bot), [undefined, true, true, undefined, undefined, true], 'a human row is as it was');
+  assert(!('bot' in g.players[0]) && !('owner' in g.players[1]), 'rows carry bot: true, nothing else new');
+  [4, 5, 6].forEach(id => s.removePlayer(id, t));
+  // qualifying waits for every bot; the grid goes by time, bots or not
+  s.start({ q: 1, r: 2, len: LEN }, t);
+  t += 100000;
+  assert.strictEqual(s.lap(1, 81, t), '');
+  assert.strictEqual(s.lap(3, 80, t), '');
+  assert.strictEqual(s.phase, 'quali', 'bot A has not done its lap');
+  assert.strictEqual(s.lap(2, 82, t), '');
+  g = s.snapshot();
+  assert.deepStrictEqual([g.phase, g.grid], ['grid', [3, 1, 2]]);
+  t = g.goAt; s.tick(t);
+  // race: progress and laps as for anybody; a bot removed mid-race is a DNF row that keeps bot: true
+  s.progress(2, 0.6); s.progress(3, 0.4); s.progress(1, 0.5);
+  assert.deepStrictEqual(s.snapshot().order, [2, 1, 3]);
+  assert.strictEqual(s.removePlayer(3, t), true);
+  g = s.snapshot();
+  const b = g.players.find(p => p.id === 3);
+  assert.deepStrictEqual([b.left, b.dnf, b.bot, g.order[2]], [true, true, true, 3]);
+  assert.strictEqual(s.isBot(3), false, 'gone');
+  t += 100000; assert.strictEqual(s.lap(2, 90, t), ''); assert.strictEqual(s.lap(1, 91, t), '');
+  t += 100000; assert.strictEqual(s.lap(2, 90, t), ''); assert.strictEqual(s.lap(1, 91, t), '');
+  g = s.snapshot();
+  assert.deepStrictEqual([g.phase, g.order, g.players.filter(p => p.bot).map(p => [p.id, p.fin, p.dnf])], ['results', [2, 1, 3], [[2, true, false], [3, false, true]]]);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(g)), g);
+  // free practice: the leaver's row goes, the bot that stays is a bot again in the next session
+  s.end();
+  g = s.snapshot();
+  assert.deepStrictEqual(g.players.map(p => [p.id, p.bot === true]), [[1, false], [2, true]]);
+  s.start({ q: 1, r: 1, len: LEN }, t);
+  assert.deepStrictEqual(s.snapshot().players.map(p => [p.id, p.bot === true, p.spec]), [[1, false, false], [2, true, false]]);
+});
+
+test('bots: a full field of 1 human + 15 bots; removing the bots in qualifying completes it; a bot added mid-session spectates', () => {
+  const s = createSession({ random: () => 0 });
+  let t = 2000000;
+  s.addPlayer(1, 'Solo', t);
+  for (let i = 2; i <= 16; i++) s.addPlayer(i, 'AI ' + i, t, { bot: true, owner: 1 });
+  s.start({ q: 2, r: 3, len: LEN }, t);
+  t += 100000;
+  assert.strictEqual(s.lap(1, 80, t), '');
+  t += 100000;
+  assert.strictEqual(s.lap(1, 80, t), '');
+  assert.strictEqual(s.phase, 'quali');
+  for (let i = 2; i <= 16; i++) s.removePlayer(i, t);           // the owner's game went away
+  assert.strictEqual(s.phase, 'grid', 'nobody left to wait for');
+  assert.deepStrictEqual(s.snapshot().grid, [1]);
+  s.addPlayer(30, 'late bot', t, { bot: true, owner: 1 });
+  const p = s.snapshot().players.find(q => q.id === 30);
+  assert.deepStrictEqual([p.spec, p.bot], [true, true], 'like anybody joining during the grid');
+  assert.strictEqual(s.solid(1, 30, s.snapshot().goAt), false);
+  const big = createSession();
+  for (let i = 1; i <= 16; i++) big.addPlayer(i, '十六個字的超級長名字車手' + String(i).padStart(4, '0'), t, i > 1 ? { bot: true, owner: 1 } : undefined);
+  big.start({ q: 1, r: 99, len: LEN, year: 2026, wear: 5 }, t);
+  assert(Buffer.byteLength(JSON.stringify(big.snapshot())) < 4200, 'bots add 11 bytes a row');
+});
+
 console.log(failed ? '\n' + failed + ' test(s) FAILED' : '\nall session tests passed');
 process.exit(failed ? 1 : 0);

@@ -6,6 +6,10 @@
    under it, and the search also matches the Chinese names / aliases and the country in English and Chinese (COUNTRY
    below); 設定 has the 視野 (FOV) slider (onFov, getFov; 'f1drive.fov'); the 大獎賽 tab the starting compound
    (setCompound / onCompound: main.js's next set); the pit strip names the next set and its key (setPit p.next).
+   v7: the computer drivers (電腦車手) - in the 大獎賽 tab how many (0..16 - humans) and how strong (新手 / 業餘 / 職業 /
+   傳奇 / 混合), remembered ('f1drive.bots', getBots / onBots; read-only for a room's guests and during a session: the
+   view's bots.canEdit) with the field listed in free practice; an AI tag on bots in the standings, the session box, the
+   results, the room roster; their minimap dots ringed in the second livery colour; the car cards say who drives them.
    Classic script; uses F1.telemetry when it is loaded, F1.cars.ersNote for the battery line of the car cards,
    F1.COCKPIT_FOV for the range of the FOV slider. */
 (function () {
@@ -18,7 +22,7 @@
     onCreateRoom: null, onJoinRoom: null, onLeaveRoom: null, onProfile: null,
     onGpStart: null, onGpAction: null,
     onYear: null, onCar: null, onAudio: null, onMirrors: null,
-    onFov: null, onCompound: null
+    onFov: null, onCompound: null, onBots: null
   };
   var inited = false;
   var tele = null;          // F1.telemetry once init() found it and its canvas
@@ -61,6 +65,16 @@
   // starts on mediums, the reference).
   var COMPOUNDS = { S: '軟胎', M: '中性胎', H: '硬胎' };
   var nextCmp = 'M';
+
+  // 大獎賽: the computer drivers (電腦車手). The setting {count, skill} is the player's (remembered): it is the field alone
+  // and, as the host, the room's (main.js caps it at the room's free seats). The level ids are js/ai.js's (F1.AI.LEVELS)
+  // plus 'mixed'; their skill values give the nearest level of a bot's own skill (its row's tooltip).
+  var BOTS_STORE_KEY = 'f1drive.bots';
+  var BOTS_MAX = 15;                         // alone: the player + 15 (a room holds 16 cars)
+  var BOT_LEVELS = [{ id: 'rookie', name: '新手', skill: 0, pct: 8 }, { id: 'amateur', name: '業餘', skill: 0.35, pct: 5 },
+    { id: 'pro', name: '職業', skill: 0.7, pct: 2.5 }, { id: 'legend', name: '傳奇', skill: 1, pct: 1 }];
+  var BOT_LEVEL_NAME = { rookie: '新手', amateur: '業餘', pro: '職業', legend: '傳奇', mixed: '混合' };
+  var botCfg = { count: 0, skill: 'pro' };   // default: no computer drivers (the v6 game)
 
   // pit strip: the last input, in the units shown (setPit is called every frame)
   var pitC = { shown: false, inLane: false, limiter: false, speeding: false, limit: 0, slot: -1, box: 0,
@@ -388,17 +402,39 @@
     for (var i = 0; i < n.length; i++) n[i].classList.toggle('on', n[i].getAttribute('data-c') === mp.colour);
   }
 
+  // the level name of a computer driver's skill (0..1): the nearest of js/ai.js's levels; '' when unknown
+  function levelName(s) {
+    if (typeof s !== 'number' || !(s === s)) return '';
+    var best = BOT_LEVELS[0];
+    for (var i = 1; i < BOT_LEVELS.length; i++) if (Math.abs(BOT_LEVELS[i].skill - s) < Math.abs(best.skill - s)) best = BOT_LEVELS[i];
+    return best.name;
+  }
+  // the AI tag of a computer driver's row (its level in the tooltip)
+  function aiTag(r) {
+    if (!r || r.bot !== true) return '';
+    var lv = levelName(r.skill);
+    return '<span class="gp-ai" title="電腦車手' + (lv ? '（' + lv + '）' : '') + '">AI</span>';
+  }
+
+  // a computer driver's dot: both colours of its car's livery (a black or white team colour alone vanishes on the panel)
+  function botDot(r, colour) {
+    var C = F1.cars, s = null;
+    try { s = C && typeof C.get === 'function' && cleanCarId(r.car) ? C.get(r.car) : null; } catch (err) { s = null; }
+    return s ? livery(s) : colour;
+  }
+
   function playerRows(roster, withTimes) {
     var html = '';
     for (var i = 0; i < roster.length; i++) {
       var r = roster[i];
       var colour = /^#[0-9a-fA-F]{6}$/.test(r.colour) ? r.colour : '#888888';
+      if (r.bot === true) colour = botDot(r, colour);
       if (withTimes) {
         html += '<div class="prow"><span class="mp-dot" style="background:' + colour + '"></span>' +
-          '<span class="mp-pname">' + esc(r.name) + '</span><span class="pt">' + fmtTime(r.best) + '</span></div>';
+          '<span class="mp-pname">' + esc(r.name) + '</span>' + aiTag(r) + '<span class="pt">' + fmtTime(r.best) + '</span></div>';
       } else {
         html += '<li><span class="mp-dot" style="background:' + colour + '"></span>' +
-          '<span class="mp-pname">' + esc(r.name) + '</span>' +
+          '<span class="mp-pname">' + esc(r.name) + '</span>' + aiTag(r) +
           (r.isSelf ? '<span class="mp-tag">你</span>' : '') +
           (r.isHost ? '<span class="mp-tag">房主</span>' : '') + '</li>';
       }
@@ -465,7 +501,10 @@
     }
 
     if (connected) {
-      setText('ptitle', el.mpPlayersTitle, '玩家（' + roster.length + ' / 16）');
+      var nBots = 0;
+      for (var b = 0; b < roster.length; b++) if (roster[b] && roster[b].bot === true) nBots++;
+      setText('ptitle', el.mpPlayersTitle, nBots ? '玩家（' + (roster.length - nBots) + ' 人 + 電腦 ' + nBots + '，' + roster.length + ' / 16）'
+        : '玩家（' + roster.length + ' / 16）');
       var rows = playerRows(roster, false);
       if (cache.prows !== rows) { cache.prows = rows; el.mpPlayers.innerHTML = rows; }
     }
@@ -609,6 +648,8 @@
   // The driver's car, when main.js puts it into the view rows (optional): a livery chip (row.colour2) and the
   // team / car name (row.team; only where there is room for it).
   function carChip(r) { return isColour(r.colour2) ? '<span class="gp-chip" style="background:' + r.colour2 + '"></span>' : ''; }
+  // the dot of a row: the driver's colour; a computer driver's is its team's, with the second livery colour beside it
+  function rowDot(r) { return r.bot === true && isColour(r.colour2) ? livery({ colour: r.colour, colour2: r.colour2 }) : cleanColour(r.colour); }
   function carTeam(r) { return typeof r.team === 'string' && r.team ? '<span class="gp-team">' + esc(r.team) + '</span>' : ''; }
 
   // Standings rows for the menu panel and the HUD session box. Qualifying / grid: best lap (qualifying also
@@ -629,8 +670,8 @@
       }
       html += '<div class="gp-row' + (r.isSelf ? ' self' : '') + (out ? ' out' : '') + '">' +
         '<span class="gp-pos">' + (count(r.pos) || i + 1) + '</span>' +
-        '<span class="mp-dot" style="background:' + cleanColour(r.colour) + '"></span>' + carChip(r) +
-        '<span class="mp-pname">' + esc(r.name) + '</span>' + (withTeam ? carTeam(r) : '') +
+        '<span class="mp-dot" style="background:' + rowDot(r) + '"></span>' + carChip(r) +
+        '<span class="mp-pname">' + esc(r.name) + '</span>' + aiTag(r) + (withTeam ? carTeam(r) : '') +
         (sub ? '<span class="gp-sub">' + sub + '</span>' : '') +
         '<span class="gp-val">' + val + '</span>' +
         (withBest ? '<span class="gp-best' + (fl !== null && r.best === fl ? ' fl' : '') + '">' + fmtTime(r.best) + '</span>' : '') +
@@ -649,8 +690,8 @@
       var r = rows[i] || {};
       html += '<tr class="' + (r.isSelf ? 'self' : '') + (r.done ? '' : ' out') + '">' +
         '<td class="c-pos">' + (count(r.pos) || i + 1) + '</td>' +
-        '<td class="c-name"><div class="res-name"><span class="mp-dot" style="background:' + cleanColour(r.colour) + '"></span>' + carChip(r) +
-        '<span class="mp-pname">' + esc(r.name) + '</span>' + (r.isSelf ? '<span class="mp-tag">你</span>' : '') + carTeam(r) + '</div></td>' +
+        '<td class="c-name"><div class="res-name"><span class="mp-dot" style="background:' + rowDot(r) + '"></span>' + carChip(r) +
+        '<span class="mp-pname">' + esc(r.name) + '</span>' + aiTag(r) + (r.isSelf ? '<span class="mp-tag">你</span>' : '') + carTeam(r) + '</div></td>' +
         '<td class="c-laps">' + count(r.laps) + '</td>' +
         '<td class="c-time">' + (r.done ? fmtTime(r.time) : '--') + '</td>' +
         '<td class="c-gap">' + (i === 0 && r.done ? '' : gapText(r, i === 0, true)) + '</td>' +
@@ -704,6 +745,7 @@
     setShown('tabgp', el.tabGpDot, on);
     renderGpCar();
     renderTyre();
+    renderBots();
 
     /* menu panel */
     setShown('gpsetup', el.gpSetup, !on && ctl);
@@ -844,8 +886,100 @@
       : '排位賽和正賽起跑時裝上這組新胎。開車時按 <kbd>T</kbd>（手把 <kbd>X</kbd>）換下一組，進站停在維修格時裝上。');
   }
 
+  /* the computer drivers (電腦車手): count and strength */
+
+  function cleanBotCount(v, def) {
+    var n = typeof v === 'number' ? Math.floor(v) : NaN;
+    return isFinite(n) ? (n < 0 ? 0 : n > BOTS_MAX ? BOTS_MAX : n) : def;
+  }
+  function cleanBotSkill(v, def) { return typeof v === 'string' && Object.prototype.hasOwnProperty.call(BOT_LEVEL_NAME, v) ? v : def; }
+
+  function loadBotsStore() {
+    try {
+      var o = JSON.parse(window.localStorage.getItem(BOTS_STORE_KEY) || 'null');
+      if (o && typeof o === 'object') {
+        botCfg.count = cleanBotCount(o.count, botCfg.count);
+        botCfg.skill = cleanBotSkill(o.skill, botCfg.skill);
+      }
+    } catch (err) { /* storage unavailable or corrupt: none */ }
+  }
+
+  function saveBotsStore() {
+    try { window.localStorage.setItem(BOTS_STORE_KEY, JSON.stringify({ count: botCfg.count, skill: botCfg.skill })); } catch (err) { /* ignore */ }
+  }
+
+  // The 電腦車手 rows of the 大獎賽 tab, from the view's bots = {count (in the field now), skill (level), max (seats for
+  // computer drivers: 16 - humans; 15 alone), canEdit (alone / the host, free practice), available (js/ai.js loaded)}
+  // and botList ([{name, colour, colour2, team, skill}]: the field, shown in free practice).
+  function renderBots() {
+    if (!inited || !el.gpBotsBox) return;
+    var b = gpView.bots && typeof gpView.bots === 'object' ? gpView.bots : null;
+    var avail = !!b && b.available !== false;
+    setShown('gpbotsbox', el.gpBotsBox, avail);
+    if (!avail) return;
+    var edit = b.canEdit === true, on = gpPhase !== 'free', online = !!gpView.online;
+    var max = Math.min(16, count(b.max));
+    var n = edit ? Math.min(botCfg.count, max) : Math.min(16, count(b.count));
+    var lvl = edit ? botCfg.skill : cleanBotSkill(b.skill, 'pro');
+    var top = Math.max(max, n), opts = '';
+    for (var i = 0; i <= top; i++) opts += '<option value="' + i + '">' + (i ? i + ' 位' : '無') + '</option>';
+    setHtml('gpbotsopts', el.gpBots, opts);
+    if (el.gpBots.value !== String(n)) el.gpBots.value = String(n);
+    if (el.gpBots.disabled !== !edit) el.gpBots.disabled = !edit;
+    var sb = el.gpSkill.children;
+    for (i = 0; i < sb.length; i++) {
+      var sel = sb[i].getAttribute('data-s') === lvl;
+      sb[i].classList.toggle('on', sel);
+      if (sb[i].getAttribute('aria-checked') !== String(sel)) sb[i].setAttribute('aria-checked', String(sel));
+      if (sb[i].disabled !== !edit) sb[i].disabled = !edit;
+    }
+    var note;
+    if (on) note = '賽事進行中不能更改電腦車手。';
+    else if (!edit) note = online ? '電腦車手由房主設定。' : '';
+    else if (botCfg.count > max) note = '房間最多 16 輛車：現在最多 ' + max + ' 位電腦車手。';
+    else note = '電腦車手用這個賽季真實車手的名字，開' + (online ? '房間裡沒人選' : '你沒選') + '的車隊的車（每隊兩個席位，你選的車隊另一位車手也會上場）。';
+    setText('gpbotsnote', el.gpBotsNote, note);
+    setShown('gpbotsnoteon', el.gpBotsNote, note);
+    // the field (free practice; in a session the standings list it)
+    var list = !on && Array.isArray(gpView.botList) ? gpView.botList : [], html = '';
+    for (i = 0; i < list.length && i < 16; i++) {
+      var e = list[i] || {}, lv = levelName(e.skill);
+      html += '<span class="gp-bot" title="' + esc((e.team ? e.team + ' ‧ ' : '') + (lv ? lv : '')) + '">' +
+        '<i style="background:' + livery({ colour: e.colour, colour2: e.colour2 }) + '"></i>' + esc(e.name) + '</span>';
+    }
+    setHtml('gpbotslist', el.gpBotsList, html);
+    setShown('gpbotsliston', el.gpBotsList, html);
+  }
+
+  function initBots() {
+    loadBotsStore();
+    if (!el.gpBots || !el.gpSkill) return;
+    var changed = function () {
+      saveBotsStore();
+      renderBots();
+      if (callbacks.onBots) callbacks.onBots({ count: botCfg.count, skill: botCfg.skill });
+    };
+    el.gpBots.addEventListener('change', function () {
+      var b = gpView.bots;
+      if (!b || b.canEdit !== true) { renderBots(); return; }
+      var n = cleanBotCount(Number(el.gpBots.value), botCfg.count);
+      if (n === botCfg.count) return;
+      botCfg.count = n;
+      changed();
+    });
+    el.gpSkill.addEventListener('click', function (e) {
+      var s = e.target && e.target.getAttribute ? e.target.getAttribute('data-s') : null, b = gpView.bots;
+      if (!s || !Object.prototype.hasOwnProperty.call(BOT_LEVEL_NAME, s) || !b || b.canEdit !== true) return;
+      if (e.target.blur) e.target.blur();
+      if (s === botCfg.skill) return;
+      botCfg.skill = s;
+      changed();
+    });
+  }
+
   function initGpPanel() {
     loadGpStore();
+    initBots();
     el.gpQ.value = String(gpCfg.q);
     el.gpR.value = String(gpCfg.r);
 
@@ -1003,7 +1137,7 @@
     }
     // a car known to have no battery (spec.ers null: all of 2010, a few 2011-2012 teams): said where its bar would be
     if (c.ers === null) bars += '<span class="car-noers" title="這輛車沒有 KERS（動能回收系統）：E 沒有作用">無 KERS</span>';
-    var en = ersNote(c);
+    var en = ersNote(c), drv = carDrivers(c.id);
     return '<button type="button" class="car-card" data-id="' + c.id + '" aria-pressed="false">' +
       '<span class="car-head"><i class="car-chip" style="background:' + cleanColour(c.colour) + '"></i>' +
       (isColour(c.colour2) ? '<i class="car-chip" style="background:' + c.colour2 + '"></i>' : '') +
@@ -1011,7 +1145,23 @@
       (c.engine ? '<span class="car-engine">' + esc(c.engine) + '</span>' : '') +
       '<span class="car-bars">' + bars + '</span>' +
       (en ? '<span class="car-ers"><b>電池</b>' + esc(en) + '</span>' : '') +
+      (drv ? '<span class="car-drv"><b>車手</b>' + drv + '</span>' : '') +
       (c.note ? '<span class="car-note">' + esc(c.note) + '</span>' : '') + '</button>';
+  }
+
+  // Who drives this car in the field now (setCars v.drivers = {carId: [{name, bot, self}]}, optional): '你', the room's
+  // players and the computer drivers (AI tag). A human takes one of the team's two seats, the computer drivers the others.
+  function carDrivers(id) {
+    var d = carsView && carsView.drivers && typeof carsView.drivers === 'object' && Object.prototype.hasOwnProperty.call(carsView.drivers, id)
+      ? carsView.drivers[id] : null, out = [];
+    if (!Array.isArray(d)) return '';
+    for (var i = 0; i < d.length && out.length < 6; i++) {
+      var e = d[i];
+      if (!e || typeof e !== 'object') continue;
+      if (e.self === true) out.push('<em>你</em>');
+      else if (typeof e.name === 'string' && e.name) out.push(esc(e.name.slice(0, 24)) + (e.bot === true ? '<i>AI</i>' : ''));
+    }
+    return out.join('、');
   }
 
   // highlight one card (the others lose it); touches only the cards whose state changes
@@ -1361,7 +1511,11 @@
         c.beginPath();
         c.arc(o.x * mapScale + mapOx, o.z * mapScale + mapOz, 3.6 * r, 0, Math.PI * 2);
         c.fillStyle = o.colour || '#ffffff';
-        c.fill(); c.stroke();
+        c.fill();
+        if (o.ring) {                           // a computer driver: its team's second colour as the ring
+          c.lineWidth = 1.8 * r; c.strokeStyle = o.ring; c.stroke();
+          c.lineWidth = 1.2 * r; c.strokeStyle = 'rgba(0,0,0,0.85)';
+        } else c.stroke();
       }
     }
     var px = x * mapScale + mapOx, pz = z * mapScale + mapOz;
@@ -1434,6 +1588,8 @@
     el.gpWear = $('gp-wear'); el.gpCar = $('gp-car'); el.gpYear = $('gp-year'); el.gpCarName = $('gp-car-name');
     el.gpCarChange = $('gp-car-change');
     el.gpTyre = $('gp-tyre'); el.gpTyreLabel = $('gp-tyre-label'); el.gpTyreNote = $('gp-tyre-note');   // v6.2
+    el.gpBotsBox = $('gp-bots-box'); el.gpBots = $('gp-bots'); el.gpSkill = $('gp-skill');               // v7: 電腦車手
+    el.gpBotsNote = $('gp-bots-note'); el.gpBotsList = $('gp-bots-list');
     el.hudGp = $('hud-gp'); el.hudGpTitle = $('hud-gp-title'); el.hudGpPos = $('hud-gp-pos'); el.hudGpYear = $('hud-gp-year');
     el.hudGpLapRow = $('hud-gp-laprow'); el.hudGpLap = $('hud-gp-lap'); el.hudGpNote = $('hud-gp-note');
     el.hudGpEnds = $('hud-gp-ends'); el.hudGpRows = $('hud-gp-rows'); el.hudGpSpec = $('hud-gp-spec');
@@ -1464,6 +1620,7 @@
       callbacks.onMirrors = opts.onMirrors || null;      // (on): the 後照鏡 switch of 設定 flipped
       callbacks.onFov = opts.onFov || null;              // (deg): the 視野 slider of 設定 moved (whole degrees)
       callbacks.onCompound = opts.onCompound || null;    // ('S' | 'M' | 'H'): the 起跑輪胎 / 下一組輪胎 row of 大獎賽
+      callbacks.onBots = opts.onBots || null;            // ({count, skill}): the 電腦車手 rows of 大獎賽 changed
       if (inited) return;
       findElements();
       inited = true;                         // from here on setNet / setGp / setLights / setPad / setCars render
@@ -1513,6 +1670,8 @@
      * Grand Prix: menu panel (Q / R, 開始 / 跳過排位 / 結束 / 再來一場, state, standings), HUD session box (replaces
      * the roster box while a session is on) and the results overlay. v = GpView (js/README-interfaces.md) plus
      * canStart / startHint; an optional v.sid re-opens a closed results overlay when the session changes.
+     * v7: v.bots = {count, skill, max, canEdit, available} (the 電腦車手 rows; available false hides them), v.botList =
+     * [{name, colour, colour2, team, skill}] (the field, listed in free practice), rows[i].bot / skill (the AI tag).
      * Cheap to call a few times a second: the DOM is only touched where the generated text changed.
      */
     setGp: function (v) {
@@ -1556,7 +1715,8 @@
      * standard car first), selected (id of the car we drive), canPickYear, canPickCar (false: disabled; a missing
      * flag counts as true), seasons: [{year, label, engine, count}] (F1.cars.seasons; shown newest first),
      * reason (text shown while a control is disabled; defaults: 賽事進行中不能換車 when both are, 年份由房主選擇…
-     * when only the year is) }. The selection follows `selected`: a card clicked is highlighted at once and
+     * when only the year is), drivers (optional, v7: {carId: [{name, bot, self}]} who drives each car in the field now:
+     * 你, the room's players, the computer drivers) }. The selection follows `selected`: a card clicked is highlighted at once and
      * onCar(id) called, and the next setCars decides. Cheap to call again with the same content: the DOM is
      * only touched where something changed (the card list is compared as generated HTML).
      */
@@ -1600,6 +1760,13 @@
       nextCmp = c;
       renderTyre();
     },
+
+    /**
+     * The 電腦車手 setting of the 大獎賽 tab: { count: 0..15 computer drivers, skill: 'rookie' | 'amateur' | 'pro' |
+     * 'legend' | 'mixed' } (remembered in localStorage 'f1drive.bots'; none by default). Alone it is the field; as the
+     * host of a room main.js caps it at the free seats (16 - players). A fresh object.
+     */
+    getBots: function () { return { count: botCfg.count, skill: botCfg.skill }; },
 
     /** The HUD rear-view mirrors setting of 設定 (on by default, remembered in localStorage 'f1drive.hud'). */
     getMirrors: function () { return view.mirrors; },
@@ -1724,7 +1891,7 @@
       setText('cur', el.cur, fmtTime(h.curTime));
       setText('last', el.last, fmtTime(h.lastTime));
       setText('best', el.best, fmtTime(h.bestTime));
-      drawMap(h.x, h.z, h.heading, h.others);   // others (optional): [{x, z, colour}] remote players
+      drawMap(h.x, h.z, h.heading, h.others);   // others (optional): [{x, z, colour, ring?}] the other cars (ring: a bot's 2nd colour)
       if (gpEndsAt) tickGpCountdown();
       if (tele) tele.draw(h);                   // never throws; a no-op while the HUD is hidden
     },

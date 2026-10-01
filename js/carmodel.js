@@ -184,14 +184,20 @@
     return { geo: m.build(), paint: m.paint, halo: [halo0, halo1] };
   }
 
-  function drawTag(ctx, w, h, name, colour) {
+  var TAG_FONT = '"Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif';
+  // badge (optional): a short label in a pill before the name ('AI': a computer driver); without one the tag is drawn
+  // exactly as before (the name centred in its box, 8 px right of the middle)
+  function drawTag(ctx, w, h, name, colour, badge) {
     ctx.clearRect(0, 0, w, h);
     var text = String(name == null ? '' : name);
     if (!text) return;
-    ctx.font = '600 34px "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    var tw = Math.min(w - 40, ctx.measureText(text).width);
-    var bw = tw + 46, bh = 46, x0 = (w - bw) / 2, y0 = (h - bh) / 2, r = 10;
+    var bt = badge ? String(badge) : '', pw = 0;
+    if (bt) { ctx.font = '700 24px ' + TAG_FONT; pw = Math.ceil(ctx.measureText(bt).width) + 18; }
+    ctx.font = '600 34px ' + TAG_FONT;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    var extra = pw ? pw + 10 : 0;
+    var tw = Math.min(w - 40 - extra, ctx.measureText(text).width);
+    var bw = tw + 46 + extra, bh = 46, x0 = (w - bw) / 2, y0 = (h - bh) / 2, r = 10;
     ctx.beginPath();
     ctx.moveTo(x0 + r, y0); ctx.lineTo(x0 + bw - r, y0); ctx.arcTo(x0 + bw, y0, x0 + bw, y0 + r, r);
     ctx.lineTo(x0 + bw, y0 + bh - r); ctx.arcTo(x0 + bw, y0 + bh, x0 + bw - r, y0 + bh, r);
@@ -202,8 +208,23 @@
     ctx.fill();
     ctx.fillStyle = colour;
     ctx.fillRect(x0 + 8, y0 + 9, 6, bh - 18);
+    if (pw) {                                // the badge: a light pill with dark letters
+      var px = x0 + 24, py = y0 + 8, ph = bh - 16, pr = 6;
+      ctx.beginPath();
+      ctx.moveTo(px + pr, py); ctx.lineTo(px + pw - pr, py); ctx.arcTo(px + pw, py, px + pw, py + pr, pr);
+      ctx.lineTo(px + pw, py + ph - pr); ctx.arcTo(px + pw, py + ph, px + pw - pr, py + ph, pr);
+      ctx.lineTo(px + pr, py + ph); ctx.arcTo(px, py + ph, px, py + ph - pr, pr);
+      ctx.lineTo(px, py + pr); ctx.arcTo(px, py, px + pr, py, pr);
+      ctx.closePath();
+      ctx.fillStyle = '#d6dde6';
+      ctx.fill();
+      ctx.font = '700 24px ' + TAG_FONT;
+      ctx.fillStyle = '#0b0d10';
+      ctx.fillText(bt, px + 9, h / 2 + 2, pw - 12);
+      ctx.font = '600 34px ' + TAG_FONT;
+    }
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(text, w / 2 + 8, h / 2 + 2, w - 60);
+    ctx.fillText(text, x0 + 31 + extra, h / 2 + 2, w - 60 - extra);
   }
 
   /**
@@ -211,7 +232,7 @@
    *   group,                        // THREE.Group, add to the scene
    *   update(state, dt, eye),       // state: {x, y?, z, heading, pitch?, roll?, speed, steer}; eye: optional
    *                                 //   world position {x, y, z} of the viewer (name tag range / size)
-   *   setColour(colour), setName(name), dispose(),
+   *   setColour(colour), setName(name, badge?), dispose(),   // badge: e.g. 'AI' (a computer driver), drawn before the name
    *   setLivery(colour, colour2, accent)   // body / secondary parts / the player's accent (nose tip, name tag)
    *   setHalo(on)                   // false for a car without a halo (CarSpec.cockpit 'modern'); default on
    * }   colour: '#rrggbb' or a hex number; setColour(c) = setLivery(c, c, c)
@@ -255,7 +276,7 @@
     tag.userData.mirror = false;       // not in the cockpit's mirrors (they show the world, not the labels)
     group.add(tag);
 
-    var curColour = '', curLivery = '', curName = null, wheelAngle = 0, ghost = false;
+    var curColour = '', curLivery = '', curName = null, curBadge = '', wheelAngle = 0, ghost = false;
 
     function setGhost(on) {
       on = !!on;
@@ -282,7 +303,7 @@
       var tagKey = '#' + c3.getHexString();
       if (tagKey !== curColour) {
         curColour = tagKey;
-        if (curName !== null) { drawTag(ctx, canvas.width, canvas.height, curName, curColour); tex.needsUpdate = true; }
+        if (curName !== null) { drawTag(ctx, canvas.width, canvas.height, curName, curColour, curBadge); tex.needsUpdate = true; }
       }
     }
     function setColour(c) { setLivery(c, null, null); }
@@ -299,11 +320,13 @@
       else for (var k = a; k < b; k += 3) { p.array[k] = 0; p.array[k + 1] = 0.74; p.array[k + 2] = -0.38; }
       p.needsUpdate = true;
     }
-    function setName(n) {
+    // badge (optional): a short label before the name, e.g. 'AI' for a computer driver ('' / none: no badge)
+    function setName(n, badge) {
       n = String(n == null ? '' : n);
-      if (n === curName) return;
-      curName = n;
-      drawTag(ctx, canvas.width, canvas.height, curName, curColour || '#ffffff');
+      badge = badge ? String(badge).slice(0, 4) : '';
+      if (n === curName && badge === curBadge) return;
+      curName = n; curBadge = badge;
+      drawTag(ctx, canvas.width, canvas.height, curName, curColour || '#ffffff', curBadge);
       tex.needsUpdate = true;
     }
 

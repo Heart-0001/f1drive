@@ -49,7 +49,7 @@ node tools/build-seasons.mjs --quiet    # 不印各賽季表格
 | `tyres` | 輪胎廠 |
 | `standing` | 車隊積分榜名次與積分；`pointsScored` 是賽車實際拿到的分數（被扣分或除名時會不同） |
 | `raceStarts`、`wins`、`poles`、`podiums` 等 | 由正賽成績統計，並與 F1DB 自己的賽季總計互相比對 |
-| `drivers` | 車手與車號 |
+| `drivers` | 車手：`id`、`name`、`abbreviation`（三字母縮寫）、`number`（車號）、`starts`（在這輛車的出賽次數） |
 | `pace` | 排位速度：`medianGapPct`、`sessions`、`rank`，另附平均值、最佳值與每場差距 |
 | `character` | 高速 / 低速賽道的差異 |
 
@@ -460,10 +460,37 @@ Racing Bulls 是「紅牛二隊」，`js/cars-data.js` 寫的是「小紅牛」�
 引擎顯示為「掛牌名稱 + 型號」，實際製造者不在名稱裡時加括號（TAG Heuer F1-2016 (Renault)、Red Bull RBPTH001 (Honda)）。
 隊名中文、顏色與說明來自 `tools/liveries/*.json`；沒有中文名稱的車隊（HRT、Manor、Racing Point、Alpine）直接用原文。
 
+### 車手（電腦車手的名字，2026-10-01 電腦車手整合）
+
+電腦車手用那一年那台車的真實車手當名字。`tools/build-cars.mjs` 從 `tools/seasons-raw.json`（F1DB）每個條目的 `drivers`
+選兩位，寫進 `js/seasons-data.js` 每輛車的 `drivers: [{ name, abbr, number }, …]`；遊戲用 `F1.cars.drivers(id)` 讀，
+`F1.AI.lineup` 的 `drivers` 參數直接傳這個函式。物理與校正完全沒動（`calibration.json` 指紋不變，`entries.json` 不變）。
+
+- **哪兩位**：在這輛車出賽次數最多的兩位，第一個座位是出賽最多的那位（一樣多時照 F1DB 的順序）。季中換隊的車手算在他
+  出賽較多的那台車（一樣多時算先列出的條目），另一台車就先用自己的車手：2025 年 Tsunoda 算 Red Bull（22 場，Racing Bulls
+  2 場），Racing Bulls 是 Hadjar 與 Lawson；2016 年 Verstappen 算 Red Bull、Kvyat 算 Toro Rosso。同一年裡不會有兩台車用
+  同一個名字或同一個縮寫（產生器檢查，不符就拒絕產生）。180 輛車全部有兩位；2026 年的出賽次數算到第 15 站
+  （F1DB v2026.15.1）。玩家開走某隊的車時，`F1.AI.lineup` 讓玩家坐第一個座位，隊友（第二位）照樣上場。
+- **欄位**：`name` 是 F1DB 的寫法（拉丁字母，保留重音符號，例如 Nico Hülkenberg、Kimi Räikkönen），`abbr` 是 F1DB 的
+  三字母縮寫（HUL），`number` 是那一季的車號（整數；2013 年以前依前一年車隊排名分配，2014 年起是車手自選的固定號碼，
+  前一年的冠軍可改用 1 號）。
+- **名字不翻成中文**：台灣的轉播與媒體多半直接寫英文名字或三字母縮寫，中文譯名沒有統一的寫法；要替 84 位車手逐一查證
+  台灣通行的譯名並不簡單，所以維持原文。房間的名字最多 16 個字，超過的由 `F1.AI.shortName` 縮成名字首字母加姓
+  （Gabriel Bortoleto → G. Bortoleto）。
+- **標準賽車**：F1Drive 自己的車，沒有真實車手，用兩個虛構、中性的名字：Alex Rowan（ROW，90 號）與 Sam Ellery（ELL，91 號）。
+  名字、縮寫與號碼都沒有和 2010–2026 任何真實車手重複（產生器檢查）。`F1.AI.lineup` 不會把標準賽車派給電腦車手，
+  這兩個名字只在程式直接查標準車的車手時才會出現。
+- **查不到時**：id 不認得，或那台車的資料壞掉，`F1.cars.drivers` 回傳 `[]`，`F1.AI.lineup` 改用它自己的虛構名字（不會重複）。
+  查詢只用 `Map`；`js/cars.js` 會再檢查一次：去掉控制字元與看不見的格式字元（零寬字元、方向控制字元等）、名字最多 40 個字、
+  縮寫不是三個大寫字母就從姓取、號碼不是 0–99 的整數就是 `null`、每台車最多兩位。每次呼叫都回傳新的陣列與物件。
+  車手不放進 CarSpec（CarSpec 只有契約欄位）。
+- `node devtests/ai-test/build-drivers.mjs` 用同一個函式（`seasonDrivers`）把名單寫到 `devtests/ai-test/drivers.json` 給模擬用，
+  並逐台比對 `js/seasons-data.js`（過期時以非零狀態結束）。
+
 ### `js/cars.js`
 
 `F1.cars.seasons`、`list(year)`、`get(id)`、`resolve(id, year?)`、`ersNote(id)`（v6.1：那台車的一行電池說明，沒有或 id 不認得
-時是空字串）、`DEFAULT_YEAR`（2026）、`attribution`
+時是空字串）、`drivers(id)`（那台車的兩位車手，電腦車手的名字，見〈車手〉）、`DEFAULT_YEAR`（2026）、`attribution`
 （`f1db`：F1DB 完整標示，含 CC BY 4.0 與「modified」；`f1dbShort`；`sources2026`；`disclaimer`）。CarSpec = 年代值 × 倍率，
 逐欄檢查，範圍與 `js/car.js` 的 `F1.sanitizeSpec` 完全相同（物理是參考車的 1/4–4 倍、ERS 1/10–10 倍、檔位 10–500 km/h、
 轉速、換檔時間、汽缸數），年代值與「年代值 × 倍率」都檢查；倍率夾在 0.95–1.05，電池的 ersPower／ersHarvest 夾在 0.75–1.15、
@@ -514,6 +541,9 @@ HUD、聲音與物理不會各用各的數字。建立一次後凍結（共用�
 - **2026 Mercedes 的回收倍率切到 1.0502**（資料 1.08）：2026 的回收率是校正在上限的 1/1.05，若要放寬就得改標準車並重跑校正
   （約 22 分鐘），而這次的原則是標準車不動。
 - **沒有電池的車電池評分 0**（包括 2010 年的標準車，原本是 50）：選單本來就依 `ers: null` 隱藏電池條，0 讓資料本身也一致。
+- **電腦車手的名字放進季資料，不另開檔案**（2026-10-01）：AI 報告提了兩個做法（另產生 `js/drivers-data.js`，或併進
+  `js/seasons-data.js`），選後者：名單和車在同一個檔案、同一個產生器、同一套 `--check`，`index.html` 不用多載一個檔。
+  名字維持 F1DB 的拉丁字母寫法（見〈車手〉），車號存成整數。
 
 ### 限制
 

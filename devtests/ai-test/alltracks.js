@@ -1,19 +1,25 @@
-// node devtests/ai-test/alltracks.js [tracks=regex] [skills=0,1] [laps=2]
+// node devtests/ai-test/alltracks.js [tracks=regex] [skills=0,1] [laps=2] [warm=1]
 // Every circuit of tracks-data.js: a computer car alone (2025 standard car, tyres on, wear x1) for a few laps from a
 // standing start at sample 0 at each skill, and then a pit stop in box 7 (planned at the start of lap 2: in at the
 // limit with the limiter, stopped in its box, the tyre change, out again). Reports per circuit: laps, offs, wall hits,
 // resets / reverses / stuck, the lap gap to the reference of the car, and the pit stop (events, lane top speed, time
-// held). Exit code 1 when a car is stuck, resets, speeds in the pit lane or does not complete its stop.
+// held). Exit code 1 when a car is stuck, resets, speeds in the pit lane or does not complete its stop. warm=1 (default):
+// first F1.AI.warmUp on the circuit (it must make its two stops, at most 3 R; the cars after it drive as without it).
 'use strict';
 const L = require('./lib'), F1 = L.F1;
 const arg = (k, d) => { const a = process.argv.find(x => x.startsWith(k + '=')); return a ? a.slice(k.length + 1) : d; };
-const re = new RegExp(arg('tracks', '.'), 'i'), skills = arg('skills', '0,1').split(',').map(Number), LAPS = +arg('laps', 2);
+const re = new RegExp(arg('tracks', '.'), 'i'), skills = arg('skills', '0,1').split(',').map(Number), LAPS = +arg('laps', 2), warm = arg('warm', '1') === '1';
 const STEP = 1 / 120;
 let bad = 0;
 const t0 = Date.now();
 for (const td of global.F1_TRACKS.filter(t => re.test(t.id) || re.test(t.name))) {
   const t = L.track(td.id), line = L.line(t, null), S = t.samples, N = S.length;
   const parts = [];
+  if (warm) {
+    const w0 = Date.now(), w = F1.AI.warmUp(t, line), wok = !!w && (!t.pit || w.pitStops === 2) && w.resets <= 3;
+    if (!wok) bad++;
+    parts.push('warm-up ' + (w ? w.calls + ' calls ' + (Date.now() - w0) + ' ms, stops ' + w.pitStops + ', R ' + w.resets : 'FAILED') + (wok ? '' : '  <-- FAIL'));
+  }
   // reference lap of the car
   let ref = 0;
   {

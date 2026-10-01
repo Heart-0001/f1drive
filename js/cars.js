@@ -12,6 +12,12 @@
 //                            year when the id is known, else DEFAULT_YEAR (so resolve('mercedes') -> '2026-mercedes').
 //     ersNote(id) -> string  one line (Traditional Chinese) about that car's battery for the car menu (tools/ers-data.json),
 //                            '' when there is none or the id is unknown
+//     drivers(id) -> [{name, abbr, number}]   the car's two real drivers of that season (F1DB; the one with the most
+//                            starts first): the names of the computer drivers (F1.AI.lineup's `drivers`). name in the
+//                            Latin alphabet as F1DB writes it ('Nico Hülkenberg', up to 19 characters: the rooms' 16 need
+//                            F1.AI.shortName), abbr three capitals ('HUL'), number the race number 0..99 (null if unknown).
+//                            The standard car's two are invented and neutral. [] for an unknown id or a car without
+//                            usable data. A new array of new objects on every call.
 //     DEFAULT_YEAR,          the newest season
 //     attribution            { f1db, f1dbShort, sources2026, disclaimer } strings for the menu
 //   }
@@ -48,6 +54,10 @@
     ers: { store: 32 * ERS_POWER, power: ERS_POWER, harvest: 230 }, cockpit: 'halo18'
   };
   var STD = { team: 'F1Drive', teamZh: 'F1Drive', car: '標準賽車', engine: '1.6 L V6 渦輪混合動力', colour: '#9AA0A6', colour2: '#2B2F36' };
+  // the standard car's drivers when the data has none (tools/build-cars.mjs STANDARD_DRIVERS: invented, neutral, no real
+  // driver's name, abbreviation or number of 2010..2026)
+  var STD_DRIVERS = [{ name: 'Alex Rowan', abbr: 'ROW', number: 90 }, { name: 'Sam Ellery', abbr: 'ELL', number: 91 }];
+  var NAME_MAX = 40;                 // code points (tools/build-cars.mjs DRIVER_NAME_MAX)
 
   function inRange(v, lo, hi) { return typeof v === 'number' && v >= lo && v <= hi; }      // (NaN fails)
   // js/car.js's F1.sanitizeSpec ranges: physics 1/4..4 x the reference, ERS 1/10..10 x; else the reference's value
@@ -63,6 +73,51 @@
   function mult(m, k) {
     var v = own(m, k), r = k === 'ersStore' ? STORE_RANGE : (k === 'ersPower' || k === 'ersHarvest' ? ERS_RANGE : M_RANGE);
     return typeof v === 'number' && isFinite(v) ? (v < r[0] ? r[0] : (v > r[1] ? r[1] : v)) : 1;
+  }
+
+  // ---- drivers (data cars[].drivers) ----
+  // control and invisible formatting characters (C0, DEL, C1, zero-width / direction marks, line / paragraph separators,
+  // direction embeddings, word joiner .. invisible operators, BOM) are removed from names (tools/build-cars.mjs refuses them)
+  var HIDDEN = [[0, 0x1f], [0x7f, 0x9f], [0x200b, 0x200f], [0x2028, 0x202e], [0x2060, 0x206f], [0xfeff, 0xfeff]];
+  function shown(ch) {
+    var c = ch.codePointAt(0);
+    for (var i = 0; i < HIDDEN.length; i++) if (c >= HIDDEN[i][0] && c <= HIDDEN[i][1]) return false;
+    return true;
+  }
+  // three capitals from a name when the data has none: the last word of three letters or more, accents dropped
+  // ('Carlos Sainz Jr.' -> 'SAI', 'Nico Hülkenberg' -> 'HUL'); '' when the name has no such word
+  function abbrOf(name) {
+    var s = typeof name.normalize === 'function' ? name.normalize('NFD') : name;
+    s = Array.from(s).filter(function (ch) { var c = ch.codePointAt(0); return c < 0x300 || c > 0x36f; }).join('');
+    var words = s.split(' ').map(function (w) { return w.replace(/[^A-Za-z]/g, ''); }).filter(function (w) { return w.length >= 3; });
+    return words.length ? words[words.length - 1].slice(0, 3).toUpperCase() : '';
+  }
+  // one driver -> { name, abbr, number } or null: the name without hidden characters, whitespace collapsed, at most
+  // NAME_MAX code points; abbr three capitals (else abbrOf); number an integer 0..99 or a string of one / two digits
+  // (else null)
+  function cleanDriver(d) {
+    var n = own(d, 'name');
+    if (typeof n !== 'string') return null;
+    if (typeof n.normalize === 'function') n = n.normalize('NFC');
+    n = Array.from(n).filter(shown).join('').replace(/\s+/g, ' ').trim();
+    n = Array.from(n).slice(0, NAME_MAX).join('').trim();
+    if (!n) return null;
+    var a = own(d, 'abbr'), num = own(d, 'number');
+    if (typeof a !== 'string' || !/^[A-Z]{3}$/.test(a)) a = abbrOf(n);
+    if (typeof num === 'string' && /^\d{1,2}$/.test(num)) num = +num;
+    return { name: n, abbr: a, number: typeof num === 'number' && num % 1 === 0 && num >= 0 && num <= 99 ? num : null };
+  }
+  // a car's list: at most two, no name twice, broken entries skipped (only the first 8 entries are looked at)
+  function cleanDrivers(list) {
+    var out = [], i, j, d;
+    if (!Array.isArray(list)) return out;
+    for (i = 0; i < list.length && i < 8 && out.length < 2; i++) {
+      d = cleanDriver(list[i]);
+      if (!d) continue;
+      for (j = 0; j < out.length; j++) if (out[j].name === d.name) d = null;
+      if (d) out.push(d);
+    }
+    return out;
   }
 
   // the era part (physics / drivetrain / ers / cockpit) of a season, every field checked as F1.sanitizeSpec does
@@ -149,6 +204,7 @@
   var byLineage = new Map();         // lineage + '|' + year -> CarSpec
   var lineageOf = new Map();         // id -> lineage
   var ersNotes = new Map();          // id -> one line about the car's battery (only where there is one)
+  var driversOf = new Map();         // id -> [{ name, abbr, number }] (only where there is one)
   var alias = new Map();             // bare constructor id / lineage key -> lineage
   var seasons = [];
 
@@ -175,6 +231,9 @@
       lineageOf.set(id, lin);
       var en = isStd ? '' : text(own(c, 'ersNote'), '');
       if (en) ersNotes.set(id, en);
+      var dl = cleanDrivers(own(c, 'drivers'));
+      if (!dl.length && isStd) dl = cleanDrivers(STD_DRIVERS);
+      if (dl.length) driversOf.set(id, dl);
       if (!byLineage.has(lin + '|' + year)) byLineage.set(lin + '|' + year, spec);
       alias.set(id.slice(prefix.length), lin);                       // newer seasons overwrite: the current meaning wins
       if (!alias.has(lin)) alias.set(lin, lin);
@@ -219,6 +278,11 @@
   function ersNote(id) {
     return typeof id === 'string' && ID_RE.test(id) ? (ersNotes.get(id) || '') : '';
   }
+  function drivers(id) {
+    var l = typeof id === 'string' && ID_RE.test(id) ? driversOf.get(id) : null, out = [];
+    if (l) for (var i = 0; i < l.length; i++) out.push({ name: l[i].name, abbr: l[i].abbr, number: l[i].number });
+    return out;
+  }
 
   var INFO = root.F1_SEASONS_INFO && typeof root.F1_SEASONS_INFO === 'object' ? root.F1_SEASONS_INFO : {};
   function info(k, fb) { var v = own(INFO, k); return typeof v === 'string' && v ? v.slice(0, 600) : fb; }
@@ -228,6 +292,7 @@
     get: get,
     resolve: resolve,
     ersNote: ersNote,
+    drivers: drivers,
     DEFAULT_YEAR: DEFAULT_YEAR,
     attribution: Object.freeze({
       f1db: info('attribution', 'Formula 1 season data: F1DB (https://github.com/f1db/f1db), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); filtered, aggregated and in a few documented places corrected for F1Drive.'),

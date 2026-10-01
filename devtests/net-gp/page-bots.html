@@ -1,0 +1,39 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>net-gp bots harness page</title>
+<!-- The network layer and the Grand Prix controller: the real net/session.js + js/net.js + js/gp.js, no game. -->
+<script src="../../net/session.js"></script>
+<script src="../../js/net.js"></script>
+<script src="../../js/gp.js"></script>
+<script>
+  window.__ev = [];
+  window.__err = [];
+  window.addEventListener('error', function (e) { window.__err.push(String(e.message)); });
+  F1.gp.init({ net: F1.net, getProfile: function () { return { name: 'Page', colour: '#00aaff' }; } });
+  ['bots', 'botHit', 'botLapRejected', 'hit', 'lapRejected'].forEach(function (n) {
+    F1.net.on(n, function (a, b, c) { window.__ev.push(['net.' + n, n === 'bots' ? a.map(function (x) { return x.id; }) : a, b, c]); });
+  });
+  ['bots', 'botsGo', 'botLapRejected', 'go'].forEach(function (n) {
+    F1.gp.on(n, function (a, b) { window.__ev.push(['gp.' + n, n === 'bots' ? a.map(function (x) { return x.id; }) : a, b]); });
+  });
+  // the game loop's share of the controller: every 50 ms
+  setInterval(function () { F1.gp.update(0.05); }, 50);
+  // A host page drives its bots like the game would: each along x in its own lane (z = 10 m per bot) at 90 m/s,
+  // 20 states a second, progress along (laps + fraction of the 200 m "track")
+  window.__hold = {};             // bot id -> a progress to report instead (a bot held back)
+  window.__driveBots = function () {
+    var x = 0;
+    clearInterval(window.__botTimer);
+    window.__botTimer = setInterval(function () {
+      x += 4.5;
+      var bots = F1.gp.bots(), rows = [];
+      for (var i = 0; i < bots.length; i++) {
+        F1.gp.botProgress(bots[i].id, __hold[bots[i].id] !== undefined ? __hold[bots[i].id] : (x + i) / 200);
+        rows.push({ id: bots[i].id, state: { x: x + i, y: 0, z: 10 * (i + 1), heading: Math.PI / 2, pitch: 0, roll: 0, speed: 90, steer: 0 } });
+      }
+      F1.net.sendBotStates(rows, true);
+      F1.net.sendState({ x: x, z: 0, heading: Math.PI / 2, speed: 90 }, true);
+    }, 50);
+    return true;
+  };
+</script>

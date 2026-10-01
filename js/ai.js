@@ -12,21 +12,28 @@
 //     skill     0..1, or a level id / name of F1.AI.LEVELS ('rookie' | '新手', 'amateur' | '業餘', 'pro' | '職業',
 //               'legend' | '傳奇'); seed: integer, every random decision comes from it (a race is reproducible)
 //     id        this car's id in `others` (skipped there); slot: its pit box, track.pit.boxes[slot] (= its room slot)
+//     mistakeRate (optional, tests) the chance of a mistake per braking zone instead of the level's
 //   ai.think(dt, others, ctx) -> input     once per PHYSICS STEP (main.js's STEP 1/120 s), right before
 //               car.update(dt, input, track). The same object every time: {up, down, left, right (false), throttle,
 //               brake, steerAxis, boost, limiter, reset}. reset = true: please do the player's R for this car
 //               (F1.AI.resetCar(car, track, idx, others, id) + lap.sync); the driver notices the move by itself.
-//               Allocation-free once V8 has optimised it (test/ai.test.js: < 1 B per call after a few minutes of
-//               racing; a few hundred B per call before that); ~1.5..3 us per call.
+//               ~2..3 us per call. Allocation: ~0 once V8 has optimised it (< 2 B per call in test/ai.test.js with race
+//               contexts; 0.4..1 B in devtests/ai-test/alloc.js between V8's rare re-optimisations). The step runs in
+//               phases, each its own function (see "the step" below), so that a branch reached for the first time
+//               de-optimises one phase, not the whole step. Call F1.AI.warmUp(track, raceLine) while the track loads:
+//               the first race of a session then allocates ~30 MB instead of ~160 MB (devtests/ai-test/warmup.js).
 //     others    every other car as views made by F1.AI.createView(id) and refreshed in place each step (it may hold
-//               this car too): {id, x, z, heading, speed, sampleIndex, d, ghost, prog, pace}. sampleIndex / d as
-//               car.state has them (F1.AI.updateView locates remote cars); ghost: not solid for anybody (Grand Prix
-//               ghost rules; cars on the pit asphalt are recognised here anyway); prog: race distance in laps
-//               (lap.progress: blue flags); pace: ai.pace of a computer car, NaN for a human (unknown)
+//               this car too): {id, x, z, heading, speed, sampleIndex, d, ghost, prog, pace, y}. sampleIndex / d as
+//               car.state has them (F1.AI.updateView locates remote cars, with their height y at a bridge); ghost:
+//               not solid for anybody (Grand Prix ghost rules; cars on the pit asphalt are recognised here anyway);
+//               prog: race distance in laps (lap.progress: blue flags); pace: ai.pace of a computer car, NaN for a
+//               human (unknown); y: the car's height (NaN unknown: only F1.AI.resetCar uses it). Fill every field of a
+//               view in place and add none (one shape for all: think() stays optimised and allocation-free).
 //     ctx       F1.AI.createContext(), refreshed in place: { phase: 'free' | 'quali' | 'grid' | 'race' | 'results',
 //               locked (the grid before lights out: pad at rest), lap (timed laps completed in this phase), laps (laps
 //               of the phase: Q / R; 0 = open-ended), done (took the flag / did its qualifying laps), prog (own race
-//               distance in laps), pit (this car's F1.createPit().state; none: no pit stops), wear (wear multiplier) }
+//               distance in laps; a number - NaN when unknown), pit (this car's F1.createPit().state; none: no pit
+//               stops), wear (wear multiplier) }. Fill it in place; done: true / false (not a number or undefined).
 //   ai.onPit(event) -> compound | null    the events of this car's F1.createPit().update(dt, car.state, track,
 //               {slot}); at 'serviceDone' -> the compound to fit (car.tyres.fit(it))
 //   ai.startCompound(raceLaps, wear) -> 'S' | 'M' | 'H'   the set to fit on the grid (F1.AI.startCompound too)
@@ -41,14 +48,18 @@
 //               concedes, pitStops; ai.log: the last 24 rare events [t, what, sample]
 //   F1.AI = { LEVELS, skillOf, levelOf, params, PACE, paceOf, prepare, profile, makeRandom, createView, createContext,
 //             updateView, placeOnGrid(car, track, slot), resetCar(car, track, idx?, others?, selfId?), createContacts(),
-//             lineup(opts),
+//             warmUp(track, raceLine, opts?), lineup(opts),
 //             shortName, INVENTED, startCompound(laps, wear, trackLength) }
+//   Heights: every track.locate of this module passes the car's height (state.y / a view's y), as js/car.js does: at an
+//   over / under crossing (Suzuka) a car stays on its road (devtests/ai-test/bridge.js).
 //
 // Driving: the racing line's path (track sample i <-> raceLine.points[i]) with a lateral offset for racecraft, pure
 // pursuit steering through the car's own steering law (car.perf.steerLockAt when js/car.js has it, else the v5 law),
 // the speed profile followed with analog pedals (the profile's deceleration fed forward, the error fed back, a braking
 // scan of everything ahead with the profile's own braking model), battery on the straights, the limiter in the pit
-// lane. Skill sets the share of the line's grip / braking margins the profile uses (calibrated: rookie +8 %, amateur
+// lane. A corner tighter than full lock with the steering margin (with js/car.js's v6.2 law: the Monaco hairpin) is
+// taken at the top of the full-lock range (~45..50 km/h, as js/raceline.js does), not at a crawl.
+// Skill sets the share of the line's grip / braking margins the profile uses (calibrated: rookie +8 %, amateur
 // +5 %, pro +2.5 %, legend +1 % median lap over the circuits against the line's own pace driven perfectly), the
 // reaction at lights out, throttle / brake application, lap-to-lap noise, lateral wander, the following gap, the
 // patience before a pass, how long it resists a quicker car, and the mistakes (late braking / too fast into a corner,
@@ -65,7 +76,10 @@
 // line); mild defence (covers the inside once, no weaving); a slower driver under pressure from a quicker one gives it
 // room on a straight after a while (rookies after ~2 s, legends never: js/car.js has no slipstream); blue flags (a car
 // a lap up) and, after the flag, out of everybody's way: the side chosen once and the edge held (anchored path: not
-// swinging across with the racing line in front of the car coming by); ghosts ignored.
+// swinging across with the racing line in front of the car coming by); ghosts ignored. Through a corner tighter than
+// full lock (from 30 m before it to 40 m after: the Monaco hairpin) nobody attacks or defends - every car turns its
+// tightest, there is no line to choose - and the queue keeps 5 m more gap (cars at different points of the turn are
+// closer than the gap along the centreline says).
 // Stopped cars (standing > 1.5 s) and cars coming the wrong way: a yellow flag (no racing past moving cars, no
 // defending or conceding); the nearest one on (or beside) the path is driven round in single file - a swerve from
 // where the path is to a place beside it (on a side it can still reach; in a tight corner its outside) and back, the
@@ -107,6 +121,9 @@
   var OBS_AFTER = 8, OBS_OUT = 30;           // m: a stopped car is passed beside it until this far past it, then the
                                              //   path blends back to the line over OBS_OUT
   var LOG_N = 24;                            // ai.log entries kept
+  var TIGHT_GAP = 5;                         // m more following gap round a corner tighter than full lock
+  var LEVEL_DY = 3;                          // m: another car this much higher / lower is on the other road of a bridge
+  var OUT_NONE = -1e9;                       // plan.outFrom: not leaving the box yet (a number: the field keeps one kind)
   var SLOW_EVERY = 12;                       // steps between two updates of the slow processes (noise, strategy)
   var STUCK_S = 5;                           // s without progress before a reverse attempt
   var STUCK_HARD_S = 14;                     // s without progress (not waiting in a queue): R
@@ -134,6 +151,7 @@
                                              //   measured (js/tyres.js: 15 laps of 5 km; +15 % for racing in traffic)
   var COMPOUND_WEAR = { S: 2.4, M: 1, H: 0.5 }; // js/tyres.js wear multipliers (S 2, + its overheating in hard racing) ...
   var COMPOUND_GRIP = { S: 1.015, M: 1, H: 0.985 };   // ... and grip
+  var ORDER = ['S', 'M', 'H'];                // the compounds, softest first
 
   // ---- skill levels (lapPct: measured gap to the reference driver of the car, devtests/ai-test/pace.js) -----------
   var LEVELS = [
@@ -147,7 +165,8 @@
   // the circuits is lapPct slower than the REFERENCE (the line's margins, p = 1, driven perfectly: no noise, no
   // mistakes, battery as the AI uses it): devtests/ai-test/calibrate.js. Linear in between.
   var LINE_GRIP = 0.86, LINE_BRAKE = 0.80;
-  var PACE = [[0, 0.84], [0.35, 0.89], [0.7, 0.941], [1, 0.977]];   // 2026-10-01, the v6.2 steering law + track data
+  var PACE = [[0, 0.841], [0.35, 0.89], [0.7, 0.942], [1, 0.977]];   // 2026-10-01 (v6.2 steering law + track data, the
+                                                                     // Monaco hairpin at full lock): 8.02 / 5.03 / 2.50 / 1.00 %
   function paceOf(s) {
     for (var i = 1; i < PACE.length; i++) if (s <= PACE[i][0]) return lerp(PACE[i - 1][1], PACE[i][1], (s - PACE[i - 1][0]) / (PACE[i][0] - PACE[i - 1][0]));
     return PACE[PACE.length - 1][1];
@@ -232,7 +251,7 @@
       d: new Float64Array(N), curv: new Float64Array(N), absK: new Float64Array(N), sign: new Float64Array(N),
       bank: new Float64Array(N), pitch: new Float64Array(N), kv: new Float64Array(N), seg: new Float64Array(N),
       lo: new Float64Array(N), hi: new Float64Array(N), tx: new Float64Array(N), tz: new Float64Array(N),
-      hdg: new Float64Array(N), lhdg: new Float64Array(N), pit: null, profiles: {}, lapT: {}, pitLoss: 0
+      hdg: new Float64Array(N), lhdg: new Float64Array(N), pit: null, profiles: {}, lapT: {}, tight: {}, pitLoss: 0, warmed: false
     };
     for (i = 0; i < N; i++) {
       var p = P[i], s = S[i];
@@ -319,10 +338,18 @@
     return (perf.spec ? perf.spec.id : '?') + '|' + [perf.power, perf.latBase, perf.downforce, perf.brakeBase, perf.traction,
       perf.dragK, perf.latMax, perf.steerLock].join(',') + '|' + grip.toFixed(4) + '|' + brake.toFixed(4);
   }
+  // the time a stop costs (G.pitLoss, from the first profile a driver uses on the track): the lane at the limit against
+  // the track at speed, the service, slowing / pulling away
+  function pitLossOf(G, va, perf) {
+    if (!G.pit || G.pitLoss > 0) return;
+    var Pq = G.pit, N = G.N, tl = 0, tr = 0;
+    for (var i = 0; i <= Pq.L; i++) { var q = (Pq.from + i) % N, vt = va[q] < perf.topSpeed ? va[q] : perf.topSpeed; tl += G.seg[q] / Pq.limitV; tr += G.seg[q] / vt; }
+    G.pitLoss = tl - tr + 2.8 + 3;
+  }
   function profile(G, perf, grip, brake) {
     var key = profileKeyOf(perf, grip, brake);
-    if (G.profiles[key]) return G.profiles[key];
-    var N = G.N, va = new Float64Array(N), i, j, m, iMin = 0;
+    if (G.profiles[key]) { pitLossOf(G, G.profiles[key], perf); return G.profiles[key]; }
+    var N = G.N, va = new Float64Array(N), tt = new Uint8Array(N), i, j, m, iMin = 0;
     var wb = perf.wheelbase || 3.6;
     for (i = 0; i < N; i++) {
       var k = G.absK[i], v = TOP, bk = G.bank[i], pt = G.pitch[i], kv = G.kv[i], sg = G.sign[i];
@@ -338,8 +365,14 @@
             v = lo;
           }
         }
-        // steering lock: tan(lock(v)) / wheelbase >= k * margin
+        // steering lock: tan(lock(v)) / wheelbase >= k * margin. With the car's own law (js/car.js perf.steerLockAt,
+        // v6.2; js/raceline.js does the same) a path tighter than full lock with the margin cannot be followed any
+        // better slower - below ~52 km/h the radius at full lock does not shrink any more: the target is the top of the
+        // full-lock range (the Monaco hairpin at ~50 km/h, as in reality), not a crawl at MIN_SPEED
         var need = Math.atan(wb * k * STEER_MARGIN);
+        // (tt: a corner tighter than full lock - no line to choose there: computer cars do not attack in it)
+        var lk0 = lockAt(perf, MIN_SPEED, bk, sg);
+        if (lk0 < need) { tt[i] = 1; if (typeof perf.steerLockAt === 'function') need = lk0; }
         if (lockAt(perf, v, bk, sg) < need) {
           var a = MIN_SPEED, b = v;
           if (lockAt(perf, a, bk, sg) < need) v = MIN_SPEED;
@@ -365,16 +398,11 @@
       var vb = Math.sqrt(v1 * v1 + 2 * dec * G.seg[i]);
       if (vb < va[i]) va[i] = vb;
     }
-    G.profiles[key] = va;
+    G.profiles[key] = va; G.tight[key] = tt;
     var lt = 0;
     for (i = 0; i < N; i++) { var vv = va[i] < perf.topSpeed ? va[i] : perf.topSpeed; lt += G.seg[i] / (vv > 1 ? vv : 1); }
     G.lapT[key] = lt;
-    if (G.pit && !(G.pitLoss > 0)) {
-      // the time a stop costs: the lane at the limit against the track at speed, the service, slowing / pulling away
-      var Pq = G.pit, tl = 0, tt = 0;
-      for (i = 0; i <= Pq.L; i++) { var q = (Pq.from + i) % N, vt = va[q] < perf.topSpeed ? va[q] : perf.topSpeed; tl += G.seg[q] / Pq.limitV; tt += G.seg[q] / vt; }
-      G.pitLoss = tl - tt + 2.8 + 3;
-    }
+    pitLossOf(G, va, perf);
     return va;
   }
 
@@ -404,16 +432,25 @@
     var slot = isNum(opts.slot) ? Math.max(0, Math.floor(opts.slot)) : 0;
     var skill = skillOf(opts.skill === undefined ? 'pro' : opts.skill);
     var isRef = !!opts.reference;
+    // (opts.mistakeRate: the chance of a mistake per braking zone instead of the level's - tests, F1.AI.warmUp)
+    var mistakeRate = isNum(opts.mistakeRate) ? clamp(opts.mistakeRate, 0, 1) : -1;
     var K = isRef ? refParams() : params(skill);
-    var perfFor = null, VA = null, profileKey = '', hasLockAt = false, WB = 3.6;   // the car's perf the profile was built for, the profile
+    if (mistakeRate >= 0) K.mistake = mistakeRate;
+    var perfFor = null, VA = null, TT = null, profileKey = '', hasLockAt = false, WB = 3.6;   // the car's perf the profile was built for, the profile
 
-    var input = { up: false, down: false, left: false, right: false, throttle: 0, brake: 0, steerAxis: 0,
+    // (the pedals and the axis start as doubles - 0.5, then 0 - so that the object's fields hold doubles from the first
+    // think on: a field created with 0 holds small integers, and the first double stored into it changes the object's
+    // shape, which throws every optimised function that has seen it - js/car.js's update included - back to the
+    // interpreter)
+    var input = { up: false, down: false, left: false, right: false, throttle: 0.5, brake: 0.5, steerAxis: 0.5,
                   boost: false, limiter: false, reset: false };
+    input.throttle = 0; input.brake = 0; input.steerAxis = 0;
     var st = car.state;
 
     // live state (ai.state) and counters (ai.stats)
     var info = { mode: 'race', targetSpeed: 0.5, offset: 0.5, offTarget: 0.5, idx: 0, plan: null, mistake: null,
-                 lapsSeen: 0, wearPerLap: 0, compound: 'M', cap: '', lastReset: '', tgt: -1, capBy: -1, obs: -1 };
+                 lapsSeen: 0, wearPerLap: 0.5, compound: 'M', cap: '', lastReset: '', tgt: -1, capBy: -1, obs: -1 };
+    info.wearPerLap = 0;                       // (a field of doubles: see input)
     // the last few rare events (reverse, R, pit decisions, mistakes): [t, what, sample] for debugging, LOG_N kept
     var log = [], logN = 0;
     function note(what) {
@@ -435,13 +472,14 @@
       goT: 0.5, reactT: 0.5, progT: 0.5, hardT: 0.5, stuckT: 0.5, wrongT: 0.5, revUntil: 0.5, revSteer: 0.5,
       revAt: 0.5, resetAt: 0.5, rejoinT: 0.5, tgtT: 0.5, tgtCool: 0.5, tgtBlock: 0.5, tgtBest: 0.5,
       tgtBestT: 0.5, followT: 0.5, defT: 0.5, pressT: 0.5, concedeT: 0.5, holdT: 0.5, boxWait: 0.5, wearRef: 0.5,
-      cLo: 0.5, cHi: 0.5, c0: 0.5, c2: 0.5, anchor: 0.5, absTgt: 0.5, sepT: 0.5, myD: 0.5, vMine: 0.5, obsD: 0.5, obsLb: 0.5, obsFrom: 0.5, myRot: 0.5, myVLat: 0.5, backT: 0.5, gT: 0.5, blockT: 0.5
+      cLo: 0.5, cHi: 0.5, c0: 0.5, c2: 0.5, anchor: 0.5, absTgt: 0.5, sepT: 0.5, myD: 0.5, vMine: 0.5, obsD: 0.5, obsLb: 0.5, obsFrom: 0.5, myRot: 0.5, myVLat: 0.5, backT: 0.5, gT: 0.5, blockT: 0.5,
+      startLane: 0.5
     };
-    var steps, idx, prevIdx, wasLocked, startLane, startDone, startFrom;
+    var steps, idx, prevIdx, wasLocked, startLaneOn, startDone, startFrom;
     var progIdx, rev, backing, revN, resetPending, onGrassPrev, hitPrev;
     var mist = { on: false, idx0: 0, span: 0, from: 0, lock: false, shift: 0, mul: 1.5 }, zoneOn;
     var tgt, tgtSide, tgtSlow, defId, yieldId, pressId, ySide, yFor, obsOn, obsK, obsKFrom, obsTgt;
-    var plan, pending = null, served, lapCount, wearRefLap, lastStops, nextCompound;
+    var plan, pending = null, served, lapCount, wearRefLap, lastStops, nextCompound, decidedLap;
     var cOn, pitU0, inPitArea;
 
     function reset() {
@@ -449,14 +487,14 @@
       idx = st.sampleIndex | 0; if (!(idx >= 0 && idx < N)) idx = 0;
       M.lastX = st.x; M.lastZ = st.z; prevIdx = idx;
       M.offset = Math.min(Math.max(st.d - LD[idx], -12), 12); M.offTarget = 0; M.wander = 0; M.noise = 0; M.thrOut = 0; M.brkOut = 0;
-      wasLocked = false; M.goT = -1; M.reactT = 0; startLane = null; startDone = true; startFrom = idx;
+      wasLocked = false; M.goT = -1; M.reactT = 0; startLaneOn = false; startDone = true; startFrom = idx;
       progIdx = idx; M.progT = 0; M.hardT = 0; M.stuckT = 0; M.wrongT = 0; rev = false; M.revUntil = 0; M.revSteer = 0; revN = 0; M.revAt = -1e9; M.resetAt = -1e9;
       resetPending = false; M.rejoinT = 0; onGrassPrev = false; hitPrev = false; backing = false; M.gT = 0;
       mist.on = false; zoneOn = false;
       tgt = null; tgtSide = 0; tgtSlow = false; M.tgtT = 0; M.tgtCool = 0; M.tgtBlock = 0; M.tgtBest = 0; M.tgtBestT = 0; M.followT = 0; defId = null; M.defT = 0; yieldId = null;
       pressId = null; M.pressT = 0; M.concedeT = 0; M.holdT = 0; M.backT = 0; M.blockT = 0; M.anchor = 0; M.absTgt = 0; M.sepT = SEP; ySide = 0; yFor = null;
       obsOn = false; obsK = 0; obsKFrom = 0; obsTgt = null; M.obsD = 0; M.obsLb = 40; M.obsFrom = 0;
-      plan = null; pending = null; served = false; M.boxWait = 0; lapCount = 0;
+      plan = null; pending = null; served = false; M.boxWait = 0; lapCount = 0; decidedLap = -1;
       M.wearRef = -1; wearRefLap = 0; lastStops = -1;
       M.cLo = -1e9; M.cHi = 1e9; cOn = false; pitU0 = 0; inPitArea = false;
       info.plan = null; info.mistake = null; info.mode = 'race';
@@ -467,6 +505,7 @@
     function setSkill(s) {
       skill = skillOf(s);
       K = isRef ? refParams() : params(skill);
+      if (mistakeRate >= 0) K.mistake = mistakeRate;
       perfFor = null;                         // the profile is rebuilt at the next think
       api.skill = skill; api.level = levelOf(skill);
     }
@@ -474,8 +513,9 @@
     function ensureProfile() {
       if (perfFor !== car.perf) {
         perfFor = car.perf; VA = profile(G, car.perf, K.grip, K.brake); profileKey = profileKeyOf(car.perf, K.grip, K.brake);
+        TT = G.tight[profileKey];
         hasLockAt = typeof perfFor.steerLockAt === 'function';
-        lockRows.length = 0;
+        for (var r0 = 0; r0 < LOCK_ROWS; r0++) lockRows[r0] = null;
         WB = perfFor.wheelbase || 3.6;
       }
     }
@@ -484,16 +524,20 @@
     // lock out. Read from rows of the law over the speed (0.25 m/s steps) per bank bin (0.01 rad) and turn side, each
     // built the first time it is needed: calling the law itself every step would box its arguments (an allocation per
     // call: V8 does not inline a function of another module into think()).
-    var LOCK_DV = 0.25, LOCK_N = 480, lockRows = [];
+    var TIGHT_BACK = Math.round(40 / ds), TIGHT_ON = Math.round(30 / ds);   // samples: the reach of a tight corner (above)
+    var LOCK_DV = 0.25, LOCK_N = 480, LOCK_ROWS = 182, lockRows = [];
+    for (var r1 = 0; r1 < LOCK_ROWS; r1++) lockRows.push(null);
+    function lockRow(key, bi, si) {             // (its own function: the rare loop stays out of the steering phase)
+      var row = new Float64Array(LOCK_N + 1);
+      for (var j = 0; j <= LOCK_N; j++) row[j] = perfFor.steerLockAt(j * LOCK_DV, bi / 100, si > 0 ? 1 : -1);
+      lockRows[key] = row;
+      return row;
+    }
     function lockFor(si) {
       var v = F[14], b = F[15];
       var bi = Math.round(b * 100) | 0; if (bi < -45) bi = -45; else if (bi > 45) bi = 45;
       var key = (bi + 45) * 2 + (si > 0 ? 1 : 0), row = lockRows[key];
-      if (!row) {
-        row = new Float64Array(LOCK_N + 1);
-        for (var j = 0; j <= LOCK_N; j++) row[j] = perfFor.steerLockAt(j * LOCK_DV, bi / 100, si > 0 ? 1 : -1);
-        lockRows[key] = row;
-      }
+      if (row === null) row = lockRow(key, bi, si);
       var x = (v < 0 ? -v : v) / LOCK_DV, j0 = x | 0;
       if (j0 >= LOCK_N) { F[14] = row[LOCK_N]; return; }
       F[14] = row[j0] + (row[j0 + 1] - row[j0]) * (x - j0);
@@ -502,12 +546,13 @@
     // Would this car, rolled on 1.5 m and 3 m along its heading (0.25 m closer to the other car, side = where that one
     // is across the road), stay clear of the other car's box (js/collide.js)? Creeping past a stopped car.
     var probe = { x: 0.5, z: 0.5, heading: 0.5 };
-    function boxClear(o, side) {
+    // (n: probes 1.5 m apart, 2 by default; mar: m the probe is moved towards it, 0.25 by default)
+    function boxClear(o, side, n, mar) {
       var ovl = F1.resolveCarCollisions && F1.resolveCarCollisions.overlap;
       if (typeof ovl !== 'function') return false;
-      var sh = Math.sin(st.heading), ch = Math.cos(st.heading), s0 = S[idx];
-      for (var k = 1; k <= 2; k++) {
-        probe.x = st.x + sh * 1.5 * k + s0.nx * 0.25 * side; probe.z = st.z + ch * 1.5 * k + s0.nz * 0.25 * side;
+      var sh = Math.sin(st.heading), ch = Math.cos(st.heading), s0 = S[idx], kn = n > 2 ? n : 2, mg = mar > 0 ? mar : 0.25;
+      for (var k = 1; k <= kn; k++) {
+        probe.x = st.x + sh * 1.5 * k + s0.nx * mg * side; probe.z = st.z + ch * 1.5 * k + s0.nz * mg * side;
         probe.heading = st.heading;
         if (ovl(probe, o) > 0) return false;
       }
@@ -563,15 +608,18 @@
           if (u < 0) {
             var span = -wrapN(obsKFrom - obsK) * ds;
             if (span > M.obsLb) span = M.obsLb; else if (span < 15) span = 15;
-            d = u <= -span ? M.obsFrom : M.obsFrom + (M.obsD - M.obsFrom) * smooth(1 + u / span);
+            // (smooth() written out here and below: a call that V8 does not inline boxes its argument and its result)
+            if (u <= -span) d = M.obsFrom;
+            else { var s1 = 1 + u / span; s1 = s1 < 0 ? 0 : (s1 > 1 ? 1 : s1); d = M.obsFrom + (M.obsD - M.obsFrom) * (s1 * s1 * (3 - 2 * s1)); }
           } else if (u < OBS_AFTER + OBS_OUT) {
-            d = u < OBS_AFTER ? M.obsD : M.obsD + (d - M.obsD) * smooth((u - OBS_AFTER) / OBS_OUT);
+            if (u < OBS_AFTER) d = M.obsD;
+            else { var s2 = (u - OBS_AFTER) / OBS_OUT; s2 = s2 < 0 ? 0 : (s2 > 1 ? 1 : s2); d = M.obsD + (d - M.obsD) * (s2 * s2 * (3 - 2 * s2)); }
           }
         }
-        if (startLane !== null && !startDone) {
+        if (startLaneOn && !startDone) {
           var w = (cyc(k - startFrom) * ds - 120) / 180;
           w = w < 0 ? 0 : (w > 1 ? 1 : w); w = w * w * (3 - 2 * w);
-          d = startLane + (LD[k] - startLane) * w;
+          d = M.startLane + (LD[k] - M.startLane) * w;
         }
         if (d > HI[k]) d = HI[k]; else if (d < LO[k]) d = LO[k];
       }
@@ -621,22 +669,22 @@
       var Pp = G.pit, u = pitU0 + m, d;
       racePathD(k); var race = F[0];
       if (u < 0) {                                        // before the lane: move over towards its mouth
-        var w = smooth(1 + u / PIT_BLEND);
-        F[0] = race + (Pp.lane[0] - race) * w; return;
+        var w = 1 + u / PIT_BLEND; w = w < 0 ? 0 : (w > 1 ? 1 : w); w = w * w * (3 - 2 * w);   // (smooth, lerp written out:
+        F[0] = race + (Pp.lane[0] - race) * w; return;                                       //  see racePathD)
       }
       if (u > Pp.L) {                                     // past the exit taper: back to the line
-        var w2 = smooth((u - Pp.L) / 40);
+        var w2 = (u - Pp.L) / 40; w2 = w2 < 0 ? 0 : (w2 > 1 ? 1 : w2); w2 = w2 * w2 * (3 - 2 * w2);
         F[0] = Pp.lane[Pp.L] + (race - Pp.lane[Pp.L]) * w2; return;
       }
       d = Pp.lane[u];
       var b = plan.box;
       if (b && !plan.through) {
         if (!served) {
-          var w3 = smooth((u - (b.u - BOX_IN - 2)) / BOX_IN);
-          d = lerp(d, b.d, w3);
-        } else if (plan.outFrom !== null) {
-          var w4 = smooth((u - plan.outFrom) / BOX_OUT);
-          if (u >= plan.outFrom - 3) d = lerp(b.d, d, w4);
+          var w3 = (u - (b.u - BOX_IN - 2)) / BOX_IN; w3 = w3 < 0 ? 0 : (w3 > 1 ? 1 : w3); w3 = w3 * w3 * (3 - 2 * w3);
+          d = d + (b.d - d) * w3;
+        } else if (plan.outFrom > OUT_NONE) {
+          var w4 = (u - plan.outFrom) / BOX_OUT; w4 = w4 < 0 ? 0 : (w4 > 1 ? 1 : w4); w4 = w4 * w4 * (3 - 2 * w4);
+          if (u >= plan.outFrom - 3) d = b.d + (d - b.d) * w4;
         }
       }
       F[0] = d;
@@ -656,8 +704,7 @@
       // the softest set that lasts the rest under WEAR_END (softer = faster); H if none does
       var base = perLapNow / (COMPOUND_WEAR[cur] || 1);
       if (!(base > 0)) base = wearLap0;
-      var order = ['S', 'M', 'H'];
-      for (var i = 0; i < order.length; i++) if (base * COMPOUND_WEAR[order[i]] * lapsLeft <= WEAR_END - 0.06) return order[i];
+      for (var i = 0; i < ORDER.length; i++) if (base * COMPOUND_WEAR[ORDER[i]] * lapsLeft <= WEAR_END - 0.06) return ORDER[i];
       return 'H';
     }
     function startCompound(laps, wear) { return AI.startCompound(laps, wear, track.length); }
@@ -680,9 +727,9 @@
     // (grip of the compound against the current set's included); a set that does not last is split by another stop
     var bestC = 'M';
     function freshStint(n, base, lapT, cur) {
-      var best = Infinity, order = ['S', 'M', 'H'];
+      var best = Infinity;
       for (var i = 0; i < 3; i++) {
-        var c = order[i], p = base * COMPOUND_WEAR[c], gain = n * 0.5 * lapT * (COMPOUND_GRIP[c] - COMPOUND_GRIP[cur]);
+        var c = ORDER[i], p = base * COMPOUND_WEAR[c], gain = n * 0.5 * lapT * (COMPOUND_GRIP[c] - COMPOUND_GRIP[cur]);
         var v = stint(0, p, n, lapT);
         if (v === Infinity) { var h = Math.ceil(n / 2); v = G.pitLoss + stint(0, p, h, lapT) + stint(0, p, n - h, lapT); }
         v -= gain;
@@ -739,7 +786,7 @@
         alongOf(bx.x, bx.z, bx.index); var lon = F[1];
         if (bu > Pp.entryU + 2 && bu < Pp.exitU - 2) b = { u: bu, d: bx.d, lon: lon, x: bx.x, z: bx.z, heading: bx.heading };
       }
-      plan = { compound: p.compound || 'M', park: !!p.park, box: b, through: !b, outFrom: null };
+      plan = { compound: p.compound || 'M', park: !!p.park, box: b, through: !b, outFrom: OUT_NONE };
       served = false; M.boxWait = 0;
       nextCompound = plan.compound;
       info.plan = plan.park ? 'park' : 'pit ' + plan.compound;
@@ -754,56 +801,90 @@
     }
 
     // ---- the step ----
+    // think() runs the phases below in order, each its own function. V8 optimises each one separately, and when a
+    // rarely taken branch is reached for the first time (optimised code has no type feedback there) only that phase is
+    // de-optimised, not the whole step: one big think() went back to the interpreter at every such branch - braking
+    // scan and traffic loop included, boxing every number they computed - and allocated ~1 GB in a first 15-car race.
+    // The phases hand doubles over in Z (fields that hold doubles: stored in place, never boxed), integers, objects and
+    // flags in closure variables (a double in a closure variable would be boxed at every store).
+    var Z = { dt: 0.5, myD: 0.5, myAlong: 0.5, gA: 0.5, vA: 0.5, dA: 0.5, gB: 0.5, vB: 0.5, dB: 0.5, gBlue: 0.5,
+              gSx: 0.5, dSx: 0.5, vSx: 0.5, capF: 0.5, accF: 0.5, vSq: 0.5, capV: 0.5, steer: 0.5, target: 0.5,
+              ff: 0.5, paceMul: 0.5, zoneMin: 0.5, gBrk: 0.5, head: 0.5, thr: 0.5, brk: 0.5 };
+    var ph = 'free', sI = S[0], crossed = false, ps = null, inLaneNow = false, yellow = false, A = null, iA = 0,
+        B = null, blue = null, Sx = null, iSx = 0, capFid = -1, squeezed = false, mode = 'race', capWhy = '', creepCap = false,
+        finished = false, blockedNow = false, tightHere = false, off = false, gr = null, scanAt = -1, hold = false, limiter = false,
+        boost = false;
+
     function think(dt, others, ctx) {
       ctx = ctx || EMPTY_CTX; others = others || EMPTY;
       if (!(dt > 0)) dt = 1 / 120;
       if (dt > 0.1) dt = 0.1;
       ensureProfile();
       M.t += dt; steps++; stats.steps++;
+      Z.dt = dt;
       input.throttle = 0; input.brake = 0; input.steerAxis = 0; input.boost = false; input.reset = false;
-      var v = st.speed, av = v < 0 ? -v : v, ph = ctx.phase || 'free', i, o;
+      if (stepPlace(ctx)) return input;        // locked on the grid, held in the box, reacting at lights out
+      stepBook(ctx);                           // noise and wander, wear, offs, the pit route
+      stepTraffic(others, ctx);                // the other cars: room alongside, caps, attackers, blue flags
+      stepRacecraft(others, ctx);              // the lateral target: passing, driving round, yielding, defending
+      stepSteer();                             // pure pursuit
+      stepSpeed(ctx);                          // the target speed (the braking scan: scanAhead), caps, the box
+      stepPedals();                            // throttle / brake, battery, limiter
+      return stepRecover();                    // wrong way, stuck, reverse, R; the pad
+    }
 
+    // where the car is; -> 1 when the pad stays at rest this step (locked, in service, the reaction at lights out)
+    function stepPlace(ctx) {
+      ph = ctx.phase || 'free';
       // ---- where the car is (own index; a jump of the car = it was placed: start over from there)
       var mx = st.x - M.lastX, mz = st.z - M.lastZ;
       if (mx * mx + mz * mz > 400 || (resetPending && mx * mx + mz * mz > 4)) relocate();
       M.lastX = st.x; M.lastZ = st.z;
       // own index: a walk from the previous one to the nearest sample (no allocation; a car moves under a sample per
-      // step), track.locate only when that is lost (more than 30 m away: the car was put somewhere else)
+      // step), track.locate only when that is lost (more than 30 m away: the car was put somewhere else) - with the
+      // car's height: at an over / under crossing (Suzuka) the road the car is on, not the one above / below it
       walkTo(); var e2 = F[7];
       if (e2 > 900) {
-        var loc = track.locate(st.x, st.z, (st.sampleIndex | 0) >= 0 ? st.sampleIndex | 0 : -1);
+        var y = isNum(st.y) ? st.y : undefined;
+        var loc = track.locate(st.x, st.z, (st.sampleIndex | 0) >= 0 ? st.sampleIndex | 0 : -1, y);
         var sl = S[loc.index], lx = st.x - sl.x, lz = st.z - sl.z;
-        if (lx * lx + lz * lz > 900) loc = track.locate(st.x, st.z, -1);
+        if (lx * lx + lz * lz > 900) loc = track.locate(st.x, st.z, -1, y);
         idx = loc.index;
       }
-      var sI = S[idx], myD = (st.x - sI.x) * sI.nx + (st.z - sI.z) * sI.nz;
+      sI = S[idx];
+      var myD = (st.x - sI.x) * sI.nx + (st.z - sI.z) * sI.nz;
+      Z.myD = myD;
       info.idx = idx;
-      var crossed = prevIdx > N * 0.75 && idx < N * 0.25;
+      crossed = prevIdx > N * 0.75 && idx < N * 0.25;
       prevIdx = idx;
 
       // ---- locked on the grid / held in the box: pad at rest
       if (ctx.locked) {
         wasLocked = true; info.mode = 'grid'; input.limiter = false; M.thrOut = M.brkOut = 0;
         progIdx = idx; M.progT = M.t; M.hardT = M.t;
-        return input;
+        return 1;
       }
-      var ps = ctx.pit || null;
+      ps = ctx.pit || null;
       if (ps && ps.service) {
         info.mode = 'pit';
         M.thrOut = M.brkOut = 0; progIdx = idx; M.progT = M.t; M.hardT = M.t;
         input.limiter = true;
-        return input;
+        return 1;
       }
       if (ps && lastStops >= 0 && ps.stops > lastStops && plan) served = true;
       if (ps) lastStops = ps.stops;
       if (wasLocked) {                         // lights out: the reaction, then the launch holding the grid lane
         wasLocked = false; M.goT = M.t;
         rndF(); M.reactT = K.react + F[6] * K.reactSpread;
-        startLane = myD; startFrom = idx; startDone = false; M.offset = 0; M.offTarget = 0;
+        M.startLane = myD; startLaneOn = true; startFrom = idx; startDone = false; M.offset = 0; M.offTarget = 0;
       }
-      if (M.goT >= 0 && M.t - M.goT < M.reactT) { info.mode = 'start'; progIdx = idx; M.progT = M.t; M.hardT = M.t; return input; }
+      if (M.goT >= 0 && M.t - M.goT < M.reactT) { info.mode = 'start'; progIdx = idx; M.progT = M.t; M.hardT = M.t; return 1; }
       if (!startDone && (cyc(idx - startFrom) * ds > 300 || M.t - M.goT > 12)) { startDone = true; M.offset = Math.min(Math.max(myD - LD[idx], -12), 12); }
+      return 0;
+    }
 
+    function stepBook(ctx) {
+      var dt = Z.dt, myD = Z.myD;
       // ---- the slow processes: pace noise, wander, wear bookkeeping
       if (steps % SLOW_EVERY === 0) {
         var h = SLOW_EVERY * dt;
@@ -836,34 +917,51 @@
         inPitArea = pitU0 >= 0 && pitU0 <= Pp.L && aMe >= Pp.pavLo[pitU0] && aMe <= Pp.pavHi[pitU0];
         if (!plan && pitU0 < -PIT_DECIDE_NEAR / ds && pitU0 > -PIT_DECIDE_FAR / ds && steps % 6 === 0) {
           if (pending) { startPlan(pending); pending = null; }
-          else if (ctx.pit) { var dec = decidePit(ctx); if (dec) startPlan(dec); }
+          // (the strategy once a lap, at the start of the window - every few steps it cost ~2 B per think() call)
+          else if (ctx.pit && decidedLap !== lapCount) { decidedLap = lapCount; var dec = decidePit(ctx); if (dec) startPlan(dec); }
         }
         // back on the track after the exit taper (or the lane was missed: forget the stop; a car going to park tries
         // again next lap)
         if (plan && !plan.park && pitU0 > Pp.L + 45) endPlan();
       } else { pitU0 = -1e9; inPitArea = false; }
-      var inLaneNow = Pp && plan && pitU0 >= 0 && pitU0 <= Pp.L;
+      inLaneNow = !!(Pp && plan && pitU0 >= 0 && pitU0 <= Pp.L);
+    }
 
-      // ---- traffic: alongside constraints, the car ahead on the path, attackers, blue flags
+    // ---- traffic: alongside constraints, the cars ahead on the path, attackers, blue flags
+    function stepTraffic(others, ctx) {
+      var v = st.speed, av = v < 0 ? -v : v, myD = Z.myD, i, o;
       cOn = false; M.cLo = -1e9; M.cHi = 1e9;
       var gHi = 0, vHi = 0, gLo = 0, vLo = 0, idHi = -1, idLo = -1, stHi = false, stLo = false;
       // yellow flag: a car standing (or coming the wrong way) on the road ahead: single file, no racing past it
-      var yellow = false;
+      yellow = false;
       // (others are ghosts on the pit asphalt only: between pit.from and the lane the cars heading for it are solid and
       // must see each other, or two stopping on the same lap merge into one another)
       var ignoreAll = ph === 'quali' || inPitArea;
-      var A = null, gA = 1e9, vA = 0, dA = 0, iA = 0, B = null, gB = -1e9, vB = 0, dB = 0, blue = null, gBlue = -1e9;
+      A = null; iA = 0; B = null; blue = null;
+      var gA = 1e9, vA = 0, dA = 0, gB = -1e9, vB = 0, dB = 0, gBlue = -1e9;
       // the nearest stopped / crawling / oncoming car on the path (it is driven round first, whatever else goes on)
-      var Sx = null, gSx = 1e9, dSx = 0, iSx = 0, vSx = 0, nSlow = 0;
+      Sx = null; iSx = 0;
+      var gSx = 1e9, dSx = 0, vSx = 0, nSlow = 0;
       // the nearest car standing near the path (reachability check after the loop)
       var Sn = null, gSn = 1e9, dSn = 0, iSn = 0, wSn = 0;
       // every car on the path gives a speed cap (the nearest one may hide a stopped one) and the deceleration that
       // keeps its gap (fed forward to the pedals: the speed loop alone brakes too late when the gap closes fast)
-      var capF = 1e9, accF = 1e9, capFid = -1;
-      var myAlong = (st.x - sI.x) * sI.tx + (st.z - sI.z) * sI.tz, myProg = typeof ctx.prog === 'number' && ctx.prog === ctx.prog ? ctx.prog : null;
+      var capF = 1e9, accF = 1e9;
+      capFid = -1; creepCap = false;
+      var myAlong = (st.x - sI.x) * sI.tx + (st.z - sI.z) * sI.tz;
+      // (own race distance, NaN = unknown: a number in every case - a variable that is a number or null is kept boxed, a
+      // new heap number at every call)
+      var myProg = ctx.prog; if (typeof myProg !== 'number') myProg = NaN;
       var vMine = v * (Math.sin(st.heading) * G.tx[idx] + Math.cos(st.heading) * G.tz[idx]);
       M.myD = myD; M.vMine = vMine; M.myVLat = v * (Math.sin(st.heading) * sI.nx + Math.cos(st.heading) * sI.nz);
       var myR = Math.sin(st.heading - G.hdg[idx]); M.myRot = 0.5 * CAR_LEN * (myR < 0 ? -myR : myR);   // this car turned against the road
+      var Pp = G.pit;
+      // a corner tighter than full lock within the last 40 m or the next 30 m (the Monaco hairpin, its exit included):
+      // every car turns its tightest there and nobody can lay a path beside another - no attack is started or carried
+      // on through it (it is followed), no defending move - and the cars of a queue are at different points of the
+      // turn, closer than the gap along the centreline says: TIGHT_GAP more of it
+      tightHere = false;
+      for (var kt = -TIGHT_BACK; kt <= TIGHT_ON && !tightHere; kt++) if (TT[cyc(idx + kt)]) tightHere = true;
       if (!ignoreAll) {
         for (i = 0; i < others.length; i++) {
           o = others[i];
@@ -926,6 +1024,7 @@
               // its cap: never closer than the time gap, a speed it can always brake to (its measured deceleration)
               var wantO = CAR_LEN + 1.5 + (o === tgt || M.followT > 1 ? 0.6 : 1) * K.gapT * av;
               if (oSlow) wantO = Math.max(wantO, CAR_LEN + 8);          // a stopped / crawling car: room to steer round it
+              if (tightHere) wantO += TIGHT_GAP;
               F[5] = ov; accOf(o); var aO = F[5], vOp = ov + (aO < 0 ? aO * 0.35 : 0), capO;
               if (vOp < 0) vOp = 0;
               if (g > wantO) capO = vOp + Math.sqrt(2 * FOLLOW_A * (g - wantO));
@@ -933,7 +1032,7 @@
               // at (or over) that cap: the deceleration that holds it - the cap curve's own FOLLOW_A relative to the
               // other car's braking, more when the closing cannot be stopped that way before the wanted gap (a car well
               // under the cap is left to the speed loop)
-              var wO = vMine - vOp, accO = 1e9;
+              var wO = vMine - vOp, accO = 1e9, crept = false;
               if (wO > 0 && vMine > capO - 1.5) {
                 var relA = wO * wO / (2 * Math.max(g - wantO, 0.5));
                 accO = (aO < 0 ? aO : 0) - (relA > FOLLOW_A ? relA : FOLLOW_A);
@@ -947,10 +1046,17 @@
                   sepOf(o, oi);
                   if (creep < 2.5 && boxClear(o, od > M.myD ? 1 : -1)) creep = 2.5;   // rolling on along its heading clears it
                   creep = creep > 5 ? 5 : creep;
-                  if (creep > capO) { capO = creep; accO = 1e9; }
+                  // the way on along its heading clear of it for 9 m with half a metre to spare (beside it, or turned
+                  // out past it): by at a running pace, not at a crawl (2026-10-02: a crawl past a car stalled on the
+                  // grid held a whole column up for 10..20 s - devtests/gp-e2e/bots.js part pits; a car parked out of
+                  // Monza's Roggia cost 4..5 s per car of the queue behind it). Only where the road bends less than the
+                  // straight probe misses by 0.35 m over its 9 m (radius > ~115 m): in a corner the car turns away
+                  if (creep < 8 && CV[idx] < 0.0086 && CV[idx] > -0.0086 && CV[oi] < 0.0086 && CV[oi] > -0.0086 &&
+                      boxClear(o, od > M.myD ? 1 : -1, 6, 0.5)) creep = 8;
+                  if (creep > capO) { capO = creep; accO = 1e9; crept = true; }
                 }
               }
-              if (capO < capF) { capF = capO; capFid = o.id; }
+              if (capO < capF) { capF = capO; capFid = o.id; creepCap = crept; }
               if (accO < accF) accF = accO;
               if (g < gA) { A = o; gA = g; vA = ov; dA = od; iA = oi; }
               if (oObs && g < gSx) { Sx = o; gSx = g; dSx = od; iSx = oi; vSx = ov; }
@@ -967,7 +1073,7 @@
             }
           } else {
             if (g > gB && g < -2) { B = o; gB = g; vB = ov; dB = od; }
-            if (myProg !== null && typeof o.prog === 'number' && o.prog > myProg + 0.5 && g > -90 && g > gBlue) { blue = o; gBlue = g; }
+            if (myProg === myProg && typeof o.prog === 'number' && o.prog > myProg + 0.5 && g > -90 && g > gBlue) { blue = o; gBlue = g; }
           }
         }
       }
@@ -980,7 +1086,7 @@
         if (cOn) { if (dCan > M.cHi) dCan = M.cHi; if (dCan < M.cLo) dCan = M.cLo; }
         if (Math.abs(dSn - dCan) < wSn) {
           var wantS = CAR_LEN + 8, capS = Math.sqrt(2 * FOLLOW_A * (gSn - wantS));
-          if (capS < capF) { capF = capS; capFid = Sn.id; }
+          if (capS < capF) { capF = capS; capFid = Sn.id; creepCap = false; }
           if (vMine > capS - 1.5) { var relS = vMine * vMine / (2 * Math.max(gSn - wantS, 0.5)); relS = relS > FOLLOW_A ? relS : FOLLOW_A; if (-relS < accF) accF = -relS; }
         }
       }
@@ -988,7 +1094,8 @@
       if (Sx) for (var q = 0; q < nSlow; q++) if (slowG[q] > gSx + 1 && slowG[q] < gSx + CAR_LEN + 12) { Sx = null; break; }
       // no room between a car alongside and the edge (or between two cars): whoever is behind gives way, the
       // car ahead keeps its line (at the edge of what is left)
-      var squeezed = false, vSq = 0;
+      squeezed = false;
+      var vSq = 0;
       if (cOn) {
         // (level within half a metre: the car with the lower id keeps its line, so that two never both stop)
         // (a standing car beside this one squeezes nothing: it is driven past, the follow / creep rules see to that)
@@ -1001,18 +1108,27 @@
           var mid = 0.5 * (M.cLo + M.cHi); M.cLo = M.cHi = mid;
         }
       }
+      Z.myAlong = myAlong; Z.gA = gA; Z.vA = vA; Z.dA = dA; Z.gB = gB; Z.vB = vB; Z.dB = dB; Z.gBlue = gBlue;
+      Z.gSx = gSx; Z.dSx = dSx; Z.vSx = vSx; Z.capF = capF; Z.accF = accF; Z.vSq = vSq;
+    }
 
-      // ---- racecraft: the lateral target
-      var mode = 'race', capV = 1e9, capWhy = '';
-      var finished = !!ctx.done || ph === 'results';
+    // ---- racecraft: the lateral target
+    function stepRacecraft(others, ctx) {
+      var dt = Z.dt, v = st.speed, av = v < 0 ? -v : v, myD = Z.myD, myAlong = Z.myAlong, vMine = M.vMine, i;
+      var gA = Z.gA, vA = Z.vA, dA = Z.dA, gB = Z.gB, vB = Z.vB, dB = Z.dB, gBlue = Z.gBlue, gSx = Z.gSx, dSx = Z.dSx, vSx = Z.vSx;
+      var Pp = G.pit, capV = 1e9;
+      mode = 'race'; capWhy = '';
+      finished = !!ctx.done || ph === 'results';
       if (plan && Pp) mode = 'pit';
       if (M.tgtCool > 0) M.tgtCool -= dt;
       var myPace = G.lapT[profileKey] || 0;
       var absOn = false, absTgt = 0;                 // this step's lateral target is an absolute place (anchored path)
       // a stopped / crawling / oncoming car on the path is driven round first (it may be hidden behind the car being
       // followed or attacked); at the start too (a car stalled on the grid)
-      var blockedNow = false;
-      if (Sx && tgt !== Sx && !inLaneNow && ph !== 'quali' && (gSx < 50 + av * 2 || vSx < -1) && (!A || gSx <= gA + 1 || vSx < -1)) {
+      blockedNow = false;
+      // (taken on below 50 m + 1.5 s, dropped beyond 60 m + 1.5 s: a car coming the wrong way was taken on from 300 m
+      // and a stopped one from 50 m + 2 s, but dropped again in the same step - every step - beyond 50 m + 1.5 s)
+      if (Sx && tgt !== Sx && !inLaneNow && ph !== 'quali' && gSx < 50 + av * 1.5 && (!A || gSx <= gA + 1 || vSx < -1)) {
         var sideS = (F[13] = dSx, F[16] = gSx, chooseSide(iSx, Sx));
         if (!sideS && gSx < 25) blockedNow = true;            // no room on either side of it
         if (sideS) {
@@ -1030,7 +1146,7 @@
         else if (typeof A.pace === 'number' && A.pace > 0 && myPace > 0) faster = A.pace > myPace * 1.01;
         else faster = mine > vA + K.attack && M.followT > K.patience;
         var slowA = vA < 3 || (vA < 12 && vA < 0.4 * VA[iA]);    // stopped / crawling: go round it early
-        if (!plan && !finished && ph !== 'quali' && tgt !== A && !(tgt && tgtSlow) && (!slowA || A === Sx) && !(yellow && !slowA) && (M.tgtCool <= 0 || vA < 3) && faster && M.concedeT <= 0 &&
+        if (!plan && !finished && ph !== 'quali' && tgt !== A && !(tgt && tgtSlow) && (!slowA || A === Sx) && !(yellow && !slowA) && (M.tgtCool <= 0 || vA < 3) && faster && M.concedeT <= 0 && (slowA || !tightHere) &&
             gA < (slowA ? 40 + av * 1.5 : 18 + av * 0.25)) {
           var side = (F[13] = dA, F[16] = gA, chooseSide(iA, A));
           if (side) { tgt = A; tgtSide = side; tgtSlow = slowA; M.tgtT = 0; M.tgtBlock = 0; M.tgtBest = gA; M.tgtBestT = 0; stats.passTries++; }
@@ -1055,8 +1171,10 @@
         if (roomHere < -0.6 && gT > -2) M.tgtBlock += dt; else M.tgtBlock = 0;
         // progress: the gap must keep shrinking (3 m in 4 s), else back to the line for a while
         if (gT < M.tgtBest - 3) { M.tgtBest = gT; M.tgtBestT = 0; } else M.tgtBestT += dt;
-        var farT = slowT ? 50 + av * 1.5 : 60;
-        if (!found || gT > farT || M.tgtBlock > 1.8 || (!slowT && (yellow || M.tgtT > 12 || M.tgtBestT > 4 || plan || ph === 'quali' || finished || M.concedeT > 0))) {
+        // (a stopped car or one coming the wrong way is taken on below 50 m + 1.5 s, the attack on a moving one below
+        // 18 m + 0.25 s: each is dropped only further away than that)
+        var farT = slowT ? 60 + av * 1.5 : 60;
+        if (!found || gT > farT || M.tgtBlock > 1.8 || (!slowT && (yellow || M.tgtT > 12 || M.tgtBestT > 4 || plan || ph === 'quali' || finished || M.concedeT > 0 || (tightHere && gT > 1)))) {
           tgt = null; tgtSlow = false; M.tgtCool = found && gT < farT ? 4 : 1;
         }
         else if (gT < -(CAR_LEN + 2.5)) { tgt = null; tgtSlow = false; stats.passes++; M.tgtCool = 1; }
@@ -1118,14 +1236,14 @@
         // finished: out of everybody's way
         if (finished && !plan && !blue && B && gB > -80) { mode = 'yield'; yieldFrom = B; yieldD = dB; }
         // defend: an attacker close behind, a corner coming: cover its inside once (no weaving)
-        if (!blue && !finished && !plan && !yellow && B && ph === 'race' && gB > -22 && vB > vMine + 0.5 &&
+        if (!blue && !finished && !plan && !yellow && !tightHere && B && ph === 'race' && gB > -22 && vB > vMine + 0.5 &&
             !(typeof B.pace === 'number' && B.pace > 0 && myPace > 0 && B.pace < myPace * 0.985)) {
           if (defId !== B) {
             defId = B; M.defT = 0;
             rndF(); if (F[6] < K.defend) { M.defT = 1; stats.defends++; }
           }
         } else if (!B || gB < -45) { defId = null; M.defT = 0; }
-        if (M.defT > 0 && defId === B && !blue && !finished) {
+        if (M.defT > 0 && defId === B && !blue && !finished && !tightHere) {
           var inside = nextCornerSide(idx, 110);
           if (inside) {
             mode = 'defend';
@@ -1183,11 +1301,15 @@
         M.offset += dOff > rate ? rate : (dOff < -rate ? -rate : dOff);
         if (M.anchor > 0) M.anchor = M.anchor - 1.2 * dt < 0 ? 0 : M.anchor - 1.2 * dt;
       }
+      Z.capV = capV;
+    }
 
-      // ---- steering: pure pursuit of the path point L metres on
+    // ---- steering: pure pursuit of the path point L metres on
+    function stepSteer() {
+      var v = st.speed, av = v < 0 ? -v : v, myD = Z.myD;
       var L = Math.min(Math.max(5 + 0.3 * av, LOOK_MIN), LOOK_MAX);
       pathD(idx, 0);
-      var off = st.onGrass || Math.abs(myD - F[0]) > 3;
+      off = st.onGrass || Math.abs(myD - F[0]) > 3;
       if (off) L *= 1.35;
       else if (cOn) L *= 0.75;                 // a car alongside: follow the (constrained) path more tightly
       var mL = (L / ds + 0.5) | 0, kL = cyc(idx + mL);           // (| 0: indices stay small integers)
@@ -1201,35 +1323,29 @@
         steer = Math.atan(kap * WB) / lock;
         steer = steer > 1 ? 1 : (steer < -1 ? -1 : steer);
       }
+      Z.steer = steer;
+    }
 
-      // ---- speed: the profile, pace, offsets, pit route, mistakes, traffic
-      var gr = car.tyres && car.tyres.state && car.tyres.state.grip;
+    // ---- speed: the profile, pace, offsets, pit route, mistakes, traffic
+    function stepSpeed(ctx) {
+      var dt = Z.dt, v = st.speed, av = v < 0 ? -v : v, myD = Z.myD, myAlong = Z.myAlong, Pp = G.pit;
+      var capV = Z.capV, capF = Z.capF, vSq = Z.vSq, gB = Z.gB, vB = Z.vB, dB = Z.dB;
+      gr = car.tyres && car.tyres.state && car.tyres.state.grip;
       var gLat = gr ? gr.lat : 1, gBrk = gr ? gr.brake : 1;
       var gripMul = gLat < 1 ? Math.sqrt(gLat) : 1;
       M.c0 = K.brake * perfFor.brakeBase * gBrk + perfFor.roll;
       M.c2 = K.brake * perfFor.brakeAero * gBrk + perfFor.dragK;
       var paceMul = (1 + M.noise) * gripMul;
       var la = (av * LATENCY / ds + 0.5) | 0, k0 = cyc(idx + la);
-      targetAt(k0, la); var target = F[2] * paceMul, braking = false;
+      targetAt(k0, la); var target = F[2] * paceMul;
       // feed-forward: the slope of the target along the path (a braking zone of the profile: its deceleration)
       targetAt(cyc(k0 + 2), la + 2); var t2 = F[2] * paceMul;
       var ff = (t2 * t2 - target * target) / (4 * ds);
       if (ff > 0) ff = 0;
-      // the braking scan: the most speed from which every target ahead can still be met at the planned braking
-      // (c0 + c2 v^2: the profile's own braking model on the flat, so on the line it reproduces the profile)
-      var reach = ((Math.log((M.c0 + M.c2 * av * av) / M.c0) / (2 * M.c2) + 25) / ds + 1) | 0;
-      if (reach > 260) reach = 260;
-      var zoneMin = 1e9, zoneAt = -1;
-      for (var m = la + SCAN_STEP; m <= reach; m += SCAN_STEP) {
-        var k = cyc(idx + m), vk = VA[k];
-        if (vk < zoneMin) { zoneMin = vk; zoneAt = m; }
-        targetAt(k, m); var tk = F[2] * paceMul;
-        if (tk < target) {
-          var Dm = m * ds - myAlong, vb2 = tk;
-          if (Dm > 0) { var vq2 = ((M.c0 + M.c2 * tk * tk) * Math.exp(2 * M.c2 * Dm) - M.c0) / M.c2; vb2 = vq2 > 0 ? Math.sqrt(vq2) : 0; }
-          if (vb2 < target) { target = vb2; braking = true; ff = -(M.c0 + M.c2 * av * av); }
-        }
-      }
+      Z.target = target; Z.ff = ff; Z.paceMul = paceMul;
+      scanAhead(la);
+      target = Z.target; ff = Z.ff;
+      var zoneMin = Z.zoneMin, zoneAt = scanAt;
       // braking zone ahead? (a corner at least 15 % slower than here): a chance of a mistake, once per zone
       var zone = zoneMin < VA[idx] * 0.85 && zoneAt > 0;
       if (zone && !zoneOn && !plan && ph !== 'grid' && startDone) {
@@ -1269,14 +1385,17 @@
           capV = Math.min(capV, av > 3 ? av * 0.7 : 0); capWhy = 'rejoin'; stats.rejoinWaits++;
         }
       }
-      if (capV < target) target = capV;
+      // (creeping past a stopped car, the creep speed is the target: the profile's slope fed forward to the pedals
+      // would brake for what the creep never reaches - it cancelled every bit of throttle and the car crawled at
+      // 0.5 m/s instead of 2.5, nose to tail behind a car stalled on the grid, for 15 s; 2026-10-02)
+      if (capV < target) { target = capV; if (creepCap && capWhy === 'follow') ff = 0; }
       if (target < 0) target = 0;
       info.tgt = tgt ? tgt.id : -1; info.capBy = capWhy === 'follow' ? capFid : -1; info.obs = obsOn ? obsK : -1;
       info.targetSpeed = target; info.cap = capWhy; info.offset = M.offset; info.offTarget = M.offTarget;
       info.mode = mode;
 
       // ---- the box: stop exactly on it
-      var hold = false;
+      hold = false;
       if (plan && Pp && plan.box && !plan.through) {
         var b = plan.box, dBox = (b.u - pitU0) * ds + b.lon - myAlong;
         if (!served) {
@@ -1291,12 +1410,39 @@
             }
           }
         } else {
-          if (plan.outFrom === null) plan.outFrom = pitU0;
+          if (!(plan.outFrom > OUT_NONE)) plan.outFrom = pitU0;
           if (plan.park) { hold = true; info.mode = 'parked'; }
         }
       }
+      Z.target = target; Z.ff = ff; Z.gBrk = gBrk; Z.head = head;
+    }
 
-      // ---- pedals: feed-forward + feedback on the target
+    // the braking scan: the most speed from which every target ahead can still be met at the planned braking
+    // (c0 + c2 v^2: the profile's own braking model on the flat, so on the line it reproduces the profile). In:
+    // Z.target / Z.ff (the target here and its feed-forward), Z.paceMul, Z.myAlong; out: Z.target, Z.ff, Z.zoneMin and
+    // scanAt (the slowest profile point within reach and where it is: a braking zone)
+    function scanAhead(la) {
+      var v = st.speed, av = v < 0 ? -v : v, target = Z.target, ff = Z.ff, paceMul = Z.paceMul, myAlong = Z.myAlong;
+      var reach = ((Math.log((M.c0 + M.c2 * av * av) / M.c0) / (2 * M.c2) + 25) / ds + 1) | 0;
+      if (reach > 260) reach = 260;
+      var zoneMin = 1e9, zoneAt = -1;
+      for (var m = la + SCAN_STEP; m <= reach; m += SCAN_STEP) {
+        var k = cyc(idx + m), vk = VA[k];
+        if (vk < zoneMin) { zoneMin = vk; zoneAt = m; }
+        targetAt(k, m); var tk = F[2] * paceMul;
+        if (tk < target) {
+          var Dm = m * ds - myAlong, vb2 = tk;
+          if (Dm > 0) { var vq2 = ((M.c0 + M.c2 * tk * tk) * Math.exp(2 * M.c2 * Dm) - M.c0) / M.c2; vb2 = vq2 > 0 ? Math.sqrt(vq2) : 0; }
+          if (vb2 < target) { target = vb2; ff = -(M.c0 + M.c2 * av * av); }
+        }
+      }
+      Z.target = target; Z.ff = ff; Z.zoneMin = zoneMin; scanAt = zoneAt;
+    }
+
+    // ---- pedals: feed-forward + feedback on the target; the battery on the straights, the limiter in the pit lane
+    function stepPedals() {
+      var dt = Z.dt, v = st.speed, av = v < 0 ? -v : v, target = Z.target, ff = Z.ff, accF = Z.accF, gBrk = Z.gBrk;
+      var steer = Z.steer, Pp = G.pit;
       var sinP = Math.sin(st.pitch || 0);
       var resist = perfFor.roll + perfFor.dragK * av * av + GRAV * sinP;
       // braking towards a target ahead: the planned deceleration fed forward, the error fed back
@@ -1323,15 +1469,21 @@
       M.thrOut = thr; M.brkOut = brk;
 
       // ---- battery on the straights, the limiter in the pit lane
-      var limiter = false;
+      limiter = false;
       if (plan && Pp && pitU0 >= Pp.entryU - 22 && pitU0 <= Pp.exitU + 2) limiter = true;
-      var bat = st.battery, boost = false;
+      var bat = st.battery;
+      boost = false;
       if (perfFor.ers && thr >= 0.98 && brk === 0 && av > 100 / 3.6 && !limiter && !st.onGrass && ph !== 'grid') {
         var keep = mode === 'overtake' || mode === 'defend' ? 0.02 : K.reserve;
         if (bat > keep) boost = true;
       }
+      Z.thr = thr; Z.brk = brk; Z.steer = steer;
+    }
 
-      // ---- recovery: wrong way, stuck, reverse attempts, R
+    // ---- recovery: wrong way, stuck, reverse attempts, R; then the pad -> input
+    function stepRecover() {
+      var dt = Z.dt, v = st.speed, av = v < 0 ? -v : v, steer = Z.steer, thr = Z.thr, brk = Z.brk, target = Z.target;
+      var head = Z.head, gB = Z.gB;
       if (rev) {
         // (backing off from a stopped car: until there is room to steer round it, or a car comes close behind)
         var revOn = M.t < M.revUntil;
@@ -1396,7 +1548,7 @@
     // The car was moved (R, a placement): carry on from where it is now.
     function relocate() {
       var i0 = st.sampleIndex | 0;
-      idx = i0 >= 0 && i0 < N ? i0 : track.locate(st.x, st.z, -1).index;
+      idx = i0 >= 0 && i0 < N ? i0 : track.locate(st.x, st.z, -1, isNum(st.y) ? st.y : undefined).index;
       prevIdx = idx; progIdx = idx; M.progT = M.t; M.hardT = M.t; M.stuckT = 0; M.wrongT = 0; rev = false; backing = false;
       M.offset = Math.min(Math.max(st.d - LD[idx], -12), 12); M.offTarget = 0; M.thrOut = M.brkOut = 0;
       mist.on = false; info.mistake = null; tgt = null; tgtSlow = false; obsOn = false;
@@ -1590,6 +1742,8 @@
         for (var q = 0; q < others.length && free; q++) {
           var o = others[q];
           if (!o || o.ghost || o === s || (selfId !== undefined && o.id === selfId)) continue;
+          // (a car on the other road of an over / under crossing is no obstacle here)
+          if (isNum(o.y) && isNum(S[j].y) && Math.abs(o.y - S[j].y) > LEVEL_DY) continue;
           var ex = o.x - S[j].x, ez = o.z - S[j].z;
           if (ex * ex + ez * ez < 49) free = false;
           // (nor just behind a car standing in the road: the R that is asked for when blocked by one must get past it)
@@ -1614,24 +1768,30 @@
 
   /** A view of a car for think()'s `others`. Create every view with this (and fill it with updateView): all views
    *  then share one shape and their numbers stay unboxed, which keeps think() allocation-free. prog / pace NaN =
-   *  unknown (a human driver's pace is not known). */
+   *  unknown (a human driver's pace is not known); y: the car's height (NaN = unknown; F1.AI.resetCar uses it at an
+   *  over / under crossing). Add no other fields to a view (one more shape and think() slows down and allocates). */
   function createView(id) {
-    return { id: id, x: 0.5, z: 0.5, heading: 0.5, speed: 0.5, sampleIndex: 0, d: 0.5, ghost: false, prog: NaN, pace: NaN };
+    return { id: id, x: 0.5, z: 0.5, heading: 0.5, speed: 0.5, sampleIndex: 0, d: 0.5, ghost: false, prog: NaN, pace: NaN,
+             y: NaN };
   }
   /** The context of a think() call (one per computer car, refreshed in place every step): see the header. */
   function createContext() {
     return { phase: 'free', locked: false, lap: 0, laps: 0, done: false, prog: NaN, pit: null, wear: 1.5 };
   }
-  /** Fill a view of another car for think()'s `others` from a car state ({x, z, heading, speed[, sampleIndex, d]}),
-   *  locating it on the track when the state has no sample index (remote cars; the hint is kept in the view). */
+  /** Fill a view of another car for think()'s `others` from a car state ({x, z, heading, speed[, y, sampleIndex, d]}),
+   *  locating it on the track when the state has no sample index (remote cars; the hint is kept in the view) - with its
+   *  height y when the state has one: at an over / under crossing (Suzuka) the road it is on, not the one above / below
+   *  (a remote state from the network has y). */
   function updateView(view, state, track) {
     view.x = state.x; view.z = state.z; view.heading = state.heading; view.speed = state.speed;
+    var y = isNum(state.y) ? state.y : NaN;
+    view.y = y;
     if (isNum(state.sampleIndex) && isNum(state.d)) { view.sampleIndex = state.sampleIndex; view.d = state.d; }
     else {
-      var hint = isNum(view.sampleIndex) ? view.sampleIndex : -1;
-      var loc = track.locate(state.x, state.z, hint);
+      var hint = isNum(view.sampleIndex) ? view.sampleIndex : -1, yl = y === y ? y : undefined;
+      var loc = track.locate(state.x, state.z, hint, yl);
       var s = track.samples[loc.index], ex = state.x - s.x, ez = state.z - s.z;
-      if (hint >= 0 && ex * ex + ez * ez > 900) loc = track.locate(state.x, state.z, -1);
+      if (hint >= 0 && ex * ex + ez * ez > 900) loc = track.locate(state.x, state.z, -1, yl);
       view.sampleIndex = loc.index; view.d = loc.d;
     }
     return view;
@@ -1644,25 +1804,30 @@
    *  onContact(i, j, dv, hit) per impact on car i from car j (dv = its velocity change, m/s). -> the strongest hit.
    *  Allocation-free after warm-up when nothing touches (js/collide.js allocates a record per impact). */
   function createContacts() {
-    var snap = [], list = [], map = [], scratch = [];
+    // (no allocation per call: the candidate lists come from a pool, one array per length, filled by index - an array
+    // emptied with length = 0 drops its storage and the next push allocates a new one; the snapshots hold doubles)
+    var snap = [], pool = [], map = new Int32Array(64), scratch = [];
     return function resolveAll(entries, dt, onContact) {
       var n = entries.length, i, j, e, s, max = 0;
       if (typeof F1.resolveCarCollisions !== 'function') return 0;
       for (i = 0; i < n; i++) {
-        e = entries[i]; s = snap[i] || (snap[i] = { x: 0, z: 0, y: 0, heading: 0, speed: 0 });
+        e = entries[i]; s = snap[i] || (snap[i] = { x: 0.5, z: 0.5, y: 0.5, heading: 0.5, speed: 0.5 });
         s.x = e.state.x; s.z = e.state.z; s.y = e.state.y || 0; s.heading = e.state.heading; s.speed = e.state.speed;
       }
       for (i = 0; i < n; i++) {
         e = entries[i];
         if (!e.solid) continue;
-        list.length = 0; map.length = 0;
-        for (j = 0; j < n; j++) {
+        var cnt = 0;
+        for (j = 0; j < n && cnt < 64; j++) {
           if (j === i || !entries[j].solid) continue;
           var dx = snap[j].x - snap[i].x, dz = snap[j].z - snap[i].z;
-          if (dx * dx + dz * dz < 400) { list.push(snap[j]); map.push(j); }
+          if (dx * dx + dz * dz < 400) map[cnt++] = j;
         }
-        if (!list.length) continue;
-        scratch.length = 0;
+        if (!cnt) continue;
+        var list = pool[cnt];
+        if (!list) { list = pool[cnt] = []; for (j = 0; j < cnt; j++) list.push(snap[0]); }
+        for (j = 0; j < cnt; j++) list[j] = snap[map[j]];
+        if (scratch.length) scratch.length = 0;
         var h = F1.resolveCarCollisions(e.state, list, dt, onContact ? scratch : undefined);
         if (h > 0) { if (e.car && e.car.bump) e.car.bump(h); if (h > max) max = h; }
         if (onContact) for (var c = 0; c < scratch.length; c++) onContact(i, map[scratch[c].i], Math.sqrt(scratch[c].ix * scratch[c].ix + scratch[c].iz * scratch[c].iz), h);
@@ -1671,10 +1836,107 @@
     };
   }
 
+
+  /** F1.AI.warmUp(track, raceLine, opts?) -> {steps, calls, pitStops, resets, passTries, offs, yields, mistakes} | null. Optional, for the loading screen: six computer cars
+   *  of this module's own drive through a short scripted session on this track - the grid and lights out, a pack in
+   *  traffic, a car stopped on the road, a blue flag, a pit stop in a box, R after facing the wrong way, the grass,
+   *  qualifying, after the flag - ~35 000 think() calls with the real js/car.js (~0.3 s of CPU, once per track: later
+   *  calls return at once unless opts.force). V8 then has type feedback for nearly every branch and has optimised the
+   *  drivers' code before the session starts: without it the first race of a session allocates ~100 MB more (the
+   *  drivers' code de-optimised again and again while V8 learns it: devtests/ai-test/warmup.js). The real drivers drive
+   *  exactly as without it (own cars and seeds; G.pitLoss is left to the first real driver). Needs js/car.js
+   *  (F1.createCar); js/pit.js for the stop. opts: spec (CarSpec, default F1.REF_SPEC), force. */
+  function warmUp(track, raceLine, opts) {
+    opts = opts || {};
+    if (typeof F1.createCar !== 'function' || !track || !track.samples) return null;
+    var G = prepare(track, raceLine);
+    if (G.warmed && !opts.force) return { steps: 0, calls: 0 };
+    var keepLoss = G.pitLoss, S = track.samples, N = S.length, ds = track.length / N, STEPW = 1 / 120, n = 6;
+    var spec = opts.spec || F1.REF_SPEC, SK = [0, 0.35, 0.7, 1, 0.5, 0.2];
+    var cars = [], ais = [], views = [], ctxs = [], pits = [], ents = [], held = [], calls = 0, steps = 0, i;
+    var contacts = createContacts(), hasPit = !!(G.pit && typeof F1.createPit === 'function');
+    // seconds of a phase for the cars in the bit mask `active` (the others are ghosts, not moved); until(): stop early
+    function run(seconds, phase, locked, active, until) {
+      var nS = Math.round(seconds / STEPW);
+      for (var k = 0; k < nS && !(until && until()); k++, steps++) {
+        for (var j = 0; j < n; j++) {
+          var st = cars[j].state, v = views[j];
+          v.x = st.x; v.z = st.z; v.y = st.y; v.heading = st.heading; v.speed = st.speed; v.sampleIndex = st.sampleIndex; v.d = st.d;
+          v.ghost = phase === 'quali' || !(active & (1 << j));
+          v.prog = (j === 5 ? 1 : 0) + st.sampleIndex / N; v.pace = ais[j].pace;   // (car 5 a lap up: blue flags)
+        }
+        for (j = 0; j < n; j++) {
+          var c = cars[j], s = c.state, cx = ctxs[j];
+          if (!(active & (1 << j))) continue;
+          if (held[j]) { s.speed = 0; continue; }     // stopped on the road
+          cx.phase = phase; cx.locked = locked; cx.laps = phase === 'race' ? 20 : 0; cx.lap = 1; cx.prog = views[j].prog;
+          cx.wear = 3; cx.pit = pits[j] ? pits[j].state : null; cx.done = phase === 'results';
+          var inp = ais[j].think(STEPW, views, cx); calls++;
+          if (locked) { s.speed = 0; continue; }
+          var ev = null;
+          if (pits[j] && pits[j].state.service) { s.speed = 0; ev = pits[j].update(STEPW, s, track, { slot: j }); }
+          else if (inp.reset) { resetCar(c, track, s.sampleIndex, views, 9001 + j); continue; }
+          else { c.update(STEPW, inp, track); if (pits[j]) ev = pits[j].update(STEPW, s, track, { slot: j, limiter: inp.limiter }); }
+          if (ev) { var cmp = ais[j].onPit(ev); if (cmp && c.tyres) c.tyres.fit(cmp); }
+        }
+        for (j = 0; j < n; j++) ents[j].solid = phase !== 'quali' && !!(active & (1 << j)) && !(pits[j] && pits[j].state.service);
+        contacts(ents, STEPW);
+      }
+    }
+    try {
+      for (i = 0; i < n; i++) {
+        var car = F1.createCar(spec, { random: makeRandom(9101 + i) });
+        cars.push(car);
+        ais.push(createAIDriver({ track: track, raceLine: raceLine, car: car, skill: SK[i], seed: 9001 + i, id: 9001 + i, slot: i,
+                                 mistakeRate: i === 0 || i === 4 ? 0.5 : -1 }));
+        views.push(createView(9001 + i)); ctxs.push(createContext());
+        pits.push(hasPit ? F1.createPit({ random: makeRandom(9201 + i) }) : null);
+        ents.push({ state: car.state, car: car, solid: true }); held.push(false);
+        if (track.grid && track.grid.length > i) placeOnGrid(car, track, i); else car.reset(track, (N - 12 * i) % N);
+        if (car.setBattery) car.setBattery(1);
+        if (car.tyres && car.tyres.setWearRate) car.tyres.setWearRate(3);
+        ais[i].reset();
+      }
+      var ALL = (1 << n) - 1;
+      run(0.5, 'grid', true, ALL);                   // on the grid, locked
+      run(9, 'race', false, ALL);                    // lights out, the pack, the first corners
+      var lead = 0;                                  // the car furthest on: stopped on the road for a while
+      for (i = 1; i < n; i++) {
+        var dl = (cars[i].state.sampleIndex - cars[lead].state.sampleIndex) % N; if (dl < 0) dl += N;
+        if (dl > 0 && dl < N / 2) lead = i;
+      }
+      held[lead] = true; run(7, 'race', false, ALL); held[lead] = false;
+      if (hasPit) {                                  // a stop in the box (two cars), until both are back on the track
+        for (i = 1; i <= 2; i++) {
+          var at = (G.pit.from - Math.round((300 + 15 * i) / ds)) % N; if (at < 0) at += N;
+          cars[i].reset(track, at); ais[i].planStop('H');
+        }
+        run(45, 'race', false, 6, function () { return ais[1].stats.pitStops > 0 && ais[2].stats.pitStops > 0 && !ais[1].plan && !ais[2].plan; });
+      }
+      var w = cars[3].state; w.heading += Math.PI; cars[3].update(1e-4, null, track);   // facing the wrong way: R
+      var g = cars[4].state, sg = S[g.sampleIndex], side = (sg.wallPosDist || 12) >= 12 ? 1 : -1;
+      g.x += sg.nx * side * 10; g.z += sg.nz * side * 10; cars[4].update(1e-4, null, track);   // on the grass
+      run(5, 'race', false, ALL);
+      run(3, 'quali', false, ALL);
+      run(3, 'results', false, ALL);
+    } catch (e) { G.warmed = true; G.pitLoss = keepLoss; return null; }
+    G.warmed = true; G.pitLoss = keepLoss;          // (the first real driver's profile sets it, as without a warm-up)
+    var sum = { steps: steps, calls: calls, pitStops: 0, resets: 0, passTries: 0, offs: 0, yields: 0, mistakes: 0 };
+    for (i = 0; i < n; i++) for (var key in sum) if (key !== 'steps' && key !== 'calls') sum[key] += ais[i].stats[key];
+    return sum;
+  }
+
   // ---- names and cars for the computer drivers -------------------------------------------------------------------
   var INVENTED = ['A. Moreau', 'K. Tanaka', 'L. Rossi', 'J. Novak', 'M. Silva', 'T. Becker', 'R. Okafor', 'S. Lindqvist',
     'D. Kowalski', 'E. Laurent', 'H. Nakamura', 'P. Romano', 'C. Duarte', 'N. Petrov', 'O. Hansen', 'V. Costa',
     'B. Keller', 'I. Moretti', 'F. Dubois', 'G. Andersen', 'Y. Sato', 'W. Fischer', 'Z. Horvat', 'U. Martins'];
+
+  // an integer seed for one seat of the field: the field's seed, the car id and the seat (FNV-1a)
+  function seatSeed(seed, car, seat) {
+    var h = 2166136261 ^ (seed | 0), str = String(car) + '#' + seat;
+    for (var k = 0; k < str.length; k++) h = Math.imul(h ^ str.charCodeAt(k), 16777619);
+    return ((h >>> 0) % 2147483646) + 1;
+  }
 
   function shortName(name) {
     name = String(name || '').replace(/\s+/g, ' ').trim();
@@ -1695,7 +1957,7 @@
     opts = opts || {};
     var cars = (opts.cars || []).filter(function (c) { return c && c.id && !/-standard$/.test(c.id); });
     var count = Math.max(0, Math.min(15, Math.floor(opts.count || 0)));
-    var rnd = makeRandom(isNum(opts.seed) ? opts.seed : 7);
+    var rnd0 = isNum(opts.seed) ? Math.floor(opts.seed) : 7;
     var taken = {}, used = {}, i, j;
     (opts.taken || []).forEach(function (id) { taken[id] = (taken[id] || 0) + 1; });
     (opts.names || []).forEach(function (n) { used[n] = 1; });
@@ -1718,9 +1980,13 @@
         inv++; dr = null;
       }
       used[name] = 1;
-      var sk = mixed ? LEVELS[Math.floor(rnd() * LEVELS.length)].skill : skillOf(opts.skill);
-      sk = clamp(sk + (rnd() - 0.5) * 0.08, 0, 1);       // nobody is exactly like a teammate
-      out.push({ name: name, car: s.car, skill: Math.round(sk * 1000) / 1000, seed: (rnd() * 2147483647) | 0,
+      // a seat's level and randomness come from the seed and the SEAT (car, seat), not from its place in the list: a
+      // human taking another seat (a player joining the room, another car picked) leaves every other driver as he
+      // was - with one generator for the whole list everybody after that seat got another level (2026-10-02)
+      var rs = makeRandom(seatSeed(rnd0, s.car, s.seat >= 2 ? 2 + i : s.seat));
+      var sk = mixed ? LEVELS[Math.floor(rs() * LEVELS.length)].skill : skillOf(opts.skill);
+      sk = clamp(sk + (rs() - 0.5) * 0.08, 0, 1);        // nobody is exactly like a teammate
+      out.push({ name: name, car: s.car, skill: Math.round(sk * 1000) / 1000, seed: (rs() * 2147483647) | 0,
                  abbr: dr && dr.abbr ? dr.abbr : name.replace(/[^A-Za-z]/g, '').slice(-3).toUpperCase() });
     }
     return out;
@@ -1730,15 +1996,14 @@
     LEVELS: LEVELS, skillOf: skillOf, levelOf: levelOf, params: params, PACE: PACE, paceOf: paceOf,
     prepare: prepare, profile: profile, makeRandom: makeRandom,
     placeOnGrid: placeOnGrid, resetCar: resetCar, updateView: updateView, createView: createView,
-    createContext: createContext, createContacts: createContacts,
+    createContext: createContext, createContacts: createContacts, warmUp: warmUp,
     lineup: lineup, shortName: shortName, INVENTED: INVENTED,
     // the set to start a race of `laps` laps on at wear multiplier `wear` on a track of `length` m: the softest that
     // lasts it (the stop strategy takes over when the measured wear says otherwise)
     startCompound: function (laps, wear, length) {
       var w = isNum(wear) && wear > 0 ? wear : 1, n = isNum(laps) && laps > 0 ? laps : 5;
       var base = WEAR_LAP0 * (isNum(length) && length > 500 ? length : 5000) * w;
-      var order = ['S', 'M', 'H'];
-      for (var i = 0; i < order.length; i++) if (base * COMPOUND_WEAR[order[i]] * n <= WEAR_END - 0.06) return order[i];
+      for (var i = 0; i < ORDER.length; i++) if (base * COMPOUND_WEAR[ORDER[i]] * n <= WEAR_END - 0.06) return ORDER[i];
       return 'H';
     },
     CAR_LEN: CAR_LEN, CAR_WID: CAR_WID, SEP: SEP

@@ -593,6 +593,114 @@ test('ers.taperKmh: a valid era taper reaches every car of the season (frozen), 
   for (const spec of F1.cars.list(2014)) assert(!('taperKmh' in spec.ers), spec.id + ': no taper before 2026');
 });
 
+// ---- the drivers of every car: the names of the computer drivers (cars[].drivers, F1.cars.drivers) ------------------
+const STD_DRIVERS = [{ name: 'Alex Rowan', abbr: 'ROW', number: 90 }, { name: 'Sam Ellery', abbr: 'ELL', number: 91 }];
+test('drivers: every car has two drivers of its F1DB entry (most starts first), unique in its season; the standard car two invented ones', () => {
+  const real = { name: new Set(), abbr: new Set(), number: new Set() };
+  for (const r of RAW.seasons) for (const e of r.entries) for (const d of e.drivers) { real.name.add(d.name); real.abbr.add(d.abbreviation); real.number.add(+d.number); }
+  let n = 0;
+  for (const s of SEASONS) {
+    const raw = RAW.seasons.find(r => r.year === s.year), names = new Set(), abbrs = new Set();
+    for (const c of s.cars) {
+      assert(Array.isArray(c.drivers) && c.drivers.length === 2, c.id + ' has two drivers');
+      assert.deepStrictEqual(F1.cars.drivers(c.id), c.drivers, c.id + ': F1.cars.drivers = the data');
+      for (const d of c.drivers) {
+        assert.deepStrictEqual(Object.keys(d), ['name', 'abbr', 'number'], c.id);
+        assert(typeof d.name === 'string' && d.name.length >= 3 && Array.from(d.name).length <= 40 && d.name === d.name.trim() && !/\s\s/.test(d.name), c.id + ' name ' + d.name);
+        assert(/^[A-Z]{3}$/.test(d.abbr), c.id + ' abbr ' + d.abbr);
+        assert(Number.isInteger(d.number) && d.number >= 0 && d.number <= 99, c.id + ' number ' + d.number);
+        assert(!names.has(d.name) && !abbrs.has(d.abbr), s.year + ': ' + d.name + ' / ' + d.abbr + ' twice');
+        names.add(d.name); abbrs.add(d.abbr); n++;
+      }
+      if (c.id === s.year + '-standard') {
+        assert.deepStrictEqual(c.drivers, STD_DRIVERS, c.id);
+        for (const d of c.drivers) for (const k of ['name', 'abbr', 'number']) assert(!real[k].has(d[k]), c.id + ': ' + d[k] + ' is a real driver\'s ' + k);
+        continue;
+      }
+      const e = raw.entries.find(x => x.id === c.id);
+      const src = c.drivers.map(d => e.drivers.find(x => x.name === d.name));
+      src.forEach((x, i) => assert(x && x.abbreviation === c.drivers[i].abbr && +x.number === c.drivers[i].number, c.id + ': ' + c.drivers[i].name + ' is a driver of the F1DB entry'));
+      assert(src[0].starts >= src[1].starts, c.id + ': the first seat has the most starts');
+      // nobody of this entry with more starts is left out, except a driver who started at least as often for another car
+      for (const x of e.drivers) if (!src.includes(x) && x.starts > src[1].starts) {
+        assert(raw.entries.some(o => o !== e && o.drivers.some(y => y.id === x.id && y.starts >= x.starts)), c.id + ': ' + x.name + ' (' + x.starts + ' starts) left out');
+      }
+    }
+  }
+  assert.strictEqual(n, 2 * (17 + 180));
+});
+
+test('drivers: known line-ups (2026 Ferrari, 2025 Red Bull / Racing Bulls after the swap, 2014 Mercedes, 2016 Red Bull / Toro Rosso)', () => {
+  const names = id => F1.cars.drivers(id).map(d => d.name);
+  assert.deepStrictEqual(names('2026-ferrari').sort(), ['Charles Leclerc', 'Lewis Hamilton']);
+  assert.deepStrictEqual(names('2025-red-bull'), ['Max Verstappen', 'Yuki Tsunoda']);     // Tsunoda 22 starts here, 2 at Racing Bulls
+  assert.deepStrictEqual(names('2025-racing-bulls'), ['Isack Hadjar', 'Liam Lawson']);   // Lawson 22 here, 2 at Red Bull
+  assert.deepStrictEqual(F1.cars.drivers('2014-mercedes'), [{ name: 'Lewis Hamilton', abbr: 'HAM', number: 44 }, { name: 'Nico Rosberg', abbr: 'ROS', number: 6 }]);
+  assert.deepStrictEqual(names('2016-red-bull'), ['Daniel Ricciardo', 'Max Verstappen']); // Kvyat's 3 starts: not named
+  assert.deepStrictEqual(names('2016-toro-rosso'), ['Carlos Sainz Jr.', 'Daniil Kvyat']);
+  assert.deepStrictEqual(names('2010-sauber'), ['Kamui Kobayashi', 'Pedro de la Rosa']);  // Heidfeld 5 starts
+  assert(names('2026-audi').includes('Nico H' + String.fromCharCode(0xfc) + 'lkenberg'), 'F1DB\'s Latin names, accents kept');
+});
+
+test('F1.cars.drivers: a new array of new objects on every call, own car ids only, never part of a CarSpec', () => {
+  const a = F1.cars.drivers('2026-mercedes');
+  a[0].name = 'x'; a.push({ name: 'y' });
+  assert.deepStrictEqual(F1.cars.drivers('2026-mercedes').map(d => d.name), ['George Russell', 'Kimi Antonelli']);
+  for (const bad of ['constructor', '__proto__', 'toString', 'hasOwnProperty', 'valueOf', '', null, undefined, 5, {}, [], 'mercedes', 'standard',
+    '2009-ferrari', '2026-constructor', 'x'.repeat(41)]) assert.deepStrictEqual(F1.cars.drivers(bad), [], String(bad));
+  for (const s of F1.cars.seasons) for (const spec of F1.cars.list(s.year)) assert(!('drivers' in spec), spec.id + ': drivers are not in the CarSpec');
+});
+
+test('broken drivers data: hidden characters removed, names clamped, abbreviations / numbers repaired, at most two, the standard car invented', () => {
+  const ch = String.fromCharCode, ZW = ch(0x200b), RLO = ch(0x202e), LS = ch(0x2028), BOM = ch(0xfeff), NUL = ch(0), C1 = ch(0x85);
+  const buemi = 'S' + 'e' + ch(0x301) + 'bastien  Buemi' + LS;                             // decomposed e + acute: NFC
+  const s = JSON.parse(JSON.stringify(SEASONS.find(q => q.year === 2014)));
+  delete s.cars[0].drivers;                                                                  // the standard car: the invented two
+  s.cars[1].drivers = [{ name: '  Max' + ZW + '  ' + RLO + 'Power' + NUL + C1 + ' ', abbr: 'max', number: '07' }, { name: buemi, abbr: 'BUE', number: 100 },
+    { name: 'Third Driver', abbr: 'THI', number: 3 }];
+  s.cars[2].drivers = [null, 7, 'x', {}, { name: '' }, { name: ZW + RLO + BOM }, { name: 'A'.repeat(60), abbr: 'AAA', number: 1.5 },
+    { name: 'A'.repeat(60) + 'B', abbr: 'AAB', number: -1 }, { name: 'Ninth', abbr: 'NIN', number: 9 }];
+  s.cars[3].drivers = 'Lewis Hamilton';
+  s.cars[4].drivers = { 0: { name: 'x' }, length: 1 };
+  s.cars[5].drivers = JSON.parse('[{"__proto__": {"name": "Polluted"}}, {"name": "Carlos Sainz Jr.", "constructor": 1, "number": "55"}]');
+  s.cars[6].drivers = [{ name: 'Nico H' + ch(0xfc) + 'lkenberg', abbr: 'hul', number: '1e1' }];
+  s.cars[7].drivers = [{ name: 'Al', abbr: 7 }];
+  const cars = sandbox([s], null);
+  assert.deepStrictEqual(plain(cars.drivers('2014-standard')), STD_DRIVERS, 'the standard car without data: the invented two');
+  assert.deepStrictEqual(plain(cars.drivers(s.cars[1].id)), [{ name: 'Max Power', abbr: 'POW', number: 7 }, { name: 'S' + ch(0xe9) + 'bastien Buemi', abbr: 'BUE', number: null }]);
+  assert.deepStrictEqual(plain(cars.drivers(s.cars[2].id)), [{ name: 'A'.repeat(40), abbr: 'AAA', number: null }], 'clamped to 40; the same clamped name once; 8 entries looked at');
+  assert.deepStrictEqual(plain(cars.drivers(s.cars[3].id)), []);
+  assert.deepStrictEqual(plain(cars.drivers(s.cars[4].id)), []);
+  assert.deepStrictEqual(plain(cars.drivers(s.cars[5].id)), [{ name: 'Carlos Sainz Jr.', abbr: 'SAI', number: 55 }], 'own properties only');
+  assert.deepStrictEqual(plain(cars.drivers(s.cars[6].id)), [{ name: 'Nico H' + ch(0xfc) + 'lkenberg', abbr: 'HUL', number: null }]);
+  assert.deepStrictEqual(plain(cars.drivers(s.cars[7].id)), [{ name: 'Al', abbr: '', number: null }]);
+  for (const spec of cars.list(2014)) assert.deepStrictEqual(F1.sanitizeSpec(plain(spec)), plain(spec), spec.id + ': the CarSpec is untouched');
+  // the standard car's own data wins; no data at all: nothing
+  const t = JSON.parse(JSON.stringify(SEASONS.find(q => q.year === 2014)));
+  t.cars[0].drivers = [{ name: 'Test One', abbr: 'TON', number: 1 }];
+  assert.deepStrictEqual(plain(sandbox([t], null).drivers('2014-standard')), [{ name: 'Test One', abbr: 'TON', number: 1 }]);
+  assert.deepStrictEqual(plain(sandbox(undefined, undefined).drivers('2025-standard')), []);
+});
+
+test('F1.AI.lineup with F1.cars.drivers: 15 computer drivers of every season all named after real drivers of their car, unique, <= 16 characters', () => {
+  require(path.join(ROOT, 'js', 'ai.js'));
+  const AI = F1.AI;
+  for (const s of F1.cars.seasons) {
+    const cars = F1.cars.list(s.year), human = cars[1].id;
+    const field = AI.lineup({ cars, taken: [human], count: 15, skill: 'pro', seed: 1, drivers: F1.cars.drivers, names: ['Player'] });
+    assert.strictEqual(field.length, 15, s.year);
+    assert.strictEqual(new Set(field.map(b => b.name)).size, 15, s.year + ': unique names');
+    for (const b of field) {
+      const d = F1.cars.drivers(b.car).find(x => AI.shortName(x.name) === b.name);
+      assert(d, s.year + ': ' + b.name + ' drives ' + b.car + ' (no invented name)');
+      assert(Array.from(b.name).length <= 16 && b.abbr === d.abbr, b.name);
+    }
+    // the human's team: the teammate (second seat) drives the other car
+    const mate = F1.cars.drivers(human)[1].name;
+    assert(field.some(b => b.car === human && b.name === AI.shortName(mate)), s.year + ': ' + mate + ' is the human\'s teammate');
+  }
+});
+
 // The era pace index, checked independently of the builder's calibration code: every season's standard car on the
 // racing line built for it (js/raceline.js's speed profile = what the autopilot of devtests/seasons-calib/check-drive.js
 // drives within ~0.02 %), on four circuits, against the 2025 standard car. The builder solves the index as the median

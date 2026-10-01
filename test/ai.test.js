@@ -4,8 +4,11 @@
 // moves), a stopped car ahead is never hit, ghosts are ignored, start reaction, a pit stop in its own box at the
 // limit, qualifying ignores the others, blue flags, the field's names / cars; and the critic's regressions (a stopped
 // car hidden behind others, a car across a narrow street, a brake test in front, a car coming the wrong way, R never
-// next to a stopped car, worn tyres changed in time, two cars into the pit lane together). Longer race simulations:
-// devtests/ai-test/ (critic-*.js: the stress cases).
+// next to a stopped car, worn tyres changed in time, two cars into the pit lane together); v6.2: Suzuka's over / under
+// crossing (two cars meeting there; views and R with the height), the Monaco hairpin at the top of the full-lock range
+// and no attack through it, F1.AI.warmUp (every branch seen; the real drivers drive exactly as without it), no
+// allocation with race contexts (a numeric race distance), the contact resolver allocation-free. Longer race
+// simulations: devtests/ai-test/ (critic-*.js: the stress cases; bridge.js, warmup.js, fingerprint.js).
 // Exit code 1 on any failure.
 'use strict';
 const assert = require('assert');
@@ -108,6 +111,17 @@ test('the field: names, the season\'s cars not taken by humans, two seats per te
   const g = AI.lineup({ cars, count: 8, skill: 'mixed', seed: 3 });
   assert(new Set(g.map(x => AI.levelOf(x.skill).id)).size >= 2, 'mixed skills');
   assert.deepStrictEqual(AI.lineup({ cars, count: 8, skill: 'mixed', seed: 3 }), g, 'deterministic');
+  // a human taking a seat (a player joining the room with that team's car) leaves every other driver as he was:
+  // same level, same randomness (2026-10-02: one generator for the whole list shuffled the levels of everybody after it)
+  const seatNames = id => [{ name: 'A ' + id.slice(5) }, { name: 'B ' + id.slice(5) }];
+  const g2 = AI.lineup({ cars, count: 8, skill: 'mixed', seed: 3, drivers: seatNames });
+  const h = AI.lineup({ cars, taken: [g2[1].car], count: 8, skill: 'mixed', seed: 3, drivers: seatNames });
+  const key = x => x.car + '|' + x.name;
+  const before = new Map(g2.map(x => [key(x), x]));
+  const kept = h.filter(x => before.has(key(x)));
+  assert(kept.length >= 6, 'most drivers stay: ' + kept.length);
+  assert(kept.every(x => before.get(key(x)).skill === x.skill && before.get(key(x)).seed === x.seed), 'levels / seeds follow the seat: ' +
+    kept.filter(x => before.get(key(x)).skill !== x.skill).map(x => x.name).join(', '));
 });
 
 test('determinism: the same seed drives the same race, another seed another', () => {
@@ -151,39 +165,61 @@ test('a faster car (2026 Mercedes vs the 2026 standard car) comes through on top
   assert(ma < mb, 'Mercedes ' + ma.toFixed(3) + ' standard ' + mb.toFixed(3));
 });
 
-test('no allocation in think() once optimised (8 cars in traffic)', () => {
-  // The same 8 drivers through 6 minutes of racing first (V8 optimises think() for every branch it meets; while it
-  // is still being optimised the interpreter boxes numbers), then one measured minute: the heap growth between two
-  // GCs is what think() allocated (the young generation is large enough that nothing is collected in between).
+test('no allocation in think() once optimised (8 cars in traffic, race contexts, F1.AI.warmUp first)', () => {
+  // F1.AI.warmUp on the track (the game calls it while the track loads), the 8 drivers through 2 minutes of racing,
+  // then measured minutes: the heap growth between two GCs is what think() allocated (the young generation is large
+  // enough that nothing is collected in between). Real tyres and race contexts as the game fills them - a number for
+  // the race distance (a variable that was a number or null boxed it at every call: 16 B), the pit state, the wear.
   if (!global.gc) { console.log('     (skipped: run with --expose-gc)'); return; }
   const t = track('it-1922'), ln = line('it-1922'), P = ln.points, N = t.samples.length, ds = t.length / N;
-  const cars = [], ais = [], views = [], pos = [];
+  const w0 = AI.warmUp(t, ln);
+  assert(w0 && w0.calls > 10000 && w0.pitStops === 2, 'warm-up ' + JSON.stringify(w0));
+  const cars = [], ais = [], views = [], pos = [], ctxs = [];
   for (let i = 0; i < 8; i++) {
-    const car = F1.createCar(F1.REF_SPEC, { tyres: false });
+    const car = F1.createCar(F1.REF_SPEC, { random: AI.makeRandom(i + 3) });
     const ai = F1.createAIDriver({ track: t, raceLine: ln, car, skill: i / 7, seed: i + 1, id: i + 1, slot: i });
     car.reset(t, 300 + i * 9); ai.reset(); cars.push(car); ais.push(ai); pos.push(300 + i * 9);
     const w = AI.createView(i + 1); w.pace = ai.pace; views.push(w);
+    ctxs.push(context({ phase: 'race', laps: 30, lap: 2, prog: 2, wear: 2, pit: F1.createPit({ random: AI.makeRandom(i + 7) }).state }));
   }
-  const VA = ais.map(a => a.profile()), ctx = context({ phase: 'race', laps: 10 });
+  const VA = ais.map(a => a.profile());
   function move() {        // along the line at 98 % of each profile: every racecraft branch, no car.update (it allocates)
     for (let i = 0; i < 8; i++) {
       const v = Math.min(VA[i][pos[i] | 0] * 0.98, 90);
       pos[i] += v / 120 / ds; if (pos[i] >= N) pos[i] -= N;
       const k = pos[i] | 0, p = P[k], q = P[(k + 1) % N], st = cars[i].state, w = views[i];
-      st.x = p.x; st.z = p.z; st.heading = Math.atan2(q.x - p.x, q.z - p.z); st.speed = v; st.sampleIndex = k; st.d = p.d;
-      w.x = st.x; w.z = st.z; w.heading = st.heading; w.speed = v; w.sampleIndex = k; w.d = p.d;
+      st.x = p.x; st.z = p.z; st.y = p.y; st.heading = Math.atan2(q.x - p.x, q.z - p.z); st.speed = v; st.sampleIndex = k; st.d = p.d;
+      w.x = st.x; w.z = st.z; w.y = st.y; w.heading = st.heading; w.speed = v; w.sampleIndex = k; w.d = p.d;
+      w.prog = 2 + pos[i] / N; ctxs[i].prog = w.prog;
     }
   }
-  for (let k = 0; k < 120 * 360; k++) { move(); for (let i = 0; i < 8; i++) ais[i].think(STEP, views, ctx); }
+  for (let k = 0; k < 120 * 120; k++) { move(); for (let i = 0; i < 8; i++) ais[i].think(STEP, views, ctxs[i]); }
   let best = Infinity;
-  for (let r = 0; r < 4 && best > 2; r++) {      // (up to 4 minutes: V8 re-optimises think() now and then, the interpreter boxes meanwhile)
+  for (let r = 0; r < 4 && best > 2; r++) {      // (up to 4 minutes: V8 re-optimises now and then, the interpreter boxes meanwhile)
     global.gc(); const h0 = process.memoryUsage().heapUsed;
-    for (let k = 0; k < 120 * 60; k++) { move(); for (let i = 0; i < 8; i++) ais[i].think(STEP, views, ctx); }
+    for (let k = 0; k < 120 * 60; k++) { move(); for (let i = 0; i < 8; i++) ais[i].think(STEP, views, ctxs[i]); }
     const h1 = process.memoryUsage().heapUsed;
     best = Math.min(best, (h1 - h0) / (120 * 60 * 8));
   }
   assert(best < 2, 'think() allocates ' + best.toFixed(2) + ' B per call');
-  console.log('     ' + best.toFixed(3) + ' B per call');
+  console.log('     ' + best.toFixed(3) + ' B per call (warm-up: ' + w0.calls + ' think calls, ' + w0.pitStops + ' stops)');
+});
+
+test('the contact resolver allocates nothing per call (cars close together, no contact)', () => {
+  if (!global.gc) { console.log('     (skipped: run with --expose-gc)'); return; }
+  const t = track(T), S = t.samples, resolve = AI.createContacts(), ent = [];
+  for (let i = 0; i < 10; i++) {
+    const car = F1.createCar(F1.REF_SPEC, { tyres: false }); car.reset(t, 100 + 5 * i);
+    const s = S[car.state.sampleIndex]; car.state.x += s.nx * (i % 2 ? 2.4 : -2.4); car.state.z += s.nz * (i % 2 ? 2.4 : -2.4); car.state.speed = 50;
+    ent.push({ state: car.state, car, solid: true });
+  }
+  for (let k = 0; k < 20000; k++) resolve(ent, STEP);
+  global.gc(); const h0 = process.memoryUsage().heapUsed;
+  let max = 0;
+  for (let k = 0; k < 50000; k++) max = Math.max(max, resolve(ent, STEP));
+  const per = (process.memoryUsage().heapUsed - h0) / 50000;
+  assert.strictEqual(max, 0, 'the cars touched');
+  assert(per < 2, per.toFixed(2) + ' B per call');
 });
 
 test('cost: think() well under 0.05 ms per call', () => {
@@ -486,6 +522,136 @@ test('two cars stopping on the same lap do not run into each other on the way in
   }, cs => cs.forEach((c, i) => { c.ctx.pit = pits[i].state; c.ai.planStop('M'); }));
   assert.strictEqual(r.touches, 0, 'they touched');
   assert(entered[0] && entered[1], 'not both went in: ' + entered);
+});
+
+
+// ---- v6.2: Suzuka's over / under crossing, the Monaco hairpin at full lock, the warm-up ------------------------------
+test('Suzuka bridge: two cars meeting at the crossing stay on their roads, never touch, ignore each other', () => {
+  // (devtests/ai-test/bridge.js: 3 skills x 9 timings) one car on each road, timed to be at the crossing together
+  const t = track('jp-1962'), ln = line('jp-1962'), S = t.samples, N = S.length, ds = t.length / N, br = t.bridges[0];
+  assert(br && br.separation > 5, 'no bridge');
+  const rel = (a, b) => { let d = ((b - a) % N + N) % N; return d > N / 2 ? d - N : d; };
+  const START = Math.round(300 / ds);
+  function run(cfg) {
+    const cs = [];
+    for (const w of ['lo', 'up']) {
+      if (!cfg[w]) continue;
+      const own = w === 'lo' ? br.lo : br.up, car = F1.createCar(F1.REF_SPEC, { tyres: false }), id = w === 'lo' ? 1 : 2;
+      const ai = F1.createAIDriver({ track: t, raceLine: ln, car, skill: 0.7, seed: 5 + id, id, slot: id });
+      car.reset(t, (own - START + N) % N); ai.reset();
+      cs.push({ w, own, car, st: car.state, ai, hold: cfg[w].hold || 0, view: AI.createView(id), remote: AI.createView(10 + id), ctx: context({ phase: 'race', laps: 9 }), at: -1, trace: new Map(), faults: 0 });
+    }
+    const views = cs.map(c => c.view), ent = cs.map(c => ({ state: c.st, car: c.car, solid: true })), hit = AI.createContacts();
+    let touches = 0, minPlan = 1e9, time = 0;
+    for (let k = 0; k < 120 * 25; k++) {
+      time += STEP;
+      cs.forEach(c => refresh(c.view, c.st));
+      for (const c of cs) {
+        const st = c.st;
+        c.ctx.locked = time < c.hold;
+        const i0 = st.sampleIndex, a0 = c.ai.state.idx, inp = c.ai.think(STEP, views, c.ctx);
+        if (c.ctx.locked) { st.speed = 0; continue; }
+        c.car.update(STEP, inp, t);
+        if (rel(i0, st.sampleIndex) < -2 || rel(i0, st.sampleIndex) > 6) c.faults++;
+        if (time - c.hold > 0.05 && (rel(a0, c.ai.state.idx) < -2 || rel(a0, c.ai.state.idx) > 6)) c.faults++;
+        if (Math.abs(st.y - t.surfaceY(st.sampleIndex, st.d)) > 1.5) c.faults++;
+        AI.updateView(c.remote, { x: st.x, y: st.y, z: st.z, heading: st.heading, speed: st.speed }, t);
+        if (Math.abs(rel(st.sampleIndex, c.remote.sampleIndex)) > 3) c.faults++;
+        const r = rel(c.own, st.sampleIndex);
+        if (r >= -60 && r <= 60 && !c.trace.has(r)) c.trace.set(r, st.speed);
+        if (c.at < 0 && r >= 0 && r < 20) c.at = time;
+      }
+      hit(ent, STEP, () => { touches++; });
+      if (cs.length === 2) minPlan = Math.min(minPlan, Math.hypot(cs[0].st.x - cs[1].st.x, cs[0].st.z - cs[1].st.z));
+    }
+    return { cs, touches, minPlan };
+  }
+  const aLo = run({ lo: {} }).cs[0], aUp = run({ up: {} }).cs[0];
+  const lag = aLo.at - aUp.at, cfg = { lo: { hold: lag < 0 ? -lag - 0.25 : 0 }, up: { hold: lag > 0 ? lag - 0.25 : 0 } };
+  const r = run(cfg), sLo = run({ lo: cfg.lo }).cs[0], sUp = run({ up: cfg.up }).cs[0];
+  assert(r.minPlan < 3, 'the two cars did not meet at the crossing (closest ' + r.minPlan.toFixed(1) + ' m)');
+  assert.strictEqual(r.touches, 0, 'contact across the bridge');
+  for (const [c, s] of [[r.cs[0], sLo], [r.cs[1], sUp]]) {
+    assert.strictEqual(c.faults, 0, c.w + ': jumped to the other road (index / height / remote view)');
+    for (const [k, v] of c.trace) assert(Math.abs(v - s.trace.get(k)) < 0.01, c.w + ': slowed for the car on the other level');
+  }
+});
+
+test('Suzuka bridge: views and R with the height (updateView, resetCar)', () => {
+  const t = track('jp-1962'), S = t.samples, br = t.bridges[0];
+  const lo = F1.createCar(F1.REF_SPEC, { tyres: false }), up = F1.createCar(F1.REF_SPEC, { tyres: false });
+  lo.reset(t, br.lo); up.reset(t, br.up);
+  assert(Math.abs(up.state.y - lo.state.y) > 5, 'heights ' + up.state.y + ' / ' + lo.state.y);
+  // a remote view with no sample index yet (its first locate is global): the road of its height
+  for (const [car, own] of [[lo, br.lo], [up, br.up]]) {
+    const v = AI.createView(7); v.sampleIndex = -1;
+    AI.updateView(v, { x: car.state.x, y: car.state.y, z: car.state.z, heading: car.state.heading, speed: 30 }, t);
+    assert(Math.abs(v.sampleIndex - own) <= 3, 'located on ' + v.sampleIndex + ', its road is at ' + own);
+    assert.strictEqual(v.y, car.state.y);
+  }
+  // R on the lower road right under a car standing on the bridge: the place is free (the other level is no obstacle)
+  const vu = AI.createView(2); refresh(vu, up.state); vu.y = up.state.y; vu.speed = 0;
+  const idx = AI.resetCar(lo, t, br.lo, [vu], 1);
+  assert(Math.abs(idx - br.lo) <= 2, 'R moved on to ' + idx + ' (the car above is on the other road)');
+  vu.y = NaN;                                    // (height unknown: as before, the car counts)
+  assert(Math.abs(AI.resetCar(lo, t, br.lo, [vu], 1) - br.lo) > 2);
+});
+
+test('Monaco hairpin: the profile at the top of the full-lock range (~50 km/h), taken without touching a wall', () => {
+  const t = track('mc-1929'), ln = line('mc-1929'), N = t.samples.length;
+  const car0 = F1.createCar(F1.REF_SPEC, { tyres: false });
+  const prof = AI.profile(AI.prepare(t, ln), car0.perf, 0.86 * AI.paceOf(1), 0.8 * Math.pow(AI.paceOf(1), 1.5));
+  let hp = 0; for (let i = 0; i < N; i++) if (prof[i] < prof[hp]) hp = i;
+  assert(prof[hp] * 3.6 > 40 && prof[hp] * 3.6 < 56, 'slowest profile point ' + (prof[hp] * 3.6).toFixed(1) + ' km/h');
+  for (const skill of [0, 1]) {
+    const d = driver('mc-1929', { ai: { skill, seed: 3 } }), ctx = context({ phase: 'race' });
+    d.car.reset(t, (hp - 250 + N) % N); d.ai.reset();
+    let vMin = 1e9, hits = 0, grass = 0, steerMax = 0;
+    for (let k = 0; k < 120 * 20; k++) {
+      const inp = d.ai.think(STEP, null, ctx); d.car.update(STEP, inp, t);
+      const r = ((d.st.sampleIndex - hp) % N + N) % N;
+      if (r < 25 || r > N - 25) { vMin = Math.min(vMin, d.st.speed); steerMax = Math.max(steerMax, Math.abs(d.st.steer)); if (d.st.hit > 0.02) hits++; if (d.st.onGrass) grass++; }
+    }
+    assert(vMin * 3.6 > (skill ? 40 : 35), 'skill ' + skill + ': ' + (vMin * 3.6).toFixed(1) + ' km/h at the hairpin');
+    assert.strictEqual(hits, 0, 'skill ' + skill + ': wall'); assert.strictEqual(grass, 0, 'skill ' + skill + ': grass');
+    assert(steerMax > 0.85, 'not at full lock (' + steerMax.toFixed(2) + ')');
+  }
+});
+
+test('Monaco hairpin: a quicker car behind does not attack through it (no line to choose), no contact', () => {
+  const t = track('mc-1929'), ln = line('mc-1929'), N = t.samples.length;
+  const prof = AI.profile(AI.prepare(t, ln), F1.createCar(F1.REF_SPEC, { tyres: false }).perf, 0.86, 0.8);
+  let hp = 0; for (let i = 0; i < N; i++) if (prof[i] < prof[hp]) hp = i;
+  const r = pack('mc-1929', [{ kind: 'ai', skill: 0, at: hp - 120, v: 20, spec: F1.cars.get('2010-hrt') }, { kind: 'ai', skill: 1, at: hp - 132, v: 22, spec: F1.cars.get('2026-mercedes') }], 120 * 14, (k, c) => {
+    if (c.view.id !== 2) return;
+    const rr = ((c.st.sampleIndex - hp) % N + N) % N, near = rr <= 15 || rr >= N - 20;
+    if (near && c.ai.state.mode === 'overtake') throw new Error('attacking in the hairpin at sample ' + c.st.sampleIndex);
+  });
+  assert.strictEqual(r.touches, 0, 'contact');
+});
+
+test('F1.AI.warmUp: every track, the real drivers drive exactly as without it (G.pitLoss from the first real driver)', () => {
+  // two copies of the same track: one warmed up first, one not; the same drivers on both must drive identically
+  const td = global.F1_TRACKS.find(x => x.id === 'gb-1948');
+  const tA = F1.buildTrack(td), tB = F1.buildTrack(td), lA = F1.buildRaceLine(tA), lB = F1.buildRaceLine(tB);
+  const w = AI.warmUp(tB, lB);
+  assert(w && w.pitStops === 2 && w.calls > 10000, JSON.stringify(w));
+  assert.deepStrictEqual(AI.warmUp(tB, lB), { steps: 0, calls: 0 }, 'a second call on the same track is free');
+  function race(t, l) {
+    const ds = [0, 1, 2].map(i => { const car = F1.createCar(F1.REF_SPEC, { random: AI.makeRandom(i + 1) }); return { car, st: car.state, ai: F1.createAIDriver({ track: t, raceLine: l, car, skill: [0.2, 0.6, 0.95][i], seed: 40 + i, id: i + 1, slot: i }) }; });
+    ds.forEach((d, i) => { AI.placeOnGrid(d.car, t, i); d.ai.reset(); });
+    const views = ds.map((d, i) => view(i + 1, d.st)), ctx = context({ phase: 'race', laps: 5, wear: 5 }), hit = AI.createContacts(), trace = [];
+    const ent = ds.map(d => ({ state: d.st, car: d.car, solid: true }));
+    for (let k = 0; k < 120 * 30; k++) {
+      ds.forEach((d, i) => refresh(views[i], d.st));
+      ds.forEach(d => { const inp = d.ai.think(STEP, views, ctx); d.car.update(STEP, inp, t); });
+      hit(ent, STEP);
+      if (k % 60 === 0) trace.push(ds.map(d => d.st.x.toFixed(6) + ',' + d.st.z.toFixed(6)).join(';'));
+    }
+    return trace.join('|');
+  }
+  assert.strictEqual(race(tB, lB), race(tA, lA), 'the warm-up changed how the drivers drive');
+  assert.strictEqual(AI.prepare(tB, lB).pitLoss, AI.prepare(tA, lA).pitLoss, 'pit loss');
 });
 
 console.log(failed ? '\n' + failed + ' test(s) FAILED' : '\nall ai tests passed');

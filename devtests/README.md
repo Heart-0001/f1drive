@@ -196,6 +196,7 @@ notice them.
 | `npx electron devtests/gp-e2e/bench.js` | N offscreen windows alone (no room), each driving Monaco on the autopilot at another pace: frame rate per window with N windows rendering, lap times against the node simulation, recovery when thrown off. 28 checks. Exit code. Env `WINDOWS` (4, 1..6), `PACES=1,0.93,0.82,0.6`, `LAPS` (1), `TRACK` (mc-1929), `FPS` (60), `UPSET=1`, `PATCH`. | 2.5 min |
 | `node devtests/gp-e2e/ap-sim.js [laps\|recover\|park\|follow\|race] [track id]` | The autopilot against the real car physics, racing line, lap counter and collisions in node: pace x controller rate, six kinds of upset, parking / lapping, following, the timeline of both `online.js` races. Exit code. | 0.5 s |
 | `node devtests/gp-e2e/make-patched.js` | Writes the mutants into `mutants/`: `ui.lap-text.js` (the "+n 圈" text), `session.timeout60.js` (60 s race close), `main.go-clock.js` (the online race clock started when the lights-out frame runs instead of at its timestamp). | < 1 s |
+| `npx electron devtests/gp-e2e/bots.js` | The COMPUTER DRIVERS (v7) end to end; our car is driven by a computer driver of its own through the fake controller (`bots-page.js`), so it races the bots. Time-warped: `monza` / `monaco` (15 bots 混合 set in the 大獎賽 tab, ×2 wear, Q 1 / R 3: the field, the boxes, qualifying as ghosts with our lap = ground truth, the grid by the times, the start without a pile-up, overtakes, our own stop at Monza (X for the hards, B for the limiter), the order by strength (Spearman), results with AI tags), `panel` (15 -> 6 -> 傳奇 -> 15 -> 0 while on the track), `ram` (we stop on the line out of the Roggia for 45 s with 15 bots lapping: they go round, nobody hits us; then we run into a bot: both feel it, the pad rumbles, it drives on), `pits` (stalled 12 s on pole, then through the field; every bot and we told to stop on lap 2: the lane full, own boxes, no speeding, no contact on the pit asphalt), `blue` (a rookie parked a lap down at Monaco gives way to the cars a lap up), `suzuka` (a 1-lap race over and under the bridge: no jump, no void lap). Real time: `room` (host + guest + 6 bots on Monaco, Q 1 / R 2: positions and standings the same on both, every bot lap accepted, the host leaving takes the bots), `host` (dedicated server: the host leaves mid-race, his bots go, the race closes, the guest is host), `perf` (race start with 15 bots at Monaco and Spa: 60 fps, main thread p95 ~2 ms). 193 checks, screenshots `out-bots/` (read them). Exit code (2 = 40-minute watchdog). Env `ONLY=<parts>`, `PORT` (24893), `PORT2` (24894), `FRAME_MS`, `VERBOSE`, `WATCH=<bot id>` (part ram: that bot's every think() for 4 s), `PATCH`. | 7.5 min |
 
 Shared files: `lib.js` (windows, checks, `PATCH`), `page.js` (runs in the page for `online.js`, `start-clock.js` and
 `bench.js`: fake controller, programmes, recorders, DOM readers), `autopilot.js` (the driver, pure logic, used by the
@@ -206,10 +207,20 @@ was called `solo-gp.js` (page `solo-gp-page.js`, output `out-solo-gp/`) and `ben
 opt-in `ap.gripPace`) and `solo-v6-page.js` (battery / tyre / service recorders, the steer-only A/B driver). For
 `online-v6.js`: `online-v6-page.js` (ERS on RB, the pit stop through LB / Back, recorders: ERS, pit lane, service, frame
 cost, server error / welcome messages, livery colours, light curtains on screen) and `pitplan.js` (the pit-stop driver,
-pure logic). Every harness here mutes its windows through `devtests/electron-userdata.js` (`SOUND=1` would make one
+pure logic). For `bots.js`: `bots-page.js` (`__bots`: our computer driver through the fake controller, warped or real
+time; programmes hold / holdAt / holdAfterGo / ram / stop / tap; recorders: contacts by wrapping `F1.resolveCarCollisions`
+(its helpers such as `.overlap` copied onto the wrapper - js/ai.js needs them), stuck bots, overtakes, the pit lane, the
+field; `watch(id, s)`). Every harness here mutes its windows through `devtests/electron-userdata.js` (`SOUND=1` would make one
 audible: do not set it while somebody is at the PC). `silence.js` proves it from inside (every window `isAudioMuted`,
 never `isCurrentlyAudible`) and outside: `mixer-watch.ps1` reads the Windows volume mixer's per-session peak meters
 (read-only; `powershell -NoProfile -ExecutionPolicy Bypass -File devtests/gp-e2e/mixer-watch.ps1 -Seconds 20` by hand).
+
+## bots-test — the computer drivers in `js/main.js` (v7)
+
+| Run | Checks | Time |
+| --- | --- | --- |
+| `node devtests/bots-test/node-race.js [track=it-1922] [bots=15] [skill=mixed] [q=1] [r=2]` | The real `js/main.js` in node with `js/ai.js` (stubs as `test/main.test.js`); our car driven by its own computer driver through a fake controller, frames at 1/120 s: the lineup (real names, the season's cars, our teammate in the other seat), the grid boxes, free practice, a whole offline Grand Prix (grid by times, lights, race, results, Spearman vs skill), a count / skill change, another track, count 0. 35 checks. Exit code. | 30 s |
+| `npx electron devtests/bots-test/game.js` | The real game, muted. `ONLY=ui,perf,gp,room`; `PORT` (24840); `PERF_S` (20); `TRACKS` (mc-1929,be-1925). The panel and the remembered setting, models / badges / minimap / mirrors, fps and frame cost with 15 vs 0 bots, a real-time solo Grand Prix with 15 bots and AI tags in the HUD and results, a room (the host's 4 bots seen by the guest, a 1-lap online race with identical results and every bot lap accepted, the host leaving). 72 checks, screenshots `bots-test/out/`. Exit code. | 6 min |
 
 ## v6-smoke — the v6 glue in `js/main.js` (+ `electron-main.js`), in the real game
 

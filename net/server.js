@@ -3,7 +3,8 @@
 //   - dedicated server:  node net/server.js [port] [password]
 // Thin relay: player list (with each player's car), current track, the room's season year, who the host is,
 // 20 Hz batched car-state snapshots, and the Grand Prix session (net/session.js holds the rules; this file
-// owns the clock and the wire).
+// owns the clock and the wire). Computer drivers ("bots") are players the host's game simulates: the server
+// gives them ids / slots and treats what their owner sends for them like a player's own (see BOT_LEVELS).
 // It is reachable from the internet, so every inbound message is size-limited, parsed defensively,
 // validated and rate-limited; a bad client can never throw past handleMessage(), and nothing a client
 // sends makes the server broadcast more than a bounded number of messages per second.
@@ -71,6 +72,22 @@ const TRACK_MIN_MS = 1000;         // track changes: one right away, then the ho
                                    //   (every client rebuilds the whole track for each one)
 const YEAR_MIN_MS = 1000;          // room year changes, the same way (every client re-resolves its car and racing line)
 const COLOURS = ['#ff7a14', '#e10600', '#1e6bff', '#19c8e6', '#35d07f', '#ffd21e', '#c04bff', '#f2f4f7'];
+// Computer drivers ("bots"). The HOST's game simulates them (js/ai.js); the server only knows them as players that
+// connection owns: it gives them ids and room slots, keeps them in the roster and the Grand Prix session, takes their
+// states / laps / lap times / impact reports from their owner's connection only, under the same checks as a human's,
+// and relays them to everybody like a human's. Strength levels as js/ai.js F1.AI.LEVELS (skill 0..1), plus 'mixed'.
+// Wire (protocol 1, additive: an older client sees bots as ordinary players):
+//   client -> server  bots {n, skill?, list?: [{name?, car?, colour?, skill?}]}   host, free practice: his field
+//                     bs {k, c, b: [[id, x, y, z, heading, pitch, roll, speed, steer, g?], ...]}   his bots' states
+//                     gl {..., id} / lap {..., id} / hit {..., from}   a lap / lap times / an impact of one of his bots
+//   server -> client  roster rows of bots: {..., bot: true, skill, owner, bi}; welcome / players: bots {n, skill}
+//                     snap rows and session rows as a player's (session rows: bot: true); glno {why, id};
+//                     hit {from, i, bot} to the owner when one of his bots was hit
+// The owner leaving takes his bots (a running session they race in ends); a human joining a full room in free
+// practice takes the newest bot's seat.
+const BOT_LEVELS = { rookie: 0, amateur: 0.35, pro: 0.7, legend: 1, mixed: null };
+const BOT_LEVEL_DEFAULT = 'pro';
+const BOT_RATE = 4;                // messages / s more for a connection per bot it owns (their laps, lap times, impacts)
 
 function isNum(v) { return typeof v === 'number' && v === v && v !== Infinity && v !== -Infinity; }
 function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
@@ -107,6 +124,12 @@ function cleanCarId(v) {                 // a CarSpec id ('2024-ferrari'); null 
 }
 function cleanLap(v) {
   return isNum(v) && v > 1 && v < 36000 ? round(v, 1000) : null;
+}
+function cleanLevel(v) {                 // a bot strength level id, or null
+  return typeof v === 'string' && Object.prototype.hasOwnProperty.call(BOT_LEVELS, v) ? v : null;
+}
+function cleanSkill(v) {                 // one bot's skill 0..1 (3 decimals), or null
+  return isNum(v) ? round(clamp(v, 0, 1), 1000) : null;
 }
 // A room password as it is compared (js/net.js sends it the same way): NFC, trimmed, at most PW_MAX
 // characters; '' = none.
@@ -201,7 +224,12 @@ function createServer(opts) {
       wss = new WebSocketServer({ server: httpServer, maxPayload: MAX_PAYLOAD, perMessageDeflate: false, clientTracking: true });
     } catch (err) { reject(err); return; }
 
-    const players = new Map();   // id -> player (said hello)
+    const players = new Map();   // id -> player (said hello): the humans, each with a connection
+    // id -> computer driver: { bot: true, owner (the id of the player whose game simulates it), bi (its index in the
+    // owner's list), name, colour, car, skill, slot, ... and the same driving / impact bookkeeping as a player }.
+    // Ids come from the same counter as the players', room slots from the same pool; humans + bots <= maxPlayers.
+    const bots = new Map();
+    let botLevel = BOT_LEVEL_DEFAULT;            // the room's strength setting (shown to everybody; the host's word)
     const perIp = new Map();
     const pwFails = new Map();   // address -> { n, t }: wrong room passwords since mono() t
     let nextId = 1, joinCounter = 0;
@@ -232,7 +260,26 @@ function createServer(opts) {
       players.forEach(function (p) {
         list.push({ id: p.id, name: p.name, colour: p.colour, car: p.car, slot: p.slot, last: p.last, best: p.best });
       });
+      // a bot's row has the same fields plus bot: true, its skill (0..1 or null), its owner and its index in his list
+      bots.forEach(function (b) {
+        list.push({ id: b.id, name: b.name, colour: b.colour, car: b.car, slot: b.slot, last: b.last, best: b.best,
+                    bot: true, skill: b.skill, owner: b.owner, bi: b.bi });
+      });
       list.sort(function (a, b) { return a.slot - b.slot; });
+      return list;
+    }
+    function botInfo() { return { n: bots.size, skill: botLevel }; }
+    function entity(id) { return players.get(id) || bots.get(id) || null; }
+    function ownerOf(e) { return e.bot ? e.owner : e.id; }
+    // the bot `id` when it is one of player p's, else null
+    function ownBot(p, id) {
+      const b = isNum(id) ? bots.get(id) : null;
+      return b && b.owner === p.id ? b : null;
+    }
+    function botsOf(id) {
+      const list = [];
+      bots.forEach(function (b) { if (b.owner === id) list.push(b); });
+      list.sort(function (a, b) { return a.bi - b.bi; });
       return list;
     }
     function gpMessage() { return { t: 'gp', now: clock(), s: session.snapshot() }; }
@@ -244,7 +291,7 @@ function createServer(opts) {
     // intermediate one.
     function flushRoster() {
       rosterAt = mono(); rosterDirty = false;
-      broadcast({ t: 'players', host: hostId, year: year, players: roster() });
+      broadcast({ t: 'players', host: hostId, year: year, bots: botInfo(), players: roster() });
     }
     function flushGp() {
       gpAt = mono(); gpDirty = false;
@@ -269,7 +316,9 @@ function createServer(opts) {
     function setTrack(id) {
       trackAt = mono(); trackNext = null;
       trackId = id; trackSeq++;
-      players.forEach(function (q) { q.state = null; q.fresh = false; q.last = null; q.best = null; q.trail.length = 0; });
+      const clear = function (q) { q.state = null; q.fresh = false; q.last = null; q.best = null; q.trail.length = 0; };
+      players.forEach(clear);
+      bots.forEach(clear);
       // a new track ends a Grand Prix in progress; everybody hears that before they load the track
       if (session.phase !== 'free') {
         while (session.phase !== 'free') session.end();
@@ -309,9 +358,71 @@ function createServer(opts) {
     function freeSlot() {
       const used = new Set();
       players.forEach(function (p) { used.add(p.slot); });
+      bots.forEach(function (b) { used.add(b.slot); });
       let s = 0;
       while (used.has(s)) s++;
       return s;
+    }
+
+    /* ---------- computer drivers ---------- */
+
+    function forgetHits(id) {                       // nobody owes id an impact budget any more
+      players.forEach(function (q) { q.hitB.delete(id); });
+      bots.forEach(function (q) { q.hitB.delete(id); });
+    }
+    function addBot(owner, bi, e, now) {
+      const id = nextId++;
+      const b = {
+        id: id, bot: true, owner: owner.id, bi: bi, order: joinCounter++, slot: freeSlot(),
+        name: cleanName(e.name, 'AI ' + (bi + 1)),
+        colour: cleanColour(e.colour, COLOURS[id % COLOURS.length]),
+        car: cleanCarId(e.car) || '',
+        skill: cleanSkill(e.skill) !== null ? cleanSkill(e.skill) : BOT_LEVELS[botLevel],
+        state: null, ct: 0, fresh: false, last: null, best: null, hitT: -1e9,
+        sAt: now, budget: 0, dist: 0, live: 0, dKey: '', jump: false, sT: -1e9, trail: [], hitB: new Map()
+      };
+      bots.set(id, b);
+      owner.nBots++;
+      session.addPlayer(id, b.name, now, { bot: true, owner: owner.id });
+      return b;
+    }
+    // (no 'gone' for a bot: the roster that follows says it; a host changing his field must not multiply traffic)
+    function removeBot(b, now) {
+      if (bots.get(b.id) !== b) return;
+      bots.delete(b.id);
+      const o = players.get(b.owner);
+      if (o) o.nBots = Math.max(0, o.nBots - 1);
+      forgetHits(b.id);
+      session.removePlayer(b.id, now);
+    }
+    // The host's field: n bots, entry i of list naming bot i (name, car, colour, skill; anything missing or not
+    // valid gets a default). Bots 0..n-1 that exist keep their ids and slots (they are updated in place), the rest
+    // are removed or added. -> true when anything changed.
+    function setBots(owner, n, list, level, now) {
+      const mine = botsOf(owner.id);
+      let changed = level !== botLevel;
+      botLevel = level;
+      for (let i = 0; i < mine.length && i < n; i++) {
+        const b = mine[i], e = list[i] && typeof list[i] === 'object' ? list[i] : {};
+        const name = cleanName(e.name, b.name), colour = cleanColour(e.colour, b.colour);
+        const car = cleanCarId(e.car) || b.car, skill = cleanSkill(e.skill) !== null ? cleanSkill(e.skill) : b.skill;
+        if (name === b.name && colour === b.colour && car === b.car && skill === b.skill) continue;
+        b.name = name; b.colour = colour; b.car = car; b.skill = skill;
+        session.rename(b.id, name);
+        changed = true;
+      }
+      for (let i = mine.length - 1; i >= n; i--) { removeBot(mine[i], now); changed = true; }
+      for (let i = mine.length; i < n; i++) {
+        addBot(owner, i, list[i] && typeof list[i] === 'object' ? list[i] : {}, now);
+        changed = true;
+      }
+      return changed;
+    }
+    // The newest bot (the last of its owner's list), the one a human joining a full room replaces.
+    function newestBot() {
+      let best = null;
+      bots.forEach(function (b) { if (!best || b.bi > best.bi || (b.bi === best.bi && b.id > best.id)) best = b; });
+      return best;
     }
     function pickHost() {
       if (hostToken) return;                     // in-game server: only the token holder is ever host
@@ -328,11 +439,23 @@ function createServer(opts) {
       ws._player = null;
       log('leave #' + p.id + ' "' + p.name + '" (' + players.size + '/' + maxPlayers + ')');
       if (closed) return;
-      players.forEach(function (q) { q.hitB.delete(p.id); });
+      forgetHits(p.id);
       if (p.id === hostId) { hostId = 0; pickHost(); }
       const now = clock();
       gpSync(now);
       session.removePlayer(p.id, now);
+      // His bots go with him (nobody simulates them any more). If they were in a running session it ends cleanly:
+      // qualifying / grid -> free practice, the race -> the results as they stand (the bots DNF); a classification
+      // that is already final stays. (Ownership could pass to the next host one day: his game would rebuild them.)
+      const mine = botsOf(p.id);
+      if (mine.length) {
+        mine.forEach(function (b) { removeBot(b, now); });
+        if (session.phase === 'quali' || session.phase === 'grid' || session.phase === 'race') {
+          session.end();
+          log('gp    the bots\' owner left -> ' + session.phase);
+        }
+        log('bots  ' + mine.length + ' of #' + p.id + ' removed');
+      }
       broadcast({ t: 'gone', id: p.id });
       sendRoster();
       sendGp();
@@ -438,11 +561,19 @@ function createServer(opts) {
       if (m.v !== PROTOCOL) { reject1(ws, 'version'); return; }
       const pw = passwordError(ws, m);
       if (pw) { reject1(ws, pw); return; }
-      if (players.size >= maxPlayers) { reject1(ws, 'full'); return; }
-      const id = nextId++;
       const now = clock();
+      if (players.size + bots.size >= maxPlayers) {
+        // a human goes before a computer driver: in free practice the newest bot makes room (its owner's game hears
+        // it from the roster); while a session is on the field is fixed
+        gpSync(now);
+        const b = players.size < maxPlayers && session.phase === 'free' ? newestBot() : null;
+        if (!b) { reject1(ws, 'full'); return; }
+        removeBot(b, now);
+        log('bots  #' + b.id + ' "' + b.name + '" makes room');
+      }
+      const id = nextId++;
       const p = {
-        id: id, ws: ws, order: joinCounter++, slot: freeSlot(),
+        id: id, ws: ws, order: joinCounter++, slot: freeSlot(), nBots: 0,
         name: cleanName(m.name, 'Player ' + id),
         colour: cleanColour(m.colour, COLOURS[id % COLOURS.length]),
         car: cleanCarId(m.car) || '',              // '' = not chosen; whatever he announces counts, even mid-session
@@ -459,7 +590,8 @@ function createServer(opts) {
       } else if (!hostId) hostId = id;
       gpSync(now);
       session.addPlayer(id, p.name, now);
-      send(ws, { t: 'welcome', v: PROTOCOL, id: id, host: hostId, track: trackId, seq: trackSeq, year: year, players: roster(), now: now });
+      send(ws, { t: 'welcome', v: PROTOCOL, id: id, host: hostId, track: trackId, seq: trackSeq, year: year, bots: botInfo(),
+                 players: roster(), now: now });
       sendRoster();
       if (!sendGp()) send(ws, gpMessage());        // the newcomer never waits for the session state
       log('join  #' + id + ' "' + p.name + '" (' + players.size + '/' + maxPlayers + ')');
@@ -467,11 +599,13 @@ function createServer(opts) {
 
     function handleMessage(ws, data, isBinary) {
       if (ws._bye) return;
-      // rate limit (token bucket); frames we have no use for count too
+      // rate limit (token bucket); frames we have no use for count too. A connection that simulates bots sends
+      // their laps, lap times and impact reports as well: BOT_RATE more per bot (none of it is broadcast as such).
       const t = mono();
       ws._seen = t;                                // (anything at all keeps a player from being dropped as idle)
+      const nb = ws._player ? ws._player.nBots : 0;
       if (t > ws._tokenT) {
-        ws._tokens = Math.min(RATE_BURST, ws._tokens + (t - ws._tokenT) * RATE_PER_SEC / 1000);
+        ws._tokens = Math.min(RATE_BURST + 2 * BOT_RATE * nb, ws._tokens + (t - ws._tokenT) * (RATE_PER_SEC + BOT_RATE * nb) / 1000);
         ws._tokenT = t;
       }
       if (ws._tokens < 1) {
@@ -490,20 +624,56 @@ function createServer(opts) {
       if (!p) return;                              // everything else needs a hello first
       const now = clock();
 
+      // A validated state of car e (a player's own, or one of his bots) arrived at mono() t.
+      const applyState = function (e, st, c, g) {
+        driven(e, st, now);
+        e.state = st; e.ct = Math.round(clamp(c, 0, 1e13)); e.fresh = true; e.sT = t;
+        // where it is and when that arrived, for its motion (see motion()); a reset starts it again
+        if (e.jump) e.trail.length = 0;
+        e.trail.push([st[0], st[2], t]);
+        if (e.trail.length > HIT_KEEP) e.trail.shift();
+        // race progress rides along; no further ahead of the laps counted than the path driven allows
+        if (isNum(g)) session.progress(e.id, g, e.dist);
+      };
+      // The car a lap / lap time / impact report is about: his own (no id, or his id), or one of his bots; null when
+      // the id names anything else (nobody may speak for somebody else's car).
+      const subject = function (id) { return id === undefined || id === p.id ? p : ownBot(p, id); };
+
       switch (m.t) {
         case 's': {                                // car state
           if (m.k !== trackSeq) return;            // state from before the last track change
           const st = cleanState(m.s);
           if (!st || !isNum(m.c)) return;
           gpSync(now);                             // (driving after lights out is the race's, tick or no tick yet)
-          driven(p, st, now);
-          p.state = st; p.ct = Math.round(clamp(m.c, 0, 1e13)); p.fresh = true; p.sT = t;
-          // where he is and when that arrived, for his motion (see motion()); a reset starts it again
-          if (p.jump) p.trail.length = 0;
-          p.trail.push([st[0], st[2], t]);
-          if (p.trail.length > HIT_KEEP) p.trail.shift();
-          // race progress rides along; no further ahead of the laps counted than the path driven allows
-          if (isNum(m.g)) session.progress(p.id, m.g, p.dist);
+          applyState(p, st, m.c, m.g);
+          break;
+        }
+        case 'bs': {                               // the states of his bots: b = [[id, x, y, z, heading, pitch, roll, speed, steer, g?], ...]
+          if (m.k !== trackSeq || !isNum(m.c) || !Array.isArray(m.b) || !p.nBots) return;
+          gpSync(now);
+          const seen = new Set();
+          for (let i = 0; i < m.b.length && i < MAX_PLAYERS; i++) {
+            const row = m.b[i];
+            if (!Array.isArray(row) || (row.length !== 9 && row.length !== 10)) continue;
+            const b = ownBot(p, row[0]);
+            if (!b || seen.has(b.id)) continue;    // somebody else's car, or the same bot twice in one message
+            const st = cleanState(row.slice(1, 9));
+            if (!st) continue;
+            seen.add(b.id);
+            applyState(b, st, m.c, row[9]);
+          }
+          break;
+        }
+        case 'bots': {                             // host, free practice only: his computer drivers
+          if (p.id !== hostId || session.phase !== 'free' || !isNum(m.n) || m.n < 0) return;
+          // as many as the room has seats for next to the humans (and anybody else's bots)
+          const n = Math.max(0, Math.min(Math.floor(m.n), maxPlayers - players.size - (bots.size - p.nBots)));
+          const level = cleanLevel(m.skill) || botLevel;               // a level that is not one keeps the room's
+          if (setBots(p, n, Array.isArray(m.list) ? m.list : [], level, now)) {
+            log('bots  ' + bots.size + ' (' + botLevel + ')');
+            sendRoster();
+            sendGp();
+          }
           break;
         }
         case 'ping': {                             // clock sync for the start lights
@@ -530,44 +700,52 @@ function createServer(opts) {
           if (changed) { log('gp    ' + m.a + ' -> ' + session.phase); sendGp(); }
           break;
         }
-        case 'gl': {                               // a lap completed in qualifying / the race
+        case 'gl': {                               // a lap completed in qualifying / the race (id: one of his bots)
           // a lap of an earlier track or an earlier session is not this session's business: no answer
           if (m.k !== trackSeq || m.sid !== session.sid) return;
+          const r = subject(m.id);
+          if (!r) return;
           gpSync(now);
-          driveKey(p);                             // (no state of his in this phase yet: nothing driven)
-          // the lap must be backed by the path his states covered since his previous lap (see driven());
-          // m.at = his estimate of the session clock when he crossed the line (race time)
-          const why = session.lap(p.id, m.time, now, { dist: p.dist, live: p.live / 1000, at: m.at });
-          if (why) send(ws, { t: 'glno', why: why });
-          else { p.dist = 0; p.live = 0; sendGp(); }
+          driveKey(r);                             // (no state of its in this phase yet: nothing driven)
+          // the lap must be backed by the path its states covered since its previous lap (see driven());
+          // m.at = the sender's estimate of the session clock when the car crossed the line (race time)
+          const why = session.lap(r.id, m.time, now, { dist: r.dist, live: r.live / 1000, at: m.at });
+          if (why) send(ws, r === p ? { t: 'glno', why: why } : { t: 'glno', why: why, id: r.id });
+          else { r.dist = 0; r.live = 0; sendGp(); }
           break;
         }
-        case 'hit': {                              // "my car just hit yours": relayed to that player only
+        case 'hit': {                              // "my car just hit yours": relayed to that car's player only
           if (m.k !== trackSeq || !isNum(m.to) || !Array.isArray(m.i) || m.i.length !== 2) return;
           if (!isNum(m.i[0]) || !isNum(m.i[1])) return;
-          const target = players.get(m.to);
-          if (!target || target === p || t - p.hitT < HIT_MIN_MS) return;
-          // both cars on this track with a recent position, the reporter's one he drove to (not a reset) after
-          // positions that show his motion, near each other, and solid for each other (in a Grand Prix qualifying
+          // the reporting car: his own, or (from) one of his bots
+          const r = subject(m.from);
+          const target = entity(m.to);
+          // his game settles contacts among its own cars (his car and his bots) itself
+          if (!r || !target || ownerOf(target) === p.id || t - r.hitT < HIT_MIN_MS) return;
+          // both cars on this track with a recent position, the reporter's one it drove to (not a reset) after
+          // positions that show its motion, near each other, and solid for each other (in a Grand Prix qualifying
           // cars and spectators are ghosts)
-          const a = p.state, b = target.state;
-          if (!a || !b || p.jump || t - p.sT > HIT_FRESH_MS || t - target.sT > HIT_FRESH_MS) return;
-          const sa = topSpeed(p, t), sb = topSpeed(target, t) || 0;
+          const a = r.state, b = target.state;
+          if (!a || !b || r.jump || t - r.sT > HIT_FRESH_MS || t - target.sT > HIT_FRESH_MS) return;
+          const sa = topSpeed(r, t), sb = topSpeed(target, t) || 0;
           if (sa === null) return;
           const dx = a[0] - b[0], dz = a[2] - b[2], near = HIT_NEAR + (sa + sb) * HIT_LAG_S;
-          if (dx * dx + dz * dz > near * near || !session.solid(p.id, target.id, now)) return;
-          p.hitT = t;
+          if (dx * dx + dz * dz > near * near || !session.solid(r.id, target.id, now)) return;
+          r.hitT = t;
           const mag = Math.sqrt(m.i[0] * m.i[0] + m.i[1] * m.i[1]);
           if (!(mag > 0) || !isNum(mag)) return;
           const ux = m.i[0] / mag, uz = m.i[1] / mag;
           // No more than the two cars can have given each other: the reporter's car must have been closing on
           // the target's along the impulse, at least as fast as the velocity change asked for (a contact gives
-          // each car at most the closing speed), and one player can only hand another so much in a row.
-          const pair = hitBudget(p, target.id, t);
-          const j = Math.min(mag, HIT_MAX, closing(p, target, ux, uz, t) + HIT_SLACK, pair.b);
+          // each car at most the closing speed), and one car can only hand another so much in a row.
+          const pair = hitBudget(r, target.id, t);
+          const j = Math.min(mag, HIT_MAX, closing(r, target, ux, uz, t) + HIT_SLACK, pair.b);
           if (!(j >= HIT_MIN_DV)) return;
           pair.b -= j;
-          send(target.ws, { t: 'hit', from: p.id, i: [round(ux * j, 100), round(uz * j, 100)] });
+          const imp = [round(ux * j, 100), round(uz * j, 100)];
+          // a bot is hit in its owner's game: he is told which of his bots it was
+          const dest = target.bot ? players.get(target.owner) : target;
+          if (dest) send(dest.ws, target.bot ? { t: 'hit', from: r.id, bot: target.id, i: imp } : { t: 'hit', from: r.id, i: imp });
           break;
         }
         case 'track': {
@@ -596,10 +774,12 @@ function createServer(opts) {
           if (session.rename(p.id, name) && session.phase !== 'free') sendGp();
           break;
         }
-        case 'lap': {
+        case 'lap': {                              // lap times for the roster (id: one of his bots)
+          const r = subject(m.id);
+          if (!r) return;
           const last = cleanLap(m.last), best = cleanLap(m.best);
-          if (last === p.last && best === p.best) return;
-          p.last = last; p.best = best;
+          if (last === r.last && best === r.best) return;
+          r.last = last; r.best = best;
           sendRoster();
           break;
         }
@@ -638,15 +818,22 @@ function createServer(opts) {
       }, HELLO_TIMEOUT_MS);
     });
 
+    // Bots ride in the same rows as the players (their owner gets his own back and skips them, as his own car's).
     function snapshot() {
-      if (players.size < 2) { players.forEach(function (p) { p.fresh = false; }); return; }
+      if (players.size < 2) {                      // nobody to tell (a lone host's bots are drawn by his own game)
+        players.forEach(function (p) { p.fresh = false; });
+        bots.forEach(function (b) { b.fresh = false; });
+        return;
+      }
       const list = [];
-      players.forEach(function (p) {
+      const row = function (p) {
         if (!p.fresh || !p.state) return;
         p.fresh = false;
         const s = p.state;
         list.push([p.id, p.ct, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]]);
-      });
+      };
+      players.forEach(row);
+      bots.forEach(row);
       if (list.length) broadcast({ t: 'snap', p: list });
     }
 
@@ -700,7 +887,8 @@ function createServer(opts) {
         port: addr && addr.port ? addr.port : port,
         close: close,
         info: function () {
-          return { players: roster(), host: hostId, track: trackId, seq: trackSeq, year: year, now: clock(), gp: session.snapshot() };
+          return { players: roster(), host: hostId, track: trackId, seq: trackSeq, year: year, bots: botInfo(), now: clock(),
+                   gp: session.snapshot() };
         }
       });
     });

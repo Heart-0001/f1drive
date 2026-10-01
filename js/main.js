@@ -3,7 +3,10 @@
    v6.1: the HUD rear-view mirrors (js/hudmirrors.js, key V), 2026 as the default season;
    v6.2: the covered stretches of js/tunnels.js (Monaco's tunnel: built with the track, the scene lights dimmed inside,
    the reverb of js/audio.js), the cockpit's FOV setting (設定 → 視野), the next set of tyres shown and picked in the
-   大獎賽 tab / the pit strip / the telemetry (a prompt on entering the pit lane), the pit speed limit of the season. */
+   大獎賽 tab / the pit strip / the telemetry (a prompt on entering the pit lane), the pit speed limit of the season;
+   v7: computer drivers (js/ai.js; "computer drivers" below): the 電腦車手 setting of the 大獎賽 tab -> F1.AI.lineup (the
+   season's real drivers in the cars nobody else drives) -> gp.setBots; alone the game simulates the field, in a room the
+   host's game simulates its bots and publishes them (net.sendBotStates, laps, impacts); they are stepped with our car. */
 (function () {
   'use strict';
   var F1 = (window.F1 = window.F1 || {});
@@ -103,6 +106,35 @@
   var eye = { x: 0, y: 0, z: 0 };
   var sharedLast = null, sharedBest = null;
   var knownPlayers = null;                   // id -> name, to announce joins / leaves
+
+  // computer drivers (v7, js/ai.js): alone every car of the field but ours, in a room the ones we host (the host's game
+  // simulates its bots and publishes them; the guests see them as remote cars). See "computer drivers" below.
+  var AI = null;                             // F1.AI, null without js/ai.js (then there are none)
+  var botCfg = { count: 0, skill: 'pro' };   // the 電腦車手 setting of the 大獎賽 tab (ui.getBots / onBots)
+  var botDesc = [];                          // our bots as js/gp.js lists them: [{id, name, colour, car, skill, slot, bi}]
+  var bots = [];                             // their cars on this track, in list order (makeBot)
+  var botById = {};                          // id -> bot
+  var botSent = null;                        // the field last asked for (signature; null: nothing asked yet)
+  var botSeeds = [];                         // per list index: the lineup's seed of that seat (the driver's randomness)
+  var botLine = null;                        // the racing line the bots drive on this track (the first one built for it)
+  var botWarm = null;                        // the track F1.AI.warmUp ran on
+  var botResolve = null;                     // F1.AI.createContacts(): our car and the bots against each other
+  var botEntries = [];                       // its entries: [0] our car, then the bots ({state, car, solid})
+  var selfEntry = { state: null, car: null, solid: true };
+  var views = [];                            // the cars think() sees: ours, the bots, (host) the remote cars
+  var selfView = null;                       // our car's view (F1.AI.createView)
+  var remoteViews = {};                      // remote car id -> its view (host)
+  var viewsDirty = true;                     // views / botEntries must be rebuilt (a car came or went)
+  var botOthers = [], botOtherIds = [];      // host: the remote cars solid for the bots this frame
+  var botRecs = [];                          // one bot's contacts with them (js/collide.js records)
+  var botStates = [];                        // [{id, state, g}] for net.sendBotStates (filled in place)
+  var lastBotHitSend = 0;
+  var botGoFrame = false;                    // the bots' lights went out in the frame being simulated
+  var selfSolid = true;                      // our car takes part in car-to-car contacts (the session's rule), this frame
+  var botTime = 0;                           // s of simulated time (spacing of a bot's R)
+  var botEpoch = 0;                          // bumped by every placement of a bot (a step loop stops after one)
+  var localHit = 0;                          // strongest impact on our car from a bot in this frame (rumble)
+  var botMs = { frames: 0, sum: 0, max: 0, cur: 0 };   // main-thread ms per frame spent on the bots (F1.game.botCost)
 
   var KEYMAP = {
     KeyW: 'up', ArrowUp: 'up',
@@ -252,6 +284,7 @@
     }
     if (net) net.setProfile({ car: car.spec.id });
     pushCars();
+    applyBots();                              // the computer drivers take the cars nobody else drives (that season's)
     return changed;
   }
 
@@ -263,10 +296,34 @@
     var canYear = !session && !guest, canCar = !session;
     var reason = session ? '賽事進行中不能換車' : (guest ? '年份由房主選擇，大家都從這一年的車裡挑。' : '');
     var sel = car && car.spec ? car.spec.id : null;
-    var key = y + '|' + sel + '|' + canYear + '|' + canCar + '|' + reason;
+    var drivers = fieldDrivers(y), dk = drivers ? JSON.stringify(drivers) : '';
+    var key = y + '|' + sel + '|' + canYear + '|' + canCar + '|' + reason + '|' + dk;
     if (key === carsKey) return;
     carsKey = key;
-    ui.setCars({ year: y, cars: cars.list(y), selected: sel, canPickYear: canYear, canPickCar: canCar, seasons: cars.seasons, reason: reason });
+    var v = { year: y, cars: cars.list(y), selected: sel, canPickYear: canYear, canPickCar: canCar, seasons: cars.seasons, reason: reason };
+    if (drivers) v.drivers = drivers;
+    ui.setCars(v);
+  }
+
+  // Who drives which car of season y while there are computer drivers (the 車輛 cards say so): {carId: [{name, bot,
+  // self}]}; null without any (the cards stay as they were).
+  function fieldDrivers(y) {
+    var out = {}, i, n = 0, id;
+    function add(cid, e) { if (cid) { (out[cid] = out[cid] || []).push(e); n++; } }
+    if (net && net.connected) {
+      var ro = net.roster || [], nb = 0;
+      for (i = 0; i < ro.length; i++) if (ro[i].bot) nb++;
+      if (!nb) return null;
+      for (i = 0; i < ro.length; i++) {
+        var r = ro[i], sp = r.isSelf ? (car ? car.spec : null) : cars.resolve(r.car || null, y);
+        add(sp ? sp.id : '', r.isSelf ? { self: true } : { name: r.name, bot: !!r.bot });
+      }
+    } else {
+      if (!botDesc.length) return null;
+      if (car && car.spec) add(car.spec.id, { self: true });
+      for (i = 0; i < botDesc.length; i++) { id = botDesc[i].car; add(id, { name: botDesc[i].name, bot: true }); }
+    }
+    return n ? out : null;
   }
 
   // 年份 picked in the menu. Alone: at once. The host: through the server (the answer is the room's 'year' event).
@@ -335,9 +392,11 @@
     return car.state.sampleIndex;
   }
 
-  // Where a freshly loaded track (and qualifying) puts us: our slot in a room (join order), the start position alone.
+  // Where a freshly loaded track (and qualifying) puts us: our slot in a room (join order), the start position alone -
+  // with computer drivers, as in a room: grid box 1 (slot 0; theirs are 1..15).
   function placeStart() {
-    return net && net.connected ? placeOnGrid(net.slot || 0) : placeAtStart();
+    if (net && net.connected) return placeOnGrid(net.slot || 0);
+    return botDesc.length && aiOn() ? placeOnGrid(0) : placeAtStart();
   }
 
   // The tyre wear multiplier: the Grand Prix option from the grid on (the race), normal in qualifying and free
@@ -378,6 +437,8 @@
 
   function selectTrack(data) {
     try {
+      clearBots();                            // (their cars belong to the old track; rebuilt below)
+      botLine = null;
       if (gp) gp.trackChanged();              // another track ends a Grand Prix (alone; in a room the server does it)
       if (raceLine) {
         scene.remove(raceLine.group);
@@ -427,6 +488,8 @@
         }
       }
       buildLine();
+      botLine = raceLine;                     // the bots keep this one when ours is rebuilt for another car (js/ai.js
+                                              //   caches its geometry per line; only the geometry is used)
 
       if (!cockpit) {
         cockpit = F1.createCockpit(camera);
@@ -441,6 +504,7 @@
       freshStart();
       sharedLast = null; sharedBest = null;
       clearInput();
+      syncBots();                             // the computer drivers' cars on this track, in their room slots
 
       ui.setTrack(data);
       cockpit.update(car.state, 0);
@@ -547,6 +611,7 @@
     remoteModels = {}; remoteCars = {}; soft = {}; ghostNow = {};
     others.length = 0; otherIds.length = 0; mapOthers.length = 0; audioOthers.length = 0;
     impacts = {}; netHit = 0;
+    remoteViews = {}; botOthers.length = 0; botOtherIds.length = 0; viewsDirty = true;
   }
 
   // Our car is on the pit lane's asphalt (lane, boxes, tapers): every other car is a ghost to it.
@@ -584,14 +649,16 @@
   // Interpolate the remote cars for this frame; fills `others` (collision), `mapOthers` (minimap), `audioOthers`.
   function updateRemotes(dt) {
     others.length = 0; otherIds.length = 0;
+    botOthers.length = 0; botOtherIds.length = 0;
     var m = 0, a = 0, id;
     if (!inRoomTrack() || typeof F1.createCarModel !== 'function') {
       for (id in remoteModels) { clearRemoteModels(); break; }
+      for (id in remoteViews) { remoteViews = {}; viewsDirty = true; break; }
       mapOthers.length = 0; audioOthers.length = 0;
       return;
     }
     net.update();
-    var list = net.players, seen = {}, year = activeYear(), inPit = ownInPit();
+    var list = net.players, seen = {}, year = activeYear(), inPit = ownInPit(), hosting = bots.length > 0;
     eye.x = car.state.x; eye.y = (car.state.y || 0) + 0.8; eye.z = car.state.z;
     for (var i = 0; i < list.length; i++) {
       var p = list[i];
@@ -602,7 +669,9 @@
         scene.add(model.group);
       }
       var rc = remoteCar(p, model, year);
-      model.setName(p.name);
+      model.setName(p.name, p.bot ? 'AI' : '');   // (another game's computer driver: an AI badge)
+      // our bots see the remote cars too (we simulate them on our side): their views, and the solid ones to collide with
+      if (hosting) remoteForBots(p);
       // Grand Prix ghosts (qualifying, spectators) and cars in the pit lane (ours or theirs): translucent, no
       // collisions. A car that stops being one only turns solid once it is clear of ours, so nothing jumps when two
       // cars overlap at that moment.
@@ -622,8 +691,9 @@
         others.push(p.state);
         otherIds.push(p.id);
       }
-      var o = mapOthers[m] || (mapOthers[m] = { x: 0, z: 0, colour: '' });
+      var o = mapOthers[m] || (mapOthers[m] = { x: 0, z: 0, colour: '', ring: '' });
       o.x = p.state.x; o.z = p.state.z; o.colour = p.colour;
+      o.ring = p.bot && rc.spec ? rc.spec.colour2 || '' : '';   // a computer driver: ringed in its second colour
       m++;
       var s = audioOthers[a] || (audioOthers[a] = { id: 0, x: 0, y: 0, z: 0, heading: 0, speed: 0, spec: null });
       s.id = p.id; s.x = p.state.x; s.y = p.state.y || 0; s.z = p.state.z; s.heading = p.state.heading; s.speed = p.state.speed;
@@ -642,6 +712,7 @@
         delete ghostNow[id];
       }
     }
+    for (id in remoteViews) if (!seen[id] || !hosting) { delete remoteViews[id]; viewsDirty = true; }
   }
 
   // Each game resolves only its own car, and a car that gets hit usually never sees the overlap (the
@@ -723,6 +794,8 @@
       setStatus(net.isHost ? HOST_PICK + passwordNote() : '已加入房間。', 'ok');
       // the host brings his season into the room (the answer is the 'year' event)
       if (net.isHost && net.setYear && isSeason(ownYear()) && net.year !== ownYear()) net.setYear(ownYear());
+      botSent = null;                         // the host brings his computer drivers too (a new room has none)
+      applyBots();
       refreshNetUi();
       pushCars();
     });
@@ -742,6 +815,7 @@
       announce(roster);
       refreshNetUi();
       pushCars();                             // (a new host may pick the year now)
+      applyBots();                            // the host: the humans' cars / seats changed (or we became the host)
     });
     net.on('track', function (id) {
       var data = findTrack(id);
@@ -758,6 +832,7 @@
       refreshNetUi();
     });
     net.on('hit', onRemoteHit);
+    net.on('botHit', onBotHit);
     net.on('disconnected', function (reason) {
       clearRemoteModels();
       knownPlayers = null; netUi.wasHost = undefined; netUi.lockText = '';
@@ -766,6 +841,7 @@
       setStatus(reason || '連線中斷', left ? '' : 'err');
       if (!left && ui.toast) ui.toast((reason || '連線中斷') + '，已回到單人模式', 6000);
       refreshNetUi();
+      botSent = null;                         // our own computer drivers again (as the setting wants them now)
       applyCar();                             // back to our own season
       renderStill();
     });
@@ -829,10 +905,13 @@
   function rowCar(r) {
     if (!cars) return null;
     if (r.isSelf) return car ? car.spec : null;
+    var b = botById[r.id];                    // one of our computer drivers
+    if (b) return b.spec;
     var rc = remoteCars[r.id];
     if (rc && rc.spec) return rc.spec;
     var ro = net && net.roster ? net.roster : [];
     for (var i = 0; i < ro.length; i++) if (ro[i].id === r.id) return cars.resolve(ro[i].car, activeYear());
+    if (r.bot && r.car) return cars.resolve(r.car, activeYear());   // (alone, before a track is loaded)
     return null;
   }
 
@@ -848,8 +927,13 @@
     v.startHint = v.canStart ? '' : (room ? '先幫房間選一條賽道' : '先選一條賽道');
     for (var i = 0; v.rows && i < v.rows.length; i++) {
       var c = rowCar(v.rows[i]);
-      if (c) { v.rows[i].team = c.teamZh || c.team; v.rows[i].colour2 = c.colour; }
+      // (the chip: the car's livery colour; a computer driver's dot is that already: its second colour then)
+      if (c) { v.rows[i].team = c.teamZh || c.team; v.rows[i].colour2 = v.rows[i].bot ? c.colour2 || c.colour : c.colour; }
     }
+    // the 電腦車手 rows: js/gp.js's bots (count, level, seats, whether we may change them) + whether there can be any
+    if (!v.bots || typeof v.bots !== 'object') v.bots = { count: 0, skill: botCfg.skill, max: 15, canEdit: false };
+    v.bots.available = aiOn();
+    v.botList = botListView();
     ui.setGp(v);
     pushCars();                               // parc fermé: the car controls follow the session
   }
@@ -938,7 +1022,562 @@
     gp.on('go', onGpGo);
     gp.on('lapRejected', onLapRejected);
     gp.on('change', pushGp);
+    // computer drivers: ours changed, the session placed / released them, their lights went out
+    gp.on('bots', onBotsList);
+    gp.on('phase', onBotsPhase);
+    gp.on('botsGo', onBotsGo);
     pushGp();
+  }
+
+  /* ---------- computer drivers (js/ai.js) ---------- */
+
+  // Alone the game simulates every computer driver; in a room the host's game simulates its own (the server keeps them as
+  // his players: same rules, same checks) and publishes them, and everybody else sees them as remote cars. Each bot has
+  // its own car (F1.createCar of its team's CarSpec), tyres, pit (js/pit.js, its box = its room slot), lap counter
+  // (js/laps.js) and driver (F1.createAIDriver), and is stepped with our car in the same physics steps, exactly as
+  // devtests/ai-test/sim.js steps a field: think -> car.update -> car against car (ours and every bot, both ways:
+  // F1.AI.createContacts) -> pit -> lap counter -> the lap to the session (gp.botLap).
+
+  function aiOn() {
+    return !!(AI && cars && typeof F1.createAIDriver === 'function' && typeof F1.createPit === 'function' &&
+              typeof F1.createLapCounter === 'function' && typeof F1.buildRaceLine === 'function');
+  }
+
+  // May car `id` touch others now (the session's rule for it: qualifying, the grid before the lights, spectators)?
+  function solidId(id) { return typeof gp.solid === 'function' ? gp.solid(id, id) : !gp.isGhost(id); }
+
+  // Seats for computer drivers: 15 alone; in a room 16 - the humans (the server's rule).
+  function botSeats() {
+    if (!(net && net.connected)) return 15;
+    var h = 0, ro = net.roster || [];
+    for (var i = 0; i < ro.length; i++) if (!ro[i].bot) h++;
+    return Math.max(0, 16 - Math.max(1, h));
+  }
+
+  // The field the setting asks for: F1.AI.lineup over the active season's cars with the humans' cars taken (a human takes
+  // one of his team's two seats, his teammate still races), named after that season's real drivers (F1.cars.drivers).
+  // -> [{name, car, colour, skill, seed}]
+  function wantedField() {
+    if (!aiOn() || !car || !car.spec) return [];
+    var n = Math.min(botCfg.count, botSeats());
+    if (!(n > 0)) return [];
+    var year = activeYear(), taken = [], names = [], i;
+    if (net && net.connected) {
+      var ro = net.roster || [];
+      for (i = 0; i < ro.length; i++) {
+        if (ro[i].bot) continue;
+        var sp = ro[i].isSelf ? car.spec : cars.resolve(ro[i].car || null, year);
+        if (sp) taken.push(sp.id);
+        if (ro[i].name) names.push(ro[i].name);
+      }
+    } else {
+      taken.push(car.spec.id);
+      var p = ui.getProfile ? ui.getProfile() : null;
+      if (p && p.name) names.push(p.name);
+    }
+    var list = AI.lineup({ cars: cars.list(year), taken: taken, count: n, skill: botCfg.skill, seed: year,
+      drivers: typeof cars.drivers === 'function' ? cars.drivers : null, names: names });
+    var out = [];
+    for (i = 0; i < list.length; i++) {
+      var s = cars.get(list[i].car);
+      out.push({ name: list[i].name, car: list[i].car, colour: s ? s.colour : undefined, skill: list[i].skill, seed: list[i].seed });
+    }
+    return out;
+  }
+
+  // Alone, or as the host in free practice: ask for the field the setting wants (gp.setBots: alone at once, in a room
+  // through the server, whose roster answers with ids and slots). Nothing is sent for the field already asked for.
+  function applyBots() {
+    if (!gp || typeof gp.setBots !== 'function' || !aiOn()) return;
+    var room = !!(net && net.connected);
+    if ((room && !net.isHost) || gp.phase !== 'free') return;
+    var list = wantedField(), have = gp.bots().length;
+    var sig = botCfg.skill + '|' + (room ? 'room' : 'solo') + '|' + list.map(function (e) { return e.name + ',' + e.car + ',' + e.skill; }).join(';');
+    if (sig === botSent) return;
+    if (!list.length && !have) { botSent = sig; return; }   // none wanted, none there (the v6 game: nothing to do)
+    var send = [];
+    for (var i = 0; i < list.length; i++) send.push({ name: list[i].name, car: list[i].car, colour: list[i].colour, skill: list[i].skill });
+    botSeeds = list.map(function (e) { return e.seed; });
+    if (gp.setBots(send, botCfg.skill)) botSent = sig;
+  }
+
+  // The 電腦車手 setting changed (the 大獎賽 tab).
+  function onBotsSetting(c) {
+    if (!c || typeof c !== 'object') return;
+    var n = Math.floor(Number(c.count));
+    botCfg.count = n >= 0 ? Math.min(n, 15) : 0;
+    if (typeof c.skill === 'string') botCfg.skill = c.skill;
+    applyBots();
+    pushGp();
+  }
+
+  // js/gp.js: our bots changed (alone: set; in a room: the roster brought them; [] / the offline ones on joining / leaving).
+  function onBotsList(list) {
+    botDesc = Array.isArray(list) ? list : [];
+    syncBots();
+    carsKey = '';
+    pushCars();
+  }
+
+  function botSpec(id) { return cars.get(id) || cars.resolve(id || null, activeYear()); }
+  function botSkill(d) { return typeof d.skill === 'number' && d.skill === d.skill ? d.skill : AI.skillOf(botCfg.skill === 'mixed' ? 'pro' : botCfg.skill); }
+
+  // The bot cars follow botDesc: a bot that went is removed, a new one is made (and placed), one whose car / strength /
+  // name / slot changed is updated where it stands.
+  function syncBots() {
+    if (!track || !botLine || !aiOn() || !botDesc.length) { clearBots(); return; }
+    if (botWarm !== track) {                   // once per track, while it loads: the drivers' code optimised before a race
+      botWarm = track;
+      try { AI.warmUp(track, botLine); } catch (err) { if (window.console) console.error(err); }
+    }
+    var out = [], keep = {}, i, b;
+    for (i = 0; i < botDesc.length; i++) {
+      var d = botDesc[i];
+      if (!d || typeof d.id !== 'number' || keep[d.id]) continue;
+      b = botById[d.id];
+      try {
+        if (b) updateBot(b, d); else b = makeBot(d);
+      } catch (err) {
+        if (window.console) console.error(err);
+        if (b) disposeBot(b);
+        b = null;
+      }
+      if (b) { out.push(b); keep[d.id] = true; }
+    }
+    for (i = 0; i < bots.length; i++) if (!keep[bots[i].id]) disposeBot(bots[i]);
+    bots = out;
+    botById = {};
+    for (i = 0; i < bots.length; i++) botById[bots[i].id] = bots[i];
+    viewsDirty = true;
+  }
+
+  function botLivery(b) {
+    if (!b.model) return;
+    var s = b.spec;
+    if (b.model.setLivery) b.model.setLivery(s.colour, s.colour2, s.colour);
+    if (b.model.setHalo) b.model.setHalo(s.cockpit !== 'modern');   // no halo before 2018, like the cockpit
+    b.model.setName(b.name, 'AI');
+  }
+
+  function makeBot(d) {
+    var spec = botSpec(d.car), skill = botSkill(d);
+    var seed = typeof botSeeds[d.bi] === 'number' ? botSeeds[d.bi] : 7919 * d.id + 13;
+    var c = F1.createCar(spec, { random: AI.makeRandom(seed * 31 + 7) });
+    var b = {
+      id: d.id, bi: d.bi, slot: d.slot, name: d.name, carId: spec.id, spec: spec, skill: skill, seed: seed,
+      car: c, ai: null, pit: F1.createPit({ random: AI.makeRandom(seed + 77) }), lap: null,
+      view: AI.createView(d.id), ctx: AI.createContext(), entry: {},
+      contact: { state: c.state, car: c, solid: true },    // its entry for botResolve
+      pitOpt: { slot: d.slot, limiter: false },
+      model: null, resetAt: -1e9, held: false, limiter: false, paved: false, solid: true, racing: false,
+      sharedLast: null, sharedBest: null, impacts: {}
+    };
+    b.ctx.pit = b.pit.state;
+    b.ai = F1.createAIDriver({ track: track, raceLine: botLine, car: c, skill: skill, seed: seed, id: d.id, slot: d.slot, name: d.name });
+    if (typeof F1.createCarModel === 'function') {
+      b.model = F1.createCarModel(spec.colour, d.name);
+      botLivery(b);
+      scene.add(b.model.group);
+    }
+    placeBotNow(b);
+    return b;
+  }
+
+  function updateBot(b, d) {
+    var spec = botSpec(d.car), skill = botSkill(d);
+    b.bi = d.bi;
+    if (d.slot !== b.slot) {                  // (its box and its grid column in free practice)
+      b.slot = d.slot; b.pitOpt.slot = d.slot;
+      if (b.ai.setSlot) b.ai.setSlot(d.slot);
+    }
+    if (spec.id !== b.carId) {                // another car (the season, or a human took its seat): driven on from here
+      b.spec = spec; b.carId = spec.id;
+      b.car.setSpec(spec);
+      b.ai = F1.createAIDriver({ track: track, raceLine: botLine, car: b.car, skill: skill, seed: b.seed, id: b.id, slot: b.slot, name: d.name });
+      b.ai.reset();
+      b.skill = skill;
+      if (!(b.pit.state.inLane || b.pit.state.visit || b.pit.state.service)) b.pit.reset();   // (the season's pit limit)
+      botLivery(b);
+    } else if (skill !== b.skill) {
+      b.skill = skill;
+      b.ai.setSkill(skill);
+    }
+    if (d.name !== b.name) { b.name = d.name; if (b.model) b.model.setName(b.name, 'AI'); }
+  }
+
+  function disposeBot(b) {
+    b.dead = true;
+    if (b.model) { scene.remove(b.model.group); b.model.dispose(); b.model = null; }
+  }
+
+  function clearBots() {
+    for (var i = 0; i < bots.length; i++) disposeBot(bots[i]);
+    bots = []; botById = {}; viewsDirty = true;
+    // (rebuilt only while there are bots to step: without this the removed bots' views stayed in F1.game.botViews)
+    views.length = 0; botEntries.length = 0;
+  }
+
+  // A new bot, or the field after a session: where the phase puts it (the grid box of its qualifying place on the grid,
+  // else its room slot: grid box slot + 1, free practice / qualifying as in a room).
+  function placeBotNow(b) {
+    var e = gp.entry(b.id, b.entry), s = gp.snapshot;
+    if (gp.phase === 'grid' && e.gridSlot >= 0 && s) placeBot(b, e.gridSlot, b.ai.startCompound(s.r, s.wear), wearRate(), false);
+    else placeBot(b, b.slot, 'M', wearRate(), gp.phase === 'free' ? 2 : 0);
+  }
+
+  // On grid box `slot` (main.js placeOnGrid), stopped: full battery, a new set, no pit visit, a new lap counter (timing
+  // from the next crossing), the driver reset. clear (free practice): a box with a car on it is not used: the car goes
+  // on along the track to the first free spot (F1.AI.resetCar); 1: ours and the remote cars count, 2: the other bots too
+  // (a bot added while the field drives; when the whole field goes back to its boxes the others are on their way there).
+  function placeBot(b, slot, compound, wear, clear) {
+    var idx = AI.placeOnGrid(b.car, track, slot), obst = clear ? placeTaken(b, clear === 2) : null;
+    if (obst) idx = AI.resetCar(b.car, track, idx, obst, b.id);
+    b.car.setBattery(1);
+    if (b.car.tyres) { b.car.tyres.fit(compound); b.car.tyres.setWearRate(wear); }
+    b.pit.reset();
+    b.lap = F1.createLapCounter(track.samples.length, idx);
+    b.lap.reset(idx);
+    b.ai.reset();
+    b.resetAt = -1e9; b.held = false; b.sharedLast = null; b.sharedBest = null; b.impacts = {};
+    botEpoch++;
+  }
+  // Does another car (ours, a remote one, withBots: a placed bot) stand within 7 m of where b was put? -> null, or every
+  // such car as an obstacle for F1.AI.resetCar ({id, x, z, y, speed, sampleIndex, ghost}: it moves b on along the track to
+  // the first spot clear of them). (Rare: a plain list, not the per-step views.)
+  function placeTaken(b, withBots) {
+    var s = b.car.state, list = [], hit = false, i, o;
+    function add(id, st) {
+      var dx = st.x - s.x, dz = st.z - s.z;
+      if (dx * dx + dz * dz < 49) hit = true;
+      list.push({ id: id, x: st.x, z: st.z, y: typeof st.y === 'number' ? st.y : NaN, speed: st.speed || 0,
+                  sampleIndex: typeof st.sampleIndex === 'number' ? st.sampleIndex : -1, ghost: false });
+    }
+    if (car) add(gp.selfId, car.state);
+    for (i = 0; withBots && i < bots.length; i++) { o = bots[i]; if (o !== b && !o.dead && o.lap) add(o.id, o.car.state); }
+    for (i = 0; i < others.length; i++) add(otherIds[i], others[i]);
+    return hit ? list : null;
+  }
+
+  // The views think() gets (and the contact entries), rebuilt when a car came or went: ours, the bots', (host) the
+  // remote cars'. All from F1.AI.createView: one shape, think() stays optimised.
+  function rebuildViews() {
+    viewsDirty = false;
+    views.length = 0; botEntries.length = 0;
+    if (!bots.length) return;
+    if (!selfView) selfView = AI.createView(gp.selfId);
+    if (!botResolve) botResolve = AI.createContacts();
+    views.push(selfView);
+    selfEntry.state = car.state; selfEntry.car = car;
+    botEntries.push(selfEntry);
+    for (var i = 0; i < bots.length; i++) { views.push(bots[i].view); botEntries.push(bots[i].contact); }
+    for (var id in remoteViews) views.push(remoteViews[id]);
+  }
+
+  // Our car's view and the bots' from their states (every step: their places changed).
+  function refreshViews() {
+    if (viewsDirty) rebuildViews();
+    if (!selfView) return;
+    var s = car.state, v = selfView, P = track ? track.pit : null, paved = P && typeof P.paved === 'function', i, b, st;
+    v.id = gp.selfId;
+    v.x = s.x; v.z = s.z; v.y = typeof s.y === 'number' ? s.y : NaN; v.heading = s.heading; v.speed = s.speed;
+    v.sampleIndex = s.sampleIndex; v.d = s.d;
+    v.ghost = !selfSolid || ownInPit() || !!(pit && pit.state.service);
+    v.prog = lap ? lap.progress(s.sampleIndex) : NaN;
+    for (i = 0; i < bots.length; i++) {
+      b = bots[i]; st = b.car.state; v = b.view;
+      b.paved = paved ? !!P.paved(st.sampleIndex, st.d) : false;
+      v.x = st.x; v.z = st.z; v.y = typeof st.y === 'number' ? st.y : NaN; v.heading = st.heading; v.speed = st.speed;
+      v.sampleIndex = st.sampleIndex; v.d = st.d;
+      v.ghost = !b.solid || b.paved || !!b.pit.state.service;
+      v.prog = b.lap ? b.lap.progress(st.sampleIndex) : NaN;
+      v.pace = b.ai.pace;
+    }
+  }
+
+  // A remote car for our bots (updateRemotes, host): its view (located with its height: Suzuka's bridge), and the solid
+  // ones (the session's rule, not on the pit asphalt) for the bots' own side of a contact.
+  function remoteForBots(p) {
+    var v = remoteViews[p.id];
+    if (!v) { v = remoteViews[p.id] = AI.createView(p.id); viewsDirty = true; }
+    var ghost = !p.active || !solidId(p.id) || remoteInPit(p.state);
+    if (p.active) AI.updateView(v, p.state, track);
+    v.ghost = ghost;
+    v.prog = remoteProg(p.id, v.sampleIndex);
+    if (!ghost) { botOthers.push(p.state); botOtherIds.push(p.id); }
+  }
+  // A remote driver's race distance for the bots' blue flags: his laps (the session) + where he is on the lap; before his
+  // first crossing (just after the start) a place past half a lap is the grid behind the line.
+  function remoteProg(id, idx) {
+    var s = gp.snapshot;
+    if (!s || (gp.phase !== 'race' && gp.phase !== 'results') || !track) return NaN;
+    for (var i = 0; i < s.players.length; i++) {
+      var p = s.players[i];
+      if (p.id !== id) continue;
+      var f = (idx | 0) / track.samples.length;
+      if (p.rLaps === 0 && f > 0.5 && gp.sinceGo < 20) f -= 1;
+      return p.rLaps + f;
+    }
+    return NaN;
+  }
+
+  // Once per frame, before the steps: what the session says of every bot (its driver's context) and of our car.
+  function botsFrame() {
+    var t0 = performance.now();
+    if (botMs.cur > 0 || bots.length) {        // (the bots' share of the last frame: F1.game.botCost)
+      botMs.frames++; botMs.sum += botMs.cur; if (botMs.cur > botMs.max) botMs.max = botMs.cur;
+    }
+    botMs.cur = 0;
+    if (viewsDirty) rebuildViews();
+    selfSolid = solidId(gp.selfId);
+    var wear = wearRate();
+    for (var i = 0; i < bots.length; i++) {
+      var b = bots[i], e = gp.entry(b.id, b.entry), c = b.ctx;
+      c.phase = gp.phase;
+      c.locked = e.locked || botGoFrame;     // (the frame of the lights going out too: the lap clock covers it)
+      c.lap = e.lap; c.laps = e.lapTotal; c.done = e.done === true;
+      c.wear = wear; c.pit = b.pit.state;
+      b.solid = solidId(b.id);
+      b.racing = gp.phase === 'race' && e.taking && !e.fin && !e.dnf;
+    }
+    botMs.cur += performance.now() - t0;
+  }
+  function botTimed(fn, a) { var t0 = performance.now(), r = fn(a); botMs.cur += performance.now() - t0; return r; }
+  // -> {frames, mean, max}: main-thread ms per frame on the bots (views, think, their physics, contacts, pit, laps,
+  // models, minimap, sound list, publishing) since the last reset
+  function botCost(reset) {
+    var o = { frames: botMs.frames, mean: botMs.frames ? Math.round(botMs.sum / botMs.frames * 1000) / 1000 : null, max: Math.round(botMs.max * 1000) / 1000 };
+    if (reset) { botMs.frames = 0; botMs.sum = 0; botMs.max = 0; }
+    return o;
+  }
+
+  // Our car stands still this frame (the grid before the lights): the bots think (a locked driver arms its start) and
+  // stand too.
+  function botsHeld() {
+    refreshViews();
+    for (var i = 0; i < bots.length; i++) {
+      var b = bots[i], st = b.car.state;
+      b.ctx.prog = b.view.prog;
+      b.ai.think(STEP, views, b.ctx);
+      if (b.ctx.locked) { st.speed = 0; st.hit = 0; }
+    }
+  }
+
+  // One physics step of the field, right after our car's (devtests/ai-test/sim.js step()). -> true when a lap moved
+  // the session on and the field was placed again (offline: the last qualifying lap): nothing more moves this frame.
+  function stepBots(dt) {
+    var n = bots.length, i, b, st, inp, ep = botEpoch;
+    botTime += dt;
+    refreshViews();
+    for (i = 0; i < n; i++) {
+      b = bots[i]; st = b.car.state;
+      b.ctx.prog = b.view.prog;
+      inp = b.ai.think(dt, views, b.ctx);
+      b.held = true;
+      if (b.ctx.locked) { st.speed = 0; continue; }           // on the grid
+      if (b.pit.state.service) {                               // held in its box: the lap clock runs, the service counts
+        st.speed = 0; st.hit = 0;
+        botPit(b, dt, true);
+        b.lap.update(st.sampleIndex, 0, dt);
+        continue;
+      }
+      b.held = false;
+      b.limiter = !!inp.limiter;
+      if (inp.reset) {                                         // its R (on, or just past, the track where it is)
+        if (botTime - b.resetAt > 1) {
+          b.resetAt = botTime;
+          b.lap.sync(AI.resetCar(b.car, track, b.lap.jumping ? b.lap.prevIdx : st.sampleIndex, views, b.id));
+        }
+        continue;
+      }
+      b.car.update(dt, inp, track);
+    }
+    // car against car among the local cars (ours and the bots), each against a snapshot of the others: both ways
+    selfEntry.solid = selfSolid && !(pit && pit.state.service) && !ownInPit();
+    for (i = 0; i < n; i++) {
+      b = bots[i];
+      b.contact.solid = b.solid && !b.paved && !b.pit.state.service && !b.ctx.locked;
+    }
+    botResolve(botEntries, dt, onLocalContact);
+    // the host's bots against the remote cars: their side of it (the other game resolves its own car), reported to them
+    if (botOthers.length) {
+      for (i = 0; i < n; i++) {
+        b = bots[i];
+        if (!b.contact.solid) continue;
+        botRecs.length = 0;
+        var h = F1.resolveCarCollisions(b.car.state, botOthers, dt, botRecs);
+        if (h > 0 && b.car.bump) b.car.bump(h);
+        if (botRecs.length) recordBotContacts(b);
+      }
+    }
+    // pit lane, lap counters
+    for (i = 0; i < n; i++) {
+      b = bots[i];
+      if (b.held) continue;
+      st = b.car.state;
+      botPit(b, dt, false);
+      if (b.lap.update(st.sampleIndex, st.speed, dt) === 2) {
+        gp.botLap(b.id, b.lap.last);          // alone: the session counts it now; in a room: sent (the server checks it)
+        if (botEpoch !== ep) return true;
+      }
+    }
+    return botEpoch !== ep;
+  }
+
+  // One step of a bot's js/pit.js; its events go to its driver (at 'serviceDone' the set to fit: also from the update
+  // made while the car is held for the service).
+  function botPit(b, dt, held) {
+    b.pitOpt.limiter = held || b.limiter;
+    var ev = b.pit.update(dt, b.car.state, track, b.pitOpt);
+    if (!ev) return;
+    var cmp = b.ai.onPit(ev);
+    if (cmp && b.car.tyres) b.car.tyres.fit(cmp);
+  }
+
+  // an impact among the local cars: car i (0 = ours) took dv from car j; ours is felt in the controller
+  function onLocalContact(i, j, dv, h) { if (i === 0 && h > localHit) localHit = h; }
+
+  // A bot hit remote cars (host): what each of them is owed, reported at 20 Hz like our own (collectContacts).
+  function recordBotContacts(b) {
+    var now = performance.now();
+    for (var k = 0; k < botRecs.length; k++) {
+      var c = botRecs[k], id = botOtherIds[c.i];
+      if (id == null) continue;
+      var r = b.impacts[id] || (b.impacts[id] = { sx: 0, sz: 0, lx: 0, lz: 0, t: 0 });
+      if (now - r.t > HIT_MEMORY_MS) { r.lx = 0; r.lz = 0; }
+      r.lx += c.ix; r.lz += c.iz; r.t = now;
+      r.sx -= c.ix; r.sz -= c.iz;
+    }
+    botRecs.length = 0;
+  }
+  function sendBotHits(now) {
+    if (now - lastBotHitSend < HIT_SEND_MS) return;
+    lastBotHitSend = now;
+    for (var i = 0; i < bots.length; i++) {
+      var b = bots[i];
+      for (var id in b.impacts) {
+        var r = b.impacts[id];
+        if (r.sx * r.sx + r.sz * r.sz > 0.04 && solidId(Number(id)) && solidId(b.id)) net.sendHit(Number(id), r.sx, r.sz, b.id);
+        r.sx = 0; r.sz = 0;
+      }
+    }
+  }
+
+  // Another game's car hit one of our bots (the server relays it to us, the bots' owner): what our own resolve of that
+  // contact has not already given the bot (as onRemoteHit does for our car).
+  function onBotHit(botId, from, imp) {
+    var b = botById[botId];
+    if (!b || b.dead || !running || !inRoomTrack() || typeof F1.applyCarImpulse !== 'function') return;
+    if (b.ctx.locked || b.pit.state.service || !b.solid || b.paved) return;
+    var k = botOtherIds.indexOf(from);
+    if (k < 0) return;                        // (a ghost for the bots, or not here)
+    var o = botOthers[k], st = b.car.state, dx = o.x - st.x, dz = o.z - st.z;
+    if (dx * dx + dz * dz > HIT_RANGE * HIT_RANGE) return;
+    var mag = Math.sqrt(imp[0] * imp[0] + imp[1] * imp[1]);
+    if (!(mag > 0.2)) return;
+    var ux = imp[0] / mag, uz = imp[1] / mag, now = performance.now();
+    var r = b.impacts[from] || (b.impacts[from] = { sx: 0, sz: 0, lx: 0, lz: 0, t: 0 });
+    if (now - r.t > HIT_MEMORY_MS) { r.lx = 0; r.lz = 0; }
+    var rest = mag - Math.max(0, r.lx * ux + r.lz * uz);
+    if (rest < 0.2) return;
+    var h = F1.applyCarImpulse(st, ux * rest, uz * rest);
+    if (h > 0 && b.car.bump) b.car.bump(h);
+    r.lx += ux * rest; r.lz += uz * rest; r.t = now;
+  }
+
+  // Once per frame after the steps: the bots on screen (ghosts by the rules for OUR car), the minimap, the sound of their
+  // engines, their race distances for the session.
+  function drawBots(dt) {
+    var m = mapOthers.length, a = audioOthers.length, inPit = ownInPit();
+    eye.x = car.state.x; eye.y = (car.state.y || 0) + 0.8; eye.z = car.state.z;
+    for (var i = 0; i < bots.length; i++) {
+      var b = bots[i], st = b.car.state;
+      if (b.model) {
+        b.model.setGhost(!b.solid || !selfSolid || inPit || b.paved);
+        b.model.update(st, dt, eye);
+      }
+      var o = mapOthers[m] || (mapOthers[m] = { x: 0, z: 0, colour: '', ring: '' });
+      o.x = st.x; o.z = st.z; o.colour = b.spec.colour; o.ring = b.spec.colour2 || '';
+      m++;
+      var s = audioOthers[a] || (audioOthers[a] = { id: 0, x: 0, y: 0, z: 0, heading: 0, speed: 0, spec: null });
+      s.id = b.id; s.x = st.x; s.y = st.y || 0; s.z = st.z; s.heading = st.heading; s.speed = st.speed; s.spec = b.spec;
+      a++;
+      gp.botProgress(b.id, b.racing ? b.lap.progress(st.sampleIndex) : null);
+    }
+    mapOthers.length = m;
+    audioOthers.length = a;
+  }
+
+  // The host, once per frame: the bots' states (~20 Hz, net.js keeps the pace), their lap times, their impacts.
+  function publishBots(now) {
+    for (var i = 0; i < bots.length; i++) {
+      var b = bots[i], o = botStates[i] || (botStates[i] = { id: 0, state: null, g: null });
+      o.id = b.id; o.state = b.car.state; o.g = b.racing ? b.lap.progress(b.car.state.sampleIndex) : null;
+      var last = roundMs(b.lap.last), best = roundMs(b.lap.best);
+      if (last !== b.sharedLast || best !== b.sharedBest) {
+        b.sharedLast = last; b.sharedBest = best;
+        net.sendLap(last, best, b.id);
+      }
+    }
+    botStates.length = bots.length;
+    if (botStates.length) net.sendBotStates(botStates);
+    sendBotHits(now);
+  }
+
+  // A session phase for the bots (after ours: onGpPhase): qualifying from their room slots, the grid boxes of their
+  // qualifying places with the set their driver picks for the race; back in free practice their room slots again.
+  function onBotsPhase(phase, prev) {
+    if (phase === 'free') {
+      var again = prev && prev !== 'free';
+      for (var i = 0; i < bots.length; i++) {
+        var b = bots[i];
+        if (again && track) placeBot(b, b.slot, 'M', 1, 1);
+      }
+      // the setting may have changed during the session; and a request the server ignored (sent just as a session
+      // began) is made again: once per return to free practice (the same field again changes nothing)
+      if (again) botSent = null;
+      applyBots();
+      return;
+    }
+    if (!track || !bots.length || !canResume()) return;
+    var s = gp.snapshot;
+    for (var k = 0; k < bots.length; k++) {
+      var c = bots[k], e = gp.entry(c.id, c.entry);
+      if (!e.taking) continue;
+      if (phase === 'quali') placeBot(c, c.slot, 'M', 1, false);
+      else if (phase === 'grid' && e.gridSlot >= 0 && s) placeBot(c, e.gridSlot, c.ai.startCompound(s.r, s.wear), s.wear, false);
+    }
+  }
+
+  // Lights out for the bots (js/gp.js 'botsGo', with or before ours): their lap clocks run from goAt, as ours (onGpGo).
+  function onBotsGo() {
+    botGoFrame = true;
+    var t = gp.sinceGo - (gp.online ? (performance.now() - lastT) / 1000 : 0);
+    for (var i = 0; i < bots.length; i++) {
+      var b = bots[i], e = gp.entry(b.id, b.entry);
+      if (!e.taking || !b.lap) continue;
+      b.lap.arm(b.car.state.sampleIndex);
+      b.lap.time = t;
+    }
+  }
+
+  // The field for the 大獎賽 tab: [{name, colour, colour2, team, skill}] (ours; a guest's from the room's roster).
+  function botListView() {
+    var out = [], i, sp;
+    if (net && net.connected && !net.isHost) {
+      var ro = net.roster || [];
+      for (i = 0; i < ro.length; i++) {
+        if (!ro[i].bot) continue;
+        sp = cars ? cars.resolve(ro[i].car || null, activeYear()) : null;
+        out.push({ name: ro[i].name, colour: sp ? sp.colour : ro[i].colour, colour2: sp ? sp.colour2 : '', team: sp ? sp.teamZh || sp.team : '', skill: ro[i].skill });
+      }
+      return out;
+    }
+    for (i = 0; i < botDesc.length; i++) {
+      var d = botDesc[i];
+      sp = cars ? botSpec(d.car) : null;
+      out.push({ name: d.name, colour: sp ? sp.colour : d.colour, colour2: sp ? sp.colour2 : '', team: sp ? sp.teamZh || sp.team : '', skill: d.skill });
+    }
+    return out;
   }
 
   /* ---------- pit lane ---------- */
@@ -1318,17 +1957,19 @@
       // the controller first: Start opens the menu before this frame counts for anything (the session clock
       // included), exactly as Esc does between two frames
       if (pad && !pollPad()) return;
-      goFrame = false;
-      gp.update(dt);                          // session clock, start lights; fires 'go'
+      goFrame = false; botGoFrame = false;
+      gp.update(dt);                          // session clock, start lights; fires 'go' (and 'botsGo')
       // Grand Prix grid: the car stands still while the lights are on, and in the frame in which they go out
       // too: 'go' has just set the lap clock to the time since lights out, which already covers this frame.
       // (So the lap clock stays in step with the session clock, whichever of 'go' and the race phase comes first.)
       var frozen = gp.inputLocked || goFrame;
       var mp = inRoomTrack();
       if (mp || mapOthers.length) updateRemotes(dt);
+      var sim = bots.length > 0;              // computer drivers to simulate (ours)
+      if (sim) botsFrame();
       var collide = others.length && typeof F1.resolveCarCollisions === 'function';
       var hit = netHit, stepped = false;
-      netHit = 0;
+      netHit = 0; localHit = 0;
       pitOpt.slot = net && net.connected ? net.slot || 0 : 0;
       pitOpt.limiter = limiterOn;
       if (frozen) {
@@ -1336,6 +1977,7 @@
         acc = 0;
         car.state.speed = 0; car.state.hit = 0;
         revInNeutral(dt);
+        if (sim) botTimed(botsHeld);          // (on the grid with us)
       } else {
         var drive = driveInputs();
         // fixed physics steps so the car and lap clock keep real-time pace at low frame rates
@@ -1348,6 +1990,7 @@
             car.state.speed = 0; car.state.hit = 0; car.state.gear = 0;   // (neutral while the car is up on the jacks)
             pitStep(STEP);
             lap.update(car.state.sampleIndex, 0, STEP);
+            if (sim && botTimed(stepBots, STEP)) { acc = 0; break; }   // the field drives on meanwhile
             continue;
           }
           car.update(STEP, drive, track);
@@ -1358,6 +2001,9 @@
           }
           if (car.state.hit > hit) hit = car.state.hit;
           stepped = true;
+          // the computer drivers: think, drive, contacts with each other and with us, pit, laps. A bot's lap that moved
+          // the session on (alone: the last qualifying lap -> the grid) placed everybody: nothing more moves this frame.
+          if (sim && botTimed(stepBots, STEP)) { acc = 0; break; }
           if (pit) pitStep(STEP);
           var bestBefore = lap.best;
           if (lap.update(car.state.sampleIndex, car.state.speed, STEP) === 2) {
@@ -1368,6 +2014,7 @@
           }
         }
         if (pit && pit.state.service) revInNeutral(dt);
+        if (localHit > hit) hit = localHit;   // (a bot ran into us)
         if (stepped) {
           car.state.hit = hit;                // strongest impact of the frame (car.update clears it every step)
           if (pad && hit > RUMBLE_MIN) pad.rumble(Math.min(1, 0.2 + hit), 120 + 280 * hit);   // walls and cars
@@ -1378,9 +2025,11 @@
       checkTyres();
       cockpit.update(car.state, dt);
       gp.setProgress(lap.progress(car.state.sampleIndex));   // race distance, rides along with the state
+      if (bots.length) botTimed(drawBots, dt);   // (after the remote cars: the minimap and the sound list both)
       if (mp) {
         net.sendState(car.state);
         shareLap();
+        if (bots.length) botTimed(publishBots, performance.now());   // the host's computer drivers, to the room
       }
       if (raceLine && lineOn) raceLine.update(car.state);
       if (track.update) track.update(t / 1000);   // light curtains of the pit lane
@@ -1458,10 +2107,20 @@
       onFov: function (deg) {                 // 設定 → 視野 (the still behind the menu shows it at once)
         if (cockpit && cockpit.setFov) { cockpit.setFov(deg); renderStill(); }
       },
-      onCompound: setCompound                 // 大獎賽 → 起跑輪胎 / 下一組輪胎
+      onCompound: setCompound,                // 大獎賽 → 起跑輪胎 / 下一組輪胎
+      onBots: onBotsSetting                   // 大獎賽 → 電腦車手 / 強度
     });
     if (ui.setCompound) ui.setCompound(nextCompound);
     mirrorsOn = ui.getMirrors ? ui.getMirrors() !== false : true;
+    AI = F1.AI && typeof F1.AI.lineup === 'function' && typeof F1.AI.createContacts === 'function' ? F1.AI : null;
+    if (ui.getBots) {                         // the remembered setting (none by default)
+      var bc = ui.getBots();
+      if (bc && typeof bc === 'object') {
+        var bn = Math.floor(Number(bc.count));
+        botCfg.count = bn >= 0 ? Math.min(bn, 15) : 0;
+        if (typeof bc.skill === 'string') botCfg.skill = bc.skill;
+      }
+    }
     initCars();
     if (typeof F1.createPit === 'function') pit = F1.createPit();
     initAudio();
@@ -1486,7 +2145,10 @@
     get spec() { return car ? car.spec : null; }, get audio() { return audio; },
     get limiter() { return limiterOn; }, get boost() { return boostKey; }, get nextCompound() { return nextCompound; },
     get remoteCars() { return remoteCars; }, get hudMirrors() { return hudMirrors; }, get mirrors() { return mirrorsOn; },
-    get tunnels() { return tunnels; }, get lights() { return { hemi: hemiLight, sun: sunLight, hemi0: HEMI0, sun0: SUN0 }; }
+    get tunnels() { return tunnels; }, get lights() { return { hemi: hemiLight, sun: sunLight, hemi0: HEMI0, sun0: SUN0 }; },
+    // v7: the computer drivers we simulate ({id, name, spec, car, ai, pit, lap, model, ctx, ...}), the setting, the views
+    get bots() { return bots; }, get botCfg() { return { count: botCfg.count, skill: botCfg.skill }; }, get botViews() { return views; },
+    botCost: botCost
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

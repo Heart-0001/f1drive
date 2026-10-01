@@ -144,7 +144,8 @@ function rawClient(port) {
 }
 
 // Tests are registered into lanes with T() and run at the bottom of the file.
-const lanes = { floods: [], tcp: [], relay: [], gp1: [], gp2: [], gp3: [], client: [], year: [], year2: [], review: [], review2: [] };
+const lanes = { floods: [], tcp: [], relay: [], gp1: [], gp2: [], gp3: [], client: [], year: [], year2: [], review: [], review2: [],
+  bots: [], bots2: [], botsClient: [] };
 let lane = lanes.relay;
 const T = (name, fn) => { lane.push([name, fn]); };
 const runLane = async list => { for (const [name, fn] of list) await test(name, fn); };
@@ -211,6 +212,43 @@ async function room(t, n, opts) {
   return r;
 }
 // a fresh instance of the real client (js/net.js is a singleton per load)
+/* ---------- computer drivers (bots) helpers ---------- */
+
+// The host asks for n bots and waits until every client in `clients` has them in its roster. -> their ids (list order)
+async function addBots(host, clients, n, list, skill) {
+  host.send(Object.assign({ t: 'bots', n }, list ? { list } : {}, skill ? { skill } : {}));
+  for (const c of clients) if (!c.closed) await c.wait(() => c.roster().filter(p => p.bot).length === n, 2000, n + ' bots');
+  return host.roster().filter(p => p.bot).sort((x, y) => x.bi - y.bi).map(p => p.id);
+}
+// the host's bots' states: rows [id, x, y, z, heading, pitch, roll, speed, steer, g?]
+function botStates(host, rows, c) { host.send({ t: 'bs', k: host.seq(), c: c === undefined ? Date.now() : c, b: rows }); }
+// bot id drives m metres on along x at z (as c.run for the own car; placed at x = 0 on a new track)
+function botRun(host, id, m, g, z) {
+  host.bx = host.bx || {};
+  const seq = host.seq();
+  if (!host.bx[id] || host.bx[id].seq !== seq) {
+    host.bx[id] = { x: 0, z: z || 0, seq };
+    botStates(host, [[id, 0, 0, host.bx[id].z, Math.PI / 2, 0, 0, 0, 0]]);
+  }
+  host.bx[id].x += m;
+  const row = [id, host.bx[id].x, 0, host.bx[id].z, Math.PI / 2, 0, 0, 0, 0];
+  if (g !== undefined) row.push(g);
+  botStates(host, [row]);
+}
+// a lap of bot id the server can believe: its states cover a lap of the test track, then the host reports it
+function botLap(host, id, time, sid) {
+  botRun(host, id, LEN);
+  host.send({ t: 'gl', k: host.seq(), sid: sid === undefined ? host.gp().sid : sid, time, id });
+}
+// real time: bot id really drives from x0 to x1 along x at z in n steps of 50 ms (as driveTo)
+async function botDriveTo(host, id, x0, x1, z, n) {
+  const v = Math.abs(x1 - x0) / (n * 0.05), h = x1 >= x0 ? Math.PI / 2 : -Math.PI / 2;
+  for (let k = 0; k <= n; k++) {
+    botStates(host, [[id, x0 + (x1 - x0) * k / n, 0, z, h, 0, 0, v, 0]]);
+    if (k < n) await sleep(50);
+  }
+}
+
 function freshNet() {
   const p = require.resolve('../js/net.js');
   delete require.cache[p];
@@ -1777,7 +1815,8 @@ function freshNet() {
       welcomeYear = 2026; ev.length = 0; inbox.length = 0;
       assert.deepStrictEqual(await N.join('127.0.0.1:' + wss.address().port), { ok: true });
       assert.deepStrictEqual(ev.filter(e => e !== 'players' && e !== 'gp'), ['connected', 'year 2026', 'track']);
-      assert.deepStrictEqual([N.year, inbox[0].car], [2026, '2024-ferrari']);
+      // (the hello, not inbox[0]: a ping of the old connection may still have been on its way when inbox was emptied)
+      assert.deepStrictEqual([N.year, inbox.find(m => m.t === 'hello').car], [2026, '2024-ferrari']);
       N.leave();
       assert.strictEqual(uncaught.length, 0, 'nothing thrown out of a message handler');
     } finally {
@@ -1787,6 +1826,496 @@ function freshNet() {
   });
 
   /* ---------- hardening: floods, kicks, amplification ---------- */
+
+  /* ---------- computer drivers (bots): the host's game simulates them, the server keeps them as players ---------- */
+  lane = lanes.bots;
+
+  T('bots: host only, free practice only; n clamped to the free seats; garbage n / skill / list sanitised; ids and slots kept; newcomers see them; a human takes the newest bot\'s seat', async t => {
+    const R = await room(t, 2);
+    const [a, b] = R.cs;
+    // a guest cannot; a host's n that is not a count changes nothing
+    b.send({ t: 'bots', n: 3 });
+    for (const n of ['3', -1, null, undefined, {}, [3], true]) a.send({ t: 'bots', n });
+    a.send('{"t":"bots","n":1e999}'); a.send('{"t":"bots","n":NaN}'); a.send('{"t":"bots"}');
+    await sleep(150);
+    assert.deepStrictEqual([R.srv.info().players.length, R.srv.info().bots, R.srv.info().gp.players.length], [2, { n: 0, skill: 'pro' }, 2]);
+    // three bots from a list to sanitise
+    const ids = await addBots(a, [a, b], 3, [{ name: 'M. Verstappen', car: '2024-red-bull', colour: '#1E41FF', skill: 0.98 },
+      { name: '\u0000<b>' + 'x'.repeat(40) + '‮', car: 'BAD CAR', colour: 'red', skill: 'fast' }, 5], 'legend');
+    let ros = b.roster(), bots = ros.filter(p => p.bot);
+    assert.deepStrictEqual(bots.map(p => [p.id, p.slot, p.bi, p.owner, p.skill, p.car]),
+      [[ids[0], 2, 0, a.id, 0.98, '2024-red-bull'], [ids[1], 3, 1, a.id, 1, ''], [ids[2], 4, 2, a.id, 1, '']]);
+    assert(ids[0] > b.id && ids[1] === ids[0] + 1 && ids[2] === ids[0] + 2, 'ids from the players\' counter');
+    assert.strictEqual(bots[0].name, 'M. Verstappen');
+    assert(Array.from(bots[1].name).length === 16 && !/[\u0000‮]/.test(bots[1].name), bots[1].name);
+    assert.strictEqual(bots[2].name, 'AI 3');
+    assert.strictEqual(bots[0].colour, '#1e41ff');
+    assert(bots.every(p => /^#[0-9a-f]{6}$/.test(p.colour)));
+    assert.deepStrictEqual(Object.keys(bots[0]).sort(), ['best', 'bi', 'bot', 'car', 'colour', 'id', 'last', 'name', 'owner', 'skill', 'slot']);
+    assert.deepStrictEqual(Object.keys(ros.find(p => p.id === a.id)).sort(), ['best', 'car', 'colour', 'id', 'last', 'name', 'slot'], 'human rows as before');
+    assert.deepStrictEqual([b.rosterMsg().bots, R.srv.info().bots], [{ n: 3, skill: 'legend' }, { n: 3, skill: 'legend' }]);
+    // the session has them: only their rows carry bot: true
+    let g = await R.settle(s => s.players.length === 5);
+    assert.deepStrictEqual(g.players.map(p => [p.id, p.bot === true]), [[a.id, false], [b.id, false], [ids[0], true], [ids[1], true], [ids[2], true]]);
+    assert(!('bot' in g.players[0]));
+    // a level that is not one keeps the room's; list entries that are missing / not objects keep what the bot had
+    const n0 = b.all('players').length;
+    a.send({ t: 'bots', n: 3, skill: 'godlike', list: 'x' });
+    a.send({ t: 'bots', n: 3, skill: 7, list: [null, 5, { name: 12, car: 5, colour: [], skill: {} }] });
+    a.send('{"t":"bots","n":3,"list":[{"__proto__":{"name":"evil"}}]}');
+    await sleep(150);
+    assert.strictEqual(b.all('players').length, n0, 'nothing changed: nothing sent');
+    assert.deepStrictEqual(R.srv.info().players.filter(p => p.bot).map(p => [p.name, p.skill]), bots.map(p => [p.name, p.skill]));
+    // more than there are seats: as many as there are (16 - 2 humans); the first three keep their ids and slots
+    a.send({ t: 'bots', n: 999, skill: 'rookie' });
+    await b.wait(() => b.roster().filter(p => p.bot).length === 14, 2000, '14 bots');
+    ros = b.roster(); bots = ros.filter(p => p.bot).sort((x, y) => x.bi - y.bi);
+    assert.deepStrictEqual(bots.slice(0, 3).map(p => [p.id, p.slot]), [[ids[0], 2], [ids[1], 3], [ids[2], 4]]);
+    assert.deepStrictEqual([ros.length, bots.map(p => p.bi), bots[3].skill, bots[3].name], [16, [...Array(14).keys()], 0, 'AI 4']);
+    assert.deepStrictEqual(ros.map(p => p.slot), [...Array(16).keys()]);
+    a.send({ t: 'bots', n: 1e308 });
+    await sleep(150);
+    assert.strictEqual(R.srv.info().players.length, 16);
+    // fewer: the first ones stay (renamed in the roster and the session)
+    await addBots(a, [a, b], 2, [{}, { name: 'Renamed' }]);
+    g = await R.settle(s => s.players.length === 4 && s.players[3].name === 'Renamed');
+    assert.deepStrictEqual(R.srv.info().players.filter(p => p.bot).map(p => [p.id, p.name]), [[ids[0], 'M. Verstappen'], [ids[1], 'Renamed']]);
+    // a newcomer sees them in his welcome and his first snapshot
+    const c = await client(R.srv.port, { name: 'C' });
+    assert.deepStrictEqual([c.last('welcome').players.filter(p => p.bot).map(p => p.id), c.last('welcome').bots], [[ids[0], ids[1]], { n: 2, skill: 'rookie' }]);
+    await c.wait(() => c.gp() && c.gp().players.filter(p => p.bot).length === 2, 2000, 'bots in his first snapshot');
+    assert.strictEqual(c.last('welcome').players.find(p => p.id === c.id).slot, 4, 'the lowest free slot');
+    // a full room in free practice: a human takes the seat of the newest bot
+    await addBots(a, [a, b, c], 13);
+    const newest = c.roster().filter(p => p.bot).sort((x, y) => y.bi - x.bi)[0];
+    const d = await client(R.srv.port, { name: 'D' });
+    assert(d.last('welcome'), 'D is in');
+    await c.wait(() => c.roster().length === 16 && c.roster().some(p => p.id === d.id), 2000, 'D in the roster');
+    assert(!c.roster().some(p => p.id === newest.id), 'the newest bot made room');
+    assert.deepStrictEqual([c.roster().filter(p => p.bot).length, c.rosterMsg().bots.n, d.last('welcome').players.find(p => p.id === d.id).slot], [12, 12, newest.slot]);
+    assert(!c.all('gone').some(m => m.id === newest.id), 'no gone for a bot: the roster says it');
+    // a session is on: parc fermé for the field, and a full room is full
+    await R.start(1, 1);
+    a.send({ t: 'bots', n: 0 });
+    await sleep(150);
+    assert.strictEqual(R.srv.info().players.filter(p => p.bot).length, 12);
+    const e = await client(R.srv.port, { name: 'E' });
+    assert.deepStrictEqual([e.last('welcome'), e.last('error') && e.last('error').code], [null, 'full']);
+    [a, b, c, d, e].forEach(x => x.ws.close());
+  });
+
+  T('bots: states (bs) only from their owner, validated like s, relayed in the snapshots; their laps (gl id) need their states; glno carries the id; lap times (lap id); progress rides on bs', async t => {
+    const R = await room(t, 2);
+    const [a, b] = R.cs;
+    const ids = await addBots(a, [a, b], 2);
+    // nothing of this is a state of the host's bots
+    botStates(b, [[ids[0], 1, 0, 1, 0, 0, 0, 10, 0]]);                         // not his
+    a.send({ t: 'bs', k: a.seq() + 1, c: 1, b: [[ids[0], 1, 0, 1, 0, 0, 0, 10, 0]] });   // another track's
+    a.send({ t: 'bs', k: a.seq(), c: 'x', b: [[ids[0], 1, 0, 1, 0, 0, 0, 10, 0]] });
+    a.send({ t: 'bs', k: a.seq(), c: 1, b: 'x' });
+    a.send({ t: 'bs', k: a.seq(), c: 1, b: { 0: [ids[0], 1, 0, 1, 0, 0, 0, 10, 0], length: 1 } });
+    botStates(a, [[ids[0]], [ids[0], 'x', 0, 0, 0, 0, 0, 0, 0], [b.id, 1, 0, 1, 0, 0, 0, 0, 0], [a.id, 1, 0, 1, 0, 0, 0, 0, 0], [999, 1, 0, 1, 0, 0, 0, 0, 0],
+      null, 5, 'x', [ids[0], 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], [String(ids[0]), 1, 0, 1, 0, 0, 0, 0, 0]]);
+    a.send('{"t":"bs","k":' + a.seq() + ',"c":1,"b":[[' + ids[0] + ',1e999,0,0,0,0,0,0,0]]}');
+    await sleep(200);
+    assert(!b.all('snap').some(m => m.p.some(e => ids.includes(e[0]))), 'nothing of the bots relayed');
+    // a good one: clamped / rounded like s; the same bot twice in one message: the first row
+    botStates(a, [[ids[0], 1e9, 5, 2.123456, 7, 3, -3, 999, 5, 0.5], [ids[0], 9, 9, 9, 9, 0, 0, 0, 0], [ids[1], 10, 0, 20, 0.5, 0, 0, 30, 0.1]], 123456);
+    await b.wait(() => b.all('snap').some(m => m.p.some(e => e[0] === ids[1])), 2000, 'bot states relayed');
+    const rows = {};
+    b.all('snap').forEach(m => m.p.forEach(e => { rows[e[0]] = e; }));
+    assert.deepStrictEqual(rows[ids[0]], [ids[0], 123456, 100000, 5, 2.12, 0.7168, 1.2, -1.2, 130, 1]);
+    assert.deepStrictEqual(rows[ids[1]], [ids[1], 123456, 10, 0, 20, 0.5, 0, 0, 30, 0.1]);
+    // qualifying: a lap of a bot whose states do not cover it is answered with the reason AND the bot's id (host only)
+    await R.start(1, 1);
+    R.clk.add(3000);
+    a.send({ t: 'gl', k: a.seq(), sid: a.gp().sid, time: 2.5, id: ids[1] });
+    await a.wait(() => a.last('glno'), 2000, 'glno');
+    assert.deepStrictEqual(a.last('glno'), { t: 'glno', why: 'not-driven', id: ids[1] });
+    // the guest cannot report the host's bot's lap or lap times: no answer, nothing counted
+    botRun(a, ids[0], LEN);
+    b.send({ t: 'gl', k: b.seq(), sid: b.gp().sid, time: 2.5, id: ids[0] });
+    b.send({ t: 'lap', last: 70, best: 70, id: ids[0] });
+    await sleep(150);
+    assert.deepStrictEqual([b.last('glno'), R.srv.info().gp.players.find(p => p.id === ids[0]).qLaps, R.srv.info().players.find(p => p.id === ids[0]).best], [null, 0, null]);
+    // the host's: backed by the bots' states, they count; the grid goes by time, bots or not
+    botLap(a, ids[0], 2.6); botLap(a, ids[1], 2.4); a.lap(2.5); b.lap(2.7);
+    const g = await R.settle(s => s.phase === 'grid');
+    assert.deepStrictEqual(g.grid, [ids[1], a.id, ids[0], b.id]);
+    a.send({ t: 'lap', last: 82.5, best: 81.25, id: ids[0] });
+    await b.wait(() => b.roster().find(p => p.id === ids[0]).best === 81.25, 2000, 'bot lap times in the roster');
+    // the race: progress rides on the bots' rows (g), held to what their path covered, as a player's
+    R.clk.to(g.goAt);
+    await R.settle(s => s.phase === 'race');
+    R.clk.add(3000);
+    botRun(a, ids[0], 150, 0.7); botRun(a, ids[1], 150, 0.2); a.run(150, 0.5); b.run(150, 0.4);
+    let s = await R.settle(x => x.order[0] === ids[0]);
+    assert.deepStrictEqual(s.order, [ids[0], a.id, b.id, ids[1]]);
+    // bot 1 standing still claims a lap and a half: held to its 150 m of driving (150 / (0.85 x 200) = 0.88 of a lap)
+    botRun(a, ids[0], 150, 0.95); botRun(a, ids[1], 0, 1.5);
+    s = await R.settle(x => x.order[1] === ids[1]);
+    assert.deepStrictEqual(s.order, [ids[0], ids[1], a.id, b.id]);
+    [a, b].forEach(x => x.ws.close());
+  });
+
+  T('bots: the host leaving takes his bots; a running session ends cleanly (race -> results with the bots DNF, qualifying -> free); the same in a token room', async t => {
+    // dedicated server, during the race
+    let R = await room(t, 2);
+    let [a, b] = R.cs;
+    let ids = await addBots(a, [a, b], 2);
+    await R.start(1, 2);
+    R.clk.add(3000);
+    botLap(a, ids[0], 2.6); botLap(a, ids[1], 2.7); a.lap(2.5); b.lap(2.8);
+    const g = await R.settle(s => s.phase === 'grid');
+    R.clk.to(g.goAt);
+    await R.settle(s => s.phase === 'race');
+    a.ws.close();
+    await b.wait(() => b.gp().phase === 'results' && b.roster().length === 1, 2000, 'results');
+    let s = b.gp();
+    assert.deepStrictEqual(s.players.map(p => [p.id, p.bot === true, p.left, p.dnf]),
+      [[a.id, false, true, true], [b.id, false, false, false], [ids[0], true, true, true], [ids[1], true, true, true]]);
+    assert.strictEqual(s.order[0], b.id, 'the one still racing ahead of the DNFs');
+    assert.deepStrictEqual([b.host(), b.rosterMsg().bots], [b.id, { n: 0, skill: 'pro' }]);
+    assert.deepStrictEqual(b.all('gone').map(m => m.id), [a.id], 'gone for the player only');
+    assert.strictEqual(R.srv.info().players.length, 1);
+    b.ws.close();
+    // dedicated server, during qualifying -> free practice; the next host can have his own
+    R = await room(t, 2);
+    [a, b] = R.cs;
+    ids = await addBots(a, [a, b], 3, null, 'amateur');
+    await R.start(2, 2);
+    a.ws.close();
+    await b.wait(() => b.gp().phase === 'free' && b.roster().length === 1 && b.host() === b.id, 2000, 'free');
+    assert.deepStrictEqual(b.gp().players.map(p => p.id), [b.id]);
+    assert.deepStrictEqual(b.rosterMsg().bots, { n: 0, skill: 'amateur' }, 'the level stays with the room');
+    const ids2 = await addBots(b, [b], 1);
+    assert(ids2[0] > ids[2] && b.roster().find(p => p.id === ids2[0]).owner === b.id);
+    b.ws.close();
+    // dedicated server, free practice: the session is not touched
+    R = await room(t, 2);
+    [a, b] = R.cs;
+    await addBots(a, [a, b], 2);
+    a.ws.close();
+    await b.wait(() => b.roster().length === 1, 2000, 'bots gone');
+    assert.deepStrictEqual([b.gp().phase, b.gp().players.length, b.gp().sid], ['free', 1, 0]);
+    b.ws.close();
+    // token room: the host's bots go with him (the room closes anyway: the game stops the server)
+    R = await room(t, 2, { hostToken: 'tok' });
+    [a, b] = R.cs;
+    assert.strictEqual(a.host(), a.id);
+    ids = await addBots(a, [a, b], 2);
+    b.send({ t: 'bots', n: 0 });
+    await sleep(100);
+    assert.strictEqual(R.srv.info().players.length, 4, 'a guest cannot change them');
+    await R.start(1, 1);
+    a.ws.close();
+    await b.wait(() => b.roster().length === 1 && b.gp().phase === 'free', 2000, 'token room: bots gone, session ended');
+    assert.strictEqual(b.host(), 0);
+    b.ws.close();
+  });
+
+  T('bots: hostile messages from a guest and garbage from the host never change the room nor crash; a host with bots has a bigger message budget', async t => {
+    const R = await room(t, 2);
+    const [a, b] = R.cs;
+    const ids = await addBots(a, [a, b], 14);                      // 2 humans + 14 bots: a full room
+    a.drive(0, 0); b.drive(5, 0); botStates(a, [[ids[0], 2, 0, 0, 0, 0, 0, 0, 0], [ids[1], 7, 0, 0, 0, 0, 0, 0, 0]]);
+    await sleep(100);
+    const state = () => JSON.stringify([R.srv.info().players, R.srv.info().bots, R.srv.info().gp]);
+    const before = state();
+    // the guest speaking for the host's bots / as the host
+    for (const m of [{ t: 'bots', n: 0 }, { t: 'bots', n: 16, skill: 'legend' }, { t: 'gl', k: b.seq(), sid: 0, time: 80, id: ids[0] },
+      { t: 'lap', last: 70, best: 70, id: ids[0] }, { t: 'lap', last: 70, best: 70, id: a.id }, { t: 'hit', k: b.seq(), to: a.id, from: ids[0], i: [5, 0] },
+      { t: 'hit', k: b.seq(), to: ids[1], from: ids[0], i: [5, 0] }, { t: 'bs', k: b.seq(), c: 1, b: [[ids[0], 50, 0, 0, 0, 0, 0, 0, 0]] }]) b.send(m);
+    // garbage from the host
+    for (const m of [{ t: 'bots', n: 14, list: [null, 5, 'x', [], { name: {}, car: [], colour: 5, skill: 'x' }] }, { t: 'bots', n: '14' },
+      { t: 'gl', k: a.seq(), sid: 0, time: 80, id: 'x' }, { t: 'gl', k: a.seq(), sid: 0, time: 80, id: b.id }, { t: 'gl', k: a.seq(), sid: 0, time: 80, id: 999 },
+      { t: 'gl', k: a.seq(), sid: 0, time: 80, id: null }, { t: 'lap', last: 1, best: 1, id: b.id }, { t: 'lap', last: 70, best: 70, id: '5' },
+      { t: 'hit', k: a.seq(), to: ids[1], from: ids[0], i: [1, 0] }, { t: 'hit', k: a.seq(), to: ids[0], i: [1, 0] }, { t: 'hit', k: a.seq(), to: a.id, from: ids[0], i: [1, 0] },
+      { t: 'hit', k: a.seq(), to: b.id, from: 'x', i: [1, 0] }, { t: 'hit', k: a.seq(), to: b.id, from: b.id, i: [1, 0] }, { t: 'hit', k: a.seq(), to: b.id, from: 999, i: [1, 0] },
+      { t: 'bs', k: a.seq(), c: 1, b: [] }, { t: 'bs', k: a.seq(), c: 1, b: Array(40).fill(null) }]) a.send(m);
+    a.send('{"t":"bots","n":14,"list":[{"__proto__":{"name":"evil"}},{"constructor":{"name":"x"}}],"skill":"__proto__"}');
+    a.send('{"t":"bots","n":14,"skill":"constructor"}'); a.send('{"t":"bots","n":14,"skill":"hasOwnProperty"}');
+    await sleep(250);
+    assert.strictEqual(state(), before, 'nothing changed');
+    assert.deepStrictEqual([a.all('hit').length, b.all('hit').length, b.all('glno').length, a.closed, b.closed], [0, 0, 0, null, null]);
+    // the host's connection may send more while it simulates bots: 200 lap times in one go all count; a guest's do not
+    // (BOT_RATE 4 / s per bot: the host's bucket holds 120 + 2 x 4 x 14 = 232 once it has refilled, ~1 s)
+    await sleep(1200);
+    for (let i = 0; i < 200; i++) a.send({ t: 'lap', last: 60 + i, best: 60, id: ids[i % 14] });
+    for (let i = 0; i < 200; i++) b.send({ t: 'lap', last: 60 + i, best: 60 });
+    await b.wait(() => b.roster().find(p => p.id === ids[199 % 14]).last === 259, 2000, 'every bot lap time');
+    await sleep(150);
+    const guest = b.roster().find(p => p.id === b.id).last;
+    assert(guest >= 150 && guest < 259, 'the guest\'s burst is RATE_BURST: ' + guest);
+    assert(!a.closed && !b.closed);
+    [a, b].forEach(x => x.ws.close());
+  });
+
+  lane = lanes.bots2;                          // real time: impact reports judge motion by arrival time
+
+  T('bots: impact reports to / from bots under the same rules (their positions, ghosts, throttle); never between one player\'s own cars', async t => {
+    const R = await room(t, 3);
+    const [a, b, o] = R.cs;
+    const ids = await addBots(a, [a, b, o], 2);
+    // b parked at the origin; the host far away; bot 1 parked 6 m in front of b
+    const keep = setInterval(() => { b.drive(0, 0); a.drive(-500, 50); botStates(a, [[ids[1], 6, 0, 0, 0, 0, 0, 0, 0]]); }, 50);
+    await sleep(160);
+    let sent = 0;
+    // bot 0 drives the last 3 m at 20 m/s at b, then the host reports its hit for it
+    const botHits = async (to, from, expected, label) => {
+      const n = to.all('hit').length;
+      await botDriveTo(a, from, -9, -3, 0, 3);
+      a.send({ t: 'hit', k: a.seq(), to: to.id, from, i: [++sent, 0] });
+      if (expected) {
+        await to.wait(() => to.all('hit').length === n + 1, 1000, label);
+        assert.deepStrictEqual(to.last('hit'), { t: 'hit', from, i: [sent, 0] }, label);
+      } else { await sleep(120); assert.strictEqual(to.all('hit').length, n, label); }
+    };
+    await botHits(b, ids[0], true, 'a bot hits a player: he hears it from the bot');
+    assert.strictEqual(o.all('hit').length + a.all('hit').length, 0, 'nobody else');
+    // b drives into bot 1: its owner hears it, told which of his bots it was
+    await driveTo(b, 0, 3, 0, 3);
+    b.send({ t: 'hit', k: b.seq(), to: ids[1], i: [4, 0] });
+    await a.wait(() => a.all('hit').length === 1, 1000, 'the owner hears his bot was hit');
+    assert.deepStrictEqual(a.last('hit'), { t: 'hit', from: b.id, bot: ids[1], i: [4, 0] });
+    // a parked bot claiming to ram at 130 m/s: only the slack (its positions do not close on him); both cars parked
+    // for longer than the motion window (500 ms)
+    const n0 = b.all('hit').length;
+    for (let k = 0; k < 12; k++) { botStates(a, [[ids[0], -3, 0, 0, Math.PI / 2, 0, 0, 130, 0]]); await sleep(50); }
+    a.send({ t: 'hit', k: a.seq(), to: b.id, from: ids[0], i: [80, 0] });
+    await b.wait(() => b.all('hit').length === n0 + 1, 1000, 'slack');
+    assert(Math.hypot(...b.last('hit').i) <= 3.01, 'a parked bot: only the slack: ' + JSON.stringify(b.last('hit').i));
+    // a teleported bot reports nothing; two reports of one bot within 40 ms: the first
+    botStates(a, [[ids[0], -2000, 0, 0, 0, 0, 0, 0, 0]]); await sleep(60);
+    botStates(a, [[ids[0], -3, 0, 0, Math.PI / 2, 0, 0, 20, 0]]);
+    a.send({ t: 'hit', k: a.seq(), to: b.id, from: ids[0], i: [2, 0] });
+    await sleep(120);
+    assert.strictEqual(b.all('hit').length, n0 + 1, 'nothing after a teleport');
+    await botDriveTo(a, ids[0], -9, -3, 0, 3);
+    a.send({ t: 'hit', k: a.seq(), to: b.id, from: ids[0], i: [2, 0] });
+    a.send({ t: 'hit', k: a.seq(), to: b.id, from: ids[0], i: [3, 0] });
+    await b.wait(() => b.all('hit').length === n0 + 2, 1000, 'one of two');
+    await sleep(100);
+    assert.deepStrictEqual([b.all('hit').length, b.last('hit').i], [n0 + 2, [2, 0]]);
+    // never between one player's own cars: his game settles those (his car / his bots)
+    await botDriveTo(a, ids[0], 1, 4, 0, 3);
+    a.send({ t: 'hit', k: a.seq(), to: ids[1], from: ids[0], i: [1, 0] });
+    a.send({ t: 'hit', k: a.seq(), to: ids[1], i: [1, 0] });
+    await sleep(60);
+    a.send({ t: 'hit', k: a.seq(), to: a.id, from: ids[1], i: [1, 0] });
+    await sleep(120);
+    assert.deepStrictEqual([a.all('hit').length, b.all('hit').length, o.all('hit').length], [1, n0 + 2, 0]);
+    // qualifying: bots are ghosts like everybody
+    clearInterval(keep);
+    await R.start(1, 1);
+    const keep2 = setInterval(() => { b.drive(0, 0); botStates(a, [[ids[1], 6, 0, 0, 0, 0, 0, 0, 0]]); }, 50);
+    await sleep(120);
+    await botHits(b, ids[0], false, 'qualifying: a ghost');
+    await driveTo(b, 0, 3, 0, 3);
+    b.send({ t: 'hit', k: b.seq(), to: ids[1], i: [4, 0] });
+    await sleep(120);
+    assert.strictEqual(a.all('hit').length, 1, 'qualifying: nothing to the owner');
+    clearInterval(keep2);
+    R.cs.forEach(x => x.ws.close());
+  });
+
+  lane = lanes.botsClient;
+
+  T('js/net.js bots against the real server: setBots, net.bots / roster / players, states relayed and kept alive, laps / lap times / impacts by bot id, the host leaving', async t => {
+    const clk = manualClock();
+    const srv = await t.start({ now: clk, random: () => 0 });
+    const A = freshNet(), B = freshNet();
+    const ev = { A: [], B: [] };
+    for (const [k, N] of [['A', A], ['B', B]]) {
+      N.on('bots', l => ev[k].push(['bots', l.map(x => x.id)]));
+      N.on('botHit', (id, from, i) => ev[k].push(['botHit', id, from, i]));
+      N.on('hit', (from, i) => ev[k].push(['hit', from, i]));
+      N.on('botLapRejected', (id, why) => ev[k].push(['botLapRejected', id, why]));
+      N.on('lapRejected', why => ev[k].push(['lapRejected', why]));
+    }
+    const take = k => ev[k].splice(0);
+    assert.strictEqual(A.setBots(2), false, 'not connected');
+    assert.deepStrictEqual(await A.join('127.0.0.1:' + srv.port), { ok: true });
+    assert.deepStrictEqual(await B.join('127.0.0.1:' + srv.port), { ok: true });
+    await until(() => A.roster.length === 2 && B.roster.length === 2, 2000, 'roster');
+    assert.deepStrictEqual([A.bots, A.botSettings], [[], { n: 0, skill: 'pro' }]);
+    assert.strictEqual(B.setBots(2), false, 'not the host');
+    for (const bad of ['2', null, {}, -1, NaN, undefined]) assert.strictEqual(A.setBots(bad), false, String(bad));
+    assert.strictEqual(A.setBots([{ name: 'M. Verstappen', car: '2026-red-bull', colour: '#1E41FF', skill: 0.98 },
+      { name: 'L. Norris', car: '2026-mclaren', skill: 0.7 }, { car: 'BAD' }], 'legend'), true);
+    await until(() => A.bots.length === 3 && B.players.length === 4, 2000, 'bots');
+    const ids = A.bots.map(x => x.id);
+    assert.deepStrictEqual(A.bots.map(x => [x.name, x.car, x.skill, x.bi, x.slot, x.colour]),
+      [['M. Verstappen', '2026-red-bull', 0.98, 0, 2, '#1e41ff'], ['L. Norris', '2026-mclaren', 0.7, 1, 3, A.bots[1].colour], ['AI 3', '', 1, 2, 4, A.bots[2].colour]]);
+    assert.deepStrictEqual([take('A'), take('B')], [[['bots', ids]], []], 'only the owner hears about his bots');
+    // our own bots are local cars: in our roster (mine), not in our players
+    assert.deepStrictEqual(A.players.map(p => p.id), [B.id]);
+    assert.deepStrictEqual(A.roster.filter(p => p.bot).map(p => [p.id, p.mine, p.owner]), ids.map(id => [id, true, A.id]));
+    assert.deepStrictEqual(B.players.map(p => [p.id, p.bot, p.skill, p.car, p.owner]),
+      [[A.id, false, null, '', 0], [ids[0], true, 0.98, '2026-red-bull', A.id], [ids[1], true, 0.7, '2026-mclaren', A.id], [ids[2], true, 1, '', A.id]]);
+    assert.deepStrictEqual(B.roster.map(p => [p.bot, p.mine]), [[false, false], [false, false], [true, false], [true, false], [true, false]]);
+    assert.deepStrictEqual([A.botSettings, B.botSettings, B.bots], [{ n: 3, skill: 'legend' }, { n: 3, skill: 'legend' }, []]);
+    // states: only ours go out; B draws them like a player's car; the keepalive repeats them parked
+    const st = (x, z, v) => ({ x, y: 1, z, heading: Math.PI / 2, pitch: 0, roll: 0, speed: v || 0, steer: 0.1 });
+    assert.strictEqual(A.sendBotStates([{ id: B.id, state: st(0, 0) }, { id: 999, state: st(0, 0) }], true), false, 'not ours');
+    assert.strictEqual(A.sendBotStates([{ id: ids[0], state: st(-40, 0, 20) }, { id: ids[1], state: st(30, 30) }, { id: ids[0], state: st(99, 99) }], true), true);
+    assert.strictEqual(A.sendBotStates([{ id: ids[1], state: st(31, 30) }]), false, 'at most ~20 times a second');
+    await until(() => { B.update(); const p = B.players.find(q => q.id === ids[1]); return p && p.active; }, 2000, 'bot pose at B');
+    assert(Math.abs(B.players.find(q => q.id === ids[1]).state.x - 30) < 1 && B.players.find(q => q.id === ids[1]).state.z === 30);
+    await sleep(3300);                                              // longer than a remote car stays visible without news
+    B.update();
+    const kept = B.players.find(q => q.id === ids[1]);
+    assert.deepStrictEqual([kept.active, kept.state.speed], [true, 0], 'kept alive, parked, while A sends nothing');
+    // impacts (free practice: everybody solid). B parked at the origin; bot 0 drives the last 3 m at it
+    const keep = setInterval(() => B.sendState(st(0, 0), true), 50);
+    for (let k = 0; k <= 3; k++) { A.sendBotStates([{ id: ids[0], state: st(-9 + k * 2, 0, 40) }], true); await sleep(50); }
+    assert.strictEqual(A.sendHit(B.id, 5, 0, ids[0]), true);
+    assert.strictEqual(A.sendHit(B.id, 5, 0, ids[0]), false, 'one per bot per 40 ms');
+    assert.deepStrictEqual([A.sendHit(ids[1], 1, 0), A.sendHit(A.id, 1, 0), A.sendHit(B.id, 1, 0, B.id), A.sendHit(B.id, 1, 0, 999)], [false, false, false, false]);
+    await until(() => ev.B.length, 1000, 'hit from a bot');
+    assert.deepStrictEqual(take('B'), [['hit', ids[0], [5, 0]]]);
+    // B drives into bot 1 (parked at 6, 0): A hears which of its bots was hit
+    A.sendBotStates([{ id: ids[1], state: st(6, 0) }], true);
+    clearInterval(keep);
+    for (let k = 0; k <= 3; k++) { B.sendState(st(k, 0, 20), true); A.sendBotStates([{ id: ids[1], state: st(6, 0) }], true); await sleep(50); }
+    B.sendHit(ids[1], 4, 0);
+    await until(() => ev.A.length, 1000, 'botHit');
+    assert.deepStrictEqual(take('A'), [['botHit', ids[1], B.id, [4, 0]]]);
+    // a session: bot laps by id (rejections come back by id), lap times by id, parc fermé for the field
+    A.selectTrack('monza');
+    await until(() => A.trackId === 'monza' && B.trackId === 'monza', 2000, 'track');
+    assert.strictEqual(A.gp('start', { q: 1, r: 1, len: LEN }), true);
+    await until(() => A.session && A.session.phase === 'quali' && B.session && B.session.phase === 'quali', 2000, 'quali');
+    assert.deepStrictEqual(B.session.players.map(p => p.bot === true), [false, false, true, true, true]);
+    assert.strictEqual(A.setBots(0), false, 'parc fermé');
+    clk.add(3000);
+    const sid = A.session.sid;
+    assert.deepStrictEqual([A.sendGpLap(sid, 2.5, undefined, B.id), B.sendGpLap(sid, 2.5, undefined, ids[0]), A.sendGpLap(sid, 2.5, undefined, 999)], [false, false, false]);
+    assert.strictEqual(A.sendGpLap(sid, 2.5, undefined, ids[2]), true);
+    await until(() => ev.A.length, 2000, 'botLapRejected');
+    assert.deepStrictEqual(take('A'), [['botLapRejected', ids[2], 'not-driven']], 'by id, not as our own lapRejected');
+    A.sendBotStates([{ id: ids[0], state: st(0, 0) }], true);
+    A.sendBotStates([{ id: ids[0], state: st(200, 0) }], true);
+    assert.strictEqual(A.sendGpLap(sid, 2.5, clk(), ids[0]), true);
+    await until(() => A.session.players.find(p => p.id === ids[0]).qLaps === 1, 2000, 'bot lap counted');
+    assert.deepStrictEqual([A.sendLap(80.1, 80.1, B.id), A.sendLap(80.1, 80.1, ids[0])], [false, true]);
+    await until(() => B.players.find(p => p.id === ids[0]).best === 80.1, 2000, 'bot lap time');
+    assert.deepStrictEqual([take('A'), take('B')], [[], []]);
+    // the host leaves: his bots go; the session (qualifying) ends
+    A.leave();
+    assert.deepStrictEqual([A.bots, A.botSettings, take('A')], [[], { n: 0, skill: 'pro' }, [['bots', []]]]);
+    await until(() => B.roster.length === 1 && B.session.phase === 'free', 2000, 'bots gone');
+    assert.deepStrictEqual([B.players, B.isHost], [[], true]);
+    B.leave();
+    assert.strictEqual(uncaught.length, 0);
+  });
+
+  T('js/net.js bots against a hostile server: garbage bot rows / settings; hits and lap answers about cars that are not ours; what it sends', async t => {
+    const wss = new WebSocket.Server({ port: nextPort(), host: '127.0.0.1' });
+    await new Promise(r => wss.on('listening', r));
+    let sock = null;
+    const inbox = [];
+    const players = [{ id: 7, name: 'me', colour: '#112233', slot: 0 },
+      { id: 20, name: 'mine', colour: '#445566', slot: 1, bot: true, skill: 7, owner: 7, bi: 1 },
+      { id: 21, name: 'mine too', colour: '#445566', slot: 2, bot: true, skill: 'x', owner: 7, bi: 0 },
+      { id: 22, name: 'theirs', slot: 3, bot: true, skill: 0.5, owner: 8 },
+      { id: 23, name: 'fake', slot: 4, bot: 'yes', owner: 7 },
+      { id: 7, name: 'me again as a bot', bot: true, owner: 7 },
+      { id: 24, slot: 5, bot: true }];
+    wss.on('connection', ws => {
+      sock = ws;
+      ws.on('message', d => {
+        const m = JSON.parse(d.toString());
+        inbox.push(m);
+        if (m.t === 'hello') ws.send(JSON.stringify({ t: 'welcome', v: 1, id: 7, host: 7, track: 'monza', seq: 3, now: Date.now(), bots: 'x', players }));
+      });
+    });
+    const N = freshNet(), ev = [];
+    for (const n of ['bots', 'botHit', 'hit', 'botLapRejected', 'lapRejected']) N.on(n, (a, b, c) => ev.push([n, a, b, c]));
+    const raw = async s => { sock.send(typeof s === 'string' ? s : JSON.stringify(s)); await sleep(15); };
+    try {
+      assert.deepStrictEqual(await N.join('127.0.0.1:' + wss.address().port), { ok: true });
+      assert.deepStrictEqual(N.bots.map(x => [x.id, x.bi, x.skill, x.name]), [[21, 0, null, 'mine too'], [20, 1, 1, 'mine']]);
+      assert.deepStrictEqual(N.players.map(p => [p.id, p.bot, p.skill, p.owner, p.name]),
+        [[22, true, 0.5, 8, 'theirs'], [23, false, null, 0, 'fake'], [24, true, null, 0, 'AI 24']]);
+      assert.deepStrictEqual([N.botSettings, N.roster.length, ev.length, ev[0][0], ev[0][1] === N.bots], [{ n: 0, skill: 'pro' }, 6, 1, 'bots', true]);
+      ev.length = 0;
+      // settings garbage -> sane; the same bots again -> no event
+      await raw({ t: 'players', host: 7, bots: { n: 1e9, skill: '__proto__' }, players });
+      assert.deepStrictEqual([N.botSettings, ev], [{ n: 16, skill: 'pro' }, []]);
+      await raw({ t: 'players', host: 7, bots: { n: 2.7, skill: 'rookie' }, players });
+      assert.deepStrictEqual(N.botSettings, { n: 2, skill: 'rookie' });
+      await raw({ t: 'players', host: 7, players });
+      assert.deepStrictEqual(N.botSettings, { n: 2, skill: 'rookie' }, 'a roster without the field keeps it');
+      // hits: one of ours by a remote car -> botHit (clamped); about cars that are not ours / from our own -> nothing
+      for (const h of [{ from: 22, bot: 20, i: [3, 4] }, { from: 22, bot: 22, i: [1, 0] }, { from: 21, bot: 20, i: [1, 0] }, { from: 22, bot: 'x', i: [1, 0] },
+        { from: 22, bot: 20, i: [1e150, 0] }, { from: 22, bot: 20, i: [1e300, 1e300] }, { from: 21, i: [1, 0] }, { from: 22, bot: null, i: [1, 0] },
+        { from: 22, i: [0, 2] }]) await raw(Object.assign({ t: 'hit' }, h));
+      assert.deepStrictEqual(ev.splice(0).map(e => e.slice(0, 4)), [['botHit', 20, 22, [3, 4]], ['botHit', 20, 22, [50, 0]], ['hit', 22, [0, 2], undefined]]);
+      // lap answers by id: only about ours, never as our own lapRejected
+      for (const g of [{ why: 'too-fast', id: 20 }, { why: 'too-fast', id: 22 }, { why: 'too-fast', id: 'x' }, { why: '<b>', id: 21 }, { why: 'no-data', id: null }]) await raw(Object.assign({ t: 'glno' }, g));
+      assert.deepStrictEqual(ev.splice(0).map(e => e.slice(0, 3)), [['botLapRejected', 20, 'too-fast'], ['botLapRejected', 21, '']]);
+      // snapshot rows of our own bots are not remote cars
+      await raw({ t: 'snap', p: [[20, 1000, 1, 0, 1, 0, 0, 0, 0, 0], [22, 1000, 5, 0, 5, 0, 0, 0, 0, 0]] });
+      N.update();
+      assert.deepStrictEqual(N.players.map(p => [p.id, p.active]), [[22, true], [23, false], [24, false]]);
+      // what goes out: states of our bots only, rounded, one row per bot, progress along
+      inbox.length = 0;
+      assert.strictEqual(N.sendBotStates([{ id: 22, state: { x: 1, z: 1, heading: 0 } }, { id: 20, state: { x: NaN, z: 0, heading: 0 } }, { id: 21 }], true), false);
+      assert.deepStrictEqual([N.setBotProgress(21, 1.234567), N.setBotProgress(22, 1), N.setBotProgress(20, 'x')], [true, false, true]);
+      assert.strictEqual(N.sendBotStates([{ id: 20, state: { x: 1.23456, y: 2, z: 3, heading: 7, pitch: 0.12345, roll: 0, speed: 50.555, steer: -0.333 } },
+        { id: 21, state: { x: 1, z: 2, heading: -1 } }, { id: 20, state: { x: 5, z: 5, heading: 0 } }, { id: 21, state: { x: 9, z: 9, heading: 0 }, g: 7 }], true), true);
+      await until(() => inbox.some(m => m.t === 'bs'), 1000, 'bs');
+      const bs = inbox.find(m => m.t === 'bs');
+      assert.deepStrictEqual([bs.k, typeof bs.c, bs.b], [3, 'number', [[20, 1.23, 2, 3, 0.7168, 0.123, 0, 50.56, -0.33], [21, 1, 0, 2, -1, 0, 0, 0, 0, 1.2346]]]);
+      // laps, lap times and impacts by bot id: only ours
+      inbox.length = 0;
+      assert.deepStrictEqual([N.sendGpLap(1, 80, undefined, 22), N.sendGpLap(1, 80, undefined, 'x'), N.sendGpLap(1, 80, 5e12, 20), N.sendGpLap(1, 80)], [false, false, true, true]);
+      assert.deepStrictEqual([N.sendLap(80, 80, 22), N.sendLap(80, 79, 20)], [false, true]);
+      assert.deepStrictEqual([N.sendHit(22, 1, 0, 20), N.sendHit(22, 1, 0, 20), N.sendHit(22, 1, 0, 21), N.sendHit(20, 1, 0), N.sendHit(7, 1, 0), N.sendHit(22, 1, 0, 22),
+        N.sendHit(22, 2, 0)], [true, false, true, false, false, false, true]);
+      await until(() => inbox.length >= 6, 1000, 'sent');
+      assert.deepStrictEqual(inbox.filter(m => m.t === 'gl').map(m => [m.id, m.at]), [[20, 5e12], [undefined, undefined]]);
+      assert.deepStrictEqual(inbox.filter(m => m.t === 'lap').map(m => [m.id, m.best]), [[20, 79]]);
+      assert.deepStrictEqual(inbox.filter(m => m.t === 'hit').map(m => [m.to, m.from]), [[22, 20], [22, 21], [22, undefined]]);
+      // setBots: whatever is asked fits in one frame (16 at most)
+      inbox.length = 0;
+      assert.strictEqual(N.setBots(Array.from({ length: 20 }, (_, i) => ({ name: '\u{1F600}'.repeat(20), car: 'x'.repeat(40), colour: '#AABBCC', skill: i / 20 })), 'mixed'), true);
+      await until(() => inbox.some(m => m.t === 'bots'), 1000, 'bots');
+      const bm = inbox.find(m => m.t === 'bots');
+      assert.deepStrictEqual([bm.n, bm.list.length, bm.skill, bm.list[3].skill, bm.list[3].car], [16, 16, 'mixed', 0.15, 'x'.repeat(40)]);
+      assert(Buffer.byteLength(JSON.stringify(bm)) <= 1900, 'bytes ' + Buffer.byteLength(JSON.stringify(bm)));
+      inbox.length = 0;
+      assert.strictEqual(N.setBots([{ name: 'A', car: '2026-ferrari', colour: '#AABBCC', skill: 2 }, { name: 5, car: 'BAD', colour: 'x', skill: 'x' }], 'nope'), true);
+      await until(() => inbox.some(m => m.t === 'bots'), 1000, 'bots 2');
+      assert.deepStrictEqual(inbox.find(m => m.t === 'bots'), { t: 'bots', n: 2, list: [{ name: 'A', car: '2026-ferrari', colour: '#aabbcc', skill: 1 }, {}] });
+      // keepalive: with the loop stopped the last rows are repeated parked (speed / steer 0, no progress)
+      inbox.length = 0;
+      await sleep(450);
+      const parked = inbox.filter(m => m.t === 'bs');
+      assert(parked.length >= 1, 'repeated');
+      assert.deepStrictEqual(parked[parked.length - 1].b, [[20, 1.23, 2, 3, 0.7168, 0.123, 0, 0, 0], [21, 1, 0, 2, -1, 0, 0, 0, 0]]);
+      // a session is on: no field changes; a new track: no more repeats of the old poses
+      await raw({ t: 'gp', now: 1, s: { sid: 4, phase: 'quali', q: 1, r: 1, len: 5000, lightsAt: 0, goAt: 0, winnerAt: 0, endsAt: 0, grid: [], order: [7, 20],
+        players: [{ id: 7, name: 'me' }, { id: 20, name: 'mine', bot: true }, { id: 21, name: 'x', bot: 'yes' }] } });
+      assert.deepStrictEqual([N.setBots(0), N.session.players.map(p => p.bot)], [false, [undefined, true, undefined]]);
+      await raw({ t: 'track', id: 'spa', seq: 4 });
+      inbox.length = 0;
+      await sleep(450);
+      assert.strictEqual(inbox.filter(m => m.t === 'bs').length, 0, 'the old track\'s poses are not repeated');
+      // a roster without our bots: they are gone ('bots' with []), and so is all that was kept for them
+      await raw({ t: 'players', host: 7, players: players.filter(p => p.id === 7 || p.id === 22) });
+      assert.deepStrictEqual([N.bots, ev.splice(0).map(e => [e[0], e[1]])], [[], [['bots', []]]]);
+      assert.deepStrictEqual([N.sendBotStates([{ id: 20, state: { x: 1, z: 1, heading: 0 } }], true), N.sendGpLap(4, 80, undefined, 20), N.setBotProgress(20, 1)], [false, false, false]);
+      sock.close(1001);
+      await until(() => !N.connected, 2000, 'disconnected');
+      assert.deepStrictEqual([N.bots, N.botSettings, N.roster], [[], { n: 0, skill: 'pro' }, []]);
+      assert.strictEqual(uncaught.length, 0, 'nothing thrown out of a message handler');
+    } finally {
+      wss.clients.forEach(ws => ws.terminate());
+      await new Promise(r => wss.close(r));
+    }
+  });
 
   lane = lanes.tcp;
   T('connections that never become WebSockets are capped (in all and per address) and short-lived', async t => {
@@ -1927,6 +2456,39 @@ function freshNet() {
     const g = await settle(R.srv, [watcher], s => s.phase === 'quali' && s.q === 2);
     assert.deepStrictEqual(g.players.map(p => p.id), [watcher.id]);
     watcher.ws.close();
+  });
+
+  T('nothing a host sends for his bots is amplified: floods of bots / bs / bot laps reach the room as a trickle; he is kicked like anybody', async t => {
+    const R = await room(t, 2);
+    const [host, watcher] = R.cs;
+    await sleep(150);
+    // his field flipping between 14 bots and none, 3000 times: each flip changes the roster and the session
+    let n = watcher.msgs.length;
+    for (let i = 0; i < 3000; i++) host.send({ t: 'bots', n: i % 2 ? 14 : 0, list: [{ name: 'b' + i }] });
+    await host.wait(() => host.closed, 5000, 'bots flood: kicked');
+    assert.strictEqual(host.closed.code, 1008);
+    await sleep(250);
+    const gotBots = watcher.msgs.length - n;
+    assert(gotBots < 30, 'the watcher got ' + gotBots + ' messages for 3000 field changes');
+    await watcher.wait(() => watcher.host() === watcher.id && watcher.roster().length === 1, 2000, 'his bots went with him');
+    // states and laps of 14 bots, 3000 messages: the room still gets its 20 snapshots a second and nothing more
+    const ids = await addBots(watcher, [watcher], 14);
+    const w2 = await client(R.srv.port, { name: 'w2' });
+    await sleep(150);
+    n = w2.msgs.length;
+    const t0 = Date.now();
+    for (let i = 0; i < 3000; i++) {
+      watcher.send(i % 3 ? { t: 'bs', k: watcher.seq(), c: i, b: ids.map((id, j) => [id, i % 50, 0, j * 10, 0, 0, 0, 10, 0]) }
+        : { t: 'gl', k: watcher.seq(), sid: 0, time: 80, id: ids[i % 14] });
+    }
+    await watcher.wait(() => watcher.closed, 5000, 'bs flood: kicked');
+    await sleep(250);
+    const ms = Date.now() - t0, gotBs = w2.msgs.length - n;
+    assert(gotBs <= 20 * ms / 1000 + 10, 'w2 got ' + gotBs + ' messages in ' + ms + ' ms');
+    assert(watcher.all('glno').length <= 400, 'answers to the flooder are bounded by his rate limit: ' + watcher.all('glno').length);
+    await w2.wait(() => w2.roster().length === 1, 2000, 'the second flooder\'s bots went with him');
+    console.log('     watcher messages per 3000-message bot flood (bots, bs + gl): ' + gotBots + ', ' + gotBs + ' in ' + ms + ' ms');
+    w2.ws.close();
   });
 
   T('a kicked or refused client that ignores the close frame loses its seat at once and is cut off', async t => {
@@ -2183,6 +2745,7 @@ function freshNet() {
   const tcp = runLane(lanes.tcp);                               // mostly waiting: fine next to anything
   await runLane(lanes.floods);
   await Promise.all([runLane(lanes.relay), runLane(lanes.gp1), runLane(lanes.gp2), runLane(lanes.gp3), runLane(lanes.client), runLane(lanes.year), runLane(lanes.year2),
+    runLane(lanes.bots), runLane(lanes.bots2), runLane(lanes.botsClient),
     runLane(lanes.review), runLane(lanes.review2), tcp]);
   await slow;
 

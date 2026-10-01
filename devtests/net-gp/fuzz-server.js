@@ -18,9 +18,10 @@ const pick = a => a[Math.floor(rnd() * a.length)];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const NASTY = ['NaN', '1e999', '-1e999', 'null', '""', '"x"', '"5"', '{}', '[]', '[1]', 'true', 'false', '-1', '0', '0.5', '1e308', '-1e308', '1e-9',
   '200', '5000', '{"__proto__":{"x":1}}', '"__proto__"', '"constructor"', '[[[[[[[[[[]]]]]]]]]]', '"' + 'x'.repeat(300) + '"', '9007199254740993', '"\\u0000\\u202e"'];
-const TYPES = ['s', 'ping', 'gp', 'gl', 'hit', 'track', 'profile', 'lap', 'hello', 'nope', 'constructor', 'year'];
+const TYPES = ['s', 'ping', 'gp', 'gl', 'hit', 'track', 'profile', 'lap', 'hello', 'nope', 'constructor', 'year', 'bots', 'bs'];
 const FIELDS = ['k', 'c', 's', 'g', 'a', 'q', 'r', 'len', 'sid', 'time', 'to', 'i', 'id', 'name', 'colour', 'last', 'best', 'v', 'token',
-  'y', 'car', 'wear', 'year', 'at', 'password'];
+  'y', 'car', 'wear', 'year', 'at', 'password', 'n', 'skill', 'list', 'b', 'from', 'bot'];
+const LEVELS = ['rookie', 'amateur', 'pro', 'legend', 'mixed'];
 const goodYear = y => y === null || (Number.isInteger(y) && y >= 2010 && y <= 2100);
 
 (async () => {
@@ -42,9 +43,15 @@ const goodYear = y => y === null || (Number.isInteger(y) && y >= 2010 && y <= 21
         if (m.t === 'track') c.seq = m.seq;
         if (m.t === 'players' || m.t === 'welcome') {
           c.host = m.host;
-          if (!Array.isArray(m.players) || m.players.length > 16 || !goodYear(m.year) || !m.players.every(p => Number.isInteger(p.id) && typeof p.name === 'string' && Array.from(p.name).length <= 16 &&
-            /^#[0-9a-f]{6}$/.test(p.colour) && /^([a-z0-9-]{1,40})?$/.test(p.car) && Number.isInteger(p.slot) && (p.last === null || Number.isFinite(p.last)))) bad.push('roster: ' + d.toString().slice(0, 300));
-          else c.others = m.players.map(p => p.id);
+          const okBots = !m.bots || (Number.isInteger(m.bots.n) && m.bots.n >= 0 && m.bots.n <= 16 && LEVELS.includes(m.bots.skill) &&
+            m.bots.n === m.players.filter(p => p.bot).length);
+          // a bot row: bot true, skill 0..1 or null, owner = a player in the room, bi a whole number; slots unique
+          const okRow = p => p.bot === undefined || (p.bot === true && (p.skill === null || (Number.isFinite(p.skill) && p.skill >= 0 && p.skill <= 1)) &&
+            Number.isInteger(p.bi) && p.bi >= 0 && m.players.some(q => q.id === p.owner && !q.bot));
+          if (!Array.isArray(m.players) || m.players.length > 16 || !goodYear(m.year) || !okBots || new Set(m.players.map(p => p.slot)).size !== m.players.length ||
+            !m.players.every(p => Number.isInteger(p.id) && typeof p.name === 'string' && Array.from(p.name).length <= 16 &&
+            /^#[0-9a-f]{6}$/.test(p.colour) && /^([a-z0-9-]{1,40})?$/.test(p.car) && Number.isInteger(p.slot) && (p.last === null || Number.isFinite(p.last)) && okRow(p))) bad.push('roster: ' + d.toString().slice(0, 300));
+          else { c.others = m.players.map(p => p.id); c.bots = m.players.filter(p => p.bot && p.owner === c.id).map(p => p.id); }
         }
         if (m.t === 'gp') {
           const s = m.s;
@@ -58,7 +65,9 @@ const goodYear = y => y === null || (Number.isInteger(y) && y >= 2010 && y <= 21
           }
         }
         if (m.t === 'snap' && !m.p.every(e => e.length === 10 && e.every(Number.isFinite))) bad.push('snap: ' + d.toString().slice(0, 200));
-        if (m.t === 'hit' && !(Number.isInteger(m.from) && m.i.length === 2 && m.i.every(Number.isFinite) && Math.hypot(m.i[0], m.i[1]) <= 80.01)) bad.push('hit: ' + d.toString());
+        if (m.t === 'hit' && !(Number.isInteger(m.from) && m.i.length === 2 && m.i.every(Number.isFinite) && Math.hypot(m.i[0], m.i[1]) <= 80.01 &&
+          (m.bot === undefined || (c.bots || []).includes(m.bot)))) bad.push('hit: ' + d.toString());
+        if (m.t === 'glno' && m.id !== undefined && !(c.bots || []).includes(m.id)) bad.push('glno about a car that is not ours: ' + d.toString());
       });
       ws.on('close', () => { c.open = false; resolve(c); });
       ws.on('error', () => {});
@@ -84,11 +93,26 @@ const goodYear = y => y === null || (Number.isInteger(y) && y >= 2010 && y <= 21
     if (r < (c.host === c.id ? 0.66 : 0.605)) return '{"t":"gp","a":' + f(pick(['start', 'start', 'skip', 'skip', 'end', 'again', 'again'])) + ',"q":' + f(pick([1, 2, 3])) + ',"r":' + f(pick([1, 2, 3])) + ',"len":' + f(200) + ',"wear":' + f(pick([1, 2, 5, 9])) + ',"year":' + f(1999) + '}';
     if (r < (c.host === c.id ? 0.69 : 0.62)) return '{"t":"year","y":' + f(pick([2010, 2014, 2024, 2026, 2009, 2101]), 0.2) + '}';
     if (r < 0.86) return '{"t":"gl","k":' + f(c.seq) + ',"sid":' + f(c.sid) + ',"time":' + f(2.2 + rnd() * 2) + ',"at":' + f(now - rnd() * 5000, 0.3) + '}';
-    if (r < 0.92) return '{"t":"hit","k":' + f(c.seq) + ',"to":' + f(to) + ',"i":' + f([rnd() * 200 - 100, rnd() * 200 - 100]) + '}';
+    if (r < 0.92) return '{"t":"hit","k":' + f(c.seq) + ',"to":' + f(to) + ',"i":' + f([rnd() * 200 - 100, rnd() * 200 - 100]) +
+      (rnd() < 0.4 ? ',"from":' + f(bot(c)) : '') + '}';
     if (r < 0.921) return '{"t":"track","id":' + f(pick(['monza', 'spa', 'suzuka'])) + '}';
-    if (r < 0.98) return '{"t":"profile","name":' + f('n' + Math.floor(rnd() * 99)) + ',"colour":' + f('#a0b0c0') + ',"car":' + f(pick(['2024-ferrari', '2010-red-bull', 'x'.repeat(41), 'A b'])) + '}';
-    return '{"t":"lap","last":' + f(60 + rnd() * 30) + ',"best":' + f(60) + '}';
+    if (r < 0.95) return '{"t":"profile","name":' + f('n' + Math.floor(rnd() * 99)) + ',"colour":' + f('#a0b0c0') + ',"car":' + f(pick(['2024-ferrari', '2010-red-bull', 'x'.repeat(41), 'A b'])) + '}';
+    if (r < 0.96) return '{"t":"lap","last":' + f(60 + rnd() * 30) + ',"best":' + f(60) + (rnd() < 0.5 ? ',"id":' + f(bot(c)) : '') + '}';
+    // computer drivers: the host's field (anybody may try), their states, their laps
+    if (r < (c.host === c.id ? 0.968 : 0.962)) {
+      const n = Math.floor(rnd() * 20) - 2, list = [];
+      for (let i = 0; i < Math.min(Math.max(n, 0), 16); i++) list.push(rnd() < 0.8 ? { name: 'b' + i, car: pick(['2024-ferrari', '2026-red-bull', 'BAD']), colour: '#102030', skill: rnd() * 1.4 - 0.2 } : JSON.parse(val()));
+      return '{"t":"bots","n":' + f(n) + ',"skill":' + f(pick(LEVELS.concat(['godlike', '__proto__']))) + ',"list":' + f(list) + '}';
+    }
+    if (r < 0.99) {
+      const rows = [];
+      for (let i = 0, n = 1 + Math.floor(rnd() * 4); i < n; i++) rows.push([bot(c), rnd() * 40, 0, rnd() * 40, rnd() * 6, 0, 0, rnd() * 90, 0, rnd() * 3 - 0.5]);
+      return '{"t":"bs","k":' + f(c.seq) + ',"c":' + f(Date.now()) + ',"b":' + f(rows, 0.08) + '}';
+    }
+    return '{"t":"gl","k":' + f(c.seq) + ',"sid":' + f(c.sid) + ',"time":' + f(2.2 + rnd() * 2) + ',"at":' + f(now - rnd() * 5000, 0.3) + ',"id":' + f(bot(c)) + '}';
   }
+  // one of this client's bots most of the time, else anybody's / nonsense
+  function bot(c) { return c.bots && c.bots.length && rnd() < 0.8 ? pick(c.bots) : pick(c.others.length ? c.others : [1]); }
 
   clients[0].ws.send(JSON.stringify({ t: 'track', id: 'monza' }));
   const end = Date.now() + SECONDS * 1000;
@@ -113,7 +137,12 @@ const goodYear = y => y === null || (Number.isInteger(y) && y >= 2010 && y <= 21
     await sleep(55);                                              // ~55 messages / s per client: just under the limit
   }
   await sleep(300);
-  // afterwards: a normal client is served normally
+  // afterwards: a normal client is served normally (the host first ends the session and drops his bots: a room full
+  // of bots during a session is rightly 'full')
+  const host = clients.find(c => c.open && c.id && c.id === c.host);
+  const botsLeft = srv.info().bots.n;
+  if (host) ['{"t":"gp","a":"end"}', '{"t":"gp","a":"end"}', '{"t":"bots","n":0}'].forEach(s => host.ws.send(s));
+  await sleep(300);
   const probe = await connect(99);
   assert(probe.id > 0 || clients.filter(c => c.open).length === 16, 'a new client can join');
   probe.ws.send(JSON.stringify({ t: 'ping', c: 42 }));
@@ -162,6 +191,7 @@ const goodYear = y => y === null || (Number.isInteger(y) && y >= 2010 && y <= 21
   console.log('exceptions caught inside the server: ' + errors.length + (errors.length ? '\n  ' + errors.slice(0, 10).join('\n  ') : ''));
   console.log('malformed messages received by clients: ' + bad.length + (bad.length ? '\n  ' + bad.slice(0, 10).join('\n  ') : ''));
   console.log('kicked for flooding: ' + logs.filter(l => /flood/.test(l)).length + ', still connected: ' + still + '/8, probe id ' + probe.id);
+  console.log('bot field changes in the server log: ' + logs.filter(l => /^bots /.test(l)).length + ', bots at the end: ' + botsLeft + ' (' + info.bots.skill + ')');
   const ok = errors.length === 0 && bad.length === 0 && probe.id > 0;
   console.log(ok ? 'FUZZ OK' : 'FUZZ FAILED');
   process.exit(ok ? 0 : 1);

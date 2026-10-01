@@ -11,6 +11,10 @@
 //   visit only after it), Monaco's tunnel (js/tunnels.js built / disposed with the track, the scene lights dimmed inside,
 //   F1.audio.setTunnel with the tunnel's size), the next set of tyres (ui.setCompound / onCompound, the pit strip's
 //   next, the telemetry's nextKeys, the prompt on entering the pit lane).
+// v7 glue: the computer drivers (js/ai.js): the 電腦車手 setting (ui.getBots / onBots) -> the field alone (gp.setBots), their
+//   cars in the grid boxes behind ours, driving, a Grand Prix's placements (qualifying from the room slots, the grid by
+//   the session's order, held until the lights, the lap clocks armed at lights out), back to free practice, none again.
+//   With none (the default) everything above runs exactly as before.
 //
 //   node test/main.test.js        -> exit code 1 on any failed check (about 1 s)
 //   MAIN=<another main.js> runs the checks against it (e.g. the one from before the fixes: they must fail)
@@ -37,15 +41,15 @@ global.THREE = Object.assign({}, THREE_REAL, { WebGLRenderer: function () { this
 
 /* ---------- the real modules (index.html's order, minus DOM / WebGL ones) ---------- */
 for (const f of ['tracks-data.js', 'js/seasons-data.js', 'js/cars.js', 'js/track.js', 'js/tyres.js', 'js/car.js', 'js/raceline.js',
-  'js/tunnels.js', 'js/collide.js', 'js/laps.js', 'js/pit.js', 'net/session.js', 'js/gp.js']) require(path.join(ROOT, f));
+  'js/tunnels.js', 'js/collide.js', 'js/laps.js', 'js/pit.js', 'js/ai.js', 'net/session.js', 'js/gp.js']) require(path.join(ROOT, f));
 const F1 = global.F1;
 let builds = 0;
 const buildTrack = F1.buildTrack;
 F1.buildTrack = d => { builds++; return buildTrack(d); };
 F1.createCockpit = () => ({ group: new THREE.Group(), update() {}, setCar() {}, setSources() {}, centreLook() {}, setLook() {} });
-const U = { opts: null, toasts: [], loading: [], year: 2025, compound: null, pit: null, hud: null, tunnel: [] };
+const U = { opts: null, toasts: [], loading: [], year: 2025, compound: null, pit: null, hud: null, tunnel: [], gp: null };
 F1.ui = {
-  init(o) { U.opts = o; }, setTrack() {}, showMenu() {}, hideMenu() {}, updateHUD(h) { U.hud = h; }, setPit(p) { U.pit = p; }, setGp() {}, setCars() {},
+  init(o) { U.opts = o; }, setTrack() {}, showMenu() {}, hideMenu() {}, updateHUD(h) { U.hud = h; }, setPit(p) { U.pit = p; }, setGp(v) { U.gp = v; }, setCars() {},
   setLights() {}, setResumeHandler() {}, toast(t) { U.toasts.push(t); }, setLoading(n) { U.loading.push(n); },
   setCompound(c) { U.compound = c; },
   getProfile: () => ({ name: 'T', colour: '#ff0000' }), getCar: () => null, getYear: () => U.year, getAudio: () => ({ volume: 0, muted: true })
@@ -344,6 +348,60 @@ function stopInBox(slot) {
     await load('it-1922');
     check('v6.2: another track: Monaco\'s tunnels gone from the scene, daylight', !tn.group.parent && g.tunnels !== tn && L.sun.intensity === L.sun0 && L.hemi.intensity === L.hemi0,
       { parent: !!tn.group.parent, sun: L.sun.intensity });
+  }
+
+  /* ================= v7: computer drivers ================= */
+  if (!g.bots) check('v7: F1.game.bots (this main.js has no computer drivers)', false);
+  else {
+    check('v7: none by default: no bots, ours alone (everything above ran without any)', g.bots.length === 0 && g.gp.bots().length === 0 && U.gp && U.gp.bots && U.gp.bots.available === true);
+    const G = g.track.grid;
+    const inBox = (st, k) => Math.hypot(st.x - (G[k].x - Math.sin(G[k].heading) * 2.8), st.z - (G[k].z - Math.cos(G[k].heading) * 2.8)) < 0.6;
+    toMenu();
+    U.opts.onBots({ count: 5, skill: 'pro' });
+    const B = g.bots, desc = g.gp.bots();
+    check('v7: 5 set in the menu (free practice): F1.gp holds them (ids 2..6, slots 1..5, real names, the season\'s cars)',
+      desc.length === 5 && desc.every((d, i) => d.id === i + 2 && d.slot === i + 1 && /^2025-/.test(d.car) && !/standard/.test(d.car) && !/^AI /.test(d.name)),
+      desc.map(d => d.name + ' ' + d.car));
+    // (ours stands where the track put it alone - on the centreline 10 samples before the line, beside boxes 2 and 3: a box
+    // with a car on it is not used, that bot goes on along the track to a free spot)
+    const clear = st => B.concat([{ car: g.car }]).every(o => o.car.state === st || Math.hypot(o.car.state.x - st.x, o.car.state.z - st.z) >= 7);
+    check('v7: their cars on Monza, each in its grid box (slot + 1) or (a box beside our car) on a free spot, stopped, pro (skill ~0.7)',
+      B.length === 5 && B.filter(b => inBox(b.car.state, b.slot)).length >= 3 && B.every(b => (inBox(b.car.state, b.slot) || clear(b.car.state)) && b.car.state.speed === 0 &&
+        Math.abs(b.skill - 0.7) < 0.05), B.map(b => [b.slot, b.skill, inBox(b.car.state, b.slot)]));
+    check('v7: the view for the 大獎賽 tab: 5 of 15, editable, the field listed', U.gp.bots.count === 5 && U.gp.bots.max === 15 && U.gp.bots.canEdit === true && U.gp.botList.length === 5, U.gp.bots);
+    tap('Escape');
+    frames(60 * 8);
+    check('v7: free practice 8 s: the bots drive off (ours stands still), nothing NaN',
+      B.filter(b => Math.abs(b.car.state.speed) > 10).length >= 2 && B.every(b => [b.car.state.x, b.car.state.z, b.car.state.speed].every(Number.isFinite)),
+      B.map(b => +b.car.state.speed.toFixed(1)));
+    check('v7: think() sees ours + the 5 (views)', g.botViews.length === 6 && g.botViews[0].id === 1);
+    // a Grand Prix with them
+    toMenu();
+    U.opts.onGpStart({ q: 1, r: 1, wear: 1 });
+    frames(2);
+    check('v7: qualifying: 6 in the session, ours in grid box 1, the bots from their room slots (boxes 2..6)',
+      g.gp.phase === 'quali' && g.gp.snapshot.players.length === 6 && inBox(g.car.state, 0) && B.every(b => inBox(b.car.state, b.slot)));
+    check('v7: the 電腦車手 rows locked during the session', U.gp.bots.canEdit === false);
+    g.gp.action('skip');
+    frames(2);
+    const s = g.gp.snapshot;
+    check('v7: the grid (join order: ours on pole): every bot in the box of its place', g.gp.phase === 'grid' && s.grid[0] === 1 && B.every(b => inBox(b.car.state, s.grid.indexOf(b.id))),
+      { grid: s.grid });
+    frames(120);
+    check('v7: held on the grid before the lights', B.every(b => inBox(b.car.state, s.grid.indexOf(b.id)) && b.car.state.speed === 0));
+    check('v7: lights out -> the race', pumpUntil(() => g.gp.phase === 'race', 60 * 12));
+    check('v7: their lap clocks armed at lights out (as ours)', B.every(b => b.lap.started && b.lap.n === 1) && g.lap.started);
+    frames(60 * 6);
+    check('v7: the race: they start (6 s)', B.filter(b => Math.abs(b.car.state.speed) > 15).length >= 3, B.map(b => +b.car.state.speed.toFixed(1)));
+    g.gp.action('end');
+    frames(2);
+    g.gp.action('end');
+    frames(2);
+    check('v7: back to free practice: the bots in their room slots again, the setting editable',
+      g.gp.phase === 'free' && B.every(b => inBox(b.car.state, b.slot)) && U.gp.bots.canEdit === true);
+    toMenu();
+    U.opts.onBots({ count: 0, skill: 'pro' });
+    check('v7: none again: no bots left', g.bots.length === 0 && g.gp.bots().length === 0);
   }
 
   console.log('\n' + passed + ' / ' + (passed + failed) + ' checks passed' + (failed ? '' : ': all main tests passed'));

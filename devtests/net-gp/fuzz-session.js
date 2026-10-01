@@ -21,7 +21,7 @@ function finite(o, where) {
   else assert(o === null || typeof o === 'string' || typeof o === 'boolean', 'odd value at ' + where + ': ' + typeof o);
 }
 
-function check(s, present, lastSid, trail) {
+function check(s, present, lastSid, trail, botIds) {
   const g = s.snapshot();
   try {
     assert.deepStrictEqual(JSON.parse(JSON.stringify(g)), g, 'snapshot survives JSON');
@@ -38,6 +38,10 @@ function check(s, present, lastSid, trail) {
     assert.deepStrictEqual(g.order.slice().sort(), drivers.map(p => p.id).sort(), 'order = the classified players');
     assert(new Set(g.grid).size === g.grid.length);
     for (const p of g.players) {
+      // computer drivers: their rows (also as DNF leavers) carry bot: true, nobody else's carries the field
+      // (a leaver's row keeps what it was; its id may since have come back as the other kind)
+      if (p.left) assert(!('bot' in p) || p.bot === true, 'bot flag of a leaver ' + p.id);
+      else assert(botIds.has(p.id) ? p.bot === true : !('bot' in p), 'bot flag of ' + p.id);
       assert(p.qLaps >= 0 && p.qLaps <= 20 && p.rLaps >= 0 && p.rLaps <= 99 && p.down >= 0 && p.rTime >= 0);
       assert(p.gap === null || p.gap >= 0);
       if (p.dnf) assert(p.left && !p.fin && !p.spec, 'DNF = a driver who left without finishing');
@@ -93,7 +97,7 @@ const seen = {};
 for (let run = 0; run < RUNS; run++) {
   const s = createSession({ random: pick([rnd, () => 0, () => 1, () => NaN, undefined]) });
   let now = 1000000 + Math.floor(rnd() * 1e9), nextId = 1, lastSid = 0;
-  const present = new Set(), trail = [];
+  const present = new Set(), trail = [], botIds = new Set();
   const steps = 20 + Math.floor(rnd() * 200);
   const anyId = () => (rnd() < 0.9 && present.size ? pick(Array.from(present)) : pick([0, 99, -1, 'x', null, undefined, 1.5]));
   for (let i = 0; i < steps; i++) {
@@ -102,7 +106,12 @@ for (let run = 0; run < RUNS; run++) {
     // keep the walk inside sessions most of the time: start one when idle, let time pass when one is on
     if (s.phase === 'free' && present.size && rnd() < 0.5) r = 0.22;
     else if (s.phase !== 'free' && rnd() < 0.25) r = 0.9;
-    if (r < 0.10) { const id = rnd() < 0.85 ? nextId++ : anyId(); op = 'add ' + id; if (s.addPlayer(id, pick(['A', 'B', null, 5, 'x'.repeat(40)]), now)) present.add(id); }
+    if (r < 0.10) {
+      // a human, or a computer driver (as the server adds them: {bot: true, owner}), or garbage options (= a human)
+      const id = rnd() < 0.85 ? nextId++ : anyId(), kind = rnd(), opts = kind < 0.4 ? { bot: true, owner: pick([1, 2, 'x', undefined]) } : kind < 0.5 ? pick(NASTY) : undefined;
+      op = 'add ' + id + (kind < 0.4 ? ' (bot)' : '');
+      if (s.addPlayer(id, pick(['A', 'B', null, 5, 'x'.repeat(40)]), now, opts)) { present.add(id); if (kind < 0.4) botIds.add(id); else botIds.delete(id); }
+    }
     else if (r < 0.17) { const id = anyId(); op = 'remove ' + id; if (s.removePlayer(id, now)) present.delete(id); }
     else if (r < 0.20) { op = 'rename'; s.rename(anyId(), pick(['N', null, 7, undefined])); }
     else if (r < 0.27) {
@@ -138,18 +147,23 @@ for (let run = 0; run < RUNS; run++) {
       op = 'progress';
       s.progress(anyId(), rnd() < 0.8 ? rnd() * 5 - 1 : pick(NASTY), rnd() < 0.4 ? undefined : rnd() < 0.8 ? rnd() * LEN : pick(NASTY));
     }
-    else if (r < 0.76) { op = 'solid'; assert(typeof s.solid(anyId(), anyId(), rnd() < 0.9 ? now : pick(NASTY)) === 'boolean'); }
+    else if (r < 0.76) {
+      op = 'solid';
+      assert(typeof s.solid(anyId(), anyId(), rnd() < 0.9 ? now : pick(NASTY)) === 'boolean');
+      const id = anyId();
+      assert.strictEqual(s.isBot(id), present.has(id) && botIds.has(id), 'isBot ' + id);
+    }
     else { const dt = pick([0, 1, 50, 500, 1000, 3000, 3000, 4000, 4000, 7000, 12000, 95000]); now += dt; op = 'tick +' + dt; s.tick(now); }
     trail.push(op);
     ops++;
-    const g = check(s, present, lastSid, trail);
+    const g = check(s, present, lastSid, trail, botIds);
     lastSid = g.sid;
     seen[g.phase] = (seen[g.phase] || 0) + 1;
   }
   // never stuck: time passes, everybody goes home -> free practice with nobody
   now += 200000; s.tick(now);
   Array.from(present).forEach(id => { s.removePlayer(id, now); present.delete(id); });
-  const g = check(s, present, lastSid, trail.concat(['everybody leaves']));
+  const g = check(s, present, lastSid, trail.concat(['everybody leaves']), botIds);
   assert.deepStrictEqual([g.phase, g.players.length], ['free', 0]);
 }
 console.log(RUNS + ' random sessions, ' + ops + ' operations, seed ' + SEED + ': all invariants held');

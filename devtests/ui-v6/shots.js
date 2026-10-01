@@ -28,10 +28,11 @@ function check(name, ok, detail) {
 }
 
 // (v6.1: js/hudmirrors.js after js/cockpit.js - the HUD rear-view mirrors; v6.2: js/track-names-zh.js after tracks-data.js - the
-// Chinese circuit names of the cards and the search -, js/tunnels.js after js/scenery.js - Monaco's tunnel)
+// Chinese circuit names of the cards and the search -, js/tunnels.js after js/scenery.js - Monaco's tunnel; v7: js/ai.js after js/pit.js -
+// the computer drivers)
 const CONTRACT_ORDER = ['js/boot.js', 'lib/three.min.js', 'tracks-data.js', 'js/track-names-zh.js', 'js/seasons-data.js', 'js/cars.js', 'js/track.js', 'js/tyres.js', 'js/car.js',
   'js/cockpit.js', 'js/hudmirrors.js', 'js/gamepad.js', 'js/audio.js', 'js/raceline.js', 'scenery-data.js', 'js/scenery.js', 'js/tunnels.js', 'js/collide.js',
-  'js/carmodel.js', 'js/laps.js', 'js/pit.js', 'net/session.js', 'js/net.js', 'js/gp.js', 'js/telemetry.js', 'js/ui.js', 'js/main.js'];
+  'js/carmodel.js', 'js/laps.js', 'js/pit.js', 'js/ai.js', 'net/session.js', 'js/net.js', 'js/gp.js', 'js/telemetry.js', 'js/ui.js', 'js/main.js'];
 // every id the v6 UI adds (reported to the integrator / end-to-end tests); v6.1: the HUD mirror frames and their switch
 const NEW_IDS = ['hud-telemetry', 'hud-pit', 'hud-pit-limit', 'hud-pit-lim', 'hud-pit-warn', 'hud-pit-box', 'hud-pit-pending', 'hud-pit-svc',
   'hud-pit-svc-label', 'hud-pit-svc-time', 'hud-pit-bar', 'hud-pit-pen', 'hud-gp-year', 'menu-tabs', 'tab-car', 'tab-gp', 'tab-mp', 'tab-set',

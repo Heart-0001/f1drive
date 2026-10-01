@@ -1,0 +1,438 @@
+
+################ net + session + gp bots
+
+== summary
+Computer drivers ("bots") now work in the protocol, the Grand Prix session and the client, following the AI report's design with a few changes. The host's game simulates the bots. The server treats them as players owned by the host's connection: they get ids and room slots, appear in the roster, take part in qualifying, the grid, the race and DNF, and go through the same validation, proof-of-driving checks, impact checks and rate limits as a human. Guests interpolate them like any remote car. Offline, `F1.gp` holds them in its local session. Nothing was committed, pushed or packaged.
+
+**Changes from the report's design:**
+- The field is set with one message, `bots {n, skill, list}`, instead of a list only. Bot laps go through `gl` with an `id` instead of a new `bgl` message.
+- The server sends no `gone` message when a bot is removed (the roster carries the change), so a host changing his field cannot multiply traffic.
+- A connection gets 4 more messages a second per bot it owns.
+- Snapshot rows carry `bot: true` on bots only, so human rows are unchanged on the wire. The two client sanitisers keep the same sparse form.
+- Offline, `F1.gp` assigns the bot ids itself (2..16).
+- New on the client: `gp.entry(id, out)` and `gp.solid(a, b)` for each bot's driving context, and a `botsGo` event to arm the bots' lap counters.
+- The offline race now republishes live standings every 500 ms when they changed, like a room does. Before, the offline order only updated on laps, which was wrong once bots race offline.
+
+**Decisions taken (please record them in docs/v6-plan.md, which I do not own):**
+- **Host leaving:** when the owner of the bots leaves, his bots are removed. A running session ends: qualifying or grid goes back to free practice, a race goes to results with the bots DNF, and results that are already final stay. This applies to dedicated and token servers alike.
+- **Full room:** a human joining a full room in free practice takes the newest bot's seat. During a session he gets `full`.
+- **Strength:** the room level defaults to `pro`. A level that is not one keeps the current level. A bot sent without its own skill gets the level's value (`null` for `mixed`).
+- **Names:** cleaned like player names, at most 16 characters, default `AI n`.
+- **Protocol:** stays version 1. An older client sees bots as ordinary players and still collides with them.
+
+**Verification:**
+- All 12 node suites pass. `test/server.test.js` passed 3 times in a row after the last change (once with the port range 24700.., twice with OS-assigned ports) and 5 times in a row before it.
+- New tests: 2 in session, 2 in gp, and 7 in the server suite (1 flood test, 4 bot-rule tests, 2 `js/net.js` client tests). They cover hostile `bots` / `bs` / `gl` / `lap` / `hit` messages from a guest, oversized `n`, garbage skill and lists, `__proto__` keys, and the per-bot rate budget.
+- New Electron harness `devtests/net-gp/electron-bots.js`: 29/29.
+- Existing harnesses: electron-net 20/20, electron-v6 25/25, electron-host 8/8, mp-e2e 30/30, start-clock 26/26, gp-e2e online-v6 65/65, gp-e2e online 141/141, ui-gp 117/117, plus gp-test browser-load and net-glue.
+- Fuzzers: fuzz-server, now including bot messages, passed `FUZZ OK` on seeds 1, 2, 3, 7 and a 30 s run on seed 11. fuzz-session holds all invariants over 3000 and 5000 runs.
+
+The integration into the game (main.js, ui.js, index.html) is not done; it is the glue agent's job, and the exact wire format and APIs are in the notes below.
+
+== apiNotes
+ - WIRE, client -> server `bots {n, skill?, list?}`. Host only, free practice only, otherwise ignored. n is a count of at least 0, floored and clamped to the free seats (maxPlayers - humans - other owners' bots); a missing, negative or non-number n is ignored. skill is the room level 'rookie' | 'amateur' | 'pro' | 'legend' | 'mixed'; any other value keeps the room's level (default 'pro'). list is [{name, car, colour, skill}], one entry per bot: entry i is always bot i. Missing or invalid fields get defaults on creation (name 'AI i+1', car '', a palette colour, the level's skill or null for 'mixed') and keep the old value on an update. Bots 0..n-1 that already exist keep their id and slot and are updated in place; extra ones are removed from the end; new ones get ids from the shared player counter and the lowest free room slot.
+ - WIRE, client -> server `bs {k: trackSeq, c: senderClockMs, b: [[id, x, y, z, heading, pitch, roll, speed, steer, g?], ...]}`. Only the sender's own bots count, at most 16 rows, the first row per bot. Each row is validated and clamped like 's' (cleanState), credited by the same proof-of-driving logic, kept in the bot's motion trail for impact checks, and g is session.progress held to the path driven. Bots are relayed in the normal 20 Hz `snap` rows [id, c, x, ...] exactly like players. Under 1 KB for 15 bots; js/net.js splits it into several frames above 1900 bytes.
+ - WIRE: `gl {k, sid, time, at?, id}` reports a lap of one of the sender's bots, checked against that bot's dist/live; a rejection comes back as `glno {why, id}` to the sender only. `lap {last, best, id}` sets a bot's roster times. `hit {k, to, i, from: botId}` is a hit reported by one of the sender's bots, checked against the bot's trail and with its own 40 ms throttle and per-pair budget. Any id or from that is not the sender's own bot drops the message silently. Hits among one owner's own cars (his car and his bots) are never relayed: his game settles them.
+ - WIRE, server -> client: bot roster rows are {id, name, colour, car, slot, last, best, bot: true, skill: 0..1 | null, owner, bi}; human rows are unchanged. `welcome` and every `players` message carry `bots: {n, skill}` (n = bots in the room, skill = the room level). Session snapshot rows of bots carry `bot: true`. A guest hitting a bot produces `hit {from: guestId, bot: botId, i}` sent to the bot's owner; a bot hitting a player produces `hit {from: botId, i}` to that player. No `gone` message is sent for bots.
+ - SERVER RULES: humans + bots <= maxPlayers (16). A human joining a full room in free practice takes the newest bot's seat (highest bi; the owner learns it from the roster); during a session he gets 'full'. When the owner leaves (dedicated or token server) all his bots are removed; if a session is in quali / grid / race it ends (quali/grid -> free, race -> results with the bots DNF); results stay as they are. A connection's message budget grows by 4/s and its burst by 8 per bot it owns (`BOT_RATE`). `srv.info()` gains `bots: {n, skill}`.
+ - SESSION (net/session.js): `addPlayer(id, name, now, {bot: true, owner})` adds a bot; anything else adds a human. `isBot(id)`. Bots are classified exactly like humans; their snapshot rows carry `bot: true`.
+ - F1.net additions:
+- `net.setBots(listOrN, skill)`: host, free practice only; returns true when sent. It sanitises the entries and keeps the frame under 1900 bytes (drops colours, then shortens names if needed).
+- `net.sendBotStates([{id, state: car.state, g?}], force?)`: call every frame; it rate-limits itself to the 45 ms send interval and sends only OUR bots. While the loop is stopped (menu), keepalive repeats the last poses parked.
+- `net.setBotProgress(id, v|null)`.
+- `net.sendGpLap(sid, time, at, botId?)`, `net.sendLap(last, best, botId?)`, `net.sendHit(toId, ix, iz, fromBotId?)`: each with a bot id only for OUR bots; sendHit allows one report per bot per 40 ms, never targets our own cars, and returns a bool.
+ - F1.net fields and events:
+- `net.bots`: OUR bots in list order, [{id, name, colour, car, slot, skill, bi, last, best}].
+- `net.botSettings`: {n, skill}.
+- `net.roster` rows gain bot, skill, owner, mine.
+- `net.players` rows gain bot, skill, owner. OUR bots are NOT in net.players (they are local cars); guests get every bot as a remote car.
+- Events: 'bots'(net.bots) when our bots change, also [] when we leave; 'botHit'(botId, fromId, [ix, iz]); 'botLapRejected'(botId, why). Our own 'lapRejected' never fires for bot laps.
+ - F1.gp additions:
+- `gp.setBots(listOrN, level)`: offline, free practice only, at most 15 bots with ids 2..16 and slots 1..15 (the player is id 1, slot 0), applied immediately; online it forwards to net.setBots.
+- `gp.bots()`: a fresh copy [{id, name, colour, car, skill, slot, bi}] of our bots (online: net.bots).
+- `gp.botLap(id, time)`: returns '' when accepted or sent, or 'not-ours' | 'not-racing' | 'done' | 'no-session' | 'not-sent' | a session reason.
+- `gp.botProgress(id, v)`.
+- `gp.entry(id, out?)`: {id, bot, taking, lap, lapTotal, done, fin, dnf, gridSlot, locked}. Pass `out` so per-step calls do not allocate.
+- `gp.solid(a, b)`: the session.solid rule for any two cars; pit-lane ghosting stays main.js's job.
+- Events: 'bots'(list), 'botsGo' (once per session at lights out when any of our bots takes part: arm their lap counters here), 'botLapRejected'(id, why).
+- `view()` rows gain bot, skill (0..1 or null) and car (CarSpec id or ''). `view().bots` = {count, skill: level, max: 16 - humans (15 offline), canEdit: offline or host, free practice only}.
+- `isGhost(botId)` works unchanged.
+ - GLUE CHECKLIST:
+- Offline: gp.setBots(F1.AI.lineup(...), level) at track load or when the lineup changes in free practice; place bots at gp.bots()[i].slot and at gp.entry(id).gridSlot on the grid.
+- Per step: ctx.lap/laps/done/locked come from gp.entry(id, out); on lap counter result 2 call gp.botLap(id, lap.last); every frame call gp.botProgress(id, lap.progress(idx)); on 'botsGo' do lap.arm(idx) and set lap.time = gp.sinceGo.
+- Collisions: use gp.solid for bot vs bot and bot vs player, plus the pit-lane rule.
+- Online host: the same, plus net.sendBotStates(...) every frame, net.sendLap(last, best, id), net.sendHit(humanId, ix, iz, botId) for bot vs remote-human contacts, and apply 'botHit' impulses to the bot's car with the same 'already applied' bookkeeping as for 'hit'.
+- Guests: bots are remote cars (livery from p.car, an 'AI' tag from p.bot); a guest's own hits on a bot use net.sendHit(botId, ...).
+ - DOCS TO ADD (not my files):
+- js/README-interfaces.md v7 section: the wire messages and APIs above.
+- devtests/README.md net-gp table row: `npx electron devtests/net-gp/electron-bots.js` — real js/net.js + js/gp.js in two Chromium pages; the host sets 6 bots through F1.gp.setBots and drives them (sendBotStates, botProgress, botLap); a real-time Grand Prix on a 200 m track: roster, remote poses, parc fermé, rejected bot laps by id, grid with bots, botsGo, live order, identical results, guest view rows, the host leaving takes his bots. 29 checks, exit code, `PORT` (default 24772), ~20 s.
+- fuzz-server now also throws bots / bs / bot-id messages and validates bot roster rows; fuzz-session adds bot players and checks the bot flag.
+
+== bugsFound
+ - Existing flaky test in test/server.test.js, 'js/net.js against a hostile server: garbage year / car / wear...' (the flake the AI report noticed): it assumed inbox[0] after a reconnect was the hello, but a ping from the closed connection can arrive after inbox is emptied. Under extra load it failed. Fixed: the test now looks for the hello message.
+ - Offline js/gp.js only republished the session on laps and phase transitions, so live race order from progress never showed. Harmless with one player, wrong with offline bots. Added a live refresh every 500 ms of game clock during the race, only when the snapshot changed, matching the room's GP_LIVE_MS.
+ - AI report design refinements:
+- Per-bot 'gone' broadcasts would let a host amplify traffic by flipping his field, so bots get none.
+- A host with 15 bots needs a larger message budget for bot laps, lap times and hits, which the report only hinted at.
+- `bs` must deduplicate rows for the same bot and cap the row count.
+- The client must cap the `bots` frame size: 16 long CJK or emoji names could exceed the 2 KB limit, and the server closes connections that send an oversized frame.
+
+== openIssues
+ - Docs not written because the files are not mine: the js/README-interfaces.md v7 section and the devtests/README.md row for electron-bots.js (text in apiNotes). The decisions in the summary should go into docs/v6-plan.md.
+ - When the host opens the menu his game loop stops, so his bots stand still for everybody. They stay visible, parked, through the keepalive. This is inherent to host-simulated bots.
+ - Bot ownership is not transferred on host migration. A dedicated server removes the leaving host's bots and ends a running session (as the task asked); the next host can set his own.
+ - Trust model unchanged: the server cannot check physics, so a hostile host can forge consistent bot paths and ram with up to 15 cars, visibly to everyone. Per-pair impulse budgets, the 40 ms throttle per car and the connection rate limit bound it.
+ - If the newest bot gives its seat to a joining human, the host's stored UI count will be higher than the actual count. A later setBots is clamped by the server; the UI should cap the count at view().bots.max.
+ - PROTOCOL stays 1. An older game (the v6.2 release) can join a room with bots and sees them as ordinary players, but an older host cannot create bots.
+
+== testsRun
+ - {"cmd":"node test/session.test.js","result":"all session tests passed (2 new bot tests)"}
+ - {"cmd":"node test/gp.test.js","result":"all gp tests passed (2 new bot tests, view contract extended with bots / bot / skill / car)"}
+ - {"cmd":"F1_TEST_PORT_BASE=24700 node test/server.test.js (x3 after the final change; x3 earlier) and node test/server.test.js (OS ports, x2 after the final change, x2 earlier)","result":"all server tests passed (~16.4 s) every run; 7 new bot tests incl. a bot flood test"}
+ - {"cmd":"for f in test/*.test.js; do node $f; done (12 suites)","result":"all 12 suites passed (ai, car, cars, collide, gp, laps, main 51/51, pit, server, session, track, tyres)"}
+ - {"cmd":"PORT=24772 npx electron devtests/net-gp/electron-bots.js (new)","result":"29/29 checks passed"}
+ - {"cmd":"npx electron devtests/net-gp/electron-net.js / electron-v6.js / electron-host.js","result":"20/20, 25/25, 8/8"}
+ - {"cmd":"node devtests/net-gp/fuzz-server.js 12 {1,2,3,7} and 30 11 (bot messages added)","result":"FUZZ OK each: 0 server exceptions, 0 malformed messages, 0 kicks"}
+ - {"cmd":"node devtests/net-gp/fuzz-session.js 3000 12345 / 5000 4242 (bots added)","result":"all invariants held"}
+ - {"cmd":"node devtests/gp-test/net-glue.js; npx electron devtests/gp-test/browser-load.js","result":"all checks passed (both)"}
+ - {"cmd":"PORT=24731 npx electron devtests/integration/mp-e2e.js","result":"30/30 checks passed"}
+ - {"cmd":"PORT=24760 npx electron devtests/gp-e2e/start-clock.js","result":"26/26 checks passed"}
+ - {"cmd":"PORT=24781 npx electron devtests/gp-e2e/online-v6.js","result":"65/65 checks passed"}
+ - {"cmd":"PORT=24782 npx electron devtests/gp-e2e/online.js","result":"141/141 checks passed"}
+ - {"cmd":"npx electron devtests/ui-gp/shots.js","result":"117/117 checks passed"}
+
+################ driver names data
+
+== summary
+Every car now carries the names of its two real drivers. tools/build-cars.mjs reads them from tools/seasons-raw.json (F1DB) and writes them to js/seasons-data.js as cars[].drivers = [{name, abbr, number}, x2]. All 180 real cars of 2010..2026 have two; each season's standard car has two invented, neutral names. js/cars.js exposes F1.cars.drivers(id), which uses a Map lookup only, checks every field again, and returns a new array of new objects on each call. Hostile or unknown ids give []. The drivers are not part of the CarSpec, so F1.sanitizeSpec(spec) still deep-equals spec.
+
+How the two are picked: the two drivers with the most starts in that car, the first seat the one with the most (ties keep F1DB's order). A driver who raced two cars in one season counts for the car he started most often in. For example, 2025 Tsunoda is Red Bull's (22 starts) and Racing Bulls get Hadjar and Lawson. The build refuses data where a name or abbreviation would appear twice in one season. The result is identical to the AI author's drivers.json for all 180 entries; only the number changed from a string to an integer.
+
+The standard car's names are Alex Rowan (ROW, #90) and Sam Ellery (ELL, #91). The build checks that no real driver of 2010..2026 used those names, abbreviations or numbers. F1.AI.lineup never puts bots in the standard car, so these names only appear when code asks for the standard car's drivers directly.
+
+Chinese display: I kept F1DB's Latin names with their accents ('Nico Hülkenberg'), as Taiwanese media mostly do. There is no single Taiwan form, and a sourced translation for all 84 drivers is not trivial. This is recorded in docs/seasons-data.md (new section 車手, the js/cars.js paragraph, a 決定與取捨 entry, and the raw `drivers` field row).
+
+Physics and calibration are untouched. The calibration.json fingerprint is still 1e2d80907c718183. calibration.json, entries.json and ers-effect.json have the same sha256 as before. The new js/seasons-data.js equals the old one byte for byte in content once the `drivers` fields are removed.
+
+devtests/ai-test/build-drivers.mjs now imports seasonDrivers from build-cars, so there is one source for the rule. It writes drivers.json (180 entries, integer numbers) and exits 1 if any car of js/seasons-data.js disagrees with it. Its --js option still works but the game no longer needs it.
+
+test/cars.test.js gains 5 tests:
+- the data matches F1DB, with the most-starts and owner rule, uniqueness in each season, and the standard car's invented pair;
+- known line-ups;
+- the API: copies on every call, hostile ids, nothing added to CarSpec;
+- broken data in a sandbox: hidden characters, too-long names, bad abbreviations and numbers, more than two entries, own properties only, the standard car's fallback;
+- F1.AI.lineup with F1.cars.drivers: 15 bots in every season all get real names, unique, at most 16 characters, and the human's teammate drives the other seat.
+
+== apiNotes
+ - F1.cars.drivers(carId) -> [{name, abbr, number}, {name, abbr, number}]. Pass it straight to F1.AI.lineup({..., drivers: F1.cars.drivers}); it does not use `this`. It returns a NEW array of NEW plain objects on every call, so callers may mutate them.
+ - Fields: name is F1DB's Latin spelling, accents kept, up to 19 code points today ('Gabriel Bortoleto', 'Jérôme d'Ambrosio'). It is NOT shortened: the rooms' NAME_MAX is 16, so use F1.AI.shortName(name) (lineup already does) before sending a name to the server. abbr is three capitals ('HUL'), usable as the HUD / standings tag. number is the race number as an integer 0..99 (2026 Norris #1, Verstappen #3); it is null only when data is broken.
+ - Seat order: index 0 is the driver with the most starts in that car. F1.AI.lineup puts a human in seat 0 of their team, so the teammate (index 1) still races. Examples: 2026-ferrari = Leclerc, Hamilton; 2026-red-bull = Verstappen, Hadjar; 2026-racing-bulls = Lindblad, Lawson; 2026-alpine = Colapinto, Gasly (tie on starts, F1DB order).
+ - Standard cars ('<year>-standard') return [{name:'Alex Rowan', abbr:'ROW', number:90}, {name:'Sam Ellery', abbr:'ELL', number:91}]. lineup never fields the standard car, so these only appear if the glue asks for them directly.
+ - Unknown, hostile or non-string ids ('constructor', '__proto__', 'mercedes', 'standard', '2009-ferrari', null, 5, {}) return []. lineup then uses its own unique invented names (F1.AI.INVENTED). Lookups go through a Map only.
+ - Drivers are NOT in the CarSpec (F1.cars.get / list / resolve are unchanged; F1.sanitizeSpec(spec) still deep-equals spec). Read them only via F1.cars.drivers(id) or the raw window.F1_SEASONS[i].cars[j].drivers.
+ - No new script file: js/seasons-data.js (already in index.html and the build files) carries the lists. Do NOT add js/drivers-data.js / window.F1_DRIVERS.
+ - Builder exports for tools: STANDARD_DRIVERS, DRIVER_NAME_MAX (40), cleanDriver(f1dbDriver), seasonDrivers(rawSeason, problems) -> Map, checkStandardDrivers(raw, problems).
+ - js/README-interfaces.md (not my file) should list F1.cars.drivers(id) next to F1.cars.ersNote(id) in the v6 F1.cars section. Suggested text: 'drivers(id) -> [{name, abbr, number}] the car's two real drivers (F1DB, most starts first; the standard car two invented); [] for unknown ids; the names of the computer drivers.'
+
+== bugsFound
+ - The Edit tool turns \uXXXX escapes in edit text into literal characters. A regex with   became a raw line separator and the module failed to parse. Fixed by writing the hidden-character test as code-point ranges (HIDDEN tables in tools/build-cars.mjs and js/cars.js) and building test strings with String.fromCharCode. Other agents editing regexes with \u escapes may hit the same thing.
+
+== openIssues
+ - test/gp.test.js currently fails 1 test because js/gp.js view() gained a `bots` field. That file and its test belong to the net/gp owner, and the work is in progress.
+ - js/README-interfaces.md should document F1.cars.drivers(id); I don't own that file (suggested text is in apiNotes).
+ - When two drivers tie on starts in a car, F1DB's order decides who takes seat 0 (2026 Alpine: Colapinto before Gasly; 2026 Audi: Bortoleto before Hülkenberg). This only matters for which driver a human in that team displaces.
+ - 2026 starts are counted to round 15 (F1DB v2026.15.1). A later F1DB refresh (node tools/build-seasons.mjs) then node tools/build-cars.mjs updates the names. The build refuses a season where a mid-season swap would leave one name on two cars, so if that ever happens the rule needs a manual look.
+
+== testsRun
+ - {"cmd":"node tools/build-cars.mjs --check --quiet (before any change)","result":"exit 0: js/seasons-data.js, devtests/seasons-calib/entries.json and docs/seasons-data.md up to date (54.1 s); calibration fingerprint 1e2d80907c718183"}
+ - {"cmd":"node tools/build-cars.mjs --quiet (regenerate)","result":"checks passed, wrote the 3 outputs (58.9 s); only js/seasons-data.js changed (it gained cars[].drivers); entries.json and the doc table are unchanged"}
+ - {"cmd":"compare old vs new js/seasons-data.js with drivers stripped (vm load, JSON compare)","result":"identical otherwise: true; 197 cars (17 standard + 180) each have 2 drivers"}
+ - {"cmd":"sha256 of calibration.json / entries.json / ers-effect.json before and after","result":"unchanged (c266c133..., b4191a84..., dd97a5c5...); calibration fingerprint still 1e2d80907c718183"}
+ - {"cmd":"scratch: seasonDrivers over all raw seasons vs the AI author's drivers.json","result":"180 entries, 0 differ (apart from number now an integer), no problems"}
+ - {"cmd":"scratch: seasonDrivers on a broken synthetic season (RLO in a name, bad abbr, number 123, duplicate name / abbreviation across cars)","result":"every case reported as a build problem (the build refuses to write)"}
+ - {"cmd":"node test/cars.test.js","result":"all cars tests passed (incl. 5 new driver tests and the build-cars --check test), 80 s"}
+ - {"cmd":"node devtests/ai-test/build-drivers.mjs (and --js scratch file)","result":"exit 0: 180 entries, 197 cars of the game, F1.cars.drivers matches for every car; the --js output loads (180 keys)"}
+ - {"cmd":"for f in test/*.test.js; do node $f; done (12 suites)","result":"11 pass (ai, car, cars, collide, laps, main 51/51, pit, server, session, track, tyres). test/gp.test.js FAILS 1 test: 'offline: a complete Grand Prix through the public API'. Its expected view() lacks the new `bots: {canEdit, count, max, skill}` field that the net/gp owner agent is adding to js/gp.js right now; this is their in-progress work, not related to these changes"}
+ - {"cmd":"node tools/build-cars.mjs --check --quiet (final, after the doc edits)","result":"exit 0: all 3 outputs up to date (53.5 s)"}
+
+################ ai.js update
+
+== summary
+js/ai.js now follows v6.2: it passes the car's height to every track lookup, takes the Monaco hairpin at about 45 km/h, and is far more stable for V8. All suites pass: test/ai.test.js (29 tests), the matrix, alltracks, the three critic stress suites, a new Suzuka bridge check, and all 12 node test suites. One parked-car stress run passes only right at its 60-s limit (open issues). Nothing was committed, and I only touched files I own.
+
+**Allocation (the main problem).** think() was one huge function (26 KB of bytecode). Every rarely-used branch reached for the first time threw all of it back to V8's interpreter, which boxes every number. A first 15-car race allocated about 1.1 GB in think() (about 900 B per call), and a second race about 240 MB. I found the causes with V8's deopt trace (exact source lines) and the sampling heap profiler. Fixes:
+- think() now runs as 8 phase functions plus the braking scan, so a cold branch only knocks out its own phase. The driving is bit-identical, checked with a new fingerprint script.
+- Fixed objects that changed shape at runtime: `input`, `info.wearPerLap`, `plan.outFrom`, `startLane`, the steering-lock table and the contact snapshots.
+- `ctx.prog` was being boxed on every call (about 16 B).
+- The contact resolver allocated a new array per car per step (`length = 0`); it now reuses arrays.
+- Hand-inlined `smooth`/`lerp` in the path helpers, and the tyre strategy now runs once a lap instead of every 6 steps.
+- New `F1.AI.warmUp(track, raceLine)` for the loading screen: about 29,000 think() calls in 0.1–0.5 s, and it does not change how the real drivers drive (checked bit for bit).
+
+Results: the first race allocates 24 MB with the warm-up and 160 MB without (1.1 GB before). Later races are 15–30 MB, and steady state is 1–2 B per call. think() costs 1.7–2.2 µs per call, about 0.2 µs more than before because of the phase calls.
+
+**Suzuka bridge.** The height is passed in think()'s fallback lookup, the relocation lookup and `updateView`. Views gained a `y` field, and `resetCar` ignores a car on the other level. In 27 timed runs the two cars came within 0.8 m in plan (6.2 m apart in height): no contact, no level jump, and each drove exactly as when alone. A lookup without the height would have put a car on the wrong road 30–32 steps per pass.
+
+**Monaco hairpin.** The AI's own speed profile still dropped to 25 km/h; it now follows raceline.js and plans about 49 km/h. Alone, cars take it at 40.1 km/h (rookie) and 45.4 km/h (legend) with no wall or grass. A new rule stops attacking and defending through any corner tighter than full lock, and keeps 5 m more gap there. Only Monaco's hairpin qualifies among the 40 circuits. Across 10 seeds of a 15-car race: 0 contacts, against 4 for the old file.
+
+**Pace.** Recalibrated to PACE [[0,0.841],[0.35,0.89],[0.7,0.942],[1,0.977]]: +8.02 / +5.03 / +2.50 / +1.00 %.
+
+**Two existing target-selection flips fixed** (the old code effectively engaged at the same distance):
+- A car coming the wrong way was picked as the obstacle up to 300 m away but dropped again in the same step, every step.
+- A stopped car did the same between 50 m + 1.5 s and 50 m + 2 s of distance.
+
+**Old vs new on today's data:**
+
+| Suite | New | Old |
+|---|---|---|
+| Matrix contacts | 3 (none heavy, worst 0.24) | 6 (1 heavy) |
+| Matrix finishing order vs skill | 0.73 | 0.67 |
+| Start stress (72 races) contacts | 18 | 18 |
+| Start stress pile-ups | 0 | 2 |
+| Parked car: touches | 1 (max 0.11) | 2 |
+| Parked car: car-to-car contacts | 6 | 14 (2 heavy) |
+| Parked car: resets | 5 | 5 |
+
+The remaining differences in the stress runs come from the 0.001 PACE change: swapping only PACE between the old and new files swaps the results (checked on 4 circuits).
+
+== apiNotes
+ - NEW F1.AI.warmUp(track, raceLine): call it while the track loads (behind the loading screen) whenever computer cars may race on that track. It costs 0.1-0.5 s once per track; later calls on the same track return {steps:0, calls:0} at once. It returns {steps, calls, pitStops, resets, passTries, offs, yields, mistakes}, or null when js/car.js is missing. Pass the SAME raceLine object the bots get. It does not change how any real driver drives (fingerprint.js warm=1 is identical). Without it the first race of a session allocates ~160 MB in think() instead of ~24 MB.
+ - One racing line object for the bots per track: the AI caches its geometry and profiles per raceLine.points object. When main.js rebuilds the player's line after a car change, keep giving the bots the line they were created with; a new line object rebuilds those caches, and warmUp would run again.
+ - VIEWS: createView(id) now returns {id, x, z, heading, speed, sampleIndex, d, ghost, prog, pace, y}. Set view.y = car.state.y for local cars (the player and the bots). For remote humans use F1.AI.updateView(view, p.state, track) with a state that has y (network states do): it then locates the car on its own road at Suzuka's bridge. F1.AI.resetCar uses view.y to ignore cars on the other level; NaN means unknown and the car still counts. Make every view with createView, fill it in place, and add no other fields (a second object shape slows think() and makes it allocate).
+ - CONTEXTS: ctx.prog must always be a number (NaN when unknown, never null or undefined) and ctx.done a boolean (net/session.js fin / dnf / qDone already are). Fill the context made by F1.AI.createContext() in place every step, one per bot.
+ - PIT EVENTS DURING THE SERVICE: the bot.pit.update(...) made while the car is held for its service returns events too, and 'serviceDone' happens there. Pass every event from that call to bot.ai.onPit(ev) and fit the compound it returns (car.tyres.fit). The per-step loop text in the AI report dropped it; sim.js stepPit and F1.AI.warmUp do it right. Otherwise the bot leaves on old tyres and its stop count is wrong.
+ - Unchanged: createAIDriver({track, raceLine, car, skill, seed, id, slot, name}), think(dt, others, ctx), reset(), onPit(ev), startCompound(laps, wear), pace, planStop, setSkill, setSlot, state, stats, log, placeOnGrid, resetCar(car, track, idx, others, selfId), createContacts() -> resolveAll(entries, dt, onContact?) (now allocation-free), lineup, LEVELS. New optional createAIDriver opts.mistakeRate (0..1): the chance of a mistake per braking zone, for tests.
+ - Behaviour the game will show: the Monaco hairpin is taken at ~40-45 km/h (the profile plans ~49). Through a corner tighter than full lock (only Monaco's hairpin among the 40 circuits), from 30 m before to 40 m after it, bots neither attack nor defend and keep 5 m more following gap. The tyre strategy is decided once a lap at the start of the decision window before the pit entry; planStop still works at the next chance. PACE is [[0,0.841],[0.35,0.89],[0.7,0.942],[1,0.977]] (+8 / +5 / +2.5 / +1 %).
+ - For js/README-interfaces.md v7 (owned by others): F1.AI.warmUp, view.y, numeric ctx.prog / boolean ctx.done, pit events during the service passed to onPit, the tight-corner rule, opts.mistakeRate. For CLAUDE.md: test/ai.test.js now has 29 tests (~3 s). New harnesses: devtests/ai-test/bridge.js (~1 s), fingerprint.js (~12 s), warmup.js (~1.5 min); alloc.js options races / minutes / warm / sample; alltracks.js also warms up every circuit.
+
+== bugsFound
+ - Whole-function de-optimisation cascade: think() was one 26 KB-bytecode function. Each branch first reached in optimised code de-optimised all of it, braking scan and traffic loop included, and the interpreter boxes every number. A first 15-car race allocated ~1.1 GB in think() (901 B per call); this is the source of the v6.2 critic's '75 MB in one minute'. Fixed by splitting it into phases plus F1.AI.warmUp.
+ - ctx.prog was copied into a variable that was a number or null, so every think() with a real race distance boxed a heap number (~16 B per call). The unit test never saw it because its contexts had prog = NaN. Fixed.
+ - F1.AI.createContacts emptied its candidate arrays with length = 0 every car every step, freeing their storage so the next push allocated a new one (~22-30 MB per race). Fixed with a pool of fixed-length arrays.
+ - Objects whose shape changed during a race (each change de-optimises every function that has seen them, js/car.js's update included for `input`): input pedals and info.wearPerLap started as small integers, plan.outFrom as null, startLane was a double in a closure variable (boxed at every store), the steering-lock row table went from packed to holey, and the contact snapshots started as small integers. All fixed.
+ - The Monaco hairpin was planned at MIN_SPEED (25 km/h). js/ai.js's own profile kept the old rule (path tighter than full lock means crawl) after raceline.js changed in v6.2. It now plans the top of the full-lock range (~49 km/h).
+ - The fallback track.locate in think(), relocate() and F1.AI.updateView passed no height, so at Suzuka's bridge a global locate (first locate of a remote car, or after a jump) lands on the other road 30-32 steps per pass. All lookups now pass the height.
+ - Target flip-flop in racecraft: a car coming the wrong way was taken on up to 300 m away and dropped again in the same step (beyond 50 m + 1.5 s), every step; a stopped car did the same between 50 m + 1.5 s and 50 m + 2 s. This inflated passTries (1,222 in one warm-up) and wasted work. Fixed with hysteresis that keeps the same effective engagement distance.
+ - The tyre strategy (decidePit / freshStint / stint) ran every 6 steps through the decision window and allocated each time (an array literal per call, boxed doubles), ~2 B per think() call on average. It now runs once a lap.
+ - G.pitLoss came from whichever profile was built first on a track. Now computed in one helper, also for cached profiles, so a warm-up leaves it to the first real driver.
+ - Through Monaco's hairpin, attacks and defending moves at the new ~45 km/h caused rear-ends at the exit, and a follow gap measured along the centreline under-reads the real distance between cars at different points of the 180-degree turn. Fixed with the no-attack / no-defence rule and 5 m more following gap in corners tighter than full lock.
+
+== openIssues
+ - critic-obstacle passes, but the Baku 'straight' parked-car run has one car standing 60.0 s, exactly at the 60-s limit (2 R, 10 offs). The cause is in the existing avoidance logic: the swerve round the parked car starts at 26-29 m/s on a curving stretch where the racing line crosses the road, and the target speed ignores the swerve path's own curvature. The car runs wide onto the grass, stops nose-to-tail, backs off straight toward the edge, and loops. With the previous PACE the same run is clean (0 R, longest stand 8 s), and the old file shows the same weakness under the same timing. Suggested fix: cap the speed while driving round a stopped car by the lateral acceleration the swerve path needs, and steer while backing off.
+ - Allocation left after the fix: ~24 MB in the first race with the warm-up (~160 MB without); later races 15-30 MB, mostly around pit-stop windows and V8 'dependent prototype chain changed' invalidations at session phase changes. Those invalidations also hit js/car.js and js/pit.js; they come from outside ai.js (no single call reproduces them) and ai.js cannot avoid them. Steady state 1-2 B per call.
+ - For js/car.js (other owner): car.state's numeric fields start as Smi 0, so the first double stored into each field deprecates the object's map and de-optimises every function that reads car.state (car.js, collide.js, ai.js) once per field. Initialising them as doubles would remove that; js/tyres.js grip {lat: 1, ...} and wear [0, 0, 0, 0] behave the same.
+ - The stress-suite totals (wrong-way ghost hits, contacts in the start test) are chaotic: changing PACE by 0.001 per level swaps them between the old and new files (checked on 4 circuits). Compare them over many seeds, not single runs.
+ - think() costs ~0.2 us more per call from the phase calls (1.7-2.2 us in the matrix): 15 bots at 120 Hz is ~4 ms of CPU per second.
+ - Measured in node only. Not checked in Electron: the warm-up's load-time cost (0.1-0.5 s in node) and the allocation with V8's background compiler at real time.
+ - Observation: the matrix now makes only 3 pit stops (the critic's run had 18). The old file makes the same 3 on today's data, so the cause is tyre or data changes since then, not this work.
+
+== testsRun
+ - {"cmd":"node test/ai.test.js (several runs)","result":"29/29 pass; allocation test 1.48-1.60 B per call (race contexts, after F1.AI.warmUp; limit 2); contact resolver 0 B per call; think 2.0-2.8 us per call"}
+ - {"cmd":"for f in test/*.test.js; do node $f; done","result":"all 12 suites pass (ai, car, cars, collide, gp, laps, main 51/51, pit, server, session, track, tyres)"}
+ - {"cmd":"node devtests/ai-test/fingerprint.js, against a copy of the pre-refactor file","result":"the phase split, the shape fixes, the inlined smooth/lerp, the contact-resolver pool and the myProg fix are bit-identical on all 7 scenarios; with warm=1 identical to without the warm-up (final code)"}
+ - {"cmd":"node devtests/ai-test/calibrate.js","result":"PACE [[0,0.841],[0.35,0.89],[0.7,0.942],[1,0.977]]: medians 8.02 / 5.03 / 2.50 / 1.00 % (targets 8 / 5 / 2.5 / 1); Monaco reference lap 1:18.250 (1:19.225 before the hairpin fix)"}
+ - {"cmd":"node devtests/ai-test/pace.js","result":"median 7.05 / 4.63 / 2.27 / 0.86 % (its 7 circuits, best lap), monotonic"}
+ - {"cmd":"node devtests/ai-test/matrix.js","result":"exit 0: 42 races, 378 cars, 1246 race laps, all finished, 0 R, 0 stuck, 0 pit speeding; contacts 3 (none over 0.25, max 0.24); offs 33; passes 133; order vs skill median 0.73 (A 1.00, B 0.50, C 0.62); think 1.72 us per call. Old file today: 6 contacts (1 heavy), 36 offs, 0.67"}
+ - {"cmd":"node devtests/ai-test/alltracks.js","result":"exit 0, all ok: 40/40 circuits, warm-up makes 2 stops with at most 1 R everywhere (70-270 ms per track), laps alone at skill 0 and 1 with 0 R / 0 stuck, pit stop ok on every circuit"}
+ - {"cmd":"node devtests/ai-test/critic-start.js (and seeds=6)","result":"exit 0: 36 races, 13 contacts (3 over 0.25, max 0.30), 0 pile-ups, 0 R, 0 stuck (old file: 10 contacts, 1 pile-up, exit 1). 72 races: 18 vs 18 contacts, 0 vs 2 pile-ups"}
+ - {"cmd":"node devtests/ai-test/critic-obstacle.js","result":"exit 0. Parked car, 41 runs (judged): 1 touch (max 0.11), car-to-car 6 (none heavy), 5 R, all finished (old file: 2 touches, 14 car-to-car with 2 heavy, 5 R). Wrong-way ghost, 22 runs (not judged): 262 hits (old 246). Baku straight run: a car stood 60.0 s, exactly at the 60-s limit (see openIssues)"}
+ - {"cmd":"node devtests/ai-test/critic-mixed.js","result":"exit 0: computer car the striker in 2 of 44 contacts with the erratic humans (max 0.25); 10 cars on the same lap all served in their own boxes, lane top 77-78/80 km/h, 0 contacts; wear x5 2-4 stops, 0 punctures, never past 97 %; 2010 cars 0 % battery; Monaco hairpin 40.1 / 45.4 km/h, 0 walls, 15 cars 0 contacts; determinism identical"}
+ - {"cmd":"node devtests/ai-test/bridge.js","result":"all ok: 27 runs (3 skills x 9 timings), as close as 0.8 m in plan and 6.2 m apart in height; 0 touches, no index / driver-index / height / remote-view level jump, speed and lateral place identical to alone (0.00 km/h, 0.00 m); a locate without the height would be on the wrong road 30-32 steps per pass"}
+ - {"cmd":"Monaco 15 cars x 3 laps, 10 seeds (critic-sim scratch harness)","result":"0 contacts in all 10 seeds, 1 wall touch in total (old file: 4 contacts)"}
+ - {"cmd":"node devtests/ai-test/warmup.js races=2 (synchronous compiles)","result":"without warm-up: race 1 159.9 MB (132 B/call), race 2 16.8 MB; with warm-up (522 ms, 29076 calls, 2 stops): race 1 24.3 MB (20 B/call), race 2 27.3 MB. Same harness on the old file: race 1 1091 MB (901 B/call), race 2 237 MB"}
+ - {"cmd":"node --expose-gc --min-semi-space-size=256 --max-semi-space-size=256 devtests/ai-test/alloc.js suzuka 15 races=1 minutes=4 warm=30","result":"per minute 122.3 / 6.1 / 2.1 / 1.3 B per call (the first minute includes this harness's own drivers' tier-up)"}
+
+################ glue: bots in the game
+
+== summary
+The computer drivers now work in the game, both offline and in rooms. All the required suites and harnesses are green, the bots default to 0, and nothing was committed or packaged.
+
+**What works now**
+- **Settings (大獎賽 tab).** The player sets 電腦車手 (無 / 1..15 alone, up to 16 minus the humans in a room) and 強度 (新手 / 業餘 / 職業 / 傳奇 / 混合). The choice is remembered in localStorage 'f1drive.bots'. Guests see it read-only (電腦車手由房主設定。), and it is locked during a session (賽事進行中不能更改電腦車手。). In free practice the tab lists the field with team colours.
+- **Who drives what.** The field comes from F1.AI.lineup: the season's real drivers in the cars the humans did not take. Two seats per team; your teammate still races. The 車輛 cards show who drives each car (你 / names + AI), but only when there are bots.
+- **Marking bots.** An AI tag (tooltip: its level) appears in the standings, the HUD session box, the results and the room roster. Bot dots use both livery colours, the minimap dots are ringed in the second team colour, and the 3D name tags carry an AI badge.
+- **Offline.** Each bot has its own car, tyres, pit (box = its slot), lap counter and driver. They are stepped in our physics steps exactly like devtests/ai-test/sim.js: think, car update, contacts with every bot and our car, pit events (including the ones during a service), lap counter, gp.botLap. They are placed like a room (us in grid box 1, bots in boxes 2..16), held on the grid and during services, armed at lights out ('botsGo'), drawn with js/carmodel.js (livery, halo, ghost rules) and fed to the sound and the minimap. The HUD mirrors show them.
+- **Online host.** Simulates his bots the same way and publishes them (net.sendBotStates, laps, lap times, bot-side hits against remote humans, 'botHit' impulses). Guests see bots as remote cars with the AI badge. When the host leaves, his bots are gone.
+
+**Performance (this PC, offscreen at 60 fps, autopilot driving)**
+| Track | Bots | fps | Main-thread ms/frame (mean / p95) | Bots' own share |
+|---|---|---|---|---|
+| Monaco | 15 | 60.0 | 1.63 / 2.1 | 0.34 ms |
+| Monaco | 0 | 60.0 | 1.04 / 1.5 | – |
+| Spa | 15 | 60.0 | 1.68 / 2.2 | 0.34 ms |
+| Spa | 0 | 60.0 | 1.01 / 1.4 | – |
+
+In node, a step with 16 cars takes 0.05 ms (p95 0.08). Loading Monaco with bots takes 846 ms instead of 328 ms, because of the AI warm-up. No cheaper model for far bots was needed.
+
+**Bugs I found in my own new code and fixed**
+- The free-spot search used the shared views, which are still empty before the first bots exist, so a bot was put on the centreline beside our car.
+- Putting the whole field back in its boxes after a session treated the other bots' race positions as obstacles, so some bots were moved off their boxes.
+- Online, a bots request the server ignored would never be sent again. It is now re-sent once on every return to free practice.
+
+**Defaults I decided (please record them in docs/v6-plan.md; it is not my file)**
+- 0 bots, level 職業.
+- With bots, offline, we start in grid box 1, also in qualifying (before: the centreline 10 samples before the line).
+- After a session the bots go back to their grid boxes; our car stays where it is.
+- The lineup seed is the season year, so the same setting always gives the same field and the same 混合 levels.
+- The bots keep the track's first racing line.
+- The warm-up runs only when there are bots.
+- The car cards change only when there are bots.
+
+== apiNotes
+ - SCRIPT ORDER: index.html loads js/ai.js right after js/pit.js. The contract checks in devtests/ui-gp/shots.js and devtests/ui-v6/shots.js were updated to match. The 'Final script order' in js/README-interfaces.md needs the same change. package.json build.files already ships js/*.js.
+ - F1.ui (ui.js + index.html):
+- init({..., onBots({count, skill})}) and getBots() -> {count 0..15, skill 'rookie'|'amateur'|'pro'|'legend'|'mixed'}; stored in localStorage 'f1drive.bots', default {0, 'pro'}.
+- setGp(view): view.bots = {count, skill, max, canEdit, available} (available false hides the rows); view.botList = [{name, colour, colour2, team, skill}], listed in free practice; rows[i].bot / skill give the AI tag (class .gp-ai, tooltip 電腦車手（level）). A bot's dot is its livery gradient and its chip is colour2.
+- setCars(v): optional v.drivers = {carId: [{name, bot, self}]}, shown as the card line 車手 ….
+- updateHUD: h.others[i].ring (optional) rings a minimap dot.
+- Room roster rows with bot get an AI tag and the title 玩家（n 人 + 電腦 m，k / 16）.
+- New DOM ids: gp-bots-box, gp-bots (select 0..max), gp-skill (buttons data-s), gp-bots-note, gp-bots-list; classes .gp-bot, .car-drv.
+ - carModel.setName(name, badge?): badge (e.g. 'AI') is drawn as a light pill before the name. Without a badge the tag is drawn as before. main.js sets 'AI' on our bots, and on remote cars whose net.players row has bot.
+ - main.js behaviour (for the v7 section of the contract):
+- The setting gives F1.AI.lineup({cars: F1.cars.list(activeYear), taken: humans' cars (our car alone; in a room every non-bot roster row's car resolved to the room year), count: min(count, 15 alone or 16 - humans), skill, seed: year, drivers: F1.cars.drivers, names: human names}), sent with gp.setBots(list, level). It is sent alone, or as the host in free practice, and only when the field changed (signature); on every return to free practice it is re-sent once.
+- gp 'bots' rebuilds the bot cars (makeBot / updateBot, in place on a car or skill change).
+- Placement: free practice and qualifying = grid box slot + 1, our car in box 1 alone; grid = box of the bot's place in snapshot.grid, with the set from ai.startCompound(r, wear) at wear x snapshot.wear; back to free = their boxes again. A box with a car on it is skipped: F1.AI.resetCar moves the bot on to a free spot.
+- The bots are stepped right after our car.update in every physics step (stepBots), also while our car is held for a service. When our car is frozen on the grid, they think once per frame (botsHeld).
+- Contacts: F1.AI.createContacts over [our car, bots]; a car is solid when gp.solid(id, id) holds, it is not on the pit asphalt, not in service and not locked. The host also resolves the bot side against remote solid cars.
+- 'botsGo': lap.arm(idx); lap.time = gp.sinceGo minus the frame delay online, the same as ours. gp.botProgress (and the g of net.sendBotStates) only while racing.
+- F1.game gains bots, botCfg, botViews (the views think() sees: ours first) and botCost(reset) -> {frames, mean, max}: main-thread ms per frame on the bots.
+ - HINTS FOR THE CRITIC'S devtests/gp-e2e/bots.js:
+- The gp-e2e autopilot (page.js others()) only sees F1.net.players. Offline bots are invisible to it, so feed it F1.game.bots (car.state) or expect contacts.
+- A native select cannot be opened offscreen: set #gp-bots.value and dispatch 'change' (devtests/bots-test/game.js w.setBots). The level buttons are #gp-skill button[data-s=…].
+- A bot's ai.state and ai.stats are reachable through F1.game.bots[i].ai.
+- A player parked on pole in free practice holds the bot behind him in the same column for up to ~16 s at Monaco (the AI's yellow-flag queue); it then goes round. That is the AI's rule, not a hang.
+ - devtests/README.md rows (not my file):
+- `node devtests/bots-test/node-race.js [track=it-1922] [bots=15] [skill=mixed] [q=1] [r=2]`: the real js/main.js in node with js/ai.js (stubs as test/main.test.js). Our car is driven by its own AI through a fake controller, frames at 1/120 s. Checks the lineup (real names, season's cars, our teammate in the other seat), the grid boxes, free practice, a whole offline Grand Prix (grid by times, lights, race, results, Spearman vs skill), a count/skill change, another track, count 0. 35 checks, exit code, about 30 s.
+- `npx electron devtests/bots-test/game.js`: the real game, muted. ONLY=ui,perf,gp,room; PORT default 24840; PERF_S default 20; TRACKS default mc-1929,be-1925. Parts: the panel and remembered setting, models / badges / minimap / mirrors, fps and frame cost with 15 vs 0 bots, a real-time solo Grand Prix with 15 bots and AI tags in the HUD and results, a room (host's 4 bots seen by the guest, a 1-lap online race with identical results and every bot lap accepted, the host leaving). 72 checks, exit code, about 6 min, screenshots in devtests/bots-test/out/.
+- test/main.test.js now also loads js/ai.js and has a v7 section (66 checks in total).
+
+== bugsFound
+ - Fixed, my own new main.js code: the free-spot search for a newly placed bot used the shared think() views. Those are empty before the first bots exist, so F1.AI.resetCar saw no obstacles and put the bot on the centreline beside our car. It now gets an explicit obstacle list (placeTaken).
+ - Fixed, my own new main.js code: putting the whole field back in its grid boxes after a session counted the other bots' race positions as obstacles, so some bots were moved off their boxes. Now only our car and the remote cars count; the other bots count only when a single bot is added while the field drives.
+ - Fixed, my own new main.js code: online, a bots request the server silently ignored (for example one sent just as a session began) would never be sent again, because its signature already matched. The host now re-sends once on every return to free practice; the same field again changes nothing on the server.
+ - No defects found in the owners' modules (js/ai.js, js/gp.js, js/net.js, net/*, js/cars.js) during integration; their APIs worked as documented.
+
+== openIssues
+ - Docs not written because the files are not mine: the js/README-interfaces.md v7 section (texts in apiNotes, plus the net, data and AI owners' notes), the devtests/README.md rows for bots-test, the decisions in docs/v6-plan.md, and CLAUDE.md (test/main.test.js now loads js/ai.js and has a v7 section).
+ - AI behaviour, not fixed (js/ai.js is not mine): if the player parks on pole in free practice, the bot directly behind him waits up to ~16 s at Monaco (yellow-flag single file), then goes round. Seen in node with a stationary player.
+ - By design: if bots are added while our car stands next to their grid boxes, those bots go to the first free spot along the track (up to 80 m on). After a session the bots go back to their boxes and our car stays where it is.
+ - Alone with bots, our qualifying start is grid box 1 instead of the old start 10 samples before the line. The v5 contract text should say so.
+ - Bots' blue flags for remote humans use an estimated race distance: session laps plus the place on the lap, with a grid rule for the first 20 s after the start. Right after a line crossing it can lag one lap for a moment.
+ - Inherent to host-simulated bots: while the host has the menu open, his bots stand still (net.js keepalive parks them for the others).
+ - Performance was measured only on this PC in offscreen windows, where the GPU's own time is not separated: 60 fps held, +0.6 ms main thread per frame with 15 bots. Not checked on a weaker GPU or in a visible window.
+ - Not run: exe-smoke and npm run dist (not asked), net-gp/electron-bots.js and the net fuzzers (the net owner's, untouched), grid-shots, bench. The full 15-bot Electron Grand Prix with qualifying is left to the critic's devtests/gp-e2e/bots.js; my real-time gp part skips qualifying, and node-race.js runs the full one in node.
+
+== testsRun
+ - {"cmd":"for f in test/*.test.js; do node $f; done (12 suites, after the last edit)","result":"all 12 exit 0: ai, car, cars (93 s), collide, gp, laps, main 66/66 (15 new v7 checks), pit, server (16.4 s), session, track, tyres"}
+ - {"cmd":"node tools/build-cars.mjs --check","result":"exit 0, every output up to date (65.6 s)"}
+ - {"cmd":"node devtests/bots-test/node-race.js (Monza, 15 mixed, Q1 R2, then Monaco)","result":"35/35; Spearman 0.96; 0 resets / offs / wall hits / stuck; step 0.053 ms median, 0.076 p95"}
+ - {"cmd":"PORT=24840 npx electron devtests/bots-test/game.js (ui, perf, gp, room)","result":"72/72 exit 0 (screenshots read)"}
+ - {"cmd":"npx electron devtests/ui-gp/shots.js","result":"117/117 (run twice, the second after the last ui.js edit)"}
+ - {"cmd":"npx electron devtests/ui-v6/shots.js","result":"154/154 (run twice)"}
+ - {"cmd":"npx electron devtests/hudmirrors-test/run.js","result":"exit 0, 41 PASS, 0 FAIL"}
+ - {"cmd":"npx electron devtests/tunnel-test/run.js","result":"exit 0, 12 PASS, 0 FAIL"}
+ - {"cmd":"PORT=24800 npx electron devtests/gp-smoke/smoke.js","result":"197/197 (run twice, the second after the last main.js edit)"}
+ - {"cmd":"PORT=24820 npx electron devtests/v6-smoke/smoke.js","result":"150/150"}
+ - {"cmd":"npx electron devtests/gp-e2e/solo.js","result":"584/584 (run twice)"}
+ - {"cmd":"npx electron devtests/gp-e2e/solo-v6.js","result":"295/295"}
+ - {"cmd":"PORT=24845 npx electron devtests/integration/mp-e2e.js","result":"30/30"}
+ - {"cmd":"PORT=24825 npx electron devtests/v6-critic/critic.js","result":"85/85"}
+ - {"cmd":"PORT=24837 npx electron devtests/v61-critic/critic.js","result":"98/98"}
+ - {"cmd":"PORT=24830 npx electron devtests/gp-e2e/online.js","result":"141/141"}
+ - {"cmd":"PORT=24835 npx electron devtests/gp-e2e/online-v6.js","result":"65/65, every window at least 59.8 fps"}
+ - {"cmd":"npx electron devtests/v62-critic/critic.js (extra, not in the required list)","result":"134/134"}
+ - {"cmd":"PORT=24846 npx electron devtests/gp-e2e/start-clock.js (extra)","result":"26/26"}
+
+################ bots e2e + critic + re-run
+
+== summary
+The bots now pass the end-to-end runs, alone and online. I fixed three real problems in the computer drivers and a small one in main.js. Then I re-ran everything: all 82 runs pass. I wrote the new harness devtests/gp-e2e/bots.js; it passes 193 of 193 checks. Every window was muted, and nothing was committed, pushed or packaged.
+
+**What the new harness covers (devtests/gp-e2e/bots.js + bots-page.js)**
+Our car is driven by its own computer driver through the fake controller, so it races the bots instead of driving through them.
+- **Monza and Monaco, single player, time-warped:** 15 mixed bots set in the 大獎賽 tab, Q 1 / R 3, wear x2.
+  - Qualifying has no contacts, and our lap matches the ground truth.
+  - The grid is the qualifying order, with every car in its box.
+  - Start: 0 contacts in the first 25 s at both tracks.
+  - Overtakes: 18–23 place changes per race. At Monza we also stop once (X for the hards, B for the limiter).
+  - Results: everybody finishes. The order follows strength (Spearman 0.76–0.95; legends average P2–4.6, rookies P13–14.5).
+  - No bot was stuck, needed an R or got a puncture.
+- **Changing the panel on track:** 15 → 6 → legends → 15 → 0 bots. Removed bots and their models are gone; new cars are put down clear of everyone.
+- **A bot running into you:**
+  - We stop on the line out of the Roggia for 45 s: all 15 bots go round us with no touch on our car. (With the old AI code only 1 got past.)
+  - We then run into the back of a bot at about 15 km/h faster: both cars feel it, the controller rumbles, and the bot drives on.
+- **Stalled start and the pit lane:** after a 12 s stall on pole, 11 cars pass with no hit and we gain 8 places. Then every car stops on lap 2: up to 16 in the lane, each in its own box, no speeding.
+- **Blue flags:** a lapped rookie at Monaco gave way 6–9 times with no contact.
+- **Suzuka:** a 1-lap race with 15 bots under and over the bridge, with no position jumps, void or rejected laps.
+- **Online (real time), host + guest + 6 bots on Monaco, Q 1 / R 2:**
+  - The guest sees each bot within 0.1 m of where the host has it.
+  - Live standings matched in 8 of 8 samples; grid and results are identical.
+  - Every bot lap was accepted by the server.
+  - When the host leaves, the guest has no bots left.
+  - On a dedicated server, a host leaving mid-race takes his bots, the race closes, and the guest becomes host.
+- **Frame rate at a race start with 15 bots:** 60 fps at Monaco and Spa, main thread about 2 ms per frame at p95.
+
+**What I fixed**
+1. **Bots crawling past a stopped car (js/ai.js).** While edging round a stopped car, the bot's pedals still braked for the track ahead. So it crawled at walking pace instead of creeping, nose to tail. The car behind a player standing in box 1 took 17.5 s to get by at Monaco; it now takes about 4 s, and the field clears in 9.5 s instead of 22.
+2. **Passing a stopped car at a walk (js/ai.js).** Even with plenty of room, bots passed a stopped car at 9 km/h at most. On straights and gentle curves they now pass at about 29 km/h when the way ahead is clear. A stall on pole now costs the column behind about 2.3 s per car (was up to 4.6 s, with some never getting past).
+   - The AI test suites came out the same or better. Against the original code, one obstacle suite went from 89 stuck events to 15 and from 5 R to 3, with hits and contacts unchanged.
+3. **Bot strengths reshuffled when a player joined (js/ai.js).** In the room test, Ocon went from legend to rookie when the guest joined. Each seat now keeps its own level; a unit test covers it.
+4. **Removed bots stayed in a debug list (js/main.js).** F1.game.botViews kept the removed bots after setting 0. It is now cleared.
+
+I also found a fault in my own harness: my contact recorder hid a helper the AI relies on, so in early runs the bots thought every gap past a stopped car was closed. This made a jam at the Roggia look much worse than it is. I fixed it, re-checked the jam, and took out two AI changes that had been aimed at it.
+
+**Defaults I chose:** in mixed strength, each seat's level comes from the season and the seat (car + seat). The stop test brakes gently (it is a stop, not a brake test). My harness uses ports 24893 / 24894, because v61-critic already uses 24890.
+
+**Docs:** I added rows for gp-e2e/bots.js and bots-test to devtests/README.md. The contract (README-interfaces v7), docs/v6-plan.md decisions and CLAUDE.md are left for the docs stage.
+
+== apiNotes
+ - js/ai.js F1.AI.lineup(opts): each driver's level (mixed), ±0.04 jitter and driver seed now come from makeRandom(seatSeed(opts.seed, carId, seat)), where the seat is 0/1 for the team's two seats and 2+i for extra seats. Taking or freeing one seat no longer changes any other driver. The output for a given seed differs from before; the names and the order of the seats are unchanged.
+ - js/ai.js inside the creep logic (no API change): new closure flag creepCap. When the binding cap is the creep past a stopped car, the profile's feed-forward is dropped (ff = 0) at the pedals. New: creep = 8 m/s when the road at both cars is straight-ish (|curvature| < 0.0086, radius > about 115 m) and boxClear(o, side, 6, 0.5) sees 9 m along the heading clear with 0.5 m to spare. boxClear(o, side, n, mar) takes optional n (number of probes, default 2) and mar (margin, default 0.25).
+ - js/main.js: F1.game.botViews is empty once there are no bots (it used to keep the removed bots' views).
+ - Harness rule: anything that wraps F1.resolveCarCollisions must copy its own properties (.overlap etc.) onto the wrapper. js/ai.js's boxClear reads F1.resolveCarCollisions.overlap and silently returns false without it, so bots think every gap past a stopped car is closed.
+ - devtests/gp-e2e/bots-page.js (window.__bots), usable warped (after solo-page.js; it replaces __e.ap.step) or in real time (its own fake pad):
+- __bots.start(), .skill, .seed, .pit, .stop(compound), .tap(button) (X = 2)
+- programmes .hold {until, kmh}, .holdAt {at, s, kmh}, .holdAfterGo (s), .ram {id 0 = pick a bot 15..45 m ahead on a straight, closing, s}
+- recorders .contacts (each with other / paved), .rec (stuck, laneMax, speeding, orders, jumps, voids), .overtakes(fromT), .field(), .contactSummary(f), .watch(id, s) -> .watchLog
+ - devtests/gp-e2e/bots.js: ONLY=monza,monaco,panel,ram,pits,blue,suzuka,room,host,perf; PORT 24893, PORT2 24894; WATCH=<bot id> (part ram); PATCH honoured through lib.pageFile(). 193 checks, about 7.5 min, screenshots in devtests/gp-e2e/out-bots/.
+
+== bugsFound
+ - js/ai.js (fixed): while creeping past a stopped car, the pedals still applied the profile's braking feed-forward even though the creep cap was the target (ff about -27 m/s²). It cancelled every throttle input; the bot oscillated at 0.5 m/s instead of 2.5 and sat nose to tail behind a player standing in box 1 for about 15 s. Monaco free-practice spawn: the car behind the player took 17.5 s to get by, now about 4 s.
+ - js/ai.js (fixed): the creep past a stopped car was capped at 5 m/s, and 2.5 m/s once within about 9.5 m, even when the car was beside it with the way clear. A player stalled on pole held the left grid column single file at 9 km/h (cars behind got by at 7 / 12 s or not in 12 s). A car parked out of Monza's Roggia let only 1 of 15 bots by in 45 s in the real game. Now 8 m/s when a 9 m probe along the heading is clear on straight-ish road: 15 of 15 by.
+ - js/ai.js lineup (fixed): skill, jitter and seed came from one generator in list order, so a human taking a seat changed every later bot. In the room test, Ocon went from legend (1) to rookie (0.033) and Bortoleto became the legend when the guest joined.
+ - js/main.js (fixed): clearBots left the removed bots' views in `views` (F1.game.botViews held 16 entries with 0 bots). A driver using botViews, such as node-race's player driver, would see ghosts.
+ - Harness lesson (in my own bots-page.js, fixed): wrapping F1.resolveCarCollisions without copying .overlap makes js/ai.js's boxClear always false. The bots then never creep past stopped cars, which looks like an AI gridlock. Documented in devtests/README.md.
+
+== openIssues
+ - A player standing still in box 1 when a track loads in free practice still makes the bots queue past him single file (the AI's yellow-flag rule). With the fixes the whole field is by in 9 s at Monaco but about 25 s at Monza, where the queue on the start straight forms a chain. A player stalled on pole costs the column behind him about 2.3 s per car.
+ - Cosmetic and pre-existing, more visible with bots: live standings are ordered by distance, but the gap is taken at the last line crossing. After a pit stop or a mid-lap pass, a lower row can show a smaller gap (seen: P16 +17.600 under P15 +26.450).
+ - Dedicated server only (design choice of the net owner, covered by test/server.test.js): when the host who owns the bots leaves mid-race, the race closes for everybody with the results as they stood. The remaining human gets '未完賽 DNF' after 0 laps. The alternative, removing the bots as DNF and letting the race go on, would need a decision.
+ - ai.pace is the profile's lap time without an acceleration limit. It runs 9–15 % under the bots' real laps (Monza 2026: quali lap / pace 1.09–1.11; Monaco 1.13–1.15). It is consistent across bots, so it works for comparing them, but it is not a lap-time prediction.
+ - One bot-against-bot contact of 0.49 at Monza, in the queue round our stopped car (cars 13 and 15, about 100 m before it). There was none on our car. The AI suites show no rise in heavy contacts.
+ - At Monaco with wear x2 the bots start a 3-lap race on softs and finish at up to 85–88 % wear, so their last laps are slow. Race time against 3 x their qualifying lap reached 1.13, so my check allows up to 1.16.
+ - Time-warped runs are not bit-identical from run to run (wall-clock rules such as js/gamepad.js's 500 ms button-gap resync can shift a frame). The checks use margins; Monaco's race order varied between runs.
+ - With 混合 (mixed), levels are random per seat. Real champions can be rookies, e.g. Hamilton as a rookie in 2014. This is by design, and each seat now keeps its level.
+ - Docs not written (left for the docs stage): the v7 section of js/README-interfaces.md, the decisions in docs/v6-plan.md (it is being edited by the orchestrator), and the CLAUDE.md test list (12 node suites; ai.test now has the lineup-seat check). js/ai.js PACE needs no recalibration: the changes only act beside stopped cars, and the per-level gaps in matrix.js are unchanged.
+ - Not run: npm run dist, the exe smoke test, review / e-* scripts and the screenshot-only tools (3d-test / car-test / gamepad-test / scenery-test shot.js), and seasons-calib/calibrate.mjs (not needed; build-cars --check passes).
+
+== testsRun
+ - {"cmd":"npx electron devtests/gp-e2e/bots.js (new)","result":"193 / 193 checks passed (436 s): monza, monaco, panel, ram, pits, blue, suzuka, room, host, perf"}
+ - {"cmd":"node test/*.test.js (12 suites: ai, car, cars, collide, gp, laps, main, pit, server, session, track, tyres)","result":"all 12 exit 0 (ai: all passed incl. the new lineup check; main 66/66; cars 122 s)"}
+ - {"cmd":"node tools/build-cars.mjs --check","result":"rc 0 (80.8 s)"}
+ - {"cmd":"node devtests/ai-test/matrix.js","result":"rc 0: 42 races, contacts 4 (max 0.24, heavy 0), passes 132, Spearman median 0.74 (A 1.00, B 0.50, C 0.62), resets 0, stuck 0. Original ai.js: contacts 3, passes 133, 0.73"}
+ - {"cmd":"node devtests/ai-test/critic-start.js","result":"rc 0: 36 races, contacts 12 (heavy 3, max 0.30), pile-ups 0, R 0, stuck 0. Original ai.js: 13 contacts, heavy 3"}
+ - {"cmd":"node devtests/ai-test/critic-obstacle.js (mode=parked, A/B)","result":"rc 0: hits 1 (max 0.11), AI-AI 6, R 3, stuck 15. Original ai.js: hits 1, AI-AI 6, R 5, stuck 89"}
+ - {"cmd":"node devtests/ai-test/critic-obstacle.js mode=wrong (A/B)","result":"hits 247, AI-AI 43, R 31. Original ai.js: 262 / 51 / 36 (reported, not judged)"}
+ - {"cmd":"node devtests/ai-test/critic-mixed.js, alltracks.js, bridge.js, fingerprint.js","result":"all rc 0"}
+ - {"cmd":"node devtests/bots-test/node-race.js","result":"35 / 35"}
+ - {"cmd":"node devtests: track-test, 3d-test build/escape/targeted/drive-all, raceline test build/drive/test3, laps-test drive/grid, pit-test check/drive all, pit-logic, gp-test net-glue, net-gp fuzz-server/fuzz-session, scenery-test, scenery-pit, audio control-test, seasons-calib check-drive/drive-check, gamepad-test x3, car-test x2, v62-critic bank-ab, gp-e2e ap-sim/pitplan-sim, track-fix check-v62/bridge-check/bank-check, car-v6 crossing, cockpit-test api.test","result":"all rc 0 (e.g. scenery FAILS 0, pit-check all passed, laps 40/40, raceline drive 40/40, escape through 0, drive-check all seasons ok)"}
+ - {"cmd":"npx electron devtests/audio-test/render.js && node analyze.js && ears.js worklet && ears.js nodes && tunnel.js","result":"358/358, 45/45, 45/45, 28/28"}
+ - {"cmd":"npx electron ui-gp / ui-v6 / gp-test browser-load / hudmirrors-test / v6-smoke app-check / gp-smoke grid-shots / tunnel-test","result":"117/117, 154/154, all passed, 41/41, 7/7, 27/27, 12/12"}
+ - {"cmd":"npx electron devtests/gp-e2e/solo.js / solo-v6.js","result":"584/584, 295/295"}
+ - {"cmd":"npx electron devtests/v62-critic/critic.js / v61-critic / v6-critic","result":"134/134, 98/98, 85/85"}
+ - {"cmd":"npx electron devtests/gp-smoke/smoke.js / v6-smoke/smoke.js","result":"197/197, 150/150"}
+ - {"cmd":"npx electron devtests/integration/mp-e2e.js / net-gp/electron-net.js / net-gp/electron-bots.js","result":"30/30, 20/20, 29/29"}
+ - {"cmd":"npx electron devtests/gp-e2e/start-clock.js / bench.js","result":"26/26, 28/28"}
+ - {"cmd":"npx electron devtests/bots-test/game.js","result":"72/72 (15 bots: 60.0 fps, main thread mean 1.65 ms, p95 2.2 ms at Monaco and Spa; 0 bots: 1.04 / 1.5)"}
+ - {"cmd":"npx electron devtests/gp-e2e/online.js / online-v6.js","result":"141/141 (748 s), 65/65 (458 s)"}
+ - {"cmd":"npx electron devtests/integration/shot.js, keys.js","result":"smoke OK (HUD read, keys reach the game). The first shot.js run failed only because my runner had set OUT; re-run without it, OK"}
+ - {"cmd":"node <scratchpad>/stall-start.js and park-test.js (real main.js in node, A/B)","result":"car stalled on pole, Monaco: the car behind gets by at 5.8 s (was never in 12 s); free-practice spawn with the player standing, Monaco: whole field by in 8-9.5 s (was 22 s); car parked on the centreline at the Roggia: 15/15 by in 80 s (was 12/15)"}

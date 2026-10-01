@@ -15,8 +15,9 @@ const LEN = 5000;                       // m -> minimum lap 54.5 s
 const MIN = minLapTime(LEN);
 const DT = 0.0625;                      // s per update(): 62.5 ms, exact in binary, so the game clock has no rounding
 const VIEW_KEYS = ['phase', 'online', 'canControl', 'taking', 'spectating', 'q', 'r', 'year', 'wear', 'lap', 'lapTotal', 'pos', 'count',
-  'done', 'endsInMs', 'rows', 'spectators'];
-const ROW_KEYS = ['pos', 'id', 'name', 'colour', 'isSelf', 'laps', 'best', 'time', 'gap', 'down', 'done', 'dnf', 'left'];
+  'done', 'endsInMs', 'rows', 'spectators', 'bots'];
+const ROW_KEYS = ['pos', 'id', 'name', 'colour', 'isSelf', 'laps', 'best', 'time', 'gap', 'down', 'done', 'dnf', 'left', 'bot', 'skill', 'car'];
+const LEVELS = ['rookie', 'amateur', 'pro', 'legend', 'mixed'];
 
 function run(gp, sec) { for (let i = 0, n = Math.round(sec / DT); i < n; i++) gp.update(DT); }
 
@@ -52,7 +53,16 @@ function view(gp) {
     assert.strictEqual(r.pos, i + 1);
     assert(/^#[0-9a-f]{6}$/.test(r.colour), 'colour ' + r.colour);
     assert.strictEqual(r.isSelf, r.id === gp.selfId);
+    assert.strictEqual(typeof r.bot, 'boolean', 'bot');
+    assert(r.skill === null || (r.bot && r.skill >= 0 && r.skill <= 1), 'skill ' + r.skill);
+    assert(typeof r.car === 'string' && /^([a-z0-9-]{1,40})?$/.test(r.car), 'car ' + r.car);
   });
+  // computer drivers: {count, skill (a level), max (16 - humans), canEdit}
+  assert.deepStrictEqual(Object.keys(v.bots).sort(), ['canEdit', 'count', 'max', 'skill']);
+  assert(Number.isInteger(v.bots.count) && v.bots.count >= 0 && v.bots.count <= 16, 'bots.count ' + v.bots.count);
+  assert(Number.isInteger(v.bots.max) && v.bots.max >= 0 && v.bots.max <= 16, 'bots.max ' + v.bots.max);
+  assert(LEVELS.includes(v.bots.skill), 'bots.skill ' + v.bots.skill);
+  assert.strictEqual(typeof v.bots.canEdit, 'boolean');
   const self = v.rows.filter(r => r.isSelf);
   assert.strictEqual(v.pos, self.length ? self[0].pos : 0);
   v.spectators.forEach(s => assert.deepStrictEqual(Object.keys(s).sort(), ['colour', 'id', 'name']));
@@ -77,13 +87,30 @@ function quiet(fn) {                    // run fn with console.error silenced ->
 
 function makeRoom(random) {
   const srv = createSession({ random: random || (() => 0) });      // () => 0: the lights hold for 500 ms
-  const room = { srv, t: 5000000, hostId: 1, roster: [], clients: [], year: null };   // year: the room's, as on the server
+  const room = { srv, t: 5000000, hostId: 1, roster: [], clients: [], year: null,   // year: the room's, as on the server
+                 botLevel: 'pro' };                                                 // the room's bot strength setting
 
+  // as js/net.js: humans and bots in the roster (bot rows: bot, skill, car, owner, mine), our own bots in net.bots
   room.sendRoster = () => room.clients.forEach(c => {
-    c.net.roster = room.roster.map(p => ({ id: p.id, name: p.name, colour: p.colour, isHost: p.id === room.hostId, isSelf: p.id === c.id }));
+    c.net.roster = room.roster.map(p => ({ id: p.id, name: p.name, colour: p.colour, car: p.car || '', isHost: p.id === room.hostId, isSelf: p.id === c.id,
+      bot: !!p.bot, skill: p.bot ? p.skill : null, owner: p.bot ? p.owner : 0, mine: !!p.bot && p.owner === c.id }));
     c.net.isHost = c.id === room.hostId;
+    const mine = room.roster.filter(p => p.bot && p.owner === c.id).sort((a, b) => a.bi - b.bi)
+      .map(p => ({ id: p.id, name: p.name, colour: p.colour, car: p.car || '', slot: p.slot, skill: p.skill, bi: p.bi, last: null, best: null }));
+    c.net.botSettings = { n: room.roster.filter(p => p.bot).length, skill: room.botLevel };
+    const sig = JSON.stringify(mine), had = JSON.stringify(c.net.bots || []);
+    c.net.bots = mine;
     c.net.emit('players', c.net.roster);
+    if (sig !== had) c.net.emit('bots', c.net.bots);
   });
+  // a bot of player `owner` (as net/server.js makes them: in the session with {bot: true, owner})
+  room.addBot = (owner, id, name, o) => {
+    o = o || {};
+    srv.addPlayer(id, name, room.t, { bot: true, owner });
+    room.roster.push({ id, name, colour: o.colour || '#123456', car: o.car || '', bot: true, skill: o.skill === undefined ? 0.7 : o.skill, owner,
+      bi: room.roster.filter(p => p.bot && p.owner === owner).length, slot: room.roster.length });
+    room.sendRoster(); room.push();
+  };
   room.push = () => {
     let s = null;
     room.clients.forEach(c => { s = c.net.session = JSON.parse(JSON.stringify(srv.snapshot())); c.net.emit('gp', s); });
@@ -100,7 +127,7 @@ function makeRoom(random) {
     const net = {
       connected: false, isHost: false, id: 0, roster: [], session: null,
       skew: 0,                                   // our estimate of the server clock is this far off (ms)
-      calls: { gp: [], lap: [], progress: [] },
+      calls: { gp: [], lap: [], progress: [], bots: [], botLap: [], botProgress: [] },
       on(n, fn) { (handlers[n] = handlers[n] || []).push(fn); },
       emit(n, a, b) { (handlers[n] || []).slice().forEach(fn => fn(a, b)); },
       serverNow() { return room.t + net.skew; },
@@ -113,13 +140,41 @@ function makeRoom(random) {
         if (ok) room.push();
         return true;
       },
-      sendGpLap(sid, time) {
+      sendGpLap(sid, time, at, botId) {
+        if (botId !== undefined) {               // one of our bots' (js/net.js sends it with the bot's id)
+          net.calls.botLap.push([sid, time, botId]);
+          if (!(net.bots || []).some(b => b.id === botId)) return false;
+          if (sid !== srv.sid) return true;
+          const why = srv.lap(botId, time, room.t);
+          if (why) net.emit('botLapRejected', botId, why); else room.push();
+          return true;
+        }
         net.calls.lap.push([sid, time]);
         if (sid !== srv.sid) return;
         const why = srv.lap(net.id, time, room.t);
         if (why) net.emit('lapRejected', why); else room.push();
       },
-      setProgress(v) { net.calls.progress.push(v); if (v !== null) srv.progress(net.id, v); }
+      setProgress(v) { net.calls.progress.push(v); if (v !== null) srv.progress(net.id, v); },
+      // host, free practice: as net/server.js, bots 0..n-1 keep their ids (100 + i here)
+      setBots(list, skill) {
+        net.calls.bots.push([list, skill]);
+        if (!net.connected || !net.isHost || srv.phase !== 'free') return false;
+        const n = typeof list === 'number' ? list : list.length;
+        room.roster.filter(p => p.bot && p.owner === net.id && p.bi >= n).forEach(p => { srv.removePlayer(p.id, room.t); });
+        room.roster = room.roster.filter(p => !(p.bot && p.owner === net.id && p.bi >= n));
+        if (typeof skill === 'string') room.botLevel = skill;
+        for (let i = 0; i < n; i++) {
+          const e = (Array.isArray(list) && list[i]) || {}, id = 100 + i;
+          const have = room.roster.find(p => p.id === id);
+          if (have) { have.name = e.name || have.name; have.car = e.car || have.car; continue; }
+          srv.addPlayer(id, e.name || 'AI ' + (i + 1), room.t, { bot: true, owner: net.id });
+          room.roster.push({ id, name: e.name || 'AI ' + (i + 1), colour: e.colour || '#e10600', car: e.car || '', bot: true,
+            skill: e.skill === undefined ? null : e.skill, owner: net.id, bi: i, slot: room.roster.length });
+        }
+        room.sendRoster(); room.push();
+        return true;
+      },
+      setBotProgress(id, v) { net.calls.botProgress.push([id, v]); if (v !== null) srv.progress(id, v); return true; }
     };
     const gp = createGp(), log = record(gp);
     gp.init({ net, getProfile: () => ({ name: 'Solo', colour: '#00ff00' }) });
@@ -184,7 +239,8 @@ test('module: require() gives F1.gp, usable before init(); F1.createGp() makes i
 test('offline: a complete Grand Prix through the public API (quali -> grid -> lights -> race -> results -> again -> end)', () => {
   const { gp, log } = offline({ name: 'Tester', colour: '#12ABcd' });
   assert.deepStrictEqual(view(gp), { phase: 'free', online: false, canControl: true, taking: false, spectating: false,
-    q: 3, r: 5, year: null, wear: 1, lap: 0, lapTotal: 0, pos: 0, count: 0, done: false, endsInMs: null, rows: [], spectators: [] });
+    q: 3, r: 5, year: null, wear: 1, lap: 0, lapTotal: 0, pos: 0, count: 0, done: false, endsInMs: null, rows: [], spectators: [],
+    bots: { count: 0, skill: 'pro', max: 15, canEdit: true } });
   assert.strictEqual(gp.isGhost(2), false);
   gp.lapDone(80); gp.setProgress(0.5);                       // nothing to report to in free practice
   assert.deepStrictEqual(log.take(), []);
@@ -195,9 +251,11 @@ test('offline: a complete Grand Prix through the public API (quali -> grid -> li
   assert.deepStrictEqual([gp.phase, gp.sid, gp.selfId, gp.taking, gp.canControl, gp.online], ['quali', 1, 1, true, true, false]);
   assert.deepStrictEqual([gp.lap, gp.lapTotal, gp.gridSlot, gp.inputLocked, gp.lights, gp.goFlash, gp.sinceGo], [0, 2, -1, false, 0, false, 0]);
   assert.strictEqual(gp.isGhost(2), true, 'qualifying: everybody else is a ghost');
-  const row0 = { pos: 1, id: 1, name: 'Tester', colour: '#12abcd', isSelf: true, laps: 0, best: null, time: null, gap: null, down: 0, done: false, dnf: false, left: false };
+  const row0 = { pos: 1, id: 1, name: 'Tester', colour: '#12abcd', isSelf: true, laps: 0, best: null, time: null, gap: null, down: 0, done: false, dnf: false, left: false,
+    bot: false, skill: null, car: '' };
   assert.deepStrictEqual(view(gp), { phase: 'quali', online: false, canControl: true, taking: true, spectating: false,
-    q: 2, r: 2, year: null, wear: 1, lap: 0, lapTotal: 2, pos: 1, count: 1, done: false, endsInMs: null, rows: [row0], spectators: [] });
+    q: 2, r: 2, year: null, wear: 1, lap: 0, lapTotal: 2, pos: 1, count: 1, done: false, endsInMs: null, rows: [row0], spectators: [],
+    bots: { count: 0, skill: 'pro', max: 15, canEdit: false } });
   run(gp, 100);
   assert.deepStrictEqual(log.take(), [], 'driving fires nothing');
   gp.lapDone(80);
@@ -288,7 +346,8 @@ test('offline: a complete Grand Prix through the public API (quali -> grid -> li
   for (const a of ['end', 'again', 'skip', 'start', 'bogus', null, undefined]) assert.strictEqual(gp.action(a), false, String(a));
   assert.deepStrictEqual(log.take(), []);
   assert.deepStrictEqual(view(gp), { phase: 'free', online: false, canControl: true, taking: false, spectating: false,
-    q: 2, r: 2, year: null, wear: 1, lap: 0, lapTotal: 0, pos: 0, count: 0, done: false, endsInMs: null, rows: [], spectators: [] });
+    q: 2, r: 2, year: null, wear: 1, lap: 0, lapTotal: 0, pos: 0, count: 0, done: false, endsInMs: null, rows: [], spectators: [],
+    bots: { count: 0, skill: 'pro', max: 15, canEdit: true } });
   assert.strictEqual(gp.isGhost(2), false);
 });
 
@@ -996,6 +1055,158 @@ test('online: lapDone sends the session clock of the crossing with the lap, so a
   assert.strictEqual(solo.start({ q: 1, r: 1 }, LEN), true);
   solo.update(100); solo.lapDone(80);
   assert.strictEqual(solo.snapshot.players[0].qLaps, 1, 'offline laps need no proof of driving');
+});
+
+/* ---------- computer drivers (bots) ---------- */
+
+test('offline bots: setBots in free practice (sanitised, ids 2.., slots 1..), a whole Grand Prix with them, entry / solid / botsGo', () => {
+  const { gp, log } = offline({ name: 'Tester', colour: '#12ABcd', car: '2026-ferrari' });
+  const ev = [];
+  gp.on('bots', l => ev.push(l.map(b => b.id)));
+  gp.on('botsGo', () => ev.push('botsGo'));
+  gp.on('go', () => ev.push('go'));
+  gp.on('botLapRejected', (id, why) => ev.push(['rejected', id, why]));
+  assert.deepStrictEqual(gp.bots(), []);
+  for (const bad of ['x', -1, NaN, null, undefined, {}, Infinity]) assert.strictEqual(gp.setBots(bad), false, String(bad));
+  assert.strictEqual(gp.setBots([
+    { name: 'M. Verstappen', car: '2026-red-bull', colour: '#1E41FF', skill: 0.98 },
+    { name: '\u0000  L.‮ Norris  ' + 'x'.repeat(30), car: 'BAD CAR', colour: 'red', skill: 'fast' },
+    null], 'legend'), true);
+  assert.deepStrictEqual(ev.splice(0), [[2, 3, 4]]);
+  assert.deepStrictEqual(log.take(), ['change']);
+  const b = gp.bots();
+  assert.deepStrictEqual(b, [
+    { id: 2, name: 'M. Verstappen', colour: '#1e41ff', car: '2026-red-bull', skill: 0.98, slot: 1, bi: 0 },
+    { id: 3, name: 'L. Norris xxxxxx', colour: '#888888', car: '', skill: 1, slot: 2, bi: 1 },
+    { id: 4, name: 'AI 3', colour: '#888888', car: '', skill: 1, slot: 3, bi: 2 }]);
+  b[0].name = 'changed';
+  assert.strictEqual(gp.bots()[0].name, 'M. Verstappen', 'a fresh copy');
+  assert.deepStrictEqual(view(gp).bots, { count: 3, skill: 'legend', max: 15, canEdit: true });
+  // at most 15 next to the player; bots 0..n-1 keep their ids; a level that is not one keeps the previous
+  assert.strictEqual(gp.setBots(99, 'godlike'), true);
+  assert.deepStrictEqual(gp.bots().map(x => x.id), [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+  assert.deepStrictEqual([gp.bots()[0].name, gp.bots()[3].name, gp.bots()[3].skill, view(gp).bots.skill], ['AI 1', 'AI 4', 1, 'legend']);
+  assert.strictEqual(gp.setBots([{ name: 'Rook', skill: 0.1 }, { name: 'Ama' }, { name: 'Pro', car: '2026-mercedes' }], 'rookie'), true);
+  assert.deepStrictEqual(gp.bots().map(x => [x.id, x.name, x.skill]), [[2, 'Rook', 0.1], [3, 'Ama', 0], [4, 'Pro', 0]]);
+  ev.length = 0; log.take();
+
+  // qualifying: everybody, bots included, from the start; nobody touches anybody
+  assert.strictEqual(gp.start({ q: 1, r: 2 }, LEN), true);
+  let v = view(gp);
+  assert.deepStrictEqual(v.rows.map(r => [r.id, r.bot, r.skill, r.car, r.colour]),
+    [[1, false, null, '2026-ferrari', '#12abcd'], [2, true, 0.1, '', '#888888'], [3, true, 0, '', '#888888'], [4, true, 0, '2026-mercedes', '#888888']]);
+  assert.deepStrictEqual(v.bots, { count: 3, skill: 'rookie', max: 15, canEdit: false });
+  assert.strictEqual(gp.setBots(1), false, 'parc fermé');
+  const out = {};
+  assert.strictEqual(gp.entry(2, out), out, 'fills the object it is given');
+  assert.deepStrictEqual(out, { id: 2, bot: true, taking: true, lap: 0, lapTotal: 1, done: false, fin: false, dnf: false, gridSlot: -1, locked: false });
+  assert.deepStrictEqual(gp.entry(99), { id: 99, bot: false, taking: false, lap: 0, lapTotal: 0, done: false, fin: false, dnf: false, gridSlot: -1, locked: false });
+  assert.deepStrictEqual([gp.solid(1, 2), gp.solid(2, 3), gp.isGhost(2)], [false, false, true]);
+  assert.deepStrictEqual([gp.botLap(99, 80), gp.botLap(1, 80)], ['not-ours', 'not-ours'], 'only our bots');
+  assert.strictEqual(gp.botLap(2, 10), 'too-fast');
+  assert.deepStrictEqual(ev.splice(0), [['rejected', 2, 'too-fast']]);
+  run(gp, 100);
+  gp.lapDone(81);
+  assert.deepStrictEqual([gp.botLap(3, 79.5), gp.botLap(2, 80)], ['', '']);
+  assert.strictEqual(gp.botLap(2, 80), 'done');
+  assert.strictEqual(gp.phase, 'quali', 'bot 4 still has its lap to do');
+  assert.deepStrictEqual(gp.entry(2), { id: 2, bot: true, taking: true, lap: 1, lapTotal: 1, done: true, fin: false, dnf: false, gridSlot: -1, locked: false });
+  assert.strictEqual(gp.botLap(4, 82), '');
+  assert.deepStrictEqual([gp.phase, gp.snapshot.grid, gp.gridSlot], ['grid', [3, 2, 1, 4], 2]);
+  assert.strictEqual(gp.botLap(3, 80), 'no-session');
+
+  // the grid: held until lights out, then 'go' (ours) and 'botsGo' once each
+  assert.deepStrictEqual(gp.entry(3), { id: 3, bot: true, taking: true, lap: 0, lapTotal: 2, done: false, fin: false, dnf: false, gridSlot: 0, locked: true });
+  assert.deepStrictEqual([gp.solid(1, 3), gp.inputLocked], [false, true]);
+  run(gp, 4.5);
+  assert.deepStrictEqual([gp.solid(1, 3), gp.entry(4).locked, gp.entry(4).gridSlot], [true, true, 3], 'solid from the first light on');
+  ev.length = 0;
+  run(gp, 6);
+  assert.deepStrictEqual(ev.splice(0), ['go', 'botsGo']);
+  run(gp, 5);
+  assert.deepStrictEqual(ev, []);
+  assert.deepStrictEqual([gp.phase, gp.entry(3).locked, gp.solid(2, 4)], ['race', false, true]);
+  // the race: bots' progress orders them, their laps count, they take the flag
+  gp.botProgress(4, 0.6); gp.botProgress(2, 0.3); gp.setProgress(0.5); gp.botProgress(3, 0.2); gp.botProgress(99, 5);
+  assert.deepStrictEqual(gp.snapshot.order, [3, 2, 1, 4], 'progress alone publishes nothing');
+  log.take();
+  run(gp, 0.5);
+  assert.deepStrictEqual([gp.snapshot.order, log.take()], [[4, 1, 2, 3], ['change']], 'the live order within 0.5 s, as in a room');
+  run(gp, 2);
+  assert.deepStrictEqual(log.take(), [], 'nothing moved: nothing published');
+  run(gp, 100);
+  for (const id of [4, 2, 3]) assert.strictEqual(gp.botLap(id, 90 + id), '');
+  gp.lapDone(95);
+  run(gp, 100);
+  for (const id of [4, 2, 3]) assert.strictEqual(gp.botLap(id, 90 + id), '');
+  assert.strictEqual(gp.botLap(4, 90), 'done', 'flag taken');
+  gp.lapDone(95);
+  assert.strictEqual(gp.phase, 'results');
+  v = view(gp);
+  assert.deepStrictEqual(v.rows.map(r => [r.id, r.bot, r.done, r.laps]), [[4, true, true, 2], [2, true, true, 2], [3, true, true, 2], [1, false, true, 2]]);
+  assert.deepStrictEqual([gp.entry(3).done, gp.entry(3).fin, gp.solid(1, 3)], [true, true, true]);
+  assert.strictEqual(gp.setBots(1), false);
+  // free practice again: the field can change; the session drops the removed bots
+  assert.strictEqual(gp.action('end'), true);
+  assert.strictEqual(gp.setBots(1), true);
+  assert.deepStrictEqual(gp.bots().map(x => x.id), [2]);
+  assert.strictEqual(gp.start({ q: 1, r: 1 }, LEN), true);
+  assert.deepStrictEqual(gp.snapshot.players.map(p => [p.id, p.bot === true]), [[1, false], [2, true]]);
+  assert.strictEqual(gp.action('end'), true);
+  // init() starts from an empty field (no event: as documented for init)
+  ev.length = 0;
+  gp.init({ net: null, getProfile: () => ({ name: 'Tester', colour: '#12ABcd' }) });
+  assert.deepStrictEqual([gp.bots(), ev, view(gp).bots.count], [[], [], 0]);
+});
+
+test('online bots: the room\'s bots mirror the server (bots() = net.bots, rows / view().bots from the roster); setBots / botLap / botProgress go to net', () => {
+  const room = makeRoom();
+  const h = room.client(1, 'Host', '#ff0000'); h.connect();
+  const g = room.client(2, 'Guest', '#00ff00'); g.connect();
+  const ev = { h: [], g: [] };
+  for (const [k, c] of [['h', h], ['g', g]]) {
+    c.gp.on('bots', l => ev[k].push(l.map(b => b.id)));
+    c.gp.on('botsGo', () => ev[k].push('botsGo'));
+    c.gp.on('botLapRejected', (id, why) => ev[k].push(['rejected', id, why]));
+  }
+  // a guest's request goes to net, which refuses it (only the host may)
+  assert.strictEqual(g.gp.setBots(3, 'pro'), false);
+  assert.deepStrictEqual(g.net.calls.bots, [[3, 'pro']]);
+  assert.strictEqual(h.gp.setBots([{ name: 'Ann', car: '2026-mclaren', skill: 0.5 }, { name: 'Bo' }], 'amateur'), true);
+  assert.deepStrictEqual([ev.h.splice(0), ev.g], [[[100, 101]], []], 'only the owner hears about his bots');
+  assert.deepStrictEqual(h.gp.bots(), [
+    { id: 100, name: 'Ann', colour: '#e10600', car: '2026-mclaren', skill: 0.5, slot: 2, bi: 0 },
+    { id: 101, name: 'Bo', colour: '#e10600', car: '', skill: null, slot: 3, bi: 1 }]);
+  assert.deepStrictEqual(g.gp.bots(), []);
+  assert.deepStrictEqual([view(h.gp).bots, view(g.gp).bots], [
+    { count: 2, skill: 'amateur', max: 14, canEdit: true }, { count: 2, skill: 'amateur', max: 14, canEdit: false }]);
+  // a session: the rows say which cars are bots, with their skill and car from the roster
+  h.gp.start({ q: 1, r: 1 }, LEN);
+  assert.strictEqual(g.gp.phase, 'quali');
+  assert.deepStrictEqual(view(g.gp).rows.map(r => [r.id, r.bot, r.skill, r.car]), [[1, false, null, ''], [2, false, null, ''], [100, true, 0.5, '2026-mclaren'], [101, true, null, '']]);
+  assert.deepStrictEqual(view(h.gp).bots.canEdit, false, 'parc fermé');
+  assert.strictEqual(h.gp.setBots(0), false);
+  // laps of our bots go to net with the bot id; a guest cannot report them
+  assert.strictEqual(g.gp.botLap(100, 80), 'not-ours');
+  assert.strictEqual(h.gp.botLap(101, 10), '', 'sent: the server judges it');
+  assert.deepStrictEqual(ev.h.splice(0), [['rejected', 101, 'too-fast']]);
+  room.wait(100);
+  for (const id of [100, 101]) assert.strictEqual(h.gp.botLap(id, 80 + id / 1000), '');
+  assert.deepStrictEqual(h.net.calls.botLap, [[1, 10, 101], [1, 80.1, 100], [1, 80.101, 101]]);
+  assert.strictEqual(h.gp.botLap(100, 85), 'done');
+  room.lap(1, 81); room.lap(2, 82);
+  assert.deepStrictEqual([g.gp.phase, g.gp.snapshot.grid], ['grid', [100, 101, 1, 2]]);
+  assert.deepStrictEqual(h.gp.entry(101), { id: 101, bot: true, taking: true, lap: 0, lapTotal: 1, done: false, fin: false, dnf: false, gridSlot: 1, locked: true });
+  assert.deepStrictEqual(g.gp.entry(101).gridSlot, 1, 'anybody may ask about any car');
+  room.wait(9.5); h.gp.update(0.016); g.gp.update(0.016);
+  assert.deepStrictEqual([ev.h.splice(0), ev.g.splice(0)], [['botsGo'], []], 'botsGo for the owner only');
+  // progress of our bots goes to net (it rides with their states)
+  h.gp.botProgress(101, 0.4); h.gp.botProgress(2, 0.9); g.gp.botProgress(100, 0.9);
+  assert.deepStrictEqual(h.net.calls.botProgress, [[101, 0.4]]);
+  assert.deepStrictEqual(g.net.calls.botProgress, []);
+  // leaving the room: the room's bots are no longer ours
+  h.disconnect();
+  assert.deepStrictEqual([ev.h.splice(0), h.gp.bots(), view(h.gp).bots], [[[]], [], { count: 0, skill: 'pro', max: 15, canEdit: true }]);
 });
 
 console.log(failed ? '\n' + failed + ' test(s) FAILED' : '\nall gp tests passed');

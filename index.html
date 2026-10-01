@@ -271,6 +271,29 @@
   #gp-tyre button.on[data-c="M"] { color: #1a1206; background: #f0c419; border-color: #f0c419; }
   #gp-tyre button.on[data-c="H"] { color: #12151a; background: #e9edf2; border-color: #e9edf2; }
   #gp-tyre-note { margin: 4px 0 0; font-size: 12px; }
+  /* v7: the computer drivers (電腦車手: how many, how strong; the field in free practice) */
+  #gp-bots-box { margin: 10px 0 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .gp-bots-row label, .gp-skill-row label { flex: none; width: 56px; font-size: 13px; color: var(--muted); }
+  #mp-panel #gp-bots { flex: 0 0 96px; cursor: pointer; font: 600 15px var(--num-font); font-variant-numeric: tabular-nums; }
+  #mp-panel #gp-bots option { font: 14px var(--ui-font); background: var(--panel); color: var(--text); }
+  #gp-skill button { font-family: var(--ui-font); font-size: 13px; }
+  #gp-skill button:disabled { cursor: default; opacity: .55; }
+  #gp-skill button:disabled:hover { color: #c9d1db; background: var(--panel); }
+  #gp-skill button.on:disabled:hover { color: #fff; background: var(--accent); }
+  #gp-bots-note { margin: 4px 0 0; font-size: 12px; }
+  #gp-bots-list { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; font-size: 12px; color: #c9d1db; }
+  .gp-bot { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .gp-bot i { flex: none; width: 9px; height: 9px; border-radius: 2px; transform: skewX(-12deg); border: 1px solid rgba(255,255,255,.25); }
+  /* a computer driver's tag in the standings, the results, the room roster */
+  .gp-ai {
+    flex: none; padding: 0 4px; font: 700 10px/14px var(--num-font); letter-spacing: .04em; color: #0b0d10;
+    background: #c9d1db; border-radius: 3px;
+  }
+  .gp-row.out .gp-ai { opacity: .6; }
+  .car-drv { display: block; margin-top: 5px; font-size: 11.5px; line-height: 1.45; color: #c9d1db; }
+  .car-drv b { margin-right: 5px; font-weight: 600; }
+  .car-drv em { font-style: normal; font-weight: 600; color: #fff; }
+  .car-drv i { margin-left: 3px; padding: 0 3px; font: 700 9.5px/13px var(--num-font); font-style: normal; color: #0b0d10; background: #aab3bf; border-radius: 2px; }
   #gp-start { width: 100%; margin-top: 12px; }
   #gp-state {
     display: flex; align-items: baseline; gap: 10px; padding: 7px 12px;
@@ -783,6 +806,20 @@
           </div>
         </div>
         <p id="gp-tyre-note" class="mp-note">排位賽和正賽起跑時裝上這組新胎。開車時按 <kbd>T</kbd>（手把 <kbd>X</kbd>）換下一組，進站停在維修格時裝上。</p>
+        <div id="gp-bots-box" class="hidden">
+          <div class="mp-field gp-bots-row">
+            <label for="gp-bots">電腦車手</label>
+            <select id="gp-bots" aria-label="電腦車手人數"><option value="0">無</option></select>
+          </div>
+          <div class="mp-field gp-skill-row">
+            <label id="gp-skill-label">強度</label>
+            <div id="gp-skill" class="seg" role="radiogroup" aria-labelledby="gp-skill-label">
+              <button type="button" role="radio" data-s="rookie" title="新手：每圈慢約 8%，偶爾失誤">新手</button><button type="button" role="radio" data-s="amateur" title="業餘：每圈慢約 5%">業餘</button><button type="button" role="radio" data-s="pro" title="職業：每圈慢約 2.5%">職業</button><button type="button" role="radio" data-s="legend" title="傳奇：每圈慢約 1%，幾乎不失誤">傳奇</button><button type="button" role="radio" data-s="mixed" title="混合：每位電腦車手的強度隨機">混合</button>
+            </div>
+          </div>
+          <p id="gp-bots-note" class="mp-note hidden"></p>
+          <div id="gp-bots-list" class="hidden"></div>
+        </div>
         <div id="gp-setup">
           <div class="mp-field gp-laps">
             <label for="gp-q">排位圈數</label>
@@ -935,6 +972,7 @@
 <script src="js/carmodel.js"></script>
 <script src="js/laps.js"></script>
 <script src="js/pit.js"></script>
+<script src="js/ai.js"></script>
 <script src="net/session.js"></script>
 <script src="js/net.js"></script>
 <script src="js/gp.js"></script>
