@@ -241,7 +241,7 @@ Choices I made (record for the user):
 - All of them are muted through electron-userdata.
 
 == bugsFound
- - devtests/cockpit-test/shots.js had been broken since the CSP added in e02cf43: the hook was an inline script, which the CSP blocks, so the run died with 'Cannot read properties of undefined (reading __render)'. Fixed: the hook is now written to out/ck-hook.js and loaded by URL.
+ - devtests/cockpit-test/shots.js had been broken since the CSP added in 0424b7a: the hook was an inline script, which the CSP blocks, so the run died with 'Cannot read properties of undefined (reading __render)'. Fixed: the hook is now written to out/ck-hook.js and loaded by URL.
  - A narrower FOV alone (60) pushed the steering-wheel display under the HUD's bottom telemetry graphic (its lower edge moved from 83 % to 91 % of the screen height; I saw it in the HUD-on screenshots). Prevented with the framing lens shift.
 
 == openIssues
@@ -523,7 +523,7 @@ Defaults decided: kept the calibration method (keyboard autopilot, deploying) an
  - {"cmd":"node test/cars.test.js (after the || 0 fix)","result":"all cars tests passed (79-107 s)"}
  - {"cmd":"node devtests/seasons-calib/drive-check.mjs","result":"exit 0, 221 s, 'all seasons ok'; correlation with the real order 0.952..1.000, with the data target 0.952..1.000; 0 off-track runs; wrote drive-check.json"}
  - {"cmd":"node devtests/seasons-calib/check-drive.js","result":"exit 0, 4 s; every season within 0.26 % of noDeployMedian on Sepang / COTA / Jeddah / Zandvoort (2011 and 2012 +0.26 %, 2026 -0.15 %); 0 off"}
- - {"cmd":"node devtests/seasons-calib/check-drive.js --tracks <all 40>","result":"every season within 0.05 % except 2026 -0.47 % (1.0478 vs 1.0527); on a snapshot of HEAD c50dc5a: 2026 -0.06 %, others within 0.20 %"}
+ - {"cmd":"node devtests/seasons-calib/check-drive.js --tracks <all 40>","result":"every season within 0.05 % except 2026 -0.47 % (1.0478 vs 1.0527); on a snapshot of HEAD c2bd064: 2026 -0.06 %, others within 0.20 %"}
  - {"cmd":"for f in test/*.test.js; do node $f; done (after)","result":"11 of 12 pass (car.test bit-identical golden, cars, collide, gp, laps, main 51/51, pit, server, session, track, tyres); ai.test.js FAILS 'no allocation in think()' 3.97-4.78 B per call (limit 2; it passed before the regeneration)"}
  - {"cmd":"test/ai.test.js isolation in scratch copies (old vs new seasons-data.js; skipping the preceding 2026 Mercedes test)","result":"old data: 0.613 B pass; new data: 3.96 B fail; reverting every int/double flip in the new data: still fails; previous js/laps.js: still fails; old data without the preceding test: 4.36 B FAIL. So the check depends on the JIT warm-up left by earlier tests, not on the data"}
 

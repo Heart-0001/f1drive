@@ -41,10 +41,10 @@ computer drivers (offline and in rooms). The user writes Traditional Chinese; UI
 
 ## State (2026-10-02 13:30, run finished)
 
-Released on GitHub (private repo Heart-0001/f1drive): v6.1 = c50dc5a, v6.2 = dd08276, v7.0 = 766a0e1 (prereleases) and
-**v7.1 = a955137 (latest, F1Drive-v7.1.exe)**: computer drivers + Fable review round 3 (30 confirmed findings fixed) +
+Released on GitHub (PUBLIC repo Heart-0001/f1drive since 2026-10-02 23:30; history rewritten that night to drop two personal e-mail addresses — every commit id before then changed, the docs were updated to the new ids; pre-rewrite backup bundle in the session scratchpad only): v6.1 = c2bd064, v6.2 = 6eb2c29, v7.0 = 9890cad (prereleases) and
+**v7.1 = 79335dd (latest, F1Drive-v7.1.exe)**: computer drivers + Fable review round 3 (30 confirmed findings fixed) +
 the AI pressing follow-up (no pressing into a braking car; passes 4328 vs 3961, contacts 48 vs 58 in 672 races).
-HEAD = origin/main = a955137 + this docs commit. Everything green: 12 node suites, build-cars --check, every node
+HEAD = origin/main = 79335dd + this docs commit. Everything green: 12 node suites, build-cars --check, every node
 devtest, every Electron harness (gp-e2e/bots.js 193/193), exe smoke 22/22 on the clean-worktree build.
 Nothing is running; the user plays the release on their laptop and will say what to change next.
 

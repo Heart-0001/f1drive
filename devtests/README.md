@@ -137,7 +137,7 @@ replaces it with a synthetic profile.
 | --- | --- | --- |
 | `node devtests/review/build-all.js` | Table per track: samples, length, wall coverage and gaps, closest parallel section, tightest radius. | 3 s |
 | `node devtests/review/drive-all.js [id or name part]` | 60 Hz version of `3d-test/drive-all.js`. | 9 s |
-| `node devtests/review/escape.js [name part]` | 60 Hz wall-escape test, written before the pit lanes (v6): a car steered into a pit lane (|d| about 13 m, no wall there) counts as an escape, so it no longer ends `total escapes 0` (204 at commit 17170a2, 203 after review r3; Albert Park, Monza ... at the pit entry / exit). `3d-test/escape.js` is the wall check that knows the lanes. | 7 s |
+| `node devtests/review/escape.js [name part]` | 60 Hz wall-escape test, written before the pit lanes (v6): a car steered into a pit lane (|d| about 13 m, no wall there) counts as an escape, so it no longer ends `total escapes 0` (204 at commit d1decf6, 203 after review r3; Albert Park, Monza ... at the pit entry / exit). `3d-test/escape.js` is the wall check that knows the lanes. | 7 s |
 | `node devtests/review/dir-clamp.js` | Racing direction of the data against a table of real directions (`ok` / `MISMATCH`), then walls drawn inside the collision limit (list must be empty). | 2 s |
 | `node devtests/review/wall-geom.js` | Where walls stand closer than 9 m to the centreline (expected at narrowed roads and shared mid walls). | 25 s |
 | `node devtests/review/cross.js`, `gaps.js`, `pinch.js` | Traces for Monaco / Baku / Suzuka wall gaps and crossings, road pinch at four tight corners. | < 1 s |

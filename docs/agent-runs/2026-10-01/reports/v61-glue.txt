@@ -2,7 +2,7 @@
 ################ v6.1 glue
 
 == summary
-The v6.1 glue is finished and every suite it lists is green on the final tree. The earlier glue agent's partial work (in WIP commit 27cea48) was reviewed and is almost all correct. I kept it, finished the hudmirrors harness, and fixed four defects.
+The v6.1 glue is finished and every suite it lists is green on the final tree. The earlier glue agent's partial work (in WIP commit f64a597) was reviewed and is almost all correct. I kept it, finished the hudmirrors harness, and fixed four defects.
 
 What is in place:
 1. **Default season 2026:** START_YEAR = 2026 in js/main.js, so a fresh install opens on 2026 with its standard car. The harnesses that were written for the reference car now pick '2025-standard' before the game boots. The shared helper devtests/ref-car.js (+ ref-car.html, a blank page of the same file:// origin) writes the menu's stored choice, localStorage 'f1drive.car', into the window. Harnesses that test a fresh install open their windows with `fresh: true` and now expect 2026: v6-smoke part boot, v6-critic newbie and the window sizes, online-v6, solo-v6's fresh-profile check.
@@ -18,7 +18,7 @@ Defects I fixed in this session:
 - **js/main.js:** the mirror render ran inside the frame's try block, so a mirror failure would have stopped the game with the error overlay. It is now isolated in renderMirrors / mirrorsFailed: the mirrors switch off for good, the 設定 switch shows 無法顯示, and driving continues.
 - **devtests/hudmirrors-test/run.js:** it had no window-all-closed handler. Electron quit with exit 0 when the first window closed, so the restart checks never ran and a failing run reported success.
 - **devtests/hudmirrors-test/run.js:** one check hard-coded x = 1018 for a 1280-wide window. The offscreen window now comes out 1281 px wide at DPR 1, so the check now uses W - 262.
-- **devtests/car-v6/game-check.js:** it pressed the old pad buttons and assumed the reference car was the default. It also had a battery threshold that already failed on e02cf43 (I verified on a temporary worktree, since removed): the final review made battery deploy traction-limited. I aligned it the same way v6-smoke already was.
+- **devtests/car-v6/game-check.js:** it pressed the old pad buttons and assumed the reference car was the default. It also had a battery threshold that already failed on 0424b7a (I verified on a temporary worktree, since removed): the final review made battery deploy traction-limited. I aligned it the same way v6-smoke already was.
 
 Results: every listed suite passes — 11 node suites, build-cars --check, the gamepad tests and all Electron harnesses; exact results per command are in testsRun. ui-v6, ui-gp, solo, solo-v6, v6-smoke and gp-smoke were re-run after the last main.js change.
 

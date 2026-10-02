@@ -1,4 +1,4 @@
-// BASELINE, NOT USED BY THE GAME: js/laps.js as it was before the review (git a4eff5c), kept so that
+// BASELINE, NOT USED BY THE GAME: js/laps.js as it was before the review (git d9b95ce), kept so that
 // devtests/laps-test/drive.js can show on the same index stream what it got wrong. Only change: it does not
 // register itself as F1.createLapCounter.
 // F1Drive - lap counting from the car's track sample index. Pure logic (no DOM, no THREE), also loadable

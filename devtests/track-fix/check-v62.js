@@ -17,11 +17,11 @@ const NEWF = path.resolve(args.find((a, i) => !a.startsWith('--') && (bi < 0 || 
 global.window = global;
 global.THREE = require(path.join(ROOT, 'lib/three.min.js'));
 function loadTracks(file) { const w = {}; new Function('window', fs.readFileSync(file, 'utf8'))(w); return w.F1_TRACKS; }
-// the old lap: the cache copy, else tracks-data.js of commit c50dc5a (the last one before the corrections)
+// the old lap: the cache copy, else tracks-data.js of commit c2bd064 (the last one before the corrections)
 function loadOld() {
   if (fs.existsSync(BEFORE)) return loadTracks(BEFORE);
   try {
-    const src = require('child_process').execSync('git show c50dc5a:tracks-data.js', { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
+    const src = require('child_process').execSync('git show c2bd064:tracks-data.js', { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
     const w = {}; new Function('window', src)(w); return w.F1_TRACKS;
   } catch (e) { console.log('(no old tracks-data.js: feature windows taken as fractions of the new lap)'); return null; }
 }

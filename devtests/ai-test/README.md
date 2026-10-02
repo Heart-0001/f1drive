@@ -84,9 +84,9 @@ first chicane (bots.js part pits) bumps of 0.16..0.20 in about 1 race in 5.
 
 Reproduced first. gp-e2e/bots.js part pits with a contact dump (a scratch copy; the harness itself is unchanged), round
 3's file: 7 of 40 runs touch at sample 316..319, 17.1 s after lights out, always the same pair - G. Bortoleto (legend,
-Audi) and F. Alonso (0.98, Aston Martin): 0.158 (4x) and 0.203 (3x); HEAD 17170a2's file never did. In node,
+Audi) and F. Alonso (0.98, Aston Martin): 0.158 (4x) and 0.203 (3x); HEAD d1decf6's file never did. In node,
 `press.js` (the same field through critic-sim.js, the player's stall included) puts the same two cars into the same
-side contact at 316..319 and 17.1 s: round 3 19 of 160 runs (max 0.34, 4 over 0.25), 17170a2 0 of 48, pressing off 0
+side contact at 316..319 and 17.1 s: round 3 19 of 160 runs (max 0.34, 4 over 0.25), d1decf6 0 of 48, pressing off 0
 of 48. The chain (`press.js trace=8:2,6,8,10:11:17.3`): R. Russell (amateur) concedes and is still giving room as it
 brakes for the chicane; F. Colapinto presses it (P#2) and attacks into the braking zone, G. Bortoleto presses it too
 from behind Colapinto; three cars arrive at the chicane together, Bortoleto at 15 m/s, 5..10 under its corner speed;
@@ -119,13 +119,13 @@ the way to its target): a car going back to the line after a concede saw a car p
 all) so that the racecraft branches are warm before the race.
 Tried and not kept: the literal release to the normal following gap with the braking anticipated in full - no bump, but
 the quicker car fell 20..30 m back in every braking zone, lost the pressure on the next straight, and the order from a
-reversed grid fell below the old file's (120 races: B 0.23 against r3 0.60 and 17170a2 0.29; matrix passes 118, Spearman
+reversed grid fell below the old file's (120 races: B 0.23 against r3 0.60 and d1decf6 0.29; matrix passes 118, Spearman
 0.62); keeping the press gap with full anticipation (B 0.48); pressing on into the braking zone with a corner-aware cap
 (arrive a following gap behind it at its corner speed): 13 bumps in 160; a shorter / later release window (T0 1..2 s):
 1..3 bumps in 160 and no more passes; an earlier concede (lerp 1.5..5.5 s) +0.05 on B only (not worth changing AI-5's
 give-room character); no attack started in a braking zone at all: no gain.
 
-Measured (final js/ai.js; round 3 = 541115e's js/ai.js, 17170a2 = the file before review r3):
+Measured (final js/ai.js; round 3 = f925513's js/ai.js, d1decf6 = the file before review r3):
 - the target: gp-e2e/bots.js part pits, 40 runs, 40 x 14 / 14 checks; no contact at the first chicane on lap 1 (round 3:
   7 of 40, 0.158..0.203; at the chicane only one 0.043 touch at 6..8 m/s, on lap 2). The pit-exit merge
   (lap 2, the whole field out of the lane at once, still in the exit taper with its stop planned, where none of the
@@ -137,7 +137,7 @@ Measured (final js/ai.js; round 3 = 541115e's js/ai.js, 17170a2 = the file befor
 - press.js, 160 runs: no contact at the chicane (round 3: 19, max 0.34). test/ai.test.js: 36 tests; the two new ones
   fail on round 3's file (its pits field bumps 0.16 / 0.16 / 0.31 / 0.32 in runs 8 / 16 / 26 / 39; with the press
   diagnostic added to it, it presses a car braking for the chicane for 42 steps).
-- passing.js seeds 0..5 (matrix.js's races B and C on its 14 circuits, 168 races), 17170a2 / round 3 / now: passes 727
+- passing.js seeds 0..5 (matrix.js's races B and C on its 14 circuits, 168 races), d1decf6 / round 3 / now: passes 727
   / 959 / 1076; contacts 31 (10 over 0.25) / 16 (0) / 12 (1: 0.31, Bahrain C seed 2, a concede ending in the middle of
   the slow T10 with the car being let by on the outside); offs 220 / 112 / 38; finishing order vs skill, mean of the
   per-seed medians: all 0.573 / 0.668 / 0.667, B (reversed grid) 0.472 / 0.668 / 0.675, C (random grid) 0.598 / 0.685 /
