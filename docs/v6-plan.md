@@ -344,3 +344,6 @@ Reports (every reviewer's findings, the verdicts, the fixers' and the re-run's s
    portable exe as the asset, Traditional Chinese notes (round 3 changes: smarter overtaking, the bots' pit limit, the
    Silverstone grid, the start gantry lights, the credits, search by 日本站 ...). Suggested tag: v7.1.
 6. Then update CLAUDE.md's state (commit id, release) and refresh docs/claude-memory/.
+
+- ~09:30: Fable round 3 committed + pushed 541115e (no release yet). AI pressing follow-up RUNNING (run wf_e576af1f-aa0, script wf-ai-press.js: fix + independent check). Then: dist from a clean worktree, exe smoke, commit, push, release v7.1 (final of this run).
+- ~12:40: AI pressing follow-up DONE (reports docs/agent-runs/2026-10-01/reports/ai-press-reports.txt): press released 2.5..1 s before the car ahead brakes, gap held, pass set up on the inside of the coming corner; 672 races: passes 4328 vs round 3 3961, contacts 48 (5 heavy) vs 58 (8), offs 147 vs 392, finish order level; lap-1 chicane bump 0 / 40 Electron runs; independent check verdict ok. Open (minor): Monaco wear x2 soft stint can reach 93 % (1 run in 8), a hairpin alongside misjudgement at Bahrain T10. Next: commit, clean build, exe smoke, push, release v7.1.

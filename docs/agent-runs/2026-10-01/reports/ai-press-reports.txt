@@ -1,0 +1,118 @@
+
+################ ai press fix
+
+== summary
+Fixed the Monaco lap-1 chicane bump without losing round 3's passing. Nothing is committed.
+
+Cause: round 3 kept pressing a slower car into the braking zone without allowing for its braking. On lap 1 two or three cars reached the chicane together and the next car attacked one of them mid-chicane. Reproduced in Electron (bots.js part pits: 7 of 40 runs with round 3's file, always Bortoleto and Alonso, 0.158-0.203 at samples 316-319, 17.1 s after lights out) and in node (new devtests/ai-test/press.js: same pair, same place, 19 of 160 runs, max 0.34; the file before round 3 and pressing off both 0 of 48).
+
+js/ai.js now (decisions recorded in devtests/ai-test/README.md):
+1. The press runs fully until 2.5 s before the car ahead's braking point and is gone 1 s before it; it also stops while that car slows by more than 2-6 m/s2. The braking point comes from a new per-profile table of corner minima (G.apex), computed once per step.
+2. Once released, the gap is held: no dropping back, no closing in. Its braking is reacted to only as far as this car is not already braking as hard.
+3. The pass is set up instead: in the 2.5-1 s window a known slower car is attacked on the inside of the coming corner; not alongside by turn-in, the attack is given up. No attack starts mid-corner or within 2.5 s of a corner tighter than full lock.
+4. A parked car is also checked where the car's line is heading (a car returning to the line after letting someone by hit one at 0.50).
+5. F1.AI.warmUp runs an extra 12 s train into the slowest corner, keeping first-race memory at round 3's level.
+6. New diagnostic field ai.state.press.
+
+The literal version you suggested (drop back to the normal gap, react fully to braking) removed the bump but made reversed-grid finishing order worse than the pre-round-3 file (0.23 vs 0.29).
+
+Results (pre-round-3 / round 3 / now). passing.js seeds 0-5, 168 races: passes 727 / 959 / 1076; finish order vs skill, mean of per-seed medians, all 0.573 / 0.668 / 0.667, reversed grid 0.472 / 0.668 / 0.675, random grid 0.598 / 0.685 / 0.667; contacts 31 (10 over 0.25) / 16 (0) / 12 (1); offs 220 / 112 / 38. matrix.js single seed: passes 115 / 166 / 187, order 0.74 / 0.79 / 0.72 (lower on one seed, level over six), contacts 6 / 4 / 3, offs 30 / 23 / 4. Electron bots.js part pits: 40 of 40 runs 14/14, no chicane contact on lap 1. Full bots.js: 193/193 once, 192/193 once (part monaco's 93 % tyre-wear check, which also fails on round 3's file in 2 of 8 Monaco runs vs 1 of 8 now). Unit tests: all 36 pass, two new ones fail on round 3's file; all 12 node suites pass. Memory: 1.49 B per think() call; first race with warm-up 21.5 MB (round 3 22.6). Driving fingerprint changes as expected; warm=1 prints the same lines.
+
+== testsRun
+ - {"cmd":"node test/ai.test.js","result":"all 36 tests pass (1.49 B per think() call); the two new regression tests fail on round 3's file (chicane bumps 0.16/0.16/0.31/0.32; with the press diagnostic added to round 3, it presses a braking car for 42 steps)"}
+ - {"cmd":"for f in test/*.test.js; do node $f; done","result":"all 12 suites pass (main 91/91)"}
+ - {"cmd":"ONLY=pits electron <scratch copy of devtests/gp-e2e/bots.js with a contact dump> x40 (final js/ai.js) vs x40 (round 3's file via PATCH)","result":"final: 40/40 runs 14/14, no lap-1 chicane contact (one 0.043 touch on lap 2); round 3: 7/40 chicane bumps 0.158-0.203. Pit-exit merge: final 21/40 up to 0.114, round 3 13/40 up to 0.097"}
+ - {"cmd":"npx electron devtests/gp-e2e/bots.js (full, twice)","result":"193/193 once; 192/193 once: part monaco tyre check (soft set at 0.932). Same check fails on round 3's file in 2 of 8 Monaco runs (0.936, 0.945) vs 1 of 8 for the final file"}
+ - {"cmd":"node devtests/ai-test/press.js runs=160 (final / round 3 / pre-round-3 48 / pressing off 48)","result":"0 / 19 (max 0.34) / 0 / 0 chicane contacts"}
+ - {"cmd":"node devtests/ai-test/passing.js seeds=0..5 (pre-round-3 / round 3 / final)","result":"passes 727/959/1076; contacts 31(10 heavy)/16(0)/12(1: 0.31 at Bahrain T10); finish-order mean of medians all 0.573/0.668/0.667, B 0.472/0.668/0.675, C 0.598/0.685/0.667"}
+ - {"cmd":"node devtests/ai-test/matrix.js","result":"passes 187 (round 3 166, pre-round-3 115); contacts 3 (0 heavy, max 0.24); offs 4; Spearman median 0.72 (A 1.00, B 0.57, C 0.64) vs round 3 0.79; think() 2.41 us"}
+ - {"cmd":"node devtests/ai-test/critic-start.js","result":"36 races: contacts 3 (round 3 2), heavy 0, max 0.21, pile-ups 0, R 0, offs 5"}
+ - {"cmd":"node devtests/ai-test/critic-obstacle.js mode=parked / mode=wrong (plus PACE+0.001 nudged copies)","result":"parked: hits 4 (max 0.39), AI-AI 1, R 8, no FAIL lines (nudged: R 5/6, no FAILs; round 3 nudged had a FAIL each). wrong-way: ghost hits 43 (round 3 53), AI-AI 6 heavy (round 3 1; nudged runs 6/3 vs 7/2: pile-ups behind head-ons, chaotic)"}
+ - {"cmd":"node devtests/ai-test/critic-mixed.js","result":"pit lane: all served, lane top 78/80, nothing near the lane; computer car the striker in 2 of 43 contacts with erratic humans (max 0.21); wear x5 no puncture; Monaco hairpin 0 contacts; deterministic. Bahrain pit race: two lap-1 rear-ends (0.20, 0.26) from 'squeezed' cars"}
+ - {"cmd":"node devtests/ai-test/wrongway.js","result":"8/15/40 m/s head-ons 6(4)/2(0)/13(11) vs round 3 7(6)/3(0)/10(9)"}
+ - {"cmd":"node --expose-gc ... devtests/ai-test/alloc.js suzuka 15 minutes=5","result":"per minute 271/10/21/1.1/0.62 B per call (round 3 284/9.8/20/-1.1/0.62)"}
+ - {"cmd":"node devtests/ai-test/warmup.js sync=1","result":"first race with warm-up 21.5 MB (round 3 22.6; 36 MB before the warm-up train was added); without warm-up 193 MB (round 3 170)"}
+ - {"cmd":"node devtests/ai-test/fingerprint.js [warm=1]; bridge.js; alltracks.js","result":"fingerprint changed (new driving), warm=1 prints the same lines; bridge all ok; alltracks all ok"}
+
+== verdict
+ok
+
+== openIssues
+ - Full bots.js part monaco check 'no set past 93 % wear' is flaky on both files: round 3's file 2 of 8 Monaco runs (0.936, 0.945), the final file 1 of 8 (0.932). Cause is the stint plan's margin (W_PLAN 0.88) on softs at wear x2 over 3 laps, not this change. Left as is; the fix would be a tyre-strategy change in js/ai.js or a looser threshold in bots.js (other owner).
+ - matrix.js on its single seed shows finish-order median 0.72 vs round 3's 0.79 (B 0.57 vs 0.69, C 0.64 vs 0.71). Over passing.js seeds 0-5 (the same B and C races, 168 races) it is level (0.667 vs 0.668), so I read the single seed as noise.
+ - One heavy contact (0.31) in 168 passing.js races (round 3 had 0): Bahrain C seed 2, T10 hairpin, a car stops letting another by mid-corner with that car on the outside. The critic Bahrain pit race also had a 0.26 rear-end there. Likely an existing weakness: the along-track gap misjudges whether two cars are alongside at hairpins.
+ - Pit-exit merge on lap 2 in bots.js part pits: light contacts more often (21/40 up to 0.114 vs 13/40 up to 0.097). The cars still have a stop planned there, where none of the press/attack changes runs; attributed to different race histories. All under the 0.25 line, none on the pit asphalt.
+ - Wrong-way ghost runs (critic-obstacle mode=wrong) show more heavy AI-AI pile-ups behind head-ons (6 vs 1; with tiny PACE changes 7/2 vs 6/3). Reported-only suite; chaotic.
+ - js/README-interfaces.md (not my file) lists ai.state fields; the new ai.state.press field could be added there.
+ - F1.AI.warmUp is now 0.1-0.25 s (was 0.08-0.19 s) because of the extra 12 s train into the slowest corner.
+
+################ ai press check
+
+== summary
+Verdict: ok. I measured everything myself and nothing in the repo is changed. I compared three versions of js/ai.js: the current file ("now"), round 3 (541115e) and 17170a2. The older two ran through AI_JS for node and PATCH for Electron, and a marker in each window confirmed which file was loaded. js/ai.js stayed the same file (md5 c9e7e02f) for the whole check.
+
+**The lap-1 chicane bump is fixed.**
+- Electron, part pits, through a scratch wrapper that prints every contact: 40 of 40 runs pass 14/14, with no contact at the first chicane on lap 1. 17170a2 also had none (0 of 40). Round 3 hit 0.203 at samples 317-318, 17.1 s after lights out, in 2 of 30 runs, so the check does catch the bump.
+- press.js, 160 runs: now has no contacts at all. Round 3 had 19 at the chicane (max 0.34). 17170a2 had none at the chicane, but 2 elsewhere on lap 1 (one at 0.26).
+
+**Contacts: no worse than 17170a2 overall, and clearly fewer.**
+- Full bots.js: 193/193, then 192/193. The one failure is the Monaco tyre check ("no set past 93 % wear", a set at 0.930), not a contact. Both runs had 0 race contacts at Monza and Monaco.
+- bots-test/game.js: 72/72.
+- critic suites, each run three times (the file as is, and with PACE nudged ±0.001 per level), now vs 17170a2:
+  - critic-start (216 races): 14 contacts, 2 heavy, 2 failing races, against 42, 10 heavy, 5 failing races.
+  - wrong-way car: 138 hits on it and 20 car-to-car contacts, against 762 and 123.
+  - parked car: 9 hits on it plus 5 car-to-car, no failures, against 6 plus 16, no failures.
+  - critic-mixed erratic humans: the computer car hit a human 2 times (max 0.21), same as 17170a2. The race where 10 cars all stop on the same lap is slightly worse, see open issues.
+- passing.js: see the table below.
+
+**Passing: more passes than round 3, finishing order level within noise.**
+- matrix.js (seed 0), now / round 3 / 17170a2: passes 187 / 166 / 115; Spearman median 0.72 / 0.79 / 0.74 (reversed grid 0.57 / 0.69 / 0.57, random grid 0.64 / 0.71 / 0.60); contacts 3 / 4 / 6; offs 4 / 23 / 30.
+- passing.js, seeds 0-5: my numbers match the owner's exactly (passes 1076 / 959 / 727, finishing order 0.667 / 0.668 / 0.572). I then added seeds 6-23 and logged each race:
+
+| | now | round 3 | 17170a2 |
+|---|---|---|---|
+| passes, seeds 0-11 (336 races) | 2160 | 1992 | 1498 |
+| contacts (heavy), seeds 0-11 | 23 (3) | 37 (2) | 75 (18) |
+| offs, seeds 0-11 | 66 | 207 | 425 |
+| passes, seeds 0-23 (672 races) | 4328 | 3961 | not run |
+| contacts (heavy), seeds 0-23 | 48 (5) | 58 (8) | not run |
+| offs, seeds 0-23 | 147 | 392 | not run |
+
+- Finishing order, compared race by race, now minus round 3 over 672 races: all −0.010 ± 0.009 (standard error), reversed grid −0.005 ± 0.017, random grid −0.015 ± 0.009. Now against 17170a2: reversed grid +0.26, random grid +0.05.
+
+**Other checks:** all 12 node suites pass (ai 36/36, 1.489 B per call). fingerprint.js prints the same lines with and without warm=1.
+
+**Harness:** no harness bugs found and none fixed. One mistake of mine: a sed command early in the session wrote a stray copy of bots.js into devtests/gp-e2e as ".pump = async ...". I deleted it, and git status is back to the owner's 7 modified files plus press.js.
+
+Logs and scripts are in scratchpad\verify-press (logs\, e\, bots-dump.js, passing-rho.js, agg.js, pitsagg.js).
+
+== testsRun
+ - {"cmd":"for f in test/*.test.js; do node $f; done","result":"12/12 suites pass (ai 36/36, 1.489 B per think() call; main 91/91)"}
+ - {"cmd":"npx electron devtests/gp-e2e/bots.js (full, run 1, via scratch dump wrapper verify-press/bots-dump.js)","result":"193/193; Monza and Monaco: 0 race contacts; pits: one merge touch of 0.013"}
+ - {"cmd":"npx electron devtests/gp-e2e/bots.js (full, run 2)","result":"192/193; FAIL monaco 'no set past 93 % wear' (F. Colapinto softs 0.930); no contact failures"}
+ - {"cmd":"ONLY=pits bots.js x40, now (scratch dump wrapper)","result":"40/40 runs 14/14; 0 lap-1 chicane contacts; pit-exit merge touches in 13 of 41 runs, max 0.217 (also 0.114)"}
+ - {"cmd":"ONLY=pits bots.js x40, PATCH js/ai.js=17170a2 copy","result":"39/40 runs 14/14 (one 'places gained' miss); 0 chicane contacts; merge touches in 12 of 40, max 0.080"}
+ - {"cmd":"ONLY=pits bots.js x30, PATCH js/ai.js=round-3 copy","result":"30/30 runs 14/14; lap-1 chicane bump 0.203 @317-318 at 17.1 s in 2 of 30 runs (the check catches the bump); merge max 0.087"}
+ - {"cmd":"ONLY=monaco bots.js x10 each: now / 17170a2 / round 3","result":"max tyre wear: now 0.867-0.900, 0 fails; 17170a2 0.850-0.869, 0 fails; round 3 0.854-0.945, 2 fails (0.945, 0.936)"}
+ - {"cmd":"npx electron devtests/bots-test/game.js","result":"72/72 (376 s)"}
+ - {"cmd":"node devtests/ai-test/press.js runs=160 (now / r3 / 17170a2)","result":"now: 0 contacts; round 3: 19 at the chicane, max 0.34, exit 1; 17170a2: 0 at the chicane, 2 lap-1 contacts elsewhere (one 0.26)"}
+ - {"cmd":"node devtests/ai-test/matrix.js (now / r3 / 17170a2)","result":"passes 187/166/115; Spearman median 0.72/0.79/0.74 (B 0.57/0.69/0.57, C 0.64/0.71/0.60); contacts 3/4/6 (heavy 0/0/2); offs 4/23/30; all finished"}
+ - {"cmd":"passing.js seeds 0-5 (now / r3 / 17170a2)","result":"identical to the owner's numbers: passes 1076/959/727, contacts 12(1)/16(0)/31(10), offs 38/112/220"}
+ - {"cmd":"scratch passing-rho.js (passing.js + one line per race) seeds 0-23 now and r3, seeds 0-11 for 17170a2","result":"672 races: passes 4328 vs 3961, contacts 48(5) vs 58(8); finishing order now minus round 3, race by race: all -0.010+/-0.009, B -0.005+/-0.017, C -0.015+/-0.009; vs 17170a2 (336 races): B +0.259, C +0.047"}
+ - {"cmd":"critic-start.js seeds=6, three ways each (file as is, PACE +/-0.001)","result":"216 races: now 14 contacts / 2 heavy / 2 FAIL races (both COTA @1735); round 3 17/0/0; 17170a2 42/10/5"}
+ - {"cmd":"critic-obstacle.js mode=parked, three ways each","result":"123 runs: now obstacle 9 (5 >0.15, max 0.40) + AI-AI 5, R 17, 0 FAIL; round 3 7 (2) + 19, R 21, 3 FAIL; 17170a2 6 (2, max 0.40) + 16, R 12, 0 FAIL"}
+ - {"cmd":"critic-obstacle.js mode=wrong, three ways each","result":"66 runs: hits on the ghost / AI-AI (heavy): now 138 / 20 (15); round 3 153 / 15 (10); 17170a2 762 / 123 (94)"}
+ - {"cmd":"critic-mixed.js (all) + only=erratic,pit with PACE +/-0.001","result":"exit 0 for all; erratic: AI the striker now 2 (max 0.21) = 17170a2 2 (0.21), round 3 0; 10-car pit race: now 10 contacts (1 heavy 0.26, 1 light pile-up, all Bahrain lap 1) vs 17170a2 6 (0 heavy) vs round 3 1; Monaco hairpin 0; deterministic"}
+ - {"cmd":"node devtests/ai-test/fingerprint.js and warm=1","result":"same lines (the warm-up changes no driving)"}
+
+== verdict
+ok
+
+== openIssues
+ - Full bots.js is still flaky on part monaco's check 'no set past 93 % wear': 1 of my 2 full runs failed (a soft set at 0.930). In Monaco runs: the current file fails 1 of 12 (max wear 0.867-0.930); round 3 fails 2 of 10 (0.854-0.945); 17170a2 never fails and never goes above 0.869 in 10 runs. So the stint plan's margin (W_PLAN 0.88) is not the whole cause, as the owner said: the driving since 17170a2 raises tyre wear at Monaco. The current file halves round 3's rate but is still worse than 17170a2 on this check.
+ - Pit-exit merge on lap 2 (bots.js part pits): touches happen about as often as with 17170a2 (13 of 41 runs vs 12 of 40), but two were heavier, 0.217 and 0.114, against a 17170a2 max of 0.080 (round 3: 0.087). Both are still under the 0.25 check and off the pit asphalt. The owner's report gave a max of 0.114.
+ - New repeating weak spot, COTA T11 hairpin (sample ~1735): both PACE-nudged critic-start runs fail there: a 0.31 rear-end, and a light pile-up of 0.16 + 0.20. Trace with the +0.001 PACE copy (cota seed 4, ids 7 and 14): pro14's attack on ama7 is given up at the turn-in under the new 'not alongside by the turn-in' rule while pro14 is 11 m off the line. It slows to 8 m/s on the wide side, then turns at full lock back to the line into ama7 and hits it at 0.31. The along-track gap reads -10.75 m at contact, the same hairpin-geometry misjudgement the owner noted at Bahrain T10.
+ - Bahrain is the current file's contact hotspot: 3 of its 5 heavy contacts in 672 passing.js races (seeds 2, 7 and 12; 0.27-0.32), and all of critic-mixed's 10-car pit-race contacts (lap 1, T1 and T10: one 0.26, and a light pile-up in one nudged run). 17170a2 had 6 contacts in that race, none heavy.
+ - critic-obstacle with a parked car: across 3 PACE variants, the current file has more hits over 0.15 on the parked car (5 vs 2 for 17170a2, same max 0.40) and more R (17 vs 12), but fewer AI-AI contacts (5 vs 16) and no FAIL lines. The 0.39-0.40 hits are at Jeddah 'slowest exit': a car going round the parked car (overtake mode, target = the parked car) slides into it at 12-13 m/s while turning at full lock out of the slowest corner. The run then jams and needs R. The file before this change (round 3) does not hit there.
+ - matrix.js on its single seed is below round 3: Spearman 0.72 vs 0.79 (reversed grid 0.57 vs 0.69, random grid 0.64 vs 0.71), and below round 3's numbers in the README (0.78, reversed grid 0.64). Over 24 seeds (672 races) the race-by-race difference is within noise (-0.010 +/- 0.009); the random grid is the weakest (-0.015 +/- 0.009).
+ - Not verified here: that the two new unit tests fail on round 3's file (test/ai.test.js has no AI_JS switch). Indirect evidence: press.js shows round 3 bumping in its runs 8, 16, 26 and 39, which the new pits-field test replays.

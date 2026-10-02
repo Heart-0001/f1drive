@@ -784,5 +784,56 @@ test('a car coming the wrong way at 40 m/s on the racing line: a stream of 5 car
   assert(bad.length <= 1, 'heavy hits: ' + bad.join(', '));
 });
 
+// ---- the press follow-up (2026-10-02): pressing a slower car never into its braking --------------------------------
+test('a slower car is pressed on the straight, never while it brakes or is about to (Monza, into the first chicane)', () => {
+  // round 3 pressed a slower car into the braking zone (its braking not anticipated while no harder than the quicker
+  // car's plan): now the press is let go from PRESS_T0 s before where it must brake and while it decelerates
+  const t = track('it-1922'), ln = line('it-1922'), N = t.samples.length, ds = t.length / N, S = t.samples, P = ln.points;
+  for (const [fast, slow, gap0] of [[1, 0, 20], [1, 0.35, 18], [0.7, 0, 25]]) {
+    const mk = (vid, skill, at) => {
+      const car = F1.createCar(F1.cars.get('2026-mercedes'), { tyres: false }), st = car.state;
+      car.reset(t, at); st.x = S[at].x + S[at].nx * P[at].d; st.z = S[at].z + S[at].nz * P[at].d; car.update(1e-4, null, t); st.speed = 60;
+      const ai = F1.createAIDriver({ track: t, raceLine: ln, car, skill, seed: 3 + vid, id: vid, slot: vid }); ai.reset();
+      return { car, st, ai, view: AI.createView(vid), ctx: context({ phase: 'race', laps: 10, lap: 1 }), dec: [] };
+    };
+    const at = (N - Math.round(700 / ds)) % N;                // 700 m before the line, the chicane ~600 m after it
+    const lead = mk(1, slow, (at + Math.round(gap0 / ds)) % N), fol = mk(2, fast, at), cs = [lead, fol], views = cs.map(c => c.view);
+    const hit = AI.createContacts();
+    const ent = cs.map(c => ({ state: c.st, car: c.car, solid: true }));
+    let touches = 0, pressedStraight = 0, intoBraking = 0, vPrev = 60;
+    for (let k = 0; k < 120 * 14; k++) {
+      for (const c of cs) { refresh(c.view, c.st); c.view.pace = c.ai.pace; }
+      for (const c of cs) c.car.update(STEP, c.ai.think(STEP, views, c.ctx), t);
+      hit(ent, STEP, () => { touches++; });
+      const a = (lead.st.speed - vPrev) / STEP; vPrev = lead.st.speed;
+      lead.dec.push(a); if (lead.dec.length > 12) lead.dec.shift();
+      const pressing = fol.ai.state.press === 1;
+      if (pressing && lead.dec.every(x => x > -1)) pressedStraight++;
+      if (pressing && lead.dec.length === 12 && lead.dec.every(x => x < -6)) intoBraking++;   // 0.1 s of braking
+    }
+    assert(pressedStraight > 60, fast + ' behind ' + slow + ': not pressed on the straight (' + pressedStraight + ' steps)');
+    assert.strictEqual(intoBraking, 0, fast + ' behind ' + slow + ': pressed while it brakes (' + intoBraking + ' steps)');
+    assert.strictEqual(touches, 0, fast + ' behind ' + slow + ': contact');
+  }
+});
+
+test('the field of bots.js part pits on lap 1: no bump at Monza\'s first chicane (pressing into its braking zone)', () => {
+  // devtests/ai-test/press.js (devtests/ai-test/critic-sim.js, the real physics): the player stalled 12 s on pole, the 15
+  // computer cars of F1.AI.lineup(2026, mixed) behind it in join order, lap 1. Round 3's file touched at the chicane
+  // (samples 280..345) in 19 of 160 runs, up to 0.34 (runs 8, 16, 26 and 39 among them); with the press let go before
+  // the braking zone: none. These runs and the first 12 here.
+  const { createScenario } = require(path.join(ROOT, 'devtests', 'ai-test', 'critic-sim.js'));
+  const lineup = AI.lineup({ cars: F1.cars.list(2026), taken: ['2026-ferrari'], count: 15, skill: 'mixed', seed: 2026,
+    drivers: typeof F1.cars.drivers === 'function' ? F1.cars.drivers : null, names: ['Player'] });
+  const bumps = [];
+  for (const k of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16, 26, 39]) {
+    const cars = [{ kind: 'human', skill: 1, car: '2026-ferrari', name: 'player', seed: 4242 + k, slot: 0, holdS: 12 }]
+      .concat(lineup.map((e, i) => ({ kind: 'ai', skill: e.skill, car: e.car, name: 'b' + (i + 2), seed: e.seed + k, slot: i + 1 })));
+    const rep = createScenario({ track: 'it-1922', cars, laps: 3, seed: 1, start: 'grid', lockS: 2, maxS: 47 }).run();
+    for (const c of rep.contacts) if (c.idx >= 280 && c.idx <= 345 && c.h > 0.12) bumps.push('run ' + k + ': ' + c.a + ' x ' + c.b + ' ' + c.h + ' @' + c.idx);
+  }
+  assert.strictEqual(bumps.length, 0, bumps.join('; '));
+});
+
 console.log(failed ? '\n' + failed + ' test(s) FAILED' : '\nall ai tests passed');
 process.exit(failed ? 1 : 0);

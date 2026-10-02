@@ -9,7 +9,9 @@
 //                               forcePit: {lap, compound} })
 //     car spec: { kind: 'ai' | 'parked' | 'wrong' | 'erratic' | 'human', skill, car (spec id), name, seed,
 //                 at (sample), d (lateral m, default: the racing line), yaw (rad, parked), v (m/s, wrong-way /
-//                 rolling start), blind (erratic: sees nobody), noise / brakeEvery / liftEvery / weave (erratic) }
+//                 rolling start), blind (erratic: sees nobody), noise / brakeEvery / liftEvery / weave (erratic),
+//                 holdS (s: a stalled start - no pedal for holdS s after lights out, then its driver starts afresh:
+//                 devtests/gp-e2e/bots-page.js's holdAfterGo) }
 //   sc.run() -> report (contacts with the striker attributed, pile-ups, per car: laps, best, resets, stuck,
 //               offs, wall hits, pit stops / speeding, steering reversals per second on the straights, pedal flips)
 'use strict';
@@ -112,7 +114,8 @@ function createScenario(o) {
     rep.contacts.push({ t: Math.round(time * 100) / 100, a: A.name, b: B.name, ka: A.kind, kb: B.kind, h: Math.round(h * 100) / 100, kind: kindC,
       striker: striker ? striker.name : '', strikerKind: striker ? striker.kind : '', victimKind: victim ? victim.kind : '',
       gap: Math.round(g * 10) / 10, closing: Math.round(Math.abs(va - vb) * 10) / 10, idx: A.car.state.sampleIndex,
-      modes: (A.ai ? A.ai.state.mode + ':' + A.ai.state.cap : A.kind) + ' / ' + (B.ai ? B.ai.state.mode + ':' + B.ai.state.cap : B.kind),
+      modes: (A.ai ? A.ai.state.mode + ':' + A.ai.state.cap + (A.ai.state.press >= 0 ? ' P#' + A.ai.state.press : '') : A.kind) + ' / ' +
+        (B.ai ? B.ai.state.mode + ':' + B.ai.state.cap + (B.ai.state.press >= 0 ? ' P#' + B.ai.state.press : '') : B.kind),
       lap: A.lap ? A.lap.n : 0, x: A.car.state.x, z: A.car.state.z, ids: [A.id, B.id] });
     A.contacts++; B.contacts++;
     if (striker) striker.struck++;
@@ -134,6 +137,14 @@ function createScenario(o) {
     }
     if (time < c.eBrakeUntil) { out.brake = 1; out.throttle = 0; out.boost = false; }
     else if (time < c.eLiftUntil) { out.throttle = Math.min(out.throttle, 0.15); out.boost = false; }
+    return out;
+  }
+
+  // a stalled start (holdS): no pedal at a standstill (bots-page.js: the brake held at a standstill engages reverse)
+  function holdInput(c, inp) {
+    const out = c.hOut || (c.hOut = { up: false, down: false, left: false, right: false, throttle: 0, brake: 0, steerAxis: 0, boost: false, limiter: false, reset: false });
+    const v = c.car.state.speed;
+    out.throttle = 0; out.brake = v > 0.3 ? 0.35 : 0; out.steerAxis = v < 1 ? 0 : inp.steerAxis; out.boost = false; out.limiter = false; out.reset = false;
     return out;
   }
 
@@ -161,6 +172,10 @@ function createScenario(o) {
       ctx.phase = phase; ctx.locked = locked; ctx.lap = c.laps.length; ctx.laps = R; ctx.done = c.fin; ctx.prog = c.view.prog;
       let inp = c.ai.think(STEP, c.c.blind ? blindViews : views, ctx);
       if (c.kind === 'erratic') { const r0 = inp.reset; inp = erraticInput(c, inp); inp.reset = r0; }
+      if (c.c.holdS > 0 && !locked) {
+        if (time - goAt < c.c.holdS) inp = holdInput(c, inp);
+        else if (!c.holdOver) { c.holdOver = true; c.ai.reset(); }
+      }
       c.inp = inp;
       if (locked) { st.speed = 0; continue; }
       if (c.pit.state.service) { st.speed = 0; st.hit = 0; stepPit(c, inp); c.lap.update(st.sampleIndex, 0, STEP); continue; }
@@ -215,7 +230,7 @@ function createScenario(o) {
     for (const id of ids) {
       const c = cars[id - 1], st = c.car.state, a = c.ai ? c.ai.state : null, inp = c.inp || {};
       row.push(c.name + ' i' + st.sampleIndex + ' d' + st.d.toFixed(2) + ' L' + P[st.sampleIndex].d.toFixed(2) + ' h' + st.heading.toFixed(3) + ' v' + st.speed.toFixed(1) + ' va' + vAlong(c).toFixed(1) +
-        (a ? ' ' + a.mode + ':' + a.cap + (a.capBy >= 0 ? '#' + a.capBy : '') + (a.tgt >= 0 ? ' T#' + a.tgt : '') + (a.obs >= 0 ? ' obs' + a.obs : '') + (a.plan ? ' plan:' + a.plan : '') + ' tg' + a.targetSpeed.toFixed(1) + ' off' + a.offset.toFixed(2) + '>' + a.offTarget.toFixed(2) : '') +
+        (a ? ' ' + a.mode + ':' + a.cap + (a.capBy >= 0 ? '#' + a.capBy : '') + (a.tgt >= 0 ? ' T#' + a.tgt : '') + (a.press >= 0 ? ' P#' + a.press : '') + (a.obs >= 0 ? ' obs' + a.obs : '') + (a.plan ? ' plan:' + a.plan : '') + ' tg' + a.targetSpeed.toFixed(1) + ' off' + a.offset.toFixed(2) + '>' + a.offTarget.toFixed(2) : '') +
         ' T' + (inp.throttle || 0).toFixed(2) + ' B' + (inp.brake || 0).toFixed(2) + ' S' + (inp.steerAxis || 0).toFixed(2));
     }
     if (ids.length === 2) row.push('gap ' + along(cars[ids[0] - 1], cars[ids[1] - 1]).toFixed(2));

@@ -225,7 +225,7 @@ function createRace(o) {
     });
     return { track: t.id, R, Q, wear, cars: rows, res, session: sp };
   }
-  return { run, step, cars, session, track: t, get time() { return time; } };
+  return { run, step, cars, session, track: t, res, get time() { return time; } };
 }
 
 // Spearman rank correlation

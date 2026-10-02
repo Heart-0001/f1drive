@@ -44,7 +44,8 @@
 //   ai.state    live: mode ('race' | 'follow' | 'overtake' | 'defend' | 'yield' | 'pit' | 'parked' | 'start' | 'grid' |
 //               'reverse' | 'recover'), targetSpeed, cap (what holds it back), capBy (id of the car whose follow cap
 //               binds, -1), tgt (id of the car being passed / driven round, -1), obs (sample of the stopped car it
-//               swerves round, -1), offset, idx, plan, mistake, compound... (a debug overlay can show these)
+//               swerves round, -1), press (id of the nearest slower car it presses, -1), offset, idx, plan, mistake,
+//               compound... (a debug overlay can show these)
 //   ai.stats    counters: mistakes, offs, wallHits, resets, reverses, stuck, passes, passTries, defends, yields,
 //               concedes, pitStops; ai.log: the last 24 rare events [t, what, sample]
 //   F1.AI = { LEVELS, skillOf, levelOf, params, PACE, paceOf, prepare, profile, makeRandom, createView, createContext,
@@ -72,10 +73,14 @@
 // second, where both cars are actually heading (a car sliding wide in a tight corner), and - closing fast - where this
 // car will catch it (the racing line may swing across the road on the way); a car found there stays found for 0.3 s.
 // A car known to be slower (its pace: a computer car) is pressed on the straights (radius > PRESS_R at both cars; not
-// with a stop planned, from the decision to 90 m past the lane):
-// followed at PRESS_GAP of the time gap and its braking - no harder than this car's own plan - not anticipated, so that
-// the quicker car gains in the braking zone instead of braking with it from 100 m back (js/car.js has no slipstream:
-// without this a car 2..4 % quicker sat in a train behind a slower one for whole races; review r3). A slower one (by
+// with a stop planned, from the decision to 90 m past the lane): followed at PRESS_GAP of the time gap, its lifts not
+// anticipated (js/car.js has no slipstream: without this a car 2..4 % quicker sat in a train behind a slower one for whole
+// races; review r3) - but never into its braking: released from PRESS_T0 s before where it must brake for a corner and
+// while it decelerates; then the gap it has is held (no closing in, no dropping back) and its braking anticipated as far
+// as this car does not brake as hard yet. The pass is set up for the braking zone instead: in that window the slower car
+// is attacked on the inside of the corner it brakes for, so that this car is beside it, not behind it, when it brakes,
+// and outbrakes it; not alongside by the turn-in, the attack is given up (the car in front has the corner: follow it,
+// try again on the exit / the next straight), and none is started in a corner. A slower one (by
 // pace, or held up) is attacked on the side with room at ITS place - beside it on the straight (more room the faster it
 // is gone by), the inside edge into the corner unless it is there itself - while the gap keeps shrinking; the path is
 // checked for it where the two will meet until this car is alongside; a car alongside always gets room (both boxes'
@@ -129,8 +134,17 @@
   var WANDER_TAU = 4;                        // s: lateral wander correlation time
   var FOLLOW_A = 7;                          // m/s^2 of deceleration a follower keeps in hand over the car ahead
   var PRESS_PACE = 0.01;                     // a car ahead known to be this much slower (pace) is pressed: closed up on
-  var PRESS_GAP = 0.3;                       //   to this share of the time gap (K.gapT), its braking not anticipated
-  var PRESS_R = 80;                          //   (m: on a road no tighter than this at either car)
+  var PRESS_GAP = 0.3;                       //   to this share of the time gap (K.gapT), its lifts not anticipated
+  var PRESS_R = 80;                          //   (m: on a road no tighter than this at either car; no attack is started
+                                             //   in a corner that tight, one not alongside by its turn-in is given up)
+  var PRESS_T0 = 2.5, PRESS_T1 = 1;          // s: pressed fully while the car pressed is PRESS_T0 s or more from where it
+                                             //   must brake for a corner, not at all within PRESS_T1 s of it; in that
+                                             //   window a pass is set up (an attack on the corner's inside)
+  var PRESS_BRK = 0.75, PRESS_VK = 0.9;      //   where it must brake: a slower car's braking (this share of this car's
+                                             //   plan) down to this share of this car's corner speeds
+  var PRESS_DEC0 = 2, PRESS_DEC1 = 6;        // m/s^2: nor while it decelerates (pressed fully below DEC0, not at all
+                                             //   past DEC1: a lift, braking, a brake test)
+  var SETUP_LOOK = 450;                      // m: the corner whose inside a pass set up goes for, looked for this far on
   var PRESS_NEAR = 0.5, PRESS_FAR = 1;       // s: a quicker car this close behind presses (concede), let go beyond
   var PRESS_DV = 1.5, PRESS_SEEN = 2;        // m/s of closing while this car is flat out: a car of unknown pace is seen to
                                              //   be quicker, and presses for PRESS_SEEN s after that
@@ -270,7 +284,7 @@
       d: new Float64Array(N), curv: new Float64Array(N), absK: new Float64Array(N), sign: new Float64Array(N),
       bank: new Float64Array(N), pitch: new Float64Array(N), kv: new Float64Array(N), seg: new Float64Array(N),
       lo: new Float64Array(N), hi: new Float64Array(N), tx: new Float64Array(N), tz: new Float64Array(N),
-      hdg: new Float64Array(N), lhdg: new Float64Array(N), pit: null, profiles: {}, lapT: {}, tight: {}, pitLoss: 0, warmed: false,
+      hdg: new Float64Array(N), lhdg: new Float64Array(N), pit: null, profiles: {}, lapT: {}, tight: {}, apex: {}, pitLoss: 0, warmed: false,
       pitTrackT: 0, pitLossV: 0                // (pitLossOf: the track's time over the lane's stretch, the limit pitLoss is for)
     };
     for (i = 0; i < N; i++) {
@@ -435,7 +449,15 @@
       var vb = Math.sqrt(v1 * v1 + 2 * dec * G.seg[i]);
       if (vb < va[i]) va[i] = vb;
     }
-    G.profiles[key] = va; G.tight[key] = tt;
+    // the next corner at or after each sample (the first sample of a local minimum of the profile; -1: none): where a
+    // car pressed must brake (pressRoom)
+    var ap = new Int32Array(N), nxt = -1;
+    for (m = 2 * N - 1; m >= 0; m--) {
+      i = m % N;
+      if (va[i] < va[(i - 1 + N) % N] && va[i] <= va[(i + 1) % N] && va[i] < TOP) nxt = i;
+      if (m < N) ap[i] = nxt;
+    }
+    G.profiles[key] = va; G.tight[key] = tt; G.apex[key] = ap;
     var lt = 0;
     for (i = 0; i < N; i++) { var vv = va[i] < perf.topSpeed ? va[i] : perf.topSpeed; lt += G.seg[i] / (vv > 1 ? vv : 1); }
     G.lapT[key] = lt;
@@ -473,7 +495,7 @@
     var mistakeRate = isNum(opts.mistakeRate) ? clamp(opts.mistakeRate, 0, 1) : -1;
     var K = isRef ? refParams() : params(skill);
     if (mistakeRate >= 0) K.mistake = mistakeRate;
-    var perfFor = null, VA = null, TT = null, profileKey = '', hasLockAt = false, WB = 3.6;   // the car's perf the profile was built for, the profile
+    var perfFor = null, VA = null, TT = null, AP = null, profileKey = '', hasLockAt = false, WB = 3.6;   // the car's perf the profile was built for, the profile
 
     // (the pedals and the axis start as doubles - 0.5, then 0 - so that the object's fields hold doubles from the first
     // think on: a field created with 0 holds small integers, and the first double stored into it changes the object's
@@ -486,7 +508,7 @@
 
     // live state (ai.state) and counters (ai.stats)
     var info = { mode: 'race', targetSpeed: 0.5, offset: 0.5, offTarget: 0.5, idx: 0, plan: null, mistake: null,
-                 lapsSeen: 0, wearPerLap: 0.5, compound: 'M', cap: '', lastReset: '', tgt: -1, capBy: -1, obs: -1 };
+                 lapsSeen: 0, wearPerLap: 0.5, compound: 'M', cap: '', lastReset: '', tgt: -1, capBy: -1, obs: -1, press: -1 };
     info.wearPerLap = 0;                       // (a field of doubles: see input)
     // the last few rare events (reverse, R, pit decisions, mistakes): [t, what, sample] for debugging, LOG_N kept
     var log = [], logN = 0;
@@ -510,7 +532,7 @@
       revAt: 0.5, resetAt: 0.5, rejoinT: 0.5, tgtT: 0.5, tgtCool: 0.5, tgtBlock: 0.5, tgtBest: 0.5,
       tgtBestT: 0.5, followT: 0.5, defT: 0.5, pressT: 0.5, concedeT: 0.5, holdT: 0.5, boxWait: 0.5, wearRef: 0.5,
       cLo: 0.5, cHi: 0.5, c0: 0.5, c2: 0.5, anchor: 0.5, absTgt: 0.5, sepT: 0.5, myD: 0.5, vMine: 0.5, obsD: 0.5, obsLb: 0.5, obsFrom: 0.5, myRot: 0.5, myVLat: 0.5, backT: 0.5, gT: 0.5, blockT: 0.5,
-      startLane: 0.5, fastT: 0.5, closeR: 0.5, gBPrev: 0.5, closeT: 0.5
+      startLane: 0.5, fastT: 0.5, closeR: 0.5, gBPrev: 0.5, closeT: 0.5, pRoom: 0.5
     };
     var steps, idx, prevIdx, wasLocked, startLaneOn, startDone, startFrom;
     var progIdx, rev, backing, revN, resetPending, onGrassPrev, hitPrev;
@@ -551,7 +573,7 @@
     function ensureProfile() {
       if (perfFor !== car.perf) {
         perfFor = car.perf; VA = profile(G, car.perf, K.grip, K.brake); profileKey = profileKeyOf(car.perf, K.grip, K.brake);
-        TT = G.tight[profileKey];
+        TT = G.tight[profileKey]; AP = G.apex[profileKey];
         hasLockAt = typeof perfFor.steerLockAt === 'function';
         for (var r0 = 0; r0 < LOCK_ROWS; r0++) lockRows[r0] = null;
         WB = perfFor.wheelbase || 3.6;
@@ -674,6 +696,11 @@
       F[3] = 0;
       pathD(oi, mOi); var pd0 = F[0];
       if (Math.abs(od - pd0) < wPath || (g < 22 && Math.abs(od - M.myD) < wPath + M.myRot)) { F[3] = 1; return; }
+      // a car standing there: also where this car's path is going (its offset on its way to its target - back to the
+      // line after giving room, say), unless it is the one being driven round. The path is laid with the offset of now:
+      // a car going back from the edge after a concede saw a car parked on the racing line 150 m on only when its
+      // offset came back over it, 66 m before it at 48 m/s, and hit it at 0.5 (critic-obstacle.js, 2026-10-02)
+      if (ov < 3 && ov > -3 && !obsOn && o !== tgt && Math.abs(od - (pd0 + M.offTarget - M.offset)) < wPath) { F[3] = 1; return; }
       var cl = M.vMine - ov;                                   // closing speed
       var t1 = g / (cl > 1 ? cl : 1); if (t1 > 1) t1 = 1;
       var dP = od + vLat * t1;                                 // its sideways motion over the next second
@@ -854,7 +881,7 @@
               gSx: 0.5, dSx: 0.5, vSx: 0.5, capF: 0.5, accF: 0.5, vSq: 0.5, capV: 0.5, steer: 0.5, target: 0.5,
               ff: 0.5, paceMul: 0.5, zoneMin: 0.5, gBrk: 0.5, head: 0.5, thr: 0.5, brk: 0.5 };
     var ph = 'free', sI = S[0], crossed = false, ps = null, inLaneNow = false, yellow = false, A = null, iA = 0,
-        B = null, blue = null, Sx = null, iSx = 0, capFid = -1, squeezed = false, mode = 'race', capWhy = '', creepCap = false,
+        B = null, blue = null, Sx = null, iSx = 0, capFid = -1, pressFid = -1, pTight = 0, squeezed = false, mode = 'race', capWhy = '', creepCap = false,
         finished = false, blockedNow = false, tightHere = false, off = false, gr = null, scanAt = -1, hold = false, limiter = false,
         boost = false;
 
@@ -993,11 +1020,16 @@
       // every car on the path gives a speed cap (the nearest one may hide a stopped one) and the deceleration that
       // keeps its gap (fed forward to the pedals: the speed loop alone brakes too late when the gap closes fast)
       var capF = 1e9, accF = 1e9;
-      capFid = -1; creepCap = false;
+      capFid = -1; creepCap = false; pressFid = -1;
+      var gPress = 1e9;
       var myAlong = (st.x - sI.x) * sI.tx + (st.z - sI.z) * sI.tz;
       // (own race distance, NaN = unknown: a number in every case - a variable that is a number or null is kept boxed, a
       // new heap number at every call)
       var myProg = ctx.prog; if (typeof myProg !== 'number') myProg = NaN;
+      // (pressing a slower car: how far on a car at this car's speed with a slower car's braking would have to be braking
+      // for the corners ahead - M.pRoom, once per step: the car pressed, g m further on, has g less)
+      M.pRoom = 1e9; pTight = 0;
+      if (myPace > 0 && !plan && !ignoreAll && AP !== null && av > 10) pressRoom();
       var vMine = v * (Math.sin(st.heading) * G.tx[idx] + Math.cos(st.heading) * G.tz[idx]);
       M.myD = myD; M.vMine = vMine; M.myVLat = v * (Math.sin(st.heading) * sI.nx + Math.cos(st.heading) * sI.nz);
       var myR = Math.sin(st.heading - G.hdg[idx]); M.myRot = 0.5 * CAR_LEN * (myR < 0 ? -myR : myR);   // this car turned against the road
@@ -1071,20 +1103,44 @@
               if (oSlow) wantO = Math.max(wantO, CAR_LEN + 8);          // a stopped / crawling car: room to steer round it
               if (tightHere) wantO += TIGHT_GAP;
               F[5] = ov; accOf(o); var aO = F[5], vOp = ov + (aO < 0 ? aO * 0.35 : 0), capO;
-              // a car known to be slower (its pace: a computer car) is pressed: closed up on to a shorter gap, and its
-              // braking - no harder than this car's own braking plan: its plan, not a brake test or a crash - is not
-              // anticipated. Held at the full time gap with the other car's braking anticipated, a quicker car had to
-              // brake with it from 100 m back in every braking zone and never got close enough to try a pass: whole
-              // races in a train behind slower cars (js/car.js has no slipstream; review r3). Not in a corner (radius
-              // under PRESS_R at either car): cars at different points of a turn are closer than the gap along the
-              // track says, and the one in front turns in across the nose of one pressing close behind. Nor on the way
-              // into, through and out of the pit lane (a stop planned: plan): cars leave the lane in a queue at the limit
-              // and the one pressed is still pulling away from it (2026-10-02: bots.js part pits, the whole field out of
-              // Monza's lane at once: pressing doubled the bumps at the merge, once on the pit asphalt)
+              // a car known to be slower (its pace: a computer car) is pressed on the straight: closed up on to a
+              // shorter gap, its lifts not anticipated. Held at the full time gap with the other car's every lift
+              // anticipated, a quicker car never got close enough to try a pass: whole races in a train behind slower
+              // cars (js/car.js has no slipstream; review r3). But never into its braking: pK (1 pressed .. 0 not) falls
+              // from PRESS_T0 s before where it must brake for a corner (M.pRoom - g: it is g m further on) to PRESS_T1 s
+              // before it, and with its deceleration (PRESS_DEC0..1 m/s^2: a lift, braking for traffic, a brake test).
+              // The gap then goes from the press gap towards the following gap - never by dropping back (a lift on the
+              // straight cost the quicker car a few metres before every braking zone) and never closer than it is: the
+              // gap it has is held (no closing in on a car that brakes or is about to). Its braking is anticipated as
+              // any car's is (0.35 s of it) as far as this car does not brake as hard yet: braking with it, the gap held
+              // is the margin (anticipated in full, the quicker car fell 20..30 m back in every braking zone and lost
+              // the pressure on the next straight). Pressed into the braking zone (r3: its braking not anticipated as
+              // long as it was no harder than this car's plan) the quicker car closed in on a car that brakes earlier,
+              // with less in hand than FOLLOW_A at the end of the zone (an F1 car brakes 3..5 m/s^2 harder than the
+              // computer drivers' plans at 30 m/s), and 2..3 cars arrived at the corner together: on lap 1 at Monza's
+              // first chicane one car 15 m/s under its corner speed, the next one attacked it there and they touched
+              // (0.16..0.32 in 1 race in 5; devtests/ai-test/press.js 19 of 160, now 0; bots.js part pits; 2026-10-02).
+              // The pass is set up instead (stepRacecraft): beside it before it brakes, or not at all. Not in a corner
+              // (radius under PRESS_R at either car): cars at different points of a turn are closer than the gap along
+              // the track says, and the one in front turns in across the nose of one pressing close behind. Nor on the
+              // way into, through and out of the pit lane (a stop planned: plan): cars leave the lane in a queue at the
+              // limit and the one pressed is still pulling away from it (bots.js part pits: the whole field out of
+              // Monza's lane at once, pressing doubled the bumps at the merge)
               if (myPace > 0 && !plan && o.pace > myPace * (1 + PRESS_PACE) && !oSlow && !tightHere && !yellowWas &&
                   G.absK[idx] < 1 / PRESS_R && G.absK[oi] < 1 / PRESS_R) {
-                wantO = CAR_LEN + 1.5 + PRESS_GAP * K.gapT * av;
-                if (aO > -(M.c0 + M.c2 * ov * ov)) vOp = ov;
+                var pK = ((M.pRoom - g) / (av > 10 ? av : 10) - PRESS_T1) / (PRESS_T0 - PRESS_T1);
+                pK = pK < 0 ? 0 : (pK > 1 ? 1 : pK);
+                var pA = (aO + PRESS_DEC1) / (PRESS_DEC1 - PRESS_DEC0);
+                pK *= pA < 0 ? 0 : (pA > 1 ? 1 : pA);
+                var wP = CAR_LEN + 1.5 + PRESS_GAP * K.gapT * av, wB = wantO + (wP - wantO) * pK, wH = g > wP ? g : wP;
+                wantO = wB < wH ? wB : wH;
+                // (this car's own deceleration now: its brake pedal of the last step at its braking power, drag, rolling)
+                var myDec = M.thrOut > 0.05 ? 0 : M.brkOut * (perfFor.brakeBase + perfFor.brakeAero * av * av) * (gr ? gr.brake : 1) +
+                  perfFor.roll + perfFor.dragK * av * av;
+                var kA = aO < 0 ? (-aO - myDec) / -aO : 0;
+                kA = kA < 0 ? 0 : (kA > 1 ? 1 : kA);
+                vOp = ov + (aO < 0 ? aO * 0.35 * (1 - pK) * kA : 0);
+                if (pK > 0 && g < gPress) { gPress = g; pressFid = o.id; }
               }
               if (vOp < 0) vOp = 0;
               if (g > wantO) capO = vOp + Math.sqrt(2 * FOLLOW_A * (g - wantO));
@@ -1222,9 +1278,22 @@
         else if (knownA) faster = A.pace > myPace * (1 + PRESS_PACE);
         else faster = mine > vA + K.attack && M.followT > K.patience;
         var slowA = vA < 3 || (vA < 12 && vA < 0.4 * VA[iA]);    // stopped / crawling: go round it early
-        if (!plan && !finished && ph !== 'quali' && tgt !== A && !(tgt && tgtSlow) && (!slowA || A === Sx) && !(yellow && !slowA) && (M.tgtCool <= 0 || vA < 3) && faster && M.concedeT <= 0 && (slowA || !tightHere) &&
-            gA < (slowA ? 40 + av * 1.5 : 18 + av * 0.25)) {
+        // a pass set up: a car known to be slower, PRESS_T1..PRESS_T0 s before where it must brake (pressed, it is being
+        // released: stepTraffic) - attacked now (a failed attack's cool-down notwithstanding) on the inside of the corner
+        // it brakes for, so that this car is beside it, not behind it, when it brakes (not for a corner tighter than full
+        // lock: pTight, the Monaco hairpin - no line to choose there, nobody attacks through it)
+        var pbA = ((M.pRoom - gA) / (av > 10 ? av : 10) - PRESS_T1) / (PRESS_T0 - PRESS_T1);
+        var setupA = knownA && A.pace > myPace * (1 + PRESS_PACE) && pbA < 1 && pbA > 0 && !tightHere && !pTight;
+        // (an attack on a moving car is not started in a corner - radius under PRESS_R here - unless already alongside: a
+        // car slowed by the traffic in a chicane was attacked there by the next one, and they touched; 2026-10-02; nor
+        // within PRESS_T0 s of the braking point of a corner tighter than full lock: it could not be completed before it)
+        if (!plan && !finished && ph !== 'quali' && tgt !== A && !(tgt && tgtSlow) && (!slowA || A === Sx) && !(yellow && !slowA) && (M.tgtCool <= 0 || vA < 3 || setupA) && faster && M.concedeT <= 0 &&
+            (slowA || (!tightHere && !(pTight && M.pRoom < av * PRESS_T0) && (G.absK[idx] < 1 / PRESS_R || gA <= ALONG))) && gA < (slowA ? 40 + av * 1.5 : 18 + av * 0.25)) {
           var side = (F[13] = dA, F[16] = gA, chooseSide(iA, A));
+          if (side && setupA) {                       // (the corner's inside, when there is room there at its place)
+            var cinA = nextCornerSide(iA, SETUP_LOOK);
+            if (cinA && cinA !== side && (cinA > 0 ? HI[iA] - (dA + SEP) : (dA - SEP) - LO[iA]) > 1) side = cinA;
+          }
           if (side) { tgt = A; tgtSide = side; tgtSlow = slowA; M.tgtT = 0; M.tgtBlock = 0; M.tgtBest = gA; M.tgtBestT = 0; stats.passTries++; }
         }
       } else M.followT = 0;
@@ -1245,12 +1314,18 @@
         var rI = slowT ? iT : idx;
         var roomHere = tgtSide > 0 ? HI[rI] - (dT + sepT) : (dT - sepT) - LO[rI];
         if (roomHere < -0.6 && gT > -2) M.tgtBlock += dt; else M.tgtBlock = 0;
-        // progress: the gap must keep shrinking (3 m in 4 s), else back to the line for a while
-        if (gT < M.tgtBest - 3) { M.tgtBest = gT; M.tgtBestT = 0; } else M.tgtBestT += dt;
+        // progress: the gap must keep shrinking (3 m in 4 s), else back to the line for a while - a pass set up on a car
+        // known to be slower is held until the corner (it gains in the braking zone, not before)
+        var setupT = found && !slowT && !pTight && myPace > 0 && tgt.pace > myPace * (1 + PRESS_PACE) &&
+          ((M.pRoom - gT) / (av > 10 ? av : 10) - PRESS_T1) / (PRESS_T0 - PRESS_T1) < 1;
+        if (gT < M.tgtBest - 3 || setupT) { M.tgtBest = gT; M.tgtBestT = 0; } else M.tgtBestT += dt;
         // (a stopped car or one coming the wrong way is taken on below 50 m + 1.5 s, the attack on a moving one below
         // 18 m + 0.25 s: each is dropped only further away than that)
         var farT = slowT ? 60 + (av - (vT < 0 ? vT : 0)) * 1.5 : 60;
-        if (!found || gT > farT || M.tgtBlock > 1.8 || (!slowT && (yellow || M.tgtT > 12 || M.tgtBestT > 4 || plan || ph === 'quali' || finished || M.concedeT > 0 || (tightHere && gT > 1)))) {
+        // (not alongside by the turn-in - radius under PRESS_R here - the car in front has the corner: given up, followed;
+        // held on the inside through the corner the attacker came out of it 5..10 m/s slower and lost the car in front)
+        if (!found || gT > farT || M.tgtBlock > 1.8 || (!slowT && (yellow || M.tgtT > 12 || M.tgtBestT > 4 || plan || ph === 'quali' || finished || M.concedeT > 0 || (tightHere && gT > 1) ||
+            (G.absK[idx] > 1 / PRESS_R && gT > ALONG)))) {
           tgt = null; tgtSlow = false; M.tgtCool = found && gT < farT ? 4 : 1;
         }
         else if (gT < -(CAR_LEN + 2.5)) { tgt = null; tgtSlow = false; stats.passes++; M.tgtCool = 1; }
@@ -1278,7 +1353,7 @@
           mode = 'overtake';
           // beside it on the straight; the inside edge into the corner it goes for (the side follows the corner
           // that comes, when there is room on its inside: the other car is then on the outside for its turn-in)
-          var cin = nextCornerSide(iT, 140), absT;
+          var cin = nextCornerSide(iT, setupT ? SETUP_LOOK : 140), absT;
           // (the room at ITS place, with a margin over the test below that takes the side back: the road may be wider
           // here, and a car giving room keeps to the edge it chose - the inside measured here sent the quicker car into
           // it at 70 km/h more; review r3)
@@ -1482,7 +1557,7 @@
       // 0.5 m/s instead of 2.5, nose to tail behind a car stalled on the grid, for 15 s; 2026-10-02)
       if (capV < target) { target = capV; if (creepCap && capWhy === 'follow') ff = 0; }
       if (target < 0) target = 0;
-      info.tgt = tgt ? tgt.id : -1; info.capBy = capWhy === 'follow' ? capFid : -1; info.obs = obsOn ? obsK : -1;
+      info.tgt = tgt ? tgt.id : -1; info.capBy = capWhy === 'follow' ? capFid : -1; info.obs = obsOn ? obsK : -1; info.press = pressFid;
       info.targetSpeed = target; info.cap = capWhy; info.offset = M.offset; info.offTarget = M.offTarget;
       info.mode = mode;
 
@@ -1693,6 +1768,24 @@
       var inside = nextCornerSide(iO, 160);
       if (inside) return inside;
       return roomL >= roomR ? 1 : -1;
+    }
+    // M.pRoom: how far on from this car a car at its speed av would have to start braking for the corners ahead (the
+    // next local minima of the profile, AP, as far as one could matter) with a slower car's braking - PRESS_BRK of this
+    // car's plan c0 + c2 v^2 - down to PRESS_VK of this car's corner speeds (the braking distance from v0 to v1 under
+    // c0 + c2 v^2: ln((c0 + c2 v0^2) / (c0 + c2 v1^2)) / (2 c2)); 1e9: none. (No arguments: a double passed to a
+    // call that V8 does not inline is boxed)
+    function pressRoom() {
+      var av = st.speed < 0 ? -st.speed : st.speed, c0 = PRESS_BRK * M.c0, c2 = PRESS_BRK * M.c2, e0 = c0 + c2 * av * av, room = 1e9;
+      var lim = Math.log(e0 / c0) / (2 * c2) + 60 + av * PRESS_T0;
+      var myAlong = (st.x - sI.x) * sI.tx + (st.z - sI.z) * sI.tz, k = AP[idx] | 0;
+      for (var n = 0; n < 8 && k >= 0; n++) {
+        var dk = cyc(k - idx) * ds - myAlong;
+        if (dk > lim) break;
+        var vk = VA[k] * PRESS_VK;
+        if (vk < av) { var r = dk - Math.log(e0 / (c0 + c2 * vk * vk)) / (2 * c2); if (r < room) { room = r; pTight = TT[k] | 0; } }
+        k = AP[cyc(k + 1)] | 0;
+      }
+      M.pRoom = room;
     }
     // +1 / -1: the inside (left / right) of the next real corner within `metres` of sample i, 0 = none
     function nextCornerSide(i, metres) {
@@ -2032,6 +2125,18 @@
       var g = cars[4].state, sg = S[g.sampleIndex], side = (sg.wallPosDist || 12) >= 12 ? 1 : -1;
       g.x += sg.nx * side * 10; g.z += sg.nz * side * 10; cars[4].update(1e-4, null, track);   // on the grass
       run(5, 'race', false, ALL);
+      // a train into the slowest corner, the slowest driver in front and the quickest at the back, 20 m apart at speed:
+      // pressing on the straight and its release for the braking, a pass set up, attacks (sides chosen and changed, given
+      // up at the turn-in), defending, giving room, squeezed - the racecraft branches a race reaches (2026-10-02: with the
+      // press let go before braking zones the start alone left them cold, and a first race allocated 36 MB instead of 23)
+      var VW = ais[0].profile(), PW = raceLine.points || raceLine, slowW = 0, order = [0, 5, 1, 4, 2, 3];
+      for (i = 0; i < N; i++) if (VW[i] < VW[slowW]) slowW = i;
+      for (i = 0; i < n; i++) {
+        var jw = order[i], atW = ((slowW - Math.round((330 + 20 * i) / ds)) % N + N) % N, sw = cars[jw].state, pw = PW[atW];
+        cars[jw].reset(track, atW); sw.x = S[atW].x + S[atW].nx * pw.d; sw.z = S[atW].z + S[atW].nz * pw.d;
+        cars[jw].update(1e-4, null, track); sw.speed = 60; ais[jw].reset();
+      }
+      run(12, 'race', false, ALL);
       run(3, 'quali', false, ALL);
       run(3, 'results', false, ALL);
     } catch (e) { G.warmed = true; G.pitLoss = keepLoss; G.pitLossV = keepLossV; return null; }
