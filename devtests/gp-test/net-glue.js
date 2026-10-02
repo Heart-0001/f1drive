@@ -23,24 +23,38 @@ globalThis.WebSocket = FakeWS;
 const net = require(path.join(ROOT, 'js/net.js'));
 const gp = require(path.join(ROOT, 'js/gp.js'));
 
-// ---- the "server": player 1 = us (host), player 2 = somebody else -------------------------------
+// ---- the "server" (protocol 2, as net/server.js speaks it): player 1 = us (host), player 2 = somebody else; the room
+// (Monza, a Grand Prix of Q 1 / R 2 set in the lobby) starts with `start`, its session after our `loaded` (the barrier)
 const srv = createSession({ random: () => 0 });
 const roster = [{ id: 1, name: 'Me', colour: '#ff7a14', slot: 0 }, { id: 2, name: 'Other', colour: '#00ccff', slot: 1 }];
+const room = { st: 'lobby', rs: 0, set: { track: 'monza', year: null, mode: 'gp', q: 1, r: 2, wear: 1, bots: 0, skill: 'pro' }, ready: [2], rr: 0, load: null, len: 0 };
+let startLen = 0;
 const deliver = m => sock.onmessage({ data: JSON.stringify(m) });
 const sendGp = () => deliver({ t: 'gp', now: T, s: srv.snapshot() });
+const sendRoom = () => deliver(Object.assign({ t: 'room' }, JSON.parse(JSON.stringify(room))));
 function server(m) {
   if (m.t === 'hello') {
     srv.addPlayer(1, m.name, T); srv.addPlayer(2, 'Other', T);
-    deliver({ t: 'welcome', v: 1, id: 1, host: 1, track: 'monza', seq: 7, players: roster, now: T });
-    deliver({ t: 'players', host: 1, players: roster });
+    deliver({ t: 'welcome', v: 2, id: 1, host: 1, ded: false, now: T, room: JSON.parse(JSON.stringify(room)), bots: { n: 0, skill: 'pro' }, players: roster });
+    deliver({ t: 'players', host: 1, bots: { n: 0, skill: 'pro' }, players: roster });
     sendGp();
   } else if (m.t === 'ping') deliver({ t: 'pong', c: m.c, s: T });
-  else if (m.t === 'gp') {
-    const ok = m.a === 'start' ? srv.start({ q: m.q, r: m.r, len: m.len }, T) : m.a === 'skip' ? srv.skip(T)
-      : m.a === 'end' ? srv.end() : m.a === 'again' ? srv.again(T) : false;
+  else if (m.t === 'start') {                       // the host's 開始: everybody loads (player 2 already has)
+    if (room.st !== 'lobby') return;
+    room.st = 'loading'; room.rs++; startLen = m.len;
+    room.load = { at: T, until: T + 20000, wait: [1], done: [2], fail: [] };
+    sendRoom();
+  } else if (m.t === 'loaded') {                    // ours: the barrier ends, the session (room first, then gp)
+    if (room.st !== 'loading' || m.rs !== room.rs || m.ok !== true) return;
+    room.st = 'session'; room.load = null; room.len = startLen;
+    sendRoom();
+    if (srv.start({ q: room.set.q, r: room.set.r, len: room.len }, T)) sendGp();
+  } else if (m.t === 'gp') {
+    if (room.st !== 'session') return;
+    const ok = m.a === 'skip' ? srv.skip(T) : m.a === 'end' ? srv.end() : m.a === 'again' ? srv.again(T) : false;
     if (ok) sendGp();
   } else if (m.t === 'gl') {
-    if (m.k !== 7 || m.sid !== srv.sid) return;
+    if (m.k !== room.rs || m.sid !== srv.sid) return;
     const why = srv.lap(1, m.time, T);
     if (why) deliver({ t: 'glno', why }); else sendGp();
   } else if (m.t === 's') { if (typeof m.g === 'number') srv.progress(1, m.g); }
@@ -69,15 +83,24 @@ const car = { x: 1, y: 0, z: 2, heading: 0, pitch: 0, roll: 0, speed: 50, steer:
   assert.deepStrictEqual(take(), ['phase quali>free', 'change', 'change', 'change'], 'abandoned; roster; first snapshot');
   assert.strictEqual(gp.now(), net.serverNow());
 
-  // host starts: goes out as a gp message, comes back as a snapshot
-  assert.strictEqual(gp.start({ q: 1, r: 2 }, 5000), true);
-  assert.deepStrictEqual(last('gp'), { t: 'gp', a: 'start', q: 1, r: 2, len: 5000 });
+  // host starts (protocol 2): F1.gp cannot start a room (the lobby's 開始 does: start, then the loading barrier)
+  assert.strictEqual(gp.start({ q: 1, r: 2 }, 5000), false, 'online: a room starts through its lobby');
+  assert.strictEqual(sock.sent.filter(m => m.t === 'gp').length, 0, 'no gp start message');
+  assert.strictEqual(net.startRoom({ len: 5000 }), true);
+  assert.deepStrictEqual(last('start'), { t: 'start', len: 5000 });
+  assert.deepStrictEqual([net.room.st, net.room.rs, gp.phase], ['loading', 1, 'free'], 'loading: no session yet');
+  take();
+  net.sendState(car, true);
+  assert.strictEqual(last('s'), undefined, 'no car state before the session (and before our loaded)');
+  assert.strictEqual(net.sendLoaded(1, true, { len: 5000 }), true);
+  assert.deepStrictEqual(last('loaded'), { t: 'loaded', rs: 1, ok: true, len: 5000 });
   assert.deepStrictEqual(take(), ['phase free>quali', 'change']);
+  assert.strictEqual(net.room.st, 'session');
   assert.deepStrictEqual([gp.phase, gp.sid, gp.taking, gp.lapTotal], ['quali', 1, true, 1]);
   assert.strictEqual(gp.isGhost(2), true);
 
   gp.lapDone(12.3456789);
-  assert.deepStrictEqual(last('gl'), { t: 'gl', k: 7, sid: 1, time: 12.346, at: T }, 'with the server clock of the crossing');
+  assert.deepStrictEqual(last('gl'), { t: 'gl', k: 1, sid: 1, time: 12.346, at: T }, 'with the server clock of the crossing (k = the load cycle)');
   assert.deepStrictEqual(take(), ['rejected too-fast']);
   wait(100);
   gp.lapDone(80);

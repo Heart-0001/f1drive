@@ -137,7 +137,7 @@ app.whenReady().then(async () => {
         var i = F1_TRACKS.findIndex(function (t) { return t.id === ${J(id)}; });
         var c = document.querySelector('.card[data-i="' + i + '"]');
         if (!c) { var cs = [].slice.call(document.querySelectorAll('.card')); c = cs.filter(function (n) { return n.textContent.indexOf(F1_TRACKS[i].name) >= 0; })[0]; }
-        if (!c) return false; c.click(); return true; })()`);
+        if (!c) return false; c.click(); var __g=document.getElementById('setup-go'); if(__g) __g.click(); return true; })()`);
       const ok = clicked && await until(`F1.game.running && F1.game.trackData && F1.game.trackData.id === ${J(id)}`, 20000);
       if (!ok) { console.log('FAIL ' + id + ': the track did not load'); bad++; await key('Escape'); continue; }
       await js(`F1.ui.toast && F1.ui.toast(''); true`);

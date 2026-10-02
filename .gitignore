@@ -25,3 +25,4 @@ devtests/**/cache/
 devtests/track-audit/perception/snap/
 devtests/track-audit/perception/patched/
 devtests/review-r3/
+devtests/review-lobby/

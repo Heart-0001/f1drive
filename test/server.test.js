@@ -1,13 +1,15 @@
-// node test/server.test.js — tests for net/server.js with real `ws` clients (the relay, the Grand Prix over the
-// wire, the v6 cars / room year / tyre wear, protocol hardening), plus js/net.js: address parsing, the real client
-// against the real server, and the client against a hostile server.
+// node test/server.test.js — tests for net/server.js with real `ws` clients (the relay, the room lobby of protocol 2
+// (v7.2: settings, ready, start, the loading barrier, back to the lobby), the Grand Prix over the wire, the v6 cars /
+// room year / tyre wear, protocol hardening), plus js/net.js: address parsing, the real client against the real
+// server, and the client against a hostile server.
 //
 // Ports: the OS picks them (port 0) unless F1_TEST_PORT_BASE is set, then base .. base + 59 are used.
 // Clock: the Grand Prix tests hand createServer a manual clock (opts.now) and step it, so a whole race takes
 // milliseconds; one test ("real clock") runs a complete Grand Prix on the default clock in real time (~14.5 s).
 // Order: every test has its own server, so they run in a few concurrent lanes next to the real-time one.
 // The flood tests hog the event loop (client and server share this process): they go first, alone, while
-// the real-time test is only waiting for its qualifying lap and its start lights. Whole suite: ~15 s.
+// the real-time test is only waiting for its qualifying lap and its start lights. Whole suite: ~23 s (the lobby
+// tests wait out SET_PER_S / READY_PER_S / START_MIN_MS windows in real time).
 // (On the real clock the minimum lap is len / 91.67 m/s = 2.2 s on the shortest track, and the grid takes
 // 4 s + 5 lights + the hold: that test cannot be shorter.)
 'use strict';
@@ -16,7 +18,7 @@ const nodeNet = require('net');
 const http = require('http');
 const crypto = require('crypto');
 const WebSocket = require('ws');
-const { createServer, IDLE_MS } = require('../net/server.js');
+const { createServer, IDLE_MS, LOAD_TIMEOUT_MS, START_MIN_MS, SET_PER_S, READY_PER_S } = require('../net/server.js');
 const { minLapTime, RACE_TIMEOUT_MS } = require('../net/session.js');
 const netClient = require('../js/net.js');
 
@@ -54,7 +56,12 @@ function client(port, hello) {
     c.rosterMsg = () => c.last('players') || c.last('welcome');
     c.roster = () => c.rosterMsg().players;
     c.host = () => c.rosterMsg().host;
-    c.seq = () => (c.last('track') || c.last('welcome')).seq;
+    // the room as this client knows it (welcome.room, then every `room` message; kept without its t field)
+    c.rm = null;
+    c.room = () => c.rm;
+    c.rs = () => (c.rm ? c.rm.rs : 0);
+    // our track of the room's current load cycle is built (ok) or not
+    c.loaded = (ok, extra) => c.send(Object.assign({ t: 'loaded', rs: c.rs(), ok: ok !== false }, extra || {}));
     // Grand Prix
     c.gp = () => { const m = c.last('gp'); return m ? m.s : null; };
     c.me = () => c.gp().players.find(p => p.id === c.id && !p.left);
@@ -62,7 +69,7 @@ function client(port, hello) {
     c.px = 0; c.pz = 0; c.placed = false;
     c.drive = (x, z, g, v, h) => {
       c.px = x; c.pz = z; c.placed = true;
-      c.send({ t: 's', k: c.seq(), c: Date.now(), s: [x, 0, z, h || 0, 0, 0, v || 0, 0], g });
+      c.send({ t: 's', k: c.rs(), c: Date.now(), s: [x, 0, z, h || 0, 0, 0, v || 0, 0], g });
     };
     // The car drives m metres on along x (one state; the server credits it as far as the time since the car's
     // previous state allows at 130 m/s, up to 5 s of it: the tests step the clock before a lap).
@@ -70,17 +77,23 @@ function client(port, hello) {
     // A lap the server can believe: the car covers a lap of the test track first, then reports it.
     c.lap = (time, sid, at) => {
       c.run(LEN);
-      c.send({ t: 'gl', k: c.seq(), sid: sid === undefined ? c.gp().sid : sid, time, at });
+      c.send({ t: 'gl', k: c.rs(), sid: sid === undefined ? c.gp().sid : sid, time, at });
     };
     ws.on('message', d => {
       try { c.msgs.push(JSON.parse(d.toString())); } catch (e) { c.msgs.push({ t: '?raw' }); }
-      if (c.msgs[c.msgs.length - 1].t === 'track') c.placed = false;        // a new track: the car is not on it yet
+      const m = c.msgs[c.msgs.length - 1];
+      const r = m.t === 'room' ? Object.assign({}, m) : m.t === 'welcome' && m.room ? Object.assign({}, m.room) : null;
+      if (r) {
+        delete r.t;
+        if (!c.rm || r.rs !== c.rm.rs) c.placed = false;                    // a new load cycle: the car is not on it yet
+        c.rm = r;
+      }
     });
     ws.on('close', (code, reason) => { c.closed = { code, reason: reason.toString() }; });
     ws.on('error', () => {});
     ws.on('open', async () => {
       if (hello === false) { resolve(c); return; }
-      c.send(Object.assign({ t: 'hello', v: 1, name: 'P', colour: '#112233' }, hello || {}));
+      c.send(Object.assign({ t: 'hello', v: 2, name: 'P', colour: '#112233' }, hello || {}));
       try {
         await c.wait(() => c.last('welcome') || c.closed);
         const w = c.last('welcome');
@@ -91,7 +104,7 @@ function client(port, hello) {
     setTimeout(() => reject(new Error('connect timeout')), 3000);
   });
 }
-const state = (x, v) => ({ t: 's', k: 0, c: Date.now(), s: [x, 0, 0, 0, 0, 0, v || 0, 0] });
+const state = (x, v, k) => ({ t: 's', k: k === undefined ? 1 : k, c: Date.now(), s: [x, 0, 0, 0, 0, 0, v || 0, 0] });
 // The car really drives from x0 to x1 along x in n steps of 50 ms (n + 1 states; the speed field tells the truth).
 // Its POSITIONS, timed by their arrival, are all the server believes of its motion when it judges an impact report.
 async function driveTo(c, x0, x1, z, n) {
@@ -144,7 +157,7 @@ function rawClient(port) {
 }
 
 // Tests are registered into lanes with T() and run at the bottom of the file.
-const lanes = { floods: [], tcp: [], relay: [], gp1: [], gp2: [], gp3: [], client: [], year: [], year2: [], review: [], review2: [],
+const lanes = { floods: [], tcp: [], relay: [], gp1: [], gp2: [], gp3: [], client: [], year: [], year2: [], review: [], review2: [], lobby: [], lobby2: [],
   bots: [], bots2: [], botsClient: [] };
 let lane = lanes.relay;
 const T = (name, fn) => { lane.push([name, fn]); };
@@ -187,20 +200,71 @@ async function settle(srv, clients, pred, ms) {
   }, ms || 3000, 'all clients on the same snapshot' + (pred ? ' with ' + pred : ''));
   return JSON.parse(want);
 }
-// A room of n players on a track, manual clock, shortest hold before lights out. cs[0] is the host.
-// opts: createServer options, plus cars: the car id each player announces in its hello.
+// Every client still connected ends up with exactly the room the server holds (and that one satisfies pred). -> room
+async function syncRoom(srv, clients, pred, ms) {
+  let want = '';
+  await until(() => {
+    const r = srv.info().room;
+    if (pred && !pred(r)) return false;
+    want = JSON.stringify(r);
+    return clients.every(c => c.closed || JSON.stringify(c.room()) === want);
+  }, ms || 3000, 'all clients on the same room' + (pred ? ' with ' + pred : ''));
+  return JSON.parse(want);
+}
+// A room of n players, manual clock, shortest hold before lights out, no START_MIN_MS between the host's start / back
+// (unless opts says so). cs[0] is the host. The host sets the track (monza) in the lobby; then, unless opts.lobby,
+// he starts free practice and everybody loads it: the room is in a free-practice session on the track (what
+// protocol 1's track pick gave).
+// opts: createServer options, plus cars: the car id each player announces in its hello; lobby: stay in the lobby;
+// real: the server's own clock instead of the manual one.
 async function room(t, n, opts) {
+  opts = opts || {};
   const clk = manualClock();
-  const srv = await t.start(Object.assign({ now: clk, random: () => 0 }, opts));
+  const so = Object.assign({ now: clk, random: () => 0, startMinMs: 0 }, opts);
+  if (opts.real) delete so.now;                  // real: the server's own clock (the relay tests)
+  delete so.cars; delete so.lobby; delete so.real;
+  const srv = await t.start(so);
   const cs = [];
   for (let i = 0; i < n; i++) {
-    cs.push(await client(srv.port, Object.assign({ name: 'P' + (i + 1) }, opts && opts.cars ? { car: opts.cars[i] } : {},
-      i === 0 && opts && opts.hostToken ? { token: opts.hostToken } : {})));
+    cs.push(await client(srv.port, Object.assign({ name: 'P' + (i + 1) }, opts.cars ? { car: opts.cars[i] } : {},
+      i === 0 && opts.hostToken ? { token: opts.hostToken } : {})));
   }
-  cs[0].send({ t: 'track', id: 'monza' });
-  for (const c of cs) await c.wait(() => c.last('track'), 2000, 'track');
-  const r = { srv, clk, cs, settle: (pred, ms) => settle(srv, r.cs, pred, ms) };
-  r.start = async (q, rr) => { cs[0].send({ t: 'gp', a: 'start', q: q, r: rr, len: LEN }); return r.settle(s => s.phase === 'quali'); };
+  const r = { srv, clk, cs, settle: (pred, ms) => settle(srv, r.cs, pred, ms), sync: (pred, ms) => syncRoom(srv, r.cs, pred, ms) };
+  r.host = () => r.cs.find(c => !c.closed && c.id && c.id === srv.info().host) || null;
+  r.len = LEN;                                   // the track length the host's start names
+  // the host starts a load cycle with the room's settings (force: whoever is not ready loads too); everybody still
+  // connected reports his track built -> the session (in a Grand Prix: qualifying)
+  r.go = async () => {
+    const rs = srv.info().room.rs + 1;
+    r.host().send({ t: 'start', len: r.len, force: true });
+    await r.sync(x => x.st === 'loading' && x.rs === rs);
+    r.cs.forEach(c => { if (!c.closed) c.loaded(); });
+    return r.sync(x => x.st === 'session' && x.rs === rs);
+  };
+  r.lobby = async () => {
+    if (srv.info().room.st !== 'lobby') r.host().send({ t: 'back' });
+    return r.sync(x => x.st === 'lobby');
+  };
+  // free practice: back to the lobby, mode free, start, everybody loads
+  r.free = async () => {
+    await r.lobby();
+    r.host().send({ t: 'set', mode: 'free' });
+    await r.sync(x => x.set.mode === 'free');
+    return r.go();
+  };
+  // a Grand Prix of q / rr laps: back to the lobby, the settings (extra: wear, year...; len: the start's length),
+  // start, everybody loads -> qualifying
+  r.start = async (q, rr, extra) => {
+    extra = Object.assign({}, extra);
+    r.len = extra.len || LEN;
+    delete extra.len;
+    await r.lobby();
+    const set = Object.assign({ t: 'set', mode: 'gp', q: q, r: rr }, extra);
+    r.host().send(set);
+    await r.sync(x => x.set.mode === 'gp' && (q === undefined || x.set.q === q) && (rr === undefined || x.set.r === rr));
+    await r.go();
+    return r.settle(s => s.phase === 'quali');
+  };
   // one qualifying lap each, in join order (2.5 s, 2.6 s, ...) -> grid
   r.toGrid = async () => {
     clk.add(3000);
@@ -209,8 +273,13 @@ async function room(t, n, opts) {
     return r.settle(s => s.phase === 'grid');
   };
   r.toRace = async () => { const g = await r.toGrid(); clk.to(g.goAt); return r.settle(s => s.phase === 'race'); };
+  cs[0].send({ t: 'set', track: 'monza' });
+  await r.sync(x => x.set.track === 'monza');
+  if (!opts.lobby) await r.go();
   return r;
 }
+// a room in the lobby (track set), for the tests that set the room up themselves
+const lobbyRoom = (t, n, opts) => room(t, n, Object.assign({ lobby: true }, opts));
 // a fresh instance of the real client (js/net.js is a singleton per load)
 /* ---------- computer drivers (bots) helpers ---------- */
 
@@ -221,11 +290,11 @@ async function addBots(host, clients, n, list, skill) {
   return host.roster().filter(p => p.bot).sort((x, y) => x.bi - y.bi).map(p => p.id);
 }
 // the host's bots' states: rows [id, x, y, z, heading, pitch, roll, speed, steer, g?]
-function botStates(host, rows, c) { host.send({ t: 'bs', k: host.seq(), c: c === undefined ? Date.now() : c, b: rows }); }
+function botStates(host, rows, c) { host.send({ t: 'bs', k: host.rs(), c: c === undefined ? Date.now() : c, b: rows }); }
 // bot id drives m metres on along x at z (as c.run for the own car; placed at x = 0 on a new track)
 function botRun(host, id, m, g, z) {
   host.bx = host.bx || {};
-  const seq = host.seq();
+  const seq = host.rs();
   if (!host.bx[id] || host.bx[id].seq !== seq) {
     host.bx[id] = { x: 0, z: z || 0, seq };
     botStates(host, [[id, 0, 0, host.bx[id].z, Math.PI / 2, 0, 0, 0, 0]]);
@@ -238,7 +307,7 @@ function botRun(host, id, m, g, z) {
 // a lap of bot id the server can believe: its states cover a lap of the test track, then the host reports it
 function botLap(host, id, time, sid) {
   botRun(host, id, LEN);
-  host.send({ t: 'gl', k: host.seq(), sid: sid === undefined ? host.gp().sid : sid, time, id });
+  host.send({ t: 'gl', k: host.rs(), sid: sid === undefined ? host.gp().sid : sid, time, id });
 }
 // real time: bot id really drives from x0 to x1 along x at z in n steps of 50 ms (as driveTo)
 async function botDriveTo(host, id, x0, x1, z, n) {
@@ -261,9 +330,15 @@ function freshNet() {
     const srv = await t.start({ random: () => 0 }, SLOW_PORT);
     const a = await client(srv.port, { name: 'Ann' }), b = await client(srv.port, { name: 'Bob' });
     assert(Math.abs(b.last('welcome').now - Date.now()) < 150, 'the default clock starts at Date.now(): ' + (b.last('welcome').now - Date.now()));
-    a.send({ t: 'track', id: 'monza' });
-    await b.wait(() => b.last('track'));
-    a.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN });
+    a.send({ t: 'set', track: 'monza', mode: 'gp', q: 1, r: 1 });
+    await b.wait(() => b.room().set.track === 'monza' && b.room().set.mode === 'gp');
+    b.send({ t: 'ready', on: true });
+    await a.wait(() => a.room().ready.includes(b.id));
+    a.send({ t: 'start', len: LEN });
+    await b.wait(() => b.room().st === 'loading');
+    // the default barrier: everybody gets 20 s on the server clock
+    assert.strictEqual(b.room().load.until - b.room().load.at, LOAD_TIMEOUT_MS);
+    a.loaded(true, { len: LEN }); b.loaded();
     await settle(srv, [a, b], s => s.phase === 'quali');
     const t0 = Date.now();
     a.lap(2.2);
@@ -299,11 +374,16 @@ function freshNet() {
   /* ---------- the relay ---------- */
   lane = lanes.relay;
 
-  T('join / roster / leave', async t => {
+  T('join / roster / leave; welcome v2: room, ded, no track / seq / year', async t => {
     const srv = await t.start();
     const a = await client(srv.port, { name: 'Alice' });
-    assert.strictEqual(a.last('welcome').host, a.id, 'first player is host on a dedicated server');
-    assert.strictEqual(a.last('welcome').track, null);
+    const w = a.last('welcome');
+    assert.strictEqual(w.host, a.id, 'first player is host on a dedicated server');
+    assert.deepStrictEqual(Object.keys(w).sort(), ['bots', 'ded', 'host', 'id', 'now', 'players', 'room', 't', 'v']);
+    assert.deepStrictEqual([w.v, w.ded], [2, true]);
+    assert.deepStrictEqual(w.room, { st: 'lobby', rs: 0, set: { track: null, year: null, mode: 'free', q: 3, r: 5, wear: 1, bots: 0, skill: 'pro' },
+      ready: [], rr: 0, load: null, len: 0 }, 'a fresh room: the lobby with the defaults');
+    assert.deepStrictEqual(srv.info().room, w.room);
     const b = await client(srv.port, { name: 'Bob', colour: '#ABCDEF' });
     await a.wait(() => a.roster().length === 2);
     const ros = a.roster();
@@ -311,6 +391,7 @@ function freshNet() {
     assert.deepStrictEqual(ros.map(p => p.slot), [0, 1]);
     assert.strictEqual(ros[1].colour, '#abcdef');
     assert.deepStrictEqual(b.last('welcome').players, ros, 'the newcomer gets the roster in its welcome');
+    assert(!('year' in a.last('players')), 'the roster no longer carries the year (room.set has it)');
     b.ws.close();
     await a.wait(() => a.roster().length === 1);
     assert(a.last('gone') && a.last('gone').id === b.id);
@@ -319,6 +400,11 @@ function freshNet() {
     assert.strictEqual(c.last('welcome').players.find(p => p.id === c.id).slot, 1);
     assert(c.id > b.id);
     a.ws.close(); c.ws.close();
+    // an in-game server is not dedicated
+    const s2 = await t.start({ hostToken: 'tok' });
+    const h = await client(s2.port, { token: 'tok' });
+    assert.deepStrictEqual([h.last('welcome').ded, s2.info().ded], [false, false]);
+    h.ws.close();
   });
 
   T('name / colour sanitising', async t => {
@@ -335,19 +421,23 @@ function freshNet() {
     a.ws.close(); b.ws.close();
   });
 
-  T('host migration on a dedicated server', async t => {
+  T('host migration on a dedicated server: the settings stay with the room, the new host sets them', async t => {
     const srv = await t.start();
     const a = await client(srv.port), b = await client(srv.port), c = await client(srv.port);
     assert.strictEqual(c.last('welcome').host, a.id);
-    // non-host cannot change the track
-    b.send({ t: 'track', id: 'monza' });
+    // a guest cannot set the room up (nor with protocol 1's track message)
+    b.send({ t: 'set', track: 'monza' }); b.send({ t: 'track', id: 'monza' });
     await sleep(120);
-    assert.strictEqual(c.last('track'), null);
+    assert.deepStrictEqual([c.all('room').length, srv.info().room.set.track], [0, null]);
+    a.send({ t: 'set', track: 'spa', year: 2024 });
+    await c.wait(() => c.room().set.track === 'spa');
+    b.send({ t: 'ready', on: true });
+    await c.wait(() => c.room().ready.includes(b.id));
     a.ws.close();
-    await c.wait(() => c.host() === b.id);
-    b.send({ t: 'track', id: 'monza' });
-    await c.wait(() => c.last('track'));
-    assert.strictEqual(c.last('track').id, 'monza');
+    await c.wait(() => c.host() === b.id && c.room().ready.length === 0, 2000, 'b hosts and is no longer listed as ready');
+    assert.deepStrictEqual([c.room().set.track, c.room().set.year], ['spa', 2024], 'the settings stay');
+    b.send({ t: 'set', track: 'monza' });
+    await c.wait(() => c.room().set.track === 'monza');
     b.ws.close();
     await c.wait(() => c.host() === c.id);
     c.ws.close();
@@ -362,48 +452,78 @@ function freshNet() {
     const h = await client(srv.port, { name: 'Host', token: 'secret-token' });
     assert.strictEqual(h.last('welcome').host, h.id);
     await g.wait(() => g.host() === h.id);
-    g.send({ t: 'track', id: 'spa' });
+    g.send({ t: 'set', track: 'spa' }); g.send({ t: 'start', len: LEN, force: true });
     await sleep(100);
-    assert.strictEqual(h.last('track'), null, 'guest must not pick the track');
+    assert.deepStrictEqual([h.all('room').length, g.all('nostart').length, srv.info().room.set.track], [0, 0, null], 'guest must not set up / start');
     h.ws.close();
     await g.wait(() => g.host() === 0);
+    g.send({ t: 'set', track: 'spa' });
+    await sleep(100);
+    assert.strictEqual(srv.info().room.set.track, null, 'nobody hosts a token room without its host');
     g.ws.close(); bad.ws.close();
   });
 
-  T('track change broadcast, late joiner gets the current track', async t => {
+  T('set: host only, lobby only, every field validated (never clamped); late joiner gets the room in welcome; coalesced, rate-limited', async t => {
     const srv = await t.start();
     const a = await client(srv.port), b = await client(srv.port);
-    a.send({ t: 'track', id: 'suzuka' });
-    await b.wait(() => b.last('track'));
-    assert.deepStrictEqual([b.last('track').id, b.last('track').seq], ['suzuka', 1]);
-    assert.strictEqual(a.last('track').id, 'suzuka', 'the host gets the broadcast too');
+    a.send({ t: 'set', track: 'suzuka' });
+    await b.wait(() => b.room().set.track === 'suzuka');
+    await a.wait(() => a.room().set.track === 'suzuka', 1000, 'the host gets the broadcast too');
+    assert.deepStrictEqual(b.room(), srv.info().room);
     const c = await client(srv.port);
-    assert.deepStrictEqual([c.last('welcome').track, c.last('welcome').seq], ['suzuka', 1]);
-    for (const bad of ['', '../etc', 'a b', 'x'.repeat(65), 5, null, { a: 1 }]) a.send({ t: 'track', id: bad });
+    assert.strictEqual(c.last('welcome').room.set.track, 'suzuka');
+    // hostile values: each ignored, never clamped into another meaning; the valid ones apply
     await sleep(120);
-    assert.strictEqual(b.all('track').length, 1, 'invalid track ids are ignored');
-    // a host clicking through tracks (or a hostile one): everybody loads the first and then only the last pick
-    const t0 = Date.now();
-    for (let i = 0; i < 100; i++) a.send({ t: 'track', id: 'track-' + i });
-    await b.wait(() => b.last('track').id === 'track-99', 3000, 'the last pick');
-    assert(Date.now() - t0 >= 700, 'not before a second has passed since the previous change: ' + (Date.now() - t0));
-    assert.deepStrictEqual(b.all('track').map(m => [m.id, m.seq]), [['suzuka', 1], ['track-99', 2]], 'one reload, not a hundred');
-    assert.deepStrictEqual([srv.info().track, srv.info().seq], ['track-99', 2]);
-    // a pick that is still waiting dies with its host
-    a.send({ t: 'track', id: 'never' });
+    const n = b.all('room').length, before = JSON.stringify(srv.info().room);
+    for (const bad of ['', '../etc', '../../x', 'a b', 'x'.repeat(65), 5, null, { a: 1 }, ['spa'], true, '__proto__x/', 'spa\n']) a.send({ t: 'set', track: bad });
+    await sleep(150);
+    for (const m of [{ q: 1e9 }, { q: 0 }, { q: 21 }, { r: -1 }, { r: 100 }, { r: '5' }, { wear: 6 }, { wear: 0.4 }, { wear: '3' }, { year: 1999 }, { year: 2101 },
+      { year: 2024.5 }, { year: '2024' }, { mode: 'race' }, { mode: 'GP' }, { mode: null }, { q: null, r: {}, wear: [] }]) a.send(Object.assign({ t: 'set' }, m));
+    a.send('{"t":"set","q":1e999,"r":-1e999,"wear":1e999,"year":1e999}'); a.send('{"t":"set"}'); a.send('{"t":"SET","track":"spa"}');
+    await sleep(250);
+    assert.strictEqual(JSON.stringify(srv.info().room), before, 'nothing changed');
+    assert.strictEqual(b.all('room').length, n, 'nothing changed, nothing broadcast');
+    // a guest's set (all valid) changes nothing
+    b.send({ t: 'set', track: 'spa', year: 2020, mode: 'gp', q: 2, r: 2, wear: 2 });
+    await sleep(150);
+    assert.strictEqual(JSON.stringify(srv.info().room), before, 'a guest cannot');
+    await sleep(1000);                                           // (SET_PER_S: the junk used this second up)
+    // a mix: the valid fields apply, the others are ignored; wear 2.5 rounds to 3, q 2.4 to 2
+    a.send({ t: 'set', track: '../x', year: 2024, mode: 'race', q: 2.4, r: 1e9, wear: 2.5 });
+    await b.wait(() => b.room().set.year === 2024);
+    assert.deepStrictEqual(b.room().set, { track: 'suzuka', year: 2024, mode: 'free', q: 2, r: 5, wear: 3, bots: 0, skill: 'pro' });
+    a.send({ t: 'set', track: 'a.B_c-9', mode: 'gp', q: 20, r: 99, wear: 5, year: 2100 });
+    await b.wait(() => b.room().set.track === 'a.B_c-9');
+    assert.deepStrictEqual(b.room().set, { track: 'a.B_c-9', year: 2100, mode: 'gp', q: 20, r: 99, wear: 5, bots: 0, skill: 'pro' });
+    a.send({ t: 'set', q: 1, r: 1, wear: 1, year: 2010, mode: 'free' });
+    await b.wait(() => b.room().set.q === 1 && b.room().set.year === 2010);
+    // a host clicking through tracks (or a hostile one): at most SET_PER_S a second are taken, and the room goes out
+    // coalesced (at most one per 100 ms tick), the last state always
+    await sleep(1100);
+    const n1 = b.all('room').length, t0 = Date.now();
+    for (let i = 0; i < 100; i++) a.send({ t: 'set', track: 'track-' + i });
+    await b.wait(() => b.room().set.track === 'track-' + (SET_PER_S - 1), 2000, 'the last pick taken');
+    await sleep(300);
+    const got = b.all('room').length - n1;
+    assert.strictEqual(srv.info().room.set.track, 'track-' + (SET_PER_S - 1), 'SET_PER_S a second: the rest dropped');
+    assert(got >= 1 && got <= 2 + (Date.now() - t0) / 100, 'room broadcasts for 100 picks: ' + got);
+    // a pick in the next second is taken again
+    await sleep(1000);
+    a.send({ t: 'set', track: 'next' });
+    await b.wait(() => b.room().set.track === 'next');
+    // the settings stay with the room after its host is gone; the next host changes them
     a.ws.close();
     await b.wait(() => b.host() === b.id);
-    await sleep(1200);
-    assert.strictEqual(srv.info().track, 'track-99');
-    b.send({ t: 'track', id: 'mine' });
-    await c.wait(() => c.last('track').id === 'mine');
+    assert.strictEqual(srv.info().room.set.track, 'next');
+    b.send({ t: 'set', track: 'mine' });
+    await c.wait(() => c.room().set.track === 'mine');
     b.ws.close(); c.ws.close();
   });
 
-  T('snapshot relay at ~20 Hz, validated and clamped', async t => {
-    const srv = await t.start();
-    const a = await client(srv.port), b = await client(srv.port);
-    const timer = setInterval(() => a.send(state(Math.random() * 100, 50)), 25);
+  T('snapshot relay at ~20 Hz, validated and clamped (in the session only, with the cycle\'s k)', async t => {
+    const R = await room(t, 2, { real: true });
+    const [a, b] = R.cs;
+    const timer = setInterval(() => a.send(state(Math.random() * 100, 50, a.rs())), 25);
     await sleep(1050);
     clearInterval(timer);
     const snaps = b.all('snap');
@@ -418,56 +538,84 @@ function freshNet() {
     await sleep(250);
     assert.strictEqual(b.all('snap').length, n0, 'idle players must not be rebroadcast');
     // out-of-range values are clamped, malformed states are dropped
-    a.send({ t: 's', k: 0, c: 1, s: [1e30, -1e30, 5, 100, 9, -9, 1e9, 7] });
+    a.send({ t: 's', k: a.rs(), c: 1, s: [1e30, -1e30, 5, 100, 9, -9, 1e9, 7] });
     await b.wait(() => b.all('snap').length > n0);
     const c = b.last('snap').p[0];
     assert(Math.abs(c[2]) <= 1e5 && Math.abs(c[8]) <= 130 && Math.abs(c[9]) <= 1 && Math.abs(c[6]) <= 1.2, JSON.stringify(c));
     const n1 = b.all('snap').length;
     for (const s of [[1, 2, 3], 'x', null, [1, 2, 3, 4, 5, 6, 7, 'a'], [1, 2, 3, 4, 5, 6, 7, null], [NaN, 0, 0, 0, 0, 0, 0, 0]]) {
-      a.send({ t: 's', k: 0, c: 2, s });
+      a.send({ t: 's', k: a.rs(), c: 2, s });
     }
-    a.send({ t: 's', k: 99, c: 3, s: [0, 0, 0, 0, 0, 0, 0, 0] });      // wrong track sequence
-    a.send('{"t":"s","k":0,"c":1e999,"s":[0,0,0,0,0,0,0,0]}');         // Infinity timestamp
+    a.send({ t: 's', k: 99, c: 3, s: [0, 0, 0, 0, 0, 0, 0, 0] });      // another load cycle
+    a.send({ t: 's', k: a.rs() - 1, c: 3, s: [0, 0, 0, 0, 0, 0, 0, 0] });
+    a.send({ t: 's', k: String(a.rs()), c: 3, s: [0, 0, 0, 0, 0, 0, 0, 0] });
+    a.send({ t: 's', c: 3, s: [0, 0, 0, 0, 0, 0, 0, 0] });
+    a.send('{"t":"s","k":' + a.rs() + ',"c":1e999,"s":[0,0,0,0,0,0,0,0]}');  // Infinity timestamp
     await sleep(200);
     assert.strictEqual(b.all('snap').length, n1, 'malformed states must not be relayed');
+    // in the lobby and while loading nobody is on a track: states are dropped, nothing relayed
+    await R.lobby();
+    const n2 = b.all('snap').length;
+    for (let i = 0; i < 5; i++) { a.send(state(i, 10, a.rs())); a.send(state(i, 10, a.rs() + 1)); await sleep(30); }
+    a.send({ t: 'start', len: LEN, force: true });
+    await R.sync(x => x.st === 'loading');
+    for (let i = 0; i < 5; i++) { a.send(state(i, 10, a.rs())); await sleep(30); }
+    await sleep(150);
+    assert.strictEqual(b.all('snap').length, n2, 'no snapshot in the lobby / while loading');
+    assert.strictEqual(R.srv.info().room.st, 'loading');
+    a.loaded(); b.loaded();
+    await R.sync(x => x.st === 'session');
+    a.send(state(3, 10, a.rs()));
+    await b.wait(() => b.all('snap').length > n2, 1000, 'relayed again in the session');
     a.ws.close(); b.ws.close();
   });
 
-  T('lap times are shared through the roster', async t => {
-    const srv = await t.start();
-    const a = await client(srv.port), b = await client(srv.port);
-    a.send({ t: 'lap', last: 83.4567, best: 82.1 });
+  T('lap times are shared through the roster (in the session only; cleared by a start and by the lobby)', async t => {
+    const R = await room(t, 2);
+    const [a, b] = R.cs;
+    a.send({ t: 'lap', k: a.rs(), last: 83.4567, best: 82.1 });
     await b.wait(() => b.roster().find(p => p.id === a.id).best === 82.1);
-    a.send({ t: 'lap', last: 'x', best: -5 });
+    a.send({ t: 'lap', k: a.rs(), last: 'x', best: -5 });
     await b.wait(() => b.roster().find(p => p.id === a.id).best === null);
+    a.send({ t: 'lap', k: a.rs(), last: 80, best: 80 });
+    await b.wait(() => b.roster().find(p => p.id === a.id).best === 80);
+    a.send({ t: 'lap', k: a.rs() + 1, last: 70, best: 70 }); a.send({ t: 'lap', last: 70, best: 70 });
+    await sleep(150);
+    assert.strictEqual(b.roster().find(p => p.id === a.id).best, 80, 'another cycle\'s / no k: dropped');
+    await R.lobby();
+    await b.wait(() => b.roster().find(p => p.id === a.id).best === null, 1000, 'cleared in the lobby');
+    a.send({ t: 'lap', k: a.rs(), last: 70, best: 70 });
+    await sleep(150);
+    assert.strictEqual(R.srv.info().players[0].best, null, 'dropped in the lobby');
     a.ws.close(); b.ws.close();
   });
 
   T('impact reports go to the target only, clamped and throttled; only between cars that are near each other', async t => {
-    const srv = await t.start();
-    const a = await client(srv.port), b = await client(srv.port), c = await client(srv.port);
-    a.send({ t: 'hit', k: 0, to: b.id, i: [3, -4] });                  // nobody has reported a position yet
+    const R = await room(t, 3, { real: true });
+    const [a, b, c] = R.cs;
+    const k = a.rs();
+    a.send({ t: 'hit', k, to: b.id, i: [3, -4] });                     // nobody has reported a position yet
     await sleep(80);
     assert.strictEqual(b.last('hit'), null, 'a car that is not on the track cannot hit');
     // a drives at 90 m/s along +x up to b (parked 4 m ahead); c is parked half a kilometre away
     const near = async () => { b.drive(14, 10); c.drive(500, 10); await driveTo(a, -3.5, 10, 10, 3); };
     await near();
-    a.send({ t: 'hit', k: 0, to: b.id, i: [3, -4] });
+    a.send({ t: 'hit', k, to: b.id, i: [3, -4] });
     await b.wait(() => b.last('hit'));
     assert.deepStrictEqual(b.last('hit'), { t: 'hit', from: a.id, i: [3, -4] });
     await near();
-    a.send({ t: 'hit', k: 0, to: b.id, i: [3000, 0] });
+    a.send({ t: 'hit', k, to: b.id, i: [3000, 0] });
     await b.wait(() => b.all('hit').length === 2);
     assert.deepStrictEqual(b.last('hit').i, [50, 0], 'HIT_MAX');
     await near();
-    for (let i = 0; i < 20; i++) a.send({ t: 'hit', k: 0, to: b.id, i: [1, 1] });      // burst: only one passes
+    for (let i = 0; i < 20; i++) a.send({ t: 'hit', k, to: b.id, i: [1, 1] });      // burst: only one passes
     for (const bad of [{ to: a.id, i: [1, 1] }, { to: 999, i: [1, 1] }, { to: b.id, i: [1] }, { to: b.id, i: ['x', 1] },
-      { to: b.id, i: [0, 0] }, { to: 'b', i: [1, 1] }, { to: b.id }]) a.send(Object.assign({ t: 'hit', k: 0 }, bad));
+      { to: b.id, i: [0, 0] }, { to: 'b', i: [1, 1] }, { to: b.id }]) a.send(Object.assign({ t: 'hit', k }, bad));
     a.send({ t: 'hit', k: 7, to: b.id, i: [1, 1] });
     await sleep(150);
     assert.strictEqual(b.all('hit').length, 3);
-    a.send({ t: 'hit', k: 0, to: c.id, i: [5, 5] });                   // c is half a kilometre away
-    c.send({ t: 'hit', k: 0, to: a.id, i: [5, 5] });
+    a.send({ t: 'hit', k, to: c.id, i: [5, 5] });                      // c is half a kilometre away
+    c.send({ t: 'hit', k, to: a.id, i: [5, 5] });
     await sleep(100);
     assert.strictEqual(c.all('hit').length + a.all('hit').length, 0, 'nobody else gets it, and no hits from afar');
     a.ws.close(); b.ws.close(); c.ws.close();
@@ -477,28 +625,31 @@ function freshNet() {
     const srv = await t.start();
     const a = await client(srv.port), good = await client(srv.port);
     for (const junk of ['', 'not json', '{', '[]', 'null', '123', '"str"', '{"t":5}', '{"t":"nope"}', '{"t":"hello"}',
-      '{"t":"s"}', '{"t":"track"}', '{"t":"profile"}', '{"t":"lap"}', '{"__proto__":{"t":"track"}}',
-      '{"t":"s","s":{"length":8}}', '{"t":"constructor"}', '{"t":"toString"}']) a.send(junk);
+      '{"t":"s"}', '{"t":"track"}', '{"t":"profile"}', '{"t":"lap"}', '{"__proto__":{"t":"track"}}', '{"__proto__":{"t":"set","track":"x"}}',
+      '{"t":"s","s":{"length":8}}', '{"t":"constructor"}', '{"t":"toString"}', '{"t":"set","__proto__":{"track":"evil"}}',
+      '{"t":"loaded"}', '{"t":"ready"}', '{"t":"start"}', '{"t":"go"}', '{"t":"back"}', '{"t":"set","track":{"toString":1}}']) a.send(junk);
     a.ws.send(Buffer.from([0, 1, 2, 3, 255]));                 // binary frame
     await sleep(100);
     assert.strictEqual(a.closed, null, 'junk alone does not get you kicked');
+    assert.strictEqual(srv.info().room.set.track, null, 'no prototype field became a setting');
     a.send('x'.repeat(5000));                                   // over maxPayload
     await a.wait(() => a.closed);
     assert.strictEqual(a.closed.code, 1009);
     // a socket that never says hello and sends only garbage
     const raw = await client(srv.port, false);
-    raw.send({ t: 'track', id: 'monza' });
+    raw.send({ t: 'set', track: 'monza' });
+    raw.send({ t: 'start', len: LEN, force: true });
     raw.send(state(1, 1));
-    raw.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN });
+    raw.send({ t: 'loaded', rs: 1, ok: true });
     raw.send({ t: 'gl', k: 0, sid: 0, time: 3 });
     raw.send({ t: 'ping', c: 1 });
     await sleep(100);
-    assert.strictEqual(good.last('track'), null, 'messages before hello are ignored');
+    assert.strictEqual(good.all('room').length, 0, 'messages before hello are ignored');
     assert.strictEqual(raw.msgs.length, 0, 'and not answered');
     raw.ws.terminate();
     // the server still works
-    good.send({ t: 'track', id: 'monza' });   // good is host now (a left)
-    await good.wait(() => good.last('track'));
+    good.send({ t: 'set', track: 'monza' });   // good is host now (a left)
+    await good.wait(() => good.room().set.track === 'monza');
     good.ws.close();
   });
 
@@ -520,12 +671,17 @@ function freshNet() {
     cs.forEach(c => c.ws.close()); y.ws.close();
   });
 
-  T('wrong protocol version is rejected', async t => {
+  T('protocol 2: any other hello v is rejected with error version, need 2', async t => {
     const srv = await t.start();
-    const x = await client(srv.port, { v: 999 });
-    await x.wait(() => x.closed);
-    assert.strictEqual(x.last('error').code, 'version');
-    assert.strictEqual(x.closed.code, 1008);
+    for (const v of [999, 1, 3, '2', null, 2.5, [2], undefined]) {
+      const x = await client(srv.port, { v });
+      await x.wait(() => x.closed);
+      assert.deepStrictEqual([x.id, x.last('error'), x.closed.code], [0, { t: 'error', code: 'version', need: 2 }, 1008], JSON.stringify(v));
+    }
+    const ok = await client(srv.port, { v: 2 });
+    assert(ok.id > 0);
+    assert.strictEqual(srv.info().players.length, 1);
+    ok.ws.close();
   });
 
   T('closing the server disconnects clients with 1001; port in use is reported', async t => {
@@ -595,71 +751,601 @@ function freshNet() {
     a.ws.close(); b.ws.close(); c.ws.close();
   });
 
-  lane = lanes.year;                           // the year's rate limit runs on real time: these tests wait a lot
-  T('room year: host only, a whole 2010..2100, in welcome and every players message, rate-limited, stays with the room', async t => {
-    const srv = await t.start();
+  lane = lanes.year;
+  T('room year: room.set.year, host only, lobby only, a whole 2010..2100, in welcome.room; stays with the room', async t => {
+    const srv = await t.start({ startMinMs: 0 });
     const a = await client(srv.port, { name: 'Host' }), b = await client(srv.port, { name: 'Guest' });
-    assert.strictEqual(a.last('welcome').year, null, 'no year until the host picks one');
-    await b.wait(() => b.last('players'));
-    assert.strictEqual(b.last('players').year, null);
-    b.send({ t: 'year', y: 2020 });                                               // not the host
-    for (const bad of [2009, 2101, 2024.5, '2024', null, {}, [2024], true, -2024, 0]) a.send({ t: 'year', y: bad });
-    a.send('{"t":"year","y":1e999}'); a.send({ t: 'year' }); a.send({ t: 'YEAR', y: 2020 }); a.send({ t: 'year', year: 2020 });
+    assert.strictEqual(a.last('welcome').room.set.year, null, 'no year until the host picks one');
+    b.send({ t: 'set', year: 2020 });                                             // not the host
+    for (const bad of [2009, 2101, 2024.5, '2024', null, {}, [2024], true, -2024, 0]) a.send({ t: 'set', year: bad });
+    a.send('{"t":"set","year":1e999}'); a.send({ t: 'year', y: 2020 }); a.send({ t: 'SET', year: 2020 }); a.send({ t: 'set', y: 2020 });
     await sleep(200);
-    assert.strictEqual(srv.info().year, null, 'all refused');
-    a.send({ t: 'year', y: 2024 });
-    await b.wait(() => b.rosterMsg().year === 2024);
-    assert.strictEqual(srv.info().year, 2024);
-    await a.wait(() => a.rosterMsg().year === 2024, 1000, 'the host hears it too');
-    // every later roster carries it, and a newcomer gets it in its welcome
-    b.send({ t: 'profile', name: 'G2' });
-    await a.wait(() => a.roster()[1].name === 'G2');
-    assert.strictEqual(a.last('players').year, 2024);
+    assert.strictEqual(srv.info().room.set.year, null, 'all refused (protocol 1\'s year message too)');
+    await sleep(1000);                                                            // (SET_PER_S: the junk used this second up)
+    a.send({ t: 'set', year: 2024 });
+    await b.wait(() => b.room().set.year === 2024);
+    assert.strictEqual(srv.info().year, 2024, 'srv.info().year = room.set.year');
+    await a.wait(() => a.room().set.year === 2024, 1000, 'the host hears it too');
     const c = await client(srv.port, { name: 'Late' });
-    assert.strictEqual(c.last('welcome').year, 2024);
-    // a host scrolling through the seasons: the first pick right away, then only the last one, a second later
+    assert.strictEqual(c.last('welcome').room.set.year, 2024);
+    // a host scrolling through the seasons: the room ends on the last one, everybody with it
     await sleep(1050);
-    const t0 = Date.now(), n = c.all('players').length;
-    for (let y = 2010; y <= 2026; y++) a.send({ t: 'year', y });
-    await c.wait(() => c.rosterMsg().year === 2026, 3000, 'the last pick');
-    assert(Date.now() - t0 >= 700, 'not before a second has passed since the previous change: ' + (Date.now() - t0));
-    const seen = c.all('players').slice(n).map(m => m.year).filter((y, i, l) => i === 0 || y !== l[i - 1]);
-    assert.deepStrictEqual(seen, [2010, 2026], 'two changes, not seventeen');
-    // a pick equal to the current year cancels one that is still waiting
-    a.send({ t: 'year', y: 2011 }); a.send({ t: 'year', y: 2026 });
-    await sleep(1250);
-    assert.strictEqual(srv.info().year, 2026);
-    // the pick of a host who leaves dies with him; the year itself stays with the room
-    a.send({ t: 'year', y: 2012 });                                               // applied at once (the window is over)
-    await c.wait(() => c.rosterMsg().year === 2012);
-    a.send({ t: 'year', y: 2015 });                                               // waits...
-    a.ws.close();                                                                 // ...and its host is gone
+    for (let y = 2010; y <= 2018; y++) a.send({ t: 'set', year: y });
+    await c.wait(() => c.room().set.year === 2018, 2000, 'the last pick');
+    // the year changes only in the lobby (parc fermé while loading and in a session)
+    a.send({ t: 'set', track: 'monza' });
+    await c.wait(() => c.room().set.track === 'monza');
+    a.send({ t: 'start', len: LEN, force: true });
+    await c.wait(() => c.room().st === 'loading');
+    a.send({ t: 'set', year: 2019 });
+    [a, b, c].forEach(x => x.loaded());
+    await c.wait(() => c.room().st === 'session');
+    a.send({ t: 'set', year: 2019 });
+    await sleep(150);
+    assert.strictEqual(srv.info().room.set.year, 2018, 'not while loading / in a session');
+    a.send({ t: 'back' });
+    await c.wait(() => c.room().st === 'lobby');
+    await sleep(1000);                                                            // (SET_PER_S)
+    a.send({ t: 'set', year: 2012 });
+    await c.wait(() => c.room().set.year === 2012);
+    // the year itself stays with the room: host migration, an empty room
+    a.ws.close();
     await c.wait(() => c.host() === b.id);
-    await sleep(1150);
-    assert.deepStrictEqual([srv.info().year, c.rosterMsg().year, b.rosterMsg().year], [2012, 2012, 2012]);
-    b.send({ t: 'year', y: 2013 });                                               // the new host picks
-    await c.wait(() => c.rosterMsg().year === 2013);
+    assert.strictEqual(c.room().set.year, 2012);
+    b.send({ t: 'set', year: 2013 });                                             // the new host picks
+    await c.wait(() => c.room().set.year === 2013);
     b.ws.close();
     await c.wait(() => c.host() === c.id);
-    assert.strictEqual(c.rosterMsg().year, 2013);
     c.ws.close();
     await until(() => srv.info().players.length === 0, 2000, 'empty room');
     const d = await client(srv.port, { name: 'Next' });
-    assert.deepStrictEqual([d.last('welcome').year, d.last('welcome').host], [2013, d.id], 'an empty room keeps its year');
+    assert.deepStrictEqual([d.last('welcome').room.set.year, d.last('welcome').room.set.track, d.last('welcome').host], [2013, 'monza', d.id],
+      'an empty room keeps its settings');
     d.ws.close();
 
     // in-game (token) server: without its host nobody can change the year
     const s2 = await t.start({ hostToken: 'tok' });
     const h = await client(s2.port, { name: 'H', token: 'tok' }), g = await client(s2.port, { name: 'G' });
-    g.send({ t: 'year', y: 2018 });
-    h.send({ t: 'year', y: 2019 });
-    await g.wait(() => g.rosterMsg().year === 2019);
+    g.send({ t: 'set', year: 2018 });
+    h.send({ t: 'set', year: 2019 });
+    await g.wait(() => g.room().set.year === 2019);
     h.ws.close();
     await g.wait(() => g.host() === 0);
-    g.send({ t: 'year', y: 2020 });
+    g.send({ t: 'set', year: 2020 });
     await sleep(150);
-    assert.deepStrictEqual([s2.info().year, g.rosterMsg().year], [2019, 2019]);
+    assert.deepStrictEqual([s2.info().room.set.year, g.room().set.year], [2019, 2019]);
     g.ws.close();
+  });
+
+  /* ---------- the room lobby (protocol 2, v7.2) ---------- */
+  lane = lanes.lobby;
+
+  T('lobby: ready (guests only, booleans only, lobby only, rate-limited); a change of track / year / mode clears it (rr + 1), laps / wear / bots do not', async t => {
+    const R = await lobbyRoom(t, 3);
+    const [a, b, c] = R.cs;
+    // nobody is on a track in the lobby
+    assert.deepStrictEqual([R.srv.info().room.st, R.srv.info().room.rs, R.srv.info().room.load, R.srv.info().room.len], ['lobby', 0, null, 0]);
+    b.send({ t: 'ready', on: true });
+    await R.sync(x => x.ready.length === 1);
+    assert.deepStrictEqual(c.room().ready, [b.id]);
+    // the host is never listed; anything but a boolean is ignored
+    a.send({ t: 'ready', on: true });
+    for (const on of [1, 'true', null, {}, [true], undefined]) c.send({ t: 'ready', on });
+    c.send('{"t":"ready","on":1e999}');
+    await sleep(150);
+    await sleep(1000);                                           // (c's ready messages of this second are used up)
+    assert.deepStrictEqual(R.srv.info().room.ready, [b.id]);
+    c.send({ t: 'ready', on: true });
+    await R.sync(x => x.ready.length === 2);
+    b.send({ t: 'ready', on: false });
+    await R.sync(x => x.ready.length === 1);
+    assert.deepStrictEqual(R.srv.info().room.ready, [c.id]);
+    b.send({ t: 'ready', on: true });
+    await R.sync(x => x.ready.length === 2);
+    // laps, wear, bots: ready stays
+    const rr = R.srv.info().room.rr;
+    a.send({ t: 'set', q: 4, r: 6, wear: 2 });
+    await R.sync(x => x.set.q === 4);
+    a.send({ t: 'bots', n: 2, skill: 'rookie' });
+    await R.sync(x => x.set.bots === 2 && x.set.skill === 'rookie');
+    assert.deepStrictEqual([R.srv.info().room.ready.length, R.srv.info().room.rr], [2, rr]);
+    // track / year / mode: cleared, rr + 1 (each message that changes one of them)
+    await sleep(1000);
+    for (const [m, k] of [[{ track: 'spa' }, 'track'], [{ year: 2022 }, 'year'], [{ mode: 'gp' }, 'mode']]) {
+      b.send({ t: 'ready', on: true }); c.send({ t: 'ready', on: true });
+      await R.sync(x => x.ready.length === 2);
+      const rr0 = R.srv.info().room.rr;
+      a.send(Object.assign({ t: 'set' }, m));
+      const x = await R.sync(y => y.set[k] === m[k]);
+      assert.deepStrictEqual([x.ready, x.rr], [[], rr0 + 1], k);
+      await sleep(400);                                          // (at most 5 ready messages a second each)
+    }
+    // the same value again: nothing changes, nothing cleared
+    b.send({ t: 'ready', on: true });
+    await R.sync(x => x.ready.length === 1);
+    a.send({ t: 'set', track: 'spa', mode: 'gp' });
+    await sleep(150);
+    assert.deepStrictEqual(R.srv.info().room.ready, [b.id]);
+    // ready flooding: READY_PER_S a second taken, the room goes out coalesced
+    await sleep(1050);
+    const n = a.all('room').length, t0 = Date.now();
+    for (let i = 0; i < 200; i++) c.send({ t: 'ready', on: i % 2 === 0 });
+    await sleep(400);
+    const got = a.all('room').length - n;
+    assert(got <= 2 + (Date.now() - t0) / 100, 'room broadcasts for 200 ready flips: ' + got);
+    assert(READY_PER_S === 5);
+    assert.deepStrictEqual(R.srv.info().room.ready.includes(c.id), true, 'the 5th of 5 taken (on), the rest dropped');
+    await R.sync();
+    // in a session ready is not a thing
+    await R.go();
+    const ready0 = JSON.stringify(R.srv.info().room.ready);
+    c.send({ t: 'ready', on: false }); b.send({ t: 'ready', on: false });
+    await sleep(150);
+    assert.strictEqual(JSON.stringify(R.srv.info().room.ready), ready0, 'not outside the lobby');
+    // back to the lobby: everybody's ready is cleared (without an rr change: not a settings change)
+    const rr1 = R.srv.info().room.rr;
+    await R.lobby();
+    assert.deepStrictEqual([R.srv.info().room.ready, R.srv.info().room.rr], [[], rr1]);
+    // a guest leaving takes his flag along
+    await sleep(1000);
+    b.send({ t: 'ready', on: true });
+    await R.sync(x => x.ready.length === 1);
+    b.ws.close();
+    await R.sync(x => x.ready.length === 0);
+    R.cs.forEach(x => x.ws.close());
+  });
+
+  T('lobby: start rules (nostart to the host only: state, track, len, busy, not-ready with the ids; force); guests cannot start / go / back', async t => {
+    const clk = manualClock();
+    const srv = await t.start({ now: clk });                    // START_MIN_MS as it is
+    const a = await client(srv.port, { name: 'H' }), b = await client(srv.port, { name: 'B' }), c = await client(srv.port, { name: 'C' });
+    const why = async (m, from) => {
+      from = from || a;
+      const n = from.all('nostart').length;
+      from.send(Object.assign({ t: 'start' }, m));
+      await from.wait(() => from.all('nostart').length > n, 1000, 'nostart for ' + JSON.stringify(m));
+      return from.last('nostart');
+    };
+    assert.deepStrictEqual(await why({ len: LEN }), { t: 'nostart', why: 'track' }, 'no track yet');
+    a.send({ t: 'set', track: 'monza' });
+    await c.wait(() => c.room().set.track === 'monza');
+    for (const len of [50, 199, 100001, '5000', null, [5000], {}, undefined]) assert.deepStrictEqual(await why({ len }), { t: 'nostart', why: 'len' }, JSON.stringify(len));
+    a.send('{"t":"start","len":1e999}');
+    await a.wait(() => a.last('nostart') && a.all('nostart').length === 10);
+    assert.strictEqual(a.last('nostart').why, 'len');
+    assert.deepStrictEqual(await why({ len: LEN }), { t: 'nostart', why: 'not-ready', wait: [b.id, c.id] });
+    b.send({ t: 'ready', on: true });
+    await a.wait(() => a.room().ready.includes(b.id));
+    assert.deepStrictEqual(await why({ len: LEN, force: 1 }), { t: 'nostart', why: 'not-ready', wait: [c.id] }, 'force must be true');
+    // a guest's start / go / back: no effect, no answer
+    for (const m of [{ t: 'start', len: LEN, force: true }, { t: 'go' }, { t: 'back' }]) { b.send(m); c.send(m); }
+    await sleep(150);
+    assert.deepStrictEqual([srv.info().room.st, b.all('nostart').length + c.all('nostart').length], ['lobby', 0]);
+    // nobody but the host hears about refusals
+    assert.strictEqual(b.all('nostart').length + c.all('nostart').length, 0);
+    // force: c (not ready) loads too
+    a.send({ t: 'start', len: LEN, force: true });
+    await c.wait(() => c.room().st === 'loading');
+    const r1 = c.room();
+    assert.deepStrictEqual([r1.rs, r1.load.at, r1.load.until, r1.load.wait, r1.load.done, r1.load.fail, r1.len],
+      [1, clk(), clk() + LOAD_TIMEOUT_MS, [a.id, b.id, c.id], [], [], 0]);
+    assert.deepStrictEqual(await why({ len: LEN, force: true }), { t: 'nostart', why: 'state' }, 'during loading');
+    // back within START_MIN_MS of the start: dropped; after it: the lobby
+    a.send({ t: 'back' });
+    await sleep(150);
+    assert.strictEqual(srv.info().room.st, 'loading', 'back within a second of the start is dropped');
+    await sleep(START_MIN_MS - 100);
+    a.send({ t: 'back' });
+    await c.wait(() => c.room().st === 'lobby');
+    // start right after back: busy; a second later: on
+    assert.deepStrictEqual(await why({ len: LEN, force: true }), { t: 'nostart', why: 'busy' });
+    await sleep(START_MIN_MS + 50);
+    a.send({ t: 'start', len: LEN, force: true });
+    await c.wait(() => c.room().st === 'loading' && c.room().rs === 2);
+    a.send({ t: 'start', len: LEN, force: true });              // twice
+    await a.wait(() => a.last('nostart').why === 'state');
+    // go before his own track is built: dropped (and within START_MIN_MS anyway); after both: the session
+    await sleep(START_MIN_MS + 50);
+    a.send({ t: 'go' });
+    await sleep(150);
+    assert.strictEqual(srv.info().room.st, 'loading', 'go before the host loaded');
+    a.loaded(true, { len: LEN });
+    await sleep(100);
+    b.send({ t: 'go' });
+    await sleep(100);
+    assert.strictEqual(srv.info().room.st, 'loading', 'a guest\'s go');
+    a.send({ t: 'go' });
+    await c.wait(() => c.room().st === 'session');
+    assert.deepStrictEqual([srv.info().room.len, srv.info().gp.phase], [LEN, 'free'], 'mode free: no Grand Prix');
+    // start in a session: state
+    assert.deepStrictEqual(await why({ len: LEN, force: true }), { t: 'nostart', why: 'state' });
+    [a, b, c].forEach(x => x.ws.close());
+  });
+
+  T('lobby: the loading barrier (all loaded / the deadline / the host\'s go / nobody loaded); failed loaders out of the session and back in the lobby; the host\'s length', async t => {
+    const R = await lobbyRoom(t, 3);
+    const [a, b, c] = R.cs, clk = R.clk;
+    const order = x => x.msgs.filter(m => m.t === 'room' || m.t === 'gp').map(m => m.t === 'room' ? 'room ' + m.st : 'gp ' + m.s.phase);
+    // 1. a Grand Prix, everybody loads: qualifying starts only at the barrier
+    a.send({ t: 'set', mode: 'gp', q: 1, r: 1, wear: 2, year: 2024 });
+    await R.sync(x => x.set.mode === 'gp' && x.set.year === 2024);
+    a.send({ t: 'start', len: 5000, force: true });
+    await R.sync(x => x.st === 'loading');
+    const sid0 = R.srv.info().gp.sid;
+    a.loaded(true, { len: 5800 }); b.loaded();
+    await R.sync(x => x.load.done.length === 2);
+    assert.deepStrictEqual([R.srv.info().room.load.wait, R.srv.info().room.load.done, R.srv.info().gp.phase, R.srv.info().gp.sid],
+      [[c.id], [a.id, b.id], 'free', sid0], 'the barrier holds: no qualifying yet');
+    c.loaded();
+    let g = await R.settle(s => s.phase === 'quali');
+    assert.deepStrictEqual([g.sid, g.q, g.r, g.len, g.year, g.wear], [sid0 + 1, 1, 1, 5000, 2024, 2], 'the room\'s settings; 5800 is 16 % off 5000: the start\'s length');
+    assert.deepStrictEqual([R.srv.info().room.st, R.srv.info().room.load, R.srv.info().room.len], ['session', null, 5000]);
+    const seen = order(c).slice(-2);
+    assert.deepStrictEqual(seen, ['room session', 'gp quali'], 'the room message before the gp it causes');
+    // the host's length when within 15 % of the start's
+    await R.lobby();
+    a.send({ t: 'start', len: 5000, force: true });
+    await R.sync(x => x.st === 'loading');
+    a.loaded(true, { len: 5700 }); b.loaded(true, { len: 1000 }); c.loaded(true, { len: 9000 });
+    g = await R.settle(s => s.phase === 'quali');
+    assert.deepStrictEqual([g.len, R.srv.info().room.len], [5700, 5700], 'the host\'s built length (a guest\'s is not used)');
+    // 2. the deadline: c never loads; at load.until the session starts with him in it (he joins it when built)
+    await R.lobby();
+    a.send({ t: 'set', mode: 'free' });
+    await R.sync(x => x.set.mode === 'free');
+    a.send({ t: 'start', len: LEN, force: true });
+    let r = await R.sync(x => x.st === 'loading');
+    a.loaded(); b.loaded();
+    await R.sync(x => x.load.wait.length === 1);
+    clk.to(r.load.until - 1);
+    await sleep(250);
+    assert.strictEqual(R.srv.info().room.st, 'loading', '1 ms before the deadline');
+    clk.to(r.load.until);
+    r = await R.sync(x => x.st === 'session');
+    assert.deepStrictEqual([r.rs, R.srv.info().gp.players.map(p => p.id)], [3, [a.id, b.id, c.id]], 'the late one is still in the session');
+    c.loaded();                                                  // ...and reports later: no barrier any more
+    await sleep(100);
+    assert.strictEqual(R.srv.info().room.st, 'session');
+    // 3. the host's go, once his own track is built; failed loaders are taken out of the session
+    await R.lobby();
+    a.send({ t: 'set', mode: 'gp', q: 2 });
+    await R.sync(x => x.set.mode === 'gp' && x.set.q === 2);
+    a.send({ t: 'start', len: LEN, force: true });
+    await R.sync(x => x.st === 'loading');
+    b.loaded(false, { why: 'no-track' });
+    await R.sync(x => x.load.fail.length === 1);
+    assert.deepStrictEqual(R.srv.info().room.load.fail, [b.id]);
+    a.loaded();
+    await R.sync(x => x.load.done.length === 1);
+    a.send({ t: 'go' });
+    g = await R.settle(s => s.phase === 'quali');
+    assert.deepStrictEqual(g.players.map(p => p.id), [a.id, c.id], 'b (no track) is out of the session; c (still loading) is in');
+    c.loaded(false, { why: 'error' });                           // c joins the session late and cannot build it: out too
+    g = await R.settle(s => s.players.length === 1);
+    assert.deepStrictEqual(g.players.map(p => p.id), [a.id]);
+    // back to the lobby: both are in the session again
+    a.send({ t: 'back' });
+    g = await R.settle(s => s.phase === 'free' && s.players.length === 3);
+    assert.deepStrictEqual(g.players.map(p => p.id).sort(), [a.id, b.id, c.id].sort());
+    // 4. nobody loaded: back to the lobby, nostart 'load' to the host
+    await R.sync(x => x.st === 'lobby');
+    a.send({ t: 'start', len: LEN, force: true });
+    r = await R.sync(x => x.st === 'loading');
+    a.loaded(false); b.loaded(false);
+    await R.sync(x => x.load.fail.length === 2);
+    clk.to(r.load.until);
+    await R.sync(x => x.st === 'lobby');
+    await a.wait(() => a.last('nostart') && a.last('nostart').why === 'load', 1000, 'nostart load');
+    assert.deepStrictEqual([b.all('nostart').length, c.all('nostart').length, R.srv.info().gp.phase], [0, 0, 'free']);
+    // 5. the only one who loaded leaves: nobody (present) loaded
+    const ns = a.all('nostart').length;
+    a.send({ t: 'start', len: LEN, force: true });
+    await R.sync(x => x.st === 'loading');
+    b.loaded();
+    await R.sync(x => x.load.done.length === 1);
+    b.ws.close();
+    await R.sync(x => x.load.wait.length === 2 && x.load.done.length === 0);
+    // ...and everybody else leaving the wait list completes the barrier: a fails, c leaves
+    a.loaded(false);
+    c.ws.close();
+    await R.sync(x => x.st === 'lobby');
+    await a.wait(() => a.all('nostart').length === ns + 1, 1000, 'nostart load again');
+    assert.strictEqual(a.last('nostart').why, 'load');
+    a.ws.close();
+  });
+
+  T('lobby: loaded spoofing (another rs, twice, before a start, len from a guest, in the lobby) and car states / laps / impacts outside the session', async t => {
+    const R = await lobbyRoom(t, 3);
+    const [a, b, c] = R.cs;
+    const room0 = JSON.stringify(R.srv.info().room);
+    // before any start, in the lobby: nothing
+    for (const c1 of [a, b]) {
+      c1.send({ t: 'loaded', rs: 0, ok: true }); c1.send({ t: 'loaded', rs: 1, ok: true, len: 5000 });
+      c1.send(state(1, 1, 0)); c1.send(state(1, 1, 1));
+      c1.send({ t: 'lap', k: 0, last: 80, best: 80 }); c1.send({ t: 'gl', k: 0, sid: 0, time: 80 }); c1.send({ t: 'hit', k: 0, to: c.id, i: [1, 0] });
+      c1.send({ t: 'bs', k: 0, c: 1, b: [] }); c1.send({ t: 'gp', a: 'skip' }); c1.send({ t: 'gp', a: 'end' }); c1.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN });
+    }
+    await sleep(200);
+    assert.strictEqual(JSON.stringify(R.srv.info().room), room0);
+    assert.deepStrictEqual([c.all('snap').length, c.all('hit').length, a.all('glno').length + b.all('glno').length, R.srv.info().gp.sid],
+      [0, 0, 0, 0], 'nothing relayed, nothing answered, no session started (gp start is not a thing in protocol 2)');
+    assert(R.srv.info().players.every(p => p.best === null));
+    a.send({ t: 'start', len: 5000, force: true });
+    await R.sync(x => x.st === 'loading');
+    // while loading: no states, no laps
+    b.send(state(1, 1, 1)); b.send({ t: 'lap', k: 1, last: 80, best: 80 });
+    // spoofing: another rs, garbage rs, the host's len from a guest, twice
+    b.send({ t: 'loaded', rs: 0, ok: true }); b.send({ t: 'loaded', rs: 2, ok: true }); b.send({ t: 'loaded', rs: '1', ok: true });
+    b.send({ t: 'loaded', ok: true });
+    await sleep(150);
+    assert.deepStrictEqual(R.srv.info().room.load.wait, [a.id, b.id, c.id], 'another rs / none: ignored');
+    b.send({ t: 'loaded', rs: 1, ok: true, len: 9000, why: '<script>' });
+    b.send({ t: 'loaded', rs: 1, ok: false, why: 'no-track' });                     // the second one: ignored
+    c.send({ t: 'loaded', rs: 1, ok: 'yes' });                                       // not true: a failure
+    await R.sync(x => x.load.done.length === 1 && x.load.fail.length === 1);
+    assert.deepStrictEqual([R.srv.info().room.load.done, R.srv.info().room.load.fail], [[b.id], [c.id]]);
+    assert.deepStrictEqual([c.all('snap').length, R.srv.info().players.every(p => p.best === null)], [0, true], 'nothing taken while loading');
+    // a car change while loading: kept (parc fermé); name and colour change
+    b.send({ t: 'profile', name: 'Bee', car: '2024-ferrari' });
+    await a.wait(() => a.roster().find(p => p.id === b.id).name === 'Bee');
+    assert.strictEqual(a.roster().find(p => p.id === b.id).car, '');
+    a.loaded(true, { len: 5100 });
+    await R.sync(x => x.st === 'session');
+    assert.strictEqual(R.srv.info().room.len, 5100, 'the host\'s length, not the guest\'s 9000');
+    // a loaded report in the session, again / of another cycle: ignored
+    a.send({ t: 'loaded', rs: 1, ok: false }); b.send({ t: 'loaded', rs: 1, ok: false });
+    await sleep(150);
+    assert.deepStrictEqual(R.srv.info().gp.players.map(p => p.id), [a.id, b.id], 'only c (failed) is out');
+    // free practice: the car can change now
+    b.send({ t: 'profile', car: '2024-ferrari' });
+    await a.wait(() => a.roster().find(p => p.id === b.id).car === '2024-ferrari');
+    // states of the cycle are relayed now (b sends with the right k)
+    b.drive(3, 0);
+    await c.wait(() => c.all('snap').length > 0, 1000, 'states in the session');
+    R.cs.forEach(x => x.ws.close());
+  });
+
+  lane = lanes.lobby2;
+
+  // LOBBY-1 (lobby review): the server drops the host's go / back (and a gp end acting as back) within START_MIN_MS of
+  // the last one it took, without an answer, so js/main.js holds a click that early until START_MIN_MS (+ 30 ms) have
+  // passed since it saw the room's st change. That is always enough: the server took the action before it sent that change.
+  T('LOBBY-1: the host\'s go / back / gp end sent START_MIN_MS + 30 ms after he saw the room change are taken; sooner: dropped, no answer', async t => {
+    const R = await lobbyRoom(t, 2, { startMinMs: START_MIN_MS });
+    const [h, g] = R.cs;
+    // the moment the host has the room in state st (polled every 5 ms: never before it came)
+    const seen = async st => { await h.wait(() => h.room().st === st, 3000, 'the host sees ' + st); return Date.now(); };
+    const at = async (t0, ms) => { const w = t0 + ms - Date.now(); if (w > 0) await sleep(w); };
+    const AFTER = START_MIN_MS + 30;
+    h.send({ t: 'start', len: LEN, force: true });
+    const tL = await seen('loading');
+    h.loaded(true, { len: LEN });
+    await h.wait(() => h.room().load && h.room().load.done.includes(h.id), 1000, 'the host loaded');
+    h.send({ t: 'go' });                                   // 不等了，開始 at once
+    await sleep(150);
+    assert.deepStrictEqual([R.srv.info().room.st, h.all('nostart').length], ['loading', 0], 'go within the second: dropped without an answer');
+    await at(tL, AFTER);
+    h.send({ t: 'go' });
+    const tS = await seen('session');
+    h.send({ t: 'back' });                                 // the room menu's 回到大廳 at once
+    await sleep(150);
+    assert.deepStrictEqual([R.srv.info().room.st, h.all('nostart').length], ['session', 0], 'back within the second: dropped without an answer');
+    await at(tS, AFTER);
+    h.send({ t: 'back' });
+    const tB = await seen('lobby');
+    // a Grand Prix whose barrier ends by itself (everybody loaded); 結束大獎賽 in qualifying = back to the lobby
+    h.send({ t: 'set', mode: 'gp', q: 1, r: 1 });
+    await h.wait(() => h.room().set.mode === 'gp');
+    await at(tB, AFTER);
+    h.send({ t: 'start', len: LEN, force: true });
+    await seen('loading');
+    h.loaded(true, { len: LEN }); g.loaded(true);
+    const tQ = await seen('session');
+    await h.wait(() => h.gp() && h.gp().phase === 'quali', 1000, 'qualifying');
+    await at(tQ, AFTER);
+    h.send({ t: 'gp', a: 'end' });
+    await seen('lobby');
+    assert.strictEqual(h.all('nostart').length, 0);
+    R.cs.forEach(x => x.ws.close());
+  });
+
+  T('lobby: joining in every state (lobby: a bot\'s seat; loading: one more to wait for, full; free session: a bot\'s seat; Grand Prix: full / spectator)', async t => {
+    const R = await lobbyRoom(t, 2);
+    const [a, b] = R.cs;
+    // lobby, full with bots: a human takes the newest bot's seat
+    a.send({ t: 'bots', n: 14 });
+    await R.sync(x => x.set.bots === 14);
+    await b.wait(() => b.roster().length === 16);
+    const c = await client(R.srv.port, { name: 'C' });
+    R.cs.push(c);
+    assert(c.id > 0, 'in');
+    assert.deepStrictEqual([c.last('welcome').room.st, c.last('welcome').room.set.track], ['lobby', 'monza']);
+    await b.wait(() => b.roster().filter(p => p.bot).length === 13);
+    assert.strictEqual(R.srv.info().room.set.bots, 14, 'the wish stays');
+    // loading: the newcomer is appended to the wait list, the deadline stays; a full room is full
+    a.send({ t: 'start', len: LEN, force: true });
+    const r0 = await R.sync(x => x.st === 'loading');
+    R.clk.add(5000);
+    b.ws.close();
+    await R.sync(x => x.load.wait.length === 2);
+    const d = await client(R.srv.port, { name: 'D' });
+    R.cs.push(d);
+    assert.deepStrictEqual([d.last('welcome').room.st, d.last('welcome').room.load.wait, d.last('welcome').room.load.until],
+      ['loading', [a.id, c.id, d.id], r0.load.until], 'D waited for, the deadline unchanged');
+    await R.sync(x => x.load.wait.length === 3);
+    const e = await client(R.srv.port, { name: 'E' });
+    await e.wait(() => e.closed);
+    assert.deepStrictEqual([e.id, e.last('error').code], [0, 'full'], 'no bot makes room while loading');
+    // d loads, a and c too: the session (free practice); a newcomer of a free session takes a bot's seat
+    a.loaded(); c.loaded(); d.loaded();
+    await R.sync(x => x.st === 'session');
+    const f = await client(R.srv.port, { name: 'F' });
+    R.cs.push(f);
+    assert.deepStrictEqual([f.id > 0, f.last('welcome').room.st, f.last('welcome').room.rs], [true, 'session', 1]);
+    await a.wait(() => a.roster().filter(p => p.bot).length === 12);
+    // a Grand Prix: full; a seat freed: a spectator during the grid
+    await R.start(1, 1);
+    const g1 = await client(R.srv.port, { name: 'G1' });
+    await g1.wait(() => g1.closed);
+    assert.strictEqual(g1.last('error').code, 'full');
+    f.ws.close();
+    await R.sync(x => true);
+    R.cs = R.cs.filter(x => !x.closed);
+    await R.settle(s => s.players.length === 15);
+    R.clk.add(3000);
+    a.send({ t: 'gp', a: 'skip' });
+    await R.settle(s => s.phase === 'grid');
+    const s1 = await client(R.srv.port, { name: 'S1' });
+    R.cs.push(s1);
+    const g = await R.settle(s => s.players.length === 16);
+    assert.deepStrictEqual([s1.last('welcome').room.st, g.players.find(p => p.id === s1.id).spec], ['session', true]);
+    // back to the lobby: everybody (the spectator too) is there
+    await R.lobby();
+    assert.deepStrictEqual([s1.room().st, R.srv.info().gp.players.every(p => !p.spec)], ['lobby', true]);
+    R.cs.forEach(x => x.ws.close());
+  });
+
+  T('lobby: back / gp end -> lobby (session ended, cars and ready cleared; room before gp); gp end in the race -> results; a Grand Prix nobody is left in -> lobby', async t => {
+    const R = await room(t, 3);
+    const [a, b, c] = R.cs;
+    const tail = (x, n) => x.msgs.filter(m => m.t === 'room' || m.t === 'gp').slice(-n).map(m => m.t === 'room' ? 'room ' + m.st : 'gp ' + m.s.phase);
+    // free practice: cars on track, lap times; back -> lobby: everything cleared
+    a.drive(0, 0); b.drive(5, 0);
+    a.send({ t: 'lap', k: a.rs(), last: 80, best: 80 });
+    await c.wait(() => c.roster()[0].best === 80);
+    await R.lobby();
+    assert.deepStrictEqual(R.srv.info().players.map(p => p.best), [null, null, null]);
+    await c.wait(() => c.roster()[0].best === null);
+    // a Grand Prix to the race; a guest's back / gp end: nothing
+    await R.start(1, 2);
+    await R.toRace();
+    for (const m of [{ t: 'back' }, { t: 'gp', a: 'end' }, { t: 'gp', a: 'skip' }]) { b.send(m); c.send(m); }
+    await sleep(150);
+    assert.deepStrictEqual([R.srv.info().room.st, R.srv.info().gp.phase], ['session', 'race']);
+    // gp end in the race: the results (the room stays in the session)
+    a.send({ t: 'gp', a: 'end' });
+    await R.settle(s => s.phase === 'results');
+    assert.strictEqual(R.srv.info().room.st, 'session');
+    // gp end in the results: the lobby, the room message first
+    a.send({ t: 'gp', a: 'end' });
+    await R.settle(s => s.phase === 'free');
+    await R.sync(x => x.st === 'lobby');
+    for (const x of R.cs) assert.deepStrictEqual(tail(x, 2), ['room lobby', 'gp free'], 'room, then gp');
+    // gp end in qualifying and on the grid: the lobby too
+    for (const phase of ['quali', 'grid']) {
+      await R.start(1, 1);
+      if (phase === 'grid') await R.toGrid();
+      a.send({ t: 'gp', a: 'end' });
+      await R.sync(x => x.st === 'lobby');
+      await R.settle(s => s.phase === 'free');
+      assert.deepStrictEqual(tail(c, 2), ['room lobby', 'gp free'], phase);
+    }
+    // gp start / again in a session: start ignored; again only from the results
+    await R.start(1, 1);
+    const sid = R.srv.info().gp.sid;
+    a.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN }); a.send({ t: 'gp', a: 'again' });
+    await sleep(150);
+    assert.deepStrictEqual([R.srv.info().gp.sid, R.srv.info().gp.phase], [sid, 'quali']);
+    // everybody classified leaves the grid, only a spectator stays: the room goes back to the lobby by itself
+    await R.toGrid();
+    const s = await client(R.srv.port, { name: 'spec' });
+    R.cs.push(s);
+    await R.settle(x => x.players.length === 4);
+    b.ws.close(); c.ws.close();
+    await R.settle(x => x.players.length === 2);
+    a.ws.close();
+    await s.wait(() => s.room().st === 'lobby' && s.host() === s.id, 2000, 'lobby, s hosts');
+    assert.deepStrictEqual([s.host(), s.gp().phase, tail(s, 2)], [s.id, 'free', ['room lobby', 'gp free']]);
+    s.ws.close();
+  });
+
+  T('lobby: dedicated server: host migration in the lobby and while loading (settings survive, the new host can go); an empty room goes back to the lobby with its settings', async t => {
+    const R = await lobbyRoom(t, 3);
+    const [a, b, c] = R.cs;
+    a.send({ t: 'set', year: 2020, mode: 'gp', q: 2, r: 3, wear: 4 });
+    a.send({ t: 'bots', n: 2, skill: 'legend' });
+    await R.sync(x => x.set.bots === 2 && x.set.year === 2020);
+    const set0 = JSON.stringify(R.srv.info().room.set);
+    // in the lobby: b is host, the settings stay, the old host's bots went with him
+    a.ws.close();
+    await R.sync(x => true);
+    await c.wait(() => c.host() === b.id && c.roster().length === 2);
+    assert.strictEqual(JSON.stringify(R.srv.info().room.set), set0);
+    // b starts; while loading he leaves: c is host, the barrier runs on, c can go once he has loaded
+    b.send({ t: 'start', len: LEN, force: true });
+    await R.sync(x => x.st === 'loading');
+    b.ws.close();
+    await c.wait(() => c.host() === c.id);
+    assert.deepStrictEqual(R.srv.info().room.load.wait, [c.id]);
+    c.send({ t: 'go' });
+    await sleep(100);
+    assert.strictEqual(R.srv.info().room.st, 'loading', 'not before his own track is built');
+    c.loaded();
+    const g = await settle(R.srv, [c], s => s.phase === 'quali');
+    assert.deepStrictEqual([g.q, g.r, g.year, g.wear, g.players.map(p => p.id)], [2, 3, 2020, 4, [c.id]]);
+    // the room empties: the lobby, the settings kept, the session over
+    c.ws.close();
+    await until(() => R.srv.info().players.length === 0 && R.srv.info().room.st === 'lobby', 2000, 'empty -> lobby');
+    assert.deepStrictEqual([R.srv.info().gp.phase, JSON.stringify(R.srv.info().room.set), R.srv.info().room.ready, R.srv.info().room.load],
+      ['free', set0, [], null]);
+    const d = await client(R.srv.port, { name: 'D' });
+    assert.deepStrictEqual([d.last('welcome').host, d.last('welcome').room.st, JSON.stringify(d.last('welcome').room.set)], [d.id, 'lobby', set0]);
+    d.ws.close();
+  });
+
+  T('lobby: the in-game host leaving in the lobby / while loading: no host, the barrier still completes for the guests', async t => {
+    const R = await lobbyRoom(t, 3, { hostToken: 'tok' });
+    const [h, b, c] = R.cs;
+    h.send({ t: 'start', len: LEN, force: true });
+    await R.sync(x => x.st === 'loading');
+    b.loaded();
+    h.ws.close();
+    await b.wait(() => b.host() === 0);
+    assert.deepStrictEqual(R.srv.info().room.load.wait, [c.id]);
+    c.loaded();
+    await settle(R.srv, [b, c], s => s.phase === 'free');
+    await until(() => R.srv.info().room.st === 'session', 1000, 'session');
+    b.send({ t: 'back' }); c.send({ t: 'set', track: 'spa' });
+    await sleep(120);
+    assert.deepStrictEqual([R.srv.info().room.st, R.srv.info().room.set.track], ['session', 'monza'], 'no host: nobody changes the room');
+    b.ws.close(); c.ws.close();
+  });
+
+  T('lobby: the in-game host leaving as the last one loading starts nothing (the room is closing: no session a moment before the guests are disconnected)', async t => {
+    const R = await lobbyRoom(t, 3, { hostToken: 'tok' });
+    const [h, b, c] = R.cs;
+    h.send({ t: 'start', len: LEN, force: true });
+    await R.sync(x => x.st === 'loading');
+    b.loaded(); c.loaded();
+    await R.sync(x => x.st === 'loading' && x.load.done.length === 2 && x.load.wait.length === 1 && x.load.wait[0] === h.id);
+    const nRoom = b.all('room').length;
+    h.ws.close();
+    await b.wait(() => b.host() === 0);
+    await sleep(150);
+    const r = R.srv.info().room;
+    assert.deepStrictEqual([r.st, r.load.wait, r.load.done.slice().sort()], ['loading', [], [b.id, c.id].sort()], 'the barrier did not end with the host\'s leaving');
+    assert(b.all('room').slice(nRoom).every(m => m.st === 'loading'), 'no session / lobby room message');
+    assert.deepStrictEqual([b.gp().phase, R.srv.info().gp.phase], ['free', 'free']);
+    b.ws.close(); c.ws.close();
+  });
+
+  T('lobby: the bots field only in the lobby; room.set.bots / skill = the host\'s wish (clamped 0..15), in the room message', async t => {
+    const R = await lobbyRoom(t, 2);
+    const [a, b] = R.cs;
+    a.send({ t: 'bots', n: 99, skill: 'amateur' });
+    await R.sync(x => x.set.bots === 15 && x.set.skill === 'amateur');
+    await b.wait(() => b.roster().filter(p => p.bot).length === 14, 2000, '14 seats');
+    a.send({ t: 'bots', n: 3.9 });
+    await R.sync(x => x.set.bots === 3);
+    b.send({ t: 'bots', n: 0, skill: 'legend' });
+    a.send({ t: 'bots', n: -1 }); a.send({ t: 'bots', n: '2' });
+    await sleep(150);
+    assert.deepStrictEqual([R.srv.info().room.set.bots, R.srv.info().room.set.skill, R.srv.info().bots.n], [3, 'amateur', 3]);
+    await R.go();
+    a.send({ t: 'bots', n: 0 });
+    await sleep(150);
+    assert.deepStrictEqual([R.srv.info().room.set.bots, R.srv.info().bots.n], [3, 3], 'not in a session (free practice included)');
+    R.cs.forEach(x => x.ws.close());
   });
 
   /* ---------- Grand Prix over the wire (manual clock) ---------- */
@@ -686,28 +1372,33 @@ function freshNet() {
     a.ws.close();
   });
 
-  T('Grand Prix: only the host controls it, and only once the room has a track', async t => {
+  T('Grand Prix: only the host controls it, only once the room has a track; it starts at the barrier; settings validated, not clamped', async t => {
     const clk = manualClock();
-    const srv = await t.start({ now: clk, random: () => 0 });
+    const srv = await t.start({ now: clk, random: () => 0, startMinMs: 0 });
     const a = await client(srv.port), b = await client(srv.port);
-    const cfg = { q: 1, r: 1, len: LEN };
-    a.send(Object.assign({ t: 'gp', a: 'start' }, cfg));         // host, but no track yet
+    a.send({ t: 'set', mode: 'gp', q: 1, r: 1 });
+    a.send({ t: 'start', len: LEN, force: true });              // host, but no track yet
+    await a.wait(() => a.last('nostart'));
+    assert.deepStrictEqual([a.last('nostart').why, srv.info().gp.phase, srv.info().room.st], ['track', 'free', 'lobby'], 'start is refused without a track');
+    a.send({ t: 'set', track: 'monza' });
+    await b.wait(() => b.room().set.track === 'monza' && b.room().set.mode === 'gp');
+    for (const act of ['start', 'skip', 'end', 'again']) b.send({ t: 'gp', a: act, q: 1, r: 1, len: LEN });
+    b.send({ t: 'start', len: LEN, force: true });
     await sleep(150);
-    assert.strictEqual(srv.info().gp.phase, 'free', 'start is refused without a track');
-    a.send({ t: 'track', id: 'monza' });
-    await b.wait(() => b.last('track'));
-    for (const act of ['start', 'skip', 'end', 'again']) b.send(Object.assign({ t: 'gp', a: act }, cfg));
-    await sleep(150);
-    assert.deepStrictEqual([srv.info().gp.phase, srv.info().gp.sid], ['free', 0], 'a guest cannot start');
-    a.send(Object.assign({ t: 'gp', a: 'start' }, cfg));
+    assert.deepStrictEqual([srv.info().gp.phase, srv.info().gp.sid, srv.info().room.st], ['free', 0, 'lobby'], 'a guest cannot start');
+    a.send({ t: 'start', len: LEN, force: true });
+    await b.wait(() => b.room().st === 'loading');
+    a.loaded(); b.loaded();
     let g = await settle(srv, [a, b], s => s.phase === 'quali');
     assert.deepStrictEqual([g.sid, g.q, g.r, g.len], [1, 1, 1, LEN]);
-    for (const act of ['skip', 'end', 'again', 'start']) b.send(Object.assign({ t: 'gp', a: act }, cfg));
+    for (const act of ['skip', 'end', 'again', 'start']) b.send({ t: 'gp', a: act, q: 1, r: 1, len: LEN });
+    b.send({ t: 'back' });
     await sleep(150);
-    assert.deepStrictEqual([srv.info().gp.phase, srv.info().gp.sid], ['quali', 1], 'a guest cannot skip / end / restart');
+    assert.deepStrictEqual([srv.info().gp.phase, srv.info().gp.sid, srv.info().room.st], ['quali', 1, 'session'], 'a guest cannot skip / end / restart / go back');
     a.send({ t: 'gp', a: 'again' });                             // only from the results
+    a.send({ t: 'gp', a: 'start', q: 5, r: 5, len: LEN });      // protocol 1's start: ignored
     await sleep(120);
-    assert.strictEqual(srv.info().gp.phase, 'quali');
+    assert.deepStrictEqual([srv.info().gp.phase, srv.info().gp.sid], ['quali', 1]);
     a.send({ t: 'gp', a: 'skip' });
     g = await settle(srv, [a, b], s => s.phase === 'grid');
     assert.deepStrictEqual(g.grid, [a.id, b.id], 'no times: join order');
@@ -728,16 +1419,21 @@ function freshNet() {
     assert.strictEqual(srv.info().gp.phase, 'results');
     a.send({ t: 'gp', a: 'again' });
     g = await settle(srv, [a, b], s => s.phase === 'quali');
-    assert.strictEqual(g.sid, 2);
-    a.send({ t: 'gp', a: 'end' });
+    assert.deepStrictEqual([g.sid, srv.info().room.rs], [2, 1], 'again: the same load cycle');
+    a.send({ t: 'gp', a: 'end' });                               // qualifying: back to the lobby
     await settle(srv, [a, b], s => s.phase === 'free');
-    // lap counts are clamped to 1..20 / 1..99, missing ones default to 3 / 5; a start in mid-session restarts it
-    a.send({ t: 'gp', a: 'start', q: 1e9, r: -5, len: LEN });
-    g = await settle(srv, [a, b], s => s.phase === 'quali');
-    assert.deepStrictEqual([g.sid, g.q, g.r], [3, 20, 1]);
-    a.send({ t: 'gp', a: 'start', q: 2.4, len: 99999.5 });
-    g = await settle(srv, [a, b], s => s.sid === 4);
-    assert.deepStrictEqual([g.phase, g.q, g.r, g.len], ['quali', 2, 5, 99999.5]);
+    await b.wait(() => b.room().st === 'lobby');
+    // lap counts are never clamped: out of range is ignored (the room keeps 1 / 1); a whole value after rounding
+    a.send({ t: 'set', q: 1e9, r: -5 });
+    await sleep(120);
+    assert.deepStrictEqual([srv.info().room.set.q, srv.info().room.set.r], [1, 1]);
+    a.send({ t: 'set', q: 2.4, r: 20 });
+    await b.wait(() => b.room().set.q === 2 && b.room().set.r === 20);
+    a.send({ t: 'start', len: 99999.5, force: true });
+    await b.wait(() => b.room().st === 'loading');
+    a.loaded(); b.loaded();
+    g = await settle(srv, [a, b], s => s.sid === 3);
+    assert.deepStrictEqual([g.phase, g.q, g.r, g.len], ['quali', 2, 20, 99999.5]);
     a.ws.close(); b.ws.close();
   });
 
@@ -924,11 +1620,13 @@ function freshNet() {
     // the host and the spectator leave too: the room is empty and the session is over
     a.ws.close(); d.ws.close();
     await until(() => R.srv.info().players.length === 0 && R.srv.info().gp.phase === 'free', 2000, 'empty room -> free');
-    assert.strictEqual(R.srv.info().gp.players.length, 0);
-    // the next visitor finds a normal room and can run a Grand Prix
+    assert.deepStrictEqual([R.srv.info().gp.players.length, R.srv.info().room.st], [0, 'lobby']);
+    // the next visitor finds a normal room (in the lobby, its settings kept) and can run a Grand Prix
     const e = await client(R.srv.port, { name: 'Next' });
-    assert.strictEqual(e.last('welcome').host, e.id);
-    e.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN });
+    assert.deepStrictEqual([e.last('welcome').host, e.room().st, e.room().set.mode], [e.id, 'lobby', 'gp']);
+    e.send({ t: 'start', len: LEN });
+    await e.wait(() => e.room().st === 'loading');
+    e.loaded();
     await e.wait(() => e.gp() && e.gp().phase === 'quali');
     assert.deepStrictEqual([e.gp().sid, e.gp().players.map(p => p.id)], [2, [e.id]]);
     e.ws.close();
@@ -961,7 +1659,7 @@ function freshNet() {
   });
 
   lane = lanes.gp2;
-  T('Grand Prix: a track change ends the session and everybody is told before they load the track', async t => {
+  T('Grand Prix: the host\'s back ends the session and everybody is told (room lobby, then gp free); the old cycle\'s laps are ignored', async t => {
     const R = await room(t, 3);
     const [a, b, c] = R.cs;
     await R.start(1, 3);
@@ -969,39 +1667,52 @@ function freshNet() {
     R.clk.add(3000);
     a.lap(2.5);
     await R.settle(s => s.players[0].rLaps === 1);
-    b.send({ t: 'track', id: 'spa' });                           // not the host
+    const rs = a.rs();
+    b.send({ t: 'back' }); b.send({ t: 'set', track: 'spa' });  // not the host
     await sleep(120);
-    assert.strictEqual(srv_phase(R), 'race');
-    a.send({ t: 'track', id: 'spa' });
+    assert.deepStrictEqual([srv_phase(R), R.srv.info().room.st], ['race', 'session']);
+    a.send({ t: 'back' });
     const g = await R.settle(s => s.phase === 'free');
     assert.deepStrictEqual([g.sid, g.grid, g.winnerAt, g.players.map(p => p.spec)], [1, [], 0, [false, false, false]]);
     for (const x of R.cs) {
-      await x.wait(() => x.last('track').id === 'spa');
-      assert.strictEqual(x.last('track').seq, 2);
-      const iTrack = x.msgs.lastIndexOf(x.last('track'));
+      await x.wait(() => x.room().st === 'lobby');
+      const iRoom = x.msgs.findIndex(m => m.t === 'room' && m.st === 'lobby' && m.rs === rs);
       const iFree = x.msgs.findIndex(m => m.t === 'gp' && m.s.phase === 'free' && m.s.sid === 1);
-      assert(iFree >= 0 && iFree < iTrack, 'gp(free) comes before the track message');
+      assert(iRoom >= 0 && iRoom < iFree, 'room(lobby) comes before gp(free)');
     }
-    // laps of the old track / the ended session are ignored without an answer
-    b.send({ t: 'gl', k: 1, sid: 1, time: 3 });
+    // laps of the ended session are ignored without an answer (in the lobby nothing is a lap)
+    b.send({ t: 'gl', k: rs, sid: 1, time: 3 });
+    b.lap(3);
     await sleep(120);
     assert.strictEqual(b.all('glno').length, 0);
-    b.lap(3);                                                    // right track, right sid, but there is no session
+    // a new free-practice session: a lap there is answered (no Grand Prix), one of the old cycle is not
+    await R.free();
+    b.send({ t: 'gl', k: rs, sid: 1, time: 3 });
+    await sleep(120);
+    assert.strictEqual(b.all('glno').length, 0);
+    b.lap(3);
     await b.wait(() => b.last('glno'));
-    assert.strictEqual(b.last('glno').why, 'no-session');
-    // picking a track in every other phase ends the session too (never left hanging in the results)
+    assert.deepStrictEqual([b.last('glno').why, b.rs(), rs + 1], ['no-session', rs + 1, rs + 1]);
+    // back in every other phase ends the session too (never left hanging in the results)
     for (const phase of ['quali', 'grid', 'results']) {
-      a.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN });
-      await R.settle(s => s.phase === 'quali');
+      await R.start(1, 1);
       if (phase !== 'quali') await R.toGrid();
       if (phase === 'results') {
         R.clk.to(srv_gp(R).goAt); await R.settle(s => s.phase === 'race');
         a.send({ t: 'gp', a: 'end' }); await R.settle(s => s.phase === 'results');
       }
-      a.send({ t: 'track', id: 'monza' });
+      a.send({ t: 'back' });
       await R.settle(s => s.phase === 'free');
+      await R.sync(x => x.st === 'lobby');
     }
     assert.strictEqual(srv_gp(R).sid, 4);
+    // back while loading: nobody is on a track yet; the next start is a new cycle
+    a.send({ t: 'start', len: LEN, force: true });
+    await R.sync(x => x.st === 'loading');
+    a.loaded();
+    a.send({ t: 'back' });
+    const r = await R.sync(x => x.st === 'lobby');
+    assert.deepStrictEqual([r.load, srv_gp(R).phase, srv_gp(R).sid], [null, 'free', 4]);
     R.cs.forEach(x => x.ws.close());
   });
 
@@ -1024,10 +1735,10 @@ function freshNet() {
     assert.strictEqual(await why(b, MIN - 0.01), 'too-fast', 'faster than a 330 km/h average');
     assert.strictEqual(await why(b, 5.2), 'inconsistent', 'a 5.2 s lap 3 s into the session');
     for (const bad of ['2.5', null, {}, [2.5], true, -2.5, 0, 3601]) assert.strictEqual(await why(b, bad), 'bad', JSON.stringify(bad));
-    b.send('{"t":"gl","k":1,"sid":1,"time":1e999}');
+    b.send('{"t":"gl","k":' + b.rs() + ',"sid":1,"time":1e999}');
     await b.wait(() => b.all('glno').length === 12);
     assert.strictEqual(b.last('glno').why, 'bad');
-    b.send({ t: 'gl', k: 1, sid: 1 });                           // no time at all
+    b.send({ t: 'gl', k: b.rs(), sid: 1 });                      // no time at all
     await b.wait(() => b.all('glno').length === 13);
     assert.strictEqual(b.last('glno').why, 'bad');
     assert.strictEqual(srv_gp(R).players[1].qLaps, 0, 'none of that counted');
@@ -1038,9 +1749,9 @@ function freshNet() {
     b.lap(2.6);
     await R.settle(s => s.players[1].qDone);
     assert.strictEqual(await why(b, 2.3), 'done', 'qualifying laps are used up');
-    // stale session id / track sequence: not answered at all
+    // stale session id / load cycle: not answered at all
     b.lap(2.5, 0); b.lap(2.5, 2); b.lap(2.5, '1'); b.lap(2.5, null); b.lap(2.5, 1.5);
-    b.send({ t: 'gl', k: 0, sid: 1, time: 2.5 }); b.send({ t: 'gl', k: '1', sid: 1, time: 2.5 }); b.send({ t: 'gl', sid: 1, time: 2.5 });
+    b.send({ t: 'gl', k: b.rs() - 1, sid: 1, time: 2.5 }); b.send({ t: 'gl', k: String(b.rs()), sid: 1, time: 2.5 }); b.send({ t: 'gl', sid: 1, time: 2.5 });
     await sleep(150);
     assert.strictEqual(b.all('glno').length, 15);
     // on the grid and as a spectator
@@ -1064,33 +1775,33 @@ function freshNet() {
   });
 
   lane = lanes.year2;
-  T('Grand Prix v6: the session races the room year (never a client\'s), wear 1..5, again keeps both; parc fermé', async t => {
+  T('Grand Prix v6: the session races the room year (never a client\'s) and the room\'s wear; again keeps both; parc fermé', async t => {
     const R = await room(t, 3, { cars: ['2020-ferrari', '2020-mercedes', ''] });
     const [a, b, c] = R.cs;
     await a.wait(() => a.roster().length === 3);
     assert.deepStrictEqual(a.roster().map(p => p.car), ['2020-ferrari', '2020-mercedes', '']);
     // no room year yet: the session has none either, whatever the host names
-    a.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN, year: 2024 });
-    let g = await R.settle(s => s.phase === 'quali');
+    let g = await R.start(1, 1, { len: LEN });
+    a.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN, year: 2024 });           // (protocol 1's start: ignored)
+    await sleep(100);
+    g = R.srv.info().gp;
     assert.deepStrictEqual([g.sid, g.year, g.wear], [1, null, 1]);
     a.send({ t: 'gp', a: 'end' });
     await R.settle(s => s.phase === 'free');
-    a.send({ t: 'year', y: 2020 });
-    await c.wait(() => c.rosterMsg().year === 2020);
-    a.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN, year: 1999, wear: 3 });
-    g = await R.settle(s => s.sid === 2);
-    assert.deepStrictEqual([g.phase, g.year, g.wear], ['quali', 2020, 3], 'the room year, the wear asked for');
+    g = await R.start(1, 1, { year: 2020, wear: 3 });
+    assert.deepStrictEqual([g.sid, g.phase, g.year, g.wear], [2, 'quali', 2020, 3], 'the room year, the wear set');
 
-    // while a session is on: no year change, no car change (name and colour still change)
-    a.send({ t: 'year', y: 2021 });
+    // while a session is on: no settings change, no car change (name and colour still change)
+    a.send({ t: 'set', year: 2021, wear: 5 });
     b.send({ t: 'profile', name: 'Bee', colour: '#123456', car: '2021-mercedes' });
     await a.wait(() => a.roster()[1].name === 'Bee');
     assert.deepStrictEqual([a.roster()[1].colour, a.roster()[1].car], ['#123456', '2020-mercedes']);
     await sleep(120);
     const n = a.all('players').length;
     b.send({ t: 'profile', car: '2021-mercedes' });                              // a car change alone: nothing at all
-    await sleep(1150);                                                           // longer than the year's rate limit
-    assert.deepStrictEqual([R.srv.info().year, a.rosterMsg().year, R.srv.info().players[1].car, a.all('players').length], [2020, 2020, '2020-mercedes', n]);
+    await sleep(250);
+    assert.deepStrictEqual([R.srv.info().room.set.year, R.srv.info().room.set.wear, R.srv.info().players[1].car, a.all('players').length],
+      [2020, 3, '2020-mercedes', n]);
     // ...but whoever joins mid-session keeps the car he announces
     const d = await client(R.srv.port, { name: 'Late', car: '2020-williams' });
     R.cs.push(d);
@@ -1106,54 +1817,44 @@ function freshNet() {
     assert.deepStrictEqual([g.year, g.wear], [2020, 3]);
     a.send({ t: 'gp', a: 'end' });
     g = await R.settle(s => s.phase === 'results');
-    a.send({ t: 'year', y: 2022 });                                              // the results are still a session
+    a.send({ t: 'set', year: 2022 });                                           // the results are still a session
     b.send({ t: 'profile', car: '2021-mercedes' });
     a.send({ t: 'gp', a: 'again' });
     g = await R.settle(s => s.sid === 3);
     assert.deepStrictEqual([g.phase, g.year, g.wear], ['quali', 2020, 3], 'again: the same year and wear');
-    assert.deepStrictEqual([R.srv.info().year, R.srv.info().players[1].car], [2020, '2020-mercedes']);
+    assert.deepStrictEqual([R.srv.info().room.set.year, R.srv.info().players[1].car], [2020, '2020-mercedes']);
 
-    // free practice again: the year and the cars can change
-    a.send({ t: 'gp', a: 'end' });
-    await R.settle(s => s.phase === 'free');
+    // the lobby again: the year and the cars can change
+    await R.lobby();
     b.send({ t: 'profile', car: '2021-mercedes' });
-    a.send({ t: 'year', y: 2021 });
-    await c.wait(() => c.rosterMsg().year === 2021 && c.roster()[1].car === '2021-mercedes', 3000, 'year and car after the session');
+    a.send({ t: 'set', year: 2021 });
+    await c.wait(() => c.room().set.year === 2021 && c.roster()[1].car === '2021-mercedes', 3000, 'year and car in the lobby');
 
-    // wear over the wire: clamped / rounded like the lap counts, the default when it is not a number
+    // wear over the wire: rounded; out of range or not a number is ignored (the room keeps its wear), never clamped
+    await sleep(1050);                                                           // (SET_PER_S: a new second)
     let sid = R.srv.info().gp.sid;
-    for (const [w, want] of [[9, 5], [0, 1], [2.6, 3], ['3', 1], [undefined, 1], [null, 1], [5, 5], [1, 1]]) {
-      a.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN, wear: w });
-      g = await R.settle(s => s.sid === sid + 1);
-      sid++;
-      assert.strictEqual(g.wear, want, JSON.stringify(w));
+    for (const [w, want] of [[9, 3], [0, 3], [2.6, 3], [4.4, 4], ['3', 4], [null, 4], [5, 5], [1, 1]]) {
+      a.send({ t: 'set', wear: w });
+      await sleep(120);
+      assert.strictEqual(R.srv.info().room.set.wear, want, JSON.stringify(w));
     }
-    for (const w of ['1e999', '-1e999', '{}', '[4]', 'true']) {
-      a.send('{"t":"gp","a":"start","q":1,"r":1,"len":' + LEN + ',"wear":' + w + '}');
-      g = await R.settle(s => s.sid === sid + 1);
-      sid++;
-      assert.strictEqual(g.wear, 1, w);
-    }
-
-    // a year pick still waiting for the rate limit goes with the start (it is the host's latest word)
-    a.send({ t: 'gp', a: 'end' });
-    await R.settle(s => s.phase === 'free');
-    a.send({ t: 'year', y: 2016 }); a.send({ t: 'year', y: 2017 });             // at least 2017 waits (2021 was just set)
-    a.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN });
-    g = await R.settle(s => s.sid === sid + 1);
-    assert.deepStrictEqual([g.phase, g.year, R.srv.info().year], ['quali', 2017, 2017]);
-    await c.wait(() => c.rosterMsg().year === 2017);
-    await sleep(1150);
-    assert.deepStrictEqual([R.srv.info().year, c.rosterMsg().year], [2017, 2017], 'and nothing is applied later');
-    // a guest's start (refused) takes no year with it either
-    b.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN, wear: 4 });
+    for (const w of ['1e999', '-1e999', '{}', '[4]', 'true']) a.send('{"t":"set","wear":' + w + '}');
+    await sleep(150);
+    assert.strictEqual(R.srv.info().room.set.wear, 1);
+    await sleep(1050);
+    a.send({ t: 'set', wear: 4 });
+    g = await R.start(1, 1);
+    assert.deepStrictEqual([g.sid, g.year, g.wear], [sid + 1, 2021, 4]);
+    // a guest's settings and start take nothing with them
+    await R.lobby();
+    b.send({ t: 'set', year: 2015, wear: 2 }); b.send({ t: 'start', len: LEN, force: true });
     await sleep(120);
-    assert.deepStrictEqual([R.srv.info().gp.sid, R.srv.info().gp.wear], [sid + 1, 1]);
+    assert.deepStrictEqual([R.srv.info().room.st, R.srv.info().room.set.year, R.srv.info().room.set.wear], ['lobby', 2021, 4]);
     R.cs.forEach(x => x.ws.close());
   });
 
   lane = lanes.gp3;
-  T('Grand Prix: garbage / wrong-type / oversized gp, gl, ping and progress never change state or crash', async t => {
+  T('Grand Prix: garbage / wrong-type / oversized gp, gl, ping, progress and room messages never change state or crash', async t => {
     const R = await room(t, 2);
     const [a, b] = R.cs;
     const junk = [
@@ -1167,10 +1868,14 @@ function freshNet() {
       '{"t":"gl","k":null,"sid":null,"time":null}', '{"t":"gl","k":1,"sid":"0","time":3}',
       '{"t":"ping"}', '{"t":"ping","c":"x"}', '{"t":"ping","c":null}', '{"t":"ping","c":1e999}', '{"t":"ping","c":{}}', '{"t":"ping","c":[]}',
       '{"t":"s","k":1,"c":1,"s":[0,0,0,0,0,0,0,0],"g":"x"}', '{"t":"s","k":1,"c":1,"s":[0,0,0,0,0,0,0,0],"g":1e999}',
-      '{"t":"s","k":1,"c":1,"s":[0,0,0,0,0,0,0,0],"g":{}}', '{"t":"s","k":1,"c":1,"s":[0,0,0,0,0,0,0,0],"g":-1e308}', '{"t":"s","k":1,"c":1,"s":"x","g":0.5}'
+      '{"t":"s","k":1,"c":1,"s":[0,0,0,0,0,0,0,0],"g":{}}', '{"t":"s","k":1,"c":1,"s":[0,0,0,0,0,0,0,0],"g":-1e308}', '{"t":"s","k":1,"c":1,"s":"x","g":0.5}',
+      // protocol 2 messages no state takes: garbage settings, ready, loaded, start; go outside the loading
+      '{"t":"set","track":5,"q":1e999}', '{"t":"set","year":"2024","mode":"race","wear":0}', '{"t":"set","track":"../x"}', '{"t":"ready","on":"yes"}',
+      '{"t":"ready","on":null}', '{"t":"loaded","rs":"2","ok":true}', '{"t":"loaded","rs":-1,"ok":true}', '{"t":"loaded","rs":1e999,"ok":true}',
+      '{"t":"start","len":"200"}', '{"t":"start","len":1e999,"force":true}', '{"t":"go","x":1}', '{"t":"bots","n":"3"}', '{"t":"track","id":"spa"}', '{"t":"year","y":2024}'
     ];
     const check = async (label, expectGlno) => {
-      const before = JSON.stringify(srv_gp(R));
+      const before = JSON.stringify(srv_gp(R)), room0 = JSON.stringify(R.srv.info().room);
       const n = [a.all('glno').length, b.all('glno').length, a.all('pong').length, b.all('pong').length];
       for (const j of junk) { a.send(j); b.send(j); }
       await sleep(200);
@@ -1183,6 +1888,7 @@ function freshNet() {
       assert.deepStrictEqual([a.all('glno').length - n[0], b.all('glno').length - n[1]], [expectGlno, expectGlno], label + ': glno');
       assert.deepStrictEqual([a.all('pong').length - n[2], b.all('pong').length - n[3]], [0, 0], label + ': pong');
       assert.strictEqual(a.closed || b.closed, null, label + ': junk alone does not get you kicked');
+      assert.strictEqual(JSON.stringify(R.srv.info().room), room0, label + ': room changed');
     };
     await check('free', 0);
     // '{"t":"gl","k":1,"sid":"0"...}' and friends never match; with sid 1 running, none of the junk has k 1 + sid 1
@@ -1200,7 +1906,7 @@ function freshNet() {
     a.send({ t: 'gp', a: 'again' });
     await R.settle(s => s.phase === 'quali');
     const before = JSON.stringify(srv_gp(R));
-    b.send('{"t":"gl","k":1,"sid":2,"time":"fast"}'); b.send('{"t":"gl","k":1,"sid":2,"time":[1,2,3]}');
+    b.send('{"t":"gl","k":' + b.rs() + ',"sid":2,"time":"fast"}'); b.send('{"t":"gl","k":' + b.rs() + ',"sid":2,"time":[1,2,3]}');
     await b.wait(() => b.all('glno').length === 2);
     assert.strictEqual(JSON.stringify(srv_gp(R)), before);
     // oversized: the socket is closed by the size limit, the room lives on
@@ -1253,9 +1959,9 @@ function freshNet() {
     g = await R.settle(s => s.players.length === 2);
     await b.wait(() => b.host() === 0);
     for (const act of ['skip', 'end', 'again', 'start']) { b.send({ t: 'gp', a: act, q: 1, r: 1, len: LEN }); c.send({ t: 'gp', a: act, q: 1, r: 1, len: LEN }); }
-    b.send({ t: 'track', id: 'spa' });
+    b.send({ t: 'track', id: 'spa' }); b.send({ t: 'set', track: 'spa' }); b.send({ t: 'back' }); c.send({ t: 'back' });
     await sleep(150);
-    assert.deepStrictEqual([srv_phase(R), R.srv.info().track, R.srv.info().host], ['quali', 'monza', 0]);
+    assert.deepStrictEqual([srv_phase(R), R.srv.info().track, R.srv.info().host, R.srv.info().room.st], ['quali', 'monza', 0, 'session']);
     g = await R.toRace();                                        // the drivers finish qualifying themselves
     assert.deepStrictEqual(g.grid, [b.id, c.id]);
     R.clk.add(3000);
@@ -1263,7 +1969,7 @@ function freshNet() {
     g = await R.settle(s => s.phase === 'results');
     assert.deepStrictEqual(g.order, [b.id, c.id]);
     b.ws.close(); c.ws.close();
-    await until(() => R.srv.info().gp.phase === 'free', 2000, 'empty room -> free');
+    await until(() => R.srv.info().gp.phase === 'free' && R.srv.info().room.st === 'lobby', 2000, 'empty room -> free, the lobby');
   });
 
   T('Grand Prix: impact reports follow the ghost rule (none in qualifying / while the grid forms / with spectators)', async t => {
@@ -1276,7 +1982,7 @@ function freshNet() {
       // not jump; to does not move, or it would drive away from the impact as far as the server can tell)
       to.drive(to.px, to.pz);
       await driveTo(from, to.px - 9, to.px - 6, to.pz, 3);         // (150 ms: also the 40 ms throttle)
-      from.send({ t: 'hit', k: from.seq(), to: to.id, i: [++sent, 0] });
+      from.send({ t: 'hit', k: from.rs(), to: to.id, i: [++sent, 0] });
       if (expected) { await to.wait(() => to.all('hit').length === n + 1, 1000, label); assert.strictEqual(to.last('hit').i[0], sent, label); }
       else { await sleep(100); assert.strictEqual(to.all('hit').length, n, label); }
     };
@@ -1303,41 +2009,46 @@ function freshNet() {
     await hit(a, s, false, 'driver to spectator');
     a.send({ t: 'gp', a: 'end' }); await R.settle(x => x.phase === 'results');
     a.send({ t: 'gp', a: 'end' }); await R.settle(x => x.phase === 'free');
+    await R.sync(x => x.st === 'lobby');
+    await hit(s, a, false, 'the lobby: nobody is on a track');
+    await R.free();
     await hit(s, a, true, 'free practice again');
     R.cs.forEach(x => x.ws.close());
   });
 
   T('year / car garbage from host and guest never changes the room, never crashes, never gets you kicked', async t => {
-    const R = await room(t, 2, { cars: ['2024-ferrari', ''] });
+    const R = await lobbyRoom(t, 2, { cars: ['2024-ferrari', ''] });
     const [a, b] = R.cs;
-    a.send({ t: 'year', y: 2024 });
-    await b.wait(() => b.rosterMsg().year === 2024);
-    const junk = ['{"t":"year"}', '{"t":"year","y":"2025"}', '{"t":"year","y":1e999}', '{"t":"year","y":-1e999}', '{"t":"year","y":2025.5}',
-      '{"t":"year","y":null}', '{"t":"year","y":[2025]}', '{"t":"year","y":{"valueOf":2025}}', '{"t":"year","y":true}', '{"t":"year","y":2009}',
-      '{"t":"year","y":2101}', '{"t":"year","year":2025}', '{"t":"YEAR","y":2025}', '{"t":"year","y":"__proto__"}', '{"t":"year","y":9007199254740993}',
+    a.send({ t: 'set', year: 2024 });
+    await b.wait(() => b.room().set.year === 2024);
+    const junk = ['{"t":"set"}', '{"t":"set","year":"2025"}', '{"t":"set","year":1e999}', '{"t":"set","year":-1e999}', '{"t":"set","year":2025.5}',
+      '{"t":"set","year":null}', '{"t":"set","year":[2025]}', '{"t":"set","year":{"valueOf":2025}}', '{"t":"set","year":true}', '{"t":"set","year":2009}',
+      '{"t":"set","year":2101}', '{"t":"set","y":2025}', '{"t":"SET","year":2025}', '{"t":"set","year":"__proto__"}', '{"t":"set","year":9007199254740993}',
+      '{"t":"year","y":2025}', '{"t":"year","year":2025}',
       '{"t":"profile","car":null}', '{"t":"profile","car":5}', '{"t":"profile","car":"X"}', '{"t":"profile","car":["2024-mclaren"]}',
       '{"t":"profile","car":{"length":3}}', '{"t":"profile","car":""}', '{"t":"profile","car":"' + 'a'.repeat(41) + '"}',
       '{"t":"profile","car":"a\\u0000b"}', '{"t":"profile","car":"__proto__"}', '{"t":"profile","car":"2024-mclaren\\n"}',
-      '{"t":"profile","car":1e999}', '{"t":"hello","v":1,"name":"again","car":"2024-mclaren"}'];
+      '{"t":"profile","car":1e999}', '{"t":"hello","v":2,"name":"again","car":"2024-mclaren"}'];
     const check = async label => {
-      const before = JSON.stringify([R.srv.info().year, R.srv.info().players, R.srv.info().gp]);
+      const before = JSON.stringify([R.srv.info().room, R.srv.info().players, R.srv.info().gp]);
       await sleep(120);
       const n = [a.all('players').length, b.all('players').length];
       for (const j of junk) { a.send(j); b.send(j); }
       await sleep(250);
-      assert.strictEqual(JSON.stringify([R.srv.info().year, R.srv.info().players, R.srv.info().gp]), before, label + ': state changed');
+      assert.strictEqual(JSON.stringify([R.srv.info().room, R.srv.info().players, R.srv.info().gp]), before, label + ': state changed');
       assert.deepStrictEqual([a.all('players').length - n[0], b.all('players').length - n[1]], [0, 0], label + ': rosters sent');
       assert.strictEqual(a.closed || b.closed, null, label + ': kicked');
     };
-    await check('free');
+    await check('lobby');
+    await sleep(1050);                                           // (SET_PER_S: the junk used this second up)
     await R.start(1, 1);
     await check('quali');
     // the valid messages still work afterwards
     a.send({ t: 'gp', a: 'end' });
     await R.settle(s => s.phase === 'free');
     await sleep(1050);
-    a.send({ t: 'year', y: 2025 }); b.send({ t: 'profile', car: '2025-mclaren' });
-    await b.wait(() => b.rosterMsg().year === 2025 && b.roster()[1].car === '2025-mclaren');
+    a.send({ t: 'set', year: 2025 }); b.send({ t: 'profile', car: '2025-mclaren' });
+    await b.wait(() => b.room().set.year === 2025 && b.roster()[1].car === '2025-mclaren');
     a.ws.close(); b.ws.close();
   });
 
@@ -1348,10 +2059,12 @@ function freshNet() {
     const car = i => (String(2000 + i) + '-' + 'x'.repeat(40)).slice(0, 40);   // the longest car ids there can be
     const cs = [];
     for (let i = 0; i < 16; i++) cs.push(await client(srv.port, { name: name(i), car: car(i) }));
-    cs[0].send({ t: 'track', id: 'monza' });
-    cs[0].send({ t: 'year', y: 2026 });
-    await cs[15].wait(() => cs[15].last('track') && cs[15].rosterMsg().year === 2026);
-    cs[0].send({ t: 'gp', a: 'start', q: 1, r: 50, len: LEN, wear: 5 });
+    cs[0].send({ t: 'set', track: 'monza', year: 2026, mode: 'gp', q: 1, r: 50, wear: 5 });
+    await cs[15].wait(() => cs[15].room().set.year === 2026 && cs[15].room().set.mode === 'gp');
+    cs[0].send({ t: 'start', len: LEN, force: true });
+    for (const c of cs) { await c.wait(() => c.room().st === 'loading'); c.loaded(); }
+    const rmsg = Buffer.byteLength(JSON.stringify(cs[15].all('room').find(m => m.st === 'loading')));
+    assert(rmsg < 1024, 'room message while 16 load: ' + rmsg + ' bytes');
     await settle(srv, cs, s => s.phase === 'quali');
     clk.add(3000);
     cs.forEach((c, i) => c.lap(2.5 + i * 0.001));
@@ -1392,38 +2105,65 @@ function freshNet() {
   /* ---------- js/net.js, the real client ---------- */
   lane = lanes.client;
 
-  T('js/net.js against the real server: Grand Prix calls and events, clock sync, teardown, reconnect', async t => {
+  T('js/net.js against the real server: lobby, start, barrier, Grand Prix calls and events, clock sync, teardown, reconnect', async t => {
     let skew = 3 * 86400000 + 12345;                             // this server's clock is three days ahead of ours
     const srvNow = () => Date.now() + skew;
-    const srv = await t.start({ now: srvNow, random: () => 0 });
+    const srv = await t.start({ now: srvNow, random: () => 0, startMinMs: 0 });
     const A = freshNet(), B = freshNet();
     const ev = { A: [], B: [] };
-    for (const n of ['connected', 'disconnected', 'gp', 'lapRejected', 'track']) {
-      A.on(n, x => ev.A.push([n, x])); B.on(n, x => ev.B.push([n, x]));
+    for (const n of ['connected', 'disconnected', 'gp', 'lapRejected', 'track', 'room', 'load', 'go', 'lobby', 'nostart']) {
+      A.on(n, (x, y) => ev.A.push([n, x, y])); B.on(n, (x, y) => ev.B.push([n, x, y]));
     }
+    const names = k => ev[k].filter(e => e[0] !== 'gp' && e[0] !== 'room').map(e => e[0]);
     assert(Math.abs(A.serverNow() - Date.now()) < 50, 'not in a room: our own clock');
-    assert.strictEqual(A.gp('start', { q: 1, r: 1, len: LEN }), false, 'not connected');
-    assert.strictEqual(A.sendGpLap(1, 3), false);
+    assert.deepStrictEqual([A.gp('skip'), A.sendGpLap(1, 3), A.setRoom({ track: 'monza' }), A.startRoom({ len: LEN }), A.room, A.loadedRs],
+      [false, false, false, false, null, -1], 'not connected');
     assert.deepStrictEqual(await A.join('127.0.0.1:' + srv.port), { ok: true });
     assert.deepStrictEqual(await B.join('127.0.0.1:' + srv.port), { ok: true });
-    assert.deepStrictEqual([A.isHost, B.isHost, A.id > 0, B.id > A.id], [true, false, true, true]);
+    assert.deepStrictEqual([A.isHost, B.isHost, A.id > 0, B.id > A.id, A.ded, B.address], [true, false, true, true, true, '127.0.0.1:' + srv.port]);
+    assert.deepStrictEqual([A.room.st, A.room.rs, A.trackId, B.room.set], ['lobby', 0, null,
+      { track: null, year: null, mode: 'free', q: 3, r: 5, wear: 1, bots: 0, skill: 'pro' }]);
+    assert.deepStrictEqual(names('B'), ['connected'], 'no load in the lobby; track never');
     await until(() => A.session && B.session && B.session.players.length === 2 && A.session.players.length === 2, 2000, 'first gp');
     assert.deepStrictEqual([B.session.phase, B.session.sid, B.session.grid, B.session.order.length], ['free', 0, [], 2]);
     // clock: within a few ms of the server's after the first pings
     await sleep(450);
     assert(Math.abs(A.serverNow() - srvNow()) < 25, 'serverNow: ' + (A.serverNow() - srvNow()));
     assert(Math.abs(B.serverNow() - srvNow()) < 25, 'serverNow: ' + (B.serverNow() - srvNow()));
-    // only the host can act, and only with sane arguments
-    assert.strictEqual(B.gp('start', { q: 1, r: 1, len: LEN }), false, 'not the host');
-    assert.strictEqual(A.gp('launch'), false);
-    assert.strictEqual(A.gp('start', { q: 1, r: 1 }), false, 'no track length');
-    assert.strictEqual(A.gp('start', { q: 1, r: 1, len: LEN }), true, 'sent; the server refuses it: no track yet');
-    await sleep(150);
-    assert.strictEqual(A.session.phase, 'free');
+    // only the host sets the room up and starts, only with sane arguments
+    assert.deepStrictEqual([B.setRoom({ track: 'monza' }), B.startRoom({ len: LEN, force: true }), B.goNow(), B.backToLobby(), B.selectTrack('monza')],
+      [false, false, false, false, false], 'not the host');
+    assert.deepStrictEqual([A.gp('start', { q: 1, r: 1, len: LEN }), A.gp('launch'), A.gp('skip')], [false, false, false], 'start is not a gp action; no session');
+    assert.strictEqual(A.startRoom({ len: LEN }), false, 'no track yet');
+    assert.deepStrictEqual([A.setRoom({}), A.setRoom({ q: 0, r: 1e9, wear: 9, year: 1999, mode: 'race', track: '../x' }), A.setRoom(null)], [false, false, false],
+      'nothing valid: nothing sent');
     assert.strictEqual(A.selectTrack('monza'), true);
-    await until(() => B.trackId === 'monza' && A.trackId === 'monza', 2000, 'track');
-    assert.strictEqual(A.gp('start', { q: 1, r: 1, len: LEN }), true);
+    assert.strictEqual(A.setRoom({ mode: 'gp', q: 1, r: 1, year: 2024, wear: 2 }), true);
+    await until(() => B.trackId === 'monza' && B.room.set.mode === 'gp' && B.room.set.year === 2024 && B.year === 2024, 2000, 'settings');
+    assert.strictEqual(A.room.set.track, 'monza');
+    // ready: guests only, booleans only
+    assert.deepStrictEqual([A.setReady(true), B.setReady('yes'), B.setReady(true)], [false, false, true]);
+    await until(() => A.room.ready.includes(B.id) && A.roster.find(p => p.id === B.id).ready === true, 2000, 'ready');
+    assert.deepStrictEqual(A.roster.map(p => [p.ready, p.load]), [[true, ''], [true, '']], 'the host counts as ready');
+    // start: len checked locally; the barrier
+    assert.deepStrictEqual([A.startRoom({ len: 50 }), A.startRoom({}), A.startRoom(null), A.goNow()], [false, false, false, false]);
+    assert.strictEqual(A.startRoom({ len: LEN }), true);
+    await until(() => A.room.st === 'loading' && B.room.st === 'loading', 2000, 'loading');
+    assert.deepStrictEqual(ev.B.filter(e => e[0] === 'load').map(e => e.slice(1)), [['monza', 1]], 'load once for rs 1');
+    assert.deepStrictEqual(B.roster.map(p => p.load), ['wait', 'wait']);
+    // while loading nothing goes out: states, laps, hits; and the host's go needs his own track built
+    B.sendState({ x: 0, z: 0, heading: 0 }, true);
+    assert.deepStrictEqual([B.sendGpLap(1, 3), B.sendLap(80, 80), B.sendHit(A.id, 1, 0), A.goNow(), B.sendLoaded(0, true), B.sendLoaded(2, true)],
+      [false, false, false, false, false, false]);
+    assert.strictEqual(A.sendLoaded(1, true, { len: LEN, why: 'BAD!' }), true);
+    assert.deepStrictEqual([A.loadedRs, A.sendLoaded(1, true), A.goNow()], [1, false, true], 'once per rs; then go');
+    // (A's go ended the barrier before B loaded: B joins the session when its track is built)
     await until(() => A.session.phase === 'quali' && B.session.phase === 'quali', 2000, 'quali');
+    assert.deepStrictEqual([A.room.st, A.room.len, B.loadedRs, A.session.year, A.session.wear], ['session', LEN, -1, 2024, 2]);
+    assert.deepStrictEqual(names('A').slice(1), ['load', 'go'], 'the host: load, then go');
+    assert.deepStrictEqual(names('B'), ['connected', 'load', 'go'], 'B: go too (the session is on), though its own track is not built yet');
+    B.sendState({ x: 0, z: 0, heading: 0 }, true);                // not loaded yet: nothing goes out
+    assert.strictEqual(B.sendLoaded(1, true, { len: LEN }), true);
     const t0 = Date.now();
     A.sendState({ x: 0, z: 0, heading: 0 }, true); B.sendState({ x: 0, z: 0, heading: 0 }, true);   // on track
     assert.deepStrictEqual(A.session, B.session);
@@ -1431,7 +2171,7 @@ function freshNet() {
     // laps: rejected ones come back as events, accepted ones as snapshots
     assert.strictEqual(B.sendGpLap(B.session.sid, 1), true);
     await until(() => ev.B.some(e => e[0] === 'lapRejected'), 2000, 'lapRejected');
-    assert.deepStrictEqual(ev.B.filter(e => e[0] === 'lapRejected'), [['lapRejected', 'too-fast']]);
+    assert.deepStrictEqual(ev.B.filter(e => e[0] === 'lapRejected').map(e => e[1]), ['too-fast']);
     assert.strictEqual(B.sendGpLap(B.session.sid, NaN), false);
     assert.strictEqual(B.sendGpLap('1', 3), false);
     await sleep(2300 - (Date.now() - t0));
@@ -1448,7 +2188,6 @@ function freshNet() {
     await until(() => A.session.phase === 'race' && B.session.phase === 'race', 2000, 'race');
     // progress rides on the car state; null stops it
     assert.deepStrictEqual(A.session.order, [B.id, A.id], 'grid order');
-    // (both cars have driven ~150 m since lights out: the clock jumped 9.5 s, which credits up to 5 s of it)
     A.setProgress(0.5); B.setProgress(0.25);
     A.sendState({ x: 350, z: 0, heading: 0 }, true); B.sendState({ x: 359, z: 0, heading: 0 }, true);
     await until(() => A.session.order[0] === A.id && B.session.order[0] === A.id, 2000, 'order by progress');
@@ -1459,40 +2198,58 @@ function freshNet() {
     B.setProgress(0.75);
     B.sendState({ x: 359, z: 0, heading: 0 }, true);
     await until(() => A.session.order[0] === B.id, 2000, 'order by progress (2)');
-    // B leaves: nothing of the room's Grand Prix stays behind; A sees a DNF
+    // B leaves: nothing of the room stays behind; A sees a DNF
     const bId = B.id;
     B.leave();
-    assert.deepStrictEqual([B.connected, B.session, B.id, B.trackId, B.roster.length], [false, null, 0, null, 0]);
+    assert.deepStrictEqual([B.connected, B.session, B.id, B.trackId, B.roster.length, B.room, B.loadedRs, B.address, B.ded],
+      [false, null, 0, null, 0, null, -1, null, false]);
     assert(Math.abs(B.serverNow() - Date.now()) < 50, 'clock offset dropped: ' + (B.serverNow() - Date.now()));
-    assert.deepStrictEqual(ev.B[ev.B.length - 1], ['disconnected', '已離開房間']);
+    assert.deepStrictEqual(ev.B[ev.B.length - 1], ['disconnected', '已離開房間', undefined]);
     await until(() => A.session.players.some(p => p.left), 2000, 'DNF');
     assert.deepStrictEqual(A.session.players.map(p => [p.id, p.left, p.dnf]), [[A.id, false, false], [bId, true, true]]);
-    // B comes back: a new id, a spectator; the stale progress is not sent again
+    // B comes back: a new id, a spectator; it loads the running session's track ('load' at once); the stale progress
+    // is not sent again
+    ev.B.length = 0;
     assert.deepStrictEqual(await B.join('127.0.0.1:' + srv.port), { ok: true });
+    assert.deepStrictEqual(names('B'), ['connected', 'load'], 'a newcomer of a session: load at once, no go');
     await until(() => B.session && B.session.players.length === 3, 2000, 'rejoin');
+    assert.strictEqual(B.sendLoaded(1, true), true);
     B.sendState({ x: 9, z: 0, heading: 0 }, true);
     assert.deepStrictEqual(B.session.players[2], Object.assign({}, B.session.players[2], { id: B.id, spec: true, left: false }));
     assert(B.id > bId, 'a new id');
     assert.strictEqual(B.trackId, 'monza');
+    // the host ends the race (results), then back to the lobby: both hear 'lobby'; nothing goes out there
+    assert.strictEqual(A.gp('end'), true);
+    await until(() => B.session.phase === 'results', 2000, 'results');
+    assert.strictEqual(A.backToLobby(), true);
+    await until(() => B.room.st === 'lobby' && A.room.st === 'lobby', 2000, 'lobby');
+    assert.deepStrictEqual([names('B').slice(-1), names('A').slice(-1)], [['lobby'], ['lobby']]);
+    assert.deepStrictEqual([A.gp('skip'), A.backToLobby(), A.goNow(), B.sendGpLap(2, 3), B.sendLap(1, 1)], [false, false, false, false, false]);
+    // nostart reaches the host: B not ready
+    assert.strictEqual(A.startRoom({ len: LEN }), true);
+    await until(() => ev.A.some(e => e[0] === 'nostart'), 2000, 'nostart');
+    assert.deepStrictEqual(ev.A.filter(e => e[0] === 'nostart').map(e => e.slice(1)), [['not-ready', [B.id]]]);
     // the server goes away: both are told, both are clean
     await srv.close();
     await until(() => !A.connected && !B.connected, 3000, 'disconnected');
-    assert.deepStrictEqual(ev.A[ev.A.length - 1], ['disconnected', '連線中斷：房主已關閉房間']);
-    assert.deepStrictEqual([A.session, A.id, A.isHost, A.trackId, A.players.length], [null, 0, false, null, 0]);
+    assert.deepStrictEqual(ev.A[ev.A.length - 1].slice(0, 2), ['disconnected', '連線中斷：房主已關閉房間']);
+    assert.deepStrictEqual([A.session, A.id, A.isHost, A.trackId, A.players.length, A.room], [null, 0, false, null, 0, null]);
     assert(Math.abs(A.serverNow() - Date.now()) < 50);
     // a new server on another clock: everything is learnt again
     const back = -10 * 86400000;
     const srv2 = await t.start({ now: () => Date.now() + back });
     assert.deepStrictEqual(await A.join('127.0.0.1:' + srv2.port), { ok: true });
     await until(() => A.session, 2000, 'gp after reconnect');
-    assert.deepStrictEqual([A.id, A.isHost, A.trackId, A.session.phase, A.session.sid, A.session.players.length], [1, true, null, 'free', 0, 1]);
+    assert.deepStrictEqual([A.id, A.isHost, A.trackId, A.session.phase, A.session.sid, A.session.players.length, A.room.st, A.room.rs],
+      [1, true, null, 'free', 0, 1, 'lobby', 0]);
     await sleep(100);
     assert(Math.abs(A.serverNow() - (Date.now() + back)) < 25, 'serverNow after reconnect: ' + (A.serverNow() - (Date.now() + back)));
     A.leave();
+    assert.deepStrictEqual(ev.A.filter(e => e[0] === 'track').length + ev.B.filter(e => e[0] === 'track').length, 0, 'track is never emitted');
     assert.strictEqual(uncaught.length, 0);
   });
 
-  T('js/net.js against a hostile server: malformed gp / pong / glno / hit / snap / track cannot throw or poison state', async t => {
+  T('js/net.js against a hostile server: malformed gp / pong / glno / hit / snap / room cannot throw or poison state', async t => {
     // a fake server: says welcome, records what the client sends, answers pings from a clock we control
     const wss = new WebSocket.Server({ port: nextPort(), host: '127.0.0.1' });
     await new Promise(r => wss.on('listening', r));
@@ -1505,14 +2262,14 @@ function freshNet() {
         const m = JSON.parse(d.toString());
         inbox.push(m);
         if (m.t === 'hello') {
-          ws.send(JSON.stringify({ t: 'welcome', v: 1, id: 7, host: 8, track: 'monza', seq: 3, now: fakeNow(),
+          ws.send(JSON.stringify({ t: 'welcome', v: 2, id: 7, host: 8, now: fakeNow(), room: { st: 'session', rs: 3, set: { track: 'monza' }, ready: [], rr: 0, load: null, len: 5000 },
             players: [{ id: 7, name: 'me', colour: '#112233', slot: 0 }, { id: 8, name: 'other', colour: '#445566', slot: 1 }] }));
         } else if (m.t === 'ping' && answer) ws.send(JSON.stringify({ t: 'pong', c: m.c, s: fakeNow() }));
       });
     });
     const N = freshNet();
     const ev = [];
-    for (const n of ['gp', 'lapRejected', 'hit', 'track', 'disconnected']) N.on(n, (x, y) => ev.push([n, x, y]));
+    for (const n of ['gp', 'lapRejected', 'hit', 'track', 'load', 'go', 'lobby', 'disconnected']) N.on(n, (x, y) => ev.push([n, x, y]));
     const raw = async s => { sock.send(typeof s === 'string' ? s : JSON.stringify(s)); await sleep(15); };
     const clockOk = (label, extra) => {
       const d = N.serverNow() - fakeNow() - (extra || 0);
@@ -1522,7 +2279,9 @@ function freshNet() {
       assert.deepStrictEqual(await N.join('127.0.0.1:' + wss.address().port), { ok: true });
       await sleep(80);
       clockOk('synchronised');
-      assert.deepStrictEqual([N.id, N.isHost, N.trackId, N.session], [7, false, 'monza', null]);
+      assert.deepStrictEqual([N.id, N.isHost, N.trackId, N.session, N.room.st, N.room.rs], [7, false, 'monza', null, 'session', 3]);
+      assert.deepStrictEqual(ev.filter(e => e[0] === 'load').map(e => e.slice(1)), [['monza', 3]], 'a session on: load at once');
+      assert.strictEqual(N.sendLoaded(3, true), true);
 
       // --- pong ---
       const ping = inbox.filter(m => m.t === 'ping').pop();
@@ -1615,23 +2374,29 @@ function freshNet() {
       assert.strictEqual(N.players[0].active, true);
       assert(Object.keys(N.players[0].state).every(k => Number.isFinite(N.players[0].state[k])), JSON.stringify(N.players[0].state));
 
-      // --- track: our race distance belongs to the old track ---
+      // --- room: our race distance belongs to the old load cycle ---
       inbox.length = 0;
       N.setProgress(2.5);
       N.sendState({ x: 1, z: 2, heading: 0 }, true);
       await until(() => inbox.some(m => m.t === 's'), 1000, 's');
       assert.deepStrictEqual([inbox.find(m => m.t === 's').g, inbox.find(m => m.t === 's').k], [2.5, 3]);
-      for (const tr of [{ id: 5, seq: 4 }, { id: 'x'.repeat(100), seq: 4 }, { id: '../etc', seq: 4 }, { id: 'spa', seq: 'x' }, { id: 'spa' }, { seq: 4 }, { id: '<b>', seq: 4 }]) {
-        await raw(Object.assign({ t: 'track' }, tr));
+      for (const r of [{}, { st: 'bogus', rs: 4 }, { st: 5 }, { st: ['session'] }, { st: '__proto__' }, { st: 'LOBBY' }, { st: null, set: { track: 'spa' } }]) {
+        await raw(Object.assign({ t: 'room' }, r));
       }
-      assert.strictEqual(N.trackId, 'monza');
-      assert.strictEqual(ev.filter(e => e[0] === 'track').length, 1, 'only the one from the welcome');
-      await raw({ t: 'track', id: 'spa', seq: 4 });
-      assert.strictEqual(N.trackId, 'spa');
+      await raw({ t: 'track', id: 'spa', seq: 4 });                // protocol 1: ignored
+      assert.deepStrictEqual([N.trackId, N.room.rs, ev.filter(e => e[0] === 'track' || e[0] === 'load').length], ['monza', 3, 1], 'nothing of that is a room');
+      await raw({ t: 'room', st: 'loading', rs: 4, set: { track: 'spa' }, load: { at: 1, until: 2, wait: [7], done: [], fail: [] } });
+      assert.deepStrictEqual([N.trackId, ev[ev.length - 1]], ['spa', ['load', 'spa', 4]]);
       inbox.length = 0;
       N.sendState({ x: 1, z: 2, heading: 0 }, true);
+      await sleep(60);
+      assert.strictEqual(inbox.filter(m => m.t === 's').length, 0, 'loading: no states');
+      assert.strictEqual(N.sendLoaded(4, true), true);
+      await raw({ t: 'room', st: 'session', rs: 4, set: { track: 'spa' } });
+      assert.deepStrictEqual(ev[ev.length - 1], ['go', 4, undefined]);
+      N.sendState({ x: 1, z: 2, heading: 0 }, true);
       await until(() => inbox.some(m => m.t === 's'), 1000, 's');
-      assert.deepStrictEqual([inbox.find(m => m.t === 's').g, inbox.find(m => m.t === 's').k], [undefined, 4], 'progress cleared by the track change');
+      assert.deepStrictEqual([inbox.find(m => m.t === 's').g, inbox.find(m => m.t === 's').k], [undefined, 4], 'progress cleared by the new load cycle');
 
       // --- everything else ---
       for (const j of ['null', '[]', '5', '"x"', '{"t":{}}', '{"t":"welcome","id":99,"host":99}', '{"t":"players","players":"x"}', '{"t":"nope"}', 'not json', '']) await raw(j);
@@ -1646,14 +2411,16 @@ function freshNet() {
       N.setProgress(1.5);
       sock.close(1001);
       await until(() => !N.connected, 2000, 'disconnected');
-      assert.deepStrictEqual([N.session, N.id, N.trackId, N.isHost], [null, 0, null, false]);
+      assert.deepStrictEqual([N.session, N.id, N.trackId, N.isHost, N.room, N.loadedRs], [null, 0, null, false, null, -1]);
       assert(Math.abs(N.serverNow() - Date.now()) < 50, 'the 5e9 ms offset is gone');
       // ...and a new connection starts from scratch (no progress in the first state, clock learnt again)
       fakeOff = -7e9; answer = true; inbox.length = 0;
       assert.deepStrictEqual(await N.join('127.0.0.1:' + wss.address().port), { ok: true });
       N.sendState({ x: 1, z: 2, heading: 0 }, true);
+      assert.strictEqual(N.sendLoaded(3, true), true, 'loaded again for the new connection');
+      N.sendState({ x: 1, z: 2, heading: 0 }, true);
       await until(() => inbox.some(m => m.t === 's'), 1000, 's');
-      assert.deepStrictEqual([inbox.find(m => m.t === 's').g, inbox.find(m => m.t === 's').k, N.session], [undefined, 3, null]);
+      assert.deepStrictEqual([inbox.filter(m => m.t === 's').length, inbox.find(m => m.t === 's').g, inbox.find(m => m.t === 's').k, N.session], [1, undefined, 3, null]);
       await sleep(60);
       clockOk('after reconnect');
       N.leave();
@@ -1666,14 +2433,15 @@ function freshNet() {
   });
 
   T('js/net.js v6 against the real server: car in profile / roster / players, room year + event, wear, parc fermé', async t => {
-    const srv = await t.start({ random: () => 0 });
+    const srv = await t.start({ random: () => 0, startMinMs: 0 });
     const A = freshNet(), B = freshNet(), C = freshNet();
     const ev = { A: [], B: [], C: [] };
     for (const [k, N] of [['A', A], ['B', B], ['C', C]]) {
-      for (const n of ['connected', 'disconnected', 'year', 'track', 'players', 'gp']) N.on(n, x => ev[k].push([n, n === 'year' ? x : null]));
+      for (const n of ['connected', 'disconnected', 'year', 'track', 'players', 'gp', 'room', 'load', 'go', 'lobby']) N.on(n, x => ev[k].push([n, n === 'year' ? x : n === 'load' ? x : null]));
     }
     const years = k => ev[k].filter(e => e[0] === 'year').map(e => e[1]);
     const addr = '127.0.0.1:' + srv.port;
+    const load = async (rs, ...Ns) => { for (const N of Ns) { await until(() => N.room && N.room.rs === rs && N.room.st !== 'lobby', 2000, 'load ' + rs); N.sendLoaded(rs, true, { len: LEN }); } };
     // the profile before joining: sanitised; a car that is not an id keeps the previous one
     A.setProfile({ name: 'Ann', colour: '#112233', car: '2024-ferrari' });
     B.setProfile({ name: 'Bob', car: 'Not A Car' });
@@ -1689,56 +2457,71 @@ function freshNet() {
     assert.deepStrictEqual([A.year, B.year, years('A'), years('B')], [null, null, [], []], 'no year yet: none, and no event');
     assert.deepStrictEqual(A.roster.map(p => [p.name, p.car]), [['Ann', '2024-ferrari'], ['Bob', '2024-mclaren']]);
     assert.deepStrictEqual([A.players[0].car, B.players[0].car], ['2024-mclaren', '2024-ferrari']);
-    // the year: host only, whole 2010..2100; the event comes with the roster
+    // the year: host only, lobby only, whole 2010..2100; the event comes with the room
     for (const bad of [2009, 2101, 2024.5, '2024', null, undefined, NaN, Infinity]) assert.strictEqual(A.setYear(bad), false, String(bad));
     assert.strictEqual(B.setYear(2024), false, 'not the host');
     assert.strictEqual(A.setYear(2024), true);
     assert.strictEqual(A.year, null, 'not before the server says so');
-    await until(() => A.year === 2024 && B.year === 2024, 2000, 'year');
+    await until(() => A.year === 2024 && B.year === 2024 && B.room.set.year === 2024, 2000, 'year');
     assert.deepStrictEqual([years('A'), years('B')], [[2024], [2024]]);
     // a car change alone goes out and reaches the others
     B.setProfile({ car: '2024-williams' });
     await until(() => A.roster[1].car === '2024-williams' && A.players[0].car === '2024-williams', 2000, 'car change');
-    // a newcomer: connected, then the year, then the track (its car is known before the track is built)
+    // a free-practice session; a newcomer: connected, then the year, then the room, then load (its car is known before
+    // the track is built)
     assert.strictEqual(A.selectTrack('monza'), true);
     await until(() => B.trackId === 'monza', 2000, 'track');
+    assert.strictEqual(A.startRoom({ len: LEN, force: true }), true);
+    await load(1, A, B);
+    await until(() => A.room.st === 'session' && B.room.st === 'session', 2000, 'session');
     C.setProfile({ name: 'Cy', car: '2023-alpine' });
     assert.deepStrictEqual(await C.join(addr), { ok: true });
-    assert.deepStrictEqual(ev.C.filter(e => e[0] === 'connected' || e[0] === 'year' || e[0] === 'track'), [['connected', null], ['year', 2024], ['track', null]]);
+    assert.deepStrictEqual(ev.C.filter(e => ['connected', 'year', 'room', 'load', 'track'].includes(e[0])), [['connected', null], ['year', 2024], ['room', null], ['load', 'monza']]);
     await until(() => A.roster.length === 3 && A.roster[2].car === '2023-alpine', 2000, 'C in the roster');
-    // Grand Prix: the wear goes along, the year is the room's
-    assert.strictEqual(A.gp('start', { q: 1, r: 1, len: LEN, wear: 4, year: 1999 }), true);
+    C.sendLoaded(1, true);
+    // free practice: the car may change
+    B.setProfile({ car: '2024-ferrari' });
+    await until(() => A.roster[1].car === '2024-ferrari', 2000, 'car change in free practice');
+    // Grand Prix: the wear and the laps are the room's, the year too
+    assert.strictEqual(A.backToLobby(), true);
+    await until(() => [A, B, C].every(N => N.room.st === 'lobby'), 2000, 'lobby');
+    assert.strictEqual(A.setRoom({ mode: 'gp', q: 1, r: 1, wear: 4 }), true);
+    await until(() => C.room.set.wear === 4 && C.room.set.mode === 'gp', 2000, 'settings');
+    assert.strictEqual(A.startRoom({ len: LEN, force: true }), true);
+    await load(2, A, B, C);
     await until(() => [A, B, C].every(N => N.session && N.session.phase === 'quali'), 2000, 'quali');
     assert.deepStrictEqual([A, B, C].map(N => [N.session.year, N.session.wear]), [[2024, 4], [2024, 4], [2024, 4]]);
     // parc fermé: the year is refused locally, the car is kept by the server, the choice is remembered
-    assert.strictEqual(A.setYear(2025), false, 'a session is on');
+    assert.deepStrictEqual([A.setYear(2025), A.setRoom({ wear: 2 }), A.setBots(2)], [false, false, false], 'a session is on');
     B.setProfile({ car: '2024-haas' });
     B.setProfile({ name: 'Bobby' });
     await until(() => A.roster[1].name === 'Bobby', 2000, 'rename');
-    assert.deepStrictEqual([A.roster[1].car, B.getProfile().car], ['2024-williams', '2024-haas']);
-    // back in free practice the car chosen meanwhile goes out by itself
-    assert.strictEqual(A.gp('end'), true);
-    await until(() => A.roster[1].car === '2024-haas' && C.players.find(p => p.id === B.id).car === '2024-haas', 2000, 'car sent again after the session');
-    assert.deepStrictEqual([A.session.phase, A.year, years('C')], ['free', 2024, [2024]]);
-    // a Grand Prix without a wear: the default
-    assert.strictEqual(A.gp('start', { q: 1, r: 1, len: LEN }), true);
+    assert.deepStrictEqual([A.roster[1].car, B.getProfile().car], ['2024-ferrari', '2024-haas']);
+    // back in the lobby the car chosen meanwhile goes out by itself
+    assert.strictEqual(A.gp('end'), true);                         // (qualifying: the lobby)
+    await until(() => A.roster[1].car === '2024-haas' && C.players.find(p => p.id === B.id).car === '2024-haas', 2000, 'car sent again in the lobby');
+    assert.deepStrictEqual([A.session.phase, A.room.st, A.year, years('C')], ['free', 'lobby', 2024, [2024]]);
+    // a Grand Prix without a wear change: the room's (4)
+    assert.strictEqual(A.startRoom({ len: LEN, force: true }), true);
+    await load(3, A, B, C);
     await until(() => A.session.phase === 'quali' && A.session.sid === 2, 2000, 'second start');
-    assert.deepStrictEqual([A.session.year, A.session.wear], [2024, 1]);
+    assert.deepStrictEqual([A.session.year, A.session.wear], [2024, 4]);
     A.gp('end');
-    await until(() => A.session.phase === 'free', 2000, 'free');
+    await until(() => A.session.phase === 'free' && A.room.st === 'lobby', 2000, 'free');
     // leaving: nothing of the room stays, and no year event for it
     const nb = years('B').length;
     B.leave();
-    assert.deepStrictEqual([B.year, B.roster.length, years('B').length], [null, 0, nb]);
+    assert.deepStrictEqual([B.year, B.roster.length, years('B').length, B.room], [null, 0, nb, null]);
     assert.deepStrictEqual(B.getProfile(), { name: 'Bobby', colour: '#ff7a14', car: '2024-haas' }, 'the profile is ours, it stays');
     C.leave(); A.leave();
+    assert.strictEqual(ev.A.filter(e => e[0] === 'track').length, 0);
     assert.strictEqual(uncaught.length, 0);
   });
 
-  T('js/net.js against a hostile server: garbage year / car / wear are sanitised; the year event fires on real changes only', async t => {
+  T('js/net.js against a hostile server: garbage room / year / car / wear are sanitised; the year event fires on real changes only; version texts', async t => {
     const wss = new WebSocket.Server({ port: nextPort(), host: '127.0.0.1' });
     await new Promise(r => wss.on('listening', r));
-    let sock = null, welcomeYear = '2024';
+    let sock = null, welcomeRoom = { st: 'lobby', rs: 0, set: { year: '2024' } }, refuse = null;
     const inbox = [];
     wss.on('connection', ws => {
       sock = ws;
@@ -1746,47 +2529,77 @@ function freshNet() {
         const m = JSON.parse(d.toString());
         inbox.push(m);
         if (m.t === 'hello') {
-          ws.send(JSON.stringify({ t: 'welcome', v: 1, id: 7, host: 8, track: 'monza', seq: 3, year: welcomeYear, now: Date.now(),
+          if (refuse) { ws.send(JSON.stringify(refuse)); ws.close(1008, 'version'); return; }
+          ws.send(JSON.stringify({ t: 'welcome', v: 2, id: 7, host: 8, ded: 'yes', room: welcomeRoom, now: Date.now(),
             players: [{ id: 7, name: 'me', colour: '#112233', slot: 0, car: m.car }, { id: 8, name: 'other', colour: '#445566', slot: 1, car: '<script>' }] }));
         } else if (m.t === 'ping') ws.send(JSON.stringify({ t: 'pong', c: m.c, s: Date.now() }));
       });
     });
     const N = freshNet();
     const ev = [];
-    for (const n of ['connected', 'year', 'track', 'players', 'gp']) N.on(n, x => ev.push(n === 'year' ? 'year ' + x : n));
+    for (const n of ['connected', 'year', 'track', 'players', 'gp', 'room', 'load', 'go', 'lobby', 'nostart']) N.on(n, (x, y) => ev.push(n === 'year' ? 'year ' + x : n === 'load' ? 'load ' + x + ' ' + y : n === 'nostart' ? 'nostart ' + x + ' ' + JSON.stringify(y) : n));
     const raw = async s => { sock.send(typeof s === 'string' ? s : JSON.stringify(s)); await sleep(15); };
     const years = () => ev.filter(e => /^year/.test(e));
-    const roster = (year, cars, host) => ({ t: 'players', host: host || 8, year, players: [
+    const roster = (cars, host) => ({ t: 'players', host: host || 8, players: [
       { id: 7, name: 'me', colour: '#112233', slot: 0, car: cars[0] }, { id: 8, name: 'other', colour: '#445566', slot: 1, car: cars[1] }] });
+    const roomMsg = (o, set) => Object.assign({ t: 'room', st: 'lobby', rs: 0, set: Object.assign({ track: 'monza', year: 2024 }, set || {}), ready: [], rr: 0, load: null, len: 0 }, o || {});
     const snap = (year, wear, phase) => ({ t: 'gp', now: 1, s: { sid: 1, phase: phase || 'quali', q: 1, r: 1, len: 5000, year, wear,
       lightsAt: 0, goAt: 0, winnerAt: 0, endsAt: 0, grid: [], order: [7], players: [{ id: 7, name: 'me' }] } });
+    const DEF = { track: null, year: null, mode: 'free', q: 3, r: 5, wear: 1, bots: 0, skill: 'pro' };
     try {
       N.setProfile({ car: '2024-ferrari' });
       assert.deepStrictEqual(await N.join('127.0.0.1:' + wss.address().port), { ok: true });
-      assert.strictEqual(inbox[0].car, '2024-ferrari', 'the hello carries the car');
-      assert.deepStrictEqual([N.year, years()], [null, []], 'a year that is a string: none, and no event');
+      assert.deepStrictEqual([inbox[0].v, inbox[0].car], [2, '2024-ferrari'], 'the hello: protocol 2, the car');
+      assert.deepStrictEqual([N.year, years(), N.ded, N.room], [null, [], false, { st: 'lobby', rs: 0, set: DEF, ready: [], rr: 0, load: null, len: 0 }],
+        'a year that is a string: none, and no event; every field present');
       assert.deepStrictEqual([N.roster.map(p => p.car), N.players[0].car], [['2024-ferrari', ''], ''], 'a car that is not an id: ""');
+      assert.deepStrictEqual(N.roster.map(p => [p.ready, p.load]), [[false, ''], [true, '']], 'the host counts as ready');
 
-      // --- year in the roster: garbage -> null; a change fires the event, a repeat does not ---
-      for (const y of [2024.5, '2024', 1e308, -2024, 2009, 2101, {}, [2024], true, null, undefined]) await raw(roster(y, ['a', 'b']));
-      await raw('{"t":"players","host":8,"year":1e999,"players":[]}');
-      assert.deepStrictEqual([N.year, years()], [null, []]);
-      await raw(roster(2024, ['2024-ferrari', '2024-mclaren'])); await raw(roster(2024, ['2024-ferrari', '2024-mclaren']));
-      assert.deepStrictEqual([N.year, years()], [2024, ['year 2024']]);
+      // --- room garbage: every field sanitised, never thrown on ---
+      await raw({ t: 'room', st: 'lobby', rs: -5, set: { track: '../x', year: 2024.5, mode: 'race', q: 1e9, r: 0, wear: 9, bots: 1e9, skill: '__proto__' },
+        ready: [7, 'x', null, 7, 8, {}], rr: 'x', load: { wait: [1] }, len: -1, extra: { a: 1 } });
+      assert.deepStrictEqual(N.room, { st: 'lobby', rs: 0, set: Object.assign({}, DEF, { bots: 15 }), ready: [7, 8], rr: 0, load: null, len: 0 });
+      assert.deepStrictEqual(N.roster.map(p => p.ready), [true, true]);
+      const many = [];
+      for (let i = 0; i < 1000; i++) many.push(i + 100);
+      await raw({ t: 'room', st: 'loading', rs: 2.9, set: { track: 'spa', year: 2010, mode: 'gp', q: 2.4, r: 99, wear: 4.6, bots: 3.7, skill: 'legend' },
+        ready: many, rr: 3, load: { at: 'x', until: 1e999, wait: many, done: [7, 7], fail: 'x' }, len: 5000 });
+      assert.deepStrictEqual([N.room.st, N.room.rs, N.room.set, N.room.ready.length, N.room.rr, N.room.load.at, N.room.load.until,
+        N.room.load.wait.length, N.room.load.done, N.room.load.fail, N.room.len],
+        ['loading', 2, { track: 'spa', year: 2010, mode: 'gp', q: 2, r: 99, wear: 5, bots: 3, skill: 'legend' }, 64, 3, 0, 0, 64, [7], [], 5000]);
+      assert.deepStrictEqual(N.roster.map(p => p.load), ['done', ''], 'from load');
+      assert.deepStrictEqual(ev.filter(e => /^load|^year/.test(e)).slice(-2), ['year 2010', 'load spa 2'], 'year, room, then load');
+      assert.strictEqual(N.sendLoaded(2, true, { len: 1e9, why: 'X' }), true);
+      await until(() => inbox.some(m => m.t === 'loaded'), 1000, 'loaded');
+      assert.deepStrictEqual(inbox.filter(m => m.t === 'loaded').pop(), { t: 'loaded', rs: 2, ok: true }, 'garbage len / why left out');
+      assert.deepStrictEqual([N.sendLoaded(2, true), N.sendLoaded(1, true), N.loadedRs], [false, false, 2]);
+      await raw('{"t":"room","st":"session","rs":2,"set":{"track":"spa","q":1e999},"len":1e999}');
+      assert.deepStrictEqual([N.room.st, N.room.set.q, N.room.len, N.room.load, ev[ev.length - 1]], ['session', 3, 0, null, 'go']);
+      await raw({ t: 'room', st: 'lobby', rs: 2, set: { track: 'spa', year: 2010 } });
+      assert.strictEqual(ev[ev.length - 1], 'lobby');
+      // nostart: why / ids sanitised
+      await raw({ t: 'nostart', why: 'not-ready', wait: [8, 'x', null, 9] }); await raw({ t: 'nostart', why: '<b>BAD</b>', wait: 'x' });
+      await raw({ t: 'nostart' });
+      assert.deepStrictEqual(ev.filter(e => /^nostart/.test(e)), ['nostart not-ready [8,9]', 'nostart  []', 'nostart  []']);
+
+      // --- year in the room: garbage -> null; a change fires the event, a repeat does not ---
+      ev.length = 0;
+      for (const y of [2024.5, '2024', 1e308, -2024, 2009, 2101, {}, [2024], true, null, undefined]) await raw(roomMsg({}, { year: y }));
+      assert.deepStrictEqual([N.year, years()], [null, ['year null']], 'one change (2010 -> none), then no more');
+      await raw(roomMsg()); await raw(roomMsg());
+      assert.deepStrictEqual([N.year, years()], [2024, ['year null', 'year 2024']]);
       await raw({ t: 'players', host: 8, year: 2030, players: 'x' });            // not a roster: ignored whole
-      await raw({ t: 'players', host: 8, year: 2030 });
-      assert.deepStrictEqual([N.year, N.roster.length, years()], [2024, 2, ['year 2024']]);
-      await raw(roster(2024.5, ['2024-ferrari', '2024-mclaren']));
-      assert.deepStrictEqual([N.year, years()], [null, ['year 2024', 'year null']], 'the room has no (usable) year any more');
-      await raw(roster(2030, ['2024-ferrari', '2024-mclaren']));
-      assert.deepStrictEqual([N.year, years()], [2030, ['year 2024', 'year null', 'year 2030']]);
+      await raw({ t: 'players', host: 8, year: 2030, players: [{ id: 7, name: 'me', colour: '#112233', slot: 0 }, { id: 8, name: 'other', colour: '#445566', slot: 1 }] });
+      assert.deepStrictEqual([N.year, N.roster.length, years()], [2024, 2, ['year null', 'year 2024']], 'the roster carries no year any more');
+      await raw(roomMsg({}, { year: 2030 }));
+      assert.deepStrictEqual([N.year, years()], [2030, ['year null', 'year 2024', 'year 2030']]);
 
       // --- cars in the roster rows ---
       for (const c of [5, null, {}, ['2024-ferrari'], 'A', 'a b', '', 'a'.repeat(41), '2024_x', '<img>', 'x\u0000', '__proto__']) {
-        await raw(roster(2030, ['2024-ferrari', c]));
+        await raw(roster(['2024-ferrari', c]));
         assert.deepStrictEqual([N.players[0].car, N.roster[1].car], ['', ''], JSON.stringify(c));
       }
-      await raw(roster(2030, ['2024-ferrari', 'a'.repeat(40)]));
+      await raw(roster(['2024-ferrari', 'a'.repeat(40)]));
       assert.deepStrictEqual([N.players[0].car, N.roster[1].car], ['a'.repeat(40), 'a'.repeat(40)]);
 
       // --- year / wear in the session snapshot ---
@@ -1798,36 +2611,46 @@ function freshNet() {
       await raw('{"t":"gp","s":{"sid":1,"phase":"quali","players":[],"year":1e999,"wear":1e999}}');
       assert.deepStrictEqual([N.session.year, N.session.wear], [null, 1]);
 
-      // --- setYear: refused locally when not the host / in a session; else sent, and net.year waits for the server ---
+      // --- setYear / setRoom: refused locally when not the host / not in the lobby; else sent, net.year waits for the server ---
       assert.strictEqual(N.setYear(2025), false, 'not the host');
-      await raw(roster(2030, ['2024-ferrari', ''], 7));
+      await raw(roster(['2024-ferrari', ''], 7));
       assert.strictEqual(N.isHost, true);
-      assert.strictEqual(N.setYear(2025), false, 'a session is on (quali)');
+      await raw(roomMsg({ st: 'session', rs: 3 }, { year: 2030 }));
+      assert.strictEqual(N.setYear(2025), false, 'a session is on');
       inbox.length = 0;
-      await raw(snap(2030, 1, 'free'));                                           // quali -> free: our car matches, nothing sent
+      await raw(roomMsg({ rs: 3 }, { year: 2030 }));                         // back in the lobby: our car matches, nothing sent
       assert.strictEqual(N.setYear(2025), true);
-      await until(() => inbox.some(m => m.t === 'year'), 1000, 'year message');
-      assert.deepStrictEqual([inbox.filter(m => m.t === 'year'), inbox.filter(m => m.t === 'profile').length, N.year], [[{ t: 'year', y: 2025 }], 0, 2030]);
+      await until(() => inbox.some(m => m.t === 'set'), 1000, 'set message');
+      assert.deepStrictEqual([inbox.filter(m => m.t === 'set'), inbox.filter(m => m.t === 'profile').length, N.year], [[{ t: 'set', year: 2025 }], 0, 2030]);
 
-      // --- parc fermé resync: a session ends and the server has another car for us -> we tell it once ---
-      await raw(roster(2030, ['old-car', ''], 7));
-      await raw(snap(2030, 1, 'free'));                                           // free -> free: no transition, nothing
+      // --- parc fermé resync: back in the lobby and the server has another car for us -> we tell it once ---
+      await raw(roster(['old-car', ''], 7));
+      await raw(roomMsg({ rs: 3 }, { year: 2030 }));                         // lobby -> lobby: no transition, nothing
       assert.strictEqual(inbox.filter(m => m.t === 'profile').length, 0);
-      await raw(snap(2030, 1, 'quali')); await raw(snap(2030, 1, 'results'));
-      await raw(snap(2030, 1, 'free'));
+      await raw(roomMsg({ st: 'loading', rs: 4 }, { year: 2030 })); await raw(roomMsg({ st: 'session', rs: 4, set: { track: 'monza', year: 2030, mode: 'gp' } }));
+      await raw(snap(2030, 1, 'free')); await raw(snap(2030, 1, 'quali')); await raw(snap(2030, 1, 'free'));
+      assert.strictEqual(inbox.filter(m => m.t === 'profile').length, 0, 'not from the gp snapshots any more');
+      await raw(roomMsg({ rs: 4 }, { year: 2030 }));
       await until(() => inbox.some(m => m.t === 'profile'), 1000, 'profile sent again');
-      await raw(snap(2030, 1, 'free')); await raw(snap(2030, 1, 'free'));
+      await raw(roomMsg({ rs: 4 }, { year: 2030 }));
       assert.deepStrictEqual(inbox.filter(m => m.t === 'profile'), [{ t: 'profile', name: 'Player', colour: '#ff7a14', car: '2024-ferrari' }]);
 
-      // --- a welcome with a real year: connected, then year, then track ---
+      // --- a welcome with a real year, in a session: connected, year, room, load ---
       N.leave();
-      assert.strictEqual(N.year, null);
-      welcomeYear = 2026; ev.length = 0; inbox.length = 0;
+      assert.deepStrictEqual([N.year, N.room], [null, null]);
+      welcomeRoom = { st: 'session', rs: 9, set: { track: 'suzuka', year: 2026 } }; ev.length = 0; inbox.length = 0;
       assert.deepStrictEqual(await N.join('127.0.0.1:' + wss.address().port), { ok: true });
-      assert.deepStrictEqual(ev.filter(e => e !== 'players' && e !== 'gp'), ['connected', 'year 2026', 'track']);
-      // (the hello, not inbox[0]: a ping of the old connection may still have been on its way when inbox was emptied)
-      assert.deepStrictEqual([N.year, inbox.find(m => m.t === 'hello').car], [2026, '2024-ferrari']);
+      assert.deepStrictEqual(ev.filter(e => e !== 'players' && e !== 'gp'), ['connected', 'year 2026', 'room', 'load suzuka 9']);
+      assert.deepStrictEqual([N.year, N.trackId, N.ded, N.address, inbox.find(m => m.t === 'hello').car], [2026, 'suzuka', false, '127.0.0.1:' + wss.address().port, '2024-ferrari']);
       N.leave();
+
+      // --- version refusals: the text by need ---
+      for (const [m, text] of [[{ t: 'error', code: 'version' }, '房間的遊戲版本比較舊（F1Drive v7.1 以前），請房主更新到 v7.2 以上。'],
+        [{ t: 'error', code: 'version', need: 3 }, '你的遊戲版本比較舊，請更新後再加入。'], [{ t: 'error', code: 'version', need: 1 }, '遊戲版本與房間不同，無法加入。'],
+        [{ t: 'error', code: 'version', need: 'x' }, '房間的遊戲版本比較舊（F1Drive v7.1 以前），請房主更新到 v7.2 以上。']]) {
+        refuse = m;
+        assert.deepStrictEqual(await N.join('127.0.0.1:' + wss.address().port), { ok: false, error: text }, JSON.stringify(m));
+      }
       assert.strictEqual(uncaught.length, 0, 'nothing thrown out of a message handler');
     } finally {
       wss.clients.forEach(ws => ws.terminate());
@@ -1840,8 +2663,8 @@ function freshNet() {
   /* ---------- computer drivers (bots): the host's game simulates them, the server keeps them as players ---------- */
   lane = lanes.bots;
 
-  T('bots: host only, free practice only; n clamped to the free seats; garbage n / skill / list sanitised; ids and slots kept; newcomers see them; a human takes the newest bot\'s seat', async t => {
-    const R = await room(t, 2);
+  T('bots: host only, lobby only; n clamped to the free seats; garbage n / skill / list sanitised; ids and slots kept; newcomers see them; a human takes the newest bot\'s seat', async t => {
+    const R = await lobbyRoom(t, 2);
     const [a, b] = R.cs;
     // a guest cannot; a host's n that is not a count changes nothing
     b.send({ t: 'bots', n: 3 });
@@ -1892,13 +2715,15 @@ function freshNet() {
     assert.deepStrictEqual(R.srv.info().players.filter(p => p.bot).map(p => [p.id, p.name]), [[ids[0], 'M. Verstappen'], [ids[1], 'Renamed']]);
     // a newcomer sees them in his welcome and his first snapshot
     const c = await client(R.srv.port, { name: 'C' });
+    R.cs.push(c);
     assert.deepStrictEqual([c.last('welcome').players.filter(p => p.bot).map(p => p.id), c.last('welcome').bots], [[ids[0], ids[1]], { n: 2, skill: 'rookie' }]);
     await c.wait(() => c.gp() && c.gp().players.filter(p => p.bot).length === 2, 2000, 'bots in his first snapshot');
     assert.strictEqual(c.last('welcome').players.find(p => p.id === c.id).slot, 4, 'the lowest free slot');
-    // a full room in free practice: a human takes the seat of the newest bot
+    // a full room in the lobby: a human takes the seat of the newest bot
     await addBots(a, [a, b, c], 13);
     const newest = c.roster().filter(p => p.bot).sort((x, y) => y.bi - x.bi)[0];
     const d = await client(R.srv.port, { name: 'D' });
+    R.cs.push(d);
     assert(d.last('welcome'), 'D is in');
     await c.wait(() => c.roster().length === 16 && c.roster().some(p => p.id === d.id), 2000, 'D in the roster');
     assert(!c.roster().some(p => p.id === newest.id), 'the newest bot made room');
@@ -1915,18 +2740,20 @@ function freshNet() {
   });
 
   T('bots: states (bs) only from their owner, validated like s, relayed in the snapshots; their laps (gl id) need their states; glno carries the id; lap times (lap id); progress rides on bs', async t => {
-    const R = await room(t, 2);
+    const R = await lobbyRoom(t, 2);
     const [a, b] = R.cs;
     const ids = await addBots(a, [a, b], 2);
+    botStates(a, [[ids[0], 1, 0, 1, 0, 0, 0, 10, 0]]);                         // the lobby: nobody is on a track
+    await R.go();                                                                // free practice
     // nothing of this is a state of the host's bots
     botStates(b, [[ids[0], 1, 0, 1, 0, 0, 0, 10, 0]]);                         // not his
-    a.send({ t: 'bs', k: a.seq() + 1, c: 1, b: [[ids[0], 1, 0, 1, 0, 0, 0, 10, 0]] });   // another track's
-    a.send({ t: 'bs', k: a.seq(), c: 'x', b: [[ids[0], 1, 0, 1, 0, 0, 0, 10, 0]] });
-    a.send({ t: 'bs', k: a.seq(), c: 1, b: 'x' });
-    a.send({ t: 'bs', k: a.seq(), c: 1, b: { 0: [ids[0], 1, 0, 1, 0, 0, 0, 10, 0], length: 1 } });
+    a.send({ t: 'bs', k: a.rs() + 1, c: 1, b: [[ids[0], 1, 0, 1, 0, 0, 0, 10, 0]] });   // another load cycle's
+    a.send({ t: 'bs', k: a.rs(), c: 'x', b: [[ids[0], 1, 0, 1, 0, 0, 0, 10, 0]] });
+    a.send({ t: 'bs', k: a.rs(), c: 1, b: 'x' });
+    a.send({ t: 'bs', k: a.rs(), c: 1, b: { 0: [ids[0], 1, 0, 1, 0, 0, 0, 10, 0], length: 1 } });
     botStates(a, [[ids[0]], [ids[0], 'x', 0, 0, 0, 0, 0, 0, 0], [b.id, 1, 0, 1, 0, 0, 0, 0, 0], [a.id, 1, 0, 1, 0, 0, 0, 0, 0], [999, 1, 0, 1, 0, 0, 0, 0, 0],
       null, 5, 'x', [ids[0], 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], [String(ids[0]), 1, 0, 1, 0, 0, 0, 0, 0]]);
-    a.send('{"t":"bs","k":' + a.seq() + ',"c":1,"b":[[' + ids[0] + ',1e999,0,0,0,0,0,0,0]]}');
+    a.send('{"t":"bs","k":' + a.rs() + ',"c":1,"b":[[' + ids[0] + ',1e999,0,0,0,0,0,0,0]]}');
     await sleep(200);
     assert(!b.all('snap').some(m => m.p.some(e => ids.includes(e[0]))), 'nothing of the bots relayed');
     // a good one: clamped / rounded like s; the same bot twice in one message: the first row
@@ -1939,20 +2766,20 @@ function freshNet() {
     // qualifying: a lap of a bot whose states do not cover it is answered with the reason AND the bot's id (host only)
     await R.start(1, 1);
     R.clk.add(3000);
-    a.send({ t: 'gl', k: a.seq(), sid: a.gp().sid, time: 2.5, id: ids[1] });
+    a.send({ t: 'gl', k: a.rs(), sid: a.gp().sid, time: 2.5, id: ids[1] });
     await a.wait(() => a.last('glno'), 2000, 'glno');
     assert.deepStrictEqual(a.last('glno'), { t: 'glno', why: 'not-driven', id: ids[1] });
     // the guest cannot report the host's bot's lap or lap times: no answer, nothing counted
     botRun(a, ids[0], LEN);
-    b.send({ t: 'gl', k: b.seq(), sid: b.gp().sid, time: 2.5, id: ids[0] });
-    b.send({ t: 'lap', last: 70, best: 70, id: ids[0] });
+    b.send({ t: 'gl', k: b.rs(), sid: b.gp().sid, time: 2.5, id: ids[0] });
+    b.send({ t: 'lap', k: b.rs(), last: 70, best: 70, id: ids[0] });
     await sleep(150);
     assert.deepStrictEqual([b.last('glno'), R.srv.info().gp.players.find(p => p.id === ids[0]).qLaps, R.srv.info().players.find(p => p.id === ids[0]).best], [null, 0, null]);
     // the host's: backed by the bots' states, they count; the grid goes by time, bots or not
     botLap(a, ids[0], 2.6); botLap(a, ids[1], 2.4); a.lap(2.5); b.lap(2.7);
     const g = await R.settle(s => s.phase === 'grid');
     assert.deepStrictEqual(g.grid, [ids[1], a.id, ids[0], b.id]);
-    a.send({ t: 'lap', last: 82.5, best: 81.25, id: ids[0] });
+    a.send({ t: 'lap', k: a.rs(), last: 82.5, best: 81.25, id: ids[0] });
     await b.wait(() => b.roster().find(p => p.id === ids[0]).best === 81.25, 2000, 'bot lap times in the roster');
     // the race: progress rides on the bots' rows (g), held to what their path covered, as a player's
     R.clk.to(g.goAt);
@@ -1971,7 +2798,7 @@ function freshNet() {
   T('bots: the host leaving takes his bots out of the session (race: DNF, qualifying: gone); the others race on; the same in a token room', async t => {
     // dedicated server, during the race: the bots are DNF, the humans still racing finish it (review r3: the race
     // used to be cut short to the results, the one left classified with 0 laps)
-    let R = await room(t, 3);
+    let R = await lobbyRoom(t, 3);
     let [a, b, c] = R.cs;
     let ids = await addBots(a, [a, b, c], 2);
     await R.start(1, 2);
@@ -2004,7 +2831,7 @@ function freshNet() {
     b.ws.close(); c.ws.close();
     // dedicated server, during qualifying: the bots leave it, B (the next host) qualifies on; then free practice
     // (his end) and he can have his own
-    R = await room(t, 2);
+    R = await lobbyRoom(t, 2);
     [a, b] = R.cs;
     ids = await addBots(a, [a, b], 3, null, 'amateur');
     await R.start(2, 2);
@@ -2018,21 +2845,22 @@ function freshNet() {
     await b.wait(() => b.gp().phase === 'grid', 2000, 'grid');
     assert.deepStrictEqual(b.gp().grid, [b.id]);
     b.send({ t: 'gp', a: 'end' });
-    await b.wait(() => b.gp().phase === 'free', 2000, 'free');
+    await b.wait(() => b.gp().phase === 'free' && b.room().st === 'lobby', 2000, 'free, the lobby');
     const ids2 = await addBots(b, [b], 1);
     assert(ids2[0] > ids[2] && b.roster().find(p => p.id === ids2[0]).owner === b.id);
     b.ws.close();
     // dedicated server, free practice: the session is not touched
-    R = await room(t, 2);
+    R = await lobbyRoom(t, 2);
     [a, b] = R.cs;
     await addBots(a, [a, b], 2);
+    await R.go();
     a.ws.close();
     await b.wait(() => b.roster().length === 1, 2000, 'bots gone');
     assert.deepStrictEqual([b.gp().phase, b.gp().players.length, b.gp().sid], ['free', 1, 0]);
     b.ws.close();
     // token room: the host's bots go with him, out of the session as on a dedicated server (the room closes anyway:
     // the game stops the server)
-    R = await room(t, 2, { hostToken: 'tok' });
+    R = await lobbyRoom(t, 2, { hostToken: 'tok' });
     [a, b] = R.cs;
     assert.strictEqual(a.host(), a.id);
     ids = await addBots(a, [a, b], 2);
@@ -2047,24 +2875,25 @@ function freshNet() {
   });
 
   T('bots: hostile messages from a guest and garbage from the host never change the room nor crash; a host with bots has a bigger message budget', async t => {
-    const R = await room(t, 2);
+    const R = await lobbyRoom(t, 2);
     const [a, b] = R.cs;
     const ids = await addBots(a, [a, b], 14);                      // 2 humans + 14 bots: a full room
+    await R.go();                                                  // free practice
     a.drive(0, 0); b.drive(5, 0); botStates(a, [[ids[0], 2, 0, 0, 0, 0, 0, 0, 0], [ids[1], 7, 0, 0, 0, 0, 0, 0, 0]]);
     await sleep(100);
     const state = () => JSON.stringify([R.srv.info().players, R.srv.info().bots, R.srv.info().gp]);
     const before = state();
     // the guest speaking for the host's bots / as the host
-    for (const m of [{ t: 'bots', n: 0 }, { t: 'bots', n: 16, skill: 'legend' }, { t: 'gl', k: b.seq(), sid: 0, time: 80, id: ids[0] },
-      { t: 'lap', last: 70, best: 70, id: ids[0] }, { t: 'lap', last: 70, best: 70, id: a.id }, { t: 'hit', k: b.seq(), to: a.id, from: ids[0], i: [5, 0] },
-      { t: 'hit', k: b.seq(), to: ids[1], from: ids[0], i: [5, 0] }, { t: 'bs', k: b.seq(), c: 1, b: [[ids[0], 50, 0, 0, 0, 0, 0, 0, 0]] }]) b.send(m);
+    for (const m of [{ t: 'bots', n: 0 }, { t: 'bots', n: 16, skill: 'legend' }, { t: 'gl', k: b.rs(), sid: 0, time: 80, id: ids[0] },
+      { t: 'lap', k: b.rs(), last: 70, best: 70, id: ids[0] }, { t: 'lap', k: b.rs(), last: 70, best: 70, id: a.id }, { t: 'hit', k: b.rs(), to: a.id, from: ids[0], i: [5, 0] },
+      { t: 'hit', k: b.rs(), to: ids[1], from: ids[0], i: [5, 0] }, { t: 'bs', k: b.rs(), c: 1, b: [[ids[0], 50, 0, 0, 0, 0, 0, 0, 0]] }]) b.send(m);
     // garbage from the host
     for (const m of [{ t: 'bots', n: 14, list: [null, 5, 'x', [], { name: {}, car: [], colour: 5, skill: 'x' }] }, { t: 'bots', n: '14' },
-      { t: 'gl', k: a.seq(), sid: 0, time: 80, id: 'x' }, { t: 'gl', k: a.seq(), sid: 0, time: 80, id: b.id }, { t: 'gl', k: a.seq(), sid: 0, time: 80, id: 999 },
-      { t: 'gl', k: a.seq(), sid: 0, time: 80, id: null }, { t: 'lap', last: 1, best: 1, id: b.id }, { t: 'lap', last: 70, best: 70, id: '5' },
-      { t: 'hit', k: a.seq(), to: ids[1], from: ids[0], i: [1, 0] }, { t: 'hit', k: a.seq(), to: ids[0], i: [1, 0] }, { t: 'hit', k: a.seq(), to: a.id, from: ids[0], i: [1, 0] },
-      { t: 'hit', k: a.seq(), to: b.id, from: 'x', i: [1, 0] }, { t: 'hit', k: a.seq(), to: b.id, from: b.id, i: [1, 0] }, { t: 'hit', k: a.seq(), to: b.id, from: 999, i: [1, 0] },
-      { t: 'bs', k: a.seq(), c: 1, b: [] }, { t: 'bs', k: a.seq(), c: 1, b: Array(40).fill(null) }]) a.send(m);
+      { t: 'gl', k: a.rs(), sid: 0, time: 80, id: 'x' }, { t: 'gl', k: a.rs(), sid: 0, time: 80, id: b.id }, { t: 'gl', k: a.rs(), sid: 0, time: 80, id: 999 },
+      { t: 'gl', k: a.rs(), sid: 0, time: 80, id: null }, { t: 'lap', k: a.rs(), last: 1, best: 1, id: b.id }, { t: 'lap', k: a.rs(), last: 70, best: 70, id: '5' },
+      { t: 'hit', k: a.rs(), to: ids[1], from: ids[0], i: [1, 0] }, { t: 'hit', k: a.rs(), to: ids[0], i: [1, 0] }, { t: 'hit', k: a.rs(), to: a.id, from: ids[0], i: [1, 0] },
+      { t: 'hit', k: a.rs(), to: b.id, from: 'x', i: [1, 0] }, { t: 'hit', k: a.rs(), to: b.id, from: b.id, i: [1, 0] }, { t: 'hit', k: a.rs(), to: b.id, from: 999, i: [1, 0] },
+      { t: 'bs', k: a.rs(), c: 1, b: [] }, { t: 'bs', k: a.rs(), c: 1, b: Array(40).fill(null) }]) a.send(m);
     a.send('{"t":"bots","n":14,"list":[{"__proto__":{"name":"evil"}},{"constructor":{"name":"x"}}],"skill":"__proto__"}');
     a.send('{"t":"bots","n":14,"skill":"constructor"}'); a.send('{"t":"bots","n":14,"skill":"hasOwnProperty"}');
     await sleep(250);
@@ -2073,8 +2902,8 @@ function freshNet() {
     // the host's connection may send more while it simulates bots: 200 lap times in one go all count; a guest's do not
     // (BOT_RATE 4 / s per bot: the host's bucket holds 120 + 2 x 4 x 14 = 232 once it has refilled, ~1 s)
     await sleep(1200);
-    for (let i = 0; i < 200; i++) a.send({ t: 'lap', last: 60 + i, best: 60, id: ids[i % 14] });
-    for (let i = 0; i < 200; i++) b.send({ t: 'lap', last: 60 + i, best: 60 });
+    for (let i = 0; i < 200; i++) a.send({ t: 'lap', k: a.rs(), last: 60 + i, best: 60, id: ids[i % 14] });
+    for (let i = 0; i < 200; i++) b.send({ t: 'lap', k: b.rs(), last: 60 + i, best: 60 });
     await b.wait(() => b.roster().find(p => p.id === ids[199 % 14]).last === 259, 2000, 'every bot lap time');
     await sleep(150);
     const guest = b.roster().find(p => p.id === b.id).last;
@@ -2086,9 +2915,10 @@ function freshNet() {
   lane = lanes.bots2;                          // real time: impact reports judge motion by arrival time
 
   T('bots: impact reports to / from bots under the same rules (their positions, ghosts, throttle); never between one player\'s own cars', async t => {
-    const R = await room(t, 3);
+    const R = await lobbyRoom(t, 3);
     const [a, b, o] = R.cs;
     const ids = await addBots(a, [a, b, o], 2);
+    await R.go();                                                  // free practice
     // b parked at the origin; the host far away; bot 1 parked 6 m in front of b
     const keep = setInterval(() => { b.drive(0, 0); a.drive(-500, 50); botStates(a, [[ids[1], 6, 0, 0, 0, 0, 0, 0, 0]]); }, 50);
     await sleep(160);
@@ -2097,7 +2927,7 @@ function freshNet() {
     const botHits = async (to, from, expected, label) => {
       const n = to.all('hit').length;
       await botDriveTo(a, from, -9, -3, 0, 3);
-      a.send({ t: 'hit', k: a.seq(), to: to.id, from, i: [++sent, 0] });
+      a.send({ t: 'hit', k: a.rs(), to: to.id, from, i: [++sent, 0] });
       if (expected) {
         await to.wait(() => to.all('hit').length === n + 1, 1000, label);
         assert.deepStrictEqual(to.last('hit'), { t: 'hit', from, i: [sent, 0] }, label);
@@ -2107,34 +2937,34 @@ function freshNet() {
     assert.strictEqual(o.all('hit').length + a.all('hit').length, 0, 'nobody else');
     // b drives into bot 1: its owner hears it, told which of his bots it was
     await driveTo(b, 0, 3, 0, 3);
-    b.send({ t: 'hit', k: b.seq(), to: ids[1], i: [4, 0] });
+    b.send({ t: 'hit', k: b.rs(), to: ids[1], i: [4, 0] });
     await a.wait(() => a.all('hit').length === 1, 1000, 'the owner hears his bot was hit');
     assert.deepStrictEqual(a.last('hit'), { t: 'hit', from: b.id, bot: ids[1], i: [4, 0] });
     // a parked bot claiming to ram at 130 m/s: only the slack (its positions do not close on him); both cars parked
     // for longer than the motion window (500 ms)
     const n0 = b.all('hit').length;
     for (let k = 0; k < 12; k++) { botStates(a, [[ids[0], -3, 0, 0, Math.PI / 2, 0, 0, 130, 0]]); await sleep(50); }
-    a.send({ t: 'hit', k: a.seq(), to: b.id, from: ids[0], i: [80, 0] });
+    a.send({ t: 'hit', k: a.rs(), to: b.id, from: ids[0], i: [80, 0] });
     await b.wait(() => b.all('hit').length === n0 + 1, 1000, 'slack');
     assert(Math.hypot(...b.last('hit').i) <= 3.01, 'a parked bot: only the slack: ' + JSON.stringify(b.last('hit').i));
     // a teleported bot reports nothing; two reports of one bot within 40 ms: the first
     botStates(a, [[ids[0], -2000, 0, 0, 0, 0, 0, 0, 0]]); await sleep(60);
     botStates(a, [[ids[0], -3, 0, 0, Math.PI / 2, 0, 0, 20, 0]]);
-    a.send({ t: 'hit', k: a.seq(), to: b.id, from: ids[0], i: [2, 0] });
+    a.send({ t: 'hit', k: a.rs(), to: b.id, from: ids[0], i: [2, 0] });
     await sleep(120);
     assert.strictEqual(b.all('hit').length, n0 + 1, 'nothing after a teleport');
     await botDriveTo(a, ids[0], -9, -3, 0, 3);
-    a.send({ t: 'hit', k: a.seq(), to: b.id, from: ids[0], i: [2, 0] });
-    a.send({ t: 'hit', k: a.seq(), to: b.id, from: ids[0], i: [3, 0] });
+    a.send({ t: 'hit', k: a.rs(), to: b.id, from: ids[0], i: [2, 0] });
+    a.send({ t: 'hit', k: a.rs(), to: b.id, from: ids[0], i: [3, 0] });
     await b.wait(() => b.all('hit').length === n0 + 2, 1000, 'one of two');
     await sleep(100);
     assert.deepStrictEqual([b.all('hit').length, b.last('hit').i], [n0 + 2, [2, 0]]);
     // never between one player's own cars: his game settles those (his car / his bots)
     await botDriveTo(a, ids[0], 1, 4, 0, 3);
-    a.send({ t: 'hit', k: a.seq(), to: ids[1], from: ids[0], i: [1, 0] });
-    a.send({ t: 'hit', k: a.seq(), to: ids[1], i: [1, 0] });
+    a.send({ t: 'hit', k: a.rs(), to: ids[1], from: ids[0], i: [1, 0] });
+    a.send({ t: 'hit', k: a.rs(), to: ids[1], i: [1, 0] });
     await sleep(60);
-    a.send({ t: 'hit', k: a.seq(), to: a.id, from: ids[1], i: [1, 0] });
+    a.send({ t: 'hit', k: a.rs(), to: a.id, from: ids[1], i: [1, 0] });
     await sleep(120);
     assert.deepStrictEqual([a.all('hit').length, b.all('hit').length, o.all('hit').length], [1, n0 + 2, 0]);
     // qualifying: bots are ghosts like everybody
@@ -2144,7 +2974,7 @@ function freshNet() {
     await sleep(120);
     await botHits(b, ids[0], false, 'qualifying: a ghost');
     await driveTo(b, 0, 3, 0, 3);
-    b.send({ t: 'hit', k: b.seq(), to: ids[1], i: [4, 0] });
+    b.send({ t: 'hit', k: b.rs(), to: ids[1], i: [4, 0] });
     await sleep(120);
     assert.strictEqual(a.all('hit').length, 1, 'qualifying: nothing to the owner');
     clearInterval(keep2);
@@ -2155,7 +2985,7 @@ function freshNet() {
 
   T('js/net.js bots against the real server: setBots, net.bots / roster / players, states relayed and kept alive, laps / lap times / impacts by bot id, the host leaving', async t => {
     const clk = manualClock();
-    const srv = await t.start({ now: clk, random: () => 0 });
+    const srv = await t.start({ now: clk, random: () => 0, startMinMs: 0 });
     const A = freshNet(), B = freshNet();
     const ev = { A: [], B: [] };
     for (const [k, N] of [['A', A], ['B', B]]) {
@@ -2187,8 +3017,18 @@ function freshNet() {
       [[A.id, false, null, '', 0], [ids[0], true, 0.98, '2026-red-bull', A.id], [ids[1], true, 0.7, '2026-mclaren', A.id], [ids[2], true, 1, '', A.id]]);
     assert.deepStrictEqual(B.roster.map(p => [p.bot, p.mine]), [[false, false], [false, false], [true, false], [true, false], [true, false]]);
     assert.deepStrictEqual([A.botSettings, B.botSettings, B.bots], [{ n: 3, skill: 'legend' }, { n: 3, skill: 'legend' }, []]);
-    // states: only ours go out; B draws them like a player's car; the keepalive repeats them parked
+    // states: only ours go out, only in the session of the cycle we loaded; B draws them like a player's car; the
+    // keepalive repeats them parked
     const st = (x, z, v) => ({ x, y: 1, z, heading: Math.PI / 2, pitch: 0, roll: 0, speed: v || 0, steer: 0.1 });
+    assert.strictEqual(A.sendBotStates([{ id: ids[0], state: st(0, 0) }], true), false, 'the lobby: nobody is on a track');
+    assert.strictEqual(A.selectTrack('monza'), true);
+    await until(() => B.trackId === 'monza', 2000, 'track');
+    assert.strictEqual(A.startRoom({ len: LEN, force: true }), true);
+    await until(() => A.room.st === 'loading' && B.room.st === 'loading', 2000, 'loading');
+    assert.strictEqual(A.sendBotStates([{ id: ids[0], state: st(0, 0) }], true), false, 'loading');
+    A.sendLoaded(1, true, { len: LEN }); B.sendLoaded(1, true, { len: LEN });
+    await until(() => A.room.st === 'session' && B.room.st === 'session', 2000, 'session');
+    assert.strictEqual(A.setBots(1), false, 'the field is set in the lobby only');
     assert.strictEqual(A.sendBotStates([{ id: B.id, state: st(0, 0) }, { id: 999, state: st(0, 0) }], true), false, 'not ours');
     assert.strictEqual(A.sendBotStates([{ id: ids[0], state: st(-40, 0, 20) }, { id: ids[1], state: st(30, 30) }, { id: ids[0], state: st(99, 99) }], true), true);
     assert.strictEqual(A.sendBotStates([{ id: ids[1], state: st(31, 30) }]), false, 'at most ~20 times a second');
@@ -2213,10 +3053,14 @@ function freshNet() {
     B.sendHit(ids[1], 4, 0);
     await until(() => ev.A.length, 1000, 'botHit');
     assert.deepStrictEqual(take('A'), [['botHit', ids[1], B.id, [4, 0]]]);
-    // a session: bot laps by id (rejections come back by id), lap times by id, parc fermé for the field
-    A.selectTrack('monza');
-    await until(() => A.trackId === 'monza' && B.trackId === 'monza', 2000, 'track');
-    assert.strictEqual(A.gp('start', { q: 1, r: 1, len: LEN }), true);
+    // a Grand Prix: bot laps by id (rejections come back by id), lap times by id, parc fermé for the field
+    assert.strictEqual(A.backToLobby(), true);
+    await until(() => A.room.st === 'lobby' && B.room.st === 'lobby', 2000, 'lobby');
+    assert.strictEqual(A.setRoom({ mode: 'gp', q: 1, r: 1 }), true);
+    await until(() => B.room.set.mode === 'gp', 2000, 'mode gp');
+    assert.strictEqual(A.startRoom({ len: LEN, force: true }), true);
+    await until(() => A.room.st === 'loading' && B.room.st === 'loading', 2000, 'loading 2');
+    A.sendLoaded(2, true, { len: LEN }); B.sendLoaded(2, true, { len: LEN });
     await until(() => A.session && A.session.phase === 'quali' && B.session && B.session.phase === 'quali', 2000, 'quali');
     assert.deepStrictEqual(B.session.players.map(p => p.bot === true), [false, false, true, true, true]);
     assert.strictEqual(A.setBots(0), false, 'parc fermé');
@@ -2259,7 +3103,8 @@ function freshNet() {
       ws.on('message', d => {
         const m = JSON.parse(d.toString());
         inbox.push(m);
-        if (m.t === 'hello') ws.send(JSON.stringify({ t: 'welcome', v: 1, id: 7, host: 7, track: 'monza', seq: 3, now: Date.now(), bots: 'x', players }));
+        if (m.t === 'hello') ws.send(JSON.stringify({ t: 'welcome', v: 2, id: 7, host: 7, now: Date.now(), bots: 'x', players,
+          room: { st: 'session', rs: 3, set: { track: 'monza' }, ready: [], rr: 0, load: null, len: 5000 } }));
       });
     });
     const N = freshNet(), ev = [];
@@ -2267,6 +3112,7 @@ function freshNet() {
     const raw = async s => { sock.send(typeof s === 'string' ? s : JSON.stringify(s)); await sleep(15); };
     try {
       assert.deepStrictEqual(await N.join('127.0.0.1:' + wss.address().port), { ok: true });
+      assert.strictEqual(N.sendLoaded(3, true), true);              // (the room's session: our cars may go out)
       assert.deepStrictEqual(N.bots.map(x => [x.id, x.bi, x.skill, x.name]), [[21, 0, null, 'mine too'], [20, 1, 1, 'mine']]);
       assert.deepStrictEqual(N.players.map(p => [p.id, p.bot, p.skill, p.owner, p.name]),
         [[22, true, 0.5, 8, 'theirs'], [23, false, null, 0, 'fake'], [24, true, null, 0, 'AI 24']]);
@@ -2310,7 +3156,22 @@ function freshNet() {
       assert.deepStrictEqual(inbox.filter(m => m.t === 'gl').map(m => [m.id, m.at]), [[20, 5e12], [undefined, undefined]]);
       assert.deepStrictEqual(inbox.filter(m => m.t === 'lap').map(m => [m.id, m.best]), [[20, 79]]);
       assert.deepStrictEqual(inbox.filter(m => m.t === 'hit').map(m => [m.to, m.from]), [[22, 20], [22, 21], [22, undefined]]);
-      // setBots: whatever is asked fits in one frame (16 at most)
+      // keepalive: with the loop stopped the last rows are repeated parked (speed / steer 0, no progress)
+      inbox.length = 0;
+      await sleep(450);
+      const parked = inbox.filter(m => m.t === 'bs');
+      assert(parked.length >= 1, 'repeated');
+      assert.deepStrictEqual(parked[parked.length - 1].b, [[20, 1.23, 2, 3, 0.7168, 0.123, 0, 0, 0], [21, 1, 0, 2, -1, 0, 0, 0, 0]]);
+      // a session is on: no field changes; a new load cycle: no more repeats of the old poses
+      await raw({ t: 'gp', now: 1, s: { sid: 4, phase: 'quali', q: 1, r: 1, len: 5000, lightsAt: 0, goAt: 0, winnerAt: 0, endsAt: 0, grid: [], order: [7, 20],
+        players: [{ id: 7, name: 'me' }, { id: 20, name: 'mine', bot: true }, { id: 21, name: 'x', bot: 'yes' }] } });
+      assert.deepStrictEqual([N.setBots(0), N.session.players.map(p => p.bot)], [false, [undefined, true, undefined]]);
+      await raw({ t: 'room', st: 'loading', rs: 4, set: { track: 'spa' } });
+      inbox.length = 0;
+      await sleep(450);
+      assert.strictEqual(inbox.filter(m => m.t === 'bs').length, 0, 'the old cycle\'s poses are not repeated');
+      // the lobby: setBots; whatever is asked fits in one frame (16 at most)
+      await raw({ t: 'room', st: 'lobby', rs: 4, set: { track: 'spa' } });
       inbox.length = 0;
       assert.strictEqual(N.setBots(Array.from({ length: 20 }, (_, i) => ({ name: '\u{1F600}'.repeat(20), car: 'x'.repeat(40), colour: '#AABBCC', skill: i / 20 })), 'mixed'), true);
       await until(() => inbox.some(m => m.t === 'bots'), 1000, 'bots');
@@ -2321,20 +3182,6 @@ function freshNet() {
       assert.strictEqual(N.setBots([{ name: 'A', car: '2026-ferrari', colour: '#AABBCC', skill: 2 }, { name: 5, car: 'BAD', colour: 'x', skill: 'x' }], 'nope'), true);
       await until(() => inbox.some(m => m.t === 'bots'), 1000, 'bots 2');
       assert.deepStrictEqual(inbox.find(m => m.t === 'bots'), { t: 'bots', n: 2, list: [{ name: 'A', car: '2026-ferrari', colour: '#aabbcc', skill: 1 }, {}] });
-      // keepalive: with the loop stopped the last rows are repeated parked (speed / steer 0, no progress)
-      inbox.length = 0;
-      await sleep(450);
-      const parked = inbox.filter(m => m.t === 'bs');
-      assert(parked.length >= 1, 'repeated');
-      assert.deepStrictEqual(parked[parked.length - 1].b, [[20, 1.23, 2, 3, 0.7168, 0.123, 0, 0, 0], [21, 1, 0, 2, -1, 0, 0, 0, 0]]);
-      // a session is on: no field changes; a new track: no more repeats of the old poses
-      await raw({ t: 'gp', now: 1, s: { sid: 4, phase: 'quali', q: 1, r: 1, len: 5000, lightsAt: 0, goAt: 0, winnerAt: 0, endsAt: 0, grid: [], order: [7, 20],
-        players: [{ id: 7, name: 'me' }, { id: 20, name: 'mine', bot: true }, { id: 21, name: 'x', bot: 'yes' }] } });
-      assert.deepStrictEqual([N.setBots(0), N.session.players.map(p => p.bot)], [false, [undefined, true, undefined]]);
-      await raw({ t: 'track', id: 'spa', seq: 4 });
-      inbox.length = 0;
-      await sleep(450);
-      assert.strictEqual(inbox.filter(m => m.t === 'bs').length, 0, 'the old track\'s poses are not repeated');
       // a roster without our bots: they are gone ('bots' with []), and so is all that was kept for them
       await raw({ t: 'players', host: 7, players: players.filter(p => p.id === 7 || p.id === 22) });
       assert.deepStrictEqual([N.bots, ev.splice(0).map(e => [e[0], e[1]])], [[], [['bots', []]]]);
@@ -2383,7 +3230,7 @@ function freshNet() {
       const ws = new WebSocket('ws://127.0.0.1:' + srv.port, { localAddress: '127.0.0.3' });
       const c = { ws, msgs: [], closed: null };
       ws.on('message', d => { c.msgs.push(JSON.parse(d.toString())); resolve(c); });
-      ws.on('open', () => { if (hello) ws.send(JSON.stringify({ t: 'hello', v: 1, name: hello })); else setTimeout(() => resolve(c), 30); });
+      ws.on('open', () => { if (hello) ws.send(JSON.stringify({ t: 'hello', v: 2, name: hello })); else setTimeout(() => resolve(c), 30); });
       ws.on('close', code => { c.closed = code; resolve(c); });
       ws.on('error', () => resolve(c));
     });
@@ -2433,17 +3280,17 @@ function freshNet() {
     const rosters = b.all('players').length - n0;
     assert(rosters < 25, 'roster broadcasts caused by the flood: ' + rosters);
     await b.wait(() => b.roster().length === 1);
-    b.send({ t: 'track', id: 'ok' });
-    await b.wait(() => b.last('track'));
+    b.send({ t: 'set', track: 'ok' });
+    await b.wait(() => b.room().set.track === 'ok');
     b.ws.close();
   });
 
-  T('nothing a client sends is amplified: floods of lap / profile / gp / gl / ping / joins reach the room as a trickle', async t => {
-    const R = await room(t, 3);
+  T('nothing a client sends is amplified: floods of lap / profile / gp / gl / ping / room messages / joins reach the room as a trickle', async t => {
+    const R = await lobbyRoom(t, 3, { startMinMs: START_MIN_MS });
     const [host, watcher, spammer] = R.cs;
     await R.start(1, 1);
     await sleep(150);
-    const count = () => ({ players: watcher.all('players').length, gp: watcher.all('gp').length, all: watcher.msgs.length });
+    const count = () => ({ players: watcher.all('players').length, gp: watcher.all('gp').length, room: watcher.all('room').length, all: watcher.msgs.length });
     const flood = async (from, make, label, limit) => {
       const n = count();
       for (let i = 0; i < 3000; i++) from.send(make(i));
@@ -2451,24 +3298,31 @@ function freshNet() {
       assert.strictEqual(from.closed.code, 1008, label);
       await sleep(250);
       const d = count();
-      assert(d.all - n.all < limit, label + ': the watcher got ' + (d.all - n.all) + ' messages (' + (d.players - n.players) + ' rosters, ' + (d.gp - n.gp) + ' gp)');
+      assert(d.all - n.all < limit, label + ': the watcher got ' + (d.all - n.all) + ' messages (' + (d.players - n.players) + ' rosters, ' +
+        (d.gp - n.gp) + ' gp, ' + (d.room - n.room) + ' room)');
       return d.all - n.all;
     };
     const got = [];
     // in a session a rename touches the roster AND the Grand Prix snapshot
     got.push(await flood(spammer, i => ({ t: 'profile', name: 'n' + i }), 'profile', 25));
     let s2 = await client(R.srv.port, { name: 's2' });
-    got.push(await flood(s2, i => ({ t: 'lap', last: 60 + i, best: 60 }), 'lap', 25));
+    got.push(await flood(s2, i => ({ t: 'lap', k: R.srv.info().room.rs, last: 60 + i, best: 60 }), 'lap', 25));
     s2 = await client(R.srv.port, { name: 's3' });
     await s2.wait(() => s2.gp());
-    got.push(await flood(s2, () => ({ t: 'gl', k: 1, sid: 1, time: 0.5 }), 'gl', 12));
+    got.push(await flood(s2, () => ({ t: 'gl', k: s2.rs(), sid: 1, time: 0.5 }), 'gl', 12));
     assert(s2.all('glno').length <= 200, 'answers to the flooder itself are bounded by the rate limit (120 burst + 60 / s): ' + s2.all('glno').length);
     s2 = await client(R.srv.port, { name: 's4' });
     got.push(await flood(s2, i => ({ t: 'ping', c: i }), 'ping', 12));
     assert(s2.all('pong').length <= 200, 'pongs: ' + s2.all('pong').length);
     s2 = await client(R.srv.port, { name: 's5' });
     got.push(await flood(s2, i => ({ t: 'gp', a: i % 2 ? 'end' : 'start', q: 1, r: 1, len: LEN }), 'gp from a guest', 12));
-    assert.deepStrictEqual([srv_phase(R), srv_gp(R).sid], ['quali', 1], 'and it changed nothing');
+    assert.deepStrictEqual([srv_phase(R), srv_gp(R).sid, R.srv.info().room.st], ['quali', 1, 'session'], 'and it changed nothing');
+    // a guest's room messages: set / ready / start / loaded / go / back
+    s2 = await client(R.srv.port, { name: 's6' });
+    const k6 = s2.rs();
+    got.push(await flood(s2, i => [{ t: 'set', track: 'x' + i, mode: 'free' }, { t: 'ready', on: i % 2 === 0 }, { t: 'start', len: LEN, force: true },
+      { t: 'loaded', rs: k6, ok: i % 2 === 0 }, { t: 'go' }, { t: 'back' }][i % 6], 'room messages from a guest', 12));
+    assert.deepStrictEqual([srv_phase(R), R.srv.info().room.st, R.srv.info().room.set.track], ['quali', 'session', 'monza'], 'and they changed nothing');
     // even the host cannot make the server spray snapshots
     got.push(await flood(host, i => ({ t: 'gp', a: i % 2 ? 'end' : 'start', q: 1, r: 1, len: LEN }), 'gp from the host', 25));
     await watcher.wait(() => watcher.host() === watcher.id);
@@ -2480,47 +3334,45 @@ function freshNet() {
     await sleep(250);
     const d = count();
     // per join + leave the watcher used to get 2 rosters + 2 snapshots (+ gone); now it is bounded by time
-    assert(d.players - n.players < 40 && d.gp - n.gp < 40, 'churn: ' + (d.players - n.players) + ' rosters, ' + (d.gp - n.gp) + ' gp for 40 joins + 40 leaves');
-    console.log('     watcher messages per 3000-message flood (profile, lap, gl, ping, guest gp, host gp): ' + got.join(', ') +
+    assert(d.players - n.players < 40 && d.gp - n.gp < 40 && d.room - n.room < 10, 'churn: ' + (d.players - n.players) + ' rosters, ' + (d.gp - n.gp) +
+      ' gp, ' + (d.room - n.room) + ' room for 40 joins + 40 leaves');
+    console.log('     watcher messages per 3000-message flood (profile, lap, gl, ping, guest gp, guest room, host gp): ' + got.join(', ') +
       '; churn: ' + (d.players - n.players) + ' rosters + ' + (d.gp - n.gp) + ' gp');
     // the room still works, and its state is the latest
-    watcher.send({ t: 'gp', a: 'end' }); watcher.send({ t: 'gp', a: 'start', q: 2, r: 3, len: LEN });
+    await sleep(START_MIN_MS + 50);
+    await watcher.wait(() => watcher.room().st === 'lobby');
+    watcher.send({ t: 'set', q: 2, r: 3 });
+    await watcher.wait(() => watcher.room().set.q === 2);
+    watcher.send({ t: 'start', len: LEN });
+    await watcher.wait(() => watcher.room().st === 'loading');
+    watcher.loaded();
     const g = await settle(R.srv, [watcher], s => s.phase === 'quali' && s.q === 2);
     assert.deepStrictEqual(g.players.map(p => p.id), [watcher.id]);
     watcher.ws.close();
   });
 
-  T('nothing a host sends for his bots is amplified: floods of bots / bs / bot laps reach the room as a trickle; he is kicked like anybody', async t => {
-    const R = await room(t, 2);
+  T('nothing the host sends in the lobby is amplified: floods of set / bots / start / back / go reach the room as a trickle; transitions at most one a second', async t => {
+    const R = await lobbyRoom(t, 2, { startMinMs: START_MIN_MS });
     const [host, watcher] = R.cs;
-    await sleep(150);
-    // his field flipping between 14 bots and none, 3000 times: each flip changes the roster and the session
-    let n = watcher.msgs.length;
-    for (let i = 0; i < 3000; i++) host.send({ t: 'bots', n: i % 2 ? 14 : 0, list: [{ name: 'b' + i }] });
-    await host.wait(() => host.closed, 5000, 'bots flood: kicked');
-    assert.strictEqual(host.closed.code, 1008);
-    await sleep(250);
-    const gotBots = watcher.msgs.length - n;
-    assert(gotBots < 30, 'the watcher got ' + gotBots + ' messages for 3000 field changes');
-    await watcher.wait(() => watcher.host() === watcher.id && watcher.roster().length === 1, 2000, 'his bots went with him');
-    // states and laps of 14 bots, 3000 messages: the room still gets its 20 snapshots a second and nothing more
-    const ids = await addBots(watcher, [watcher], 14);
-    const w2 = await client(R.srv.port, { name: 'w2' });
-    await sleep(150);
-    n = w2.msgs.length;
-    const t0 = Date.now();
+    await sleep(1100);
+    const n = { room: watcher.all('room').length, all: watcher.msgs.length };
     for (let i = 0; i < 3000; i++) {
-      watcher.send(i % 3 ? { t: 'bs', k: watcher.seq(), c: i, b: ids.map((id, j) => [id, i % 50, 0, j * 10, 0, 0, 0, 10, 0]) }
-        : { t: 'gl', k: watcher.seq(), sid: 0, time: 80, id: ids[i % 14] });
+      host.send([{ t: 'set', track: 't' + i, year: 2010 + (i % 17), mode: i % 2 ? 'gp' : 'free', q: 1 + (i % 5) }, { t: 'bots', n: i % 15 },
+        { t: 'start', len: LEN, force: true }, { t: 'back' }, { t: 'go' }, { t: 'ready', on: true }][i % 6]);
     }
-    await watcher.wait(() => watcher.closed, 5000, 'bs flood: kicked');
-    await sleep(250);
-    const ms = Date.now() - t0, gotBs = w2.msgs.length - n;
-    assert(gotBs <= 20 * ms / 1000 + 10, 'w2 got ' + gotBs + ' messages in ' + ms + ' ms');
-    assert(watcher.all('glno').length <= 400, 'answers to the flooder are bounded by his rate limit: ' + watcher.all('glno').length);
-    await w2.wait(() => w2.roster().length === 1, 2000, 'the second flooder\'s bots went with him');
-    console.log('     watcher messages per 3000-message bot flood (bots, bs + gl): ' + gotBots + ', ' + gotBs + ' in ' + ms + ' ms');
-    w2.ws.close();
+    await host.wait(() => host.closed, 5000, 'kicked');
+    assert.strictEqual(host.closed.code, 1008);
+    await sleep(400);
+    const rooms = watcher.all('room').length - n.room, all = watcher.msgs.length - n.all;
+    const starts = new Set(watcher.all('room').slice(n.room).filter(m => m.st === 'loading').map(m => m.rs)).size;
+    assert(starts <= 1, 'one start (START_MIN_MS): ' + starts);
+    assert(rooms <= 12 && all < 40, 'the watcher got ' + all + ' messages (' + rooms + ' room) for 3000 lobby messages from the host');
+    console.log('     watcher messages per 3000-message host lobby flood: ' + all + ' (' + rooms + ' room, ' + starts + ' start)');
+    // every room message well-formed
+    for (const m of watcher.all('room')) {
+      assert(['lobby', 'loading', 'session'].includes(m.st) && Number.isInteger(m.rs) && Array.isArray(m.ready) && (m.load === null || Array.isArray(m.load.wait)), JSON.stringify(m));
+    }
+    watcher.ws.close();
   });
 
   T('a kicked or refused client that ignores the close frame loses its seat at once and is cut off', async t => {
@@ -2531,14 +3383,14 @@ function freshNet() {
     liar.send({ t: 'hello', v: 999, name: 'liar' });
     await until(() => liar.closeFrame === 1008, 2000, 'close frame');
     assert.strictEqual(liar.last('error').code, 'version');
-    liar.send({ t: 'hello', v: 1, name: 'liar' });
+    liar.send({ t: 'hello', v: 2, name: 'liar' });
     await sleep(200);
     assert.strictEqual(liar.last('welcome'), null, 'a refused socket stays refused');
     assert.strictEqual(srv.info().players.length, 1);
     await until(() => liar.ended, 2000, 'the server destroys the socket');
     // kicked for flooding: removed from the room immediately, its later messages are dead letters
     const rude = await rawClient(srv.port);
-    rude.send({ t: 'hello', v: 1, name: 'rude' });
+    rude.send({ t: 'hello', v: 2, name: 'rude' });
     await until(() => rude.last('welcome'), 2000, 'welcome');
     await good.wait(() => good.roster().length === 2);
     const t0 = Date.now();
@@ -2549,7 +3401,7 @@ function freshNet() {
     assert.strictEqual(rude.ended, false, 'the peer never answered the close');
     await sleep(300);                                            // the rate limiter would have refilled by now
     const n = good.msgs.length;
-    rude.send({ t: 'profile', name: 'still here' }); rude.send({ t: 'hello', v: 1, name: 'again' }); rude.send({ t: 'ping', c: 1 });
+    rude.send({ t: 'profile', name: 'still here' }); rude.send({ t: 'hello', v: 2, name: 'again' }); rude.send({ t: 'ping', c: 1 });
     const pongs = rude.msgs.filter(m => m.t === 'pong').length;
     await sleep(200);
     assert.strictEqual(good.msgs.length, n, 'nothing from a kicked socket reaches the room');
@@ -2575,11 +3427,10 @@ function freshNet() {
     // a hosts and stays parked; h drives at 80 m/s; x reports laps it never drove; y's states come only every 16 s
     const [a, h, x, y] = R.cs;
     const MONZA = 5793, MIN_M = minLapTime(MONZA);             // 63.2 s
-    a.send({ t: 'gp', a: 'start', q: 1, r: 1, len: MONZA });
-    await R.settle(s => s.phase === 'quali');
+    await R.start(1, 1, { len: MONZA });
     const gl = async (c, time) => {
       const n = c.all('glno').length;
-      c.send({ t: 'gl', k: c.seq(), sid: c.gp().sid, time });
+      c.send({ t: 'gl', k: c.rs(), sid: c.gp().sid, time });
       await handled(c);
       return c.all('glno').length > n ? c.last('glno').why : '';
     };
@@ -2653,8 +3504,8 @@ function freshNet() {
   lane = lanes.review2;                        // real time
 
   T('impact reports: as hard as the cars\' POSITIONS were closing, never the speed a client claims; none after a teleport; a budget per pair; none on stale positions (hit-spam, MP-1)', async t => {
-    const srv = await t.start();
-    const v = await client(srv.port, { name: 'victim' }), e = await client(srv.port, { name: 'evil' }), o = await client(srv.port, { name: 'other' });
+    const R = await room(t, 3, { real: true });                 // (a free-practice session: impacts are taken there only)
+    const [v, e, o] = R.cs;
     // the victim is parked at the origin and reports 20 times a second, as the game does
     const vt = setInterval(() => v.drive(0, 0), 50);
     const W = -Math.PI / 2;                                      // heading -x: straight at the victim from +x
@@ -2663,7 +3514,7 @@ function freshNet() {
     // n reports of `i`, 45 ms apart -> the velocity changes that reached the victim meanwhile
     const fire = async (n, i) => {
       const n0 = v.all('hit').length;
-      for (let k = 0; k < n; k++) { e.send({ t: 'hit', k: 0, to: v.id, i }); await sleep(45); }
+      for (let k = 0; k < n; k++) { e.send({ t: 'hit', k: e.rs(), to: v.id, i }); await sleep(45); }
       await sleep(100);
       return v.all('hit').slice(n0).map(m => m.i);
     };
@@ -2700,23 +3551,25 @@ function freshNet() {
     [v, e, o].forEach(c => c.ws.close());
   });
 
-  T('a Grand Prix start while the host\'s own track pick still waits is refused, not undone a moment later (track-then-start)', async t => {
-    const srv = await t.start({ hostToken: 'tok' });
-    const h = await client(srv.port, { name: 'H', token: 'tok' }), g = await client(srv.port, { name: 'G' });
-    h.send({ t: 'track', id: 'monza' });
-    await g.wait(() => g.last('track'));
-    await sleep(300);
-    h.send({ t: 'track', id: 'monaco' });                         // within a second of the last change: it waits
-    await sleep(100);
-    h.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN });        // on Monza, which Monaco is about to replace
+  T('the settings are frozen from the start: set / bots while loading or in the session are dropped; the session races what was set at the start (frozen-settings)', async t => {
+    const R = await lobbyRoom(t, 2, { hostToken: 'tok' });
+    const [h, g] = R.cs;
+    h.send({ t: 'set', mode: 'gp', q: 2, r: 3, wear: 2, year: 2024 });
+    h.send({ t: 'bots', n: 2 });
+    await R.sync(x => x.set.q === 2 && x.set.bots === 2);
+    h.send({ t: 'start', len: LEN, force: true });
+    await R.sync(x => x.st === 'loading');
+    // while loading: a new track, other laps, another season, the field: all dropped
+    h.send({ t: 'set', track: 'monaco', q: 5, r: 9, wear: 5, year: 2010, mode: 'free' });
+    h.send({ t: 'bots', n: 0 });
     await sleep(150);
-    assert.deepStrictEqual([srv.info().gp.phase, srv.info().gp.sid], ['free', 0], 'refused');
-    await g.wait(() => g.last('track').id === 'monaco', 2000, 'the pick goes out');
-    h.send({ t: 'gp', a: 'start', q: 1, r: 1, len: LEN });
-    await settle(srv, [h, g], s => s.phase === 'quali');
+    assert.deepStrictEqual([R.srv.info().room.set.track, R.srv.info().room.set.q, R.srv.info().room.set.year, R.srv.info().bots.n], ['monza', 2, 2024, 2]);
+    h.loaded(); g.loaded();
+    const s = await R.settle(x => x.phase === 'quali');
+    assert.deepStrictEqual([s.q, s.r, s.wear, s.year, s.players.filter(p => p.bot).length], [2, 3, 2, 2024, 2], 'what was set at the start');
+    h.send({ t: 'set', track: 'monaco' });
     await sleep(1200);
-    assert.deepStrictEqual([srv.info().gp.phase, srv.info().track], ['quali', 'monaco'], 'and it stays on');
-    assert.deepStrictEqual(g.all('track').map(m => m.id), ['monza', 'monaco']);
+    assert.deepStrictEqual([R.srv.info().gp.phase, R.srv.info().room.set.track, R.srv.info().room.st], ['quali', 'monza', 'session'], 'and it stays on');
     assert(!g.all('gp').some(m => m.s.sid === 1 && m.s.phase === 'free'), 'never thrown back to free practice');
     h.ws.close(); g.ws.close();
   });
@@ -2776,7 +3629,7 @@ function freshNet() {
 
   const tcp = runLane(lanes.tcp);                               // mostly waiting: fine next to anything
   await runLane(lanes.floods);
-  await Promise.all([runLane(lanes.relay), runLane(lanes.gp1), runLane(lanes.gp2), runLane(lanes.gp3), runLane(lanes.client), runLane(lanes.year), runLane(lanes.year2),
+  await Promise.all([runLane(lanes.relay), runLane(lanes.gp1), runLane(lanes.gp2), runLane(lanes.gp3), runLane(lanes.client), runLane(lanes.year), runLane(lanes.year2), runLane(lanes.lobby), runLane(lanes.lobby2),
     runLane(lanes.bots), runLane(lanes.bots2), runLane(lanes.botsClient),
     runLane(lanes.review), runLane(lanes.review2), tcp]);
   await slow;

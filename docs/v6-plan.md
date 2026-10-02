@@ -348,3 +348,75 @@ Reports (every reviewer's findings, the verdicts, the fixers' and the re-run's s
 - ~09:30: Fable round 3 committed + pushed f925513 (no release yet). AI pressing follow-up RUNNING (run wf_e576af1f-aa0, script wf-ai-press.js: fix + independent check). Then: dist from a clean worktree, exe smoke, commit, push, release v7.1 (final of this run).
 - ~12:40: AI pressing follow-up DONE (reports docs/agent-runs/2026-10-01/reports/ai-press-reports.txt): press released 2.5..1 s before the car ahead brakes, gap held, pass set up on the inside of the coming corner; 672 races: passes 4328 vs round 3 3961, contacts 48 (5 heavy) vs 58 (8), offs 147 vs 392, finish order level; lap-1 chicane bump 0 / 40 Electron runs; independent check verdict ok. Open (minor): Monaco wear x2 soft stint can reach 93 % (1 run in 8), a hairpin alongside misjudgement at Bahrain T10. Next: commit, clean build, exe smoke, push, release v7.1.
 - ~13:30: DONE. v7.1 = 79335dd committed, clean-worktree build, exe smoke 22/22 (gantry lamps dark after lights out, 5 bots race), pushed, release v7.1 (latest, not prerelease) https://github.com/Heart-0001/f1drive/releases/tag/v7.1. Run finished; nothing running.
+
+## v7.2 room lobby (user 10-02 ~23:20: "阿多人叫我選賽道 然後就直接跑進畫面了? 不應該等大家都到才開始嗎")
+- Same evening: v7.1 exes copied into dist/ (v6.1, v6.2, v7.0, v7.1); repo made PUBLIC at the user's request after a history rewrite (git filter-repo: the first commit's author address and an address an audit agent had written into a User-Agent string replaced; all commit ids changed; main + tags force-pushed; releases kept; docs updated to the new ids).
+- Lobby workflow docs/agent-runs/2026-10-01/scripts/wf-lobby.js: design (play today's flow, docs/lobby-design.md + contract) -> net / menu owners -> lobby harness + all online harnesses + full re-run -> Fable review, verification, fixes, final re-run -> then dist, exe smoke, commit, push, release v7.2.
+- User ~23:35, single player too: "個人也是阿 為啥都是點賽道就開始了阿" -> a card click selects the track and opens a start panel (開始 / Enter / pad A). And a bug: "為啥我拿RB19跑SPA 我才用x1 跑到第二圈一半我已經爆胎了??? 我沒撞欸" -> tyre investigation branch (fix + independent check) inside the lobby workflow, before its E2E stage. First lobby run stopped after a few minutes and relaunched with both: run wf_fb0afad9-1dd.
+- ~23:50: relaying the user's note ("第一圈也沒有衝出賽道很多") to the workflow's tyre agent by SendMessage RESUMED A SECOND COPY of it (lesson: workflow agents cannot be messaged; a send starts a parallel copy). The copy found: WEAR_K ~3-4x too high (medium ~8.5-12 %/lap at Spa, soft 17-24 %, human-like driving 30-45 %/lap on softs -> wear-out puncture at 263-306 s), no impacts in clean driving; SECONDARY: an understeer slide without braking (load.slip > 0.4) leaves full flat spots on all four tyres (FLAT_LAT 0.2). It was told to stand down and write devtests/tyre-test/notes-parallel-agent.md. TODO after the tyre chain: check the workflow's fix covers the flat-spot issue; if not, fix it before the release.
+- ~00:05: the duplicate stood down (no project edits; notes devtests/tyre-test/notes-parallel-agent.md): clean drives have zero impacts; wear per Spa lap (most worn tyre) medium 8.5 (line) / 10.2 (AI) / 12.2 (keyboard) / 14.5 (clean human) / 15-22 (rough or pad), soft 17 / 20 / 24 / 29 / 31-45; root cause WEAR_K ~3-4x too high + soft 2x + carcass fails 3-12 % past 100 %. The workflow agent's working copy already removes the flat spots from an unbraked understeer slide. OPEN for later: kerbs outside the white line count as grass in js/car.js (grass scrub + dirt on kerbs, a few % of wear) — check after the tyre chain / give to the lobby review stage if not handled.
+- 23:55: NOTE for the watchdog: the workflow tyre agent ae474542d82f4a7c6 is ALIVE and writes to subagents/agent-ae474542d82f4a7c6.jsonl (car / cars / ai tests at 23:51); the file under subagents/workflows/wf_fb0afad9-1dd/ with the same id is the stood-down copy (SubagentHandback 23:44), so the watchdog shows it as silent — do NOT treat that as a stall.
+- 00:10: a second duplicate (woken by a background calibration finishing) stood down too; its calibration matrix (RB19 line x1 mean of 40 circuits: soft cliff 90 km / worn 116, medium 147 / 189, hard 207 / 266; x2 / x3 scale exactly; 11 / 4320 punctures, all wall impacts on worn tyres) and the 4 harness checks the new wear moves are in devtests/tyre-test/notes-harness-impact.md — CHECK that the lobby E2E stage handled them (v6-smoke tyres + golden flick, v6-critic puncture, solo-v6 pit wear) and the kerbs-as-grass item.
+- 00:20: tyre fix DONE (js/tyres.js WEAR_K 3.9e-6 -> 1.0e-6, soft 2.0 -> 1.65, hard 0.5 -> 0.7, FLAT_LAT 0.2 -> 0; js/ai.js WEAR_LAP0 / COMPOUND_WEAR follow; car.js untouched, no recalibration): RB19 Spa x1 laps to the cliff soft 14.5 / medium 23.6 / hard 33 (human-like 13.1 / 20.8); 4320-stint matrix, no puncture without contact. Independent check running. Open for E2E: the 4 harness checks (devtests/tyre-test/notes-harness-impact.md); for the AI: critic-mixed erratic at Baku, a legend rear-ends a blind brake-testing human (0.74). Watchdog patched: uses the newer of the two transcripts of an agent id, ignore.txt split fixed.
+- 2026-10-03 ~01:00..04:00, the lobby workflow's E2E stage (the only agent editing; not committed): new harness `devtests/lobby-test/run.js` (164 checks, muted offscreen: solo panel by mouse / Enter / pad A, Esc / pad B back, 重新開始 without a rebuild, free practice and a Grand Prix with bots from the panel, 8 window sizes; a room of 3 + a latecomer through lobby / 準備 / 開始 / the loading barrier (wire recorder: no car state or snapshot outside the session; go on all windows within 100 ms; gp quali only after the room's session message), 再來一場, 回到大廳, leaving in every state, the dedicated `node net/server.js` with host migration in the lobby and while loading, protocol 2 version texts). Every other harness moved to the start panel / lobby flows (helpers in gp-e2e/lib.js and v6-critic/lib.js; a host's start / back within 1 s is refused by the server: the helpers retry). Decisions taken: (1) net/server.js: the in-game host leaving runs no room transition (the guests went into a session a moment before the room closed when the host was the last one loading; regression test in test/server.test.js); (2) the tyre checks of v6-smoke / v6-critic / solo-v6 run on softs (real-length stints: a medium no longer reaches the old bars at x5), the flick of v6-smoke's golden part now expects no flat spot (FLAT_LAT 0), a new set's grip is its compound's (soft 1.015); (3) net-gp/fuzz-server.js detects server exceptions by "error: " (a `loaded {why: 'error'}` log line had been counted as one); (4) exe-smoke was run against an unpacked copy of the working tree in the session scratchpad (no `npm run dist`): 23 / 23. Open: ai-test/critic-mixed `erratic` at Baku (a legend in follow mode rear-ends the blind brake-testing human at 0.74, seen since the tyre change: for the AI), audio-test/minimise-test fails 2 of 7 under the harness mute (its baseline needs an unmuted window), tunnel-test/make-data --check differs only in the "checked" notes.
+
+### v7.2 room lobby: the decisions taken for the user (tell them)
+The binding contract is the "v7.2 room lobby" section of js/README-interfaces.md; docs/lobby-design.md explains it (flows,
+texts, edge cases). In short:
+1. Single player: a track card opens the start panel (出發面板: track, car / season, 自由練習 or 大獎賽 with Q / R / wear,
+   computer drivers, starting tyres); nothing drives before 開始 (Enter / pad A; 開始 has focus, so a quick practice is
+   card + Enter). Esc / pad B back to the cards. The 大獎賽 tab starts nothing any more (「在目前賽道開大獎賽…」 opens the panel).
+2. Rooms have a lobby (房間大廳) right after creating / joining: nobody is on a track there. The host sets the room (track
+   from the cards, season, mode, Q / R / wear, computer drivers); guests see it read-only, pick their own car and starting
+   tyres and press 準備. A change of track, season or mode clears every 準備 (toast); laps, wear and bots do not.
+3. 開始 (host) needs everybody ready; 「不等了，直接開始」 asks first and names who is not ready. A host alone starts at once.
+4. Loading barrier: everybody builds the track behind a loading screen listing who is still loading; the session begins
+   when all have loaded, after 20 s at the latest, or on the host's 「不等了，開始」 once his own track is built. A Grand
+   Prix starts qualifying only then; car states count only from then (all cars appear together).
+5. After the results the host chooses 再來一場 or 回到大廳; a room never drops back to single player / free practice by
+   itself. 結束大獎賽 in qualifying / on the grid takes the room back to the lobby (asked first).
+6. Esc in a room session opens the room menu (繼續駕駛; the host also 回到大廳). Joining a running session follows the
+   v5..v7.1 rules (free practice drives, qualifying participates, grid / race / results spectate); joining while loading
+   adds the newcomer to the barrier.
+7. The in-game host leaving closes the room (guests in the lobby / loading go back to the cards with a toast; guests on
+   the track drive on alone). On `node net/server.js` the first player is host and the role passes to the
+   longest-connected player; the settings stay with the room.
+8. Protocol 2 (`PROTOCOL` 2; `error {code: 'version', need: 2}`), with a clear text for an old server (v7.1 and before)
+   and for a newer one.
+9. The host's last setup (mode, Q, R, wear) is remembered and a fresh room takes it; cars and bots are frozen at 開始
+   (cars may change in the lobby and in free practice, not during loading or a Grand Prix).
+- Implementation decisions of the E2E stage: see the 2026-10-03 ~01:00..04:00 entry above.
+
+### v7.2 lobby review (Fable, 2026-10-03 ~04:00..05:00): 2 confirmed findings, fixed
+- LOBBY-1 (minor): the server drops the host's go / back (and a gp end acting as back) within START_MIN_MS (1 s) of the
+  last one it took, WITHOUT an answer, so 「取消，回到大廳」 / 「不等了，開始」 clicked as soon as the loading screen showed
+  them (0.25..0.8 s after 開始), or the room menu's 回到大廳 right after the session began, did nothing and said nothing.
+  Decision: fixed in js/main.js, not on the server: a go / back / end asked for within 1 s of the last change of the
+  room's st the client saw is HELD for the rest of that second and then sent (the latest one asked for wins; dropped if
+  the load cycle changed meanwhile or we are no longer the host; the wait is re-checked, a new change of st starts a new
+  second). The server took the action before it sent that change, so the wait always clears its gate; no extra toast
+  (the delay is under a second). The server keeps answering a too-early START with `nostart busy` (「太快了…」).
+- LOBBY-2 (cosmetic): a double click on 開始 over a slow link (RTT above the click gap) sent two starts; the second was
+  refused (`nostart state`) and 「現在無法開始」 showed over a load that was going on. Decision: the host's start goes out
+  once until its answer (`startPending`, cleared by the next 'room', 'nostart' or 'disconnected'); 開始 is NOT drawn
+  disabled meanwhile (a focused button that becomes disabled loses the focus, and Enter would then do nothing after a
+  refusal); and a `nostart state` that arrives once the room has left the lobby is not toasted.
+- Regression checks: test/main.test.js (LOBBY-1 / LOBBY-2: 12 new checks, they fail against the pre-fix main.js),
+  test/server.test.js (LOBBY-1: go / back / gp end sent START_MIN_MS + 30 ms after the room change the host saw are taken;
+  sooner they are dropped without an answer), devtests/lobby-test part `early` (the real game: one click on 取消 /
+  不等了 / 回到大廳 inside the second is carried out, no toast; a double click on 開始 through a TCP proxy of RTT 150 /
+  400 ms sends one start and shows no 「現在無法開始」). The reviewer's verifier devtests/review-lobby/verify/run.js (not in
+  git: its screenshots show LAN addresses) no longer reproduces either bug.
+- Final re-run after these fixes (2026-10-03 ~04:45..06:00, muted, the working tree, not committed): the 12 node suites
+  (main 160 checks, server with the new LOBBY-1 test), `build-cars --check`, `calibrate.mjs --check` (up to date),
+  `ers-effect --check`, every node devtest and every Electron harness of devtests/README.md: lobby-test 181/181 (164 + the
+  new `early` part's 17), gp-e2e solo 602, solo-v6 303, online 144, online-v6 66, start-clock 26, bots 197, bench 28,
+  gp-smoke 203, grid-shots 27, v6-smoke 153, app-check 7, v6-critic 89, v61-critic 99, v62-critic 135, ui-gp 121, ui-v6
+  154, hudmirrors 41, tunnel run 12, mp-e2e 33, net-gp electron-net 27 / bots 33 / host 12 / v6 29, bots-test/game 79,
+  car-v6/game-check 13, gamepad game-map 11, audio analyze 358 / ears 45 / tunnel 28 / live 60 / asar 4, fuzz-server OK,
+  exe smoke 23/23 (unpacked copy of the working tree). Non-zero verdicts, all known before this round: ai-test
+  critic-mixed (`erratic` at Baku 0.74), audio minimise-test 5/7 (needs an audible window), tunnel make-data --check
+  ("checked" notes only), telemetry-test DPR 2 pass, start-clock against its mutant (must fail: 23/26). Not run (no
+  verdict, diagnostics only): audio alloc-profile, telemetry probe-cost / probe-alloc, cockpit-test compare.js,
+  car-v6/smoke-wrap.js (historical), the review-final / review-r3 / handling-test probes. Next: commit, clean-worktree
+  `npm run dist`, exe smoke on it, push, release v7.2 (when the orchestrator / user says so).

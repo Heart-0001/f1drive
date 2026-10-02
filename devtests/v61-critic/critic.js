@@ -11,7 +11,7 @@ const { app, ipcMain } = require('electron');
 const path = require('path');
 require('../electron-userdata')(app, 'v61-critic');
 const L = require('./lib');
-const { sleep, J, results, state, check, note, makeWin } = L;
+const { sleep, J, results, state, check, note, makeWin, roomTrack, roomStart } = L;
 const ONLY = (process.env.ONLY || '').split(',').filter(Boolean);
 const PORT = Number(process.env.PORT || 24890);
 
@@ -361,8 +361,9 @@ async function partRoom() {
   await B.click('#tab-mp'); await B.click('mp-join');
   check('B joins', await B.until(`F1.net.connected`, 6000));
   await B.pickCar('2026-ferrari');
-  await A.pickTrack('it-1922');
-  const onTrack = `F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id`;
+  // v7.2: the host sets the room's track in the lobby, B presses 準備, 開始: both load, the session after the barrier
+  check('the host sets Monza in the lobby; 開始', await roomTrack(A, 'it-1922') && await roomStart(A, [B]));
+  const onTrack = `F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id && F1.net.room.st === 'session'`;
   check('both on Monza, on their grid slots', await A.until(onTrack, 15000) && await B.until(onTrack, 15000));
   for (const w of [A, B]) await w.js(`__t.fakePad(); ` + KEEP);
   await sleep(2500);
@@ -491,9 +492,10 @@ async function partGp() {
   await w.open({ fresh: true, warp: true });
   check('Monza', await w.pickTrackWarp('it-1922'));
   await w.tap('Escape'); await w.until(`!F1.game.running`, 2000, 'menu');
-  await w.click('#tab-gp');
+  // (v7.2: the Grand Prix starts from the start panel: the loaded track's card, 大獎賽, 重新開始)
+  await w.card('it-1922'); await w.mode('gp');
   await w.field('gp-q', '1'); await w.field('gp-r', '1');
-  await w.click('gp-start');
+  await w.go();
   check('the Grand Prix starts (qualifying)', await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 4000));
   await w.tap('Escape'); await w.until(`!F1.game.running`, 2000, 'menu');
   await w.click('#tab-gp'); await w.click('gp-skip');

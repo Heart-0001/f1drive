@@ -140,13 +140,34 @@ app.whenReady().then(async () => {
     await js(`(function () { var e = document.getElementById('mp-port'); e.value = ${J(String(PORT))}; e.dispatchEvent(new Event('change', { bubbles: true })); document.getElementById('mp-create').click(); return true; })()`);
     check('room created (the car is then placed by placeOnGrid(net.slot))', await until(`F1.net.connected && F1.net.isHost`, 5000), await js(`document.getElementById('mp-status').textContent`));
 
+    // v7.2: the room loads a track through its lobby: back to it (in a session), the room's track, 開始 (force: the host
+    // alone); the session begins after the loading barrier and main.js puts the car on its room slot (the same track is
+    // not rebuilt: a new load cycle places the car again)
+    const roomLoad = async id => {
+      // (START_MIN_MS: the server takes the host's start / back at most once a second; a refused one is sent again)
+      const rs0 = await js(`F1.net.room.rs`);
+      for (let k = 0; k < 4 && await js(`F1.net.room.st !== 'lobby'`); k++) {
+        await js(`F1.net.backToLobby(); true`);
+        if (await until(`F1.net.room.st === 'lobby'`, 1500, 'lobby')) break;
+        await sleep(1100);
+      }
+      await js(`F1.net.setRoom({ track: ${J(id)} }); true`);
+      await until(`F1.net.room.set.track === ${J(id)}`, 3000, 'room track');
+      await sleep(1100);
+      for (let k = 0; k < 4; k++) {
+        await js(`(function () { var td = F1_TRACKS.filter(function (t) { return t.id === ${J(id)}; })[0]; return F1.net.startRoom({ len: Math.round(td.lengthKm * 1000), force: true }); })()`);
+        if (await until(`F1.net.room.rs > ${rs0}`, 1500, 'start')) break;
+        await sleep(1100);                                   // (START_MIN_MS since the last start / back)
+      }
+      return until(`F1.net.room.st === 'session' && F1.game.running && F1.net.loadedRs === F1.net.room.rs && F1.game.trackData.id === ${J(id)}`, 20000, id + ' loads');
+    };
     for (const part of TRACKS) {
       const td = await js(`(function () { var t = F1_TRACKS.filter(function (t) { return (t.name + ' ' + t.id).toLowerCase().indexOf(${J(part)}) >= 0; })[0]; return t ? { id: t.id, name: t.name } : null; })()`);
       if (!td) { check('track "' + part + '" exists', false); continue; }
       for (const slot of SLOTS) {
-        // the host picks the track (again): everybody in the room, we too, loads it and is put on its slot
-        await js(`window.__slot = ${slot}; window.__old = F1.game.track; F1.net.selectTrack(${J(td.id)}); true`);
-        const ok = await until(`F1.game.running && F1.game.track && F1.game.track !== window.__old && F1.game.trackData.id === ${J(td.id)}`, 20000, td.id + ' loads');
+        // the host loads the track (again): everybody in the room, we too, loads it and is put on its slot
+        await js(`window.__slot = ${slot}; true`);
+        const ok = await roomLoad(td.id);
         await sleep(500);
         const b = await js(`__g.box(${slot})`);
         check(td.id + ' slot ' + slot + ': main.js put the car in grid box ' + (slot + 1) + ' (nose at the rear edge of the front bar, on the centreline, along the box)',

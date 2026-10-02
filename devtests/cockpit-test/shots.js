@@ -330,7 +330,7 @@ async function main() {
     if (curTrack === name) return;
     if (await js(`F1.game.running`)) { w.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' }); await sleep(60); w.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'Escape' }); await sleep(300); }
     const picked = await js(`(function () { var c = [].slice.call(document.querySelectorAll('.card')).filter(function (n) { return n.textContent.toLowerCase().indexOf(${J(name)}) >= 0; })[0];
-      if (!c) return null; c.click(); return c.querySelector('.card-name').textContent; })()`);
+      if (!c) return null; c.click(); var __g=document.getElementById('setup-go'); if(__g) __g.click(); return c.querySelector('.card-name').textContent; })()`);
     for (let k = 0; k < 150; k++) { if (await js(`!!(F1.game.running && F1.game.track && window.__ck)`)) break; await sleep(100); }
     await sleep(500);
     console.log('track', picked);

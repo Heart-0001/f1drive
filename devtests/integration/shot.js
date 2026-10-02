@@ -20,7 +20,7 @@ app.whenReady().then(async () => {
     await shot('menu');
     const clicked = await w.webContents.executeJavaScript(`(function(){
       var c=[].slice.call(document.querySelectorAll('.card')).filter(function(n){return n.textContent.toLowerCase().indexOf(${JSON.stringify(trackName)})>=0;})[0];
-      if(!c) return 'no card'; c.click(); return c.textContent; })()`);
+      if(!c) return 'no card'; c.click(); var __g=document.getElementById('setup-go'); if(__g) __g.click(); return c.textContent; })()`);
     console.log('clicked:', clicked);
     await sleep(1000);
     await shot('start');

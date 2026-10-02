@@ -6,7 +6,12 @@
    大獎賽 tab / the pit strip / the telemetry (a prompt on entering the pit lane), the pit speed limit of the season;
    v7: computer drivers (js/ai.js; "computer drivers" below): the 電腦車手 setting of the 大獎賽 tab -> F1.AI.lineup (the
    season's real drivers in the cars nobody else drives) -> gp.setBots; alone the game simulates the field, in a room the
-   host's game simulates its bots and publishes them (net.sendBotStates, laps, impacts); they are stepped with our car. */
+   host's game simulates its bots and publishes them (net.sendBotStates, laps, impacts); they are stepped with our car.
+   v7.2 ("choose first, then start"): alone a track card opens the start panel (ui.setSetup: track, car, season, mode,
+   laps, tyre wear, computer drivers, starting tyres) and only 開始 (Enter, the controller's A) builds the track and drives;
+   a room has a lobby (房間大廳, protocol 2 of js/net.js): nobody drives there, the host sets the room up, the guests press
+   準備, the host's 開始 makes everybody load at once behind a loading screen (ui.setRoomLoading) and the session begins
+   when all have loaded (the barrier is the server's: net 'load' -> sendLoaded -> 'go'); 回到大廳 brings everybody back. */
 (function () {
   'use strict';
   var F1 = (window.F1 = window.F1 || {});
@@ -88,7 +93,6 @@
 
   // multiplayer
   var netUi = { status: '', statusKind: '', busy: false, lockText: '' };
-  var HOST_PICK = '房間已建立，你是房主。選一條賽道開始。';   // the host's status until the room has a track
   var remoteModels = {};                     // player id -> F1.createCarModel()
   var remoteCars = {};                       // player id -> {car, year, colour, spec}: the car that player drives
   var others = [];                           // states of the active, solid remote cars this frame (for collisions)
@@ -107,6 +111,28 @@
   var sharedLast = null, sharedBest = null;
   var knownPlayers = null;                   // id -> name, to announce joins / leaves (the players: no computer drivers)
   var knownBots = 0;                         // computer drivers in the last roster
+
+  // v7.2: the menu's left area (ui.setSetup) and a room's lobby / loading screen
+  var setupShow = 'tracks';                  // 'tracks' (the cards) | 'setup' (the start panel / the lobby) | 'picker' (host)
+  var setupTrack = null;                     // alone: the track of the start panel (a card was clicked)
+  var lastSetup = null;                      // the SetupView last handed to ui.setSetup (F1.game.setup)
+  var rl = null;                             // a room's load in progress: {rs, phase: 'build' | 'wait' | 'quali'}, else null
+  var rlTimer = 0, rlShown = false;          // the loading screen's countdown (re-drawn 4 times a second while it shows)
+  var loadFailRs = -1;                       // the room's load cycle our build failed in (this version lacks its track)
+  var roomTaken = false;                     // the room's settings were looked at once for this connection (takeRoom)
+  var pickerFresh = false;                   // the host's picker of a fresh room (its own banner)
+  var roomBots = null;                       // the host: the room's computer drivers {count, skill} (null: not a host)
+  var joinedPw = false;                      // we joined with a room password (the lobby's 有密碼)
+  var yearCarNote = '';                      // the room's season changed our car: said with the 準備 toast of that change
+  var startPending = false;                  // the host's start went out; its answer (a 'room' / 'nostart') is not here yet
+  // The server takes the host's start / go / back (and a gp end that goes back to the lobby) only START_MIN_MS after the
+  // last one it took, and drops a go / back / end inside that second without an answer. Every one it takes changes the
+  // room's st, which we see after it took it: so a go / back / end asked for within ROOM_ACT_MS of the last change of st
+  // we saw waits here for the rest of that second (roomAct) instead of being lost.
+  var ROOM_ACT_MS = 1000;                    // net/server.js START_MIN_MS
+  var roomStAt = -1e9;                       // performance.now() when we saw net.room.st change
+  var roomActTimer = 0;                      // the host's go / back / end waiting for that second to pass
+  var padBoost = false;                     // the controller's A / RB as last polled (the menu takes A on its rising edge)
 
   // computer drivers (v7, js/ai.js): alone every car of the field but ours, in a room the ones we host (the host's game
   // simulates its bots and publishes them; the guests see them as remote cars). See "computer drivers" below.
@@ -294,9 +320,13 @@
   function pushCars() {
     if (!cars || !ui.setCars) return;
     var y = activeYear(), session = !!(gp && gp.phase !== 'free'), room = !!(net && net.connected);
-    var guest = room && !net.isHost;
-    var canYear = !session && !guest, canCar = !session;
-    var reason = session ? '賽事進行中不能換車' : (guest ? '年份由房主選擇，大家都從這一年的車裡挑。' : '');
+    var guest = room && !net.isHost, r = room ? net.room : null, st = r ? r.st : '';
+    // v7.2, a room: the season only in its lobby (the host's); the cars in the lobby and in a free-practice session
+    // (parc fermé while loading and in a Grand Prix)
+    var gpRoom = st === 'session' && !!(r && r.set && r.set.mode === 'gp');
+    var canYear = !session && !guest && (!r || st === 'lobby'), canCar = !session && st !== 'loading' && !gpRoom;
+    var reason = session || gpRoom ? '賽事進行中不能換車' : st === 'loading' ? '載入賽道中不能換車'
+      : (guest ? '年份由房主選擇，大家都從這一年的車裡挑。' : (room && !canYear ? '賽季只能在房間大廳更改。' : ''));
     var sel = car && car.spec ? car.spec.id : null;
     var drivers = fieldDrivers(y), dk = drivers ? JSON.stringify(drivers) : '';
     var key = y + '|' + sel + '|' + canYear + '|' + canCar + '|' + reason + '|' + dk;
@@ -520,19 +550,22 @@
       if (raceLine && lineOn) raceLine.update(car.state);
       pushHUD();
       pushGp();                               // a Grand Prix can be started now
-      if (ui.setResumeHandler) ui.setResumeHandler(resume);
-      resume();
+      if (ui.setResumeHandler) ui.setResumeHandler(canResume() ? resume : null);
+      renderStill();
+      // (v7.2: a build no longer drives: the caller decides - 開始 alone, the room's barrier)
+      return true;
     } catch (err) {
       fail('載入賽道失敗：' + (data && data.name ? data.name : '') + '\n' + (err && err.stack ? err.stack : err));
+      return false;
     }
   }
 
   // Building a track holds the page for 0.2..0.6 s: a note goes up first and the build runs once it has been painted
   // (after the next frame; a window that paints nothing, e.g. hidden, builds after LOAD_WAIT_MS anyway). A pick made
-  // while one waits replaces it.
-  function loadTrack(data) {
+  // while one waits replaces it (and its callback: only the newest is told). opts.then(ok) once it is built.
+  function loadTrack(data, opts) {
     var waiting = !!loadNext;
-    loadNext = data;
+    loadNext = { data: data, then: opts && typeof opts.then === 'function' ? opts.then : null };
     if (ui.setLoading) ui.setLoading(data.name || data.id || '');
     if (waiting) return;
     loadRaf = requestAnimationFrame(function () {
@@ -546,17 +579,22 @@
   function loadNow() {
     if (loadRaf) { cancelAnimationFrame(loadRaf); loadRaf = 0; }
     clearTimeout(loadTimer); loadTimer = 0;
-    var data = loadNext;
+    var job = loadNext;
     loadNext = null;
-    if (!data) return;
-    selectTrack(data);
+    if (!job) return;
+    var ok = selectTrack(job.data);
     if (ui.setLoading) ui.setLoading(null);
     if (net && net.connected) refreshNetUi();
+    pushSetup();
+    if (job.then) job.then(ok);
   }
 
-  // In a room we only drive on the room's track (the one everybody else has loaded).
+  // In a room we only drive on the room's track in its session, once our build of this load cycle was reported
+  // (v7.2: nobody drives in the lobby or before the barrier; the server takes no state then either).
   function inRoomTrack() {
-    return !!(net && net.connected && trackData && net.trackId === trackData.id);
+    if (!(net && net.connected && trackData)) return false;
+    var r = net.room;
+    return !!(r && r.st === 'session' && r.set && r.set.track === trackData.id && net.loadedRs === r.rs);
   }
   function canResume() {
     if (!track || !car) return false;
@@ -565,6 +603,7 @@
 
   function resume() {
     if (!canResume()) return;
+    if (rl) { rl = null; pushRoomLoading(); }   // (a room: on the track now, the loading screen goes)
     ui.hideMenu();
     clearInput();
     if (audio) audio.setActive(true);
@@ -574,14 +613,22 @@
     rafId = requestAnimationFrame(frame);
   }
 
-  function exitToMenu() {
+  // The loop stops (the menu, a room going back to its lobby).
+  function stopLoop() {
     running = false;
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
     clearInput();
     if (audio) audio.setActive(false);
+  }
+
+  // Esc / Start / 選單 while driving: alone the cards (繼續駕駛 offered), in a room its menu (the lobby view of the session).
+  function exitToMenu() {
+    stopLoop();
     // multiplayer: our car stays where it is, visible and solid for the others, reported as standing still
     if (net && net.connected) net.park();
+    setupShow = net && net.connected ? 'setup' : 'tracks';
     ui.showMenu(tracks);
+    pushSetup();
     renderStill();                            // static frame behind the menu
   }
 
@@ -815,6 +862,12 @@
     net.setProfile({ name: p.name, colour: p.colour, car: car && car.spec ? car.spec.id : undefined });
   }
 
+  // The host's line in the 多人連線 tab (v7.2: the room is set up in its lobby).
+  function hostStatus() {
+    return net.ded ? '你是房主（第一位進房的玩家）。在房間大廳選賽道和設定，大家準備好就按「開始」。'
+      : '房間已建立，你是房主。在房間大廳選賽道和設定，大家準備好就按「開始」。' + passwordNote();
+  }
+
   function initNet() {
     net = F1.net || null;
     if (!net) { refreshNetUi(); return; }
@@ -822,61 +875,245 @@
 
     net.on('connected', function () {
       netUi.lockText = '';
-      setStatus(net.isHost ? HOST_PICK + passwordNote() : '已加入房間。', 'ok');
-      // the host brings his season into the room (the answer is the 'year' event)
-      if (net.isHost && net.setYear && isSeason(ownYear()) && net.year !== ownYear()) net.setYear(ownYear());
-      botSent = null;                         // the host brings his computer drivers too (a new room has none)
+      setStatus(net.isHost ? hostStatus() : '已加入房間。選好車就按「準備」。', 'ok');
+      roomTaken = false; pickerFresh = false; roomBots = null; loadFailRs = -1; yearCarNote = '';
+      rl = null;
+      clearRemoteModels();
+      if (running) { stopLoop(); ui.showMenu(tracks); }   // (joined from the menu anyway; never driving in a lobby)
+      setupShow = 'setup';                    // the lobby (nobody drives until the host starts and everybody has loaded)
+      takeRoom();                             // (or with the 'room' event, when the room's state comes after this)
+      botSent = null;
       applyBots();
       refreshNetUi();
       pushCars();
+      pushSetup();
     });
-    // The room's season: everybody drives a car of it. (Fired after 'connected', before 'track', and on every change.)
+    // The room's season: everybody drives a car of it. (Fired before 'room' on the message that changed it.)
     net.on('year', function (y) {
       var changed = applyCar();
-      if (changed && car && !net.isHost && isSeason(y)) toast('房間是 ' + y + ' 賽季：你的車換成 ' + carName(car.spec), 6000);
+      if (changed && car && !net.isHost && isSeason(y)) {
+        yearCarNote = '（你的車換成 ' + carName(car.spec) + '）';
+        toast('房間是 ' + y + ' 賽季：你的車換成 ' + carName(car.spec), 6000);
+      }
       renderStill();
     });
     net.on('players', function (roster) {
       var wasHost = netUi.wasHost;
       netUi.wasHost = net.isHost;
-      if (knownPlayers && net.isHost && wasHost === false) {
-        setStatus('原本的房主離開了，現在你是房主。', 'ok');
-        if (ui.toast) ui.toast('你現在是房主');
-      }
       announce(roster);
+      if (knownPlayers && net.isHost && wasHost === false) {
+        // (the dedicated server: the longest-connected player takes over; the room's settings stay, our game makes the
+        // computer drivers the room asks for)
+        setStatus('原本的房主離開了，現在你是房主。在房間大廳選賽道和設定，大家準備好就按「開始」。', 'ok');
+        toast('你現在是房主：可以設定房間並按「開始」', 6000);
+        var r0 = net.room;
+        if (r0 && r0.set) roomBots = { count: Math.max(0, Math.floor(Number(r0.set.bots)) || 0), skill: typeof r0.set.skill === 'string' ? r0.set.skill : botCfg.skill };
+        botSent = null;
+      }
       refreshNetUi();
       pushCars();                             // (a new host may pick the year now)
       applyBots();                            // the host: the humans' cars / seats changed (or we became the host)
+      pushSetup();
     });
-    net.on('track', function (id) {
-      var data = findTrack(id);
-      if (!data) {
-        netUi.lockText = '房主選了這個版本沒有的賽道（' + id + '），請更新遊戲。';
-        setStatus('無法載入房主選的賽道', 'err');
-        refreshNetUi();
-        return;
-      }
-      netUi.lockText = '';
-      if (netUi.status === HOST_PICK + passwordNote()) setStatus('房間已建立，你是房主。' + passwordNote(), 'ok');   // the room has its track now
-      clearRemoteModels();
-      loadTrack(data);                        // spawns on our grid slot and starts driving
-      refreshNetUi();
+    net.on('room', onRoom);
+    net.on('load', onRoomLoad);
+    net.on('go', onRoomGoEvent);
+    net.on('lobby', onRoomLobby);
+    net.on('nostart', function (why) {
+      startPending = false;
+      // (a second start that crossed the first one's 'room': the room is loading already, nothing to say)
+      if (!(why === 'state' && net.room && net.room.st !== 'lobby')) toast(NOSTART[why] || '現在無法開始', 5000);
+      pushSetup();
     });
     net.on('hit', onRemoteHit);
     net.on('botHit', onBotHit);
     net.on('disconnected', function (reason) {
+      var onTrack = running;
       clearRemoteModels();
       knownPlayers = null; netUi.wasHost = undefined; netUi.lockText = '';
       netUi.busy = false;
+      rl = null; loadFailRs = -1; roomTaken = false; pickerFresh = false; roomBots = null;
+      startPending = false; roomStAt = -1e9;
+      if (roomActTimer) { clearTimeout(roomActTimer); roomActTimer = 0; }
+      pushRoomLoading();
       var left = reason === '已離開房間';
       setStatus(reason || '連線中斷', left ? '' : 'err');
-      if (!left && ui.toast) ui.toast((reason || '連線中斷') + '，已回到單人模式', 6000);
+      // the lobby / the loading screen: back to the cards; on the track: driving on alone
+      if (!onTrack) setupShow = 'tracks';
+      if (!left) {
+        if (!onTrack && /房主已關閉房間/.test(reason || '')) toast('房主關閉了房間，已回到單人模式', 6000);
+        else toast((reason || '連線中斷') + '，已回到單人模式', 6000);
+      }
       refreshNetUi();
       botSent = null;                         // our own computer drivers again (as the setting wants them now)
       applyCar();                             // back to our own season
+      pushSetup();
       renderStill();
     });
     refreshNetUi();
+  }
+
+  var NOSTART = {                            // net 'nostart' (the server refused the host's 開始)
+    track: '先選一條賽道', busy: '太快了，請稍等一下再按開始', 'not-ready': '還有玩家沒準備',
+    load: '沒有人載入成功，回到房間大廳。', state: '現在無法開始', len: '賽道長度不對，無法開始'
+  };
+
+  // The room's settings as we find them, once per connection: the host of a fresh room (no track, never started)
+  // brings his remembered setup (season, mode, laps, tyre wear) and his computer drivers, and gets the track picker;
+  // a room that has settings already (a dedicated server's) keeps them.
+  function takeRoom() {
+    var r = net && net.connected ? net.room : null;
+    if (!r || !r.set || roomTaken) return;
+    roomTaken = true;
+    if (!net.isHost) return;
+    if (r.rs === 0 && !r.set.track) {
+      var s = ui.getSetup ? ui.getSetup() : {}, y = ownYear(), p = {};
+      if (isSeason(y)) p.year = y;
+      if (s.mode === 'gp' || s.mode === 'free') p.mode = s.mode;
+      if (typeof s.q === 'number') p.q = s.q;
+      if (typeof s.r === 'number') p.r = s.r;
+      if (typeof s.wear === 'number') p.wear = s.wear;
+      if (net.setRoom) net.setRoom(p);
+      roomBots = { count: botCfg.count, skill: botCfg.skill };
+      setupShow = 'picker';
+      pickerFresh = true;
+    } else {
+      roomBots = { count: Math.max(0, Math.floor(Number(r.set.bots)) || 0), skill: typeof r.set.skill === 'string' ? r.set.skill : botCfg.skill };
+    }
+    botSent = null;
+    applyBots();
+  }
+
+  // net 'room': the lobby / loading / session state of the room changed (settings, ready flags, loads).
+  function onRoom(room, prev) {
+    takeRoom();
+    var r = net.room || room;
+    if (!r || !r.set) return;
+    if (prev && prev.st !== r.st) roomStAt = performance.now();
+    startPending = false;                     // (the answer to our start, or a change it crossed: nostart 'state' is quiet)
+    var me = net.id, wasReady = !!(prev && Array.isArray(prev.ready) && prev.ready.indexOf(me) >= 0);
+    // our 準備 cleared by the host's change of the track / season / mode
+    if (prev && prev.set && r.rr !== prev.rr && !net.isHost && r.st === 'lobby' && wasReady) {
+      var what = [];
+      if (prev.set.track !== r.set.track) what.push('賽道');
+      if (prev.set.year !== r.set.year) what.push('賽季');
+      if (prev.set.mode !== r.set.mode) what.push('模式');
+      toast('房主改了' + (what.length ? what.join('、') : '設定') + '，請再按一次「準備」。' + yearCarNote, 6000);
+    }
+    yearCarNote = '';
+    // pulled into the load without having pressed 準備 (the host did not wait)
+    if (prev && prev.st === 'lobby' && r.st === 'loading' && !net.isHost && !wasReady) toast('房主開始了：你還沒按準備，也一起載入。', 5000);
+    if (r.set.track) pickerFresh = false;
+    if (setupShow === 'picker' && !(net.isHost && r.st === 'lobby')) setupShow = 'setup';
+    if (r.st === 'lobby') loadFailRs = -1;
+    pushCars();
+    pushGp();
+    pushSetup();
+    if (rl) pushRoomLoading();
+  }
+
+  // net 'load' (trackId, rs): build the room's track (frozen in our slot, no driving) and report it; once per load cycle,
+  // also for a newcomer joining a room that is loading or in a session.
+  function onRoomLoad(id, rs) {
+    if (!net || !net.connected) return;
+    if (running) stopLoop();
+    clearRemoteModels();
+    setupShow = 'setup';
+    ui.showMenu(tracks);
+    var data = findTrack(id);
+    if (!data) {                              // a newer version's track: out of this session, in the lobby view
+      loadFailRs = rs; rl = null;
+      if (net.sendLoaded) net.sendLoaded(rs, false, { why: 'no-track' });
+      toast('你的版本沒有這條賽道（' + id + '），請更新遊戲。這一場你在大廳等。', 8000);
+      pushRoomLoading(); pushSetup(); pushCars();
+      return;
+    }
+    loadFailRs = -1;
+    rl = { rs: rs, phase: 'build' };
+    pushRoomLoading(); pushSetup(); pushCars();
+    if (track && trackData && trackData.id === id && !loadNext) {
+      // the track is loaded already (back in the lobby and started again): nothing is built
+      setTimeout(function () { roomTrackReady(rs, true, true); }, 0);
+    } else {
+      loadTrack(data, { then: function (ok) { roomTrackReady(rs, ok, false); } });
+    }
+  }
+
+  // Our build of load cycle rs is done (ok: built): report it. Back in the lobby, left, or a newer start meanwhile: report
+  // nothing (the track stays loaded for the next start).
+  function roomTrackReady(rs, ok, same) {
+    var r = net && net.connected ? net.room : null;
+    if (!r || r.rs !== rs || r.st === 'lobby' || !rl || rl.rs !== rs) return;
+    if (!ok || !track || !car) {
+      loadFailRs = rs; rl = null;
+      if (net.sendLoaded) net.sendLoaded(rs, false, { why: 'error' });
+      pushRoomLoading(); pushSetup();
+      return;
+    }
+    if (same) {                               // our car (and our bots) back into the grid boxes, a fresh start
+      clearInput();
+      resetLap(placeStart());
+      freshStart();
+      for (var i = 0; i < bots.length; i++) placeBot(bots[i], bots[i].slot, 'M', 1, false);
+      cockpit.update(car.state, 0);
+      if (raceLine && lineOn) raceLine.update(car.state);
+      renderStill();
+    }
+    if (net.sendLoaded) net.sendLoaded(rs, true, { len: track.length });
+    if (r.st === 'session') enterSession();   // the barrier is over (we were late, or joined during the session)
+    else { rl.phase = 'wait'; pushRoomLoading(); }
+    refreshNetUi();
+    pushSetup();
+  }
+
+  // net 'go' (rs): the barrier is over, the session begins. Free practice: drive. A Grand Prix: its qualifying comes
+  // with the next message (onGpPhase places us and drives).
+  function onRoomGoEvent(rs) {
+    if (!rl || rl.rs !== rs || rl.phase === 'build') { pushSetup(); return; }   // (still building: its end enters)
+    var r = net.room;
+    if (r && r.set && r.set.mode === 'gp' && gp.phase === 'free') { rl.phase = 'quali'; pushRoomLoading(); return; }
+    enterSession();
+  }
+
+  // On the track in the room's session, from wherever it is now: free practice; qualifying (from our slot); the grid
+  // (our box); the race / results as a spectator (a ghost).
+  function enterSession() {
+    rl = null;
+    pushRoomLoading();
+    if (!canResume()) { pushSetup(); return; }
+    var ph = gp.phase, s = gp.snapshot;
+    if (ph === 'quali' && gp.taking) {
+      resetLap(placeStart());
+      freshStart();
+      if (s) toast('大獎賽排位賽進行中：排位 ' + s.q + ' 圈，正賽 ' + s.r + ' 圈', 5000);
+    } else if (ph === 'grid' && gp.taking && gp.gridSlot >= 0) {
+      resetLap(placeOnGrid(gp.gridSlot));
+      freshStart();
+      cockpit.centreLook();
+    } else if (ph === 'free') toast('自由練習開始', 2500);
+    resume();
+  }
+
+  // net 'lobby': the room went back to its lobby (the host's 回到大廳, a Grand Prix ended outside its race, nobody
+  // loaded): off the track, the menu on the lobby; the track stays loaded (a start on it is instant).
+  function onRoomLobby() {
+    rl = null;
+    loadFailRs = -1;
+    pushRoomLoading();
+    stopLoop();
+    clearRemoteModels();
+    if (pit) pit.reset();
+    limiterOn = false;
+    setupShow = 'setup';
+    ui.showMenu(tracks);
+    if (!net.isHost) toast('房主回到房間大廳', 4000);
+    botSent = null;
+    applyBots();                              // (the host: a field changed meanwhile can be asked for again)
+    refreshNetUi();
+    pushGp();
+    pushCars();
+    pushSetup();
+    renderStill();
   }
 
   function roomResult(res, what) {
@@ -907,20 +1144,306 @@
     if (!address) { setStatus('請輸入房主的 IP 位址', 'err'); refreshNetUi(); return; }
     var pw = passwordOf(opts);
     netUi.busy = true;
+    joinedPw = !!pw;
     setStatus('正在連線到 ' + address + ' …', '');
     refreshNetUi();
     var p = pw && net.join.length >= 2 ? net.join(address, { password: pw }) : net.join(address);
     p.then(function (r) { roomResult(r, '加入房間'); }, function () { roomResult(null, '加入房間'); });
   }
 
-  // A card in the track grid was clicked.
+  /* ---------- v7.2: the start panel (alone) and the room lobby: the menu's callbacks ---------- */
+
+  // A card was clicked: alone the start panel of that track opens (nothing is built yet); the host's picker sets the
+  // room's track (everybody sees it in the lobby; nobody loads before 開始).
   function onPickTrack(data) {
+    if (!data) return;
     if (net && net.connected) {
-      // the host's choice goes through the server; everybody (incl. us) loads it on the 'track' event
-      if (net.isHost) net.selectTrack(data.id);
+      var r = net.room;
+      if (net.isHost && r && r.st === 'lobby' && net.setRoom && net.setRoom({ track: data.id })) {
+        setupShow = 'setup';
+        pickerFresh = false;
+      }
+      pushSetup();
       return;
     }
-    loadTrack(data);
+    setupTrack = data;
+    setupShow = 'setup';
+    pushSetup();                              // (synchronously: 開始 has the focus, Enter drives)
+  }
+
+  // ← 選擇其他賽道 (the panel) / ← 返回大廳 (the host's picker), Esc, the controller's B.
+  function onSetupBack() {
+    if (net && net.connected) {
+      if (setupShow === 'picker') { setupShow = 'setup'; pushSetup(); }
+      return;
+    }
+    setupShow = 'tracks';
+    pushSetup();
+  }
+
+  // 開始. Alone: a running Grand Prix ends, the panel's track is built (the loaded one is not: back to the start), then
+  // free practice or a Grand Prix. A room's host: the room loads (net.startRoom; force: he confirmed 仍要開始).
+  function onSetupStart(cfg) {
+    cfg = cfg && typeof cfg === 'object' ? cfg : {};
+    if (net && net.connected) { startRoom(cfg); return; }
+    var data = setupTrack;
+    if (!data || !car) return;
+    var c = { mode: cfg.mode === 'gp' ? 'gp' : 'free', q: cfg.q, r: cfg.r, wear: cfg.wear };
+    if (gp && gp.phase !== 'free') gp.trackChanged();   // (alone: ends it; the 'free' phase says so)
+    if (track && trackData && trackData.id === data.id && !loadNext) {
+      restartHere();
+      beginSolo(c);
+    } else {
+      loadTrack(data, { then: function (ok) { if (ok && !(net && net.connected)) beginSolo(c); } });
+    }
+  }
+
+  // 重新開始 on the loaded track: nothing rebuilt, our car (and the computer drivers) back to the start, a fresh start.
+  function restartHere() {
+    clearInput();
+    resetLap(placeStart());
+    freshStart();
+    for (var i = 0; i < bots.length; i++) placeBot(bots[i], bots[i].slot, 'M', 1, 1);
+    cockpit.update(car.state, 0);
+    if (raceLine && lineOn) raceLine.update(car.state);
+  }
+
+  function beginSolo(c) {
+    setupShow = 'tracks';                     // (Esc while driving opens the cards)
+    if (c.mode === 'gp') {
+      // the 'phase' event (qualifying) places us and drives
+      if (gp.start({ q: c.q, r: c.r, wear: c.wear, year: car.spec ? car.spec.year : undefined }, track.length)) {
+        if (!running) resume();
+        return;
+      }
+      toast('無法開始大獎賽，改為自由練習', 4000);
+    }
+    resume();
+  }
+
+  // The host's 開始 in the lobby: everybody loads the room's track (the length of it, for the session).
+  // A second click before the server's answer sends nothing (startPending; a second start would only be refused with
+  // nostart 'state', 「現在無法開始」 over a load that is going on).
+  function startRoom(cfg) {
+    var r = net.room;
+    if (!net.isHost || !r || r.st !== 'lobby' || !net.startRoom || startPending) return;
+    var td = r.set && r.set.track ? findTrack(r.set.track) : null;
+    if (!td) { toast(NOSTART.track, 3000); return; }
+    var len = Math.round(Number(td.lengthKm) * 1000);
+    if (!net.startRoom({ len: len, force: cfg.force === true })) { toast(NOSTART.state, 3000); return; }
+    startPending = true;
+  }
+
+  // The panel's mode / laps / tyre wear changed: alone ui.js has stored it (開始's line follows); the host's go to the room.
+  function onSetupChange(p) {
+    if (!p || typeof p !== 'object') return;
+    if (net && net.connected) {
+      var r = net.room;
+      if (net.isHost && r && r.st === 'lobby' && net.setRoom) net.setRoom(p);
+    }
+    pushSetup();
+  }
+
+  function onReady(on) {
+    if (net && net.connected && !net.isHost && net.setReady) net.setReady(!!on);
+    pushSetup();
+  }
+
+  function onRoomTrackPicker() {
+    var r = net && net.connected ? net.room : null;
+    if (!r || !net.isHost || r.st !== 'lobby') return;
+    setupShow = 'picker';
+    pushSetup();
+  }
+
+  // 回到大廳 / 取消，回到大廳 (the host; ui.js asked first where a Grand Prix would end)
+  function onRoomBack() {
+    roomAct(function () { if (net && net.connected && net.isHost && net.backToLobby) net.backToLobby(); });
+  }
+
+  // 不等了，開始 (the host, on the loading screen, once his own track is built)
+  function onRoomGo() {
+    roomAct(function () { if (net && net.connected && net.isHost && net.goNow) net.goNow(); });
+  }
+
+  // The host's go / back / gp end: now, or (within ROOM_ACT_MS of the last change of the room's st we saw: the server
+  // would drop it) once that second is over, if the load cycle is still the same and we are still the host (the
+  // latest one asked for wins). The wait is checked again then: a change of st meanwhile starts a new second.
+  function roomAct(fn) {
+    var r = net && net.connected ? net.room : null;
+    if (!r) return;
+    if (roomActTimer) { clearTimeout(roomActTimer); roomActTimer = 0; }
+    var wait = roomStAt + ROOM_ACT_MS - performance.now();
+    if (wait <= 0) { fn(); return; }
+    var rs = r.rs;
+    roomActTimer = setTimeout(function () {
+      roomActTimer = 0;
+      var r2 = net && net.connected ? net.room : null;
+      if (r2 && r2.rs === rs && net.isHost) roomAct(fn);
+    }, wait + 30);
+  }
+
+  // 在目前賽道開大獎賽… (the 大獎賽 tab alone; ui.js selected 大獎賽 in the setup)
+  function onGpOpen() {
+    if (net && net.connected) return;
+    if (!track || !trackData) return;
+    setupTrack = trackData;
+    setupShow = 'setup';
+    pushSetup();
+  }
+
+  // Esc / the controller's B in the menu (not in a field): a confirm row closes; the panel / the picker goes back; on the
+  // cards alone (Esc only) and in a room's session menu: back to driving. The lobby and the loading screen: nothing.
+  function menuBack(k) {
+    if (rl) return;
+    if (ui.setupKey && ui.setupKey(k)) return;
+    var room = !!(net && net.connected);
+    if (setupShow === 'picker' || (!room && setupShow === 'setup' && setupTrack)) { onSetupBack(); return; }
+    if (k === 'esc' && canResume()) resume();
+  }
+
+  var MODE_NAME = { free: '自由練習', gp: '大獎賽' };
+  var PHASE_BANNER = { quali: '排位賽', grid: '起跑', race: '正賽', results: '成績' };
+
+  // A track's name as the menu shows it (the Chinese one where js/track-names-zh.js has it).
+  function trackName(td) {
+    if (!td) return '';
+    var Z = window.F1_TRACK_NAMES_ZH, z = Z && typeof td.id === 'string' && Object.prototype.hasOwnProperty.call(Z, td.id) ? Z[td.id] : null;
+    return z && z.name ? z.name : String(td.name || td.id || '');
+  }
+
+  // The menu's left area: the start panel alone, the lobby in a room (ui.setSetup; SetupView in js/README-interfaces.md).
+  // Skipped while driving (the menu is hidden; opening it pushes again).
+  function pushSetup() {
+    if (!ui || !ui.setSetup || running) return;
+    // 繼續駕駛 (#menu-resume, the room menu's #setup-resume) follows whether we may drive now (a room: its session)
+    if (ui.setResumeHandler) ui.setResumeHandler(canResume() ? resume : null);
+    var room = !!(net && net.connected);
+    if (room && !(net.room && net.room.set)) return;   // (connected, the room's state not here yet: its 'room' event draws)
+    var v = room ? roomSetupView() : soloSetupView();
+    lastSetup = v;
+    ui.setSetup(v);
+  }
+
+  function soloSetupView() {
+    var td = setupTrack, s = ui.getSetup ? ui.getSetup() : null;
+    if (!s || typeof s !== 'object') s = { mode: 'free', q: 3, r: 5, wear: 1 };
+    var mode = s.mode === 'gp' ? 'gp' : 'free', current = !!(td && track && trackData && trackData.id === td.id);
+    return {
+      show: setupShow === 'setup' && td ? 'setup' : 'tracks', room: false,
+      track: td, trackId: td ? td.id : null, trackMissing: false, current: current,
+      mode: mode, q: s.q, r: s.r, wear: s.wear, canEdit: true,
+      go: { show: true, enabled: !!td, label: current ? '重新開始' : '開始',
+            sub: mode === 'gp' ? '大獎賽 ‧ 排位 ' + s.q + ' 圈 ‧ 正賽 ' + s.r + ' 圈' : '自由練習 ‧ ' + trackName(td) },
+      hint: 'Enter 或手把 A：開始 ‧ Esc 或手把 B：返回賽道列表',
+      note: gp && gp.phase !== 'free' ? '大獎賽進行中：開始新的賽事會結束目前的大獎賽。' : '',
+      banner: ''
+    };
+  }
+
+  // the state of a player in the room's load (net.room.load): '' | 'wait' | 'done' | 'fail'
+  function loadState(ld, id) {
+    if (!ld) return '';
+    if (Array.isArray(ld.done) && ld.done.indexOf(id) >= 0) return 'done';
+    if (Array.isArray(ld.fail) && ld.fail.indexOf(id) >= 0) return 'fail';
+    if (Array.isArray(ld.wait) && ld.wait.indexOf(id) >= 0) return 'wait';
+    return '';
+  }
+
+  function roomSetupView() {
+    var r = net.room, set = r.set || {}, host = !!net.isHost, st = r.st;
+    var td = set.track ? findTrack(set.track) : null, missing = !!(set.track && !td);
+    var lobby = st === 'lobby', session = st === 'session', mode = set.mode === 'gp' ? 'gp' : 'free';
+    var ro = net.roster || [], readyIds = Array.isArray(r.ready) ? r.ready : [], year = activeYear();
+    var players = [], unready = [], humans = 0, readyN = 0, me = null, i;
+    for (i = 0; i < ro.length; i++) {
+      var p = ro[i];
+      if (!p || p.bot) continue;
+      humans++;
+      var rdy = !!p.isHost || (typeof p.ready === 'boolean' ? p.ready : readyIds.indexOf(p.id) >= 0);
+      if (rdy) readyN++; else unready.push(p.name);
+      var sp = cars ? (p.isSelf && car ? car.spec : cars.resolve(p.car || null, year)) : null;
+      var ld = typeof p.load === 'string' && p.load ? p.load : loadState(r.load, p.id);
+      if (p.isSelf && loadFailRs === r.rs && !lobby) ld = 'fail';
+      var row = { id: p.id, name: p.name, colour: p.colour, colour2: sp ? sp.colour : '', team: sp ? sp.teamZh || sp.team || '' : '',
+                  carName: sp ? carName(sp) : '', isHost: !!p.isHost, isSelf: !!p.isSelf, ready: rdy, load: ld,
+                  slot: typeof p.slot === 'number' ? p.slot : i };
+      players.push(row);
+      if (p.isSelf) me = row;
+    }
+    players.sort(function (a, b) { return a.slot - b.slot; });
+    var allReady = unready.length === 0, myReady = !!(me && me.ready);
+    var sub = !set.track ? '先選賽道' : MODE_NAME[mode] + ' ‧ ' + (humans <= 1 ? '只有你一個人，可以直接開始' : readyN + ' / ' + humans + ' 已準備');
+    var status = '';
+    if (!host) {
+      if (missing) status = '無法準備：你的版本沒有這條賽道';
+      else if (!set.track) status = '等待房主選擇賽道…';
+      else if (myReady) status = allReady ? '等待房主開始…' : '等待其他玩家準備（' + readyN + ' / ' + humans + '）';
+      else status = '選好車和起跑輪胎就按「準備」。';
+    }
+    var banner = '', note = '', hint = '';
+    if (setupShow === 'picker' && host && lobby) {
+      banner = pickerFresh ? '房間已建立。先幫房間選一條賽道（點卡片不會馬上開始）。' : '點一張卡片設成房間的賽道（不會馬上開始）。';
+    } else if (session) banner = gp.phase !== 'free' && PHASE_BANNER[gp.phase] ? '大獎賽進行中：' + PHASE_BANNER[gp.phase] : '自由練習中';
+    else if (st === 'loading') banner = '載入賽道中…';
+    if (loadFailRs === r.rs && !lobby) note = '你的版本沒有這條賽道（' + set.track + '），請更新遊戲。這一場你在大廳等。';
+    if (lobby) hint = host ? 'Enter 或手把 A：開始' : 'Enter 或手把 A：準備／取消準備';
+    else if (session && canResume()) hint = 'Esc 或手把 Start：繼續駕駛';
+    return {
+      show: setupShow === 'picker' && host && lobby ? 'picker' : 'setup', room: true,
+      track: td, trackId: set.track || null, trackMissing: missing, current: false,
+      mode: mode, q: set.q, r: set.r, wear: set.wear, canEdit: host && lobby,
+      go: { show: host && lobby, enabled: host && lobby && !!set.track && allReady, label: '開始', sub: sub },
+      hint: hint, note: note, banner: banner,
+      st: st, phase: gp ? gp.phase : 'free', isHost: host, ded: !!net.ded, address: roomAddress(), hasPassword: roomHasPw(),
+      players: players, counts: { humans: humans, ready: readyN }, unready: unready,
+      ready: { show: !host && lobby, on: myReady, enabled: !host && lobby && !!td, status: status },
+      force: host && lobby && !!set.track && !allReady,
+      canPick: host && lobby, resume: session && canResume(), lobbyBtn: host && session,
+      botList: botListView(), botSkill: typeof set.skill === 'string' ? set.skill : ''
+    };
+  }
+
+  // the room's address for the lobby: ours as the host (LAN), else the one we joined
+  function roomAddress() {
+    if (net.isHost && net.hostInfo) {
+      var a = Array.isArray(net.hostInfo.addresses) ? net.hostInfo.addresses : [];
+      return a.length ? a[0] + ':' + net.hostInfo.port : '';
+    }
+    return typeof net.address === 'string' ? net.address : '';
+  }
+  function roomHasPw() { return net.isHost && net.hostInfo ? !!net.hostInfo.hasPassword : joinedPw; }
+
+  // A room's loading screen (ui.setRoomLoading): who is still loading, the time left; re-drawn while it shows.
+  function pushRoomLoading() {
+    if (!ui || !ui.setRoomLoading) return;
+    var r = net && net.connected ? net.room : null;
+    if (!rl || !r || !r.set) {
+      if (rlTimer) { clearInterval(rlTimer); rlTimer = 0; }
+      if (rlShown) { rlShown = false; ui.setRoomLoading(null); }
+      return;
+    }
+    var set = r.set, td = set.track ? findTrack(set.track) : null, ld = r.load, host = !!net.isHost;
+    var ro = net.roster || [], rows = [];
+    for (var i = 0; i < ro.length; i++) {
+      var p = ro[i];
+      if (!p || p.bot) continue;
+      var s;
+      if (p.isSelf) s = loadFailRs === r.rs ? 'fail' : net.loadedRs === r.rs ? 'done' : 'wait';
+      else s = ld ? loadState(ld, p.id) || 'wait' : 'done';
+      rows.push({ id: p.id, name: p.name, colour: p.colour, isSelf: !!p.isSelf, isHost: !!p.isHost, state: s });
+    }
+    var left = ld && typeof ld.until === 'number' && typeof net.serverNow === 'function' ? Math.max(0, (ld.until - net.serverNow()) / 1000) : null;
+    ui.setRoomLoading({
+      title: rl.phase === 'quali' ? '排位賽即將開始…' : rl.phase === 'wait' ? '等待其他玩家載入…' : '載入賽道中…',
+      sub: (trackName(td) || set.track || '') + ' ‧ ' +
+        (set.mode === 'gp' ? '大獎賽（排位 ' + set.q + ' 圈、正賽 ' + set.r + ' 圈）' : '自由練習'),
+      rows: rows, leftS: r.st === 'loading' ? left : null,
+      canGo: host && r.st === 'loading' && net.loadedRs === r.rs,
+      canCancel: host
+    });
+    rlShown = true;
+    if (!rlTimer) rlTimer = setInterval(pushRoomLoading, 250);
   }
 
   /* ---------- Grand Prix ---------- */
@@ -954,8 +1477,11 @@
     // (the session says so after the lap counter has completed our last lap: lap.last / best are the counted ones)
     if (!(v.taking && (v.done || v.phase === 'results'))) lapsDone = null;
     else if (!lapsDone && lap) lapsDone = { last: roundMs(lap.last), best: roundMs(lap.best) };
-    v.canStart = !!(track && car) && (!room || (net.isHost && inRoomTrack()));
-    v.startHint = v.canStart ? '' : (room ? '先幫房間選一條賽道' : '先選一條賽道');
+    // v7.2: a Grand Prix starts from the start panel / the room lobby; the tab offers 在目前賽道開大獎賽… alone with a
+    // track loaded (canStart), and in a room 回到大廳 to its host (room)
+    v.room = room;
+    v.canStart = !room && !!(track && car);
+    v.startHint = '';
     for (var i = 0; v.rows && i < v.rows.length; i++) {
       var c = rowCar(v.rows[i]);
       // (the chip: the car's livery colour; a computer driver's dot is that already: its second colour then)
@@ -964,17 +1490,15 @@
     // the 電腦車手 rows: js/gp.js's bots (count, level, seats, whether we may change them) + whether there can be any
     if (!v.bots || typeof v.bots !== 'object') v.bots = { count: 0, skill: botCfg.skill, max: 15, canEdit: false };
     v.bots.available = aiOn();
+    if (room) {
+      // a room's field changes in its lobby only, by its host, who sees the room's wish (a new host: the room's field)
+      v.bots.canEdit = !!(net.isHost && net.room && net.room.st === 'lobby' && gp.phase === 'free');
+      if (net.isHost) { var w = roomBots || botCfg; v.bots.want = w.count; v.bots.wantSkill = w.skill; }
+    }
     v.botList = botListView();
     ui.setGp(v);
     pushCars();                               // parc fermé: the car controls follow the session
-  }
-
-  // 開始大獎賽 in the menu panel. Alone: a track must be loaded; the host: the room's track.
-  function startGp(cfg) {
-    if (!track || !car || !canResume()) return;
-    cfg = cfg || {};
-    // the answer is the 'phase' event (in a room: from the server, whose session year is the room's)
-    gp.start({ q: cfg.q, r: cfg.r, wear: cfg.wear, year: car.spec ? car.spec.year : undefined }, track.length);
+    pushSetup();                              // (the lobby's session banner, the panel's Grand Prix warning)
   }
 
   // A phase of the Grand Prix put us on the track: out of the menu (keys held while driving stay held).
@@ -984,6 +1508,9 @@
   function onGpPhase(phase, prev) {
     var s = gp.snapshot;
     var ready = !!(track && car && lap && canResume());   // the track the session runs on is loaded
+    // v7.2: a room's session acts only while the room is in its session (the 'free' that comes with its return to the
+    // lobby says nothing: the lobby says it)
+    var rr = net && net.connected ? net.room : null, quiet = !!(net && net.connected) && !(rr && rr.st === 'session');
     // the session's season decides the cars: ours follows it (parc fermé from here on)
     var switched = applyCar() && phase !== 'free';
     var carNote = switched ? '（' + activeYear() + ' 賽季：你的車換成 ' + carName(car.spec) + '）' : '';
@@ -998,12 +1525,14 @@
         if (audio) { audio.play('pitgun'); audio.play('jack', 0.6); }
       }
       if (pit) pit.reset();
-      toast('大獎賽已結束，回到自由練習' + (fitted ? '（已換上新胎：' + (COMPOUND_NAME[nextCompound] || nextCompound) + '）' : ''));
+      if (!quiet) toast('大獎賽已結束，回到自由練習' + (fitted ? '（已換上新胎：' + (COMPOUND_NAME[nextCompound] || nextCompound) + '）' : ''));
       return;
     }
+    if (quiet) return;
     if (!gp.taking) {
       // we joined a room whose Grand Prix is already on: our car is not moved, it roams as a ghost
       if (prev === 'free') toast('大獎賽進行中，你正在觀戰，下一場開始時才會加入' + carNote, 6000);
+      if (rl && rl.phase === 'quali') enterSession();   // (the loading screen waited for this Grand Prix: we watch it)
       return;
     }
     if (phase === 'quali') {
@@ -1105,7 +1634,7 @@
   // -> [{name, car, colour, skill, seed}]
   function wantedField() {
     if (!aiOn() || !car || !car.spec) return [];
-    var n = Math.min(botCfg.count, botSeats());
+    var cfg = botWish(), n = Math.min(cfg.count, botSeats());
     if (!(n > 0)) return [];
     var year = activeYear(), taken = [], names = [], i;
     if (net && net.connected) {
@@ -1121,7 +1650,7 @@
       var p = ui.getProfile ? ui.getProfile() : null;
       if (p && p.name) names.push(p.name);
     }
-    var list = AI.lineup({ cars: cars.list(year), taken: taken, count: n, skill: botCfg.skill, seed: year,
+    var list = AI.lineup({ cars: cars.list(year), taken: taken, count: n, skill: cfg.skill, seed: year,
       drivers: typeof cars.drivers === 'function' ? cars.drivers : null, names: names });
     var out = [];
     for (i = 0; i < list.length; i++) {
@@ -1133,26 +1662,33 @@
 
   // Alone, or as the host in free practice: ask for the field the setting wants (gp.setBots: alone at once, in a room
   // through the server, whose roster answers with ids and slots). Nothing is sent for the field already asked for.
+  // The field asked for: the 電腦車手 setting alone; in a room its host's working copy of the room's (roomBots: his own
+  // setting for a fresh room, the room's for one he took over).
+  function botWish() { return net && net.connected && roomBots ? roomBots : botCfg; }
+
   function applyBots() {
     if (!gp || typeof gp.setBots !== 'function' || !aiOn()) return;
     var room = !!(net && net.connected);
     if ((room && !net.isHost) || gp.phase !== 'free') return;
-    var list = wantedField(), have = gp.bots().length;
-    var sig = botCfg.skill + '|' + (room ? 'room' : 'solo') + '|' + list.map(function (e) { return e.name + ',' + e.car + ',' + e.skill; }).join(';');
+    if (room && !(net.room && net.room.st === 'lobby')) return;   // v7.2: a room's field changes in its lobby only
+    if (room && !roomTaken) return;           // (the room's own field first: takeRoom)
+    var cfg = botWish(), list = wantedField(), have = gp.bots().length;
+    var sig = cfg.skill + '|' + (room ? 'room' : 'solo') + '|' + list.map(function (e) { return e.name + ',' + e.car + ',' + e.skill; }).join(';');
     if (sig === botSent) return;
     if (!list.length && !have) { botSent = sig; return; }   // none wanted, none there (the v6 game: nothing to do)
     var send = [];
     for (var i = 0; i < list.length; i++) send.push({ name: list[i].name, car: list[i].car, colour: list[i].colour, skill: list[i].skill });
     botSeeds = list.map(function (e) { return e.seed; });
-    if (gp.setBots(send, botCfg.skill)) botSent = sig;
+    if (gp.setBots(send, cfg.skill)) botSent = sig;
   }
 
-  // The 電腦車手 setting changed (the 大獎賽 tab).
+  // The 電腦車手 setting changed (the start panel / the room lobby).
   function onBotsSetting(c) {
     if (!c || typeof c !== 'object') return;
     var n = Math.floor(Number(c.count));
     botCfg.count = n >= 0 ? Math.min(n, 15) : 0;
     if (typeof c.skill === 'string') botCfg.skill = c.skill;
+    if (net && net.connected && net.isHost) roomBots = { count: botCfg.count, skill: botCfg.skill };   // (the host's lobby edit)
     applyBots();
     pushGp();
   }
@@ -1868,7 +2404,7 @@
     if (e.code === 'Escape') {
       if (running) { e.preventDefault(); exitToMenu(); }
       else if (typing) { e.preventDefault(); e.target.blur(); }   // Esc in a text field only leaves the field
-      else if (canResume()) { e.preventDefault(); resume(); }
+      else { e.preventDefault(); menuBack('esc'); }             // (v7.2: the panel / the picker go back first)
       return;
     }
     if (!running || typing) return;     // menu / text fields: keys are for typing, not for driving
@@ -1946,10 +2482,16 @@
   }
 
   // The loop does not run while the menu is open: poll from a timer so that Start resumes, as Esc does.
-  // (Often enough that a press is never swallowed by gamepad.js's 500 ms edge resync.)
+  // (Often enough that a press is never swallowed by gamepad.js's 500 ms edge resync.) v7.2: B = back (as Esc: the
+  // panel to the cards, a confirm row / the host's picker closed); A (its rising edge: A or RB, js/gamepad.js's boost;
+  // held while the menu opened it does not count) = 開始 in the panel and for the host, 準備 for a guest.
   function pollPadInMenu() {
-    if (running) return;
-    if (pad.poll().pressed.menu && canResume()) resume();
+    if (running) { padBoost = !!(pad.state && pad.state.boost); return; }
+    var ps = pad.poll(), a = !!ps.boost, edge = a && !padBoost;
+    padBoost = a;
+    if (ps.pressed.menu) { if (!rl && canResume()) resume(); return; }
+    if (ps.pressed.limiter) { menuBack('b'); return; }
+    if (edge && !rl && ui.setupKey) ui.setupKey('a');
   }
 
   function initPad() {
@@ -2176,8 +2718,14 @@
         if (cockpit && cockpit.setCar && car) cockpit.setCar(car.spec, p && p.colour);   // the accent is our colour
         pushGp();
       },
-      onGpStart: startGp,
-      onGpAction: function (a) { gp.action(a); },
+      // (a room's 結束大獎賽 outside the race goes back to the lobby: roomAct waits out the server's second)
+      onGpAction: function (a) {
+        if (a === 'end' && gp.online) roomAct(function () { gp.action('end'); });
+        else gp.action(a);
+      },
+      // v7.2: the start panel / the room lobby (onSelectTrack: a card was clicked, it opens the panel)
+      onSetupStart: onSetupStart, onSetupBack: onSetupBack, onSetup: onSetupChange, onReady: onReady,
+      onRoomTrackPicker: onRoomTrackPicker, onRoomBack: onRoomBack, onRoomGo: onRoomGo, onGpOpen: onGpOpen,
       onYear: onPickYear,
       onCar: onPickCar,
       onAudio: function (a) { if (audio && a) { audio.setVolume(a.volume); audio.setMuted(a.muted); } },
@@ -2211,6 +2759,7 @@
     window.addEventListener('blur', clearInput);
     document.addEventListener('visibilitychange', function () { if (document.hidden) clearInput(); lastT = 0; });
     ui.showMenu(tracks);
+    pushSetup();
     renderer.render(scene, camera);
   }
 
@@ -2226,7 +2775,12 @@
     get tunnels() { return tunnels; }, get lights() { return { hemi: hemiLight, sun: sunLight, hemi0: HEMI0, sun0: SUN0 }; },
     // v7: the computer drivers we simulate ({id, name, spec, car, ai, pit, lap, model, ctx, ...}), the setting, the views
     get bots() { return bots; }, get botCfg() { return { count: botCfg.count, skill: botCfg.skill }; }, get botViews() { return views; },
-    botCost: botCost
+    botCost: botCost,
+    // v7.2: the SetupView last handed to ui.setSetup (show: 'tracks' | 'setup' | 'picker'), the room's state (net.room),
+    // the load cycle we reported built, a room's load in progress ({rs, phase} | null)
+    get setup() { return lastSetup; }, get room() { return net ? net.room || null : null; },
+    get loadedRs() { return net && typeof net.loadedRs === 'number' ? net.loadedRs : -1; },
+    get roomLoad() { return rl ? { rs: rl.rs, phase: rl.phase } : null; }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

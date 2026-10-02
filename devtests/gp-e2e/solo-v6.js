@@ -5,7 +5,7 @@
 //
 //   env ONLY=monza,suzuka,zandvoort,monza26 (default: all four)   VERBOSE=1 (detail of passed checks too)
 //       RENDER_EVERY=n (draw every n-th warped frame for real; default 600)   PIT_AFTER=n (the stop is decided at the end
-//       of race lap n and driven in the next lap; default 2: half distance)   PATCH='js/main.js=copy.js,...' (as solo.js)
+//       of race lap n and driven in the next lap; default 2: two laps on the new set follow)   PATCH='js/main.js=copy.js,...' (as solo.js)
 //       FRAME_MS=n (another frame pace than 1/60 s)   JITTER=1 (irregular frames, 5..35 ms)
 //   Screenshots: devtests/gp-e2e/out-solo-v6/<run>-NN-<what>.png (READ them); with PATCH in out-solo-v6/patched/.
 //   SILENT: the windows are muted by devtests/electron-userdata.js (never set SOUND); the last check (part 'sound',
@@ -47,7 +47,10 @@ require('../electron-userdata')(app, 'gp-e2e-solo-v6');
 const ONLY = (process.env.ONLY || '').toLowerCase().split(',').filter(Boolean);
 const VERBOSE = !!process.env.VERBOSE;
 const RENDER_EVERY = process.env.RENDER_EVERY === undefined ? 600 : Number(process.env.RENDER_EVERY) || 0;
-// the one stop at half distance: decided at the end of race lap PIT_AFTER, driven in the next lap (the in-lap)
+// the one stop: decided at the end of race lap PIT_AFTER, driven in the next lap (the in-lap); two laps on the new set
+// follow. (2026-10-02: the tyres wear like real F1 stints at x1; at x5 the autopilot's softs lose 19..24 % a lap on these
+// circuits: 57..72 % at the stop after 2 laps and the in-lap, the grip clearly down; on to 4..5 laps a soft wears through
+// (a puncture before the stop). The hards of before wear only ~7 % a lap now: ~20 % at the stop.)
 const PIT_AFTER = Number(process.env.PIT_AFTER) >= 1 ? Math.floor(Number(process.env.PIT_AFTER)) : 2;
 const PATCH = (process.env.PATCH || '').split(/[;,]/).map(p => p.trim()).filter(Boolean).map(p => { const i = p.indexOf('='); return [p.slice(0, i).trim().replace(/\\/g, '/'), path.resolve(ROOT, p.slice(i + 1).trim())]; });
 // (a run against patched copies keeps its screenshots apart: out-solo-v6/patched/)
@@ -64,7 +67,8 @@ const RUNS = {
   zandvoort: { id: 'nl-1948', year: 2012, car: '2012-ferrari' },
   monza26: { id: 'it-1922', year: 2026, car: '2026-mercedes', ab: true, speeding: true }
 };
-const NEXT = 'H';                     // the compound picked with T for the stop (M -> H: one press)
+const NEXT = 'S';                     // the compound picked with T for the race and the stop (M -> H -> S: two presses)
+const CYCLE_FROM = { S: ['M', 'H', 'S'], M: ['H', 'S', 'M'], H: ['S', 'M', 'H'] };   // three T presses from that set
 const COMPOUND_ZH = { S: '軟胎', M: '中性胎', H: '硬胎' };
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -247,9 +251,13 @@ async function abTest(w, cfg, rep, trackIdx) {
   // the pad back at rest, the autopilot off (as before A: the standing frames below must not turn the wheel)
   await w.js(`__v6.steerOnly = false; __e.ap.on = false; __e.pad.axes[0] = 0; __e.pad.axes[1] = 0; true`);
   // the track again: start position, full battery
-  check('A/B: Esc, the same track card clicked again: the car is back on the start position, standing, battery full', await w.esc(true) && await w.click(`#track-grid .card[data-i="${trackIdx}"]`) &&
+  // (v7.2: the card opens the start panel of the loaded track (目前賽道): 重新開始 puts the car back on the start, the track
+  //  not rebuilt: the ground truth is rebased by hand, as a new track did it before)
+  check('A/B: Esc, the same track card clicked again (its start panel: 重新開始), 重新開始: the car is back on the start position, standing, battery full', await w.esc(true) &&
+    await w.click(`#track-grid .card[data-i="${trackIdx}"]`) && await w.until(`F1.game.setup.show === 'setup' && F1.game.setup.current && F1.game.setup.go.label === '重新開始'`, 2000, 'panel') &&
+    await w.click('#setup-mode [data-m="free"]') && await w.click('#setup-go') &&
     await w.until(`F1.game.running && __e.queued() === 1 && F1.game.car.state.speed === 0 && F1.game.car.state.battery === 1`, 20000, 'reload'));
-  await w.js(`__e.hookCar(); true`);
+  await w.js(`__e.hookCar(); __e.rebase('restart'); true`);
   await w.frames(3);                         // (as after the first load: the ground truth rebases on the new track)
   const at = await w.js(`({ i: F1.game.car.state.sampleIndex, d: F1.game.car.state.d, v: F1.game.car.state.speed, truth: __e.truth.idx, n: F1.game.track.samples.length })`);
   check('A/B: B starts where A started (the start position, 10 samples before the line, standing; the ground truth on the new track)', at.i === at.n - 10 && Math.abs(at.d) < 0.01 && at.v === 0 && at.truth === at.i, at);
@@ -427,6 +435,8 @@ async function scenario(w, cfg, rep) {
   /* ---------- the track ---------- */
   const trackIdx = await w.js(`F1_TRACKS.findIndex(function (t) { return t.id === ${J(cfg.id)}; })`);
   check('track card clicked (real click)', trackIdx >= 0 && await w.click(`#track-grid .card[data-i="${trackIdx}"]`));
+  check('v7.2: the start panel (nothing loads yet); 自由練習, 開始 clicked', await w.until(`F1.game.setup.show === 'setup' && F1.game.setup.trackId === ${J(cfg.id)} && !F1.game.track`, 2000, 'panel') &&
+    await w.click('#setup-mode [data-m="free"]') && await w.click('#setup-go'));
   check('track loads and runs', await w.until(`F1.game.track && F1.game.trackData.id === ${J(cfg.id)} && F1.game.running && __e.queued() === 1`, 30000, 'track load'));
   check('warp hooks: renderer and car found', await w.js(`__e.hookRenderer() && __e.hookCar()`));
   await w.frames(3);
@@ -446,26 +456,32 @@ async function scenario(w, cfg, rep) {
   /* ---------- the battery A/B on the start straight ---------- */
   if (cfg.ab) await abTest(w, cfg, rep, trackIdx);
 
-  /* ---------- T: hards for the Grand Prix ---------- */
+  /* ---------- T: softs for the Grand Prix (M -> H -> S: two presses) ---------- */
   let from = w.log.length;
   await w.tap('T');
   await w.frames(1);
+  await w.tap('T');
+  await w.frames(1);
   s = await w.snap();
-  check('free practice: T (real key) picks the next set: ' + COMPOUND_ZH[NEXT] + '; the telemetry\'s next-compound indicator shows it, toast; the fitted set stays medium',
+  check('free practice: T (real key, twice: M -> H -> S) picks the next set: ' + COMPOUND_ZH[NEXT] + '; the telemetry\'s next-compound indicator shows it, toast; the fitted set stays medium',
     s.nextCompound === NEXT && s.tel.nextCompound === NEXT && s.tyres.compound === 'M' && w.toastsSince(from).indexOf('下一組輪胎：' + COMPOUND_ZH[NEXT] + '（進站換胎時裝上）') >= 0, { next: s.nextCompound, tel: s.tel.nextCompound, toasts: w.toastsSince(from) });
 
-  /* ---------- the Grand Prix: Q / R / wear in the panel ---------- */
+  /* ---------- the Grand Prix: Q / R / wear in the start panel (v7.2) ---------- */
   check('Esc opens the menu', await w.esc(true));
   if (!await w.shown('#gp-panel')) await w.click('#tab-gp');
+  check('在目前賽道開大獎賽… (大獎賽 tab): the start panel of the loaded track, mode 大獎賽', await w.click('#gp-open') &&
+    await w.until(`F1.game.setup.show === 'setup' && F1.game.setup.trackId === ${J(cfg.id)} && F1.game.setup.mode === 'gp' && __e.shown('gp-q')`, 2000, 'panel'));
   const q = await w.type('#gp-q', String(Q)), r = await w.type('#gp-r', String(R));
   check('Q / R typed into the fields: ' + Q + ' / ' + R, q === String(Q) && r === String(R), [q, r]);
   check('輪胎損耗 ×' + WEAR + ' clicked', await w.click(`#gp-wear button[data-w="${WEAR}"]`));
   const setup = await w.js(`({ stored: localStorage.getItem('f1drive.gp'), on: [].map.call(document.querySelectorAll('#gp-wear button.on'), function (b) { return b.getAttribute('data-w'); }),
-    note: document.getElementById('gp-wear-note').textContent, start: !document.getElementById('gp-start').disabled })`);
-  check('setup remembered (f1drive.gp = {q: 1, r: 6, wear: 5}), ×5 marked, 開始大獎賽 enabled', setup.stored === J({ q: Q, r: R, wear: WEAR }) && J(setup.on) === J([String(WEAR)]) && setup.start, setup);
+    note: document.getElementById('gp-wear-note').textContent, start: !document.getElementById('setup-go').disabled && __e.shown('setup-go'),
+    tyre: [].map.call(document.querySelectorAll('#setup-tyre button.on'), function (b) { return b.getAttribute('data-c'); }) })`);
+  check('setup remembered (f1drive.gp = {q: 1, r: 6, wear: 5, mode: gp}), ×5 marked, 開始 enabled, the panel\'s 起跑輪胎 shows the set picked with T (' + NEXT + ')',
+    setup.stored === J({ q: Q, r: R, wear: WEAR, mode: 'gp' }) && J(setup.on) === J([String(WEAR)]) && setup.start && J(setup.tyre) === J([NEXT]), setup);
   await w.shot('menu-gp-setup', true);
   from = w.log.length;
-  check('開始大獎賽 clicked', await w.click('#gp-start'));
+  check('開始 (重新開始) clicked', await w.click('#setup-go'));
   check('-> qualifying, out of the menu', await w.until(`F1.game.gp.phase === 'quali' && F1.game.running && __e.queued() === 1 && !__e.shown('menu')`, 3000, 'quali'));
   await w.sync();
   await w.frames(2);
@@ -520,7 +536,7 @@ async function scenario(w, cfg, rep) {
   const kersFrom = await w.js(`__v6.series.length`);
 
   /* ---------- the race ---------- */
-  // lap 1: T pressed three times at a third of the lap (S, M, back to H): the next set follows each press
+  // lap 1: T pressed three times at a third of the lap (from the softs: M, H, back to S): the next set follows each press
   ok = await w.pump(`E.n.cross >= ${cR + 1} && E.frac() >= 0.3`, 60, 'a third of race lap 1');
   const cyc = [];
   for (let t = 0; t < 3; t++) {
@@ -530,8 +546,8 @@ async function scenario(w, cfg, rep) {
     s = await w.snap();
     cyc.push({ next: s.nextCompound, tel: s.tel.nextCompound, fitted: s.tyres.compound, toasts: w.toastsSince(from) });
   }
-  check('race lap 1: T (real key) three times: the next set goes ' + cyc.map(c => c.next).join(' -> ') + ' (soft, medium, hard again), the telemetry\'s indicator and a toast follow every press; the fitted hards stay on',
-    J(cyc.map(c => c.next)) === J(['S', 'M', 'H']) && cyc.every(c => c.tel === c.next && c.fitted === NEXT && c.toasts.indexOf('下一組輪胎：' + COMPOUND_ZH[c.next] + '（進站換胎時裝上）') >= 0), cyc);
+  check('race lap 1: T (real key) three times: the next set goes ' + cyc.map(c => c.next).join(' -> ') + ' (the cycle S -> M -> H -> S from the ' + COMPOUND_ZH[NEXT] + ', back to it), the telemetry\'s indicator and a toast follow every press; the fitted set stays on',
+    J(cyc.map(c => c.next)) === J(CYCLE_FROM[NEXT]) && cyc.every(c => c.tel === c.next && c.fitted === NEXT && c.toasts.indexOf('下一組輪胎：' + COMPOUND_ZH[c.next] + '（進站換胎時裝上）') >= 0), cyc);
   // the battery on a straight (race lap 1 or 2): a screenshot of the telemetry while the manager deploys
   ok = await w.pump(`E.ap.boost && E.ap.ersStraight && g.car.state.deploy > 0.5 && g.gp.phase === 'race'`, ctx.pred * 1.5, 'deploying on a straight');
   s = await w.snap();
@@ -685,7 +701,7 @@ async function scenario(w, cfg, rep) {
     teamCell === ci.teamZh && rr.cells[2] === String(R) && rr.cells[3] === fmt(total) && rr.cells[4] === '' && rr.cells[5] === fmt(rBest) && rr.fl, { rr, teamCell });
   check('results HUD: 成績 ' + hy.year + ', P1 / 1, standings with the total; toast 正賽結束：你是第 1 名（共 1 位車手）', s.hud.gpTitle === '成績' && hy.year === String(year) && s.hud.gpPos === 'P1/1' && s.hud.rows[0].val === fmt(total) &&
     w.toastsSince(gridFrom).indexOf('正賽結束：你是第 1 名（共 1 位車手）') >= 0, { hud: s.hud, hy });
-  check('results: the telemetry still shows the car (' + s.tel.team + ' ' + s.tel.car + ') on the hards', s.tel.team === ci.team && s.tel.car === ci.car && s.tel.tyres.compound === NEXT, s.tel);
+  check('results: the telemetry still shows the car (' + s.tel.team + ' ' + s.tel.car + ') on the ' + COMPOUND_ZH[NEXT], s.tel.team === ci.team && s.tel.car === ci.car && s.tel.tyres.compound === NEXT, s.tel);
   await w.shot('results');
   await w.noErrors('Grand Prix');
 

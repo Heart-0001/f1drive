@@ -25,7 +25,7 @@ app.whenReady().then(async () => {
   report.errorVisible = await js(`!document.getElementById('error').classList.contains('hidden')`);
   await shot('01-menu');
   // select Monaco
-  await js(`(function(){var cards=[...document.querySelectorAll('.card')];var c=cards.find(x=>x.textContent.includes('Monaco'));c.click();})()`);
+  await js(`(function(){var cards=[...document.querySelectorAll('.card')];var c=cards.find(x=>x.textContent.includes('Monaco'));c.click();var __g=document.getElementById('setup-go'); if(__g) __g.click(); })()`);
   await sleep(1500);
   await shot('02-cockpit-start');
   report.hudVisible = await js(`!document.getElementById('hud').classList.contains('hidden')`);
@@ -78,7 +78,7 @@ app.whenReady().then(async () => {
   for (let i = 0; i < 6; i++) {
     win.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' });
     await sleep(150);
-    await js(`document.querySelectorAll('.card')[${i * 5}].click()`);
+    await js(`document.querySelectorAll('.card')[${i * 5}].click(); var __g=document.getElementById('setup-go'); if(__g) __g.click(); true`);
     await sleep(500);
   }
   report.renderInfo = await js(`(function(){var r=null;try{ /* no access to renderer var; count scene via THREE? */ }catch(e){} return 'n/a';})()`);

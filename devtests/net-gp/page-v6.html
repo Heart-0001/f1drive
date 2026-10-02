@@ -9,9 +9,9 @@
   window.__ev = [];
   window.__err = [];
   window.addEventListener('error', function (e) { window.__err.push(String(e.message)); });
-  ['connected', 'disconnected', 'year', 'track', 'players', 'gp'].forEach(function (n) {
-    F1.net.on(n, function (a) {
-      window.__ev.push([n, n === 'year' || n === 'track' ? a : n === 'gp' ? a.phase + ' ' + a.year + ' ' + a.wear : null]);
+  ['connected', 'disconnected', 'year', 'track', 'players', 'gp', 'room', 'load', 'go', 'lobby', 'nostart'].forEach(function (n) {
+    F1.net.on(n, function (a, b) {
+      window.__ev.push([n, n === 'year' || n === 'track' ? a : n === 'load' ? a + ' ' + b : n === 'room' ? a.st + ' ' + a.rs : n === 'nostart' ? a : n === 'gp' ? a.phase + ' ' + a.year + ' ' + a.wear : null]);
     });
   });
   F1.gp.init({ net: F1.net, getProfile: function () { return { name: 'Offline', colour: '#35d07f' }; } });

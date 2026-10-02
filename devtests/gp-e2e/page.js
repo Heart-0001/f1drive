@@ -293,10 +293,12 @@
           fl: t.querySelector('.c-best').classList.contains('fl'), out: t.classList.contains('out'), self: t.classList.contains('self') });
       }
       return { shown: shown('gp-results'), sub: text('gp-results-sub'), rows: rows, spec: shown('gp-results-spec') ? text('gp-results-spec') : '', note: text('gp-results-note'),
-        again: shown('gp-res-again'), end: shown('gp-res-end'), close: shown('gp-close') };
+        again: shown('gp-res-again'), end: shown('gp-res-end'), lobby: shown('gp-res-lobby'), close: shown('gp-close') };
     },
-    panel: function () {            // the Grand Prix panel in the menu
-      return { setup: shown('gp-setup'), startDisabled: $('gp-start').disabled, hint: shown('gp-hint') ? text('gp-hint') : '', session: shown('gp-session'), state: text('gp-state'),
+    panel: function () {            // the Grand Prix tab in the menu (v7.2: the setup is the start panel / the room lobby, #setup)
+      return { setup: shown('setup'), startDisabled: !shown('setup-go') || $('setup-go').disabled, open: shown('gp-open'), lobby: shown('gp-lobby'),
+        edit: shown('setup') && !!(F1.game.setup && F1.game.setup.canEdit),    // the setup's settings editable (alone; a room's host in its lobby)
+        hint: shown('gp-hint') ? text('gp-hint') : '', session: shown('gp-session'), state: text('gp-state'),
         self: shown('gp-self') ? text('gp-self') : '', skip: shown('gp-skip'), again: shown('gp-again'), end: shown('gp-end'), rows: gpRows('gp-standings'),
         spec: shown('gp-spec') ? text('gp-spec') : '' };
     },

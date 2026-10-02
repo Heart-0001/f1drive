@@ -72,6 +72,15 @@ function getJson(url) {
     await shot('1-menu');
     const picked = await js(`(function(){var c=[].slice.call(document.querySelectorAll('.card')).filter(function(n){return n.textContent.toLowerCase().indexOf(${JSON.stringify(TRACK)})>=0;})[0]; if(!c) return null; c.click(); return c.querySelector('.card-name').textContent;})()`);
     check('track card clicked', !!picked, picked);
+    // v7.2 (skipped on older builds): the card opens the start panel; nothing drives before 開始
+    const v72 = await js('!!document.getElementById("setup-go")');
+    if (v72) {
+      await sleep(800);
+      check('v7.2: the card opens the start panel, nothing drives before 開始', await js('F1.game.setup && F1.game.setup.show === "setup" && !F1.game.running && !F1.game.track'),
+        await js('JSON.stringify({ show: F1.game.setup && F1.game.setup.show, running: F1.game.running })'));
+      await shot('1b-start-panel');
+      await js('document.querySelector("#setup-mode [data-m=\\"free\\"]").click(); document.getElementById("setup-go").click(); true');
+    }
     check('driving starts', await until('F1.game.running && !!F1.game.track', 15000));
     await send('Input.dispatchKeyEvent', { type: 'keyDown', code: 'KeyW', key: 'w', windowsVirtualKeyCode: 87 });
     await sleep(3000);
@@ -79,14 +88,17 @@ function getJson(url) {
     const v = await js('F1.game.car.state.speed');
     check('W accelerates the car', v > 10, v);
     await shot('2-driving');
-    const gpOk = await js(`(function(){ var q=document.getElementById('gp-q'), r=document.getElementById('gp-r'); return !!(q && r && document.getElementById('gp-start')); })()`);
+    const gpOk = await js(`(function(){ var q=document.getElementById('gp-q'), r=document.getElementById('gp-r'); return !!(q && r && (document.getElementById('gp-start') || document.getElementById('setup-go'))); })()`);
     check('Grand Prix panel present', gpOk);
     await send('Input.dispatchKeyEvent', { type: 'keyDown', code: 'Escape', key: 'Escape', windowsVirtualKeyCode: 27 });
     await send('Input.dispatchKeyEvent', { type: 'keyUp', code: 'Escape', key: 'Escape', windowsVirtualKeyCode: 27 });
     check('Esc opens the menu', await until('!F1.game.running && !document.getElementById("menu").classList.contains("hidden")', 3000));
+    // (v7.2: the loaded track's card opens its start panel: 大獎賽 there, then 開始)
+    const PANEL = 'var k = F1_TRACKS.findIndex(function (t) { return t.id === F1.game.trackData.id; }); document.querySelector("#track-grid .card[data-i=\\"" + k + "\\"]").click(); document.querySelector("#setup-mode [data-m=\\"gp\\"]").click();';
+    if (v72) await js(PANEL + ' true');
     await js('document.getElementById("gp-q").value="1"; document.getElementById("gp-r").value="1"; document.getElementById("gp-q").dispatchEvent(new Event("input",{bubbles:true})); document.getElementById("gp-r").dispatchEvent(new Event("input",{bubbles:true})); true');
-    await js('document.getElementById("gp-start").click(); true');
-    check('Grand Prix qualifying starts from the menu', await until('F1.gp.phase === "quali" && F1.game.running', 5000), await js('F1.gp.phase'));
+    await js('document.getElementById("' + (v72 ? 'setup-go' : 'gp-start') + '").click(); true');
+    check('Grand Prix qualifying starts from the menu' + (v72 ? ' (the start panel)' : ''), await until('F1.gp.phase === "quali" && F1.game.running', 5000), await js('F1.gp.phase'));
     await shot('3-quali');
     await js('F1.gp.action("skip"); true');
     check('grid with start lights', await until('F1.gp.phase === "grid"', 3000));
@@ -110,10 +122,12 @@ function getJson(url) {
         await send('Input.dispatchKeyEvent', { type: 'keyUp', code: 'Escape', key: 'Escape', windowsVirtualKeyCode: 27 });
         await until('!F1.game.running', 3000);
       }
+      // (v7.2: the 電腦車手 rows live in the start panel: the loaded track's card opens it)
+      if (v72) await js(PANEL + ' true');
       await js('var s = document.getElementById("gp-bots"); s.value = "5"; s.dispatchEvent(new Event("change", { bubbles: true })); true');
-      check('v7: 5 computer drivers from the 大獎賽 tab', await until('F1.game.bots && F1.game.bots.length === 5', 15000),
+      check('v7: 5 computer drivers from the ' + (v72 ? 'start panel' : '大獎賽 tab'), await until('F1.game.bots && F1.game.bots.length === 5', 15000),
         await js('JSON.stringify({ bots: F1.game.bots ? F1.game.bots.length : null, cfg: F1.game.botCfg, phase: F1.gp.phase, options: document.getElementById("gp-bots").options.length })'));
-      await js('document.getElementById("gp-q").value="1"; document.getElementById("gp-r").value="1"; document.getElementById("gp-q").dispatchEvent(new Event("input",{bubbles:true})); document.getElementById("gp-r").dispatchEvent(new Event("input",{bubbles:true})); document.getElementById("gp-start").click(); true');
+      await js('document.getElementById("gp-q").value="1"; document.getElementById("gp-r").value="1"; document.getElementById("gp-q").dispatchEvent(new Event("input",{bubbles:true})); document.getElementById("gp-r").dispatchEvent(new Event("input",{bubbles:true})); document.getElementById("' + (v72 ? 'setup-go' : 'gp-start') + '").click(); true');
       await until('F1.gp.phase === "quali"', 5000);
       await js('F1.gp.action("skip"); true');
       check('v7: grid with the bots', await until('F1.gp.phase === "grid"', 5000));

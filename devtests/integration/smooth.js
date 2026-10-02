@@ -22,10 +22,16 @@ app.whenReady().then(async () => {
   await sleep(800);
   await B.js("document.getElementById('mp-addr').value='127.0.0.1:" + PORT + "'; document.getElementById('mp-join').click()");
   await sleep(800);
-  await A.js("[].slice.call(document.querySelectorAll('.card')).filter(function(n){return /monza/i.test(n.textContent)})[0].click()");
+  // v7.2: the host (A) sets the room's track in the lobby, B presses 準備, A 開始: both load, the session after the barrier
+  await A.js("[].slice.call(document.querySelectorAll('#track-grid .card')).filter(function(n){return /monza/i.test(n.textContent)})[0].click()");
+  await sleep(500);
+  await B.js("document.getElementById('setup-ready').click()");
+  await sleep(500);
+  await A.js("document.getElementById('setup-go').click()");
   await sleep(4000);
+  console.log('room', JSON.stringify(await A.js('({ st: F1.net.room.st, running: F1.game.running })')), JSON.stringify(await B.js('({ st: F1.net.room.st, running: F1.game.running })')));
   await B.js("window.__rec=[]; (function loop(){ if(!window.__rec) return; var p=F1.net.players[0]; if(p&&p.active) window.__rec.push([performance.now(),p.state.x,p.state.z,p.state.speed,performance.now()-p._recv,p._buf.length,p._off]); requestAnimationFrame(loop); })(); 1");
-  const WS=require(ROOT+'/node_modules/ws'); const obs=new WS('ws://127.0.0.1:'+PORT); const arr=[]; obs.on('open',()=>obs.send(JSON.stringify({t:'hello',v:1,name:'obs'}))); const cnt={}; obs.on('message',d=>{const m=JSON.parse(d); cnt[m.t]=(cnt[m.t]||0)+1; if(m.t==='snap') for(const e of m.p) if(e[0]===1) arr.push([Date.now(), e[1]]);});
+  const WS=require(ROOT+'/node_modules/ws'); const obs=new WS('ws://127.0.0.1:'+PORT); const arr=[]; obs.on('open',()=>obs.send(JSON.stringify({t:'hello',v:2,name:'obs'}))); const cnt={}; obs.on('message',d=>{const m=JSON.parse(d); cnt[m.t]=(cnt[m.t]||0)+1; if(m.t==='snap') for(const e of m.p) if(e[0]===1) arr.push([Date.now(), e[1]]);});
   await A.js('window.__ft=[]; (function loop(t){ if(!window.__ft) return; window.__ft.push(performance.now()); requestAnimationFrame(loop); })(); 1');
   await A.js('window.__sent={}; (function(){var o=WebSocket.prototype.send; WebSocket.prototype.send=function(d){try{var t=JSON.parse(d).t; window.__sent[t]=(window.__sent[t]||0)+1;}catch(e){} return o.apply(this,arguments);};})(); 1');
   A.key('W', true);

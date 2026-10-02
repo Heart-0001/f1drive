@@ -41,7 +41,9 @@ F1.ui = {
   init(o) { U.opts = o; }, setTrack() {}, showMenu() {}, hideMenu() {}, updateHUD(h) { U.hud = h; }, setPit() {}, setGp(v) { U.gp = v; },
   setCars(v) { U.cars = v; }, setLights() {}, setResumeHandler() {}, toast(t) { U.toasts.push(t); }, setLoading() {}, setCompound() {},
   getProfile: () => ({ name: 'Tester', colour: '#ff0000' }), getCar: () => '2026-ferrari', getYear: () => 2026,
-  getAudio: () => ({ volume: 0, muted: true }), getBots: () => ({ count: U.bots.count, skill: U.bots.skill })
+  getAudio: () => ({ volume: 0, muted: true }), getBots: () => ({ count: U.bots.count, skill: U.bots.skill }),
+  // v7.2: the start panel (a card opens it; 開始 = onSetupStart) and a room's loading screen
+  setSetup(v) { U.setup = v; }, setRoomLoading() {}, getSetup: () => ({ mode: 'free', q: 3, r: 5, wear: 1 })
 };
 // the player's "controller": a computer driver of its own drives our car through main.js's own input path
 const PAD = { throttle: null, brake: null, steer: null, boost: false, reset: false, on: false };
@@ -88,7 +90,8 @@ function key(code, down) {
 function tap(code) { key(code, true); key(code, false); }
 async function load(id) {
   if (g.running) tap('Escape');
-  U.opts.onSelectTrack(trackData(id));
+  U.opts.onSelectTrack(trackData(id));           // (v7.2: the start panel of the track; 開始 builds it and drives)
+  U.opts.onSetupStart({ mode: 'free' });
   frames(1); await tick(5);
   return g.trackData && g.trackData.id === id && g.running;
 }
@@ -161,7 +164,9 @@ function pct(a, p) { const s = a.slice().sort((x, y) => x - y); return s[Math.mi
   frames(10);
 
   /* a Grand Prix */
-  U.opts.onGpStart({ q: Q, r: R, wear: 2 });
+  // (v7.2: from the start panel of the loaded track: 大獎賽, 重新開始)
+  U.opts.onSelectTrack(g.trackData);
+  U.opts.onSetupStart({ mode: 'gp', q: Q, r: R, wear: 2 });
   frames(2);
   const Bq = g.bots;
   check('qualifying: the session holds us and every bot', g.gp.phase === 'quali' && g.gp.snapshot.players.length === NBOTS + 1, g.gp.phase);

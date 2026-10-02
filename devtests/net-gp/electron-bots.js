@@ -65,15 +65,27 @@ app.whenReady().then(async () => {
       (await B.js(`__ev.filter(function (e) { return e[0] === 'gp.bots' && e[1].length; }).length`)) === 0);
     const vb = await B.js(`F1.gp.view().bots`), va = await A.js(`F1.gp.view().bots`);
     check('view().bots: count / level / max / who may edit', JSON.stringify([va, vb]) === JSON.stringify([{ count: 6, skill: 'mixed', max: 14, canEdit: true }, { count: 6, skill: 'mixed', max: 14, canEdit: false }]), [va, vb]);
-    // the host page drives its bots (and its own car), the guest its own car
+    // free practice on the room's track (protocol 2: the host sets it, starts, both load); then the host page drives
+    // its bots (and its own car), the guest its own car
+    await A.js(`F1.net.selectTrack('monza')`);
+    check('track on both (the lobby: nothing loads yet)', await B.until(`F1.net.trackId === 'monza' && F1.net.room.st === 'lobby'`));
+    check('the host starts free practice (force: the guest is not ready)', (await A.js(`F1.net.startRoom({ len: 200, force: true })`)) === true &&
+      await B.until(`F1.net.room.st === 'loading'`));
+    await A.js(`F1.net.sendLoaded(1, true, { len: 200 })`); await B.js(`F1.net.sendLoaded(1, true, { len: 200 })`);
+    check('the session on both; the field frozen', await A.until(`F1.net.room.st === 'session'`) && await B.until(`F1.net.room.st === 'session'`) &&
+      (await A.js(`F1.gp.setBots(3) === false && F1.gp.view().bots.canEdit === false`)));
     await A.js(`__driveBots()`);
     await B.js(`window.__x = 0; window.__drive = setInterval(function () { __x += 4.5; F1.net.sendState({ x: __x, z: -10, heading: Math.PI / 2, speed: 90 }, true); }, 50); true`);
     check('bot poses reach the guest, each in its lane', await B.until(`(function () { F1.net.update(); var bs = F1.net.players.filter(function (p) { return p.bot; });
       return bs.length === 6 && bs.every(function (p, i) { return p.active && Math.abs(p.state.z - 10 * (i + 1)) < 0.01 && p.state.x > 0; }); })()`, 3000));
-    // a Grand Prix with them: Q 1 / R 1 on a 200 m track
-    await A.js(`F1.net.selectTrack('monza')`);
-    check('track on both', await B.until(`F1.net.trackId === 'monza'`));
-    check('the host starts', (await A.js(`F1.gp.start({ q: 1, r: 1 }, 200)`)) === true);
+    // a Grand Prix with them: Q 1 / R 1 on a 200 m track, through the lobby
+    check('online F1.gp.start -> false', (await A.js(`F1.gp.start({ q: 1, r: 1 }, 200)`)) === false);
+    await sleep(1000);                                                  // (START_MIN_MS after the start)
+    check('back to the lobby, mode gp', (await A.js(`F1.net.backToLobby()`)) === true && await B.until(`F1.net.room.st === 'lobby'`) &&
+      (await A.js(`F1.net.setRoom({ mode: 'gp', q: 1, r: 1 })`)) === true && await B.until(`F1.net.room.set.mode === 'gp'`));
+    await sleep(1000);
+    check('the host starts', (await A.js(`F1.net.startRoom({ len: 200, force: true })`)) === true && await B.until(`F1.net.room.st === 'loading' && F1.net.room.rs === 2`));
+    await A.js(`F1.net.sendLoaded(2, true, { len: 200 })`); await B.js(`F1.net.sendLoaded(2, true, { len: 200 })`);
     check('quali on both', await A.until(`F1.gp.phase === 'quali'`) && await B.until(`F1.gp.phase === 'quali'`));
     const tq = Date.now();
     check('parc fermé: the field cannot change', (await A.js(`F1.gp.setBots(2)`)) === false);

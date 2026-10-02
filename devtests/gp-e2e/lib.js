@@ -151,9 +151,22 @@ function makeWin(electron, host, tag, opts) {
     await sleep(150);
     return true;
   };
-  // a track card, by id or name part (a real click on the card would need scrolling: the card's own click handler is used)
+  // a real mouse click on the first element matching a CSS selector (scrolled into view)
+  w.clickSel = async sel => {
+    const id = await w.js(`(function () { var e = document.querySelector(${J(sel)}); if (!e) return null; if (!e.id) e.id = '__e2e-click-' + Math.random().toString(36).slice(2); return e.id; })()`);
+    if (!id) { console.log('click: ' + tag + ' ' + sel + ' not found'); return false; }
+    return w.click(id);
+  };
+  // a track card, by id or name part (a real click on the card would need scrolling: the card's own click handler is used).
+  // v7.2: alone the card opens the start panel, then 開始 (free practice; its mode button first) drives; in a room the
+  // host's card sets the room's track (the lobby's picker opened first) and nothing loads before the room's 開始.
   w.pick = name => w.js(`(function () { var k = F1_TRACKS.findIndex(function (t) { return t.id === ${J(name)} || t.name.toLowerCase().indexOf(${J(name)}) >= 0; });
-    if (k < 0) return null; document.querySelectorAll('.card')[k].click(); return F1_TRACKS[k].id + ' ' + F1_TRACKS[k].name; })()`);
+    if (k < 0) return null;
+    var room = !!(F1.net && F1.net.connected), b = document.getElementById('setup-track-btn');
+    if (room && F1.game.setup && F1.game.setup.show !== 'picker' && b) b.click();
+    document.querySelector('#track-grid .card[data-i="' + k + '"]').click();
+    if (!room) { var m = document.querySelector('#setup-mode [data-m="free"]'); if (m) m.click(); var g = document.getElementById('setup-go'); if (g) g.click(); }
+    return F1_TRACKS[k].id + ' ' + F1_TRACKS[k].name; })()`);
   w.noErrors = async () => {
     const overlay = w.isDestroyed() ? 'window destroyed' : await w.js(`document.getElementById('error').classList.contains('hidden') ? '' : document.getElementById('error-text').textContent`);
     check(tag + ': no error overlay, no console errors', !overlay && w.errors.length === 0, overlay || w.errors.slice(0, 3));
@@ -167,4 +180,61 @@ const hudTime = t => { if (t == null) return '--'; const ms = Math.floor(t * 100
   return m + ':' + String(s).padStart(2, '0') + '.' + String(r).padStart(3, '0'); };
 const hudGap = g => { if (!(g > 0)) g = 0; return '+' + (g < 60 ? (Math.floor(g * 1000 + 1e-6) / 1000).toFixed(3) : hudTime(g)); };
 
-module.exports = { ROOT, OUT, sleep, J, patched, patches, pageFile, check, info, setPart, summary, makeWin, fmt, hudTime, hudGap, results };
+/* ---------- v7.2 rooms: the lobby (docs/lobby-design.md): nobody drives before the host's 開始 and the loading barrier ---------- */
+// The host's lobby settings through the lobby's own controls: {track, mode: 'free' | 'gp', q, r, wear, bots, skill}.
+async function roomSet(hostW, o) {
+  if (o.track) {
+    await hostW.pick(o.track);
+    if (!await hostW.until(`F1.net.room.set.track === ${J(o.track)} && F1.game.setup.show === 'setup'`, 3000, 'room track')) return false;
+  }
+  if (o.mode) await hostW.clickSel(`#setup-mode [data-m="${o.mode}"]`);
+  if (o.q !== undefined) await hostW.field('gp-q', String(o.q));
+  if (o.r !== undefined) await hostW.field('gp-r', String(o.r));
+  if (o.wear !== undefined) await hostW.clickSel(`#gp-wear button[data-w="${o.wear}"]`);
+  if (o.bots !== undefined) await hostW.js(`(function () { var e = document.getElementById('gp-bots'); e.value = ${J(String(o.bots))}; e.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`);
+  if (o.skill) await hostW.clickSel(`#gp-skill button[data-s="${o.skill}"]`);
+  const want = {};
+  ['track', 'mode', 'q', 'r', 'wear', 'bots', 'skill'].forEach(k => { if (o[k] !== undefined) want[k] = typeof o[k] === 'string' && /^\d+$/.test(o[k]) ? +o[k] : o[k]; });
+  return hostW.until(`(function () { var s = F1.net.room.set, w = ${J(want)}; for (var k in w) if (s[k] !== w[k]) return false; return true; })()`, 3000, 'room settings ' + J(want));
+}
+// The guests press 準備 (those not ready yet), the host 開始 (again after START_MIN_MS if the server said busy; force: through
+// 「不等了，直接開始」 and its confirmation); everybody loads, the session begins after the barrier. o.gp: wait for
+// qualifying. -> true when every window drives in the room's session
+async function roomStart(hostW, guests, o) {
+  o = o || {};
+  if (!o.force) for (const g of guests) {
+    if (!await g.js(`!!(F1.net.room && F1.net.room.ready.indexOf(F1.net.id) >= 0)`)) await g.click('setup-ready');
+  }
+  if (!o.force && !await hostW.until(`F1.game.setup && F1.game.setup.go.enabled`, 5000, 'everybody ready')) return false;
+  for (let k = 0; k < 3; k++) {
+    if (o.force && await hostW.js(`!!(F1.game.setup && F1.game.setup.force)`)) { await hostW.click('setup-force'); await hostW.click('setup-force-yes'); }
+    else await hostW.click('setup-go');
+    if (await hostW.until(`F1.net.room.st !== 'lobby'`, 1500, 'room loading')) break;
+    await sleep(1100);
+  }
+  const cond = `F1.net.room && F1.net.room.st === 'session' && F1.game.running` + (o.gp ? ` && F1.game.gp.phase === 'quali'` : '');
+  let ok = true;
+  for (const w of [hostW].concat(guests)) ok = await w.until(cond, o.ms || 40000, 'room session') && ok;
+  return ok;
+}
+// The host takes the room back to the lobby: Esc (the room menu) and 回到大廳 (confirmed where a Grand Prix would end);
+// in the results the overlay's 回到大廳. -> every window in `all` in the lobby, off the track
+async function roomBack(hostW, all) {
+  // (again after START_MIN_MS: the server drops a back within 1 s of the host's last start)
+  for (let k = 0; k < 3 && await hostW.js(`F1.net.room.st !== 'lobby'`); k++) {
+    if (await hostW.js(`F1.game.gp.phase === 'results' && !document.getElementById('gp-res-lobby').classList.contains('hidden') && !document.getElementById('gp-results').classList.contains('hidden')`)) await hostW.click('gp-res-lobby');
+    else {
+      if (await hostW.js(`F1.game.running`)) await hostW.tap('Escape');
+      await hostW.click('setup-lobby');
+      if (await hostW.js(`!document.getElementById('setup-confirm').classList.contains('hidden')`)) await hostW.click('setup-force-yes');
+    }
+    if (await hostW.until(`F1.net.room.st === 'lobby'`, 1500, 'back')) break;
+    await sleep(1100);
+  }
+  let ok = true;
+  for (const w of all || [hostW]) ok = await w.until(`F1.net.room.st === 'lobby' && !F1.game.running`, 5000, 'lobby') && ok;
+  return ok;
+}
+
+module.exports = { ROOT, OUT, sleep, J, patched, patches, pageFile, check, info, setPart, summary, makeWin, fmt, hudTime, hudGap, results,
+  roomSet, roomStart, roomBack };

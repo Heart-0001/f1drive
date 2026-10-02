@@ -49,7 +49,7 @@ app.whenReady().then(async () => {
     host: !!window.f1host, canCreate: F1.net.canCreate, audio: { backend: F1.audio.debug.backend, ready: F1.audio.debug.ready, state: F1.audio.debug.context ? F1.audio.debug.context.state : null } })`);
   check('boots: no error overlay, the host API (preload) present', !boot.overlay && boot.host && boot.canCreate, boot);
   check('F1.audio initialised at boot without a gesture: worklet', boot.audio.backend === 'worklet' && boot.audio.ready, boot.audio);
-  await js(`(function () { var i = F1_TRACKS.findIndex(function (t) { return t.id === 'it-1922'; }); document.querySelectorAll('#track-grid .card')[i].click(); return true; })()`);
+  await js(`(function () { var i = F1_TRACKS.findIndex(function (t) { return t.id === 'it-1922'; }); document.querySelectorAll('#track-grid .card')[i].click(); var __g=document.getElementById('setup-go'); if(__g) __g.click(); return true; })()`);
   await sleep(3000);
   const before = await js(`({ running: F1.game.running, active: F1.audio.active, state: F1.audio.debug.context.state, frames: F1.audio.debug.frames })`);
   check('Monza loaded (a script click, no user gesture yet): the sound is active and its context running', before.running && before.active && before.state === 'running' && before.frames > 30, before);

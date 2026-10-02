@@ -12,7 +12,7 @@ app.whenReady().then(async () => {
   const js = (code) => win.webContents.executeJavaScript(code, true);
   // (v6 replaced the HUD's #hud-speed with the telemetry graphic: the car's own speed then)
   const SPEED = `(function () { var e = document.getElementById('hud-speed'); return e ? e.textContent : (window.F1 && F1.game && F1.game.car ? Math.round(F1.game.car.state.speed * 3.6) + ' km/h (car)' : 'n/a'); })()`;
-  await js(`(function(){var cards=[...document.querySelectorAll('.card')];var c=cards.find(x=>x.textContent.includes('Monza'));c.click();})()`);
+  await js(`(function(){var cards=[...document.querySelectorAll('.card')];var c=cards.find(x=>x.textContent.includes('Monza'));c.click();var __g=document.getElementById('setup-go'); if(__g) __g.click(); })()`);
   await sleep(800);
   await js(`window.__frames=0; (function f(){window.__frames++; requestAnimationFrame(f);})();`);
   win.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'W' });

@@ -41,10 +41,10 @@ app.whenReady().then(async () => {
     await G.field('mp-name', 'Gus'); await G.field('mp-addr', '127.0.0.1:' + PORT);
     await G.click('mp-join');
     check('G joins', await G.until(`F1.net.connected`, 6000), await G.e(`text('mp-status')`));
-    await H.pick(TRACK);
+    // v7.2: the room is set up in the lobby (the track, 大獎賽, Q 1 / R 1); a round starts with 開始 and the loading
+    // barrier (from the lobby) or with 再來一場 (from the results): they alternate
+    check('H sets the room up in the lobby: the track, 大獎賽, Q 1, R 1', await L.roomSet(H, { track: TRACK, mode: 'gp', q: 1, r: 1 }));
     const onTrack = `F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id`;
-    check('both load the track', await H.until(onTrack, 25000) && await G.until(onTrack, 25000));
-    await sleep(1200);
     for (const w of [H, G]) { await w.e('start()'); }
 
     for (let r = 0; r < ROUNDS; r++) {
@@ -53,7 +53,10 @@ app.whenReady().then(async () => {
       await H.e(`arm({ onPhase: { quali: { mode: 'idle' }, grid: { mode: 'line', scale: 1, holdFor: 0, park: null } }, onGo: { holdFor: 0 } })`);
       await G.e(`arm({ onPhase: { quali: { mode: 'idle' }, grid: { mode: 'line', scale: 0.9, holdFor: 0, park: null } }, onGo: { holdFor: 0.6 } })`);
       await G.js(`__e2e.hitch = ${hitch}; true`);
-      const started = await H.js(`F1.game.gp.start({ q: 1, r: 1 }, F1.game.track.length)`);
+      const fromLobby = await H.js(`F1.net.room.st === 'lobby'`);
+      const started = fromLobby ? await L.roomStart(H, [G], { gp: true }) && await H.until(onTrack, 3000) && await G.until(onTrack, 3000)
+        : await H.js(`F1.game.gp.action('again')`);
+      info('round ' + (r + 1) + ' started ' + (fromLobby ? 'from the lobby (開始 + the barrier)' : 'with 再來一場'));
       await H.until(`F1.game.gp.phase === 'quali'`, 3000); await G.until(`F1.game.gp.phase === 'quali'`, 3000);
       await H.js(`F1.game.gp.action('skip')`);
       const grid = await H.until(`F1.game.gp.phase === 'grid'`, 3000) && await G.until(`F1.game.gp.phase === 'grid' && F1.game.gp.inputLocked`, 3000);
@@ -72,10 +75,14 @@ app.whenReady().then(async () => {
       check('the race clock is never ahead of the session clock (by more than ' + AHEAD_MAX + ' ms) in the first 150+ frames after lights out, on either car', d.every(x => x.max <= AHEAD_MAX),
         d.map(x => ({ aheadMaxMs: +x.max.toFixed(2), goFrameDelayMs: +x.goFrameDelay.toFixed(1) })));
       check('... and never behind by more than a physics step + two frames (8.3 + 33 ms)', d.every(x => x.min >= -42), d.map(x => +x.min.toFixed(2)));
-      await H.js(`F1.game.gp.action('end')`); await sleep(300); await H.js(`F1.game.gp.action('end')`);
-      await H.until(`F1.game.gp.phase === 'free'`, 3000); await G.until(`F1.game.gp.phase === 'free'`, 3000);
+      await H.js(`F1.game.gp.action('end')`);
+      await H.until(`F1.game.gp.phase === 'results'`, 3000); await G.until(`F1.game.gp.phase === 'results'`, 3000);
       for (const w of [H, G]) await w.e(`set({ mode: 'stop' })`);
       await H.until(`Math.abs(F1.game.car.state.speed) < 0.5`, 8000); await G.until(`Math.abs(F1.game.car.state.speed) < 0.5`, 8000);
+      if (Math.floor((r + 1) / 2) % 2 === 0) {               // (the next round from the lobby: the end in the results goes back there; rounds L L A A L L, the hitch on every second)
+        await sleep(300); await H.js(`F1.game.gp.action('end')`);
+        await H.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby'`, 3000); await G.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby'`, 3000);
+      }
     }
     setPart('end');
     for (const w of [H, G]) await w.noErrors();

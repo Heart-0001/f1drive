@@ -318,15 +318,16 @@
       },
 
       /**
-       * Start a Grand Prix: q qualifying laps, r race laps, on a track trackLength metres long; wear = tyre wear
-       * multiplier 1..5 (default 1); year = the season (2010..2100) whose cars race. Online the year is the room's
-       * (net.year, put in by the server) and cfg.year is not used. -> bool
+       * Start a Grand Prix (offline): q qualifying laps, r race laps, on a track trackLength metres long; wear = tyre
+       * wear multiplier 1..5 (default 1); year = the season (2010..2100) whose cars race. -> bool. Online -> false:
+       * a room starts through its lobby (net.setRoom({mode: 'gp', q, r, wear}) + net.startRoom; the server starts the
+       * session at the end of the loading barrier, with the room's year).
        */
       start: function (cfg, trackLength) {
+        if (gp.online) return false;
         cfg = cfg || {};
         var c = { q: cfg.q, r: cfg.r, len: trackLength };
         if (cfg.wear !== undefined) c.wear = cfg.wear;
-        if (gp.online) return !!net.gp('start', c);
         if (!local) return false;
         c.year = cfg.year;
         var name = profile().name;
@@ -385,9 +386,9 @@
       /* ---------- computer drivers ---------- */
 
       /**
-       * Our computer drivers, free practice only. list = [{name, car, colour, skill}], entry i = bot i (name <= 16
-       * characters, car a CarSpec id, colour '#rrggbb', skill 0..1; missing / not valid -> 'AI n', '', grey, the
-       * level's); skill = the level they were made at: 'rookie' | 'amateur' | 'pro' | 'legend' | 'mixed' (shown in
+       * Our computer drivers, free practice only (in a room: the lobby only). list = [{name, car, colour, skill}],
+       * entry i = bot i (name <= 16 characters, car a CarSpec id, colour '#rrggbb', skill 0..1; missing / not valid ->
+       * 'AI n', '', grey, the level's); skill = the level they were made at: 'rookie' | 'amateur' | 'pro' | 'legend' | 'mixed' (shown in
        * view().bots; anything else keeps the previous one). Offline: at most 15 (ids 2..16, room slots 1..15: the
        * player is id 1, slot 0), applied at once ('bots' fires). In a room: net.setBots (host only; the server gives
        * ids / slots, at most 16 - humans; 'bots' fires when the roster brings them). -> true when applied / sent.
@@ -512,8 +513,9 @@
             if (q.bot === true) { nb++; skills[q.id] = cleanSkill(q.skill); } else humans++;
           }
           var set = net.botSettings && typeof net.botSettings === 'object' ? net.botSettings : {};
+          // (in a room the field is set in the lobby only: frozen from the start until the room is back there)
           bots = { count: nb, skill: cleanLevel(set.skill) || LEVEL_DEFAULT, max: Math.max(0, ROOM_MAX - humans),
-                   canEdit: net.isHost === true && gp.phase === 'free' };
+                   canEdit: net.isHost === true && !!net.room && net.room.st === 'lobby' };
         } else {
           q = profile();
           colours[SELF_OFFLINE] = q.colour; cars[SELF_OFFLINE] = q.car;
@@ -559,8 +561,8 @@
           endsInMs: gp.phase === 'race' && s.endsAt > 0 ? Math.max(0, Math.round(s.endsAt - gp.now())) : null,
           rows: rows, spectators: spectators,
           // computer drivers: how many there are (offline ours, in a room all of them), the strength level they were
-          // set to, how many there may be (16 - humans), and whether we may change them now (offline / the host, in
-          // free practice: parc fermé during a session)
+          // set to, how many there may be (16 - humans), and whether we may change them now (offline: in free practice;
+          // a room's host: in the lobby; parc fermé from the start on)
           bots: bots
         };
       }

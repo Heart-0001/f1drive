@@ -86,7 +86,11 @@ test('levels, skill parsing, helpers', () => {
   assert.strictEqual(AI.levelOf(0.9).id, 'legend'); assert.strictEqual(AI.levelOf(0.1).id, 'rookie');
   for (let s = 0; s <= 1; s += 0.25) { const p = AI.params(s), q = AI.params(Math.min(1, s + 0.25)); assert(q.grip >= p.grip && q.brake >= p.brake && q.mistake <= p.mistake); }
   assert.strictEqual(AI.startCompound(3, 1, 5000), 'S');
-  assert.strictEqual(AI.startCompound(30, 1, 5000), 'H');
+  // (js/tyres.js since 2026-10-02: real stint lengths at x1 - the plan takes a soft to ~18 laps of 5 km, a medium to
+  // ~34, so a 30-lap race of 5 km starts on mediums, 60 laps on hards)
+  assert.strictEqual(AI.startCompound(15, 1, 5000), 'S');
+  assert.strictEqual(AI.startCompound(30, 1, 5000), 'M');
+  assert.strictEqual(AI.startCompound(60, 1, 5000), 'H');
   assert.strictEqual(AI.startCompound(8, 5, 5800), 'H');
   const r1 = AI.makeRandom(5), r2 = AI.makeRandom(5), a = [], b = [];
   for (let i = 0; i < 50; i++) { a.push(r1()); b.push(r2()); }
@@ -492,12 +496,14 @@ test('F1.AI.resetCar with the others: never put down on (or just behind) a stand
 test('worn tyres at wear x5: stops are made in time - never past 97 %, no puncture (the stop search used to give up)', () => {
   const id = 'gb-1948', t = track(id), N = t.samples.length;
   const car = F1.createCar(F1.REF_SPEC, { random: AI.makeRandom(4) }), st = car.state;
-  car.tyres.fit('H'); car.tyres.setWearRate(5);
+  // (since js/tyres.js's real stint lengths of 2026-10-02 a soft set at x5 lasts ~5 laps here, a hard one ~12: so
+  // 10 laps started on softs need a stop)
+  car.tyres.fit('S'); car.tyres.setWearRate(5);
   const ai = F1.createAIDriver({ track: t, raceLine: line(id), car, skill: 0.7, seed: 3, id: 1, slot: 2 }), pit = F1.createPit({ random: AI.makeRandom(5) });
   car.reset(t, 10); ai.reset();
-  const ctx = context({ phase: 'race', laps: 7, pit: pit.state, wear: 5 });
+  const LAPS = 10, ctx = context({ phase: 'race', laps: LAPS, pit: pit.state, wear: 5 });
   let laps = 0, prev = st.sampleIndex, maxW = 0, punct = false, stops = 0;
-  for (let k = 0; k < 120 * 800 && laps < 7; k++) {
+  for (let k = 0; k < 120 * 1400 && laps < LAPS; k++) {
     ctx.lap = laps;
     const inp = ai.think(STEP, null, ctx);
     if (pit.state.service) st.speed = 0; else car.update(STEP, inp, t);
@@ -507,7 +513,7 @@ test('worn tyres at wear x5: stops are made in time - never past 97 %, no punctu
     if (prev > N * 0.75 && st.sampleIndex < N * 0.25) laps++;
     prev = st.sampleIndex;
   }
-  assert(laps >= 7, 'only ' + laps + ' laps');
+  assert(laps >= LAPS, 'only ' + laps + ' laps');
   assert(!punct, 'a puncture'); assert(maxW <= 0.97, 'wear reached ' + maxW.toFixed(3));
   assert(stops >= 1, 'no stop');
 });

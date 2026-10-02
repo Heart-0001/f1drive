@@ -3,7 +3,7 @@
 // Pure logic: no DOM, no THREE; update() allocates nothing; the only randomness is the injected random() (fit() draws
 // four numbers, an impact one or two), so a run is reproducible. Loadable in node: require('./js/tyres.js') ->
 // F1.Tyres = { createTyres, nextCompound, ORDER, NAMES, COLOURS, COMPOUNDS, ... }. Tests: test/tyres.test.js;
-// calibration against the real car: devtests/tyres-test/trace.js.
+// calibration against the real cars on the 40 circuits: devtests/tyre-test (README.md there has the tables).
 //
 // Wheels are indexed FL, FR, RL, RR (0..3). car.js calls update(dt, load) every physics step with the share of the
 // grip the car is using; load.lat > 0 is a LEFT-hand turn, which loads the RIGHT-hand (outside) tyres.
@@ -21,13 +21,24 @@
 // scrubs all four (GRASS_SCRUB * v). On the grass the forces are the grass's (GRASS_GRIP of the asphalt ones).
 //
 // Wear.         raw[i] += rate * compound.wear * WEAR_K * work * (front ? FRONT_RUBBER : 1) * (1 + overheat / HOT_WEAR) * dt
-//   wear = min(1, raw). Calibrated on the real car driving the racing line of all 40 tracks: a medium set at rate 1
-//   lasts 15 laps of 5 km on average (11.5..18.6 depending on the track; ~11 with keyboard braking / throttle, which
-//   are always 100 %). Front- and rear-limited tracks come out about half and half.
+//   wear = min(1, raw). Calibrated (2026-10-02, devtests/tyre-test) to real stint lengths: the real cars of 2010, 2014,
+//   2023 and 2026 (js/car.js with this file, 1/120 s) driven on all 40 circuits from a standing start until a tyre is
+//   worn through. On the racing line at full pace (the seasons calibration's keyboard driver: every brake and throttle
+//   100 %) the 2023 Red Bull reaches the cliff (75 %) after 14.5 laps of Spa on softs, 23.6 on mediums, 33 on hards
+//   (real Spa stints: softs 12..18, mediums 20..30); over the 40 circuits after ~90 / ~150 / ~210 km (soft / medium /
+//   hard: 18 / 29 / 41 laps of 5 km; per km a set lasts longest at Monza, Las Vegas, Baku and Mexico, shortest at
+//   Jacarepagua, Zandvoort, Losail and Buenos Aires: 114..193 km for a medium). A human-like keyboard driver (late
+//   braking, kerbs, slides) wears a set ~10 % faster, the gentle analog autopilot (4 % off the pace) ~1.45 x slower.
+//   The work is weighed with the reference car's limits, so a car with less grip at its limit is charged a little
+//   more: the 2026 cars have ~20 % shorter stints, 2014 ~7 %.
+//   Front- and rear-limited tracks come out about half and half. The wear rate scales it exactly (x2: half the km).
+//   (Before 2026-10-02: WEAR_K 3.9e-6, soft 2.0, hard 0.5 - a medium set lasted 15 laps of 5 km, and a soft at Spa
+//   wore through and punctured after ~4 laps on the racing line, ~2.4 for a keyboard driver who slides: the report
+//   "RB19 at Spa, x1, a puncture halfway through lap 2, I hit nothing", test/tyres.test.js "the user's case".)
 //   Grip loss:  A * max(0, w - W0)^P                        0 up to W0 = 20 %, 0.8 % at 50 %, 4 % at 75 %
 //               + CLIFF * max(0, (w - 0.75) / 0.25)^3       the cliff: ~12 % at 90 %, ~31 % at 100 %
-//   A tyre run past 100 % punctures once raw reaches its carcass life (1.03..1.12, drawn when the set is fitted);
-//   past 95 % it starts to shake a little.
+//   A tyre run past 100 % punctures once raw reaches its carcass life (1.03..1.12, drawn when the set is fitted: 3..12 %
+//   of its life later); past 95 % it starts to shake a little. Nothing else punctures a tyre but an impact (below).
 // Temperature.  dT/dt = H_WORK * work + H_SLIDE * slide - (T - T_REST) * (COOL_0 + COOL_V * v)
 //   Hard racing keeps the tyres at 90..~99 deg C, inside every compound's window; sustained sliding overheats them
 //   (6 s of heavy understeer: the outside front near 130 deg C). Above compound.hot the tyre loses
@@ -36,9 +47,11 @@
 //   or in the pit lane changes nothing.
 // Dirt.         The grass picks it up (DIRT_UP per s at speed); on asphalt it wears off with distance:
 //   d(dirt)/ds = -(dirt / DIRT_LEN + DIRT_LIN) -> clean after ~150 m (3..4 s at 45 m/s). Loss DIRT_LOSS * dirt.
-// Flat spots.   Heavy sliding (slip > FLAT_SLIP) grows them on the sliding tyres, mostly under braking (lock-ups);
-//   a hard impact (hit > HIT_FLAT) puts one on a random tyre (the fronts more likely). They never heal: vibration
-//   growing with speed and FLAT_BRAKE * flat less braking grip on that tyre.
+// Flat spots.   A lock-up - heavy sliding (slip > FLAT_SLIP) with the brake on - grows them on the sliding tyres, in
+//   proportion to the brake; a slide without the brakes (understeer, a power slide) leaves none (since 2026-10-02:
+//   before, a keyboard driver's throttle-on slides flat-spotted all four tyres within a real-length stint). A hard
+//   impact (hit > HIT_FLAT) puts one on a random tyre (the fronts more likely). They never heal: vibration growing
+//   with speed and FLAT_BRAKE * flat less braking grip on that tyre.
 // Punctures.    Worn through (above), or a very heavy impact: chance PUNCT_HIT_P * (hit - HIT_PUNCT) / (1 - HIT_PUNCT)
 //   on the tyre that took the hit. The tyre deflates over DEFLATE_T s to PUNCT_LOSS less grip; strong vibration;
 //   only fit() (a pit stop) cures it. One puncture at a time.
@@ -49,7 +62,7 @@
 //   traction  rears: half the worse one, half the mean
 //   times compound.grip. Everything is continuous in time (impact flat spots are phased in over ~0.2 s, a puncture
 //   deflates over DEFLATE_T), and a new, clean medium set in its window gives exactly 1 / 1 / 1: every loss is
-//   exactly 0, and the first 20 % of wear (3 hard laps on medium at rate 1) costs nothing at all.
+//   exactly 0, and the first 20 % of wear (~10 hard laps of 5 km on medium at rate 1) costs nothing at all.
 // setWearRate(0) freezes the state completely (wear, flat spots, punctures, temperature, dirt): the reference car.
 (function (root) {
   'use strict';
@@ -58,11 +71,12 @@
   var FL = 0, FR = 1, RL = 2, RR = 3;
 
   // ---- compounds ------------------------------------------------------------
-  // grip: multiplier on all three; wear: multiplier on the wear rate; hot: top of the working window (deg C)
+  // grip: multiplier on all three; wear: multiplier on the wear rate (a real soft lasts ~0.6 x a medium's stint, a
+  // hard ~1.4 x: Pirelli's neighbouring compounds; 2.0 / 0.5 until 2026-10-02); hot: top of the working window (deg C)
   var COMPOUNDS = {
-    S: { grip: 1.015, wear: 2.0, hot: 105 },
-    M: { grip: 1,     wear: 1,   hot: 110 },
-    H: { grip: 0.985, wear: 0.5, hot: 115 }
+    S: { grip: 1.015, wear: 1.65, hot: 105 },
+    M: { grip: 1,     wear: 1,    hot: 110 },
+    H: { grip: 0.985, wear: 0.7,  hot: 115 }
   };
   var ORDER = ['S', 'M', 'H'];
   var NAMES = { S: '軟胎', M: '中性胎', H: '硬胎' };
@@ -88,7 +102,7 @@
   var GRASS_GRIP = 0.45;            // car.js: the forces on the grass are this share of the asphalt ones
 
   // ---- wear -------------------------------------------------------------------
-  var WEAR_K = 3.9e-6;              // wear per unit of work (calibrated: devtests/tyres-test)
+  var WEAR_K = 1.0e-6;              // wear per unit of work (calibrated to real stint lengths: devtests/tyre-test)
   var W0 = 0.20;                    // no grip loss below this wear
   var W50 = 0.008, W75 = 0.04;      // grip loss at 50 % and 75 % wear
   var WP = Math.log(W75 / W50) / Math.log((0.75 - W0) / (0.5 - W0));   // 2.66
@@ -113,7 +127,7 @@
   // ---- flat spots, impacts, punctures -------------------------------------------
   var FLAT_SLIP = 0.4;              // sliding above this leaves flat spots
   var FLAT_RATE = 0.4;              // 1/s at slip 1 on the most-sliding tyre, braking (lock-up)
-  var FLAT_LAT = 0.2;               //   share of that without the brakes
+  var FLAT_LAT = 0;                 //   share of that without the brakes: none, only lock-ups (0.2 until 2026-10-02)
   var FLAT_IN = 1.5;                // 1/s: how fast an impact's flat spot is phased in
   var FLAT_BRAKE = 0.06;            // braking grip lost on a tyre with a full flat spot
   var HIT_FLAT = 0.2, HIT_FLAT_GAIN = 0.8;   // impact -> flat spot (hit - HIT_FLAT) * gain

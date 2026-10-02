@@ -82,8 +82,12 @@ function workflows(session) {
     const dir = path.join(base, id), journal = readJsonl(path.join(dir, 'journal.jsonl'));
     const started = journal.filter(l => l.type === 'started'), done = new Set(journal.filter(l => l.type === 'result').map(l => l.key));
     const agents = started.map(s => {
-      const file = path.join(dir, 'agent-' + s.agentId + '.jsonl');
+      let file = path.join(dir, 'agent-' + s.agentId + '.jsonl');
       let mtime = 0; try { mtime = fs.statSync(file).mtimeMs; } catch (e) { /* not written yet */ }
+      // a SendMessage to a workflow agent's id resumes a copy, and the live agent can end up writing to
+      // subagents/agent-<id>.jsonl instead: use whichever transcript of that id was written last
+      const alt = path.join(session, 'subagents', 'agent-' + s.agentId + '.jsonl');
+      try { const m = fs.statSync(alt).mtimeMs; if (m > mtime) { mtime = m; file = alt; } } catch (e) { /* none */ }
       return { label: s.label, phase: s.phase, id: s.agentId, running: !done.has(s.key), mtime, idleMin: mtime ? mins(now - mtime) : null, file };
     });
     // an agent re-run after a resume appears twice: only the newest "started" of a label can be running
@@ -140,7 +144,7 @@ if (!session) {
 }
 const wfs = workflows(session);
 // workflow ids listed in tools/watchdog-out/ignore.txt (one per line) are treated as finished
-const ignored = new Set((() => { try { return fs.readFileSync(path.join(OUT, 'ignore.txt'), 'utf8').split(/s+/).filter(Boolean); } catch (e) { return []; } })());
+const ignored = new Set((() => { try { return fs.readFileSync(path.join(OUT, 'ignore.txt'), 'utf8').split(/\s+/).filter(Boolean); } catch (e) { return []; } })());
 const running = [], stalled = [];
 for (const w of wfs) for (const a of w.agents) if (a.running) {
   a.last = lastAction(a.file);

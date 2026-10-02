@@ -182,6 +182,8 @@
     T.idx = i; T.U = i === 0 ? 0 : i - T.N; T.lines = i === 0 ? 1 : 0; T.cut = false;
     ev('placed', { why: why, idx: i, steps: T.steps });
   }
+  // (v7.2: 重新開始 on the loaded track puts the car back on the start without a new track object: the harness says so)
+  E.rebase = function (why) { rebase(why || 'harness'); return true; };
   E.frac = function () { return T.U >= 0 ? (T.U % T.N) / T.N : T.U / T.N; };   // of the lap; negative before the line
   T.jump = function (i) {                     // the autopilot leaves the road for another one (Suzuka shortcut)
     var d = i - T.idx;
@@ -676,7 +678,8 @@
         hintPad: shown('hud-hint-pad'), hintKeys: shown('hud-hint-keys'), track: txt($('hud-track')), speed: txt($('hud-speed')), gear: txt($('hud-gear')),
         error: shown('error') ? txt(el.errText) : '',
         res: { sub: txt($('gp-results-sub')), rows: resRows, again: shown('gp-res-again'), end: shown('gp-res-end'), close: shown('gp-close'), note: txt($('gp-results-note')) },
-        menuGp: { setup: shown('gp-setup'), startDisabled: $('gp-start').disabled, q: $('gp-q').value, r: $('gp-r').value, hint: shown('gp-hint') ? txt($('gp-hint')) : '',
+        // (v7.2: the setup is the start panel #setup, 開始 #setup-go; the tab offers 在目前賽道開大獎賽… #gp-open)
+        menuGp: { setup: shown('setup'), startDisabled: !shown('setup-go') || $('setup-go').disabled, open: shown('gp-open'), q: $('gp-q').value, r: $('gp-r').value, hint: shown('gp-hint') ? txt($('gp-hint')) : '',
           session: shown('gp-session'), state: txt($('gp-state')), self: shown('gp-self') ? txt($('gp-self')) : '', skip: shown('gp-skip'), again: shown('gp-again'),
           end: shown('gp-end'), rows: rows($('gp-standings')), resume: shown('menu-resume'), padStatus: shown('pad-status') }
       }

@@ -1,6 +1,7 @@
 // npx electron devtests/net-gp/electron-net.js
 // The real js/net.js in two real Chromium pages against the real net/server.js (default clock), a whole
-// Grand Prix on a 200 m "track" in real time: clock sync, snapshots, lights timing, rejected laps, teardown.
+// Grand Prix on a 200 m "track" in real time: the room lobby of protocol 2 (settings, ready, start, the loading
+// barrier, back to the lobby), clock sync, snapshots, lights timing, rejected laps, teardown.
 // The pages drive along x at 90 m/s meanwhile: the server counts only laps (and progress) the car states cover.
 // Port: env PORT (default 24770, inside the range reserved for the net owner).
 const { app, BrowserWindow } = require('electron');
@@ -44,11 +45,29 @@ app.whenReady().then(async () => {
       const t0 = srv.info().now, v = await w.js(`F1.net.serverNow()`), t1 = srv.info().now;
       check('serverNow within the bracket (' + (t1 - t0) + ' ms wide) +/- 15 ms', v > t0 - 15 && v < t1 + 15, { before: t0 - v, after: t1 - v });
     }
-    check('B.gp refused locally (not host)', (await B.js(`F1.net.gp('start', {q: 1, r: 1, len: 200})`)) === false);
-    await A.js(`F1.net.selectTrack('monza')`);
-    check('track reaches B', await B.until(`F1.net.trackId === 'monza'`));
-    check('host starts', (await A.js(`F1.net.gp('start', {q: 1, r: 1, len: 200})`)) === true);
-    check('quali on both', await A.until(`F1.net.session && F1.net.session.phase === 'quali'`) && await B.until(`F1.net.session && F1.net.session.phase === 'quali'`));
+    // protocol 2: the room's lobby. Nobody is on a track; the host sets the room up, the guest says ready, the host starts,
+    // both build the "track" and report it; the Grand Prix starts at the barrier
+    check('both in the lobby, no track loading', (await A.js(`F1.net.room.st === 'lobby' && F1.net.room.rs === 0`)) &&
+      (await B.js(`F1.net.room.st === 'lobby' && !__ev.some(function (e) { return e[0] === 'load' || e[0] === 'track'; })`)));
+    check('B refused locally (not host): gp start / setRoom / startRoom', (await B.js(`F1.net.gp('start', {q: 1, r: 1, len: 200})`)) === false &&
+      (await B.js(`F1.net.setRoom({ track: 'monza' })`)) === false && (await B.js(`F1.net.startRoom({ len: 200, force: true })`)) === false);
+    check('the host sets track, mode, laps', (await A.js(`F1.net.setRoom({ track: 'monza', mode: 'gp', q: 1, r: 1 })`)) === true);
+    check('the settings reach B (room.set), nothing loads', await B.until(`F1.net.trackId === 'monza' && F1.net.room.set.mode === 'gp' && F1.net.room.set.q === 1`) &&
+      (await B.js(`F1.net.room.st === 'lobby' && !__ev.some(function (e) { return e[0] === 'load'; })`)));
+    check('start without B ready: nostart not-ready', (await A.js(`F1.net.startRoom({ len: 200 })`)) === true &&
+      await A.until(`__ev.some(function (e) { return e[0] === 'nostart' && e[1] === 'not-ready'; })`) && (await B.js(`F1.net.room.st`)) === 'lobby');
+    check('B ready', (await B.js(`F1.net.setReady(true)`)) === true && await A.until(`F1.net.room.ready.indexOf(${await B.js(`F1.net.id`)}) >= 0`));
+    await sleep(1050);                                            // (START_MIN_MS is not an issue: the refused start did not count)
+    check('host starts', (await A.js(`F1.net.startRoom({ len: 200 })`)) === true);
+    check('both load rs 1', await A.until(`F1.net.room.st === 'loading' && __ev.some(function (e) { return e[0] === 'load' && e[1] === 'monza 1'; })`) &&
+      await B.until(`F1.net.room.st === 'loading' && __ev.some(function (e) { return e[0] === 'load' && e[1] === 'monza 1'; })`));
+    await A.js(`F1.net.sendLoaded(1, true, { len: 200 })`);
+    await sleep(300);
+    check('the barrier holds while B loads: no qualifying yet', (await B.js(`F1.net.room.st === 'loading' && F1.net.session.phase === 'free'`)) &&
+      JSON.stringify(await B.js(`F1.net.roster.map(function (p) { return p.load; })`)) === '["done","wait"]', await B.js(`F1.net.roster.map(function (p) { return p.load; })`));
+    await B.js(`F1.net.sendLoaded(1, true, { len: 200 })`);
+    check('quali on both, after go', await A.until(`F1.net.session && F1.net.session.phase === 'quali'`) && await B.until(`F1.net.session && F1.net.session.phase === 'quali'`) &&
+      (await B.js(`__ev.some(function (e) { return e[0] === 'go'; }) && F1.net.room.st === 'session'`)));
     const t0 = Date.now();
     // both cars drive along x at 90 m/s from now on, 20 states a second as the game sends them: the server counts
     // only laps (and live progress) that the car states cover
@@ -81,6 +100,10 @@ app.whenReady().then(async () => {
     const res = await B.js(`F1.net.session`);
     check('classification', res.order[0] === await A.js(`F1.net.id`) && res.players.every(p => p.fin && p.rLaps === 1), res.players.map(p => [p.id, p.rTime, p.gap]));
     for (const w of [A, B]) await w.js(`clearInterval(window.__drive); true`);
+    // the host takes the room back to the lobby: both hear 'lobby' (room first, then gp free); states stop
+    await sleep(1000);
+    check('back to the lobby', (await A.js(`F1.net.backToLobby()`)) === true && await A.until(`F1.net.room.st === 'lobby'`) &&
+      await B.until(`F1.net.room.st === 'lobby' && F1.net.session.phase === 'free' && __ev.some(function (e) { return e[0] === 'lobby'; })`));
     // the server goes away
     await srv.close(); srv = null;
     check('both told, nothing left behind', await A.until(`!F1.net.connected`) && await B.until(`!F1.net.connected`) &&

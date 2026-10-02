@@ -177,12 +177,13 @@
   var W_PUNCT = 0.93;                        // a set never runs on past this: in at the chance before (js/tyres.js: punctures
                                              //   from 1.03 raw; the cliff costs ~12 % grip at 90 %)
   var W_PLAN = 0.88;                         // ... and stints are planned to end below this (the wear per lap is an estimate:
-                                             //   js/tyres.js wears 11.5..18.6 laps of 5 km per medium set, and an overheating
-                                             //   soft wears faster than its 2x)
+                                             //   js/tyres.js wears a medium set out in 230..290 km for a computer driver alone,
+                                             //   and an overheating soft wears faster than its 1.65x)
   var W_SAFE = 0.85;                         // a set this worn is changed at the next chance whatever the strategy says
-  var WEAR_LAP0 = 1 / 15 / 5000 * 1.15;      // wear per lap and metre of a medium set at rate 1 before it has been
-                                             //   measured (js/tyres.js: 15 laps of 5 km; +15 % for racing in traffic)
-  var COMPOUND_WEAR = { S: 2.4, M: 1, H: 0.5 }; // js/tyres.js wear multipliers (S 2, + its overheating in hard racing) ...
+  var WEAR_LAP0 = 1 / 260000 * 1.15;         // wear per lap and metre of a medium set at rate 1 before it has been
+                                             //   measured (js/tyres.js since 2026-10-02: a medium set lasts ~260 km for a
+                                             //   computer driver alone, devtests/tyre-test; +15 % for racing in traffic)
+  var COMPOUND_WEAR = { S: 1.9, M: 1, H: 0.7 }; // js/tyres.js wear multipliers (S 1.65, + its overheating in hard racing) ...
   var COMPOUND_GRIP = { S: 1.015, M: 1, H: 0.985 };   // ... and grip
   var ORDER = ['S', 'M', 'H'];                // the compounds, softest first
 

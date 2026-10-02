@@ -8,7 +8,9 @@
   window.__ev = [];
   window.__err = [];
   window.addEventListener('error', function (e) { window.__err.push(String(e.message)); });
-  ['connected', 'disconnected', 'gp', 'lapRejected', 'track', 'players'].forEach(function (n) {
-    F1.net.on(n, function (a) { window.__ev.push([n, n === 'gp' ? { phase: a.phase, sid: a.sid, at: F1.net.serverNow() } : a]); });
+  ['connected', 'disconnected', 'gp', 'lapRejected', 'track', 'players', 'room', 'load', 'go', 'lobby', 'nostart'].forEach(function (n) {
+    F1.net.on(n, function (a, b) {
+      window.__ev.push([n, n === 'gp' ? { phase: a.phase, sid: a.sid, at: F1.net.serverNow() } : n === 'room' ? a.st + ' ' + a.rs : n === 'load' ? a + ' ' + b : a]);
+    });
   });
 </script>

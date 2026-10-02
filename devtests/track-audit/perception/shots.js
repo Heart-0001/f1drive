@@ -191,7 +191,7 @@ app.whenReady().then(async () => {
     const clicked = await js(`(function () { var i = F1_TRACKS.findIndex(function (t) { return t.id === ${J(TRACK)}; });
       var c = document.querySelector('.card[data-i="' + i + '"]');
       if (!c) { var cs = [].slice.call(document.querySelectorAll('.card')); c = cs.filter(function (n) { return n.textContent.indexOf(F1_TRACKS[i].name) >= 0; })[0]; }
-      if (!c) return false; c.click(); return true; })()`);
+      if (!c) return false; c.click(); var __g=document.getElementById('setup-go'); if(__g) __g.click(); return true; })()`);
     const ok = clicked && await until(`F1.game && F1.game.running && F1.game.trackData && F1.game.trackData.id === ${J(TRACK)} && F1.game.raceLine`, 40000);
     if (!ok) { console.log('track did not load'); app.exit(1); return; }
     await js('__p.hook()');

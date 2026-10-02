@@ -1,13 +1,23 @@
 // F1Drive multiplayer relay server.
 //   - inside the game:   require('./net/server').createServer({ port, hostToken, password })   (net/host.js)
 //   - dedicated server:  node net/server.js [port] [password]
-// Thin relay: player list (with each player's car), current track, the room's season year, who the host is,
-// 20 Hz batched car-state snapshots, and the Grand Prix session (net/session.js holds the rules; this file
-// owns the clock and the wire). Computer drivers ("bots") are players the host's game simulates: the server
-// gives them ids / slots and treats what their owner sends for them like a player's own (see BOT_LEVELS).
+// Thin relay: player list (with each player's car), the room (its lobby, settings, ready flags, loading barrier;
+// see "Room" below), who the host is, 20 Hz batched car-state snapshots, and the Grand Prix session
+// (net/session.js holds the rules; this file owns the clock and the wire). Computer drivers ("bots") are players
+// the host's game simulates: the server gives them ids / slots and treats what their owner sends for them like a
+// player's own (see BOT_LEVELS).
 // It is reachable from the internet, so every inbound message is size-limited, parsed defensively,
 // validated and rate-limited; a bad client can never throw past handleMessage(), and nothing a client
 // sends makes the server broadcast more than a bounded number of messages per second.
+//
+// Room (protocol 2, v7.2; the contract is js/README-interfaces.md "v7.2 room lobby", the design docs/lobby-design.md):
+//   st 'lobby'   nobody is on a track: the host sets the room up (set: track / year / mode / q / r / wear, bots), the
+//                guests choose their cars and say ready; car states, laps, lap times and impacts are dropped
+//   st 'loading' after the host's start: every client builds room.set.track and reports `loaded`; the settings and
+//                the field are frozen; the barrier ends when everybody has loaded, at load.until, or on the host's go
+//   st 'session' free practice (set.mode 'free') or a Grand Prix (set.mode 'gp': session.start at the barrier);
+//                states etc. are taken with k === rs; the host's back (or gp end outside the race) -> 'lobby'
+//   rs = the load cycle (+1 at every start): the k of s / bs / gl / hit / lap.
 'use strict';
 
 const http = require('http');
@@ -16,7 +26,7 @@ const { WebSocketServer } = require('ws');
 const { performance } = require('perf_hooks');
 const { createSession, cleanYear } = require('./session');   // Grand Prix rules (shared with the single-player game)
 
-const PROTOCOL = 1;
+const PROTOCOL = 2;                // 2 (v7.2): the room lobby; a hello with any other v gets error {code: 'version', need: 2}
 const DEFAULT_PORT = 24500;
 const MAX_PLAYERS = 16;
 const MAX_PAYLOAD = 2048;          // bytes per inbound message
@@ -67,24 +77,31 @@ const PW_WINDOW_MS = 60000;        // ... in this long; then it is refused ('wai
 const PW_IPS = 1024;               // addresses remembered for that
 const TICK_MS = 100;              // Grand Prix clock (lights out, timeout) and the flush of coalesced broadcasts
 const GP_LIVE_MS = 500;            // live standings are re-sent this often during a race
-const COALESCE_MS = 100;           // roster / Grand Prix broadcasts: one right away, then at most one per tick
-const TRACK_MIN_MS = 1000;         // track changes: one right away, then the host's latest pick once this has passed
-                                   //   (every client rebuilds the whole track for each one)
-const YEAR_MIN_MS = 1000;          // room year changes, the same way (every client re-resolves its car and racing line)
+const COALESCE_MS = 100;           // roster / room / Grand Prix broadcasts: one right away, then at most one per tick
+// The room (protocol 2)
+const LOAD_TIMEOUT_MS = 20000;     // the loading barrier waits this long at most (session clock; opts.loadTimeoutMs)
+const START_MIN_MS = 1000;         // between two of the host's start / back / go (and gp end outside the race): every
+                                   //   start makes every client build a track (real time; opts.startMinMs)
+const SET_PER_S = 10;              // `set` messages per connection per second; the rest are dropped silently
+const READY_PER_S = 5;             // `ready` messages per player per second
+const LEN_MIN = 200, LEN_MAX = 100000;   // m: a track length a start / a loaded report may name (as net/session.js)
+const LEN_TOL = 0.15;              // the host's built length is used when it is within 15 % of the one his start named
+const Q_MAX = 20, R_MAX = 99, WEAR_MAX = 5, ROOM_BOTS_MAX = 15;
 const COLOURS = ['#ff7a14', '#e10600', '#1e6bff', '#19c8e6', '#35d07f', '#ffd21e', '#c04bff', '#f2f4f7'];
 // Computer drivers ("bots"). The HOST's game simulates them (js/ai.js); the server only knows them as players that
 // connection owns: it gives them ids and room slots, keeps them in the roster and the Grand Prix session, takes their
 // states / laps / lap times / impact reports from their owner's connection only, under the same checks as a human's,
 // and relays them to everybody like a human's. Strength levels as js/ai.js F1.AI.LEVELS (skill 0..1), plus 'mixed'.
-// Wire (protocol 1, additive: an older client sees bots as ordinary players):
-//   client -> server  bots {n, skill?, list?: [{name?, car?, colour?, skill?}]}   host, free practice: his field
+// Wire (v7; protocol 2 allows bots only in the lobby):
+//   client -> server  bots {n, skill?, list?: [{name?, car?, colour?, skill?}]}   host, lobby: his field (also the room's
+//                     wish room.set.bots / skill, which survives him on a dedicated server)
 //                     bs {k, c, b: [[id, x, y, z, heading, pitch, roll, speed, steer, g?], ...]}   his bots' states
 //                     gl {..., id} / lap {..., id} / hit {..., from}   a lap / lap times / an impact of one of his bots
 //   server -> client  roster rows of bots: {..., bot: true, skill, owner, bi}; welcome / players: bots {n, skill}
 //                     snap rows and session rows as a player's (session rows: bot: true); glno {why, id};
 //                     hit {from, i, bot} to the owner when one of his bots was hit
 // The owner leaving takes his bots (they leave a running session as players do: DNF in the race; the others race
-// on); a human joining a full room in free practice takes the newest bot's seat.
+// on); a human joining a full room in the lobby or a free-practice session takes the newest bot's seat.
 const BOT_LEVELS = { rookie: 0, amateur: 0.35, pro: 0.7, legend: 1, mixed: null };
 const BOT_LEVEL_DEFAULT = 'pro';
 const BOT_RATE = 4;                // messages / s more for a connection per bot it owns (their laps, lap times, impacts)
@@ -131,6 +148,14 @@ function cleanLevel(v) {                 // a bot strength level id, or null
 function cleanSkill(v) {                 // one bot's skill 0..1 (3 decimals), or null
   return isNum(v) ? round(clamp(v, 0, 1), 1000) : null;
 }
+// A whole number lo..hi after Math.round, or null (out of range = not a value: never clamped into another one)
+function cleanCount(v, lo, hi) {
+  if (!isNum(v)) return null;
+  v = Math.round(v);
+  return v >= lo && v <= hi ? v : null;
+}
+function cleanLen(v) { return isNum(v) && v >= LEN_MIN && v <= LEN_MAX ? v : null; }
+function cleanWhy(v) { return typeof v === 'string' && /^[a-z-]{1,16}$/.test(v) ? v : ''; }
 // A room password as it is compared (js/net.js sends it the same way): NFC, trimmed, at most PW_MAX
 // characters; '' = none.
 function cleanPassword(v) {
@@ -159,11 +184,14 @@ function cleanState(a) {
 /**
  * createServer(opts) -> Promise<{ port, close(): Promise, info(): {...} }>
  * opts: { port = 24500, host = '0.0.0.0', hostToken = null, password = '', maxPlayers = 16, log = fn|null, now = fn,
- *         random = fn, idleMs = 180000 }
+ *         random = fn, idleMs = 180000, loadTimeoutMs = 20000, startMinMs = 1000 }
  *   hostToken: when set, only a client presenting it in `hello` is the host (the in-game "Create" flow)
- *              and the host never migrates. When null (dedicated server) the first player is the host
- *              and the role passes to the longest-connected player when the host leaves. Either way the
- *              track and the room year stay with the room.
+ *              and the host never migrates. When null (dedicated server, welcome.ded) the first player is the
+ *              host and the role passes to the longest-connected player when the host leaves. Either way the
+ *              room's settings (room.set: track, year, mode, q, r, wear, bots, skill) stay with the room.
+ *   loadTimeoutMs: how long the loading barrier waits at most, on the session clock (`now`; tests make it short or
+ *              step the manual clock past load.until).
+ *   startMinMs: real time between two of the host's start / back / go (tests make it 0).
  *   password:  when set (a non-empty string), `hello` must carry it (`password`; the token holder needs none),
  *              else error 'password'. An address that got it wrong PW_TRIES times within PW_WINDOW_MS is
  *              refused with 'wait' until that time is over. Compared as cleanPassword() leaves it.
@@ -186,6 +214,8 @@ function createServer(opts) {
   const password = cleanPassword(opts.password);
   const pwHash = password ? sha256(password) : null;       // null = an open room
   const idleMs = isNum(opts.idleMs) && opts.idleMs > 0 ? opts.idleMs : IDLE_MS;
+  const loadTimeoutMs = isNum(opts.loadTimeoutMs) && opts.loadTimeoutMs >= 0 ? opts.loadTimeoutMs : LOAD_TIMEOUT_MS;
+  const startMinMs = isNum(opts.startMinMs) && opts.startMinMs >= 0 ? opts.startMinMs : START_MIN_MS;
   const log = typeof opts.log === 'function' ? opts.log : function () {};
   const epoch = Date.now() - performance.now();
   const clock = typeof opts.now === 'function' ? opts.now : function () { return Math.round(epoch + performance.now()); };
@@ -229,21 +259,29 @@ function createServer(opts) {
     // owner's list), name, colour, car, skill, slot, ... and the same driving / impact bookkeeping as a player }.
     // Ids come from the same counter as the players', room slots from the same pool; humans + bots <= maxPlayers.
     const bots = new Map();
-    let botLevel = BOT_LEVEL_DEFAULT;            // the room's strength setting (shown to everybody; the host's word)
     const perIp = new Map();
     const pwFails = new Map();   // address -> { n, t }: wrong room passwords since mono() t
     let nextId = 1, joinCounter = 0;
     let hostId = 0;
-    let trackId = null, trackSeq = 0;
     let closed = false, started = false;
     let snapTimer = null, pingTimer = null, tickTimer = null;
     const session = createSession({ random: opts.random });
-    let rosterAt = -1e9, rosterDirty = false;      // mono() of the last roster / Grand Prix broadcast,
+    let rosterAt = -1e9, rosterDirty = false;      // mono() of the last roster / Grand Prix / room broadcast,
     let gpAt = -1e9, gpDirty = false;              //   and whether a newer one is waiting for the next tick
-    let trackAt = -1e9, trackNext = null, trackBy = 0;   // last track change; the pick that waits, and whose it is
-    // The room's season year (null until the host picks one): everybody picks a car of that year. Only the host
-    // sets it, only in free practice; it belongs to the room, so it survives host migration and an empty room.
-    let year = null, yearAt = -1e9, yearNext = null, yearBy = 0;
+    let roomAt = -1e9, roomDirty = false;
+    // The room. Its settings belong to the room (they survive host migration and an empty dedicated server); only the
+    // host changes them, only in the lobby. set.bots / set.skill are the host's wish for his field (the roster has the
+    // real one); set.skill is also the strength level everybody is shown.
+    const room = {
+      st: 'lobby', rs: 0, rr: 0, len: 0,
+      set: { track: null, year: null, mode: 'free', q: 3, r: 5, wear: 1, bots: 0, skill: BOT_LEVEL_DEFAULT }
+    };
+    const ready = new Set();     // the guests who said ready (never the host)
+    // the loading barrier while st is 'loading': at / until on the session clock, the humans still loading (wait),
+    // done, failed; the length the start named and the one the host's game built
+    let load = null;
+    const out = new Set();       // players taken out of the session for this load cycle (their track did not load)
+    let actT = -1e9;             // mono() of the host's last accepted start / back / go
 
     function send(ws, obj) {
       if (ws.readyState !== 1) return;
@@ -268,7 +306,18 @@ function createServer(opts) {
       list.sort(function (a, b) { return a.slot - b.slot; });
       return list;
     }
-    function botInfo() { return { n: bots.size, skill: botLevel }; }
+    function botInfo() { return { n: bots.size, skill: room.set.skill }; }
+    // the room as it goes on the wire (`room` message, welcome.room, srv.info().room)
+    function roomInfo() {
+      return {
+        st: room.st, rs: room.rs,
+        set: { track: room.set.track, year: room.set.year, mode: room.set.mode, q: room.set.q, r: room.set.r,
+               wear: room.set.wear, bots: room.set.bots, skill: room.set.skill },
+        ready: Array.from(ready), rr: room.rr,
+        load: load ? { at: load.at, until: load.until, wait: load.wait.slice(), done: load.done.slice(), fail: load.fail.slice() } : null,
+        len: room.len
+      };
+    }
     function entity(id) { return players.get(id) || bots.get(id) || null; }
     function ownerOf(e) { return e.bot ? e.owner : e.id; }
     // the bot `id` when it is one of player p's, else null
@@ -291,11 +340,20 @@ function createServer(opts) {
     // intermediate one.
     function flushRoster() {
       rosterAt = mono(); rosterDirty = false;
-      broadcast({ t: 'players', host: hostId, year: year, bots: botInfo(), players: roster() });
+      broadcast({ t: 'players', host: hostId, bots: botInfo(), players: roster() });
     }
     function flushGp() {
       gpAt = mono(); gpDirty = false;
       broadcast(gpMessage());
+    }
+    // A state transition (start -> loading, the barrier -> session, -> lobby) sends the room at once, and before the
+    // gp message it causes; other room changes (settings, ready, loaded, joins / leaves) are coalesced like the roster.
+    function flushRoom() {
+      roomAt = mono(); roomDirty = false;
+      broadcast(Object.assign({ t: 'room' }, roomInfo()));
+    }
+    function sendRoom() {
+      if (mono() - roomAt < COALESCE_MS) roomDirty = true; else flushRoom();
     }
     function sendRoster() {
       if (mono() - rosterAt < COALESCE_MS) rosterDirty = true; else flushRoster();
@@ -313,31 +371,124 @@ function createServer(opts) {
       log('gp    ' + session.phase);
       sendGp();
     }
-    function setTrack(id) {
-      trackAt = mono(); trackNext = null;
-      trackId = id; trackSeq++;
+    /* ---------- the room: lobby -> loading -> session -> lobby ---------- */
+
+    // Every car's state, trail and lap times start again (a new load cycle, or back to the lobby), so the
+    // proof-of-driving sums start again too.
+    function clearCars() {
       const clear = function (q) { q.state = null; q.fresh = false; q.last = null; q.best = null; q.trail.length = 0; };
       players.forEach(clear);
       bots.forEach(clear);
-      // a new track ends a Grand Prix in progress; everybody hears that before they load the track
-      if (session.phase !== 'free') {
-        while (session.phase !== 'free') session.end();
-        log('gp    track change -> free');
-        flushGp();
+    }
+    // the guests who have not said ready (the host and the bots count as ready)
+    function unready() {
+      const list = [];
+      players.forEach(function (q) { if (q.id !== hostId && !ready.has(q.id)) list.push(q.id); });
+      return list;
+    }
+    function nostart(why, wait) {
+      const h = players.get(hostId);
+      if (h) send(h.ws, wait ? { t: 'nostart', why: why, wait: wait } : { t: 'nostart', why: why });
+    }
+    // The host's start (checked by the caller): every human present builds the track.
+    function startLoading(len, now) {
+      room.rs++;
+      room.st = 'loading'; room.len = 0;
+      clearCars();
+      out.clear();
+      const wait = [];
+      players.forEach(function (q) { wait.push(q.id); });
+      load = { at: now, until: now + loadTimeoutMs, wait: wait, done: [], fail: [], startLen: len, hostLen: 0 };
+      log('start rs=' + room.rs + ' track=' + room.set.track + ' mode=' + room.set.mode +
+        (room.set.mode === 'gp' ? ' q=' + room.set.q + ' r=' + room.set.r + ' wear=' + room.set.wear : '') + ' year=' + room.set.year);
+      log('room  loading');
+      flushRoom();
+      sendRoster();                                // (lap times cleared)
+    }
+    // The barrier is over (why: 'all loaded' | 'timeout' | 'host').
+    function endBarrier(why) {
+      if (room.st !== 'loading') return;
+      const now = clock();
+      if (!load.done.length) {                     // nobody loaded: the room goes back to the lobby
+        log('go    (' + why + '): nobody loaded');
+        toLobby('nobody loaded');
+        nostart('load');
+        return;
       }
-      broadcast({ t: 'track', id: trackId, seq: trackSeq });
-      sendRoster();
-      log('track ' + trackId);
+      gpSync(now);
+      load.fail.forEach(function (id) { if (session.removePlayer(id, now)) out.add(id); });
+      const sl = load.startLen, hl = load.hostLen;
+      room.len = hl && Math.abs(hl - sl) <= LEN_TOL * sl ? hl : sl;
+      room.st = 'session'; load = null;
+      log('go    (' + why + ') rs=' + room.rs + ' len=' + room.len);
+      log('room  session');
+      flushRoom();
+      if (room.set.mode === 'gp') {
+        const s = room.set;
+        if (!session.start({ q: s.q, r: s.r, len: room.len, year: s.year, wear: s.wear }, now)) {
+          toLobby('no session');
+          nostart('load');
+          return;
+        }
+        log('gp    start -> ' + session.phase);
+      }
+      flushGp();
     }
-    // The room year goes out with the roster (`players` carries it). A pick that equals the current year
-    // only cancels one that was waiting.
-    function setYear(y) {
-      yearNext = null;
-      if (y === year) return;
-      yearAt = mono(); year = y;
+    // Back to the lobby (the host's back, gp end outside the race, a Grand Prix nobody is left in, nobody loaded,
+    // an empty room): the session ends, the cars and the ready flags are cleared, the failed loaders rejoin the
+    // session; room.set and rs stay.
+    function toLobby(why) {
+      const now = clock();
+      gpSync(now);
+      while (session.phase !== 'free') session.end();
+      clearCars();
+      ready.clear();
+      load = null;
+      out.forEach(function (id) { const q = players.get(id); if (q) session.addPlayer(id, q.name, now); });
+      out.clear();
+      room.st = 'lobby'; room.len = 0;
+      log('room  lobby (' + why + ')');
+      flushRoom();
+      flushGp();
       sendRoster();
-      log('year  ' + year);
     }
+    // A Grand Prix session that went back to free practice by itself (everybody classified left it): the room
+    // goes back to the lobby. -> true when it did
+    function gpOver() {
+      if (room.st !== 'session' || room.set.mode !== 'gp' || session.phase !== 'free') return false;
+      toLobby('gp over');
+      return true;
+    }
+    // `set` from the host in the lobby: each valid field applies, an invalid one is ignored (never clamped).
+    // -> true when anything changed
+    function applySet(m) {
+      const s = room.set;
+      let changed = false, resets = false;
+      const put = function (k, v, reset) {
+        if (v === null || v === s[k]) return;
+        s[k] = v; changed = true;
+        if (reset) resets = true;
+      };
+      if (m.track !== undefined) put('track', cleanTrackId(m.track), true);
+      if (m.year !== undefined) put('year', cleanYear(m.year), true);
+      if (m.mode !== undefined) put('mode', m.mode === 'free' || m.mode === 'gp' ? m.mode : null, true);
+      if (m.q !== undefined) put('q', cleanCount(m.q, 1, Q_MAX), false);
+      if (m.r !== undefined) put('r', cleanCount(m.r, 1, R_MAX), false);
+      if (m.wear !== undefined) put('wear', cleanCount(m.wear, 1, WEAR_MAX), false);
+      if (resets) { ready.clear(); room.rr++; }
+      if (changed) log('set   track=' + s.track + ' year=' + s.year + ' mode=' + s.mode + ' q=' + s.q + ' r=' + s.r + ' wear=' + s.wear);
+      return changed;
+    }
+    // at most max per second in window `key` of player p (mono() t)
+    function allow(p, key, max, t) {
+      let w = p[key];
+      if (!w || t - w.t >= 1000) { w = { t: t, n: 0 }; p[key] = w; }
+      if (w.n >= max) return false;
+      w.n++;
+      return true;
+    }
+    function carFree() { return room.st === 'lobby' || (room.st === 'session' && room.set.mode === 'free'); }
+
     function tick() {
       gpSync(clock());
       // players who have sent nothing at all for idleMs (the game pings every 10 s even from the menu); the
@@ -345,13 +496,8 @@ function createServer(opts) {
       const t = mono(), idle = [];
       players.forEach(function (p) { if (t - p.ws._seen > idleMs && !(hostToken && p.id === hostId)) idle.push(p); });
       idle.forEach(function (p) { log('idle  #' + p.id); reject1(p.ws, 'idle'); });
-      if (trackNext && mono() - trackAt >= TRACK_MIN_MS) {
-        if (trackBy === hostId) setTrack(trackNext); else trackNext = null;      // the host changed meanwhile
-      }
-      if (yearNext !== null && mono() - yearAt >= YEAR_MIN_MS) {
-        // the host changed meanwhile, or a session is on (parc fermé): the pick is dropped
-        if (yearBy === hostId && session.phase === 'free') setYear(yearNext); else yearNext = null;
-      }
+      if (room.st === 'loading' && clock() >= load.until) endBarrier('timeout');
+      if (roomDirty) flushRoom();
       if (rosterDirty) flushRoster();
       if (gpDirty || (session.phase === 'race' && mono() - gpAt >= GP_LIVE_MS)) flushGp();
     }
@@ -377,7 +523,7 @@ function createServer(opts) {
         name: cleanName(e.name, 'AI ' + (bi + 1)),
         colour: cleanColour(e.colour, COLOURS[id % COLOURS.length]),
         car: cleanCarId(e.car) || '',
-        skill: cleanSkill(e.skill) !== null ? cleanSkill(e.skill) : BOT_LEVELS[botLevel],
+        skill: cleanSkill(e.skill) !== null ? cleanSkill(e.skill) : BOT_LEVELS[room.set.skill],
         state: null, ct: 0, fresh: false, last: null, best: null, hitT: -1e9,
         sAt: now, budget: 0, dist: 0, live: 0, dKey: '', jump: false, sT: -1e9, trail: [], hitB: new Map()
       };
@@ -400,8 +546,8 @@ function createServer(opts) {
     // are removed or added. -> true when anything changed.
     function setBots(owner, n, list, level, now) {
       const mine = botsOf(owner.id);
-      let changed = level !== botLevel;
-      botLevel = level;
+      let changed = level !== room.set.skill;
+      room.set.skill = level;
       for (let i = 0; i < mine.length && i < n; i++) {
         const b = mine[i], e = list[i] && typeof list[i] === 'object' ? list[i] : {};
         const name = cleanName(e.name, b.name), colour = cleanColour(e.colour, b.colour);
@@ -440,28 +586,47 @@ function createServer(opts) {
       log('leave #' + p.id + ' "' + p.name + '" (' + players.size + '/' + maxPlayers + ')');
       if (closed) return;
       forgetHits(p.id);
-      if (p.id === hostId) { hostId = 0; pickHost(); }
+      let roomChanged = ready.delete(p.id);
+      out.delete(p.id);
+      const closing = !!hostToken && p.id === hostId;   // an in-game server's host: the room closes with him
+      if (p.id === hostId) {
+        hostId = 0; pickHost();
+        if (hostId) { if (ready.delete(hostId)) roomChanged = true; log('host  #' + hostId); }   // the host is never "ready"
+      }
       const now = clock();
       gpSync(now);
       session.removePlayer(p.id, now);
       // His bots go with him (nobody simulates them any more), each as a player leaving: they drop out of qualifying
       // / the grid, are DNF in the race, keep their row in final results. The others' session goes on as when a
-      // host without bots leaves (a dedicated server's next host can end it). (Ownership could pass to the next
-      // host one day: his game would rebuild them.)
+      // host without bots leaves (a dedicated server's next host can end it). On a dedicated server room.set.bots
+      // stays: the next host's game rebuilds the field from it in the lobby.
       const mine = botsOf(p.id);
       if (mine.length) {
         mine.forEach(function (b) { removeBot(b, now); });
         log('bots  ' + mine.length + ' of #' + p.id + ' removed (gp: ' + session.phase + ')');
       }
+      if (load) {                                  // loading: he is nobody the barrier waits for any more
+        [load.wait, load.done, load.fail].forEach(function (l) { const i = l.indexOf(p.id); if (i >= 0) { l.splice(i, 1); roomChanged = true; } });
+      }
       broadcast({ t: 'gone', id: p.id });
       sendRoster();
+      // a transition sends the room, then the session (toLobby / endBarrier); otherwise the session as it is now
+      if (!players.size && room.st !== 'lobby') { toLobby('empty'); return; }   // (a dedicated server: settings kept)
+      // The in-game host left: net/host.js is stopping the server, so no transition runs now (a barrier ending here
+      // would put the guests into a session a moment before they are disconnected; they go back to single player).
+      // (Should the server stay up, a later `loaded` or the timeout still ends the barrier.)
+      if (closing) { sendGp(); if (roomChanged) sendRoom(); return; }
+      if (gpOver()) return;
+      if (room.st === 'loading' && !load.wait.length) { endBarrier('all loaded'); return; }   // (sends the session too)
       sendGp();
+      if (roomChanged) sendRoom();
     }
     // Refuse / kick: tell the client why, ignore whatever else it sends, and do not depend on it to
     // complete the close handshake (a hostile peer would otherwise keep its seat for ws's 30 s timeout).
-    function reject1(ws, code) {
+    // extra: more fields for the error message (version: {need})
+    function reject1(ws, code, extra) {
       if (ws._bye) return;
-      send(ws, { t: 'error', code: code });
+      send(ws, Object.assign({ t: 'error', code: code }, extra || {}));
       ws._bye = true;
       dropPlayer(ws);
       try { ws.close(1008, code); } catch (e) {}
@@ -555,15 +720,15 @@ function createServer(opts) {
 
     function onHello(ws, m) {
       if (ws._player) return;
-      if (m.v !== PROTOCOL) { reject1(ws, 'version'); return; }
+      if (m.v !== PROTOCOL) { reject1(ws, 'version', { need: PROTOCOL }); return; }
       const pw = passwordError(ws, m);
       if (pw) { reject1(ws, pw); return; }
       const now = clock();
       if (players.size + bots.size >= maxPlayers) {
-        // a human goes before a computer driver: in free practice the newest bot makes room (its owner's game hears
-        // it from the roster); while a session is on the field is fixed
+        // a human goes before a computer driver: in the lobby and in free practice the newest bot makes room (its
+        // owner's game hears it from the roster); while loading and in a Grand Prix the field is fixed
         gpSync(now);
-        const b = players.size < maxPlayers && session.phase === 'free' ? newestBot() : null;
+        const b = players.size < maxPlayers && carFree() ? newestBot() : null;
         if (!b) { reject1(ws, 'full'); return; }
         removeBot(b, now);
         log('bots  #' + b.id + ' "' + b.name + '" makes room');
@@ -586,10 +751,14 @@ function createServer(opts) {
         if (typeof m.token === 'string' && m.token === hostToken) hostId = id;
       } else if (!hostId) hostId = id;
       gpSync(now);
+      // the session as before (qualifying: a driver; grid / race / results: a spectator); while loading he is one
+      // more for the barrier to wait for (its deadline does not move)
       session.addPlayer(id, p.name, now);
-      send(ws, { t: 'welcome', v: PROTOCOL, id: id, host: hostId, track: trackId, seq: trackSeq, year: year, bots: botInfo(),
-                 players: roster(), now: now });
+      if (room.st === 'loading') load.wait.push(id);
+      send(ws, { t: 'welcome', v: PROTOCOL, id: id, host: hostId, ded: !hostToken, now: now, room: roomInfo(), bots: botInfo(),
+                 players: roster() });
       sendRoster();
+      if (room.st === 'loading') sendRoom();
       if (!sendGp()) send(ws, gpMessage());        // the newcomer never waits for the session state
       log('join  #' + id + ' "' + p.name + '" (' + players.size + '/' + maxPlayers + ')');
     }
@@ -636,9 +805,12 @@ function createServer(opts) {
       // the id names anything else (nobody may speak for somebody else's car).
       const subject = function (id) { return id === undefined || id === p.id ? p : ownBot(p, id); };
 
+      // car states, laps, lap times and impact reports belong to the room's session of this load cycle (rs); in the
+      // lobby and while loading nobody is on a track
+      const live = room.st === 'session' && m.k === room.rs;
       switch (m.t) {
         case 's': {                                // car state
-          if (m.k !== trackSeq) return;            // state from before the last track change
+          if (!live) return;                       // (a state from before the last start / in the lobby)
           const st = cleanState(m.s);
           if (!st || !isNum(m.c)) return;
           gpSync(now);                             // (driving after lights out is the race's, tick or no tick yet)
@@ -646,7 +818,7 @@ function createServer(opts) {
           break;
         }
         case 'bs': {                               // the states of his bots: b = [[id, x, y, z, heading, pitch, roll, speed, steer, g?], ...]
-          if (m.k !== trackSeq || !isNum(m.c) || !Array.isArray(m.b) || !p.nBots) return;
+          if (!live || !isNum(m.c) || !Array.isArray(m.b) || !p.nBots) return;
           gpSync(now);
           const seen = new Set();
           for (let i = 0; i < m.b.length && i < MAX_PLAYERS; i++) {
@@ -661,45 +833,100 @@ function createServer(opts) {
           }
           break;
         }
-        case 'bots': {                             // host, free practice only: his computer drivers
-          if (p.id !== hostId || session.phase !== 'free' || !isNum(m.n) || m.n < 0) return;
+        case 'bots': {                             // host, lobby only: his computer drivers (and the room's wish)
+          if (p.id !== hostId || room.st !== 'lobby' || !isNum(m.n) || m.n < 0) return;
           // as many as the room has seats for next to the humans (and anybody else's bots)
           const n = Math.max(0, Math.min(Math.floor(m.n), maxPlayers - players.size - (bots.size - p.nBots)));
-          const level = cleanLevel(m.skill) || botLevel;               // a level that is not one keeps the room's
+          const level = cleanLevel(m.skill) || room.set.skill;         // a level that is not one keeps the room's
+          const wish = clamp(Math.floor(m.n), 0, ROOM_BOTS_MAX), wished = wish !== room.set.bots || level !== room.set.skill;
+          room.set.bots = wish;
           if (setBots(p, n, Array.isArray(m.list) ? m.list : [], level, now)) {
-            log('bots  ' + bots.size + ' (' + botLevel + ')');
+            log('bots  ' + bots.size + ' (' + room.set.skill + ')');
             sendRoster();
             sendGp();
           }
+          if (wished) sendRoom();
           break;
         }
         case 'ping': {                             // clock sync for the start lights
           if (isNum(m.c)) send(ws, { t: 'pong', c: m.c, s: now });
           break;
         }
-        case 'gp': {                               // host: start / skip / end / again
-          if (p.id !== hostId || typeof m.a !== 'string') return;
+        case 'set': {                              // host, lobby: the room's settings
+          if (!allow(p, '_setW', SET_PER_S, t) || p.id !== hostId || room.st !== 'lobby') return;
+          if (applySet(m)) sendRoom();
+          break;
+        }
+        case 'ready': {                            // a guest, lobby: ready or not
+          if (!allow(p, '_readyW', READY_PER_S, t) || p.id === hostId || room.st !== 'lobby' || typeof m.on !== 'boolean') return;
+          if (m.on === ready.has(p.id)) return;
+          if (m.on) ready.add(p.id); else ready.delete(p.id);
+          sendRoom();
+          break;
+        }
+        case 'start': {                            // host, lobby: everybody loads the room's track
+          if (p.id !== hostId) return;
+          const len = cleanLen(m.len);
+          const why = room.st !== 'lobby' ? 'state' : !room.set.track ? 'track' : len === null ? 'len' : t - actT < startMinMs ? 'busy' : '';
+          if (why) { nostart(why); return; }
+          const wait = unready();
+          if (wait.length && m.force !== true) { nostart('not-ready', wait); return; }
+          actT = t;
           gpSync(now);
-          // A track pick of his that still waits for the rate limit is about to replace the track (and so end the
-          // session): no new session until it is out (m.len is the length of the track he is on now). He starts
-          // one again once everybody has loaded the new track.
-          if ((m.a === 'start' || m.a === 'again') && trackNext && trackBy === p.id) return;
+          startLoading(len, now);
+          break;
+        }
+        case 'loaded': {                           // anybody, loading / session: the track of load cycle rs is built (or not)
+          if ((room.st !== 'loading' && room.st !== 'session') || m.rs !== room.rs || p.lrs === room.rs) return;
+          p.lrs = room.rs; p.lok = m.ok === true;
+          const why = cleanWhy(m.why);
+          log('loaded #' + p.id + (p.lok ? ' ok' : ' fail' + (why ? ' (' + why + ')' : '')));
+          if (room.st === 'loading') {
+            const len = cleanLen(m.len);
+            if (p.id === hostId && p.lok && len !== null) load.hostLen = len;   // (used only from the host)
+            const i = load.wait.indexOf(p.id);
+            if (i >= 0) { load.wait.splice(i, 1); (p.lok ? load.done : load.fail).push(p.id); }
+            if (!load.wait.length) endBarrier('all loaded'); else sendRoom();
+          } else if (!p.lok) {                     // joined a running session and cannot build its track: out of it
+            gpSync(now);
+            if (session.removePlayer(p.id, now)) out.add(p.id);
+            if (!gpOver()) sendGp();
+          }
+          break;
+        }
+        case 'go': {                               // host, loading, his own track built: the barrier ends now
+          if (p.id !== hostId || room.st !== 'loading' || p.lrs !== room.rs || !p.lok || t - actT < startMinMs) return;
+          actT = t;
+          endBarrier('host');
+          break;
+        }
+        case 'back': {                             // host, loading / session: back to the lobby
+          if (p.id !== hostId || (room.st !== 'loading' && room.st !== 'session') || t - actT < startMinMs) return;
+          actT = t;
+          toLobby('back');
+          break;
+        }
+        case 'gp': {                               // host, session: skip / end / again ('start' is the room's start now)
+          if (p.id !== hostId || room.st !== 'session' || typeof m.a !== 'string') return;
+          gpSync(now);
           let changed = false;
-          if (m.a === 'start') {
-            // the session races the ROOM's year (never one the client names); a year pick of the host's that is
-            // still waiting for the rate limit is his latest word, so it is applied with the start
-            const y = yearNext !== null && yearBy === p.id ? yearNext : year;
-            changed = !!trackId && session.start({ q: m.q, r: m.r, len: m.len, year: y, wear: m.wear }, now);
-            if (changed) setYear(y);
-          } else if (m.a === 'skip') changed = session.skip(now);
-          else if (m.a === 'end') changed = session.end();
+          if (m.a === 'skip') changed = session.skip(now);
           else if (m.a === 'again') changed = session.again(now);
+          else if (m.a === 'end') {
+            if (session.phase === 'race') changed = session.end();          // -> results as they stand
+            else {                                 // qualifying / the grid / the results / free practice: the lobby
+              if (t - actT < startMinMs) return;
+              actT = t;
+              toLobby('end');
+              return;
+            }
+          }
           if (changed) { log('gp    ' + m.a + ' -> ' + session.phase); sendGp(); }
           break;
         }
         case 'gl': {                               // a lap completed in qualifying / the race (id: one of his bots)
-          // a lap of an earlier track or an earlier session is not this session's business: no answer
-          if (m.k !== trackSeq || m.sid !== session.sid) return;
+          // a lap of an earlier load cycle or an earlier session is not this session's business: no answer
+          if (!live || m.sid !== session.sid) return;
           const r = subject(m.id);
           if (!r) return;
           gpSync(now);
@@ -712,7 +939,7 @@ function createServer(opts) {
           break;
         }
         case 'hit': {                              // "my car just hit yours": relayed to that car's player only
-          if (m.k !== trackSeq || !isNum(m.to) || !Array.isArray(m.i) || m.i.length !== 2) return;
+          if (!live || !isNum(m.to) || !Array.isArray(m.i) || m.i.length !== 2) return;
           if (!isNum(m.i[0]) || !isNum(m.i[1])) return;
           // the reporting car: his own, or (from) one of his bots
           const r = subject(m.from);
@@ -745,26 +972,10 @@ function createServer(opts) {
           if (dest) send(dest.ws, target.bot ? { t: 'hit', from: r.id, bot: target.id, i: imp } : { t: 'hit', from: r.id, i: imp });
           break;
         }
-        case 'track': {
-          if (p.id !== hostId) return;
-          const id = cleanTrackId(m.id);
-          if (!id) return;
-          if (t - trackAt < TRACK_MIN_MS) { trackNext = id; trackBy = p.id; }   // applied by the tick; the last pick wins
-          else setTrack(id);
-          break;
-        }
-        case 'year': {                             // host, free practice only: the season everybody picks a car of
-          if (p.id !== hostId || session.phase !== 'free') return;
-          const y = cleanYear(m.y);
-          if (y === null) return;
-          if (t - yearAt < YEAR_MIN_MS) { yearNext = y; yearBy = p.id; }       // applied by the tick; the last pick wins
-          else setYear(y);
-          break;
-        }
         case 'profile': {
           const name = cleanName(m.name, p.name), colour = cleanColour(m.colour, p.colour);
-          // parc fermé: the car cannot be changed while a session is on (name and colour can)
-          const car = session.phase === 'free' ? cleanCarId(m.car) || p.car : p.car;
+          // parc fermé: the car cannot be changed while loading and in a Grand Prix (name and colour can)
+          const car = carFree() ? cleanCarId(m.car) || p.car : p.car;
           if (name === p.name && colour === p.colour && car === p.car) return;
           p.name = name; p.colour = colour; p.car = car;
           sendRoster();
@@ -772,6 +983,7 @@ function createServer(opts) {
           break;
         }
         case 'lap': {                              // lap times for the roster (id: one of his bots)
+          if (!live) return;
           const r = subject(m.id);
           if (!r) return;
           const last = cleanLap(m.last), best = cleanLap(m.best);
@@ -780,7 +992,7 @@ function createServer(opts) {
           sendRoster();
           break;
         }
-        default: break;
+        default: break;                            // (protocol 1's track / year: ignored, the room has `set`)
       }
     }
 
@@ -883,9 +1095,10 @@ function createServer(opts) {
       resolve({
         port: addr && addr.port ? addr.port : port,
         close: close,
+        // (track / year: room.set's, kept for the harnesses)
         info: function () {
-          return { players: roster(), host: hostId, track: trackId, seq: trackSeq, year: year, bots: botInfo(), now: clock(),
-                   gp: session.snapshot() };
+          return { players: roster(), host: hostId, ded: !hostToken, track: room.set.track, year: room.set.year, bots: botInfo(),
+                   now: clock(), gp: session.snapshot(), room: roomInfo() };
         }
       });
     });
@@ -910,7 +1123,8 @@ function lanAddresses() {
 
 module.exports = {
   createServer: createServer, lanAddresses: lanAddresses,
-  DEFAULT_PORT: DEFAULT_PORT, MAX_PLAYERS: MAX_PLAYERS, PROTOCOL: PROTOCOL, IDLE_MS: IDLE_MS
+  DEFAULT_PORT: DEFAULT_PORT, MAX_PLAYERS: MAX_PLAYERS, PROTOCOL: PROTOCOL, IDLE_MS: IDLE_MS,
+  LOAD_TIMEOUT_MS: LOAD_TIMEOUT_MS, START_MIN_MS: START_MIN_MS, SET_PER_S: SET_PER_S, READY_PER_S: READY_PER_S
 };
 
 if (require.main === module) {
@@ -926,7 +1140,8 @@ if (require.main === module) {
   createServer({ port: p, log: stamp, password: pw }).then(function (srv) {
     stamp('F1Drive server listening on 0.0.0.0:' + srv.port + ' (TCP). LAN addresses: ' +
       (lanAddresses().join(', ') || 'none found') + (pw ? '. Players need the room password.' : '. No room password.'));
-    stamp('The first player to join is the host and picks the track and the season.');
+    stamp('The first player to join is the host: he sets the room up in the lobby (track, season, mode) and starts ' +
+      'when everybody is ready.');
     const stop = function () { srv.close().then(function () { process.exit(0); }); };
     process.on('SIGINT', stop);
     process.on('SIGTERM', stop);

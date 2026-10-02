@@ -491,7 +491,7 @@ tyres.update(dt, load)          // load = { speed, lat (-1..1 share of the later
 tyres.state = {
   compound,
   wear: [FL, FR, RL, RR],       // 0 new .. 1 gone
-  flat: [..],                   // flat-spot severity 0..1 (slides / lock-ups / impacts): vibration, less braking grip
+  flat: [..],                   // flat-spot severity 0..1 (lock-ups / impacts): vibration, less braking grip
   temp: [..],                   // deg C; outside the working window the grip drops (overheating from sliding)
   dirt,                         // 0..1 after an excursion on the grass, cleans up in a few seconds on asphalt
   puncture,                     // -1 or the wheel index: from a worn-out tyre or a heavy impact; pit to fix
@@ -499,10 +499,30 @@ tyres.state = {
   vib                           // 0..1
 }
 ```
-Medium = reference (multipliers exactly 1 when new); soft: a little more grip, wears about twice as fast; hard: a
-little less grip, lasts about twice as long. Below 50 % wear the loss is under 1 % (existing short drive tests and
-autopilots are not disturbed), about 4 % at 75 %, then grip falls off a cliff towards 100 %. At wear rate 1 a medium
-set lasts roughly 15 hard laps of an average track.
+Medium = reference (multipliers exactly 1 when new); soft: a little more grip, wears 1.65 x as fast; hard: a little
+less grip, wears 0.7 x as fast. Below 50 % wear the loss is under 1 % (existing short drive tests and autopilots are
+not disturbed), about 4 % at 75 % (the cliff), then grip falls off towards 100 %.
+
+**Stint lengths (2026-10-02, recalibrated to real F1).** At wear rate 1 the stints are the real ones; the Grand Prix
+option x2..x5 divides them exactly by the rate (qualifying always runs at x1). The user's report "RB19 at Spa, x1, a
+puncture halfway through lap 2, I hit nothing" was the old calibration (a medium set lasted 15 laps of 5 km, a soft
+half that: a soft at Spa wore through and punctured after ~4 laps on the racing line, ~2.4 for a sliding keyboard
+driver). Measured with the real cars driven on all 40 circuits until a tyre is worn through (`devtests/tyre-test`,
+tables per circuit in its README; regression: `test/tyres.test.js` "the user's case"):
+
+| wear x1, racing line at full pace (keyboard) | soft | medium | hard |
+|---|---|---|---|
+| 2023 Red Bull at Spa: laps to the cliff (75 %) — real Spa stints | 14.5 — 12..18 | 23.6 — 20..30 | 33 |
+| 2023 Red Bull, 40 circuits: km to the cliff, mean (min..max) | 90 (70..118) | 147 (114..193) | 207 (160..272) |
+| 2023 Red Bull, 40 circuits: km to 100 % | 116 | 189 | 266 |
+| 2010 Red Bull / 2014 Mercedes / 2026 Mercedes: km to the cliff | 93 / 84 / 72 | 152 / 137 / 116 | 215 / 192 / 162 |
+
+A human-like keyboard driver (late braking, kerbs, slides) wears a set ~10 % faster, the analog end-to-end autopilot
+(~4 % off the pace) ~1.45 x slower; a computer driver alone lasts ~260 km on mediums (js/ai.js `WEAR_LAP0`). A tyre
+punctures only when it is worn through (3..12 % of its life past 100 %) or from an impact (hit > 0.4, a real wall or car
+contact): in 4320 driven stints (4 cars x 40 circuits x 3 drivers x S / M / H x wear 1 / 2 / 3) no puncture came
+before 100 % except 11 from wall impacts, all past the cliff. Flat spots come from lock-ups (sliding with the brake on)
+and impacts only, no longer from slides without the brakes.
 
 ### js/track.js additions — pit lane
 
@@ -1156,3 +1176,293 @@ the sections above; this list says where:
   Baku's range 26.8 m, W5 Suzuka's bridge verge, W6 Toscana labelled a photogrammetric DSM, W7 test/track.test.js.
 - DRV-1 / W3 / MP-5 / AI-9: this document (v6.1 / v6.2 / v7 sections). DRV-2 (the calibration driver under-drives 2026 in
   slow corners by ~0.47 %) is documented in docs/seasons-data.md, not changed.
+
+## v7.2 room lobby: the room lobby (房間大廳) and the single-player start panel (出發面板)
+
+What the user asked (2026-10-02 ~23:20 / ~23:35, translated):
+- In a room the game asks for a track and then drops everybody straight onto it. Everybody should gather first, and the
+  game should start only when everybody is there.
+- Single player too: a click on a track card must not start driving. Choose first, then start.
+
+Flows, layouts, texts, edge cases, the reproduction of the v7.1 behaviour and the list of harnesses to update are in
+`docs/lobby-design.md`. This section is the binding contract. Owners:
+- **net owner**: `net/*`, `js/net.js`, `js/gp.js` and their tests.
+- **menu owner**: `js/main.js`, `js/ui.js`, `index.html`, `test/main.test.js`.
+
+The script order is unchanged.
+
+### Summary of the rules
+
+- **Single player**: a card click opens the start panel for that track (nothing loads). **開始** (or Enter: it has focus;
+  or pad A) starts the chosen mode on that track. Esc / pad B go back to the cards.
+- **Room**: after create / join everybody is in the lobby, with no track running.
+  - The host sets the room's track (from the cards), season, mode, Q / R / tyre wear and the computer drivers. Guests see
+    them read-only.
+  - Everybody picks his own car and starting tyres. Guests press **準備**.
+  - The host's **開始** needs every guest ready, or his confirmation; the guests who are not ready load too.
+  - Everybody then loads at once. The session begins when all have loaded, after `LOAD_TIMEOUT_MS` (20 s), or when the
+    host presses 「不等了，開始」.
+  - After the results the host chooses 再來一場 or 回到大廳.
+- **Protocol 2** (incompatible with 1): a server refuses `hello.v !== 2` with `error {code: 'version', need: 2}`.
+
+### Wire format, protocol 2 (everything not listed is as in v4..v7)
+
+Room state on the server: `st` = `'lobby'` (nobody on a track, no session) -> `'loading'` (the settings frozen, every
+client building the track) -> `'session'` (free practice, or a Grand Prix through `net/session.js`) -> `'lobby'`.
+`rs` = the load cycle: 0 until the first start, +1 at every `start`. It replaces v1's track seq: the `k` of `s`, `bs`,
+`gl` and `hit` must equal `rs`.
+
+Client -> server (the room state(s) in which each is accepted; anything else is dropped silently, except `start`):
+
+| Message | Who, when | Cleaning / effect |
+| --- | --- | --- |
+| `hello {v: 2, ...}` | anybody | `v !== 2` -> `error {code: 'version', need: 2}` |
+| `set {track?, year?, mode?, q?, r?, wear?}` | host, lobby | `track` `/^[A-Za-z0-9_.\-]{1,64}$/`; `year` `cleanYear`; `mode` `'free'` \| `'gp'`; `q` 1..20, `r` 1..99, `wear` 1..5 after `Math.round`. An invalid field is ignored (never clamped) and the others apply. A changed `track`, `year` or `mode` clears every guest's ready flag (`rr` + 1). At most `SET_PER_S` (10) per second per connection. |
+| `bots {n, skill?, list?}` | host, **lobby only** | as v7; also `set.bots = clamp(floor(n), 0, 15)`, `set.skill = level` (the room's wish; the roster has the real field) |
+| `ready {on}` | guest (the host is ignored), lobby | `on` must be a boolean; at most `READY_PER_S` (5) per second per player |
+| `start {len, force?}` | host, lobby | `len` 200..100000 (the host sends `round(trackData.lengthKm * 1000)`). Refused with `nostart {why}`: `'state'`, `'track'` (`set.track` null), `'len'`, `'busy'` (within `START_MIN_MS` = 1000 of the host's last start / back / go), `'not-ready'` (a guest not ready and `force !== true`; `wait` = their ids). Accepted: `st = 'loading'`, `rs + 1`, every car's state / trail / last / best cleared (as v1's `setTrack`), `load = {at: now, until: now + LOAD_TIMEOUT_MS, wait: [every human id], done: [], fail: []}`. |
+| `loaded {rs, ok, why?, len?}` | anybody, loading / session | ignored unless `rs === room.rs`; first per player per rs only. `ok === true` -> `done`, else `fail`. `why` `/^[a-z-]{1,16}$/` (log only). `len` 200..100000 is used only from the host (and only with `ok`). A newcomer in session is recorded the same way; no barrier then: his `ok: false` takes him out of the session for this cycle (`session.removePlayer`; back in when the room returns to the lobby). |
+| `go {}` | host, loading, after his own `loaded {ok: true}` | ends the barrier now (`START_MIN_MS` applies) |
+| `back {}` | host, loading / session | -> lobby (below) (`START_MIN_MS` applies) |
+| `gp {a}` | host, session | `'skip'`, `'again'` as v5; `'end'`: race -> results, quali / grid / results / a free-practice session -> same as `back` (`START_MIN_MS` applies to that one); `'start'` ignored |
+| `s`, `bs`, `gl`, `hit`, `lap` | session only, `k === rs` | as v5..v7; `lap` carries `k` too in protocol 2 |
+| `profile {name, colour, car}` | anybody | `car` applied only in the lobby and in a free-practice session (parc fermé while loading and in a Grand Prix) |
+| `track`, `year` (protocol 1) | - | ignored |
+
+The barrier (server tick and every `loaded` / leave):
+1. When `load.wait` is empty, or `clock() >= load.until`, or on the host's `go`:
+   - if `load.done` is empty: back to the lobby, and `nostart {why: 'load'}` to the host;
+   - else every id in `load.fail` is taken out of the session (`session.removePlayer`), `st = 'session'`, `load = null`,
+     `room.len` = the host's `loaded.len` if it is within ±15 % of `start.len`, else `start.len`;
+   - mode `'gp'`: `session.start({q, r, len, year, wear} = room.set + len, now)`.
+2. Players still loading stay in the session and join it when their track is built.
+
+`back`, `gp end` outside the race, the room becoming empty, or a Grand Prix session that went back to `'free'` by itself
+(every classified car left it; only spectators remain):
+- the session `end()` until `'free'`; every car's state / trail / last / best cleared;
+- `ready` cleared (`rr` unchanged: not a settings change); `load = null`; the failed loaders added back
+  (`session.addPlayer`); `st = 'lobby'`; `len = 0`;
+- `room.set` and `rs` kept.
+
+`START_MIN_MS` is real time between two of the host's accepted start / back / go (and `gp end` acting as back); a refused
+start does not count. It is `createServer` opt `startMinMs` (tests make it 0). A start inside it is answered
+`nostart busy`; a go / back / gp end inside it is dropped without an answer, so js/main.js holds those until
+`START_MIN_MS` after it saw the room's `st` change (lobby review LOBBY-1, below).
+
+Joining:
+- lobby / free-practice session: a full room makes room by removing the newest bot (as v7);
+- loading: the newcomer is appended to `load.wait` (the deadline does not move); a full room -> `error full`;
+- Grand Prix session: the v5 rules (qualifying: a participant; grid / race / results: a spectator); a full room ->
+  `error full`.
+
+Leaving while loading removes the player from `load.wait`, `load.done` and `load.fail` (every list holds players present
+only); when `wait` is then empty the barrier ends (with `done` empty: the lobby and `nostart load`). A dedicated server's
+new host is taken out of `ready` (the host is never listed).
+
+Host:
+- in-game server (host token): the creator, never migrates; the room closes with him. His leaving runs no transition
+  (no barrier end, no return to the lobby): net/host.js is stopping the server, and the guests go back to single player
+  instead of being put into a session a moment before they are disconnected. Should the server stay up, a later
+  `loaded` or the timeout still ends the barrier.
+- dedicated server (`ded`): the first player; on leaving, the longest-connected player; `room.set` survives both.
+
+Server -> client:
+
+| Message | Fields |
+| --- | --- |
+| `welcome` | `{v: 2, id, host, ded, now, room, bots, players}`; `ded` = dedicated server (no host token). No `track` / `seq` / `year`. |
+| `room` | `{st, rs, set: {track, year, mode, q, r, wear, bots, skill}, ready: [guest ids], rr, load: null \| {at, until, wait: [ids], done: [ids], fail: [ids]}, len}`. Defaults: `mode 'free'`, `q 3`, `r 5`, `wear 1`, `bots 0`, `skill 'pro'`. The host is never in `ready` (he counts as ready); bots count as ready. `len` is 0 in the lobby. |
+| `players` | as v7 without `year` (the year is `room.set.year`) |
+| `nostart` | `{why, wait?}` to the host only (whys above) |
+| `error` | `version` carries `need: 2` |
+
+Ordering:
+- A state transition sends its `room` message at once, and before the `gp` message the same transition causes:
+  - start -> loading;
+  - the barrier -> session (then `gp` with the qualifying snapshot);
+  - back / end -> lobby (then `gp` free).
+- Other room changes (settings, ready, loaded, join / leave) are coalesced like the roster: one at once, then at most one
+  per `COALESCE_MS` tick, carrying the state as it is then.
+- `welcome` (with `room`) comes first, then the current `gp`, as in v5.
+
+`createServer(opts)` gains `loadTimeoutMs` (default `LOAD_TIMEOUT_MS` = 20000, on the session clock `now`; tests make it
+short or step a manual clock past `load.until`) and `startMinMs` (default `START_MIN_MS` = 1000, real time). `srv.info()`
+gains `room` (the `room` message's fields) and `ded`; its `track` / `year` stay, as `room.set.track` / `room.set.year`
+(`seq` is gone). The module exports `LOAD_TIMEOUT_MS`, `START_MIN_MS`, `SET_PER_S`, `READY_PER_S` too.
+`net/session.js` is unchanged.
+
+### js/net.js additions (protocol 2)
+
+```js
+F1.net.room       // null outside a room; else a sanitised copy of the last `room` message: every field present and of
+                  //   its type (st one of the three, rs >= 0 integer, set.* cleaned as the server cleans them, id lists
+                  //   numbers only, at most 64 each, load null or {at, until, wait, done, fail}). A setting that is not
+                  //   valid gets its default; load is null outside 'loading'; a `room` message whose st is not one of
+                  //   the three is not a room (ignored); a welcome without a usable room gives the default lobby.
+F1.net.loadedRs   // the rs of our last sendLoaded(rs, true); -1 none (reset on connect / disconnect)
+F1.net.ded        // the room is a dedicated server's (welcome.ded)
+F1.net.address    // the address we joined ('203.0.113.5:24500'); null for the host (net.hostInfo has his)
+F1.net.trackId    // = room.set.track (the room's chosen track: in the lobby it is NOT loaded yet)
+F1.net.year       // = room.set.year ('year' still fires when it changes)
+F1.net.roster[i]  // gains ready (bool: guests from room.ready; the host and bots true) and
+                  //   load ('' | 'wait' | 'done' | 'fail' from room.load), merged when `players` or `room` arrives
+
+F1.net.setRoom(partial) -> bool     // host, lobby: partial of {track, year, mode, q, r, wear}, cleaned as the server does;
+                                    //   false when not allowed or nothing valid
+F1.net.setReady(on) -> bool         // guest, lobby
+F1.net.startRoom({len, force}) -> bool   // host, lobby, room.set.track set, len 200..100000
+F1.net.goNow() -> bool              // host, loading, loadedRs === room.rs
+F1.net.backToLobby() -> bool        // host, loading or session
+F1.net.sendLoaded(rs, ok, opts?) -> bool  // loading / session, rs === room.rs, once per rs; opts {why, len}; ok sets loadedRs
+F1.net.selectTrack(id) -> bool      // = setRoom({track: id})   (lobby only now)
+F1.net.setYear(y) -> bool           // = setRoom({year: y})     (lobby only now)
+F1.net.setBots(list, skill) -> bool // as v7, lobby only
+F1.net.gp(action) -> bool           // host, room.st 'session': 'skip' | 'end' | 'again'; 'start' -> false
+```
+
+Events:
+- `'room'(room, prev)`: every accepted `room`, and on `welcome`.
+- `'load'(trackId, rs)`: once per rs, when the room is `loading` or `session` with a track. That covers a new start
+  and a newcomer joining either state.
+- `'go'(rs)`: only on the transition loading -> session.
+- `'lobby'()`: on loading / session -> lobby.
+- `'nostart'(why, waitIds)`.
+- `'track'` is never emitted in protocol 2.
+- Order for one message: `'year'` (if the year changed), `'room'`, then the transition event. On `welcome`:
+  `'connected'`, `'year'`, `'room'`, `'load'`.
+
+Sending:
+- `sendState`, `sendBotStates`, `sendGpLap`, `sendHit`, `sendLap` and the keepalive send nothing (-> false) unless
+  `room.st === 'session'` and `loadedRs === room.rs` (the server drops them anyway); their `k` is `room.rs`, `sendLap`'s
+  included;
+- the car resync of parc fermé (a car chosen while the server kept the old one) goes out on `'lobby'` and on `'go'` of a
+  free-practice session, no longer on a `gp` phase change;
+- on `'load'` and `'lobby'` the last state, the bot rows, our progress, the bots' progress and every remote pose are
+  dropped.
+
+`version` error text by `need`:
+- no `need` (an old server): 房間的遊戲版本比較舊（F1Drive v7.1 以前），請房主更新到 v7.2 以上。
+- `need > 2`: 你的遊戲版本比較舊，請更新後再加入。
+- else: 遊戲版本與房間不同，無法加入。
+
+### js/gp.js changes
+
+- Online `start()` returns false (a room starts through `net.startRoom`). Offline it is unchanged.
+- `view().bots.canEdit` online = `net.isHost && net.room && net.room.st === 'lobby'`.
+- Nothing else changes: the room's session after the barrier is handled as before (`'phase'` quali places the car).
+
+### js/ui.js + index.html
+
+```js
+F1.ui.init({ ...,
+  onSelectTrack(trackData),   // CHANGED: a card was clicked (tracks view or the host's picker). It no longer means "drive":
+                              //   main.js opens the start panel (solo) or sets the room's track (host, picker)
+  onSetupStart(cfg),          // 開始 / Enter in Q or R / (main.js: pad A). cfg = {mode, q, r, wear, force} (force: the host
+                              //   confirmed 仍要開始)
+  onSetupBack(),              // ← 選擇其他賽道 (solo panel) / ← 返回大廳 (host's picker)
+  onSetup(partial),           // {mode} | {q} | {r} | {wear} changed in the panel / lobby (solo: already stored)
+  onReady(on),                // guest: 準備 toggled
+  onRoomTrackPicker(),        // host: 選賽道 / 換賽道
+  onRoomBack(),               // host: 回到大廳 / 取消，回到大廳 (confirmed in ui while a Grand Prix is not in its results)
+  onRoomGo(),                 // host: 不等了，開始 (loading screen)
+  onGpOpen()                  // 大獎賽 tab, solo with a track loaded: 在目前賽道開大獎賽…
+})                            // onGpStart is gone (no #gp-start); onGpAction stays ('skip' | 'end' | 'again')
+F1.ui.setSetup(v)             // the left area of the menu, from a SetupView (below); cheap to call often
+F1.ui.setRoomLoading(v)       // the room's loading screen; null hides it
+F1.ui.getSetup()              // -> {mode, q, r, wear}: the stored solo setup (localStorage 'f1drive.gp' = {q, r, wear, mode};
+                              //   mode default 'free')
+F1.ui.setGp(v)                // v.room (bool): results / 大獎賽 tab show 回到大廳 (host) instead of 結束
+```
+
+```js
+SetupView = {
+  show: 'tracks' | 'setup' | 'picker',   // the card grid / the start panel or lobby / the host's track picker (cards)
+  room: bool,
+  track: trackData | null, trackId: string | null, trackMissing: bool,   // trackMissing: this version lacks the room's track
+  current: bool,                          // solo: it is the loaded track (開始 reads 重新開始, chip 目前賽道)
+  mode, q, r, wear,                       // solo: the stored setup; room: room.set
+  canEdit: bool,                          // solo true; room: host and st 'lobby'
+  go: {show, enabled, label, sub},        // the 開始 button (#setup-go)
+  hint: string, note: string, banner: string,
+  // room only
+  st, phase, isHost, ded, address: string, hasPassword: bool,
+  players: [{id, name, colour, colour2, team, carName, isHost, isSelf, ready, load}],   // humans, slot order
+  counts: {humans, ready},                // ready includes the host
+  unready: [names],                       // for the confirm row
+  ready: {show, on, enabled, status},     // the guest's toggle (#setup-ready)
+  force: bool,                            // host: 不等了，直接開始 shown
+  canPick: bool, resume: bool, lobbyBtn: bool
+}
+RoomLoadingView = { title, sub, rows: [{id, name, colour, isSelf, isHost, state: 'wait' | 'done' | 'fail'}], leftS,
+                    canGo, canCancel }
+```
+
+DOM (ids the harnesses use):
+- `#menu.setup-open` / `#menu.picker` while those views show. In both, `#track-search` / `#track-count` are hidden in the
+  setup view, and `#track-grid` is hidden in the setup view and shown in the picker.
+- The panel / lobby: `#setup` (class `room` in a room), `#setup-back`, `#setup-title`, `#setup-state`, `#setup-current`.
+- Track: `#setup-track` (`#setup-track-name`), `#setup-track-btn`.
+- Own settings: `#setup-car` (`#setup-car-change` opens the 車輛 tab), `#setup-year` (select), `#setup-tyre` (buttons
+  `data-c` S / M / H).
+- Mode and Grand Prix settings: `#setup-mode` (buttons `data-m` free / gp); `#setup-gp` holds `#gp-q`, `#gp-r` and
+  `#gp-wear`, **moved here with their ids**; `#gp-bots-box` with `#gp-bots`, `#gp-skill`, `#gp-bots-note`,
+  `#gp-bots-list`, **moved here**.
+- `#setup-note`.
+- The action block `#setup-foot`: `#setup-go` (+ `#setup-go-sub`), `#setup-ready` (`aria-pressed`), `#setup-status`,
+  `#setup-force`, `#setup-confirm` (`#setup-force-yes`, `#setup-force-no`), `#setup-resume`, `#setup-lobby`,
+  `#setup-hint`.
+- Room header and players: `#setup-room` (`#setup-addr`, `#setup-copy`, `#setup-pw`, `#setup-leave`), `#setup-players`
+  (rows `.lobby-row[data-id]`, state `.lobby-st[data-state="host|ready|wait|load-wait|load-done|load-fail"]`),
+  `#setup-bots-line`.
+- Loading screen: `#room-loading` (`#room-loading-title`, `#room-loading-sub`, `#room-loading-list` rows
+  `.rl-row[data-id][data-state]`, `#room-loading-left`, `#room-loading-go`, `#room-loading-cancel`,
+  `#room-loading-leave`).
+- Results: `#gp-res-lobby` (room host: 回到大廳). `#gp-res-end` is shown in single player only.
+- 大獎賽 tab: `#gp-open`, `#gp-lobby` (room host, results). **Removed**: `#gp-setup`, `#gp-start`. The tab keeps
+  `#gp-car`, `#gp-tyre` (下一組輪胎 during a session) and the session part.
+- `ui.setCompound` renders `#gp-tyre` and `#setup-tyre` alike.
+
+Behaviour:
+- A card click shows the panel synchronously (main.js calls `setSetup` inside `onSelectTrack`), with `#setup-go` focused.
+  So `click(card)` followed by `click('#setup-go')` works.
+- The focus moves only when the view changes (open panel / lobby: `#setup-go` for the host and solo, `#setup-ready` for
+  a guest), never while the user types.
+- Layouts at 1280x720, 1920x1080, 721..1099 and <= 720 px follow `docs/lobby-design.md` §9. The action block is always on
+  screen without scrolling.
+
+### js/main.js glue
+
+- **Solo**:
+  - `onSelectTrack` opens the panel; `onSetupBack` / Esc / pad B (`pressed.limiter`) return to the cards.
+  - `onSetupStart(cfg)`:
+    1. a running solo Grand Prix ends;
+    2. load the track unless it is the loaded one (the same one: no rebuild, `placeStart` + `freshStart` + lap reset,
+       bots re-placed);
+    3. `'free'` -> resume; `'gp'` -> `gp.start({q, r, wear, year}, track.length)`.
+  - Pad A in the menu = the rising edge of `pad.state.boost`, taken from the state when the menu opened.
+  - Esc while driving opens the tracks view (繼續駕駛 as today).
+- **Room**:
+  - `'connected'` as host of a fresh room (`rs 0`, no track): send the stored setup (`setRoom({year: ownYear(), mode, q,
+    r, wear})` + the bots field) and open the picker.
+  - `'room'` -> SetupView; toast on `rr` when we were ready.
+  - `'load'` -> `#room-loading`, build with no resume (car frozen in its slot; the host makes his bots; same track: no
+    rebuild), then `sendLoaded(rs, true, {len: track.length})`. On an unknown track or a build error:
+    `sendLoaded(rs, false, {why: 'no-track' | 'error'})`.
+  - `'go'` -> hide the loading screen; free: `resume()`; gp: wait for `onGpPhase('quali')`.
+  - A newcomer whose `'load'` completes in session resumes at once (free practice, qualifying placement or spectator).
+  - `'lobby'` -> stop the loop, menu on the lobby view, clear the remote models, guests' toast 房主回到房間大廳.
+  - The host's 開始 goes out once until its answer (a `'room'` or `'nostart'`; `startPending`): a double click over a slow
+    link sent a second start, refused with `nostart state`. `'nostart'` toasts its reason, except `'state'` once the room
+    is no longer in the lobby (a second start that crossed the first one's answer) (lobby review LOBBY-2).
+  - The host's go (不等了，開始), back (回到大廳 / 取消，回到大廳) and gp `'end'` (結束大獎賽) within `ROOM_ACT_MS` (1000 =
+    the server's `START_MIN_MS`) of the last change of `room.st` it saw are held for the rest of that second (`roomAct`;
+    the latest one asked for wins), then sent if the load cycle (`rs`) is the same and it is still the host; the wait
+    is checked again then. The server took the action before it sent that change, so the wait always clears its gate
+    (lobby review LOBBY-1: such a click used to be dropped without a word).
+  - `onGpPhase` acts only while `room.st === 'session'`; no 「回到自由練習」 toast while the room is in the lobby.
+- **Rules**:
+  - `inRoomTrack()` = connected and `room.st === 'session'` and `trackData.id === room.set.track` and
+    `net.loadedRs === room.rs`. Remote cars, impacts, `sendState` and the bots' publishing follow it.
+  - `canResume()` in a room = `inRoomTrack()`.
+  - A host's bot field uses `room.set.bots` / `skill` once the room has settings.
+- `F1.game` gains `setup` (the last SetupView), `room` (`net.room`) and `loadedRs`.

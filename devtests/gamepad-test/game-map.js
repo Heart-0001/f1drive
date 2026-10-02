@@ -55,7 +55,7 @@ app.whenReady().then(async () => {
     await js(FAKE_PAD);
     await sleep(350);
     const name = await js(`(function () { var c = [].slice.call(document.querySelectorAll('.card')).filter(function (n) { return n.textContent.toLowerCase().indexOf(${J(TRACK)}) >= 0; })[0];
-      if (!c) return null; c.click(); return c.querySelector('.card-name').textContent; })()`);
+      if (!c) return null; c.click(); var __g=document.getElementById('setup-go'); if(__g) __g.click(); return c.querySelector('.card-name').textContent; })()`);
     const running = await until(`F1.game.running && F1.gamepad.state.connected`, 15000);
     await sleep(300);
     const car0 = await js(`({ spec: F1.game.car.spec.id, ers: !!F1.game.car.perf.ersPower || F1.game.car.state.battery > 0 })`);

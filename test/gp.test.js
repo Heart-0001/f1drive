@@ -88,7 +88,24 @@ function quiet(fn) {                    // run fn with console.error silenced ->
 function makeRoom(random) {
   const srv = createSession({ random: random || (() => 0) });      // () => 0: the lights hold for 500 ms
   const room = { srv, t: 5000000, hostId: 1, roster: [], clients: [], year: null,   // year: the room's, as on the server
-                 botLevel: 'pro' };                                                 // the room's bot strength setting
+                 botLevel: 'pro',                                                   // the room's bot strength setting
+                 st: 'lobby', rs: 0 };                                              // the room's state (protocol 2)
+  // as js/net.js: net.room, a sanitised copy of the server's room
+  room.sendRoom = () => room.clients.forEach(c => {
+    c.net.room = { st: room.st, rs: room.rs, set: { track: 'monza', year: room.year, mode: 'gp', q: 3, r: 5, wear: 1, bots: 0, skill: room.botLevel },
+                   ready: [], rr: 0, load: null, len: room.st === 'session' ? LEN : 0 };
+    c.net.emit('room', c.net.room);
+  });
+  // the host's start, everybody loaded: the server starts the session at the barrier (the room's year, as net/server.js)
+  room.begin = cfg => {
+    cfg = cfg || {};
+    room.st = 'session'; room.rs++; room.sendRoom();
+    const ok = srv.start({ q: cfg.q, r: cfg.r, len: LEN, year: room.year, wear: cfg.wear }, room.t);
+    room.push();
+    return ok;
+  };
+  // back to the lobby: the session ends
+  room.toLobby = () => { room.st = 'lobby'; room.sendRoom(); while (srv.phase !== 'free') srv.end(); room.push(); };
 
   // as js/net.js: humans and bots in the roster (bot rows: bot, skill, car, owner, mine), our own bots in net.bots
   room.sendRoster = () => room.clients.forEach(c => {
@@ -125,18 +142,19 @@ function makeRoom(random) {
   room.client = (id, name, colour) => {
     const handlers = {};
     const net = {
-      connected: false, isHost: false, id: 0, roster: [], session: null,
+      connected: false, isHost: false, id: 0, roster: [], session: null, room: null,
       skew: 0,                                   // our estimate of the server clock is this far off (ms)
       calls: { gp: [], lap: [], progress: [], bots: [], botLap: [], botProgress: [] },
       on(n, fn) { (handlers[n] = handlers[n] || []).push(fn); },
       emit(n, a, b) { (handlers[n] || []).slice().forEach(fn => fn(a, b)); },
       serverNow() { return room.t + net.skew; },
+      // as js/net.js (protocol 2): 'skip' | 'end' | 'again', host, the room's session; 'start' is not an action
       gp(a, cfg) {
         net.calls.gp.push(cfg ? [a, cfg] : [a]);
-        if (!net.connected || !net.isHost) return false;
-        // as net/server.js: the session gets the ROOM's year, never one the client names
-        const ok = a === 'start' ? srv.start(Object.assign({}, cfg, { year: room.year }), room.t) : a === 'skip' ? srv.skip(room.t)
-          : a === 'end' ? srv.end() : a === 'again' ? srv.again(room.t) : false;
+        if (!net.connected || !net.isHost || a === 'start' || !net.room || net.room.st !== 'session') return false;
+        // as net/server.js: end outside the race -> the lobby
+        if (a === 'end' && srv.phase !== 'race') { room.toLobby(); return true; }
+        const ok = a === 'skip' ? srv.skip(room.t) : a === 'end' ? srv.end() : a === 'again' ? srv.again(room.t) : false;
         if (ok) room.push();
         return true;
       },
@@ -155,10 +173,10 @@ function makeRoom(random) {
         if (why) net.emit('lapRejected', why); else room.push();
       },
       setProgress(v) { net.calls.progress.push(v); if (v !== null) srv.progress(net.id, v); },
-      // host, free practice: as net/server.js, bots 0..n-1 keep their ids (100 + i here)
+      // host, lobby: as net/server.js, bots 0..n-1 keep their ids (100 + i here)
       setBots(list, skill) {
         net.calls.bots.push([list, skill]);
-        if (!net.connected || !net.isHost || srv.phase !== 'free') return false;
+        if (!net.connected || !net.isHost || !net.room || net.room.st !== 'lobby') return false;
         const n = typeof list === 'number' ? list : list.length;
         room.roster.filter(p => p.bot && p.owner === net.id && p.bi >= n).forEach(p => { srv.removePlayer(p.id, room.t); });
         room.roster = room.roster.filter(p => !(p.bot && p.owner === net.id && p.bi >= n));
@@ -184,13 +202,14 @@ function makeRoom(random) {
       room.roster.push({ id, name, colour });
       net.id = id; net.connected = true;
       room.clients.push(c);
+      net.room = { st: room.st, rs: room.rs };
       room.sendRoster();                         // as js/net.js: the roster is applied before 'connected' fires
       net.emit('connected', { id, isHost: net.isHost });
       room.push();
     };
     c.disconnect = () => {                       // as teardown() in js/net.js
       room.clients = room.clients.filter(x => x !== c);
-      net.session = null; net.connected = false; net.isHost = false; net.id = 0; net.roster = [];
+      net.session = null; net.connected = false; net.isHost = false; net.id = 0; net.roster = []; net.room = null;
       net.emit('disconnected', 'bye');
       room.remove(id);
     };
@@ -207,7 +226,7 @@ function gridRoom() {
   const b = room.client(2, 'Bea', '#2222FF');
   b.connect();
   room.add(4, 'Di', '#ffff00');
-  room.srv.start({ q: 1, r: 2, len: LEN }, room.t); room.push();
+  room.begin({ q: 1, r: 2 });
   room.wait(100);
   assert.strictEqual(room.lap(1, 80), ''); assert.strictEqual(room.lap(2, 81), ''); assert.strictEqual(room.lap(4, 82), '');
   assert.strictEqual(b.gp.phase, 'grid');
@@ -539,8 +558,9 @@ test('online: phase / session id changes, host control (canControl follows isHos
   log.take();
   assert.deepStrictEqual([gp.canControl, view(gp).canControl], [true, true]);
 
-  assert.strictEqual(gp.start({ q: 2, r: 3 }, LEN), true);
-  assert.deepStrictEqual(net.calls.gp, [['start', { q: 2, r: 3, len: LEN }]]);
+  assert.strictEqual(gp.start({ q: 2, r: 3 }, LEN), false, 'online a Grand Prix starts in the room\'s lobby, not here');
+  assert.deepStrictEqual([net.calls.gp, log.take()], [[], []], 'nothing sent, nothing changed');
+  room.begin({ q: 2, r: 3 });
   assert.deepStrictEqual(log.take(), ['phase free>quali', 'change']);
   assert.deepStrictEqual([gp.phase, gp.sid, gp.lap, gp.lapTotal, gp.taking], ['quali', 1, 0, 2, true]);
 
@@ -555,7 +575,7 @@ test('online: phase / session id changes, host control (canControl follows isHos
   assert.deepStrictEqual(log.take(), ['change'], 'a new snapshot in the same phase: change only');
   assert.strictEqual(gp.lap, 1);
 
-  assert.strictEqual(gp.start({ q: 1, r: 1 }, LEN), true);                // the host restarts it
+  room.st = 'lobby'; room.begin({ q: 1, r: 1 });                          // the host restarts it (lobby, start, barrier)
   assert.deepStrictEqual(log.take(), ['phase quali>quali', 'change'], 'same phase, new session id');
   assert.deepStrictEqual([gp.sid, gp.lap, gp.lapTotal], [2, 0, 1]);
 
@@ -575,9 +595,9 @@ test('online: phase / session id changes, host control (canControl follows isHos
   assert.strictEqual(gp.action('skip'), true);
   assert.deepStrictEqual(net.calls.gp[n], ['skip']);
   assert.deepStrictEqual(log.take(), ['phase quali>grid', 'change']);
-  assert.strictEqual(gp.action('end'), true);
+  assert.strictEqual(gp.action('end'), true);                             // (the grid: the room goes back to the lobby)
   assert.deepStrictEqual(log.take(), ['phase grid>free', 'change']);
-  assert.deepStrictEqual([gp.taking, gp.lap, gp.lapTotal, gp.inputLocked], [false, 0, 0, false]);
+  assert.deepStrictEqual([gp.taking, gp.lap, gp.lapTotal, gp.inputLocked, net.room.st], [false, 0, 0, false, 'lobby']);
 
   // a session id that changes while the phase stays 'free' is not a new Grand Prix
   net.emit('gp', Object.assign(room.srv.snapshot(), { sid: 77 }));
@@ -912,7 +932,8 @@ test('go fires for every session, also when an offline and a room session happen
   c.gp.start({ q: 1, r: 1 }, LEN); c.gp.action('skip'); run(c.gp, 11);
   assert.deepStrictEqual([c.gp.online, c.gp.phase, c.gp.sid, goes(c.log)], [false, 'race', 1, 1]);
   c.connect();
-  assert.strictEqual(c.gp.start({ q: 1, r: 1 }, LEN), true);
+  assert.strictEqual(c.gp.start({ q: 1, r: 1 }, LEN), false, 'online: the room starts it');
+  r.begin({ q: 1, r: 1 });
   assert.strictEqual(c.gp.action('skip'), true);
   c.log.take();
   r.wait(9.5); c.gp.update(0.016); c.gp.update(0.016);
@@ -943,7 +964,7 @@ test('online: init() again on the same net does not double the listeners; a repl
   gp.init({ net: a.net, getProfile: () => ({ name: 'Solo', colour: '#00ff00' }) });
   a.connect();
   assert.deepStrictEqual(log.take(), ['change', 'change'], 'connected + the first snapshot, each once');
-  assert.strictEqual(gp.start({ q: 1, r: 1 }, LEN), true);
+  room.begin({ q: 1, r: 1 });
   assert.deepStrictEqual(log.take(), ['phase free>quali', 'change']);
   // switch the controller to another net: the old one's events no longer reach it
   const other = makeRoom().client(1, 'Al', '#ff0000');
@@ -992,7 +1013,7 @@ test('offline: start({q, r, year, wear}) puts both into the local session; view(
   assert.deepStrictEqual([view(gp).year, view(gp).wear], [2100, 1]);
 });
 
-test('online: start() sends the wear (never the year: the server puts in the room\'s); view() shows the session\'s', () => {
+test('online: start() -> false (the room starts at its barrier with the room\'s year and wear); view() shows the session\'s', () => {
   const room = makeRoom();
   room.year = 2021;
   const a = room.client(1, 'Al', '#ff0000'), gp = a.gp, net = a.net;
@@ -1000,13 +1021,13 @@ test('online: start() sends the wear (never the year: the server puts in the roo
   room.add(2, 'Bea', '#2222ff');
   const b = room.client(3, 'Cy', '#00ffff');
   assert.deepStrictEqual([view(gp).year, view(gp).wear], [null, 1], 'the room\'s session has not run yet');
-  assert.strictEqual(gp.start({ q: 1, r: 2, year: 1999, wear: 3 }, LEN), true);
-  assert.deepStrictEqual(net.calls.gp, [['start', { q: 1, r: 2, len: LEN, wear: 3 }]], 'no year on the wire');
+  assert.strictEqual(gp.start({ q: 1, r: 2, year: 1999, wear: 3 }, LEN), false);
+  assert.deepStrictEqual([net.calls.gp, gp.phase], [[], 'free'], 'nothing on the wire');
+  room.begin({ q: 1, r: 2, wear: 3 });
   assert.deepStrictEqual([gp.phase, view(gp).year, view(gp).wear], ['quali', 2021, 3]);
-  assert.strictEqual(gp.start({ q: 1, r: 2 }, LEN), true);
-  assert.deepStrictEqual(net.calls.gp[1], ['start', { q: 1, r: 2, len: LEN }], 'no wear given: none sent (the server\'s default)');
+  room.toLobby(); room.begin({ q: 1, r: 2 });
   assert.deepStrictEqual([gp.sid, view(gp).year, view(gp).wear], [2, 2021, 1]);
-  assert.strictEqual(gp.start({ q: 1, r: 2, wear: 5 }, LEN), true);
+  room.toLobby(); room.begin({ q: 1, r: 2, wear: 5 });
   // somebody who connects in the middle sees the session's year and wear, as a spectator too
   room.wait(100); room.lap(1, 80); room.lap(2, 81);
   assert.strictEqual(gp.phase, 'grid');
@@ -1014,8 +1035,8 @@ test('online: start() sends the wear (never the year: the server puts in the roo
   assert.deepStrictEqual([b.gp.phase, view(b.gp).spectating, view(b.gp).year, view(b.gp).wear], ['grid', true, 2021, 5]);
   room.wait(10);
   assert.deepStrictEqual([gp.phase, view(gp).year, view(gp).wear, view(b.gp).year], ['race', 2021, 5, 2021]);
-  // a guest cannot start one (the net refuses: not the host)
-  assert.deepStrictEqual([b.gp.canControl, b.gp.start({ q: 1, r: 1, wear: 2 }, LEN)], [false, false]);
+  // nobody starts one through gp (a guest cannot anyway)
+  assert.deepStrictEqual([b.gp.canControl, b.gp.start({ q: 1, r: 1, wear: 2 }, LEN), gp.start({ q: 1, r: 1 }, LEN)], [false, false, false]);
   // disconnected: back to the idle offline session, nothing of the room's
   a.disconnect();
   assert.deepStrictEqual([gp.online, view(gp).year, view(gp).wear], [false, null, 1]);
@@ -1181,7 +1202,8 @@ test('online bots: the room\'s bots mirror the server (bots() = net.bots, rows /
   assert.deepStrictEqual([view(h.gp).bots, view(g.gp).bots], [
     { count: 2, skill: 'amateur', max: 14, canEdit: true }, { count: 2, skill: 'amateur', max: 14, canEdit: false }]);
   // a session: the rows say which cars are bots, with their skill and car from the roster
-  h.gp.start({ q: 1, r: 1 }, LEN);
+  assert.strictEqual(h.gp.start({ q: 1, r: 1 }, LEN), false);
+  room.begin({ q: 1, r: 1 });
   assert.strictEqual(g.gp.phase, 'quali');
   assert.deepStrictEqual(view(g.gp).rows.map(r => [r.id, r.bot, r.skill, r.car]), [[1, false, null, ''], [2, false, null, ''], [100, true, 0.5, '2026-mclaren'], [101, true, null, '']]);
   assert.deepStrictEqual(view(h.gp).bots.canEdit, false, 'parc fermé');
@@ -1207,6 +1229,35 @@ test('online bots: the room\'s bots mirror the server (bots() = net.bots, rows /
   // leaving the room: the room's bots are no longer ours
   h.disconnect();
   assert.deepStrictEqual([ev.h.splice(0), h.gp.bots(), view(h.gp).bots], [[[]], [], { count: 0, skill: 'pro', max: 15, canEdit: true }]);
+});
+
+test('online (protocol 2): start() is false for everybody; view().bots.canEdit = the host while the room is in its lobby (not loading, not in a session)', () => {
+  const room = makeRoom();
+  const h = room.client(1, 'Host', '#ff0000'); h.connect();
+  const g = room.client(2, 'Guest', '#00ff00'); g.connect();
+  const canEdit = () => [view(h.gp).bots.canEdit, view(g.gp).bots.canEdit];
+  assert.deepStrictEqual(canEdit(), [true, false], 'lobby');
+  for (const st of ['loading', 'session']) {
+    room.st = st; room.sendRoom();
+    assert.deepStrictEqual(canEdit(), [false, false], st);
+    assert.strictEqual(h.gp.setBots(2), false, st + ': net refuses');
+  }
+  h.net.room = null;
+  assert.deepStrictEqual(canEdit(), [false, false], 'no room known yet');
+  room.st = 'lobby'; room.sendRoom();
+  assert.deepStrictEqual(canEdit(), [true, false]);
+  assert.deepStrictEqual([h.gp.start({ q: 1, r: 1 }, LEN), g.gp.start({ q: 1, r: 1 }, LEN), h.net.calls.gp, h.gp.phase], [false, false, [], 'free']);
+  // the room's session after the barrier is handled as before: 'phase' quali
+  h.log.take();
+  room.begin({ q: 1, r: 1 });
+  assert.deepStrictEqual([h.log.take(), h.gp.taking, h.gp.lapTotal], [['phase free>quali', 'change'], true, 1]);
+  assert.deepStrictEqual(canEdit(), [false, false], 'parc fermé');
+  // gp actions go to net (which refuses them outside the session)
+  assert.strictEqual(h.gp.action('skip'), true);
+  assert.strictEqual(h.gp.phase, 'grid');
+  assert.strictEqual(h.gp.action('end'), true);                  // the grid: back to the lobby
+  assert.deepStrictEqual([h.gp.phase, h.net.room.st, canEdit()], ['free', 'lobby', [true, false]]);
+  assert.strictEqual(h.gp.action('skip'), false, 'no session in the lobby');
 });
 
 console.log(failed ? '\n' + failed + ' test(s) FAILED' : '\nall gp tests passed');

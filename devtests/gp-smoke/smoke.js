@@ -192,8 +192,24 @@ function makeWin(tag, w0, h0) {
     await sleep(150);
     return true;
   };
-  w.pick = name => w.js(`(function () { var c = [].slice.call(document.querySelectorAll('.card')).filter(function (n) { return n.textContent.toLowerCase().indexOf(${J(name)}) >= 0; })[0];
-    if (!c) return null; c.click(); return c.querySelector('.card-name').textContent; })()`);
+  // v7.2: alone a card opens the start panel, then 開始 drives (自由練習); a room's host's card sets the room's track (the
+  // picker opened first) and nothing loads before the room's 開始 (roomStart)
+  w.pick = name => w.js(`(function () { var c = [].slice.call(document.querySelectorAll('#track-grid .card')).filter(function (n) { return n.textContent.toLowerCase().indexOf(${J(name)}) >= 0; })[0];
+    if (!c) return null;
+    var room = !!(F1.net && F1.net.connected), b = document.getElementById('setup-track-btn');
+    if (room && F1.game.setup && F1.game.setup.show !== 'picker' && b) b.click();
+    c.click();
+    if (!room) { document.querySelector('#setup-mode [data-m="free"]').click(); document.getElementById('setup-go').click(); }
+    return c.querySelector('.card-name').textContent; })()`);
+  // a single-player Grand Prix from the start panel of the loaded track (its card), 大獎賽, Q / R typed when given, 開始
+  w.startGp = async (q, r) => {
+    if (await w.js(`F1.game.running`)) await w.tap('Escape');
+    const ok = await w.js(`(function () { var k = F1_TRACKS.findIndex(function (t) { return t.id === F1.game.trackData.id; }), c = document.querySelector('#track-grid .card[data-i="' + k + '"]');
+      if (!c) return false; c.click(); document.querySelector('#setup-mode [data-m="gp"]').click(); return F1.game.setup.show === 'setup' && F1.game.setup.current && F1.game.setup.mode === 'gp'; })()`);
+    if (q !== undefined) await w.field('gp-q', String(q));
+    if (r !== undefined) await w.field('gp-r', String(r));
+    return ok && await w.click('setup-go');
+  };
   w.state = () => w.js(`__t.state()`);
   w.noErrors = async () => {
     const overlay = await w.js(`document.getElementById('error').classList.contains('hidden') ? '' : document.getElementById('error-text').textContent`);
@@ -232,7 +248,8 @@ async function partFree() {
   check('modules present', await w.js(`!!(F1.gp && F1.createLapCounter && F1.gamepad && F1.createSession && F1.net && F1.ui.setGp && F1.ui.setLights && F1.ui.setPad)`));
   const peek = await w.js(`(function () { var g = F1.game; return { gp: g.gp === F1.gp, lap: g.lap, input: g.input && Object.keys(g.input).join(','), raceLine: g.raceLine, running: g.running }; })()`);
   check('F1.game exposes gp / lap / input / raceLine (nothing loaded yet)', peek.gp && peek.lap === null && peek.input === 'up,down,left,right' && peek.raceLine === null && !peek.running, peek);
-  check('menu: Grand Prix panel asks for a track first', await w.js(`document.getElementById('gp-start').disabled && __t.text('gp-hint') === '先選一條賽道' && __t.shown('gp-setup')`), await w.js(`__t.text('gp-hint')`));
+  // (v7.2: a Grand Prix starts from the start panel of a track; the 大獎賽 tab says so)
+  check('menu: the 大獎賽 tab says to pick a track and start a Grand Prix in its start panel', await w.js(`!document.getElementById('gp-start') && __t.text('gp-hint') === '點一條賽道，在出發面板選「大獎賽」再按開始。' && !__t.shown('gp-open')`), await w.js(`__t.text('gp-hint')`));
   check('menu: no controller -> no 已連接 tag', await w.js(`!__t.shown('pad-status') && !F1.gamepad.state.connected`));
   await w.shot('a1-menu');
 
@@ -268,7 +285,7 @@ async function partFree() {
 
   await w.tap('Escape');
   check('Esc opens the menu', await w.js(`!F1.game.running && __t.shown('menu') && !__t.shown('hud') && __t.shown('menu-resume')`));
-  check('menu: Grand Prix can be started now', await w.js(`!document.getElementById('gp-start').disabled && !__t.shown('gp-hint')`), await w.js(`__t.text('gp-hint')`));
+  check('menu: Grand Prix can be started now (在目前賽道開大獎賽… offered)', await w.js(`__t.shown('gp-open')`), await w.js(`__t.text('gp-hint')`));
   const t1 = (await w.state()).lap.time; await sleep(300); const t2 = (await w.state()).lap.time;
   check('the lap clock stands still while the menu is open', t1 === t2, [t1, t2]);
   await w.shot('a3-menu-track-loaded');
@@ -291,9 +308,11 @@ async function partSolo() {
   await w.pick(TRACK);
   await w.until(`F1.game.running`, 15000, 'track');
   await w.tap('Escape');
-  check('Q / R fields take 1 / 1', (await w.field('gp-q', '1')) === '1' && (await w.field('gp-r', '1')) === '1');
-  await w.click('gp-start');
-  check('開始大獎賽 -> qualifying', await w.until(`F1.game.gp.phase === 'quali'`, 3000), await w.js(`__t.gp()`));
+  check('the loaded track\'s start panel, 大獎賽: Q / R fields take 1 / 1', await w.js(`(function () { var k = F1_TRACKS.findIndex(function (t) { return t.id === F1.game.trackData.id; });
+    document.querySelector('#track-grid .card[data-i="' + k + '"]').click(); document.querySelector('#setup-mode [data-m="gp"]').click(); return F1.game.setup.show === 'setup' && F1.game.setup.current; })()`) &&
+    (await w.field('gp-q', '1')) === '1' && (await w.field('gp-r', '1')) === '1');
+  await w.click('setup-go');
+  check('開始 (重新開始) -> qualifying', await w.until(`F1.game.gp.phase === 'quali'`, 3000), await w.js(`__t.gp()`));
   await sleep(300);
   let s = await w.state();
   check('quali: menu closed, driving', s.running && await w.js(`!__t.shown('menu') && __t.shown('hud')`));
@@ -303,7 +322,7 @@ async function partSolo() {
   check('quali: HUD session box + lap row "1 / 1" + toast with the format', await w.js(`__t.shown('hud-gp')`) && /排位賽/.test(box) && /P1\s*\/ 1/.test(box) && await w.js(`__t.text('hud-lap') === '1 / 1'`) &&
     toast === '大獎賽開始：排位 1 圈，正賽 1 圈' && await w.js(`__t.shown('hud-toast') && !__t.shown('hud-lights')`), { box, toast, lap: await w.js(`__t.text('hud-lap')`) });
   // (v6: js/ui.js stores the tyre wear option with them)
-  check('Q / R remembered', (await w.js(`localStorage.getItem('f1drive.gp')`)) === '{"q":1,"r":1,"wear":1}', await w.js(`localStorage.getItem('f1drive.gp')`));
+  check('Q / R remembered (with the mode, v7.2)', (await w.js(`localStorage.getItem('f1drive.gp')`)) === '{"q":1,"r":1,"wear":1,"mode":"gp"}', await w.js(`localStorage.getItem('f1drive.gp')`));
   await w.shot('b1-quali');
 
   // drive over the line so that the grid placement really moves the car back
@@ -367,14 +386,16 @@ async function partSolo() {
   await w.shot('b7-free-again');
 
   // a session, then another track from the menu
+  check('second session starts from the menu (the start panel)', await w.startGp() && await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000));
   await w.tap('Escape');
-  await w.click('gp-start');
-  check('second session starts from the menu', await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000));
-  await w.tap('Escape');
-  check('menu during a session: state + 跳過排位 / 結束大獎賽, no setup', await w.js(`__t.shown('gp-session') && __t.shown('gp-skip') && __t.shown('gp-end') && !__t.shown('gp-setup') && /排位賽/.test(__t.text('gp-state'))`), await w.js(`__t.text('gp-panel')`));
+  check('menu during a session: state + 跳過排位 / 結束大獎賽, no setup', await w.js(`__t.shown('gp-session') && __t.shown('gp-skip') && __t.shown('gp-end') && !__t.shown('setup') && /排位賽/.test(__t.text('gp-state'))`), await w.js(`__t.text('gp-panel')`));
   await w.shot('b8-menu-quali');
-  const other = await w.js(`(function () { var cur = F1.game.trackData.id, i = F1_TRACKS.findIndex(function (t) { return t.id !== cur; }); document.querySelectorAll('.card')[i].click(); return F1_TRACKS[i].id; })()`);
-  check('picking another track ends the session and loads it', await w.until(`F1.game.gp.phase === 'free' && F1.game.trackData.id === ${J(other)} && F1.game.running`, 15000), other);
+  const other = await w.js(`(function () { var cur = F1.game.trackData.id, i = F1_TRACKS.findIndex(function (t) { return t.id !== cur; }); document.querySelector('#track-grid .card[data-i="' + i + '"]').click(); return F1_TRACKS[i].id; })()`);
+  check('another track\'s card: its start panel warns 大獎賽進行中…; the session still on', await w.js(`F1.game.setup.show === 'setup' && F1.game.setup.trackId === ${J(other)} && __t.text('setup-note') === '大獎賽進行中：開始新的賽事會結束目前的大獎賽。' && F1.game.gp.phase === 'quali'`),
+    await w.js(`__t.text('setup-note')`));
+  await w.js(`document.querySelector('#setup-mode [data-m="free"]').click(); true`);
+  await w.click('setup-go');
+  check('開始 there ends the session and loads it', await w.until(`F1.game.gp.phase === 'free' && F1.game.trackData.id === ${J(other)} && F1.game.running`, 15000), other);
   await sleep(300);
   s = await w.state();
   check('new track: start position, fresh lap counter, no session box', s.car.i === s.car.n - 10 && !s.lap.started && await w.js(`!__t.shown('hud-gp') && F1.game.lap.prevIdx === F1.game.car.state.sampleIndex`), s.car);
@@ -382,7 +403,7 @@ async function partSolo() {
   s = await w.state();
   check('new track drives normally and times laps', s.car.v > 15 && s.lap.started && s.lap.n === 1 && await w.js(`__t.text('hud-lap') === '1'`), { v: s.car.v, lap: s.lap });
   await w.tap('Escape');
-  check('menu: a new Grand Prix can be started on the new track', await w.js(`!document.getElementById('gp-start').disabled && __t.shown('gp-setup')`));
+  check('menu: a new Grand Prix can be started on the new track (在目前賽道開大獎賽…)', await w.js(`__t.shown('gp-open') && !__t.shown('gp-session')`));
   await w.noErrors();
   w.destroy();
 }
@@ -394,9 +415,7 @@ async function partLap() {
   await w.open();
   await w.pick(TRACK);
   await w.until(`F1.game.running`, 15000, 'track');
-  await w.tap('Escape');
-  await w.field('gp-q', '1'); await w.field('gp-r', '1');
-  await w.click('gp-start');
+  await w.startGp(1, 1);
   await w.until(`F1.game.gp.phase === 'quali'`, 3000, 'quali');
   w.key('W', true);
   check('timing starts', await w.until(`F1.game.lap.started`, 6000));
@@ -453,7 +472,7 @@ async function partLap() {
     (s = await w.state()).car.i === s.car.n - 10 && Math.abs(s.car.d) < 0.01 && !s.lap.started, s && s.car);
   await w.tap('Escape');
   await w.click('gp-end');
-  check('結束大獎賽 (menu button) -> free, menu stays open with the setup back', await w.until(`F1.game.gp.phase === 'free'`, 2000) && await w.js(`!F1.game.running && __t.shown('gp-setup') && !document.getElementById('gp-start').disabled`));
+  check('結束大獎賽 (menu button) -> free, menu stays open, 在目前賽道開大獎賽… offered again', await w.until(`F1.game.gp.phase === 'free'`, 2000) && await w.js(`!F1.game.running && __t.shown('gp-open')`));
   const mt = await w.js(`__t.toast()`);
   check('the "Grand Prix ended" toast is visible over the menu (bottom of the window)', mt.shown && mt.text === '大獎賽已結束，回到自由練習' && mt.menu && !mt.hud && mt.overMenu && !mt.inHud &&
     mt.top > mt.H / 2 && mt.bottom <= mt.H && mt.left >= 0 && mt.right <= mt.W, mt);
@@ -613,8 +632,7 @@ async function partNoPad() {
   check('L toggles the line', await w.js(`F1.game.raceLine.group.visible === false`));
   await w.tap('Escape');
   check('Esc opens the menu', await w.js(`!F1.game.running && __t.shown('menu')`));
-  await w.click('gp-start');
-  check('Grand Prix starts from the menu', await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000));
+  check('Grand Prix starts from the menu (the start panel)', await w.startGp() && await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000));
   w.key('W', true);
   await w.js(`F1.game.gp.action('skip')`);
   await w.until(`F1.game.gp.phase === 'grid'`, 2000);
@@ -666,6 +684,40 @@ async function partSuzuka() {
   w.destroy();
 }
 
+/* ---- v7.2 rooms: the lobby. The host's settings (o.mode / q / r) in the lobby, the guests press 準備, the host 開始 (again
+   after START_MIN_MS when the server said busy); everybody loads and the session begins after the barrier (gp: qualifying) ---- */
+async function roomStart(hostW, guests, o) {
+  o = o || {};
+  if (o.mode) await hostW.js(`document.querySelector('#setup-mode [data-m="${o.mode}"]').click(); true`);
+  if (o.q !== undefined) await hostW.field('gp-q', String(o.q));
+  if (o.r !== undefined) await hostW.field('gp-r', String(o.r));
+  for (const g of guests) if (!(await g.js(`F1.net.room.ready.indexOf(F1.net.id) >= 0`))) await g.click('setup-ready');
+  if (!await hostW.until(`F1.game.setup.go.enabled`, 5000, 'everybody ready')) return false;
+  for (let k = 0; k < 3; k++) {
+    await hostW.click('setup-go');
+    if (await hostW.until(`F1.net.room.st !== 'lobby'`, 1500, 'room loading')) break;
+    await sleep(1100);
+  }
+  const cond = `F1.net.room.st === 'session' && F1.game.running` + (o.mode === 'gp' ? ` && F1.game.gp.phase === 'quali'` : '');
+  let ok = true;
+  for (const w of [hostW].concat(guests)) ok = await w.until(cond, 30000, 'room session') && ok;
+  return ok;
+}
+// The host takes the room back to the lobby (Esc: the room menu; 回到大廳, confirmed where a Grand Prix would end; again
+// after START_MIN_MS: the server drops a back within 1 s of the last start)
+async function roomBack(hostW, all) {
+  if (await hostW.js(`F1.game.running`)) await hostW.tap('Escape');
+  for (let k = 0; k < 3 && await hostW.js(`F1.net.room.st !== 'lobby'`); k++) {
+    await hostW.js(`document.getElementById('setup-lobby').click(); true`);
+    if (await hostW.js(`!document.getElementById('setup-confirm').classList.contains('hidden')`)) await hostW.js(`document.getElementById('setup-force-yes').click(); true`);
+    if (await hostW.until(`F1.net.room.st === 'lobby'`, 1500, 'back')) break;
+    await sleep(1100);
+  }
+  let ok = true;
+  for (const w of all) ok = await w.until(`F1.net.room.st === 'lobby' && !F1.game.running`, 5000, 'lobby') && ok;
+  return ok;
+}
+
 /* ================= room: host, guest, late joiner ================= */
 async function partRoom() {
   part = 'room';
@@ -682,11 +734,15 @@ async function partRoom() {
   await B.js(`document.querySelectorAll('.mp-swatch')[2].click(); document.getElementById('mp-join').click()`);
   check('B joins', await B.until(`F1.net.connected && !F1.net.isHost`, 5000), await B.js(`__t.text('mp-status')`));
   await sleep(300);
-  check('host without a room track: start disabled with a hint; guest: no setup, told the host starts it', await A.js(`document.getElementById('gp-start').disabled && __t.text('gp-hint') === '先幫房間選一條賽道'`) &&
-    await B.js(`!__t.shown('gp-setup') && /房主/.test(__t.text('gp-hint'))`), [await A.js(`__t.text('gp-hint')`), await B.js(`__t.text('gp-hint')`)]);
+  // v7.2: the lobby: nobody on a track; the host's picker is open, the guest waits for the track
+  check('the lobby without a room track: the host\'s track picker; the guest: 準備 disabled, told to wait for the host\'s track; nobody drives',
+    await A.js(`F1.game.setup.show === 'picker' && !F1.game.running && /^房間已建立。先幫房間選一條賽道/.test(__t.text('track-lock'))`) &&
+    await B.js(`F1.game.setup.show === 'setup' && document.getElementById('setup-ready').disabled && __t.text('setup-status') === '等待房主選擇賽道…' && !F1.game.running`),
+    [await A.js(`__t.text('track-lock')`), await B.js(`__t.text('setup-status')`)]);
   const picked = await A.pick(ROOM_TRACK);
-  const onTrack = `F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id`;
-  check('both load the room track (' + picked + ')', await A.until(onTrack, 15000) && await B.until(onTrack, 15000));
+  const onTrack = `F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id && F1.net.room.st === 'session'`;
+  check('the host sets the room track (' + picked + '); B 準備, A 開始: both load it', await B.until(`F1.net.room.set.track === F1.net.trackId && !!F1.net.trackId`, 3000) &&
+    await roomStart(A, [B], { mode: 'free' }) && await A.until(onTrack, 15000) && await B.until(onTrack, 15000));
   await sleep(1200);
   let a = await A.state(), b = await B.state();
   const n = a.car.n;
@@ -694,13 +750,14 @@ async function partRoom() {
   check('free practice in the room: own slots (grid boxes 1 and 2), solid cars, roster box', inBox(await boxOf(A, 0)) && inBox(await boxOf(B, 1)) && a.car.d > 0 && b.car.d < 0 && (await ghostOf(A, 'Bob')) === false && (await ghostOf(B, 'Alice')) === false &&
     await B.js(`__t.shown('hud-players') && !__t.shown('hud-gp')`), { a: await boxOf(A, 0), b: await boxOf(B, 1) });
 
-  // ---- the host starts the Grand Prix from the menu panel ----
-  await A.tap('Escape');
+  // ---- the host starts the Grand Prix from the lobby (v7.2) ----
+  check('host: 回到大廳 from the room menu: both in the lobby', await roomBack(A, [A, B]));
+  await A.js(`document.querySelector('#setup-mode [data-m="gp"]').click(); true`);
   await A.field('gp-q', '1'); await A.field('gp-r', '1');
-  check('host menu: start enabled, room hint', await A.js(`!document.getElementById('gp-start').disabled && /所有人/.test(__t.text('gp-hint'))`), await A.js(`__t.text('gp-hint')`));
+  check('host lobby: 大獎賽 Q 1 / R 1; 開始 waits for B (disabled, 不等了 offered)', await A.until(`F1.net.room.set.mode === 'gp' && F1.net.room.set.q === 1 && F1.net.room.set.r === 1 && !F1.game.setup.go.enabled && F1.game.setup.force`, 2000),
+    await A.js(`({ set: F1.net.room.set, go: F1.game.setup.go })`));
   await A.shot('d1-host-menu');
-  await A.click('gp-start');
-  check('both in qualifying', await A.until(`F1.game.gp.phase === 'quali'`, 3000) && await B.until(`F1.game.gp.phase === 'quali'`, 3000));
+  check('B 準備, the host clicks 開始: both in qualifying after the barrier', await roomStart(A, [B], { mode: 'gp' }) && await A.until(`F1.game.gp.phase === 'quali'`, 3000) && await B.until(`F1.game.gp.phase === 'quali'`, 3000));
   await sleep(700);
   a = await A.state(); b = await B.state();
   check('quali: host pulled out of the menu, both driving, both taking part (online)', a.running && b.running && await A.js(`!__t.shown('menu')`) && a.gp.taking && b.gp.taking && a.gp.online && b.gp.online && a.gp.canControl && !b.gp.canControl, { a: a.gp, b: b.gp });
@@ -826,17 +883,21 @@ async function partRoom() {
   check('host ends the race -> results for all three', await A.js(`F1.game.gp.action('end')`) === true && await A.until(`F1.game.gp.phase === 'results'`, 3000) &&
     await B.until(`F1.game.gp.phase === 'results'`, 3000) && await C.until(`F1.game.gp.phase === 'results'`, 3000));
   await sleep(400);
-  check('results overlay: host has 再來一場 / 結束, guest only 關閉', await A.js(`__t.shown('gp-results') && __t.shown('gp-res-again') && __t.shown('gp-res-end')`) &&
-    await B.js(`__t.shown('gp-results') && !__t.shown('gp-res-again') && !__t.shown('gp-res-end') && __t.shown('gp-close') && /房主/.test(__t.text('gp-results-note'))`), await B.js(`__t.text('gp-results')`));
+  check('results overlay: host has 再來一場 / 回到大廳 (v7.2: no 結束 in a room), guest only 關閉', await A.js(`__t.shown('gp-results') && __t.shown('gp-res-again') && __t.shown('gp-res-lobby') && !__t.shown('gp-res-end')`) &&
+    await B.js(`__t.shown('gp-results') && !__t.shown('gp-res-again') && !__t.shown('gp-res-lobby') && !__t.shown('gp-res-end') && __t.shown('gp-close') && /房主/.test(__t.text('gp-results-note'))`), await B.js(`__t.text('gp-results')`));
   await A.shot('d8-host-results'); await B.shot('d8-guest-results');
-  await A.click('gp-res-end');
-  check('結束 -> free practice for all three, roster box back', await A.until(`F1.game.gp.phase === 'free'`, 3000) && await B.until(`F1.game.gp.phase === 'free'`, 3000) && await C.until(`F1.game.gp.phase === 'free'`, 3000) &&
+  await A.click('gp-res-lobby');
+  check('回到大廳 -> all three in the lobby (no session, nobody on the track)', await A.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby' && !F1.game.running`, 3000) &&
+    await B.until(`F1.net.room.st === 'lobby' && !F1.game.running`, 3000) && await C.until(`F1.net.room.st === 'lobby' && !F1.game.running`, 3000));
+  check('自由練習 from the lobby: B and C 準備, 開始: free practice for all three, roster box back', await roomStart(A, [B, C], { mode: 'free' }) &&
     await B.js(`!__t.shown('hud-gp') && !__t.shown('gp-results') && __t.shown('hud-players')`));
   await sleep(500);
   check('free: cars that are apart are solid again', (await ghostOf(A, 'Bob')) === false && (await ghostOf(B, 'Alice')) === false, [await A.js(`__t.ghosts()`), await B.js(`__t.ghosts()`)]);
 
-  // ---- a car that stops being a ghost while it overlaps ours: nothing jumps ----
-  check('second session: all three in qualifying (C takes part now)', await A.js(`F1.game.gp.start({ q: 1, r: 1 }, F1.game.track.length)`) === true && await C.until(`F1.game.gp.phase === 'quali' && F1.game.gp.taking`, 3000) && await B.until(`F1.game.gp.phase === 'quali'`, 3000));
+  // ---- a session that ends while B overlaps A (ghosts in qualifying): v7.2 ends it in the lobby, the next start puts
+  //      every car in its own box: nothing jumps, nobody is hit ----
+  check('second session (from the lobby): all three in qualifying (C takes part now)', await roomBack(A, [A, B, C]) && await roomStart(A, [B, C], { mode: 'gp', q: 1, r: 1 }) &&
+    await C.until(`F1.game.gp.phase === 'quali' && F1.game.gp.taking`, 3000) && await B.until(`F1.game.gp.phase === 'quali'`, 3000));
   await sleep(600);
   const a3 = (await A.state()).car;
   await B.js(`(function () { var s = F1.game.car.state, a = ${J(a3)}; s.x = a.x - Math.sin(a.h) * 1.5; s.z = a.z - Math.cos(a.h) * 1.5; s.heading = a.h; s.speed = 0; return 1; })()`);
@@ -844,17 +905,17 @@ async function partRoom() {
   const b3 = (await B.state()).car;
   await A.js(`__t.hits('Bob')`); await B.js(`__t.hits('Alice')`);
   await A.js(`F1.game.gp.action('end')`);
-  await B.until(`F1.game.gp.phase === 'free'`, 3000);
+  await B.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby'`, 3000);
   await sleep(1000);
   const a4 = (await A.state()).car, b4 = (await B.state()).car;
-  check('session ended with B inside A: nobody is thrown out, the overlapping car stays a ghost', Math.hypot(a4.x - a3.x, a4.z - a3.z) < 0.01 && Math.hypot(b4.x - b3.x, b4.z - b3.z) < 0.01 &&
-    (await ghostOf(A, 'Bob')) === true && (await ghostOf(B, 'Alice')) === true && (await ghostOf(A, 'Carol')) === false, { aMoved: Math.hypot(a4.x - a3.x, a4.z - a3.z), bMoved: Math.hypot(b4.x - b3.x, b4.z - b3.z) });
-  B.key('W', true); await sleep(2000); B.key('W', false);
+  check('the session ended with B inside A: everybody in the lobby, nobody thrown out (the cars stand where they were)', Math.hypot(a4.x - a3.x, a4.z - a3.z) < 0.01 && Math.hypot(b4.x - b3.x, b4.z - b3.z) < 0.01 &&
+    (await A.js(`F1.net.room.st === 'lobby' && !F1.game.running`)) && (await B.js(`!F1.game.running`)), { aMoved: Math.hypot(a4.x - a3.x, a4.z - a3.z), bMoved: Math.hypot(b4.x - b3.x, b4.z - b3.z) });
+  check('free practice from the lobby: every car in its own box, solid, nobody hit by the overlap', await roomStart(A, [B, C], { mode: 'free' }) && inBox(await boxOf(A, 0)) && inBox(await boxOf(B, 1)) && inBox(await boxOf(C, 2)) &&
+    (await ghostOf(A, 'Bob')) === false && (await ghostOf(B, 'Alice')) === false, { a: await boxOf(A, 0), b: await boxOf(B, 1) });
   await sleep(500);
-  const a5 = (await A.state()).car, b5 = (await B.state()).car;
+  const a5 = (await A.state()).car;
   const hitA2 = await A.js(`__t.hitsStop()`), hitB2 = await B.js(`__t.hitsStop()`);
-  check('B drives out of A without an impact and is solid again once clear', Math.hypot(a5.x - a3.x, a5.z - a3.z) < 0.01 && hitA2.all === 0 && hitB2.near === 0 && hitB2.minDist < 2 &&
-    Math.hypot(a5.x - b5.x, a5.z - b5.z) > 6 && (await ghostOf(A, 'Bob')) === false && (await ghostOf(B, 'Alice')) === false, { dist: Math.hypot(a5.x - b5.x, a5.z - b5.z), hitA2, hitB2 });
+  check('... no impact on either car through the end and the new start', hitA2.all === 0 && hitB2.all === 0, { hitA2, hitB2 });
   // and solid means solid: B, put 12 m in front of A, reverses into it
   await B.js(`(function () { var s = F1.game.car.state, a = ${J(a5)}; s.x = a.x + Math.sin(a.h) * 12; s.z = a.z + Math.cos(a.h) * 12; s.heading = a.h; s.speed = 0; s.steer = 0; return 1; })()`);
   await B.js(`__t.fakePad()`);                              // (a controller lying untouched next to the keyboard: for the rumble)
@@ -872,9 +933,9 @@ async function partRoom() {
   await B.js(`window.__padOn = false; true`);
 
   // ---- a session in which B is in the menu when it starts and when the grid forms, and C sits in the menu through lights out ----
-  await B.tap('Escape');
-  check('B opens the menu', await B.js(`!F1.game.running && __t.shown('menu')`));
-  await A.js(`F1.game.gp.start({ q: 2, r: 3 }, F1.game.track.length)`);
+  // (v7.2: a session starts from the lobby, where everybody is in the menu: the barrier pulls them all onto the track)
+  check('B opens the menu: the room is taken back to the lobby (B in its menu there)', await roomBack(A, [A, B, C]) && await B.js(`!F1.game.running && __t.shown('menu')`));
+  await roomStart(A, [B, C], { mode: 'gp', q: 2, r: 3 });
   check('third session: a guest in the menu is pulled into qualifying', await B.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000) && await B.js(`!__t.shown('menu')`) &&
     await C.until(`F1.game.gp.phase === 'quali'`, 3000));
   await B.tap('Escape');
@@ -907,23 +968,26 @@ async function partRoom() {
   check('C resumes after lights out: not locked, the race clock has been running since goAt', c.running && !c.gp.locked && c.lap.started && c.lap.n === 1 && c.lap.behind && c.lap.time > 1.5 &&
     near(c.lap.time, c.gp.sinceGo, 0.1), { lap: c.lap, sinceGo: c.gp.sinceGo });
 
-  // ---- a track change by the host ends the session for everybody ----
-  await A.tap('Escape');
-  const other = await A.js(`(function () { var cur = F1.game.trackData.id, i = F1_TRACKS.findIndex(function (t) { return t.id !== cur; }); document.querySelectorAll('.card')[i].click(); return F1_TRACKS[i].id; })()`);
+  // ---- a track change by the host (v7.2: in the lobby: 回到大廳 (asked first: the race is on), the picker, 開始) ----
+  check('host: 回到大廳 in the race (confirmed): the session is over for everybody', await roomBack(A, [A, B, C]));
+  const other = await A.js(`(function () { var cur = F1.game.trackData.id, i = F1_TRACKS.findIndex(function (t) { return t.id !== cur; }); document.getElementById('setup-track-btn').click();
+    document.querySelector('#track-grid .card[data-i="' + i + '"]').click(); return F1_TRACKS[i].id; })()`);
   const moved = `F1.game.gp.phase === 'free' && F1.game.trackData.id === ${J(other)} && F1.game.running`;
-  check('host picks another track: session over, everybody on the new track', await A.until(moved, 15000) && await B.until(moved, 15000) && await C.until(moved, 15000), other);
+  check('host picks another track, 開始: everybody on the new track (free practice)', await roomStart(A, [B, C], { mode: 'free' }) && await A.until(moved, 15000) && await B.until(moved, 15000) && await C.until(moved, 15000), other);
   await sleep(800);
   c = await C.state();
   check('new track: own room slots, fresh lap counters, no session box', inBox(await boxOf(C, 2)) && inBox(await boxOf(A, 0)) && !c.lap.started && await C.js(`!__t.shown('hud-gp') && __t.shown('hud-players')`), await boxOf(C, 2));
 
   // ---- the host leaves in the middle of a session ----
-  await A.js(`F1.game.gp.start({ q: 1, r: 1 }, F1.game.track.length)`);
+  await roomBack(A, [A, B, C]);
+  await roomStart(A, [B, C], { mode: 'gp', q: 1, r: 1 });
   await B.until(`F1.game.gp.phase === 'quali'`, 3000);
   await A.tap('Escape');
   await A.js(`document.getElementById('mp-leave').click()`);
   check('host leaves: guests are offline, session gone, still driving', await B.until(`!F1.net.connected`, 5000) && await B.until(`F1.game.gp.phase === 'free' && !F1.game.gp.online`, 2000) &&
     await B.js(`F1.game.running && !__t.shown('hud-gp') && /連線中斷/.test(__t.text('hud-toast'))`), await B.js(`__t.text('hud-toast')`));
-  check('guest alone afterwards: can start a single-player Grand Prix', await B.js(`F1.game.gp.canControl`) && await (async () => { await B.tap('Escape'); return B.js(`!document.getElementById('gp-start').disabled && __t.shown('gp-setup')`); })());
+  check('guest alone afterwards: can start a single-player Grand Prix (the 大獎賽 tab offers 在目前賽道開大獎賽…)', await B.js(`F1.game.gp.canControl`) &&
+    await (async () => { await B.tap('Escape'); await B.click('tab-gp'); return B.js(`__t.shown('gp-open') && !F1.net.connected`); })());
   await A.noErrors(); await B.noErrors(); await C.noErrors();
   A.destroy(); B.destroy(); C.destroy();
 }
@@ -938,15 +1002,14 @@ async function partSpec() {
   await H.js(`document.getElementById('mp-create').click()`);
   check('H hosts', await H.until(`F1.net.connected && F1.net.isHost`, 5000), await H.js(`__t.text('mp-status')`));
   const picked = await H.pick(ROOM_TRACK);
-  check('H loads the room track (' + picked + ')', await H.until(onTrack, 15000));
-  await sleep(500);
+  check('H sets the room track in the lobby (' + picked + ')', await H.until(`!!F1.net.room.set.track && F1.game.setup.show === 'setup'`, 3000));
   // the guest's page is ready to join: name and address typed in; count the 'go' events it gets
   await S.field('mp-name', 'Sam'); await S.field('mp-addr', '127.0.0.1:' + PORT);
   await S.js(`document.querySelectorAll('.mp-swatch')[4].click(); window.__go = 0; F1.gp.on('go', function () { window.__go++; }); true`);
 
-  // ---- H alone goes to the grid; S joins while the grid is being formed (4 s before the first light) ----
-  check('H starts a Grand Prix and skips to the grid', await H.js(`F1.game.gp.start({ q: 1, r: 1 }, F1.game.track.length) && F1.game.gp.action('skip')`) === true &&
-    await H.until(`F1.game.gp.phase === 'grid' && F1.game.gp.inputLocked`, 3000), await H.js(`__t.gp()`));
+  // ---- H alone goes to the grid (v7.2: 大獎賽 from the lobby, alone: 開始 at once); S joins while the grid is being formed ----
+  check('H starts a Grand Prix alone from the lobby and skips to the grid', await roomStart(H, [], { mode: 'gp', q: 1, r: 1 }) && await H.until(onTrack, 15000) &&
+    await H.js(`F1.game.gp.action('skip')`) === true && await H.until(`F1.game.gp.phase === 'grid' && F1.game.gp.inputLocked`, 3000), await H.js(`__t.gp()`));
   await S.js(`document.getElementById('mp-join').click()`);
   check('S joins during the grid phase and loads the track', await S.until(`F1.net.connected && ${onTrack}`, 8000) && await S.until(`F1.game.gp.phase === 'grid'`, 2000), await S.js(`__t.text('mp-status')`));
   await S.js(`__t.rec()`); await H.js(`__t.rec()`);
@@ -997,23 +1060,24 @@ async function partSpec() {
   await S.js(`F1.ui.toast('')`); await H.js(`F1.ui.toast('')`);
   await H.click('gp-end');                                                       // race -> results
   check('host ends the race from the menu panel -> results', await H.until(`F1.game.gp.phase === 'results'`, 3000) && await S.until(`F1.game.gp.phase === 'results'`, 3000));
-  await H.click('gp-end');                                                       // results -> free
-  check('... and the Grand Prix -> free', await H.until(`F1.game.gp.phase === 'free'`, 3000) && await S.until(`F1.game.gp.phase === 'free'`, 3000));
+  await H.click('gp-lobby');                                                     // results -> (v7.2) 回到大廳 (the room's host: no 結束大獎賽 in the results)
+  check('... and the Grand Prix -> the lobby (v7.2: a room does not fall back to free practice)', await H.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby'`, 3000) && await S.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby'`, 3000));
   await sleep(200);
   let th = await H.js(`__t.toast()`), ts = await S.js(`__t.toast()`);
-  const overMenu = t => t.shown && t.menu && !t.hud && t.overMenu && !t.inHud && t.top > t.H / 2 && t.bottom <= t.H && t.left >= 0 && t.right <= t.W;
-  check('the host sees the "Grand Prix ended" toast over its menu', overMenu(th) && th.text === '大獎賽已結束，回到自由練習', th);
-  check('the spectator sitting in the menu sees it too', overMenu(ts) && ts.text === '大獎賽已結束，回到自由練習', ts);
+  // (in the lobby the menu toast is at the TOP of the window, clear of the 開始 / 準備 block at the bottom)
+  const overLobby = t => t.shown && t.menu && !t.hud && t.overMenu && !t.inHud && t.top >= 0 && t.bottom < t.H / 2 && t.left >= 0 && t.right <= t.W;
+  check('the host is in its lobby: no "Grand Prix ended" / 回到自由練習 toast', !(th.shown && /回到自由練習/.test(th.text)) && await H.js(`__t.shown('menu') && F1.game.setup.show === 'setup'`), th);
+  check('the spectator sitting in the menu is told 房主回到房間大廳, over its menu (top: the lobby)', overLobby(ts) && ts.text === '房主回到房間大廳', ts);
   await H.shot('e3-host-menu-toast'); await S.shot('e3-spectator-menu-toast');
   await S.js(`document.getElementById('mp-leave').click()`);
-  check('a player leaves: toast over the host\'s menu', await H.until(`__t.text('hud-toast') === 'Sam 離開了房間'`, 4000) && overMenu(await H.js(`__t.toast()`)), await H.js(`__t.toast()`));
+  check('a player leaves: toast over the host\'s menu (the lobby: top)', await H.until(`__t.text('hud-toast') === 'Sam 離開了房間'`, 4000) && overLobby(await H.js(`__t.toast()`)), await H.js(`__t.toast()`));
   await S.until(`!F1.net.connected`, 3000);
   await S.js(`document.getElementById('mp-join').click()`);
-  check('a player joins: toast over the host\'s menu', await H.until(`__t.text('hud-toast') === 'Sam 加入了房間'`, 6000) && overMenu(await H.js(`__t.toast()`)), await H.js(`__t.toast()`));
+  check('a player joins: toast over the host\'s menu (the lobby: top)', await H.until(`__t.text('hud-toast') === 'Sam 加入了房間'`, 6000) && overLobby(await H.js(`__t.toast()`)), await H.js(`__t.toast()`));
   await H.shot('e4-host-menu-join-toast');
-  await H.tap('Escape');
+  check('free practice from the lobby (S 準備, H 開始): both in the car', await roomStart(H, [S], { mode: 'free' }));
   th = await H.js(`__t.toast()`);
-  check('back in the car the toast is at the top of the HUD', th.shown && th.hud && !th.menu && th.top >= 0 && th.bottom < 70 && th.text === 'Sam 加入了房間', th);
+  check('back in the car the toast (自由練習開始) is at the top of the HUD', th.shown && th.hud && !th.menu && th.top >= 0 && th.bottom < 70 && th.text === '自由練習開始', th);
   await sleep(4300);
   check('... and goes away by itself', !(await H.js(`__t.toast()`)).shown);
   await H.tap('Escape');

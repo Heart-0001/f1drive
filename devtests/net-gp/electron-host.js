@@ -49,8 +49,18 @@ app.whenReady().then(async () => {
     check('guest with a wrong one: refused', !g2.ok && g2.error === '房間密碼錯誤', g2);
     const g3 = await G.js(`F1.net.join(${addr}, { password: '賽車 2024' })`);
     check('guest with the right one: in, the host sees him', g3.ok && await H.until(`F1.net.roster.length === 2`), g3);
+    // protocol 2 through the in-game server: a lobby, not a dedicated server; the host sets up, the guest is ready, both load
+    check('both in the lobby of an in-game room (ded false), the guest knows the address', (await H.js(`F1.net.room.st === 'lobby' && F1.net.ded === false && F1.net.address === null`)) &&
+      (await G.js(`F1.net.room.st === 'lobby' && F1.net.ded === false && F1.net.address === ${JSON.stringify('127.0.0.1:' + PORT)}`)));
+    check('the host sets the track, the guest says ready', (await H.js(`F1.net.setRoom({ track: 'monza' })`)) && await G.until(`F1.net.trackId === 'monza'`) &&
+      (await G.js(`F1.net.setReady(true)`)) && await H.until(`F1.net.room.ready.length === 1`));
+    check('start: both load, then the session', (await H.js(`F1.net.startRoom({ len: 5793 })`)) && await G.until(`F1.net.room.st === 'loading'`) &&
+      (await H.js(`F1.net.sendLoaded(F1.net.room.rs, true, { len: 5793 })`)) && (await G.js(`F1.net.sendLoaded(F1.net.room.rs, true, { len: 5793 })`)) &&
+      await H.until(`F1.net.room.st === 'session'`) && await G.until(`F1.net.room.st === 'session' && F1.net.loadedRs === F1.net.room.rs`));
+    await sleep(1000);
+    check('back to the lobby (the host)', (await H.js(`F1.net.backToLobby()`)) && await G.until(`F1.net.room.st === 'lobby'`));
     await H.js(`F1.net.leave()`);
-    check('the host leaves: the room is closed for the guest', await G.until(`!F1.net.connected`, 3000));
+    check('the host leaves: the room is closed for the guest', await G.until(`!F1.net.connected && F1.net.room === null`, 3000));
     // an open room is still what create() without options gives
     const r2 = await H.js(`F1.net.create(${PORT})`);
     const g4 = await G.js(`F1.net.join(${addr}, { password: 'whatever' })`);

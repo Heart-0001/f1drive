@@ -281,10 +281,15 @@ async function scenario(w, cfg, rep) {
   /* ---------- boot, menu, track ---------- */
   const boot = await w.open();
   check('boots without the error overlay; page helpers installed', !boot.overlay && boot.lib === 'ok', boot);
-  check('menu: no track yet -> 開始大獎賽 disabled with 先選一條賽道', await w.js(`document.getElementById('gp-start').disabled && __e.shown('gp-hint') && document.getElementById('gp-hint').textContent === '先選一條賽道'`));
+  // (v7.2: a Grand Prix starts from the start panel; the 大獎賽 tab says so)
+  check('menu: no track yet -> the 大獎賽 tab says how a Grand Prix starts (點一條賽道，在出發面板選「大獎賽」再按開始。), no 在目前賽道開大獎賽…', await w.js(`!document.getElementById('gp-start') && !__e.shown('gp-open') &&
+    __e.shown('gp-hint') && document.getElementById('gp-hint').textContent === '點一條賽道，在出發面板選「大獎賽」再按開始。'`));
   check('menu: the controller is found by the menu-time poll (已連接)', await w.until(`F1.gamepad.state.connected && __e.shown('pad-status')`, 3000, 'pad found'));
   const idx = await w.js(`F1_TRACKS.findIndex(function (t) { return t.id === ${J(cfg.id)}; })`);
   check('track card clicked (real mouse click)', idx >= 0 && await w.click(`#track-grid .card[data-i="${idx}"]`), idx);
+  check('v7.2: the card opens the start panel (開始 focused, 自由練習); nothing loads yet', await w.until(`F1.game.setup && F1.game.setup.show === 'setup' && F1.game.setup.trackId === ${J(cfg.id)}`, 2000, 'start panel') &&
+    await w.js(`!F1.game.track && !F1.game.running && document.activeElement && document.activeElement.id === 'setup-go' && F1.game.setup.mode === 'free'`));
+  check('開始 clicked (real mouse click)', await w.click('#setup-go'));
   check('track loads and the game asks for frames', await w.until(`F1.game.track && F1.game.trackData.id === ${J(cfg.id)} && F1.game.running && __e.queued() === 1`, 30000, 'track load'));
   check('warp hooks: renderer and car found', await w.js(`__e.hookRenderer() && __e.hookCar()`));
   await w.frames(3);
@@ -304,15 +309,19 @@ async function scenario(w, cfg, rep) {
 
   /* ---------- the Grand Prix is started through the menu panel ---------- */
   check('Esc opens the menu; the loop stops asking for frames', await w.esc(true) && await w.js(`__e.queued() === 0`));
+  // v7.2: the loaded track's card (目前賽道) opens its start panel; 大獎賽; Q / R; 開始 (重新開始) or Enter in a lap field
+  check('the loaded track\'s card clicked: its start panel (目前賽道, 開始 reads 重新開始)', await w.click(`#track-grid .card[data-i="${idx}"]`) &&
+    await w.until(`F1.game.setup.show === 'setup' && F1.game.setup.current && document.getElementById('setup-go-label').textContent === '重新開始'`, 2000, 'panel'));
+  check('mode 大獎賽 clicked: the laps fields show', await w.click('#setup-mode [data-m="gp"]') && await w.until(`F1.game.setup.mode === 'gp' && __e.shown('gp-q') && __e.shown('gp-r')`, 1000, 'gp mode'));
   const q = await w.type('#gp-q', String(Q)), r = await w.type('#gp-r', String(R));
   check('Q / R typed into the fields (click, select all, type): ' + Q + ' / ' + R, q === String(Q) && r === String(R), [q, r]);
   s = await w.snap();
-  check('menu: 開始大獎賽 enabled, setup shown, no hint', s.dom.menuGp.setup && !s.dom.menuGp.startDisabled && !s.dom.menuGp.hint && !s.dom.menuGp.session, s.dom.menuGp);
+  check('menu: the start panel (大獎賽) with 開始 enabled, no session; the 大獎賽 tab offers 在目前賽道開大獎賽…', s.dom.menuGp.setup && !s.dom.menuGp.startDisabled && s.dom.menuGp.open && !s.dom.menuGp.session, s.dom.menuGp);
   await w.shot('menu-before-start', true);
   from = w.log.length;
   const gpFrom = from, sid0 = s.gp.sid;                                  // log index where this Grand Prix begins
-  if (cfg.startWith === 'enter') { await w.tap('Enter'); check('Enter pressed in the 正賽圈數 field (it still has the focus) instead of a click on 開始大獎賽', true); }
-  else check('開始大獎賽 clicked', await w.click('#gp-start'));
+  if (cfg.startWith === 'enter') { await w.tap('Enter'); check('Enter pressed in the 正賽圈數 field (it still has the focus) instead of a click on 開始', true); }
+  else check('開始 (重新開始) clicked', await w.click('#setup-go'));
   check('-> qualifying, out of the menu, frames asked for again', await w.until(`F1.game.gp.phase === 'quali' && F1.game.running && __e.queued() === 1 && !__e.shown('menu')`, 3000, 'quali'));
   await w.sync();
   s = await w.snap();
@@ -324,7 +333,7 @@ async function scenario(w, cfg, rep) {
   check('quali: taking part, not locked, offline, target ' + Q + ' laps', s.gp.taking && !s.gp.locked && !s.gp.online && s.gp.canControl && s.gp.lap === 0 && s.gp.lapTotal === Q, s.gp);
   check('quali: car on the start position, standing; lap counter reset', s.car.i === N - 10 && Math.abs(s.car.d) < 0.01 && s.car.v === 0 && !s.lap.started && s.lap.n === 0 && s.lap.last === null, { car: s.car, lap: s.lap });
   // (v6: the stored object is {q, r, wear}; nothing here touches the 輪胎損耗 buttons: a fresh profile's x1)
-  check('Q / R remembered in localStorage (v6: with the tyre wear x1 of a fresh profile)', (await w.js(`localStorage.getItem('f1drive.gp')`)) === J({ q: Q, r: R, wear: 1 }), await w.js(`localStorage.getItem('f1drive.gp')`));
+  check('Q / R remembered in localStorage (v6: with the tyre wear x1 of a fresh profile; v7.2: and the mode)', (await w.js(`localStorage.getItem('f1drive.gp')`)) === J({ q: Q, r: R, wear: 1, mode: 'gp' }), await w.js(`localStorage.getItem('f1drive.gp')`));
   // v6: the session carries the season and the tyre wear; the window drives the reference car (F1.REF_SPEC, 2025: picked
   // before the game booted, see the header)
   check('quali: v6 session config: season ' + meta.year + ' (the car\'s: the 2025 standard car = F1.REF_SPEC), tyre wear x1 (the tyres wear at the normal rate)',
@@ -733,7 +742,7 @@ async function endAgain(w, ctx, rep, res, cfg) {
   check('-> free practice', await w.until(`F1.game.gp.phase === 'free'`, 3000, 'end'));
   s = await checkFree(w, from, '結束大獎賽', 'quali');
   mg = s.dom.menuGp;
-  check('結束大獎賽: the menu stays open with the setup back (開始大獎賽 enabled, Q / R still ' + Q + ' / ' + R + '), toast visible over the menu', !s.running && s.dom.menu && mg.setup && !mg.startDisabled && !mg.session && mg.q === String(Q) && mg.r === String(R) && s.dom.toast, mg);
+  check('結束大獎賽: the menu stays open (the cards), the 大獎賽 tab offers 在目前賽道開大獎賽… again, Q / R still ' + Q + ' / ' + R + ', toast visible over the menu', !s.running && s.dom.menu && !mg.setup && mg.open && !mg.session && mg.q === String(Q) && mg.r === String(R) && s.dom.toast, mg);
   await w.shot('menu-after-end', true);
   check('Esc resumes', await w.esc(false));
   await checkFreeHud(w, 'free practice');
@@ -988,6 +997,9 @@ async function endQuit(w, ctx, rep, res, cfg) {
   from = w.log.length;
   const idx = await w.js(`F1_TRACKS.findIndex(function (t) { return t.id === ${J(cfg.quitTo)}; })`);
   check('another track\'s card clicked in the middle of the race (real mouse click)', await w.click(`#track-grid .card[data-i="${idx}"]`));
+  check('v7.2: its start panel warns 大獎賽進行中：開始新的賽事會結束目前的大獎賽。 (the race still on); 自由練習, 開始', await w.until(`F1.game.setup.show === 'setup' && F1.game.setup.trackId === ${J(cfg.quitTo)}`, 2000, 'panel') &&
+    await w.js(`__e.shown('setup-note') && document.getElementById('setup-note').textContent === '大獎賽進行中：開始新的賽事會結束目前的大獎賽。' && F1.game.gp.phase === 'race'`) &&
+    await w.click('#setup-mode [data-m="free"]') && await w.click('#setup-go'));
   check('the other track loads and runs', await w.until(`F1.game.trackData.id === ${J(cfg.quitTo)} && F1.game.running && __e.queued() === 1`, 30000, 'track switch'));
   s = await checkFree(w, from, 'quit to another track', 'race');
   check('quit: exactly one phase event (race -> free: no results phase on the way out)', w.evs('phase', from).length === 1, w.evs('phase', from).map(p => p.prev + '>' + p.phase));
@@ -1002,9 +1014,11 @@ async function endQuit(w, ctx, rep, res, cfg) {
   // and a new Grand Prix starts cleanly there
   check('Esc -> menu', await w.esc(true));
   s = await w.snap();
-  check('menu on the new track: setup shown, 開始大獎賽 enabled', s.dom.menuGp.setup && !s.dom.menuGp.startDisabled && !s.dom.menuGp.session, s.dom.menuGp);
+  check('menu on the new track: the 大獎賽 tab offers 在目前賽道開大獎賽…, no session', !s.dom.menuGp.setup && s.dom.menuGp.open && !s.dom.menuGp.session, s.dom.menuGp);
+  check('在目前賽道開大獎賽… clicked: the start panel of the new track, 大獎賽, 開始 enabled', await w.click('#gp-open') &&
+    await w.until(`F1.game.setup.show === 'setup' && F1.game.setup.trackId === ${J(cfg.quitTo)} && F1.game.setup.mode === 'gp' && !document.getElementById('setup-go').disabled`, 2000, 'panel'));
   from = w.log.length;
-  check('開始大獎賽 clicked', await w.click('#gp-start'));
+  check('開始 clicked', await w.click('#setup-go'));
   check('-> qualifying on the new track', await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000, 'quali'));
   await w.sync();
   await w.frames(2);

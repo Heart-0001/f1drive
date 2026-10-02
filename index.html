@@ -130,15 +130,16 @@
   #tab-mp-dot { background: var(--good); }
   .mp-field { display: flex; gap: 8px; align-items: center; }
   .mp-field + .mp-field { margin-top: 8px; }
-  #mp-panel input[type=text], #mp-panel input[type=number], #mp-panel input[type=password], #mp-panel select {
+  #mp-panel input[type=text], #mp-panel input[type=number], #mp-panel input[type=password], #mp-panel select,
+  #setup input[type=number], #setup select {
     flex: 1 1 auto; min-width: 0; height: 34px; padding: 0 10px;
     font: 14px var(--ui-font); color: var(--text);
     background: var(--panel); border: 1px solid var(--line); border-radius: 6px; outline: none;
     -webkit-user-select: text; user-select: text;
   }
-  #mp-panel input:focus, #mp-panel select:focus { border-color: var(--accent-2); }
+  #mp-panel input:focus, #mp-panel select:focus, #setup input:focus, #setup select:focus { border-color: var(--accent-2); }
   #mp-panel input::placeholder { color: #626c7a; }
-  #mp-panel input:disabled, #mp-panel select:disabled { opacity: .5; }
+  #mp-panel input:disabled, #mp-panel select:disabled, #setup input:disabled, #setup select:disabled { opacity: .5; }
   #mp-panel #mp-port { flex: 0 0 96px; font-variant-numeric: tabular-nums; }
   .mp-btn {
     flex: none; height: 34px; padding: 0 14px; cursor: pointer; white-space: nowrap;
@@ -248,7 +249,7 @@
   }
   #gp-car-change:hover { color: #fff; border-color: #5b6575; }
   .gp-laps label, .gp-wear-row label { flex: none; font-size: 13px; color: var(--muted); }
-  #mp-panel .gp-laps input {
+  #setup .gp-laps input {
     flex: 1 1 0; padding: 0 4px; text-align: center;
     font: 600 15px var(--num-font); font-variant-numeric: tabular-nums;
   }
@@ -274,8 +275,8 @@
   /* v7: the computer drivers (電腦車手: how many, how strong; the field in free practice) */
   #gp-bots-box { margin: 10px 0 12px; padding-top: 10px; border-top: 1px solid var(--line); }
   .gp-bots-row label, .gp-skill-row label { flex: none; width: 56px; font-size: 13px; color: var(--muted); }
-  #mp-panel #gp-bots { flex: 0 0 96px; cursor: pointer; font: 600 15px var(--num-font); font-variant-numeric: tabular-nums; }
-  #mp-panel #gp-bots option { font: 14px var(--ui-font); background: var(--panel); color: var(--text); }
+  #setup #gp-bots { flex: 0 0 96px; cursor: pointer; font: 600 15px var(--num-font); font-variant-numeric: tabular-nums; }
+  #setup #gp-bots option { font: 14px var(--ui-font); background: var(--panel); color: var(--text); }
   #gp-skill button { font-family: var(--ui-font); font-size: 13px; }
   #gp-skill button:disabled { cursor: default; opacity: .55; }
   #gp-skill button:disabled:hover { color: #c9d1db; background: var(--panel); }
@@ -294,7 +295,6 @@
   .car-drv b { margin-right: 5px; font-weight: 600; }
   .car-drv em { font-style: normal; font-weight: 600; color: #fff; }
   .car-drv i { margin-left: 3px; padding: 0 3px; font: 700 9.5px/13px var(--num-font); font-style: normal; color: #0b0d10; background: #aab3bf; border-radius: 2px; }
-  #gp-start { width: 100%; margin-top: 12px; }
   #gp-state {
     display: flex; align-items: baseline; gap: 10px; padding: 7px 12px;
     background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent-2); border-radius: 6px;
@@ -385,6 +385,174 @@
   .card-meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; font-size: 12.5px; color: var(--muted); }
   .card-meta b { font: 600 12.5px var(--num-font); color: #c9d1db; white-space: nowrap; font-variant-numeric: tabular-nums; }
   #track-empty { padding: 60px 0; text-align: center; color: var(--muted); }
+  /* v7.2: the loaded track's card (alone; not in a room host's picker, where it would read as the room's) */
+  .card.current { border-color: #245c40; }
+  .card.current::after {
+    content: "目前賽道"; position: absolute; top: 8px; right: 8px; padding: 0 7px; font-size: 11.5px; font-weight: 600; line-height: 20px;
+    color: #9fe8c0; background: rgba(11,13,16,.85); border: 1px solid #245c40; border-radius: 4px;
+  }
+  #menu.picker .card.current { border-color: var(--line); }
+  #menu.picker .card.current::after { display: none; }
+
+  /* ---------- v7.2: the start panel (single player) / the room lobby (#setup), the host's track picker ---------- */
+  /* the left area shows one of three views: the cards (+ search), #setup (#menu.setup-open), the cards as the host's
+     picker (#menu.picker, banner #track-lock). The side panel stays where it is. */
+  .menu-tools { flex-wrap: wrap; row-gap: 8px; }
+  #menu.setup-open #track-search, #menu.setup-open #track-count, #menu.setup-open #track-grid,
+  #menu.setup-open #track-empty, #menu.setup-open #track-lock { display: none !important; }
+  #menu.room-view.setup-open #menu-resume { display: none !important; }   /* (the lobby's own 繼續駕駛, #setup-resume) */
+  #setup-back {
+    flex: none; height: 38px; padding: 0 16px 0 12px; cursor: pointer; white-space: nowrap;
+    font: 600 14px var(--ui-font); color: #dfe5ec; background: var(--panel-2); border: 1px solid #3a4250; border-radius: 6px;
+  }
+  #setup-back:hover { color: #fff; border-color: #5b6575; }
+  #setup-title { flex: none; margin: 0; font-size: 19px; font-weight: 700; letter-spacing: .08em; white-space: nowrap; }
+  #setup-room { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  #setup-addr { min-width: 0; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+  #setup-addr b { font: 600 14px var(--num-font); letter-spacing: .02em; color: var(--text); -webkit-user-select: text; user-select: text; }
+  #setup-leave { margin-left: auto; }
+  .mini-btn {
+    flex: none; height: 26px; padding: 0 10px; cursor: pointer; white-space: nowrap; font: 600 12.5px var(--ui-font); color: #c9d1db;
+    background: var(--panel-2); border: 1px solid #3a4250; border-radius: 5px;
+  }
+  .mini-btn:hover { color: #fff; border-color: #5b6575; }
+
+  #setup { max-width: 1180px; padding-top: 2px; }
+  #setup-state {
+    margin: 0 0 14px; padding: 9px 14px; font-size: 14px; font-weight: 600; letter-spacing: .04em;
+    background: var(--panel-2); border: 1px solid var(--line); border-left: 3px solid var(--good); border-radius: 6px;
+  }
+  .setup-grid {
+    display: grid; grid-template-columns: minmax(280px, 400px) minmax(420px, 640px); gap: 20px; align-items: stretch;
+  }
+  .setup-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .setup-card {
+    min-width: 0; padding: 14px 16px; font-size: 13.5px; line-height: 1.5;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  }
+  .setup-card h3 { margin: 0 0 10px; font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .1em; }
+  #setup-opts-note { margin-left: 10px; padding: 0 6px; font-size: 11px; font-weight: 400; letter-spacing: .02em; border: 1px solid var(--line); border-radius: 4px; }
+  .setup-row + .setup-row, .setup-row + .mp-note + #setup-gp, #setup-gp .mp-field + .mp-field { margin-top: 10px; }
+  #setup-gp { margin-top: 10px; }
+  .setup-row > label, #setup .gp-bots-row label, #setup .gp-skill-row label { flex: none; width: 64px; font-size: 13px; color: var(--muted); }
+  #setup .gp-laps label { flex: none; }
+  #setup .seg button { height: 34px; font-family: var(--ui-font); }
+  #setup .seg button:disabled { cursor: default; opacity: .55; }
+  #setup .seg button:disabled:hover { color: #c9d1db; background: var(--panel); }
+  #setup .seg button.on:disabled:hover { color: #fff; background: var(--accent); }
+  #setup-mode-note { margin: 5px 0 0 72px; }
+  #setup-tyre button.on[data-c="S"] { background: #c8231b; border-color: #c8231b; }
+  #setup-tyre button.on[data-c="M"] { color: #1a1206; background: #f0c419; border-color: #f0c419; }
+  #setup-tyre button.on[data-c="H"] { color: #12151a; background: #e9edf2; border-color: #e9edf2; }
+  #setup #gp-bots-box { margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+  #setup-car { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #setup-car .mp-dot { display: inline-block; margin-right: 7px; vertical-align: -1px; border-radius: 2px; transform: skewX(-12deg); }
+  #setup-year { flex: 0 0 120px !important; cursor: pointer; font: 600 15px var(--num-font) !important; }
+  #setup-year option { font: 14px var(--ui-font); background: var(--panel); color: var(--text); }
+  .setup-warn {
+    margin: 10px 0 0; padding: 7px 12px; font-size: 13px; color: #ffd98a;
+    background: rgba(255,184,28,.08); border: 1px solid rgba(255,184,28,.3); border-radius: 6px;
+  }
+  /* the track: a card with its outline (single player), a row of the room's settings (room) */
+  #setup-track { display: flex; flex-direction: column; gap: 6px; }
+  #setup-track-map svg { display: block; width: 100%; height: 170px; padding: 8px; }
+  #setup-track-map svg path { fill: none; stroke: #dfe5ec; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  #setup-track-map svg circle { fill: var(--accent-2); }
+  .st-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .st-label { display: none; flex: none; width: 64px; font-size: 13px; color: var(--muted); }
+  .st-names { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+  #setup-track-name { font-size: 19px; font-weight: 700; line-height: 1.3; letter-spacing: .02em; overflow-wrap: anywhere; }
+  #setup-track-en { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #setup-track-meta { font-size: 13px; color: var(--muted); }
+  #setup-current {
+    flex: none; padding: 0 8px; font-size: 12px; font-weight: 600; line-height: 22px; color: #9fe8c0;
+    border: 1px solid #245c40; border-radius: 4px;
+  }
+  #setup.room #setup-track { flex-direction: row; align-items: center; gap: 10px; margin-bottom: 10px; padding: 0 0 10px; background: none; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+  #setup.room #setup-track-map { flex: none; width: 64px; }
+  #setup.room #setup-track-map svg { height: 44px; padding: 2px; }
+  #setup.room .st-body { flex: 1 1 auto; min-width: 0; }
+  #setup.room .st-label { display: block; }
+  #setup.room #setup-track-name { font-size: 15px; }
+  #setup.room #setup-track-meta { display: none; }
+  #setup.room #setup-track-en { font-size: 11.5px; }
+  #setup.room #setup-year-row { margin: 0 0 10px; }
+  #setup.room .setup-row > label, #setup.room .gp-bots-row label, #setup.room .gp-skill-row label { width: 64px; }
+  /* the players (room) */
+  #setup-players { margin: 0; padding: 0; list-style: none; max-height: 274px; overflow-y: auto; }
+  .lobby-row { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 6px; border-radius: 5px; }
+  .lobby-row.self { background: rgba(255,255,255,.07); }
+  .lobby-row .mp-pname { flex: 0 1 auto; font-weight: 600; }
+  .lobby-car {
+    flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 6px; overflow: hidden; white-space: nowrap;
+    font-size: 12px; color: var(--muted);
+  }
+  .lobby-car i { flex: none; width: 9px; height: 12px; border-radius: 2px; transform: skewX(-12deg); border: 1px solid rgba(255,255,255,.25); }
+  .lobby-car span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .lobby-st { flex: none; font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .lobby-st[data-state="ready"], .lobby-st[data-state="load-done"] { color: var(--good); }
+  .lobby-st[data-state="wait"], .lobby-st[data-state="load-wait"] { color: #ffd98a; }
+  .lobby-st[data-state="load-fail"] { color: #ffb4ae; }
+  #setup-bots-line { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 12.5px; color: #c9d1db; }
+  #setup-bots-line .gp-bots-names { display: flex; flex-wrap: wrap; gap: 3px 10px; margin-top: 4px; font-size: 12px; }
+  #setup.room #gp-bots-list { display: none !important; }   /* (the players card lists the field) */
+  /* the action block: always on screen (sticky to the bottom of the left area) */
+  #setup-foot { position: sticky; bottom: 0; z-index: 1; margin-top: auto; padding: 12px 0 6px; }
+  /* (an opaque backing only while the panel scrolls under it: ui.js sets #setup.scrolls) */
+  #setup.scrolls #setup-foot { background: linear-gradient(rgba(12,14,18,0), #0c0e12 12px); }
+  #setup-go {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 56px; padding: 0 16px;
+    cursor: pointer; color: #fff; background: var(--accent); border: 0; border-radius: 8px;
+  }
+  #setup-go:hover { background: var(--accent-2); }
+  #setup-go:focus { outline: none; box-shadow: 0 0 0 2px #0c0e12, 0 0 0 4px rgba(255,255,255,.8); }
+  #setup-go:disabled { cursor: default; color: #a3a9b1; background: #33262a; box-shadow: none; }
+  #setup-go-label { font: 700 20px/1.15 var(--ui-font); letter-spacing: .3em; text-indent: .3em; }
+  #setup-go-sub { max-width: 100%; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; opacity: .92; }
+  #setup-ready {
+    display: block; width: 100%; height: 56px; padding: 0 16px; cursor: pointer;
+    font: 700 19px var(--ui-font); letter-spacing: .2em; color: #fff; background: var(--panel-2); border: 2px solid #5b6575; border-radius: 8px;
+  }
+  #setup-ready:hover { border-color: #8b95a3; }
+  #setup-ready:focus { outline: none; box-shadow: 0 0 0 2px #0c0e12, 0 0 0 4px rgba(255,255,255,.8); }
+  #setup-ready[aria-pressed="true"] { font-size: 16px; letter-spacing: .06em; color: #0b0d10; background: var(--good); border-color: var(--good); }
+  #setup-ready:disabled { cursor: default; opacity: .5; }
+  .setup-sess { display: flex; gap: 10px; }
+  .setup-sess .mp-btn { flex: 1 1 0; height: 44px; font-size: 15px; }
+  .setup-sess .mp-btn:focus { outline: none; box-shadow: 0 0 0 2px #0c0e12, 0 0 0 4px rgba(255,255,255,.8); }
+  #setup-status { margin: 7px 0 0; font-size: 12.5px; color: #c9d1db; text-align: center; }
+  #setup-force { display: block; width: 100%; margin-top: 8px; }
+  #setup-confirm { padding: 10px 12px; background: var(--panel-2); border: 1px solid #6b5a26; border-left: 3px solid var(--pit); border-radius: 8px; }
+  #setup-confirm p { margin: 0 0 8px; font-size: 13.5px; line-height: 1.5; }
+  #setup-confirm .mp-btn { flex: 1 1 0; }
+  #setup-hint { margin: 6px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
+  /* 大獎賽 tab: 在目前賽道開大獎賽… (single player), the confirmation of 結束大獎賽 in a room */
+  #gp-open { width: 100%; margin-top: 10px; }
+  #gp-confirm { margin-top: 10px; padding: 9px 11px; background: var(--panel-2); border: 1px solid #6b5a26; border-left: 3px solid var(--pit); border-radius: 6px; }
+  #gp-confirm p { margin: 0 0 8px; }
+  #gp-confirm .mp-btn { flex: 1 1 0; }
+
+  /* a room's loading screen: over the menu (dimmed, not usable meanwhile); the plain #loading note may sit on top */
+  #room-loading {
+    position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 16px;
+    background: rgba(5,6,8,.62);
+  }
+  .rl-box {
+    width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); display: flex; flex-direction: column;
+    padding: 16px 20px 14px; background: rgba(20,23,28,.98); border: 1px solid #3a4250; border-top: 3px solid var(--accent-2);
+    border-radius: 8px; box-shadow: 0 10px 34px rgba(0,0,0,.65);
+  }
+  #room-loading-title { font-size: 17px; font-weight: 700; letter-spacing: .08em; }
+  #room-loading-sub { margin-top: 3px; font-size: 13px; color: var(--muted); }
+  #room-loading-list { flex: 0 1 auto; min-height: 0; max-height: 50vh; overflow-y: auto; margin: 12px 0 0; padding: 0; list-style: none; font-size: 13.5px; }
+  .rl-row { display: flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 6px; border-radius: 4px; }
+  .rl-row.self { background: rgba(255,255,255,.07); }
+  .rl-st { flex: none; margin-left: auto; font-size: 12.5px; font-weight: 600; color: #ffd98a; }
+  .rl-row[data-state="done"] .rl-st { color: var(--good); }
+  .rl-row[data-state="fail"] .rl-st { color: #ffb4ae; }
+  #room-loading-left { margin: 10px 0 0; font-size: 13px; color: #c9d1db; font-variant-numeric: tabular-nums; }
+  .rl-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .rl-acts .mp-btn { flex: 1 1 auto; }
 
   /* ---------- HUD ---------- */
   #hud {
@@ -528,7 +696,7 @@
   /* toast: a layer of its own above the HUD and the menu (not a child of #hud, which is hidden while the menu
      is open): top of the screen while driving, bottom of the menu */
   #hud-toast {
-    position: fixed; z-index: 20; top: 18px; left: 50%; transform: translateX(-50%);
+    position: fixed; z-index: 35; top: 18px; left: 50%; transform: translateX(-50%);
     /* between the two mirrors (12 px clear of each), at least 240 px wide */
     max-width: max(240px, min(60vw, calc(100vw - 2 * (var(--mir-side) + var(--mir-ow)) - 24px)));
     padding: 8px 18px; font-size: 14px; text-align: center; border-left: 3px solid var(--accent-2);
@@ -540,6 +708,9 @@
     background: rgba(32,37,46,.97); border-color: #4a5361; border-left-color: var(--accent-2);
     box-shadow: 0 8px 28px rgba(0,0,0,.6);
   }
+  /* v7.2: with the start panel / lobby open the bottom holds its 開始 / 準備 block: the toast goes to the top then
+     (over the title row, for its few seconds), clear of it; above a room's loading screen too (z-index 35) */
+  #menu.setup-open:not(.hidden) ~ #hud-toast { top: 14px; bottom: auto; }
   /* a track being built (ui.setLoading; the page stops for a moment): over the menu and the HUD */
   #loading {
     position: fixed; z-index: 30; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: calc(100vw - 32px);
@@ -649,8 +820,30 @@
     #hud-menu-btn { margin: 0; padding: 4px 12px; }
     #gp-results { top: calc(274px + var(--mir-oh)); max-height: min(calc(100vh - 286px - var(--mir-oh)), max(calc(100vh - var(--tel-top) - 282px - var(--mir-oh)), 250px)); }
   }
+  /* v7.2: the left area under 720 px of content (the window under 1144 px): the start panel / lobby in one column,
+     in this order: the track (room: the settings, with the track), the settings, the players, your own settings; the
+     action block last, sticky to the bottom */
+  @media (max-width: 1143px) {
+    .setup-grid { display: flex; flex-direction: column; gap: 14px; max-width: 680px; }
+    .setup-col { display: contents; }
+    #setup-track { order: 1; }
+    #setup-opts { order: 2; }
+    #setup-people { order: 3; }
+    #setup-own { order: 4; }
+    #setup-foot { order: 5; }
+    #setup:not(.room) #setup-track { flex-direction: row; align-items: center; gap: 14px; }
+    #setup:not(.room) #setup-track-map { flex: none; width: 150px; }
+    #setup:not(.room) #setup-track-map svg { height: 100px; }
+    #setup:not(.room) .st-body { flex: 1 1 auto; min-width: 0; }
+  }
   @media (max-width: 720px) {
     .menu-head, .menu-tools { padding-left: 16px; padding-right: 16px; }
+    /* the start panel / lobby / picker first, the side panel after it */
+    #menu.setup-open .menu-body, #menu.picker .menu-body { order: -2; }
+    #setup-mode-note { margin-left: 0; }
+    .setup-row { flex-wrap: wrap; }
+    .setup-card { padding: 12px; }
+    #setup.scrolls #setup-foot { background: linear-gradient(rgba(12,14,18,0), #0c0e12 10px); }
     .hints { max-width: 100%; overflow-x: auto; }
     .keymap { font-size: 11px; }
     .keymap thead th { font-size: 10.5px; }
@@ -729,6 +922,7 @@
     <div class="res-actions">
       <span id="gp-results-note"></span>
       <button id="gp-res-again" type="button" class="mp-btn primary" tabindex="-1">再來一場</button>
+      <button id="gp-res-lobby" type="button" class="mp-btn hidden" tabindex="-1">回到大廳</button>
       <button id="gp-res-end" type="button" class="mp-btn" tabindex="-1">結束</button>
       <button id="gp-close" type="button" class="mp-btn" tabindex="-1">關閉</button>
     </div>
@@ -748,7 +942,7 @@
       <div class="brand-mark"></div>
       <div>
         <h1>F1 <span>DRIVE</span></h1>
-        <p>第一人稱賽道駕駛 ‧ 選擇賽道開始</p>
+        <p>第一人稱賽道駕駛 ‧ 選賽道、按開始</p>
         <p class="credits" id="credits" role="button" tabindex="-1">地圖資料 © OpenStreetMap contributors ‧ 賽季資料 © F1DB（CC BY 4.0，經修改）</p>
       </div>
     </div>
@@ -765,6 +959,15 @@
     </div>
   </div>
   <div class="menu-tools">
+    <!-- v7.2: the start panel's / the host's track picker's way back; the room lobby's title and address -->
+    <button id="setup-back" type="button" class="hidden">← 選擇其他賽道</button>
+    <h2 id="setup-title" class="hidden">房間大廳</h2>
+    <div id="setup-room" class="hidden">
+      <span id="setup-addr"></span>
+      <button id="setup-copy" type="button" class="mini-btn">複製</button>
+      <span id="setup-pw" class="mp-tag hidden">有密碼</span>
+      <button id="setup-leave" type="button" class="mp-btn">離開房間</button>
+    </div>
     <input id="track-search" type="search" placeholder="搜尋賽道或地點…" autocomplete="off" spellcheck="false">
     <span id="track-count"></span>
     <button id="menu-resume" type="button" class="hidden">繼續駕駛</button>
@@ -774,6 +977,113 @@
       <div id="track-lock" class="hidden"></div>
       <div id="track-grid"></div>
       <div id="track-empty" class="hidden">找不到符合的賽道</div>
+      <!-- v7.2: the start panel (single player: a card click opens it, 開始 drives) and the room lobby (房間大廳) -->
+      <section id="setup" class="hidden" aria-label="出發面板">
+        <div id="setup-state" class="hidden"></div>
+        <div class="setup-grid">
+          <div id="setup-col-a" class="setup-col">
+            <div id="setup-track" class="setup-card">
+              <div id="setup-track-map"></div>
+              <div class="st-body">
+                <div class="st-head">
+                  <span class="st-label">賽道</span>
+                  <div class="st-names"><b id="setup-track-name"></b><span id="setup-track-en" lang="en"></span></div>
+                  <span id="setup-current" class="hidden">目前賽道</span>
+                  <button id="setup-track-btn" type="button" class="mp-btn hidden">換賽道</button>
+                </div>
+                <div id="setup-track-meta"></div>
+                <p id="setup-track-missing" class="setup-warn hidden"></p>
+              </div>
+            </div>
+            <div id="setup-people" class="setup-card hidden">
+              <h3 id="setup-players-title">玩家</h3>
+              <ul id="setup-players"></ul>
+              <div id="setup-bots-line" class="hidden"></div>
+            </div>
+            <div id="setup-own" class="setup-card">
+              <h3 id="setup-own-title" class="hidden">你的設定</h3>
+              <div class="mp-field setup-row">
+                <label>你的車</label>
+                <span id="setup-car"></span>
+                <button id="setup-car-change" type="button" class="mini-btn">換車</button>
+              </div>
+              <div id="setup-year-row" class="mp-field setup-row">
+                <label for="setup-year">賽季</label>
+                <select id="setup-year"></select>
+              </div>
+              <div id="setup-tyre-row" class="mp-field setup-row">
+                <label id="setup-tyre-label">起跑輪胎</label>
+                <div id="setup-tyre" class="seg" role="radiogroup" aria-labelledby="setup-tyre-label">
+                  <button type="button" role="radio" data-c="S">軟</button><button type="button" role="radio" data-c="M">中</button><button type="button" role="radio" data-c="H">硬</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="setup-col-b" class="setup-col">
+            <div id="setup-opts" class="setup-card">
+              <h3 id="setup-opts-title" class="hidden">房間設定<span id="setup-opts-note" class="hidden">由房主設定</span></h3>
+              <div id="setup-room-rows"></div>
+              <div class="mp-field setup-row">
+                <label id="setup-mode-label">模式</label>
+                <div id="setup-mode" class="seg" role="radiogroup" aria-labelledby="setup-mode-label">
+                  <button type="button" role="radio" data-m="free">自由練習</button><button type="button" role="radio" data-m="gp">大獎賽</button>
+                </div>
+              </div>
+              <p id="setup-mode-note" class="mp-note"></p>
+              <div id="setup-gp">
+                <div class="mp-field gp-laps">
+                  <label for="gp-q">排位圈數</label>
+                  <input id="gp-q" type="number" min="1" max="20" step="1" value="3" inputmode="numeric" autocomplete="off">
+                  <label for="gp-r">正賽圈數</label>
+                  <input id="gp-r" type="number" min="1" max="99" step="1" value="5" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="mp-field gp-wear-row">
+                  <label>輪胎損耗</label>
+                  <div id="gp-wear" class="seg" role="radiogroup" aria-label="輪胎損耗倍率">
+                    <button type="button" role="radio" data-w="1">×1</button><button type="button" role="radio" data-w="2">×2</button><button type="button" role="radio" data-w="3">×3</button><button type="button" role="radio" data-w="4">×4</button><button type="button" role="radio" data-w="5">×5</button>
+                  </div>
+                </div>
+                <p id="gp-wear-note" class="mp-note">倍率只套用在正賽，排位賽的輪胎照正常損耗。</p>
+              </div>
+              <div id="gp-bots-box" class="hidden">
+                <div class="mp-field gp-bots-row">
+                  <label for="gp-bots">電腦車手</label>
+                  <select id="gp-bots" aria-label="電腦車手人數"><option value="0">無</option></select>
+                </div>
+                <div class="mp-field gp-skill-row">
+                  <label id="gp-skill-label">強度</label>
+                  <div id="gp-skill" class="seg" role="radiogroup" aria-labelledby="gp-skill-label">
+                    <button type="button" role="radio" data-s="rookie" title="新手：每圈慢約 8%，偶爾失誤">新手</button><button type="button" role="radio" data-s="amateur" title="業餘：每圈慢約 5%">業餘</button><button type="button" role="radio" data-s="pro" title="職業：每圈慢約 2.5%">職業</button><button type="button" role="radio" data-s="legend" title="傳奇：每圈慢約 1%，幾乎不失誤">傳奇</button><button type="button" role="radio" data-s="mixed" title="混合：每位電腦車手的強度隨機">混合</button>
+                  </div>
+                </div>
+                <p id="gp-bots-note" class="mp-note hidden"></p>
+                <div id="gp-bots-list" class="hidden"></div>
+              </div>
+              <p id="setup-note" class="setup-warn hidden"></p>
+            </div>
+            <div id="setup-foot">
+              <div id="setup-acts">
+                <button id="setup-go" type="button"><span id="setup-go-label">開始</span><span id="setup-go-sub"></span></button>
+                <button id="setup-ready" type="button" aria-pressed="false" class="hidden">準備</button>
+                <div class="setup-sess">
+                  <button id="setup-resume" type="button" class="mp-btn primary hidden">繼續駕駛</button>
+                  <button id="setup-lobby" type="button" class="mp-btn hidden">回到大廳</button>
+                </div>
+                <p id="setup-status" class="hidden"></p>
+                <button id="setup-force" type="button" class="mp-btn hidden">不等了，直接開始</button>
+              </div>
+              <div id="setup-confirm" class="hidden" role="alertdialog" aria-labelledby="setup-confirm-text">
+                <p id="setup-confirm-text"></p>
+                <div class="mp-field">
+                  <button id="setup-force-yes" type="button" class="mp-btn primary">仍要開始</button>
+                  <button id="setup-force-no" type="button" class="mp-btn">再等等</button>
+                </div>
+              </div>
+              <p id="setup-hint" class="hidden"></p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
     <aside id="mp-panel">
       <div id="menu-tabs" class="menu-tabs" role="tablist" aria-label="選單分頁">
@@ -808,48 +1118,28 @@
           </div>
         </div>
         <p id="gp-tyre-note" class="mp-note">排位賽和正賽起跑時裝上這組新胎。開車時按 <kbd>T</kbd>（手把 <kbd>X</kbd>）換下一組，進站停在維修格時裝上。</p>
-        <div id="gp-bots-box" class="hidden">
-          <div class="mp-field gp-bots-row">
-            <label for="gp-bots">電腦車手</label>
-            <select id="gp-bots" aria-label="電腦車手人數"><option value="0">無</option></select>
-          </div>
-          <div class="mp-field gp-skill-row">
-            <label id="gp-skill-label">強度</label>
-            <div id="gp-skill" class="seg" role="radiogroup" aria-labelledby="gp-skill-label">
-              <button type="button" role="radio" data-s="rookie" title="新手：每圈慢約 8%，偶爾失誤">新手</button><button type="button" role="radio" data-s="amateur" title="業餘：每圈慢約 5%">業餘</button><button type="button" role="radio" data-s="pro" title="職業：每圈慢約 2.5%">職業</button><button type="button" role="radio" data-s="legend" title="傳奇：每圈慢約 1%，幾乎不失誤">傳奇</button><button type="button" role="radio" data-s="mixed" title="混合：每位電腦車手的強度隨機">混合</button>
-            </div>
-          </div>
-          <p id="gp-bots-note" class="mp-note hidden"></p>
-          <div id="gp-bots-list" class="hidden"></div>
-        </div>
-        <div id="gp-setup">
-          <div class="mp-field gp-laps">
-            <label for="gp-q">排位圈數</label>
-            <input id="gp-q" type="number" min="1" max="20" step="1" value="3" inputmode="numeric" autocomplete="off">
-            <label for="gp-r">正賽圈數</label>
-            <input id="gp-r" type="number" min="1" max="99" step="1" value="5" inputmode="numeric" autocomplete="off">
-          </div>
-          <div class="mp-field gp-wear-row">
-            <label>輪胎損耗</label>
-            <div id="gp-wear" class="seg" role="radiogroup" aria-label="輪胎損耗倍率">
-              <button type="button" role="radio" data-w="1">×1</button><button type="button" role="radio" data-w="2">×2</button><button type="button" role="radio" data-w="3">×3</button><button type="button" role="radio" data-w="4">×4</button><button type="button" role="radio" data-w="5">×5</button>
-            </div>
-          </div>
-          <p id="gp-wear-note" class="mp-note">倍率只套用在正賽，排位賽的輪胎照正常損耗。</p>
-          <button id="gp-start" type="button" class="mp-btn primary" disabled>開始大獎賽</button>
-        </div>
+        <!-- (v7.2: the laps, the tyre wear and the computer drivers are set in the start panel / the room lobby) -->
         <div id="gp-session" class="hidden">
           <div id="gp-state"></div>
           <p id="gp-self" class="mp-note hidden"></p>
           <div id="gp-actions" class="mp-field gp-actions">
             <button id="gp-skip" type="button" class="mp-btn">跳過排位</button>
             <button id="gp-again" type="button" class="mp-btn primary">再來一場</button>
+            <button id="gp-lobby" type="button" class="mp-btn hidden">回到大廳</button>
             <button id="gp-end" type="button" class="mp-btn">結束大獎賽</button>
+          </div>
+          <div id="gp-confirm" class="hidden" role="alertdialog" aria-labelledby="gp-confirm-text">
+            <p id="gp-confirm-text">要結束這場大獎賽並回到房間大廳嗎？</p>
+            <div class="mp-field">
+              <button id="gp-confirm-yes" type="button" class="mp-btn primary">回到大廳</button>
+              <button id="gp-confirm-no" type="button" class="mp-btn">取消</button>
+            </div>
           </div>
           <div id="gp-standings"></div>
           <p id="gp-spec" class="mp-note hidden"></p>
         </div>
         <p id="gp-hint" class="mp-note hidden"></p>
+        <button id="gp-open" type="button" class="mp-btn primary hidden">在目前賽道開大獎賽…</button>
       </section>
 
       <section id="mp-section" class="tab-page hidden" role="tabpanel" aria-labelledby="tab-mp">
@@ -954,6 +1244,21 @@
 
 <!-- after #menu: the CSS moves it to the bottom while the menu is open -->
 <div id="hud-toast" class="hud-box hidden" role="status" aria-live="polite"></div>
+<!-- v7.2: a room's loading screen (everybody builds the track; the session begins when all have loaded, after 20 s at
+     the latest, or when the host does not wait): over the menu, which it dims and keeps from being used meanwhile -->
+<div id="room-loading" class="hidden" role="dialog" aria-modal="true" aria-labelledby="room-loading-title">
+  <div class="rl-box">
+    <b id="room-loading-title">載入賽道中…</b>
+    <div id="room-loading-sub"></div>
+    <ul id="room-loading-list"></ul>
+    <p id="room-loading-left" class="hidden"></p>
+    <div class="rl-acts">
+      <button id="room-loading-go" type="button" class="mp-btn primary hidden">不等了，開始</button>
+      <button id="room-loading-cancel" type="button" class="mp-btn hidden">取消，回到大廳</button>
+      <button id="room-loading-leave" type="button" class="mp-btn">離開房間</button>
+    </div>
+  </div>
+</div>
 <div id="loading" class="hidden" role="status" aria-live="polite"><b id="loading-title">載入賽道中…</b><span id="loading-name"></span></div>
 
 <div id="error" class="hidden">

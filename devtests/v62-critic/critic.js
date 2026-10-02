@@ -346,11 +346,15 @@ async function partSilver() {
   await w.tap('Escape'); await w.until(`!F1.game.running`, 3000, 'menu');
   await w.click('#tab-gp');
   await w.click('#gp-tyre button[data-c="S"]');
-  await w.field('gp-q', '1'); await w.field('gp-r', '1');
-  await w.shot('silver-02-gp-panel');
   const panel = await w.js(`({ tyre: [].map.call(document.querySelectorAll('#gp-tyre button'), function (b) { return b.getAttribute('data-c') + (b.classList.contains('on') ? '*' : ''); }).join(' '), label: __t.text('gp-tyre-label'), next: F1.game.nextCompound })`);
   check('大獎賽 tab: 起跑輪胎 軟 picked with the mouse (main.js next set S)', /S\*/.test(panel.tyre) && panel.next === 'S' && panel.label === '起跑輪胎', panel);
-  check('開始大獎賽 clicked', await w.click('#gp-start'));
+  // (v7.2: the Grand Prix starts from the start panel: the loaded track's card, 大獎賽, Q / R, 重新開始)
+  await w.card('gb-1948'); await w.mode('gp');
+  await w.field('gp-q', '1'); await w.field('gp-r', '1');
+  await w.shot('silver-02-gp-panel');
+  const sp = await w.js(`[].map.call(document.querySelectorAll('#setup-tyre button'), function (b) { return b.getAttribute('data-c') + (b.classList.contains('on') ? '*' : ''); }).join(' ')`);
+  check('the start panel shows the same 起跑輪胎 (軟)', /S\*/.test(sp), sp);
+  check('開始 (大獎賽) clicked', await w.go());
   await w.until(`F1.gp.phase === 'quali'`, 5000, 'qualifying');
   await w.js(`__v.hookRenderer() && __e.hookCar()`);
   await w.frames(5);
@@ -408,7 +412,9 @@ async function partNames() {
   w.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'A', modifiers: ['control'] }); w.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'A', modifiers: ['control'] });
   await w.tap('Backspace'); w.webContents.insertText('鈴鹿'); await sleep(200);
   const i = await w.trackIndex('jp-1962');
-  check('the card found is clicked: Suzuka loads, the timing box says 鈴鹿賽道', await w.click(`#track-grid .card[data-i="${i}"]`) && await w.until(`F1.game.running && F1.game.trackData.id === 'jp-1962'`, 15000, 'suzuka'));
+  check('the card found is clicked: the start panel of 鈴鹿賽道; 開始: Suzuka loads', await w.click(`#track-grid .card[data-i="${i}"]`) &&
+    await w.until(`F1.game.setup.show === 'setup' && F1.game.setup.trackId === 'jp-1962' && /鈴鹿/.test(__t.text('setup-track-name'))`, 2000, 'suzuka panel') &&
+    await w.mode('free') && await w.go() && await w.until(`F1.game.running && F1.game.trackData.id === 'jp-1962'`, 15000, 'suzuka'));
   await sleep(600);
   const hud = await w.js(`__t.text('hud-timing')`);
   check('HUD timing box title 鈴鹿賽道', /鈴鹿賽道/.test(hud), hud);

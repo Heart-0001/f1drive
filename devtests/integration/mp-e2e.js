@@ -87,25 +87,32 @@ app.whenReady().then(async () => {
     await B.js(`document.getElementById('mp-join').click()`);
     check('B connected, not host', await B.until(`F1.net.connected && !F1.net.isHost`, 5000), await B.js(`document.getElementById('mp-status').textContent`));
     await sleep(200);
-    check('B grid locked, waiting for host', await B.js(`document.getElementById('track-grid').classList.contains('locked') && /等待房主選擇賽道/.test(document.getElementById('track-lock').textContent)`));
+    // v7.2: B sees the room lobby (no cards), waiting for the host's track
+    check('B in the lobby: no cards, waiting for the host to pick the track (準備 disabled)', await B.js(`F1.game.setup.show === 'setup' && document.getElementById('track-grid').offsetParent === null &&
+      document.getElementById('setup-status').textContent === '等待房主選擇賽道…' && document.getElementById('setup-ready').disabled && !F1.game.running`));
     await B.js(`document.querySelector('.card').click()`);
     await sleep(200);
-    check('B clicking a card does nothing', await B.js(`!F1.game.track && !F1.game.running`));
+    check('B clicking a (hidden) card does nothing', await B.js(`!F1.game.track && !F1.game.running && F1.net.room.set.track === null`));
     check('rosters agree', JSON.stringify(await A.js(`F1.net.roster.map(function(p){return p.name+p.colour+p.slot+p.isHost})`)) ===
       JSON.stringify(await B.js(`F1.net.roster.map(function(p){return p.name+p.colour+p.slot+p.isHost})`)), await B.js(`F1.net.roster`));
     await B.shot('3-joined-waiting');
 
-    // ---- A picks the track ----
-    const picked = await A.js(`(function(){var c=[].slice.call(document.querySelectorAll('.card')).filter(function(n){return n.textContent.toLowerCase().indexOf(${JSON.stringify(TRACK)})>=0;})[0]; if(!c) return null; c.click(); return c.textContent;})()`);
+    // ---- A picks the track (the lobby's picker: nothing loads), B presses 準備, A 開始: both load (the barrier) ----
+    const picked = await A.js(`(function(){var c=[].slice.call(document.querySelectorAll('#track-grid .card')).filter(function(n){return n.textContent.toLowerCase().indexOf(${JSON.stringify(TRACK)})>=0;})[0]; if(!c) return null; c.click(); return c.textContent;})()`);
     console.log('A picked:', picked);
+    check('the host\'s card sets the room\'s track; B sees it; nobody loads it before 開始', await B.until(`!!F1.net.room.set.track && F1.game.setup.trackId === F1.net.room.set.track`, 3000, 'B sees the track') &&
+      await A.js(`!F1.game.track && !F1.game.running`) && await B.js(`!F1.game.track && !F1.game.running`));
+    await B.js(`document.getElementById('setup-ready').click()`);
+    check('B presses 準備: A\'s 開始 enabled', await A.until(`F1.game.setup.go.enabled`, 3000, 'A go enabled'));
+    await A.js(`document.getElementById('setup-go').click()`);
     const okA = await A.until(`F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id`, 15000, 'A loads track');
     const okB = await B.until(`F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id`, 15000, 'B loads track');
     const ids = [await A.js(`F1.game.trackData && F1.game.trackData.id`), await B.js(`F1.game.trackData && F1.game.trackData.id`)];
     check('both loaded the same track and are driving', okA && okB && ids[0] === ids[1], ids);
-    // the room has a track now: the host is no longer asked to pick one, the guest no longer waits for one
-    const texts = { host: await A.js(`document.getElementById('mp-status').textContent`), guest: await B.js(`document.getElementById('track-lock').textContent`) };
-    check('room texts once the track is picked: host status without "選一條賽道", guest banner without "等待房主選擇賽道"', texts.host === '房間已建立，你是房主。' &&
-      texts.guest === '賽道由房主選擇；房主換賽道時，所有人會一起載入。' && await B.js(`document.getElementById('track-grid').classList.contains('locked')`), texts);
+    // the room has a track now: the host's status says how the lobby works, the guest's lobby no longer waits for a track
+    const texts = { host: await A.js(`document.getElementById('mp-status').textContent`), guest: await B.js(`document.getElementById('mp-status').textContent`), guestLobby: await B.js(`F1.game.setup.ready.status`) };
+    check('room texts once the track is picked: the host status (房間已建立，你是房主。在房間大廳選賽道和設定…), the guest status (已加入房間。選好車就按「準備」。), the guest\'s lobby no longer waits for a track',
+      texts.host === '房間已建立，你是房主。在房間大廳選賽道和設定，大家準備好就按「開始」。' && texts.guest === '已加入房間。選好車就按「準備」。' && !/等待房主選擇賽道/.test(texts.guestLobby), texts);
     await sleep(1200);
     const a0 = await A.js(CAR), b0 = await B.js(CAR);
     console.log('A car', a0, '\nB car', b0);
@@ -192,10 +199,17 @@ app.whenReady().then(async () => {
     await sleep(300);
     check('B resumes with Esc', await B.js(`F1.game.running`));
 
-    // ---- host changes the track: everyone reloads ----
+    // ---- host changes the track (v7.2: 回到大廳, the picker, 開始): everyone reloads ----
     A.key('Escape', true); A.key('Escape', false);
     await sleep(300);
-    const picked2 = await A.js(`(function(){var cur=F1.game.trackData.id, i=F1_TRACKS.findIndex(function(t){return t.id!==cur;}); document.querySelectorAll('.card')[i].click(); return F1_TRACKS[i].id;})()`);
+    await A.js(`document.getElementById('setup-lobby').click()`);
+    check('host: 回到大廳 from the room menu: both in the lobby, off the track', await A.until(`F1.net.room.st === 'lobby' && !F1.game.running`, 3000) && await B.until(`F1.net.room.st === 'lobby' && !F1.game.running`, 3000));
+    const picked2 = await A.js(`(function(){var cur=F1.game.trackData.id, i=F1_TRACKS.findIndex(function(t){return t.id!==cur;}); document.getElementById('setup-track-btn').click(); document.querySelector('#track-grid .card[data-i="' + i + '"]').click(); return F1_TRACKS[i].id;})()`);
+    await B.until(`F1.net.room.set.track === ${JSON.stringify(picked2)}`, 3000, 'B sees the new track');
+    await B.js(`document.getElementById('setup-ready').click()`);
+    await A.until(`F1.game.setup.go.enabled`, 3000, 'A go enabled');
+    await sleep(1100);                                       // (START_MIN_MS after 回到大廳)
+    await A.js(`document.getElementById('setup-go').click()`);
     const sw = await B.until(`F1.game.trackData.id === ${JSON.stringify(picked2)} && F1.game.running`, 15000, 'B follows track change');
     check('track change by host is followed by B', sw && await A.js(`F1.game.trackData.id === ${JSON.stringify(picked2)} && F1.game.running`), picked2);
     await sleep(1000);
@@ -241,8 +255,8 @@ app.whenReady().then(async () => {
     await C.js(`document.getElementById('mp-join').click()`);
     await C.until(`/無法連線|逾時/.test(document.getElementById('mp-status').textContent)`, 10000, 'join failure message');
     check('failed join shows an error and re-enables the buttons', await C.js(`/無法連線|逾時/.test(document.getElementById('mp-status').textContent) && !document.getElementById('mp-join').disabled`), await C.js(`document.getElementById('mp-status').textContent`));
-    // single player in the browser-mode window still works
-    await C.js(`document.querySelector('.card').click()`);
+    // single player in the browser-mode window still works (v7.2: the card's start panel, 開始)
+    await C.js(`document.querySelector('.card').click(); document.getElementById('setup-go').click()`);
     await C.until(`F1.game.running`, 15000, 'single player start');
     C.key('W', true); await sleep(1500); C.key('W', false);
     check('single player unaffected (no room)', await C.js(`F1.game.running && F1.game.car.state.speed > 5 && Math.abs(F1.game.car.state.d) < 0.5 && document.getElementById('hud-players').classList.contains('hidden')`), await C.js(CAR));

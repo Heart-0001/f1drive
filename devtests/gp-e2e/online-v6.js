@@ -171,35 +171,39 @@ async function scenario() {
   check('room slots in join order: A 0, B 1, C 2 (C\'s refused attempt took no slot)', J(ABC.map(w => w.slot)) === '[0,1,2]', ABC.map(w => [w.tag, w.pid, w.slot]));
   check('player list of three on every window', (await all(ABC, w => w.js(`__e2e.text('mp-players-title') + '|' + [].map.call(document.querySelectorAll('#mp-players li .mp-pname'), function (n) { return n.textContent; }).join(',')`)))
     .every(t => t === '玩家（3 / 16）|Alice,Bob,Carol'));
+  // v7.2: the room lobby: the host sets the room up (track, season), everybody picks a car; nobody drives before 開始
   const picked = await A.pick(TRACK);
-  check('A picks ' + picked + ': all three load it, free practice', await waitAll(ABC, onTrack, 25000, 'track') && (await all(ABC, w => w.js(`F1.gp.phase`))).every(p => p === 'free'));
-  await sleep(1200);
-  const pit = await A.js(`(function () { var p = F1.game.track.pit; return { from: p.from, to: p.to, entry: p.entry, exit: p.exit, limit: p.limitKmh, boxes: p.boxes.slice(0, 4).map(function (b) { return { index: b.index, d: +b.d.toFixed(2), x: b.x, z: b.z, heading: b.heading }; }), N: F1.game.track.samples.length, len: F1.game.track.length }; })()`);
-  info('Monaco pit lane: entry line at sample ' + pit.entry + ', exit line ' + pit.exit + ', limit ' + pit.limit + ' km/h, boxes of slots 0 / 1 / 2 at samples ' + pit.boxes.slice(0, 3).map(b => b.index).join(' / '));
+  check('A picks ' + picked + ' in the lobby: the guests see it, nobody loads it yet', await waitAll([B, C], `F1.net.room.set.track === ${J(TRACK)} && F1.game.setup.trackId === ${J(TRACK)}`, 3000, 'room track') &&
+    (await all(ABC, w => w.js(`!F1.game.running && !F1.game.track`))).every(Boolean));
   const season0 = await all(ABC, w => w.js(`({ room: F1.net.year, car: F1.game.spec.id })`));
   check('the room starts in the host\'s season (a fresh install: 2026) with the 2026 standard car everywhere', season0.every(s => s.room === 2026 && s.car === '2026-standard'), season0);
-  await shot(B, '01-room-free-B');
+  await shot(B, '01-room-lobby-B');
 
-  /* ---------------- season and cars (free practice) ---------------- */
+  /* ---------------- season and cars (the lobby) ---------------- */
   setPart('season');
-  check('A opens its menu in free practice', await A.menu());
   const y = await A.pickYear(YEAR);
   const followed = await waitAll(ABC, `F1.net.year === ${YEAR} && F1.game.spec && F1.game.spec.year === ${YEAR}`, 5000, 'year ' + YEAR);
   await sleep(300);
   const sy = await all(ABC, w => w.js(`({ spec: F1.game.spec.id, cockpit: F1.game.spec.cockpit, toasts: __e2e.toasts.map(function (t) { return t[1]; }).filter(function (t) { return /賽季/.test(t); }), running: F1.game.running })`));
-  check('the host picks ' + YEAR + ' (車輛 tab, 年份) in free practice: the room follows; B and C (driving) are told "房間是 ' + YEAR + ' 賽季：你的車換成 ..." and now drive the ' + YEAR + ' standard car (cockpit without a halo)',
-    y === String(YEAR) && followed && sy.every(s => s.spec === YEAR + '-standard' && s.cockpit === 'modern') && sy[1].running && sy[2].running &&
+  check('the host picks ' + YEAR + ' (車輛 tab, 年份) in the lobby: the room follows; B and C are told "房間是 ' + YEAR + ' 賽季：你的車換成 ..." and now have the ' + YEAR + ' standard car (cockpit without a halo); nobody drives',
+    y === String(YEAR) && followed && sy.every(s => s.spec === YEAR + '-standard' && s.cockpit === 'modern' && !s.running) &&
     [1, 2].every(i => sy[i].toasts.length === 1 && /^房間是 2014 賽季：你的車換成 /.test(sy[i].toasts[0])) && sy[0].toasts.length === 0, sy);
   const gl = await B.js(`({ disabled: document.getElementById('car-year').disabled, value: document.getElementById('car-year').value })`);
   check('guest: its 年份 select shows ' + YEAR + ' and is disabled (the host picks the year)', gl.disabled && gl.value === String(YEAR), gl);
   // each picks a team
   check('A picks the 2014 Mercedes (card clicked)', await A.pickCar(TEAM.A));
-  await A.resume();
-  for (const w of [B, C]) { await w.menu(); check(w.tag + ' picks ' + TEAM[w.tag] + ' (card clicked)', await w.pickCar(TEAM[w.tag])); await w.resume(); }
+  for (const w of [B, C]) check(w.tag + ' picks ' + TEAM[w.tag] + ' (card clicked)', await w.pickCar(TEAM[w.tag]));
   await sleep(800);
   const specs = await all(ABC, w => w.js(`({ spec: F1.game.spec.id, profile: F1.net.getProfile().car, roster: F1.net.roster.map(function (r) { return [r.name, r.car]; }) })`));
   const rosterWant = J([['Alice', TEAM.A], ['Bob', TEAM.B], ['Carol', TEAM.C]]);
-  check('everybody drives its team\'s 2014 car; the room roster carries the three cars on every window', ABC.every((w, i) => specs[i].spec === TEAM[w.tag] && specs[i].profile === TEAM[w.tag] && J(specs[i].roster) === rosterWant), specs);
+  check('everybody has its team\'s 2014 car; the room roster carries the three cars on every window', ABC.every((w, i) => specs[i].spec === TEAM[w.tag] && specs[i].profile === TEAM[w.tag] && J(specs[i].roster) === rosterWant), specs);
+  // free practice: 準備, 開始, the loading barrier
+  check('B and C press 準備, A 開始: all three load ' + TRACK + ', free practice after the barrier', await L.roomStart(A, [B, C]) && await waitAll(ABC, onTrack, 25000, 'track') &&
+    (await all(ABC, w => w.js(`F1.gp.phase`))).every(p => p === 'free'));
+  await sleep(1200);
+  const pit = await A.js(`(function () { var p = F1.game.track.pit; return { from: p.from, to: p.to, entry: p.entry, exit: p.exit, limit: p.limitKmh, boxes: p.boxes.slice(0, 4).map(function (b) { return { index: b.index, d: +b.d.toFixed(2), x: b.x, z: b.z, heading: b.heading }; }), N: F1.game.track.samples.length, len: F1.game.track.length }; })()`);
+  info('Monaco pit lane: entry line at sample ' + pit.entry + ', exit line ' + pit.exit + ', limit ' + pit.limit + ' km/h, boxes of slots 0 / 1 / 2 at samples ' + pit.boxes.slice(0, 3).map(b => b.index).join(' / '));
+  await shot(B, '01-room-free-B');
   await sleep(600);
   const liv = await all(ABC, w => w.js(`__v6.liveries()`));
   const livOk = ABC.every((w, i) => ABC.every(o => o === w || (liv[i][o.pid] && liv[i][o.pid].spec === TEAM[o.tag] && liv[i][o.pid].painted1 && liv[i][o.pid].painted2 && liv[i][o.pid].visible)));
@@ -215,15 +219,17 @@ async function scenario() {
     await w.e(`arm({ onPhase: { quali: { mode: 'line', scale: ${QPACE[w.tag]}, holdFor: 16, acc: true, thrCap: 1, park: null } }, onGo: null, ram: null, onHit: null, release: null })`);
     await w.e('start()');
   }
-  check('A opens the menu, 大獎賽 tab', (await A.menu()) && (await A.tab('gp')));
-  check('host sets Q = 1, R = 3, 輪胎損耗 x3', (await A.field('gp-q', '1')) === '1' && (await A.field('gp-r', '3')) === '3' && (await A.clickSel('#gp-wear button[data-w="3"]')) &&
+  // (v7.2: the Grand Prix is set up in the lobby and started with 開始)
+  check('A opens the menu (the room menu), 回到大廳: everybody in the lobby', (await A.menu()) && await L.roomBack(A, ABC));
+  check('host sets 大獎賽, Q = 1, R = 3, 輪胎損耗 x3 (lobby)', await L.roomSet(A, { mode: 'gp', q: 1, r: 3, wear: 3 }) && (await A.js(`document.getElementById('gp-q').value + '/' + document.getElementById('gp-r').value`)) === '1/3' &&
     (await A.js(`document.querySelector('#gp-wear button[data-w="3"]').classList.contains('on')`)));
+  await A.tab('gp');
   const gpCar = await A.js(`__e2e.shown('gp-car') ? __e2e.text('gp-car') : ''`);
   info('大獎賽 tab, car line: ' + gpCar);
   await shot(A, '03-quali-menu-host');
   await all(ALL, w => w.js(`__e2e.fps(); __v6.cost(true); true`));     // (the frame-rate windows start here: not the track load)
+  check('B and C press 準備, the host clicks 開始: all three in qualifying after the barrier', await L.roomStart(A, [B, C], { gp: true }) && await waitAll(ABC, `F1.game.gp.phase === 'quali'`, 4000, 'quali'));
   const tQuali = Date.now();
-  check('host clicks 開始大獎賽: all three in qualifying', (await A.click('gp-start')) && await waitAll(ABC, `F1.game.gp.phase === 'quali'`, 4000, 'quali'));
   await sleep(500);
   const qv = await all(ABC, w => w.js(`({ v: F1.gp.view(), rate: F1.game.tyres.wearRate, comp: F1.game.tyres.state.compound, wear: F1.game.tyres.state.wear.slice(), year: __e2e.text('hud-gp-year'), toast: __e2e.hud().toast,
     chips: [].map.call(document.querySelectorAll('#hud-gp-rows .gp-row'), function (r) { var c = r.querySelector('.gp-chip'); return [r.querySelector('.mp-pname').textContent, c ? c.style.background : null]; }),
@@ -455,15 +461,20 @@ async function scenario() {
 
   /* ---------------- back to free practice ---------------- */
   setPart('free');
-  check('host clicks 結束 in the results overlay: free practice for everybody', (await A.click('gp-res-end')) && await waitAll(ALL, `F1.gp.phase === 'free'`, 4000));
-  await sleep(800);
+  // (v7.2: a room does not fall back to free practice by itself: 回到大廳, then free practice from the lobby)
+  check('host clicks 回到大廳 in the results overlay: everybody in the lobby', (await A.click('gp-res-lobby')) && await waitAll(ALL, `F1.gp.phase === 'free' && F1.net.room.st === 'lobby' && !F1.game.running`, 4000));
+  await sleep(500);
   const fr = await all(ABC, w => w.carUi());
+  check('the lobby: the car pickers are open again (no lock); the year select: enabled for the host, disabled for the guests (房主選)', fr.every(x => !x.locked) && !fr[0].yearDisabled && fr[1].yearDisabled && fr[2].yearDisabled &&
+    !/賽事進行中/.test(fr[1].lock), fr.map(x => ({ locked: x.locked, yearDisabled: x.yearDisabled, lock: x.lock })));
+  check('host: mode 自由練習; the guests press 準備; 開始: free practice for everybody', await L.roomSet(A, { mode: 'free' }) && await L.roomStart(A, ALL.slice(1)) &&
+    await waitAll(ALL, `F1.gp.phase === 'free' && F1.net.room.st === 'session'`, 4000));
+  await sleep(800);
+  const fr1 = await all(ABC, w => w.carUi());
   const fr2 = await all(ABC, w => w.js(`({ year: F1.net.year, roster: F1.net.roster.map(function (r) { return [r.name, r.car]; }), toast: __e2e.hud().toast, results: __e2e.shown('gp-results') })`));
   const rosterWant2 = D ? rosterWant.slice(0, -1) + ',["Dave","2014-standard"]]' : rosterWant;     // (D: the room's season, its default car)
-  check('free practice again: everybody keeps its 2014 team car, the room stays 2014, the roster still carries the cars, overlay gone, toast', ABC.every((w, k) => fr[k].spec === TEAM[w.tag] && fr[k].profile === TEAM[w.tag]) &&
-    fr2.every(x => x.year === YEAR && J(x.roster) === rosterWant2 && !x.results && x.toast === '大獎賽已結束，回到自由練習'), { fr, fr2 });
-  check('the car pickers are open again (no lock); the year select: enabled for the host, disabled for the guests (房主選)', fr.every(x => !x.locked) && !fr[0].yearDisabled && fr[1].yearDisabled && fr[2].yearDisabled &&
-    !/賽事進行中/.test(fr[1].lock), fr.map(x => ({ locked: x.locked, yearDisabled: x.yearDisabled, lock: x.lock })));
+  check('free practice again: everybody keeps its 2014 team car, the room stays 2014, the roster still carries the cars, overlay gone, toast 自由練習開始', ABC.every((w, k) => fr1[k].spec === TEAM[w.tag] && fr1[k].profile === TEAM[w.tag]) &&
+    fr2.every(x => x.year === YEAR && J(x.roster) === rosterWant2 && !x.results && x.toast === '自由練習開始'), { fr1, fr2 });
   const liv2 = await all(ABC, w => w.js(`__v6.liveries()`));
   check('the liveries are still on the remote cars', ABC.every((w, i) => ABC.every(o => o === w || (liv2[i][o.pid] && liv2[i][o.pid].spec === TEAM[o.tag] && liv2[i][o.pid].painted1))), liv2);
   await shot(C, '12-free-again-C');

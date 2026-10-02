@@ -6,7 +6,7 @@ app.whenReady().then(async () => {
   w.webContents.setFrameRate(60);
   await w.loadFile(require('path').resolve(__dirname, '..', '..', 'index.html'));
   await sleep(500);
-  await w.webContents.executeJavaScript("window.__k=[]; ['keydown','keyup','blur'].forEach(function(n){window.addEventListener(n,function(e){window.__k.push(n+':'+(e.code||''))},true)}); [].slice.call(document.querySelectorAll('.card')).filter(function(n){return /monza/i.test(n.textContent)})[0].click()");
+  await w.webContents.executeJavaScript("window.__k=[]; ['keydown','keyup','blur'].forEach(function(n){window.addEventListener(n,function(e){window.__k.push(n+':'+(e.code||''))},true)}); [].slice.call(document.querySelectorAll('.card')).filter(function(n){return /monza/i.test(n.textContent)})[0].click(); var __g=document.getElementById('setup-go'); if(__g) __g.click();");
   await sleep(1500);
   const sp = async tag => console.log(tag, await w.webContents.executeJavaScript("F1.game.car.state.speed.toFixed(2)+' '+F1.game.running"));
   w.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'W' }); await sleep(3000); await sp('after W');

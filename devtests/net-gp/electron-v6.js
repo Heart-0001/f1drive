@@ -1,5 +1,5 @@
 // npx electron devtests/net-gp/electron-v6.js
-// v6 network features in real Chromium pages: the real net/session.js + js/net.js + js/gp.js as classic scripts
+// v6 network features in real Chromium pages (protocol 2: through the room lobby): the real net/session.js + js/net.js + js/gp.js as classic scripts
 // (page-v6.html) against the real net/server.js. Cars in the profile / roster, the room year and its event order,
 // the Grand Prix year (the room's) and tyre wear through F1.gp, parc fermé and the car sent again afterwards, an
 // offline Grand Prix with year / wear, joining a room with a password. No real-time race: a few seconds in all.
@@ -48,20 +48,35 @@ app.whenReady().then(async () => {
       await B.until(`F1.net.roster.length === 2 && F1.net.players[0].car === '2024-ferrari'`), await A.js(`F1.net.roster.map(function (p) { return [p.name, p.car]; })`));
     check('no year yet: net.year null, no event', (await A.js(`F1.net.year === null && !__ev.some(function (e) { return e[0] === 'year'; })`)));
 
-    check('setYear: guest refused, bad year refused, host sent', (await B.js(`F1.net.setYear(2024)`)) === false &&
+    check('setYear (lobby): guest refused, bad year refused, host sent', (await B.js(`F1.net.setYear(2024)`)) === false &&
       (await A.js(`F1.net.setYear(2009)`)) === false && (await A.js(`F1.net.setYear(2024)`)) === true);
-    check('the year reaches both, one event each', await A.until(`F1.net.year === 2024`) && await B.until(`F1.net.year === 2024`) &&
+    check('the year reaches both (room.set.year), one event each', await A.until(`F1.net.year === 2024`) && await B.until(`F1.net.year === 2024 && F1.net.room.set.year === 2024`) &&
       JSON.stringify(await B.js(`__ev.filter(function (e) { return e[0] === 'year'; })`)) === '[["year",2024]]', await B.js(`__ev.filter(function (e) { return e[0] === 'year'; })`));
     await A.js(`F1.net.selectTrack('monza')`);
-    check('track reaches B', await B.until(`F1.net.trackId === 'monza'`));
+    check('the room\'s track reaches B, nothing loads in the lobby', await B.until(`F1.net.trackId === 'monza'`) &&
+      (await B.js(`F1.net.room.st === 'lobby' && !__ev.some(function (e) { return e[0] === 'load' || e[0] === 'track'; })`)));
+    // free practice: the host starts (B not ready: force), both load
+    check('start (force) -> loading on both', (await A.js(`F1.net.startRoom({ len: 200, force: true })`)) === true &&
+      await A.until(`F1.net.room.st === 'loading'`) && await B.until(`F1.net.room.st === 'loading'`));
+    await A.js(`F1.net.sendLoaded(1, true, { len: 200 })`); await B.js(`F1.net.sendLoaded(1, true, { len: 200 })`);
+    check('free-practice session on both', await A.until(`F1.net.room.st === 'session'`) && await B.until(`F1.net.room.st === 'session' && F1.net.session.phase === 'free'`));
 
     await C.js(`F1.net.setProfile({ name: '晨', car: '2023-alpine' })`);
     const rc = await C.js(`F1.net.join(${addr})`);
-    const order = await C.js(`__ev.filter(function (e) { return e[0] === 'connected' || e[0] === 'year' || e[0] === 'track'; })`);
-    check('newcomer: connected, then year 2024, then track', rc.ok && JSON.stringify(order) === '[["connected",null],["year",2024],["track","monza"]]', order);
+    const order = await C.js(`__ev.filter(function (e) { return ['connected', 'year', 'room', 'load', 'track'].indexOf(e[0]) >= 0; })`);
+    check('newcomer of a session: connected, year 2024, room, load (its car known before the track is built)', rc.ok &&
+      JSON.stringify(order) === '[["connected",null],["year",2024],["room","session 1"],["load","monza 1"]]', order);
+    await C.js(`F1.net.sendLoaded(1, true, { len: 200 })`);
     check('newcomer car in the host roster', await A.until(`F1.net.roster.length === 3 && F1.net.roster[2].car === '2023-alpine'`));
 
-    check('F1.gp.start (host) with year 1999 / wear 3 -> sent', (await A.js(`F1.gp.start({ q: 1, r: 1, year: 1999, wear: 3 }, 200)`)) === true);
+    // a Grand Prix: online F1.gp.start is not the way (false); the room's lobby is
+    check('F1.gp.start (host, online) -> false', (await A.js(`F1.gp.start({ q: 1, r: 1, year: 1999, wear: 3 }, 200)`)) === false);
+    await sleep(1000);                                                     // (START_MIN_MS after the start)
+    check('back to the lobby, settings: mode gp, wear 3', (await A.js(`F1.net.backToLobby()`)) === true && await C.until(`F1.net.room.st === 'lobby'`) &&
+      (await A.js(`F1.net.setRoom({ mode: 'gp', q: 1, r: 1, wear: 3, year: 2024 })`)) === true && await C.until(`F1.net.room.set.mode === 'gp' && F1.net.room.set.wear === 3`));
+    await sleep(1000);
+    check('start: all three load', (await A.js(`F1.net.startRoom({ len: 200, force: true })`)) === true && await C.until(`F1.net.room.st === 'loading' && F1.net.room.rs === 2`));
+    for (const w of [A, B, C]) { await w.until(`F1.net.room.rs === 2`); await w.js(`F1.net.sendLoaded(2, true, { len: 200 })`); }
     for (const [tag, w] of [['A', A], ['B', B], ['C', C]]) {
       check(tag + ': quali, view().year = the room year 2024, wear 3',
         await w.until(`F1.gp.phase === 'quali' && F1.gp.view().year === 2024 && F1.gp.view().wear === 3`), await w.js(`[F1.gp.phase, F1.gp.view().year, F1.gp.view().wear]`));
@@ -71,8 +86,9 @@ app.whenReady().then(async () => {
     check('parc fermé: the rename arrives, the car stays', await A.until(`F1.net.roster[1].name === '柏二'`) && (await A.js(`F1.net.roster[1].car`)) === '2024-mclaren',
       await A.js(`F1.net.roster[1]`));
     check('B remembers its choice', (await B.js(`F1.net.getProfile().car`)) === '2024-haas');
-    check('F1.gp.action(end) -> free', (await A.js(`F1.gp.action('end')`)) === true && await C.until(`F1.gp.phase === 'free'`));
-    check('back in free practice the car goes out by itself', await C.until(`F1.net.players.filter(function (p) { return p.name === '柏二'; })[0].car === '2024-haas'`),
+    await sleep(1000);
+    check('F1.gp.action(end) in qualifying -> the lobby', (await A.js(`F1.gp.action('end')`)) === true && await C.until(`F1.gp.phase === 'free' && F1.net.room.st === 'lobby'`));
+    check('back in the lobby the car goes out by itself', await C.until(`F1.net.players.filter(function (p) { return p.name === '柏二'; })[0].car === '2024-haas'`),
       await C.js(`F1.net.players.map(function (p) { return [p.name, p.car]; })`));
     check('the room year is unchanged by the session', (await C.js(`F1.net.year`)) === 2024 && (await A.js(`F1.gp.view().year`)) === 2024);
 

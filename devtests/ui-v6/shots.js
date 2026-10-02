@@ -96,7 +96,9 @@ const PAGE_LIB = `(function () {
   window.__init = function () {
     F1.ui.init({
       onSelectTrack: function (t) { __calls.push(['track', t.id]); },
-      onGpStart: function (c) { __calls.push(['start', c]); },
+      // (v7.2: a Grand Prix starts in the start panel: 開始 -> onSetupStart; its mode / laps / wear -> onSetup)
+      onSetupStart: function (c) { __calls.push(['start', c]); },
+      onSetup: function (p) { __calls.push(['setup', p]); },
       onGpAction: function (a) { __calls.push(['action', a]); },
       onYear: function (y) { __calls.push(['year', y]); },
       onCar: function (id) { __calls.push(['car', id]); },
@@ -107,6 +109,14 @@ const PAGE_LIB = `(function () {
       onProfile: function () {}
     });
     F1.ui.showMenu(window.F1_TRACKS);
+    return true;
+  };
+  // v7.2: the start panel of Monza as main.js draws it alone (a SetupView), or the cards again
+  window.__panel = function (on) {
+    if (!on) { F1.ui.setSetup({ show: 'tracks', room: false }); return true; }
+    var td = F1_TRACKS.filter(function (t) { return t.id === 'it-1922'; })[0], s = F1.ui.getSetup();
+    F1.ui.setSetup({ show: 'setup', room: false, track: td, trackId: td.id, trackMissing: false, current: false, mode: s.mode, q: s.q, r: s.r, wear: s.wear, canEdit: true,
+      go: { show: true, enabled: true, label: '開始', sub: '' }, hint: '', note: '', banner: '' });
     return true;
   };
   // telemetry pixels actually drawn: opaque pixels in the canvas backing store
@@ -281,9 +291,11 @@ app.whenReady().then(async () => {
       // GP tab free, offline: year line + wear control
       await setNet(M.NET.off); await setGp(M.V.freeTrack); await setCars(cars(L26));
       await shot('menu-1280-gp-free');
+      // (v7.2: the laps / tyre wear moved to the start panel (#gp-wear with its id); the tab offers 在目前賽道開大獎賽…)
       st = await js(`({ car: __text('gp-car'), change: __rect('gp-car-change').shown, wear: [].slice.call(document.querySelectorAll('#gp-wear button')).map(function (b) { return b.textContent + (b.classList.contains('on') ? '*' : ''); }).join(' '),
-        setup: __rect('gp-setup'), panel: __rect('mp-panel'), start: __rect('gp-start') })`);
-      check('GP tab free: season + car line with 換車, wear ×1..×5 (×1 on), start button above the fold', /^2026/.test(st.car) && /麥拉倫 MCL40/.test(st.car) && st.change && st.wear === '×1* ×2 ×3 ×4 ×5' && st.start.b <= st.panel.b, st);
+        inSetup: !!document.querySelector('#setup #gp-wear'), panel: __rect('mp-panel'), open: __rect('gp-open') })`);
+      check('GP tab free: season + car line with 換車; the start panel\'s wear ×1..×5 (×1 on); 在目前賽道開大獎賽… above the fold', /^2026/.test(st.car) && /麥拉倫 MCL40/.test(st.car) && st.change && st.wear === '×1* ×2 ×3 ×4 ×5' &&
+        st.inSetup && st.open.shown && st.open.b <= st.panel.b, st);
       await mouseClick('#gp-car-change');
       check('換車 opens the 車輛 tab', await js(`document.getElementById('tab-car').classList.contains('on') && __rect('car-list').shown`));
 
@@ -530,13 +542,15 @@ app.whenReady().then(async () => {
       check('car texts are escaped (no element injected from a team / note)', await js(`!document.querySelector('#car-list img, #car-list .car-note b') && document.querySelectorAll('#car-list .car-card').length === 1`));
       await setCars(cars(L26));
       await js(`F1.ui.setPit(null)`);
-      // wear + start
+      // wear + start (v7.2: in the start panel, mode 大獎賽)
       await tab('gp');
-      await js(`__calls.length = 0`);
+      await js(`__panel(true); document.querySelector('#setup-mode [data-m="gp"]').click(); __panel(true); __calls.length = 0`);
       await mouseClick('#gp-wear button[data-w="3"]');
-      await mouseClick('#gp-start');
+      await mouseClick('#setup-go');
       st = await js(`({ calls: JSON.stringify(__calls), store: localStorage.getItem('f1drive.gp'), on: document.querySelector('#gp-wear .on').getAttribute('data-w') })`);
-      check('輪胎損耗 ×3 (real mouse) + start -> onGpStart({q, r, wear: 3}), remembered', st.calls === '[["start",{"q":3,"r":5,"wear":3}]]' && JSON.parse(st.store).wear === 3 && st.on === '3', st);
+      check('輪胎損耗 ×3 (real mouse, start panel) + 開始 -> onSetup({wear: 3}), onSetupStart({mode: gp, q, r, wear: 3}), remembered', st.calls === '[["setup",{"wear":3}],["start",{"mode":"gp","q":3,"r":5,"wear":3,"force":false}]]' &&
+        JSON.parse(st.store).wear === 3 && st.on === '3', st);
+      await js(`__panel(false)`);
       // audio
       await tab('set');
       await js(`__calls.length = 0; var s = document.getElementById('set-volume'); s.value = '35'; s.dispatchEvent(new Event('input', { bubbles: true }))`);
@@ -668,10 +682,11 @@ app.whenReady().then(async () => {
       await tab('gp');
       const tyre = () => js(`({ on: [].slice.call(document.querySelectorAll('#gp-tyre button')).map(function (b) { return b.textContent + (b.classList.contains('on') ? '*' : ''); }).join(' '),
         aria: [].slice.call(document.querySelectorAll('#gp-tyre button')).map(function (b) { return b.getAttribute('aria-checked'); }).join(' '),
-        label: __text('gp-tyre-label'), note: __text('gp-tyre-note'), row: __rect('gp-tyre-row'), panel: __rect('mp-panel'), start: __rect('gp-start'), calls: JSON.stringify(__calls) })`);
+        label: __text('gp-tyre-label'), note: __text('gp-tyre-note'), row: __rect('gp-tyre-row'), panel: __rect('mp-panel'), start: __rect('gp-open'), calls: JSON.stringify(__calls) })`);
       st = await tyre();
-      check('v6.2 大獎賽: 起跑輪胎 軟 / 中 / 硬 with 中 marked (the default set), the note names T and the controller\'s X, the start button still above the fold',
-        st.on === '軟 中* 硬' && st.aria === 'false true false' && st.label === '起跑輪胎' && /T/.test(st.note) && /X/.test(st.note) && st.row.shown && st.start.b <= st.panel.b, st);
+      // (v7.2: 在目前賽道開大獎賽… in the place of the start button)
+      check('v6.2 大獎賽: 起跑輪胎 軟 / 中 / 硬 with 中 marked (the default set), the note names T and the controller\'s X, 在目前賽道開大獎賽… still above the fold',
+        st.on === '軟 中* 硬' && st.aria === 'false true false' && st.label === '起跑輪胎' && /T/.test(st.note) && /X/.test(st.note) && st.row.shown && st.start.shown && st.start.b <= st.panel.b, st);
       await shot('v62-gp-tyre-free');
       const storage = () => js(`JSON.stringify(Object.keys(localStorage).sort().map(function (k) { return [k, localStorage.getItem(k)]; }))`);
       const store0 = await storage();
@@ -712,7 +727,7 @@ app.whenReady().then(async () => {
       check('real game: the only boot errors are the scripts not written yet (' + (stubbed.join(', ') || 'none') + ')', err.split('\n').filter(Boolean).every(l => expected.indexOf(l) >= 0), err);
       await js(`document.getElementById('error').classList.add('hidden')`);
       const picked = await js(`(function () { var c = [].slice.call(document.querySelectorAll('.card')).filter(function (n) { return n.textContent.toLowerCase().indexOf(${J(TRACK)}) >= 0; })[0];
-        if (!c) return null; c.click(); return c.querySelector('.card-name').textContent; })()`);
+        if (!c) return null; c.click(); document.getElementById('setup-go').click(); return c.querySelector('.card-name').textContent; })()`);
       await sleep(1800);
       w.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'W' });
       await sleep(2500);

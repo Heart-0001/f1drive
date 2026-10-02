@@ -146,7 +146,7 @@ app.whenReady().then(async () => {
         if (cur) { w.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' }); await sleep(80); w.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'Escape' }); await sleep(800); }
         const clicked = await js(`(function(){ var c=[].slice.call(document.querySelectorAll('.card')); var td=(window.F1_TRACKS||[]).findIndex(function(t){return t.id===${JSON.stringify(sh.id)};});
           var tdName = td>=0 ? window.F1_TRACKS[td].name.toLowerCase() : ''; var n=c.filter(function(x){return x.textContent.toLowerCase().indexOf(tdName)>=0;})[0];
-          if(!n) return 'no card for ' + tdName; n.click(); return n.textContent.slice(0,40); })()`);
+          if(!n) return 'no card for ' + tdName; n.click(); var __g=document.getElementById('setup-go'); if(__g) __g.click(); return n.textContent.slice(0,40); })()`);
         console.log('track', sh.id, '->', clicked);
         for (let k = 0; k < 100; k++) { if (await js('!!(window.F1 && F1.game && F1.game.running && F1.game.car && F1.game.raceLine && F1.game.track && F1.game.track.samples)')) break; await sleep(100); }
         await sleep(1200);

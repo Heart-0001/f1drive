@@ -137,11 +137,29 @@ function makeWin(tag, opts) {
     await sleep(150);
     return true;
   };
-  // the track card (real mouse click) -> the game runs on it
+  // the track card (real mouse click) -> v7.2: its start panel; 自由練習, 開始 (real clicks) -> the game runs on it
   w.pickTrack = async id => {
     const i = await w.js(`F1_TRACKS.findIndex(function (t) { return t.id === ${J(id)}; })`);
     if (i < 0 || !await w.click(`#track-grid .card[data-i="${i}"]`)) return false;
+    if (!await w.goPanel('free')) return false;
     return w.until(`F1.game.running && F1.game.trackData && F1.game.trackData.id === ${J(id)}`, 20000, 'track ' + id);
+  };
+  // the start panel (v7.2) after a card click: mode, then 開始 (a build without the panel, the v5 one: nothing to do)
+  w.goPanel = async mode => {
+    if (!(await w.js(`!!document.getElementById('setup-go')`))) return true;
+    return (await w.click(`#setup-mode [data-m="${mode || 'free'}"]`)) && w.click('#setup-go');
+  };
+  // a single-player Grand Prix from the start panel of the loaded track: its card, 大獎賽, Q / R / wear (/ the starting
+  // tyre), 開始
+  w.startGp = async o => {
+    if (await w.js(`F1.game.running`)) await w.tap('Escape');
+    const i = await w.js(`F1_TRACKS.findIndex(function (t) { return t.id === F1.game.trackData.id; })`);
+    if (!await w.click(`#track-grid .card[data-i="${i}"]`) || !await w.click('#setup-mode [data-m="gp"]')) return false;
+    if (o && o.q !== undefined) await w.field('gp-q', String(o.q));
+    if (o && o.r !== undefined) await w.field('gp-r', String(o.r));
+    if (o && o.wear !== undefined) await w.click(`#gp-wear button[data-w="${o.wear}"]`);
+    if (o && o.tyre) await w.click(`#setup-tyre button[data-c="${o.tyre}"]`);
+    return w.click('#setup-go');
   };
   // the 年份 select of the 車輛 tab (a native select cannot be opened offscreen: its value is set and 'change' fired)
   w.pickYear = async y => {
@@ -363,6 +381,7 @@ async function goldenRun(which, prog, rate0) {
   if (which === 'v6') check(which + ': the reference car (2025-standard = F1.REF_SPEC)', await w.js(`JSON.stringify(F1.game.spec) === JSON.stringify(F1.REF_SPEC)`));
   const i = await w.js(`F1_TRACKS.findIndex(function (t) { return t.id === 'it-1922'; })`);
   await w.click(`#track-grid .card[data-i="${i}"]`);
+  await w.goPanel('free');
   const ok = await w.until(`F1.game.running && F1.game.track && __e.queued() === 1`, 20000);
   if (rate0) await w.js(`F1.game.tyres.setWearRate(0); true`);
   await w.js(GOLDEN_LIB + '(' + J(prog) + ')');
@@ -405,8 +424,10 @@ async function partGolden() {
     const c = compare(f6.rec, f5.rec, 11), c0 = compare(f60.rec, f5.rec, 11);
     console.log('flick input: v6 at tyre wear rate 1 vs v5: ' + J(c) + '  tyres ' + J(f6.tyres));
     check('flick input, tyre model frozen (setWearRate(0): the reference tyres): bit-identical to v5 -> the tyres are the only difference', c0.same, c0);
-    check('flick input, tyres live: the slides left flat spots (js/tyres.js: slip > FLAT_SLIP), braking grip < 1, the trajectory stays within 1 cm of v5 over 10 s',
-      Math.max.apply(null, f6.tyres.flat) > 0 && f6.tyres.grip.brake < 1 && c.worstDiff < 0.01, { worstDiff: c.worstDiff, flat: f6.tyres.flat, grip: f6.tyres.grip });
+    // (2026-10-02, js/tyres.js FLAT_LAT 0: only lock-ups (sliding with the brake on) and impacts flat-spot a tyre; the flicks
+    //  slide without the brake: the tyres wear and heat, no flat spot)
+    check('flick input, tyres live: the slides wear the tyres but leave no flat spot (no brake in the flicks), braking grip 1, the trajectory stays within 1 cm of v5 over 10 s',
+      Math.max.apply(null, f6.tyres.flat) === 0 && Math.max.apply(null, f6.tyres.wear) > 0 && f6.tyres.grip.brake === 1 && c.worstDiff < 0.01, { worstDiff: c.worstDiff, flat: f6.tyres.flat, wear: f6.tyres.wear, grip: f6.tyres.grip });
   }
 }
 
@@ -418,6 +439,7 @@ async function batteryRun(tag, year, carId, boost) {
   if (year) { await w.pickYear(year); if (carId) await w.pickCar(carId); await sleep(150); }
   const i = await w.js(`F1_TRACKS.findIndex(function (t) { return t.id === 'it-1922'; })`);
   await w.click(`#track-grid .card[data-i="${i}"]`);
+  await w.goPanel('free');
   await w.until(`F1.game.running && F1.game.track && __e.queued() === 1`, 20000);
   await w.js(`__v.hookRenderer(); true`);
   w.key('W', true); if (boost) w.key('E', true);
@@ -582,38 +604,38 @@ async function partTyres() {
   await w.open('v6', { warp: true });
   await w.pickTrack('it-1922');
   await w.js(`__v.hookRenderer() && __e.hookCar()`);
-  await w.tap('Escape');
-  await w.click('#tab-gp');
+  // (2026-10-02: the tyres wear like real F1 stints at x1; at x5 the autopilot's softs lose ~15 % a lap at Monza, a
+  //  medium only ~8 %: the race is run on softs (起跑輪胎 in the start panel) for 4 laps; the grip curve only drops
+  //  clearly past ~50 % wear)
   // (the wear option is for the race only: qualifying runs at x1, so the laps are driven in the race)
-  await w.field('gp-q', '1'); await w.field('gp-r', '3');
-  await w.click('#gp-wear button[data-w="5"]');
-  check('Grand Prix with 輪胎損耗 ×5 started from the menu', await w.click('gp-start') && await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000));
+  check('Grand Prix with 輪胎損耗 ×5 on softs started from the start panel', await w.startGp({ q: 1, r: 6, wear: 5, tyre: 'S' }) && await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000));
   const tq = await w.js(`__v.tyres()`);
   check('qualifying: wear rate 1 (the x5 is for the race only)', tq.rate === 1, tq);
   await w.js(`F1.game.gp.action('skip'); true`);
   check('qualifying skipped: on the grid', await w.pump(`g.gp.phase === 'grid'`, 5, 'grid'));
   const t0 = await w.js(`__v.tyres()`);
-  check('grid: a new medium set, wear rate 5 from here on', t0.rate === 5 && t0.compound === 'M' && Math.max.apply(null, t0.wear) === 0, t0);
+  check('grid: a new soft set, wear rate 5 from here on', t0.rate === 5 && t0.compound === 'S' && Math.max.apply(null, t0.wear) === 0, t0);
   await w.js(`__e.ap.on = true; __e.ap.mode = 'line'; true`);
   check('lights out: the race', await w.pump(`g.gp.phase === 'race' && !g.gp.inputLocked`, 30, 'race'));
   const laps = [];
-  for (let k = 1; k <= 2; k++) {
+  for (let k = 1; k <= 4; k++) {
     const ok = await w.pump(`g.gp.lap >= ${k}`, 200, 'race lap ' + k);
     const s = await w.js(`({ lap: F1.game.lap.last, tyres: __v.tyres(), hud: __v.hud.tyres })`);
     laps.push({ ok, lap: s.lap, wear: s.tyres.wear.map(x => +x.toFixed(3)), grip: s.tyres.grip, hudWear: s.hud.wear });
-    if (k === 2) await w.shot('tyres-1-worn-telemetry', true);
+    if (k === 4) await w.shot('tyres-1-worn-telemetry', true);
   }
-  console.log('wear x5, Monza, laps on the autopilot: ' + J(laps));
-  check('2 laps driven; the wear grows lap by lap (x5: a medium set is past half after 2 laps), shown in the telemetry', laps.every(l => l.ok) && laps[0].wear[0] > 0.05 && laps[1].wear[0] > laps[0].wear[0] + 0.1 &&
-    J(laps[1].hudWear.map(x => +x.toFixed(3))) === J(laps[1].wear), laps.map(l => l.wear));
-  check('grip dropping with the wear (lateral / braking / traction below 1, lower after lap 2 than after lap 1)', laps[1].grip.lat < laps[0].grip.lat && laps[1].grip.brake < laps[0].grip.brake &&
-    laps[1].grip.traction < laps[0].grip.traction && laps[1].grip.lat < 0.97, laps.map(l => l.grip));
+  console.log('wear x5, Monza, softs, laps on the autopilot: ' + J(laps));
+  check('4 laps driven; the wear grows lap by lap (x5 on softs: more than 0.1 a lap, past half after 4 laps), shown in the telemetry', laps.every(l => l.ok) && laps[0].wear[0] > 0.05 &&
+    laps.every((l, k) => k === 0 || l.wear[0] > laps[k - 1].wear[0] + 0.1) && laps[3].wear[0] > 0.5 && J(laps[3].hudWear.map(x => +x.toFixed(3))) === J(laps[3].wear), laps.map(l => l.wear));
+  // (a new soft set: 1.015 on all three, js/tyres.js)
+  check('grip dropping with the wear (lateral / braking / traction lower after lap 4 than after lap 3, the lateral grip more than 1.5 % under the new soft\'s 1.015)', laps[3].grip.lat < laps[2].grip.lat &&
+    laps[3].grip.brake < laps[2].grip.brake && laps[3].grip.traction < laps[2].grip.traction && laps[3].grip.lat < 1.015 * 0.985, laps.map(l => l.grip));
   const v = await pitVisit(w, 'tyres-pit', { limiter: true });
-  check('a pit stop restores the tyres (a new medium set: wear 0, grip 1 / 1 / 1)', v && v.after.tyres.compound === 'M' && Math.max.apply(null, v.after.tyres.wear) < 1e-6 &&
-    v.after.tyres.grip.lat === 1 && v.after.tyres.grip.brake === 1 && v.after.tyres.grip.traction === 1, v && v.after.tyres);
+  check('a pit stop restores the tyres (a new soft set, the next set picked: wear 0, grip 1.015 / 1.015 / 1.015)', v && v.after.tyres.compound === 'S' && Math.max.apply(null, v.after.tyres.wear) < 1e-6 &&
+    v.after.tyres.grip.lat === 1.015 && v.after.tyres.grip.brake === 1.015 && v.after.tyres.grip.traction === 1.015, v && v.after.tyres);
   await w.frames(10);
   await w.shot('tyres-2-after-stop', true);
-  check('the lap with the stop counted for the session (race lap 3 recorded, slower than the flying lap)', await w.pump(`g.gp.lap >= 3`, 200, 'lap 3') && (await w.js(`F1.game.lap.last`)) > laps[1].lap, await w.js(`F1.game.lap.last`));
+  check('the lap with the stop counted for the session (race lap 5 recorded, slower than the flying lap)', await w.pump(`g.gp.lap >= 5`, 200, 'lap 5') && (await w.js(`F1.game.lap.last`)) > laps[3].lap, await w.js(`F1.game.lap.last`));
   await w.noErrors();
   w.destroy();
 }
@@ -641,9 +663,8 @@ async function partAudio() {
   check('the own engine follows car.state.rpm (within 3 % in ' + (samples.length - off.length) + ' / ' + samples.length + ' samples) and its gear', off.length <= 2 && samples.filter(s => s[2] === s[3]).length >= samples.length - 2, off);
   const gEnd = samples[samples.length - 1][2];
   check('gear changes counted: ' + (up1 - up0) + ' upshifts heard for the car going 1 -> ' + gEnd, up1 - up0 >= 2 && up1 - up0 === gEnd - 1, { up0, up1, gEnd });
-  // start lights: a beep for every lamp, one at lights out
-  await w.tap('Escape');
-  await w.click('gp-start');
+  // start lights: a beep for every lamp, one at lights out (the Grand Prix from the start panel, v7.2)
+  await w.startGp();
   await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000, 'quali');
   const s0 = await w.js(`__v.sounds.length`), b0 = await w.js(`F1.audio.debug.beeps`);
   await w.js(`F1.game.gp.action('skip')`);
@@ -714,8 +735,15 @@ async function partRoom() {
   const ids = { a: await A.js(`F1.net.id`), b: await B.js(`F1.net.id`) };
   check('the roster carries the cars (each sees the other\'s)', await A.until(`F1.net.players.length === 1 && F1.net.players[0].car === '2014-red-bull'`, 3000) &&
     await B.until(`F1.net.players.length === 1 && F1.net.players[0].car === '2014-mercedes'`, 3000), { a: await A.js(`F1.net.players.map(function (p) { return p.car; })`), b: await B.js(`F1.net.players.map(function (p) { return p.car; })`) });
-  const onTrack = `F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id`;
-  await A.pickTrack('it-1922');
+  // v7.2: the host's card sets the room's track in the lobby (its picker); B presses 準備; A 開始: both load (the barrier)
+  const onTrack = `F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id && F1.net.room.st === 'session'`;
+  const mi = await A.js(`F1_TRACKS.findIndex(function (t) { return t.id === 'it-1922'; })`);
+  if ((await A.js(`F1.game.setup.show`)) !== 'picker') await A.click('#setup-track-btn');
+  await A.click(`#track-grid .card[data-i="${mi}"]`);
+  check('the host sets Monza in the lobby: nobody loads it yet', await B.until(`F1.net.room.set.track === 'it-1922'`, 3000) && !(await A.js(`F1.game.running || !!F1.game.track`)) && !(await B.js(`F1.game.running || !!F1.game.track`)));
+  await B.click('#setup-ready');
+  await A.until(`F1.game.setup.go.enabled`, 3000, 'A 開始 enabled');
+  await A.click('#setup-go');
   check('both load the room track', await A.until(onTrack, 15000) && await B.until(onTrack, 15000));
   await sleep(1200);
   const rc = { a: await A.js(`(function () { var r = F1.game.remoteCars[${ids.b}]; return r && r.spec ? r.spec.id : null; })()`), b: await B.js(`(function () { var r = F1.game.remoteCars[${ids.a}]; return r && r.spec ? r.spec.id : null; })()`) };
@@ -731,13 +759,19 @@ async function partRoom() {
   await sleep(1500);
   await A.shot('room-2-host-sees-guest-redbull');
   check('liveries on each other\'s car: screenshots room-1 (silver Mercedes ahead of B) / room-2 (dark blue Red Bull ahead of A) (READ them)', true);
-  // a Grand Prix with wear x3
+  // a Grand Prix with wear x3 (v7.2: 回到大廳, the settings in the lobby, B 準備, 開始)
   await A.tap('Escape');
-  await A.click('#tab-gp');
+  await A.click('#setup-lobby');
+  check('the host takes the room back to the lobby', await A.until(`F1.net.room.st === 'lobby' && !F1.game.running`, 3000) && await B.until(`F1.net.room.st === 'lobby' && !F1.game.running`, 3000));
+  await A.click('#setup-mode [data-m="gp"]');
   await A.field('gp-q', '1'); await A.field('gp-r', '1');
   await A.click('#gp-wear button[data-w="3"]');
-  await A.click('gp-start');
-  check('the host starts a Grand Prix with 輪胎損耗 ×3: both in qualifying', await A.until(`F1.game.gp.phase === 'quali'`, 3000) && await B.until(`F1.game.gp.phase === 'quali'`, 3000));
+  await B.until(`F1.net.room.set.mode === 'gp' && F1.net.room.set.wear === 3`, 3000, 'B sees the settings');
+  await B.click('#setup-ready');
+  await A.until(`F1.game.setup.go.enabled`, 3000, 'A 開始 enabled');
+  await sleep(1100);                                         // (START_MIN_MS after 回到大廳)
+  await A.click('#setup-go');
+  check('the host starts a Grand Prix with 輪胎損耗 ×3: both in qualifying', await A.until(`F1.game.gp.phase === 'quali'`, 15000) && await B.until(`F1.game.gp.phase === 'quali'`, 5000));
   await sleep(600);
   const gv = async w => w.js(`({ year: __t.text('hud-gp-year'), vYear: F1.game.gp.view().year, wear: F1.game.gp.view().wear, rate: F1.game.tyres.wearRate, spec: F1.game.spec.id,
     chips: [].map.call(document.querySelectorAll('#hud-gp-rows .gp-row'), function (r) { var c = r.querySelector('.gp-chip'); return [r.querySelector('.mp-pname').textContent, c ? c.style.background : null]; }),
@@ -757,8 +791,17 @@ async function partRoom() {
   check('parc fermé: the guest\'s car list is locked (賽事進行中不能換車); a click on another car changes nothing', pf.locked && pf.yearDisabled && /賽事進行中不能換車/.test(pf.lock) && pf2.spec === '2014-red-bull' && pf2.on === '2014-red-bull', { pf, pf2 });
   await B.shot('room-4-guest-parc-ferme');
   await B.tap('Escape');
-  await A.js(`F1.game.gp.action('end'); F1.game.gp.action('end'); true`);
-  check('Grand Prix ended: both in free practice, the car picker open again', await A.until(`F1.game.gp.phase === 'free'`, 3000) && await B.until(`F1.game.gp.phase === 'free' && !document.getElementById('car-list').classList.contains('locked')`, 3000));
+  await A.js(`F1.game.gp.action('end'); true`);
+  // (v7.2: a Grand Prix ended in qualifying takes the room back to the lobby; free practice starts from there)
+  check('Grand Prix ended: both in the lobby, the car picker open again', await A.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby'`, 3000) &&
+    await B.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby' && !document.getElementById('car-list').classList.contains('locked')`, 3000));
+  await A.click('#setup-mode [data-m="free"]');
+  await B.until(`F1.net.room.set.mode === 'free'`, 3000, 'B sees free');
+  await B.click('#setup-ready');
+  await A.until(`F1.game.setup.go.enabled`, 3000, 'A 開始 enabled');
+  await sleep(1100);
+  await A.click('#setup-go');
+  check('free practice from the lobby: both on the track', await A.until(onTrack, 15000) && await B.until(onTrack, 15000));
   // pit lane: A stands in its box (slot 0), B drives from its own box (slot 1, upstream) through A
   await sleep(1500);
   const box = (w, slot) => w.js(`(function () { var b = F1.game.track.pit.boxes[${slot}], s = F1.game.car.state; s.x = b.x; s.z = b.z; s.heading = b.heading; s.speed = 0; s.steer = 0; return { x: b.x, z: b.z }; })()`);

@@ -107,15 +107,18 @@ function makeWin(tag, opts) {
     return true;
   };
   w.trackIndex = id => w.js(`F1_TRACKS.findIndex(function (t) { return t.id === ${J(id)}; })`);
+  // v7.2: a card opens the start panel; 開始 (#setup-go) drives. mode: 'free' (default) | 'gp' (the panel's Grand Prix
+  // fields #gp-q / #gp-r / #gp-wear are set by the caller between w.card() and w.go())
+  w.card = async id => { const i = await w.trackIndex(id); return i >= 0 && await w.click(`#track-grid .card[data-i="${i}"]`) && await w.until(`F1.game.setup && F1.game.setup.show === 'setup'`, 2000, 'start panel'); };
+  w.mode = m => w.click(`#setup-mode [data-m="${m}"]`);
+  w.go = () => w.click('#setup-go');
   w.pickTrack = async (id, ms) => {
-    const i = await w.trackIndex(id);
-    if (i < 0 || !await w.click(`#track-grid .card[data-i="${i}"]`)) return false;
+    if (!await w.card(id) || !await w.mode('free') || !await w.go()) return false;
     return w.until(`F1.game.running && F1.game.trackData && F1.game.trackData.id === ${J(id)}`, ms || 20000, 'track ' + id);
   };
   // (warp: the loop is pumped by __e.run, so "running" is enough; the first frame is queued)
   w.pickTrackWarp = async id => {
-    const i = await w.trackIndex(id);
-    if (i < 0 || !await w.click(`#track-grid .card[data-i="${i}"]`)) return false;
+    if (!await w.card(id) || !await w.mode('free') || !await w.go()) return false;
     const ok = await w.until(`F1.game.running && F1.game.trackData && F1.game.trackData.id === ${J(id)} && __e.queued() === 1`, 20000, 'track ' + id);
     if (ok) await w.js(`__v.hookRenderer() && __e.hookCar()`);
     return ok;
@@ -148,4 +151,53 @@ function makeWin(tag, opts) {
   return w;
 }
 
-module.exports = { ROOT, OUT, host, sleep, J, results, state, check, note, makeWin };
+/* ---- v7.2 rooms: the lobby (docs/lobby-design.md). Nobody drives until the host's 開始 and the loading barrier. ---- */
+// The host picks the room's track in the lobby: the picker (選賽道 / 換賽道, open by itself in a fresh room), a card.
+async function roomTrack(hostW, id) {
+  if ((await hostW.js(`F1.game.setup && F1.game.setup.show`)) !== 'picker' && !await hostW.click('#setup-track-btn')) return false;
+  const i = await hostW.trackIndex(id);
+  if (i < 0 || !await hostW.click(`#track-grid .card[data-i="${i}"]`)) return false;
+  return hostW.until(`F1.net.room.set.track === ${J(id)} && F1.game.setup.show === 'setup'`, 3000, 'room track ' + id);
+}
+// The host's lobby settings: {mode: 'free' | 'gp', q, r, wear} through the lobby's own controls.
+async function roomSettings(hostW, o) {
+  if (o.mode) await hostW.click(`#setup-mode [data-m="${o.mode}"]`);
+  if (o.q !== undefined) await hostW.field('gp-q', String(o.q));
+  if (o.r !== undefined) await hostW.field('gp-r', String(o.r));
+  if (o.wear !== undefined) await hostW.click(`#gp-wear button[data-w="${o.wear}"]`);
+  return hostW.until(`(function () { var s = F1.net.room.set; return ${J(o.mode || null)} === null || s.mode === ${J(o.mode || null)}; })()`, 2000, 'room settings');
+}
+// The guests press 準備 (those not ready yet), the host 開始 (a second try after START_MIN_MS when the server said
+// busy); everybody loads, the session begins after the barrier. gp: wait for qualifying. -> every window drives
+async function roomStart(hostW, guests, o) {
+  o = o || {};
+  for (const g of guests) {
+    if (!await g.js(`!!(F1.net.room && F1.net.room.ready.indexOf(F1.net.id) >= 0)`)) await g.click('#setup-ready');
+  }
+  if (!await hostW.until(`F1.game.setup && F1.game.setup.go.enabled`, 5000, 'everybody ready')) return false;
+  for (let k = 0; k < 3; k++) {
+    await hostW.click('#setup-go');
+    if (await hostW.until(`F1.net.room.st !== 'lobby'`, 1500, 'room loading')) break;
+    await sleep(1100);
+  }
+  const cond = `F1.net.room && F1.net.room.st === 'session' && F1.game.running` + (o.gp ? ` && F1.game.gp.phase === 'quali'` : '');
+  let ok = true;
+  for (const w of [hostW].concat(guests)) ok = await w.until(cond, o.ms || 40000, 'room session') && ok;
+  return ok;
+}
+// The host takes the room back to the lobby (Esc: the room menu, 回到大廳, confirmed where a Grand Prix would end).
+async function roomBack(hostW, all) {
+  if (await hostW.js(`F1.game.running`)) await hostW.tap('Escape');
+  // (again after START_MIN_MS: the server drops a back within 1 s of the host's last start)
+  for (let k = 0; k < 3 && await hostW.js(`F1.net.room.st !== 'lobby'`); k++) {
+    await hostW.click('#setup-lobby');
+    if (await hostW.js(`!document.getElementById('setup-confirm').classList.contains('hidden')`)) await hostW.click('#setup-force-yes');
+    if (await hostW.until(`F1.net.room.st === 'lobby'`, 1500, 'back')) break;
+    await sleep(1100);
+  }
+  let ok = true;
+  for (const w of all || [hostW]) ok = await w.until(`F1.net.room.st === 'lobby' && !F1.game.running`, 5000, 'lobby') && ok;
+  return ok;
+}
+
+module.exports = { ROOT, OUT, host, sleep, J, results, state, check, note, makeWin, roomTrack, roomSettings, roomStart, roomBack };

@@ -4,7 +4,7 @@
   'use strict';
   var F1 = root.F1 = root.F1 || {};
 
-  var PROTOCOL = 1;
+  var PROTOCOL = 2;             // 2 (v7.2): the room lobby (net.room); incompatible with 1
   var DEFAULT_PORT = 24500;
   var SEND_MS = 45;             // own state goes out at ~20 Hz (every 3rd frame at 60 fps)
   var KEEPALIVE_MS = 200;       // when the game loop is not running (menu) the last pose is repeated, parked
@@ -21,7 +21,11 @@
   var CLOCK_MAX = 1e14;         // ms: no server clock is beyond this (keeps a hostile value out of the arithmetic)
   var PING_KEEP = 8;            // pings that may be waiting for their pong
   var GP_PHASES = { free: 1, quali: 1, grid: 1, race: 1, results: 1 };
-  var GP_ACTIONS = { start: 1, skip: 1, end: 1, again: 1 };
+  var GP_ACTIONS = { skip: 1, end: 1, again: 1 };   // ('start': a room starts with startRoom)
+  var ROOM_STATES = { lobby: 1, loading: 1, session: 1 };
+  var ROOM_IDS_MAX = 64;        // ids in one list of a room message that we keep
+  var LEN_MIN = 200, LEN_MAX = 100000;   // m: a track length a start / a loaded report may name
+  var Q_MAX = 20, R_MAX = 99, ROOM_BOTS_MAX = 15;
   var GP_MAX_PLAYERS = 64;      // rows of a session snapshot we keep (the server has at most 32)
   var YEAR_MIN = 2010, YEAR_MAX = 2100;   // a room / session year; anything else is "no year" (null)
   var WEAR_MAX = 5;             // tyre wear multiplier of a Grand Prix, 1..5
@@ -39,7 +43,9 @@
   var connectTimer = 0, keepTimer = 0;
   var hosting = false;          // we started the server through the preload API
   var profile = { name: 'Player', colour: '#ff7a14', car: '' };   // car: a CarSpec id, '' = not chosen
-  var trackSeq = 0;
+  // the room's load cycles: the rs 'load' was last emitted for, the rs we last reported (ok or not) with sendLoaded;
+  // the address being joined (net.address once in)
+  var loadEmitRs = -1, reportedRs = -1, joinLabel = null;
   var lastSendT = 0, lastState = null;
   var remotes = {};             // id -> remote record
   var lastError = '';
@@ -175,6 +181,113 @@
       lightsAt: lightsAt, goAt: goAt, winnerAt: clockMs(s.winnerAt), endsAt: clockMs(s.endsAt),
       grid: cleanIds(s.grid), order: cleanIds(s.order), players: players
     };
+  }
+
+  /* ---------- the room (protocol 2): never trusted as it comes off the wire either ---------- */
+
+  // a whole number lo..hi after Math.round, else null (as net/server.js cleans a setting: never clamped)
+  function wholeIn(v, lo, hi) {
+    if (!isNum(v)) return null;
+    v = Math.round(v);
+    return v >= lo && v <= hi ? v : null;
+  }
+  function cleanLen(v) { return isNum(v) && v >= LEN_MIN && v <= LEN_MAX ? v : null; }
+  function cleanWhy(v) { return typeof v === 'string' && /^[a-z-]{1,16}$/.test(v) ? v : ''; }
+  // up to ROOM_IDS_MAX numeric ids, each once
+  function roomIds(list) {
+    var out = [], seen = {};
+    if (!Array.isArray(list)) return out;
+    for (var i = 0; i < list.length && out.length < ROOM_IDS_MAX; i++) {
+      var id = list[i];
+      if (isNum(id) && !seen[id]) { seen[id] = true; out.push(id); }
+    }
+    return out;
+  }
+  function defaultRoom() {
+    return { st: 'lobby', rs: 0, set: { track: null, year: null, mode: 'free', q: 3, r: 5, wear: 1, bots: 0, skill: BOT_LEVEL_DEFAULT },
+             ready: [], rr: 0, load: null, len: 0 };
+  }
+  /**
+   * -> a fresh room with every documented field present and of its type (see js/README-interfaces.md, v7.2), or null
+   * when `o` is not a room at all (no object, or st not one of the three). A setting that is not valid gets the
+   * default; load is null outside 'loading'.
+   */
+  function cleanRoom(o) {
+    if (!o || typeof o !== 'object' || Array.isArray(o) || typeof o.st !== 'string' || ROOM_STATES[o.st] !== 1) return null;
+    var s = o.set && typeof o.set === 'object' && !Array.isArray(o.set) ? o.set : {};
+    var r = defaultRoom();
+    r.st = o.st;
+    r.rs = isNum(o.rs) && o.rs >= 0 && o.rs < 1e12 ? Math.floor(o.rs) : 0;
+    r.set.track = cleanTrackId(s.track);
+    r.set.year = cleanYear(s.year);
+    r.set.mode = s.mode === 'gp' ? 'gp' : 'free';
+    r.set.q = wholeIn(s.q, 1, Q_MAX) || 3;
+    r.set.r = wholeIn(s.r, 1, R_MAX) || 5;
+    r.set.wear = wholeIn(s.wear, 1, WEAR_MAX) || 1;
+    r.set.bots = isNum(s.bots) && s.bots > 0 ? Math.min(Math.floor(s.bots), ROOM_BOTS_MAX) : 0;
+    r.set.skill = cleanLevel(s.skill) || BOT_LEVEL_DEFAULT;
+    r.ready = roomIds(o.ready);
+    r.rr = isNum(o.rr) && o.rr >= 0 && o.rr < 1e12 ? Math.floor(o.rr) : 0;
+    var L = o.load;
+    if (r.st === 'loading' && L && typeof L === 'object' && !Array.isArray(L)) {
+      r.load = { at: clockMs(L.at), until: clockMs(L.until), wait: roomIds(L.wait), done: roomIds(L.done), fail: roomIds(L.fail) };
+    }
+    r.len = cleanLen(o.len) || 0;
+    return r;
+  }
+  // roster rows: ready (guests from room.ready; the host and the bots count as ready) and load ('' | 'wait' | 'done' |
+  // 'fail' from room.load)
+  function mergeRoom() {
+    var room = net.room, i, e;
+    for (i = 0; i < net.roster.length; i++) {
+      e = net.roster[i];
+      e.ready = e.isHost || e.bot || (!!room && room.ready.indexOf(e.id) >= 0);
+      e.load = '';
+      if (room && room.load && !e.bot) {
+        e.load = room.load.wait.indexOf(e.id) >= 0 ? 'wait' : room.load.done.indexOf(e.id) >= 0 ? 'done'
+          : room.load.fail.indexOf(e.id) >= 0 ? 'fail' : '';
+      }
+    }
+  }
+  // what belongs to one load cycle: our pose, our progress, our bots' poses and progress, every remote pose
+  function dropCycle() {
+    lastState = null; progress = null;
+    lastBotRows = null; botProg = {};
+    clearPoses();
+  }
+  // our car states may go out: the room's session of the cycle we built the track of
+  function onTrack() { return net.connected && !!net.room && net.room.st === 'session' && net.loadedRs === net.room.rs; }
+  function curRs() { return net.room ? net.room.rs : 0; }
+
+  // 'load' once per load cycle, when the room is loading or in a session with a track (a start, or we joined then)
+  function maybeLoad(r) {
+    if ((r.st !== 'loading' && r.st !== 'session') || !r.set.track || loadEmitRs === r.rs) return false;
+    loadEmitRs = r.rs;
+    dropCycle();
+    emit('load', r.set.track, r.rs);
+    return true;
+  }
+  // A `room` message (prev: the room we had). Events in this order: 'year' (when it changed), 'room', then the
+  // transition: 'lobby' (loading / session -> lobby), 'load' (a load cycle we have not loaded for), 'go' (loading ->
+  // session of the same cycle).
+  function applyRoom(r, prev) {
+    net.room = r;
+    net.trackId = r.set.track;
+    var y = r.set.year, yearChanged = y !== net.year;
+    net.year = y;
+    mergeRoom();
+    if (yearChanged) emit('year', y);
+    emit('room', r, prev);
+    if (prev.st !== 'lobby' && r.st === 'lobby') {
+      dropCycle();
+      resyncCar();                                 // (a car chosen during a Grand Prix may go out now)
+      emit('lobby');
+    } else if (maybeLoad(r)) {
+      // (nothing more for this message)
+    } else if (prev.st === 'loading' && r.st === 'session' && prev.rs === r.rs) {
+      if (r.set.mode === 'free') resyncCar();      // (a car chosen while loading may go out now)
+      emit('go', r.rs);
+    }
   }
 
   function emit(name, a, b, c) {
@@ -319,8 +432,8 @@
 
   function sendProfile() { send({ t: 'profile', name: profile.name, colour: profile.colour, car: profile.car }); }
 
-  // Parc fermé: the server keeps our car while a session is on. A car chosen meanwhile (or one that crossed a
-  // session start on the way) is sent again once the room is back in free practice.
+  // Parc fermé: the server keeps our car while the room loads and during a Grand Prix. A car chosen meanwhile (or one
+  // that crossed a start on the way) is sent again once the room is back in the lobby or in a free-practice session.
   function resyncCar() {
     if (!profile.car) return;
     for (var i = 0; i < net.roster.length; i++) {
@@ -388,6 +501,7 @@
     net.roster = roster;
     net.hostId = hostId;
     net.isHost = !!net.id && hostId === net.id;
+    mergeRoom();                                  // (ready / load from the room)
     rebuildPlayers();
     emit('players', roster);
     sig = sig.join('\n');
@@ -429,10 +543,8 @@
         if (!net.connected) return;
         var snap = cleanSession(m.s);
         if (!snap) return;                        // not a snapshot: keep the one we have
-        var was = net.session ? net.session.phase : 'free';
         net.session = snap;
-        emit('gp', snap);
-        if (snap.phase === 'free' && was !== 'free') resyncCar();
+        emit('gp', snap);                         // (the car goes out again with the room's 'lobby', not here)
         break;
       }
       case 'glno': {                              // our lap (or one of our bots', id) was not accepted: a short reason code
@@ -449,38 +561,41 @@
         if (isNum(m.now) && m.now > 0 && m.now < CLOCK_MAX) clockOff = m.now - localNow();   // rough until the first pong
         net.id = m.id;
         net.connected = true; net.connecting = false;
-        trackSeq = isNum(m.seq) ? m.seq : 0;
-        net.trackId = cleanTrackId(m.track);
-        net.year = cleanYear(m.year);
+        net.ded = m.ded === true;
+        net.address = hosting ? null : joinLabel;
+        net.loadedRs = -1; loadEmitRs = -1; reportedRs = -1;
         lastState = null;
+        // the room (a welcome without a usable one: a lobby with the defaults)
+        var room = cleanRoom(m.room) || defaultRoom();
+        net.room = room; net.trackId = room.set.track; net.year = room.set.year;
         applyRoster(m);
         if (pending) { var p = pending; pending = null; p.resolve({ ok: true }); }
         sendPing();
         emit('connected', { id: net.id, isHost: net.isHost });
         // the year before the track: the car (and so the racing line) is known before the track is built
         if (net.year !== null) emit('year', net.year);
-        if (net.trackId) emit('track', net.trackId);
+        emit('room', room, null);
+        maybeLoad(room);                          // a room that is loading / in a session: we load its track too
         break;
       }
-      case 'players': {                           // the roster, and the room year that rides along
+      case 'players': {                           // the roster (the room year is in the room now)
         if (!net.connected || !Array.isArray(m.players)) return;
-        var y = cleanYear(m.year), yearChanged = y !== net.year;
-        net.year = y;
         applyRoster(m);
-        if (yearChanged) emit('year', y);
+        break;
+      }
+      case 'room': {                              // the room's state, settings, ready flags, loading barrier
+        if (!net.connected) return;
+        var nr = cleanRoom(m);
+        if (!nr) return;                          // not a room: keep the one we have
+        applyRoom(nr, net.room || defaultRoom());
+        break;
+      }
+      case 'nostart': {                           // the host's start was refused: why, and who is not ready
+        if (!net.connected) return;
+        emit('nostart', cleanWhy(m.why), roomIds(m.wait));
         break;
       }
       case 'gone': break;                         // the roster that follows removes the player
-      case 'track': {
-        if (!net.connected || !cleanTrackId(m.id) || !isNum(m.seq)) return;
-        trackSeq = m.seq; net.trackId = m.id;
-        lastState = null;                         // our old pose belongs to the old track
-        progress = null;                          //   and so does our race distance (a new track ends a Grand Prix)
-        lastBotRows = null; botProg = {};         //   and our bots' poses / distances
-        clearPoses();
-        emit('track', m.id);
-        break;
-      }
       case 'hit': {                               // another car hit ours (bot: or one of our bots)
         if (!net.connected || !Array.isArray(m.i) || !isNum(m.from) || !isNum(m.i[0]) || !isNum(m.i[1])) return;
         if (!remotes[m.from]) return;             // (a player or somebody else's bot; never one of ours)
@@ -494,8 +609,10 @@
         break;
       }
       case 'error': {
+        // version: a v7.2+ server says which protocol it needs; an older one (protocol 1) does not
         lastError = m.code === 'full' ? '房間已滿（最多 16 人）'
-          : m.code === 'version' ? '遊戲版本與房主不同，無法加入'
+          : m.code === 'version' ? (!isNum(m.need) ? '房間的遊戲版本比較舊（F1Drive v7.1 以前），請房主更新到 v7.2 以上。'
+            : m.need > PROTOCOL ? '你的遊戲版本比較舊，請更新後再加入。' : '遊戲版本與房間不同，無法加入。')
           : m.code === 'busy' ? '伺服器忙碌中，請稍後再試'
           : m.code === 'flood' ? '傳送過於頻繁，伺服器已中斷連線'
           : m.code === 'password' ? (pwSent ? '房間密碼錯誤' : '這個房間需要密碼，請輸入房間密碼')
@@ -520,8 +637,10 @@
     }
     net.connected = false; net.connecting = false; net.isHost = false;
     net.id = 0; net.hostId = 0; net.slot = 0; net.trackId = null; net.year = null; net.hostInfo = null;
+    net.room = null; net.loadedRs = -1; net.ded = false; net.address = null;
+    loadEmitRs = -1; reportedRs = -1; joinLabel = null;
     net.roster = []; net.players = [];
-    remotes = {}; lastState = null; trackSeq = 0;
+    remotes = {}; lastState = null;
     // our bots were the room's: they are gone with it
     var hadBots = botSig !== '';
     net.bots = []; applyBotInfo(null);
@@ -574,12 +693,12 @@
   }
 
   function keepalive() {
-    if (!net.connected) return;
+    if (!onTrack()) return;                       // (lobby / loading: nobody is on a track)
     var now = nowMs();
     if (lastState && now - lastSendT >= KEEPALIVE_MS) {
       lastState[6] = 0; lastState[7] = 0;         // the loop is not running: the car is standing still
       lastSendT = now;
-      send({ t: 's', k: trackSeq, c: Math.round(now), s: lastState });
+      send({ t: 's', k: curRs(), c: Math.round(now), s: lastState });
     }
     if (lastBotRows && now - lastBotSendT >= KEEPALIVE_MS) {
       // our bots stand still with the loop (we simulate them): their last poses, parked, for the others
@@ -595,7 +714,7 @@
 
   // bot state rows -> one 'bs' message, or a few when they do not fit in one (never more than MSG_MAX bytes each)
   function sendRows(rows, now) {
-    var c = Math.round(now), head = '{"t":"bs","k":' + trackSeq + ',"c":' + c + ',"b":[', part = [], len = head.length + 2;
+    var c = Math.round(now), head = '{"t":"bs","k":' + curRs() + ',"c":' + c + ',"b":[', part = [], len = head.length + 2;
     for (var i = 0; i < rows.length; i++) {
       var s = JSON.stringify(rows[i]);
       if (part.length && len + s.length + 1 > MSG_MAX) {
@@ -615,14 +734,24 @@
     connected: false, connecting: false, isHost: false,
     id: 0, hostId: 0,
     slot: 0,                    // our grid slot (0 = pole), assigned by the server in join order
-    trackId: null,              // the room's current track id
-    year: null,                 // the room's season year (2010..2100) or null (none picked / not in a room)
+    trackId: null,              // = room.set.track: the room's chosen track (in the lobby it is NOT loaded yet)
+    year: null,                 // = room.set.year: the room's season year (2010..2100) or null (none picked / not in a room)
+    // The room (protocol 2), null outside one: a sanitised copy of the last `room` message (js/README-interfaces.md
+    // v7.2): {st: 'lobby' | 'loading' | 'session', rs (the load cycle), set: {track, year, mode: 'free' | 'gp', q, r,
+    // wear, bots, skill}, ready: [guest ids], rr (ready resets by a settings change), load: null | {at, until, wait,
+    // done, fail} (server clock; ids), len (m, the session's track length; 0 in the lobby)}
+    room: null,
+    loadedRs: -1,               // the rs of our last sendLoaded(rs, true); -1 none (reset on connect / disconnect)
+    ded: false,                 // the room is a dedicated server's (the host is the first player and migrates)
+    address: null,              // the address we joined ('203.0.113.5:24500'); null for the host (hostInfo has his)
     session: null,              // Grand Prix state from the server: a sanitised net/session.js snapshot (every
                                 //   documented field present and of its type), null when not in a room
     hostInfo: null,             // { port, addresses: [LAN IPv4], hasPassword } while we host
     roster: [],                 // everyone incl. us and the bots: [{id, name, colour, car, slot, last, best, isHost, isSelf,
                                 //   bot, skill, owner, mine}]: bot = a computer driver, skill its strength 0..1 (null
-                                //   = not told), owner the id of the player whose game simulates it, mine = ours
+                                //   = not told), owner the id of the player whose game simulates it, mine = ours;
+                                //   ready (guests from room.ready; the host and bots true), load ('' | 'wait' | 'done' |
+                                //   'fail' from room.load): protocol 2
     players: [],                // the OTHER cars to draw: [{id, name, colour, car, slot, bot, skill, owner, active,
                                 //   state:{x,y,z,heading,pitch,roll,speed,steer}}]; car: a CarSpec id or '' (not chosen /
                                 //   unknown). Humans and other players' bots alike; OUR bots are not in it (local cars).
@@ -631,10 +760,17 @@
     botSettings: { n: 0, skill: 'pro' },   // the room's computer drivers as the host set them: n in the room, skill =
                                 //   'rookie' | 'amateur' | 'pro' | 'legend' | 'mixed' (everybody sees it)
 
-    /** on('connected' | 'disconnected' | 'players' | 'track' | 'year' | 'hit' | 'gp' | 'lapRejected' | 'bots' |
-     *     'botHit' | 'botLapRejected', fn)
-     *  year: fn(year | null), the room year changed (also once right after 'connected', before 'track', when the
-     *  room has one; not on disconnect);  hit: fn(fromId, [ix, iz]);  gp: fn(sessionSnapshot), the object net.session now is;
+    /** on('connected' | 'disconnected' | 'players' | 'year' | 'room' | 'load' | 'go' | 'lobby' | 'nostart' | 'hit' | 'gp' |
+     *     'lapRejected' | 'bots' | 'botHit' | 'botLapRejected', fn)   ('track' is never emitted in protocol 2)
+     *  year: fn(year | null), room.set.year changed (also once right after 'connected', before 'room', when the
+     *  room has one; not on disconnect);
+     *  room: fn(room, prev), every accepted `room` message (prev: the room before) and on welcome (prev null);
+     *  load: fn(trackId, rs), once per load cycle when the room is loading or in a session with a track (a start, or we
+     *  joined then): build it, then sendLoaded(rs, ok, {len | why});  go: fn(rs), loading -> session of that cycle;
+     *  lobby: fn(), loading / session -> lobby;  nostart: fn(why, waitIds), our start was refused ('state' | 'track' |
+     *  'len' | 'busy' | 'not-ready' (waitIds: the guests not ready) | 'load' (nobody loaded));
+     *  order for one message: 'year', 'room', then 'lobby' / 'load' / 'go'; on welcome 'connected', 'year', 'room', 'load';
+     *  hit: fn(fromId, [ix, iz]);  gp: fn(sessionSnapshot), the object net.session now is;
      *  lapRejected: fn(why): 'too-fast' | 'too-soon' | 'inconsistent' | 'not-driven' (the server did not see the car
      *  cover the lap) | 'no-data' (too few car states reached it during the lap) | 'bad' | 'done' | 'not-racing' |
      *  'no-session' | '';
@@ -685,6 +821,7 @@
       var addr = parseAddress(address, DEFAULT_PORT);
       if (!addr) return Promise.resolve({ ok: false, error: '位址格式不正確（例：203.0.113.5 或 203.0.113.5:24500）' });
       if (!root.WebSocket) return Promise.resolve({ ok: false, error: '此環境不支援 WebSocket' });
+      joinLabel = addr.host + ':' + addr.port;     // net.address once we are in (cleared by teardown())
       return connect(addr, null, cleanPassword(opts && opts.password));
     },
 
@@ -695,8 +832,9 @@
     },
 
     /** setProfile({name, colour, car}): what the room sees of us. A field that is missing or not valid keeps its
-     *  previous value (car: a CarSpec id, /^[a-z0-9-]{1,40}$/). While a session is on the server keeps our car
-     *  (parc fermé); a car chosen meanwhile is sent again when the room is back in free practice. */
+     *  previous value (car: a CarSpec id, /^[a-z0-9-]{1,40}$/). While the room loads and during a Grand Prix the
+     *  server keeps our car (parc fermé); a car chosen meanwhile is sent again when the room is back in the lobby
+     *  (or the free-practice session begins). */
     setProfile: function (p) {
       p = p || {};
       var name = cleanName(p.name, profile.name), colour = cleanColour(p.colour, profile.colour);
@@ -707,25 +845,88 @@
     },
     getProfile: function () { return { name: profile.name, colour: profile.colour, car: profile.car }; },
 
-    /** Host only, free practice only: the season year for the room (2010..2100). -> true when the request was
-     *  sent. The server applies one pick right away, then the latest one a second later at most; the answer is
-     *  the 'year' event (net.year). A pick equal to net.year cancels one that is still waiting. */
-    setYear: function (y) {
-      if (!net.connected || !net.isHost || cleanYear(y) === null) return false;
-      if (net.session && net.session.phase !== 'free') return false;
-      return send({ t: 'year', y: y });
+    /* ---------- the room (protocol 2) ---------- */
+
+    /** Host, lobby: the room's settings. partial = any of {track: id, year: 2010..2100, mode: 'free' | 'gp',
+     *  q: 1..20, r: 1..99, wear: 1..5 (whole after Math.round)}, cleaned as the server cleans them: a field that is
+     *  not valid is left out (never clamped). -> true when sent (the answer is the next 'room'); false when we may not
+     *  or nothing valid is left. A changed track, year or mode clears the guests' ready flags (room.rr + 1). The
+     *  server takes at most 10 a second. */
+    setRoom: function (p) {
+      if (!net.connected || !net.isHost || !net.room || net.room.st !== 'lobby' || !p || typeof p !== 'object') return false;
+      var m = { t: 'set' }, any = false, v;
+      if (p.track !== undefined && (v = cleanTrackId(p.track)) !== null) { m.track = v; any = true; }
+      if (p.year !== undefined && (v = cleanYear(p.year)) !== null) { m.year = v; any = true; }
+      if (p.mode === 'free' || p.mode === 'gp') { m.mode = p.mode; any = true; }
+      if ((v = wholeIn(p.q, 1, Q_MAX)) !== null) { m.q = v; any = true; }
+      if ((v = wholeIn(p.r, 1, R_MAX)) !== null) { m.r = v; any = true; }
+      if ((v = wholeIn(p.wear, 1, WEAR_MAX)) !== null) { m.wear = v; any = true; }
+      return any ? send(m) : false;
     },
 
-    /** Call every frame with car.state; sends at most 20 times a second. */
+    /** Guest, lobby: ready (true) or not (false). -> true when sent (room.ready answers). */
+    setReady: function (on) {
+      if (!net.connected || net.isHost || !net.room || net.room.st !== 'lobby' || typeof on !== 'boolean') return false;
+      return send({ t: 'ready', on: on });
+    },
+
+    /** Host, lobby, room.set.track set: everybody loads it. opts = {len: the track length in m (200..100000;
+     *  round(trackData.lengthKm * 1000)), force: true = start with guests who are not ready}. -> true when sent; a
+     *  refusal comes back as 'nostart'. */
+    startRoom: function (opts) {
+      if (!net.connected || !net.isHost || !net.room || net.room.st !== 'lobby' || !net.room.set.track) return false;
+      var len = cleanLen(opts && opts.len);
+      if (len === null) return false;
+      var m = { t: 'start', len: len };
+      if (opts.force === true) m.force = true;
+      return send(m);
+    },
+
+    /** Host, loading, our own track built (loadedRs === room.rs): end the barrier now (不等了，開始). */
+    goNow: function () {
+      if (!net.connected || !net.isHost || !net.room || net.room.st !== 'loading' || net.loadedRs !== net.room.rs) return false;
+      return send({ t: 'go' });
+    },
+
+    /** Host, loading or session: everybody back to the lobby (回到大廳). */
+    backToLobby: function () {
+      if (!net.connected || !net.isHost || !net.room || (net.room.st !== 'loading' && net.room.st !== 'session')) return false;
+      return send({ t: 'back' });
+    },
+
+    /** Our track of load cycle rs is built (ok true; opts.len: its length in m) or cannot be (ok false; opts.why:
+     *  'no-track' | 'error'). Loading / session, rs === room.rs, once per rs. ok sets loadedRs: our car states may go
+     *  out once the room's session of that cycle is on. -> true when sent. */
+    sendLoaded: function (rs, ok, opts) {
+      var r = net.room;
+      if (!net.connected || !r || (r.st !== 'loading' && r.st !== 'session') || rs !== r.rs || reportedRs === rs) return false;
+      var m = { t: 'loaded', rs: rs, ok: ok === true };
+      var why = cleanWhy(opts && opts.why), len = cleanLen(opts && opts.len);
+      if (why) m.why = why;
+      if (len !== null) m.len = len;
+      if (!send(m)) return false;
+      reportedRs = rs;
+      if (m.ok) net.loadedRs = rs;
+      return true;
+    },
+
+    /** Host, lobby: the room's season (2010..2100) = setRoom({year: y}). The answer is the 'year' event (net.year). */
+    setYear: function (y) { return net.setRoom({ year: y }); },
+
+    /** Host, lobby: the room's track = setRoom({track: id}). It is loaded by everybody only at startRoom(). */
+    selectTrack: function (trackId) { return net.setRoom({ track: trackId }); },
+
+    /** Call every frame with car.state; sends at most 20 times a second. Nothing goes out unless the room's session
+     *  of the cycle we loaded is on (room.st 'session', loadedRs === room.rs). */
     sendState: function (s, force) {
-      if (!net.connected || !s) return;
+      if (!onTrack() || !s) return;
       var now = nowMs();
       if (!force && now - lastSendT < SEND_MS) return;
       if (!isNum(s.x) || !isNum(s.z) || !isNum(s.heading)) return;
       lastSendT = now;
       lastState = [s.x, isNum(s.y) ? s.y : 0, s.z, s.heading, isNum(s.pitch) ? s.pitch : 0,
         isNum(s.roll) ? s.roll : 0, isNum(s.speed) ? s.speed : 0, isNum(s.steer) ? s.steer : 0];
-      var msg = { t: 's', k: trackSeq, c: Math.round(now), s: lastState };
+      var msg = { t: 's', k: curRs(), c: Math.round(now), s: lastState };
       if (progress !== null) msg.g = Math.round(progress * 10000) / 10000;
       send(msg);
     },
@@ -733,18 +934,17 @@
     /** Race progress (laps completed + fraction of the lap) to send along with the state; null = none. */
     setProgress: function (v) { progress = isNum(v) ? v : null; },
 
-    /** Host only, free practice only: the room's computer drivers. list = [{name, car, colour, skill}] (one entry per
+    /** Host only, lobby only: the room's computer drivers. list = [{name, car, colour, skill}] (one entry per
      *  bot, in a fixed order: entry i is always bot i; name <= 16 characters, car a CarSpec id, colour '#rrggbb',
      *  skill 0..1 — anything missing or not valid gets the server's default: 'AI n', no car, a palette colour, the
      *  level's skill), or a number n (n bots with the defaults). skill = the room's level 'rookie' | 'amateur' |
      *  'pro' | 'legend' | 'mixed' (shown to everybody; anything else keeps the room's). The server gives at most
      *  16 - humans; bots 0..n-1 that exist keep their ids and slots. -> true when the request was sent; the answer is
-     *  the roster ('players', 'bots' events; net.bots). A human joining a full room in free practice takes the seat
-     *  of the newest bot. When we leave the room our bots go (out of a running session: DNF in the race; the others
-     *  race on). */
+     *  the roster ('players', 'bots' events; net.bots). n is also the room's wish (room.set.bots, skill:
+     *  room.set.skill). A human joining a full room in the lobby / free practice takes the seat of the newest bot.
+     *  When we leave the room our bots go (out of a running session: DNF in the race; the others race on). */
     setBots: function (list, skill) {
-      if (!net.connected || !net.isHost) return false;
-      if (net.session && net.session.phase !== 'free') return false;
+      if (!net.connected || !net.isHost || !net.room || net.room.st !== 'lobby') return false;
       var n;
       if (isNum(list)) { n = list; list = []; }
       else if (Array.isArray(list)) n = list.length;
@@ -775,9 +975,10 @@
     /** Host: our bots' car states. list = [{id, state, g?}] with state = car.state of each of OUR bots (ids from
      *  net.bots; anything else is left out) and g = its race progress (optional; else the one setBotProgress gave).
      *  Call it every frame like sendState: it sends at most ~20 times a second (force = now) in one 'bs' message
-     *  (or a few when it would not fit in 2 KB). -> true when something was sent. */
+     *  (or a few when it would not fit in 2 KB). Nothing goes out unless the room's session of the cycle we loaded
+     *  is on (as sendState). -> true when something was sent. */
     sendBotStates: function (list, force) {
-      if (!net.connected || !Array.isArray(list) || !list.length || botSig === '') return false;
+      if (!onTrack() || !Array.isArray(list) || !list.length || botSig === '') return false;
       var now = nowMs();
       if (!force && now - lastBotSendT < SEND_MS) return false;
       var rows = [], seen = {};
@@ -806,20 +1007,13 @@
       return true;
     },
 
-    /** Grand Prix, host only: action = 'start' (cfg {q, r, len: track length in m, wear: tyre wear 1..5}) |
-     *  'skip' | 'end' | 'again'. The session's year is the room's (net.year), set by the server.
-     *  -> true when the request was sent (the answer is the next 'gp' event; a refused one has no answer). */
-    gp: function (action, cfg) {
-      if (!net.connected || !net.isHost || GP_ACTIONS[action] !== 1) return false;
-      var m = { t: 'gp', a: action };
-      if (action === 'start') {
-        if (!cfg || !isNum(cfg.len)) return false;
-        if (isNum(cfg.q)) m.q = cfg.q;            // left out -> the server's default (3 / 5 / 1)
-        if (isNum(cfg.r)) m.r = cfg.r;
-        if (isNum(cfg.wear)) m.wear = cfg.wear;
-        m.len = cfg.len;
-      }
-      return send(m);
+    /** Grand Prix, host only, the room's session: action = 'skip' | 'end' | 'again'. 'end': during the race -> the
+     *  results; otherwise the room goes back to the lobby (as backToLobby). 'start' -> false: a room starts with
+     *  setRoom({mode: 'gp', q, r, wear}) + startRoom(). -> true when the request was sent (the answer is the next 'gp'
+     *  / 'room'; a refused one has no answer). */
+    gp: function (action) {
+      if (!net.connected || !net.isHost || GP_ACTIONS[action] !== 1 || !net.room || net.room.st !== 'session') return false;
+      return send({ t: 'gp', a: action });
     },
 
     /** Report a completed lap of Grand Prix session sid (qualifying or race). -> true when it was sent.
@@ -828,11 +1022,12 @@
      *  the car states it got from us cover it (sendState during the lap).
      *  A lap the server does not accept comes back as the 'lapRejected' event.
      *  botId (optional): the lap is one of OUR bots' (its states went out with sendBotStates); a rejection comes back
-     *  as 'botLapRejected' (botId, why). Any other id -> false, nothing sent. */
+     *  as 'botLapRejected' (botId, why). Any other id -> false, nothing sent. As sendState: only in the room's
+     *  session of the cycle we loaded. */
     sendGpLap: function (sid, time, at, botId) {
-      if (!net.connected || !isNum(sid) || !isNum(time) || !(time > 0)) return false;
+      if (!onTrack() || !isNum(sid) || !isNum(time) || !(time > 0)) return false;
       if (botId !== undefined && botId !== null && !isMine(botId)) return false;
-      var m = { t: 'gl', k: trackSeq, sid: sid, time: Math.round(time * 1000) / 1000 };
+      var m = { t: 'gl', k: curRs(), sid: sid, time: Math.round(time * 1000) / 1000 };
       if (isNum(at) && at > 0 && at < CLOCK_MAX) m.at = Math.round(at);
       if (isMine(botId)) m.id = botId;
       return send(m);
@@ -848,10 +1043,10 @@
     /** Our car hit car id (a player or somebody else's bot): (ix, iz) is the velocity change (m/s) their car is owed.
      *  fromBotId (optional): it was one of OUR bots that hit them (at most one report per bot per 40 ms goes out, as
      *  the server takes no more). Contacts among our own cars (our car, our bots) are settled locally: never sent.
-     *  -> true when it was sent. */
+     *  As sendState: only in the room's session of the cycle we loaded. -> true when it was sent. */
     sendHit: function (id, ix, iz, fromBotId) {
-      if (!net.connected || !isNum(id) || !isNum(ix) || !isNum(iz) || isMine(id) || id === net.id) return false;
-      var m = { t: 'hit', k: trackSeq, to: id, i: [Math.round(ix * 100) / 100, Math.round(iz * 100) / 100] };
+      if (!onTrack() || !isNum(id) || !isNum(ix) || !isNum(iz) || isMine(id) || id === net.id) return false;
+      var m = { t: 'hit', k: curRs(), to: id, i: [Math.round(ix * 100) / 100, Math.round(iz * 100) / 100] };
       if (fromBotId !== undefined && fromBotId !== null) {
         if (!isMine(fromBotId)) return false;
         var now = nowMs();
@@ -862,21 +1057,16 @@
       return send(m);
     },
 
-    /** Share lap times (seconds or null) with the room. botId (optional): one of OUR bots' times. */
+    /** Share lap times (seconds or null) with the room. botId (optional): one of OUR bots' times. As sendState: only
+     *  in the room's session of the cycle we loaded (the server clears every lap time at a start and in the lobby). */
     sendLap: function (last, best, botId) {
-      if (!net.connected) return false;
-      var m = { t: 'lap', last: isNum(last) ? last : null, best: isNum(best) ? best : null };
+      if (!onTrack()) return false;
+      var m = { t: 'lap', k: curRs(), last: isNum(last) ? last : null, best: isNum(best) ? best : null };
       if (botId !== undefined && botId !== null) {
         if (!isMine(botId)) return false;
         m.id = botId;
       }
       return send(m);
-    },
-
-    /** Host only: load this track for everyone (also restarts the session on the same track). */
-    selectTrack: function (trackId) {
-      if (!net.connected || !net.isHost || typeof trackId !== 'string') return false;
-      return send({ t: 'track', id: trackId });
     },
 
     /** Call once per frame before reading players[i].state / .active. */

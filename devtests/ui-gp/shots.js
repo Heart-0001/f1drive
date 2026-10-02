@@ -191,10 +191,12 @@ app.whenReady().then(async () => {
       await setNet(NET.off);
       await setGp(V.freeNoTrack);
       await shot('menu-1280-offline-notrack');
-      check('offline, no track: start disabled + hint', await js(`document.getElementById('gp-start').disabled && document.getElementById('gp-hint').textContent === '先選一條賽道' && !document.getElementById('gp-hint').classList.contains('hidden')`));
+      // (v7.2: a Grand Prix starts from the start panel (a card, 大獎賽, 開始); the tab tells how, and offers the loaded track's)
+      check('offline, no track: no start button in the tab, the hint 點一條賽道，在出發面板選「大獎賽」再按開始。, no 在目前賽道開大獎賽…', await js(`!document.getElementById('gp-start') && !document.getElementById('gp-setup') &&
+        document.getElementById('gp-hint').textContent === '點一條賽道，在出發面板選「大獎賽」再按開始。' && !document.getElementById('gp-hint').classList.contains('hidden') && !__rect('gp-open').shown`));
       await setGp(V.freeTrack);
       await shot('menu-1280-offline-track');
-      check('offline, track loaded: start enabled, no hint', await js(`!document.getElementById('gp-start').disabled && document.getElementById('gp-hint').classList.contains('hidden')`));
+      check('offline, track loaded: 在目前賽道開大獎賽… offered, the hint stays', await js(`__rect('gp-open').shown && document.getElementById('gp-hint').textContent === '點一條賽道，在出發面板選「大獎賽」再按開始。'`));
       check('menu has no horizontal overflow (1280)', await js(`document.documentElement.scrollWidth <= innerWidth && document.getElementById('mp-panel').scrollWidth <= document.getElementById('mp-panel').clientWidth`),
         await rect('mp-panel'));
       const heads = await js(`[__rect(document.querySelector('.menu-head')), __rect(document.querySelector('.hints')), __rect('keys-pad')]`);
@@ -223,17 +225,20 @@ app.whenReady().then(async () => {
 
       await setNet(NET.host(3)); await setGp(V.freeHost);
       await shot('menu-1280-host-free');
-      check('host: start enabled + room hint', await js(`!document.getElementById('gp-start').disabled && /所有人/.test(document.getElementById('gp-hint').textContent)`));
+      // (v7.2: in a room the Grand Prix is set up and started in the room lobby: the tab says so, to the host and the guests)
+      const ROOM_HINT = '大獎賽的圈數、輪胎損耗和電腦車手在房間大廳設定。';
+      check('host: no start in the tab, the room hint (set in the lobby), no 在目前賽道開大獎賽…', await js(`!document.getElementById('gp-start') && document.getElementById('gp-hint').textContent === ${JSON.stringify(ROOM_HINT)} && !__rect('gp-open').shown`),
+        await js(`document.getElementById('gp-hint').textContent`));
       await setGp(V.freeHostNoTrack);
-      check('host without a track: start disabled, startHint shown', await js(`document.getElementById('gp-start').disabled && document.getElementById('gp-hint').textContent === '先幫房間選一條賽道'`));
+      check('host without a track: the same room hint', await js(`document.getElementById('gp-hint').textContent === ${JSON.stringify(ROOM_HINT)} && !__rect('gp-open').shown`));
       await setNet(NET.guest(3)); await setGp(V.freeGuest);
       await shot('menu-1280-guest-free');
-      check('guest: no Q / R / start, told that the host starts it', await js(`__rect('gp-setup').shown === false && /房主/.test(document.getElementById('gp-hint').textContent)`),
+      check('guest: no Q / R / start in the tab, the room hint', await js(`!document.getElementById('gp-setup') && !__rect('gp-q').shown && !__rect('gp-open').shown && document.getElementById('gp-hint').textContent === ${JSON.stringify(ROOM_HINT)}`),
         await js(`document.getElementById('gp-hint').textContent`));
 
       await setNet(NET.host(3)); await setGp(V.quali3({}));
       await shot('menu-1280-host-quali3');
-      check('host in quali: skip + end shown, again hidden, setup hidden', await js(`__rect('gp-skip').shown && __rect('gp-end').shown && !__rect('gp-again').shown && !__rect('gp-setup').shown`));
+      check('host in quali: skip + end shown, again hidden, no setup in the tab', await js(`__rect('gp-skip').shown && __rect('gp-end').shown && !__rect('gp-again').shown && !document.getElementById('gp-setup') && !__rect('gp-q').shown`));
       await setNet(NET.guest(8)); await setGp(V.race8({ canControl: false }));
       await shot('menu-1280-guest-race8');
       check('guest in race: no action buttons', await js(`!__rect('gp-actions').shown && __rect('gp-standings').shown`));
@@ -242,7 +247,8 @@ app.whenReady().then(async () => {
       check('menu standings rows fit (race 16)', (await js(`__rows('#gp-standings .gp-row')`)).bad.length === 0, await js(`__rows('#gp-standings .gp-row')`));
       await setGp(V.results16({}));
       await shot('menu-1280-host-results16');
-      check('host in results: again + end shown, skip hidden', await js(`__rect('gp-again').shown && __rect('gp-end').shown && !__rect('gp-skip').shown`));
+      // (v7.2: a room's results offer 再來一場 / 回到大廳 to the host: no 結束 back to free practice in a room)
+      check('host in results (a room): again + 回到大廳 shown, 結束 and skip hidden', await js(`__rect('gp-again').shown && __rect('gp-lobby').shown && !__rect('gp-end').shown && !__rect('gp-skip').shown`));
       check('menu standings rows fit (results 16, with best lap)', (await js(`__rows('#gp-standings .gp-row')`)).bad.length === 0, await js(`__rows('#gp-standings .gp-row')`));
       check('menu panel: no horizontal overflow with 16 drivers', await js(`document.getElementById('mp-panel').scrollWidth <= document.getElementById('mp-panel').clientWidth`));
       check('names are escaped (no element injected from a name)', await js(`!document.querySelector('#gp-standings img, #gp-standings b, #gp-spec i, #hud-gp img, #gp-results img, #gp-results-spec i')`));
@@ -281,7 +287,7 @@ app.whenReady().then(async () => {
       await setNet(NET.off); await setGp(V.freeTrack);
       const clicked = await js(`(function () {
         var c = [].slice.call(document.querySelectorAll('.card')).filter(function (n) { return n.textContent.toLowerCase().indexOf(${JSON.stringify(TRACK)}) >= 0; })[0];
-        if (!c) return 'no card'; c.click(); return c.querySelector('.card-name').textContent; })()`);
+        if (!c) return 'no card'; c.click(); document.getElementById('setup-go').click(); return c.querySelector('.card-name').textContent; })()`);
       await sleep(1800);
       let driving = await js(`!document.getElementById('hud').classList.contains('hidden')`);
       check('track loads and the HUD shows (' + clicked + ')', driving, await js(`document.getElementById('error-text').textContent`));
@@ -357,7 +363,7 @@ app.whenReady().then(async () => {
         await setNet(NET.host(16)); await setGp(V.results16({})); await js(`window.__hud = { lap: 5, lapTotal: 5 }`);
         await shot('hud-' + tag + '-results16-host');
         let st = await js(`({ res: __rect('gp-results'), body: __rect('gp-results-body'), gp: __rect('hud-gp'), W: innerWidth, H: innerHeight,
-          rows: document.querySelectorAll('#gp-results tbody tr').length, again: __rect('gp-res-again'), end: __rect('gp-res-end'), close: __rect('gp-close'),
+          rows: document.querySelectorAll('#gp-results tbody tr').length, again: __rect('gp-res-again'), end: __rect('gp-res-end'), lobby: __rect('gp-res-lobby'), close: __rect('gp-close'),
           cut: [].slice.call(document.querySelectorAll('#gp-results td')).filter(function (td) { return td.className !== 'c-name' && td.scrollWidth > td.clientWidth + 1; }).length,
           names: [].slice.call(document.querySelectorAll('#gp-results .mp-pname')).map(function (n) { return n.scrollWidth > n.clientWidth + 1 ? Math.round(n.getBoundingClientRect().width) : 999; }),
           fl: (function () { var f = document.querySelectorAll('#gp-results td.fl'); return f.length ? getComputedStyle(f[0]).color + '|' + f.length : ''; })(),
@@ -365,7 +371,8 @@ app.whenReady().then(async () => {
         check(tag + ' results overlay: 16 rows inside the window, no scrolling needed, clear of the session box and the HUD mirrors', st.rows === 16 && st.res.shown && st.res.x >= 0 && st.res.y >= 0 &&
           st.res.r <= st.W && st.res.b <= st.H && st.body.sh <= st.body.ch + 1 && st.cut === 0 && st.res.x >= st.gp.r && Math.min.apply(null, st.names) >= 120 && st.fl === 'rgb(201, 139, 255)|1' && st.mir === 0,
           { res: st.res.x + ',' + st.res.y + ' ' + st.res.w + 'x' + st.res.h, body: st.body.sh + '/' + st.body.ch, gpRight: st.gp.r, minCutName: Math.min.apply(null, st.names), fl: st.fl, mir: st.mir });
-        check(tag + ' results overlay (host): again / end / close shown', st.again.shown && st.end.shown && st.close.shown);
+        // (v7.2: a room's host gets 再來一場 / 回到大廳 / 關閉; 結束 (back to free practice) is single player only)
+        check(tag + ' results overlay (a room\'s host): again / 回到大廳 / close shown, no 結束', st.again.shown && st.lobby.shown && !st.end.shown && st.close.shown);
         check(tag + ' results texts', /7:11\.234/.test(st.text) && /\+2\.137/.test(st.text) && /\+1:02\.345/.test(st.text) && /\+1 圈/.test(st.text) && /未完賽 DNF/.test(st.text) && /離線/.test(st.text) && /1:22\.901/.test(st.text), st.text);
         await setNet(NET.guest(16)); await setGp(V.results16({ canControl: false }));
         await shot('hud-' + tag + '-results16-guest');
@@ -401,38 +408,63 @@ app.whenReady().then(async () => {
     if (!ONLY || ONLY === 'checks') {
       await size(1280, 720);
       // our own callbacks (replaces main.js's: nothing of the game is needed from here on)
-      await js(`window.__calls = []; F1.ui.init({ onGpStart: function (c) { __calls.push(['start', c]); }, onGpAction: function (a) { __calls.push(['action', a]); } });
-        F1.ui.showMenu(window.F1_TRACKS); true`);
+      // (v7.2: a card only tells main.js (onSelectTrack); the start panel, drawn from main.js's SetupView (a mock here), starts
+      //  with 開始 (onSetupStart); the mode / laps / wear are its own controls)
+      await js(`window.__calls = []; F1.ui.init({ onSelectTrack: function (td) { __calls.push(['select', td.id]); }, onSetupStart: function (c) { __calls.push(['start', c]); },
+        onSetup: function (p) { __calls.push(['setup', p]); }, onGpAction: function (a) { __calls.push(['action', a]); }, onRoomBack: function () { __calls.push(['back']); } });
+        F1.ui.showMenu(window.F1_TRACKS);
+        window.__panel = function (enabled) { var td = F1_TRACKS.filter(function (t) { return t.id === 'it-1922'; })[0], s = F1.ui.getSetup();
+          F1.ui.setSetup({ show: 'setup', room: false, track: td, trackId: td.id, trackMissing: false, current: false, mode: s.mode, q: s.q, r: s.r, wear: s.wear, canEdit: true,
+            go: { show: true, enabled: enabled, label: '開始', sub: '' }, hint: '', note: '', banner: '' }); return true; };
+        true`);
       const calls = () => js(`JSON.stringify(__calls)`);
       const setField = (id, v) => js(`(function () { var e = document.getElementById(${JSON.stringify(id)}); e.focus(); e.value = ${JSON.stringify(v)};
         e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true })); return e.value; })()`);
 
       await setNet(NET.off); await setGp(V.freeNoTrack);
-      await js(`document.getElementById('gp-start').click()`);
-      await mouseClick('gp-start');
-      check('start disabled: clicking does nothing', (await calls()) === '[]', await calls());
-      await setGp(V.freeTrack);
+      await js(`document.querySelector('#track-grid .card').click()`);
+      check('a card click calls onSelectTrack only (nothing starts)', (await calls()) === '[["select","' + (await js(`F1_TRACKS[+document.querySelector('#track-grid .card').getAttribute('data-i')].id`)) + '"]]', await calls());
+      await js(`__calls.length = 0; __panel(false)`);
+      await js(`document.getElementById('setup-go').click()`);
+      await mouseClick('setup-go');
+      check('開始 disabled: clicking does nothing', (await calls()) === '[]', await calls());
+      await js(`__panel(true)`);
+      await js(`document.querySelector('#setup-mode [data-m="gp"]').click(); __panel(true)`);
       check('Q / R fields: typed values are clamped', (await setField('gp-q', '7')) === '7' && (await setField('gp-r', '250')) === '99' && (await setField('gp-q', '0')) === '1' &&
         (await setField('gp-q', '-4')) === '1' && (await setField('gp-q', '2.6')) === '3' && (await setField('gp-r', '')) === '99' && (await setField('gp-q', '33')) === '20');
       await setField('gp-q', '4'); await setField('gp-r', '12');
-      await mouseClick('gp-start');
-      check('start (real mouse click) -> onGpStart({q: 4, r: 12, wear: 1})', (await calls()) === '[["start",{"q":4,"r":12,"wear":1}]]', await calls());
+      await js(`__calls.length = 0`);
+      await mouseClick('setup-go');
+      check('開始 (real mouse click) -> onSetupStart({mode: gp, q: 4, r: 12, wear: 1, force: false})', (await calls()) === '[["start",{"mode":"gp","q":4,"r":12,"wear":1,"force":false}]]', await calls());
       // typed but not committed (no change event): start still sends the cleaned value
-      await js(`__calls.length = 0; var e = document.getElementById('gp-r'); e.value = '500'; e.dispatchEvent(new Event('input', { bubbles: true })); document.getElementById('gp-start').click()`);
-      check('start cleans an uncommitted value -> {q: 4, r: 99, wear: 1}', (await calls()) === '[["start",{"q":4,"r":99,"wear":1}]]', await calls());
+      await js(`__calls.length = 0; var e = document.getElementById('gp-r'); e.value = '500'; e.dispatchEvent(new Event('input', { bubbles: true })); document.getElementById('setup-go').click()`);
+      check('開始 cleans an uncommitted value -> {mode: gp, q: 4, r: 99, wear: 1, force: false}', (await calls()) === '[["start",{"mode":"gp","q":4,"r":99,"wear":1,"force":false}]]', await calls());
       await setField('gp-q', '6'); await setField('gp-r', '42'); await setField('mp-name', 'UI Tester');
-      check('localStorage holds the laps', (await js(`localStorage.getItem('f1drive.gp')`)) === '{"q":6,"r":42,"wear":1}', await js(`localStorage.getItem('f1drive.gp')`));
+      check('localStorage holds the laps (and the mode, v7.2)', (await js(`localStorage.getItem('f1drive.gp')`)) === '{"q":6,"r":42,"wear":1,"mode":"gp"}', await js(`localStorage.getItem('f1drive.gp')`));
+      await js(`F1.ui.setSetup({ show: 'tracks', room: false }); true`);
 
       await js(`__calls.length = 0`);
       await setGp(V.quali3({}));
       await mouseClick('gp-skip'); await mouseClick('gp-end');
-      check('menu: skip / end -> onGpAction', (await calls()) === '[["action","skip"],["action","end"]]', await calls());
+      // (v7.2: in a room 結束大獎賽 in qualifying sends everybody back to the lobby: asked first)
+      check('menu: 結束大獎賽 in a room\'s qualifying asks first (要結束這場大獎賽並回到房間大廳嗎？), no call yet', (await rect('gp-confirm')).shown && !(await rect('gp-actions')).shown && (await calls()) === '[["action","skip"]]', await calls());
+      await mouseClick('gp-confirm-yes');
+      check('menu: skip / end (confirmed) -> onGpAction', (await calls()) === '[["action","skip"],["action","end"]]', await calls());
       await js(`__calls.length = 0`);
       await setGp(V.results16({}));
       await mouseClick('gp-again');
       check('menu: again -> onGpAction("again")', (await calls()) === '[["action","again"]]', await calls());
 
-      // HUD: results overlay buttons, pointer-events
+      // a room's results: 回到大廳 (the tab and the overlay) -> onRoomBack
+      await js(`__calls.length = 0`);
+      await mouseClick('gp-lobby');
+      check('menu (a room\'s results): 回到大廳 -> onRoomBack', (await calls()) === '[["back"]]', await calls());
+      await js(`__calls.length = 0; F1.ui.hideMenu()`);
+      await sleep(150);
+      await mouseClick('gp-res-lobby');
+      check('overlay (a room\'s results): 回到大廳 -> onRoomBack', (await calls()) === '[["back"]]', await calls());
+      // HUD: results overlay buttons, pointer-events (single player: 再來一場 / 結束 / 關閉)
+      await setNet(NET.off); await setGp(Object.assign(V.results16({}), { online: false }));
       await js(`__calls.length = 0; F1.ui.hideMenu()`);
       await sleep(150);
       let hit = await js(`(function () { function at(id, fx, fy) { var r = document.getElementById(id).getBoundingClientRect(); var e = document.elementFromPoint(r.left + r.width * fx, r.top + r.height * fy); return e ? (e.id || e.tagName) : null; }
@@ -443,9 +475,9 @@ app.whenReady().then(async () => {
       check('overlay buttons do not keep the focus', await js(`document.activeElement === document.body || document.activeElement == null`), await js(`document.activeElement && (document.activeElement.id || document.activeElement.tagName)`));
       await mouseClick('gp-close');
       check('close hides the overlay, no callback', !(await rect('gp-results')).shown && (await calls()) === '[["action","again"],["action","end"]]');
-      await setGp(V.results16({}));
+      await setGp(Object.assign(V.results16({}), { online: false }));
       check('closed overlay stays closed on the next results update', !(await rect('gp-results')).shown);
-      await setGp(V.quali3({})); await setGp(V.results16({}));
+      await setGp(Object.assign(V.quali3({}), { online: false })); await setGp(Object.assign(V.results16({}), { online: false }));
       check('overlay is back after a phase change', (await rect('gp-results')).shown);
       await mouseClick('gp-close');
       await setGp(V.results16({ sid: 7 }));
@@ -522,13 +554,18 @@ app.whenReady().then(async () => {
     if (!ONLY || ONLY === 'real') {
       await load();
       await size(1280, 720);
-      await js(`[].slice.call(document.querySelectorAll('.card')).filter(function (n) { return n.textContent.toLowerCase().indexOf(${JSON.stringify(TRACK)}) >= 0; })[0].click()`);
+      await js(`[].slice.call(document.querySelectorAll('.card')).filter(function (n) { return n.textContent.toLowerCase().indexOf(${JSON.stringify(TRACK)}) >= 0; })[0].click(); document.getElementById('setup-go').click()`);
       await sleep(1800);
       const ready = await js(`(function () {
         var gp = F1.gp;
         if (!gp || typeof gp.view !== 'function') return 'no F1.gp';
         window.__calls = [];
-        F1.ui.init({ onGpStart: function (c) { __calls.push(['start', c, gp.start(c, 5000)]); }, onGpAction: function (a) { __calls.push(['action', a, gp.action(a)]); } });
+        // (v7.2: the start panel's 開始 -> onSetupStart; the harness starts the real F1.gp and puts the cards back, as main.js does)
+        F1.ui.init({ onSetupStart: function (c) { __calls.push(['start', c, gp.start(c, 5000)]); F1.ui.setSetup({ show: 'tracks', room: false }); },
+          onSetup: function () {}, onGpAction: function (a) { __calls.push(['action', a, gp.action(a)]); } });
+        window.__panel = function () { var td = F1_TRACKS.filter(function (t) { return t.id === 'it-1922'; })[0], s = F1.ui.getSetup();
+          F1.ui.setSetup({ show: 'setup', room: false, track: td, trackId: td.id, trackMissing: false, current: true, mode: s.mode, q: s.q, r: s.r, wear: s.wear, canEdit: true,
+            go: { show: true, enabled: true, label: '重新開始', sub: '' }, hint: '', note: '', banner: '' }); return true; };
         gp.init({ net: null, getProfile: F1.ui.getProfile });
         window.__push = function () {
           var v = gp.view(); v.canStart = true; v.startHint = '';
@@ -542,14 +579,15 @@ app.whenReady().then(async () => {
         F1.ui.showMenu(window.F1_TRACKS);
         return gp.phase;
       })()`);
-      check('real gp: idle offline session, panel ready', ready === 'free' && await js(`!document.getElementById('gp-start').disabled && __rect('gp-setup').shown`), ready);
+      await js(`__panel(); document.querySelector('#setup-mode [data-m="gp"]').click(); __panel(); true`);
+      check('real gp: idle offline session, the start panel ready (開始 enabled, 大獎賽)', ready === 'free' && await js(`!document.getElementById('setup-go').disabled && __rect('setup-go').shown && __rect('setup-gp').shown`), ready);
       const field = (id, v) => js(`(function () { var e = document.getElementById(${JSON.stringify(id)}); e.value = ${JSON.stringify(v)};
         e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true })); return e.value; })()`);
       await field('gp-q', '1'); await field('gp-r', '2');
-      await mouseClick('gp-start');
+      await mouseClick('setup-go');
       let s = await js(`({ phase: F1.gp.phase, calls: JSON.stringify(__calls), state: document.getElementById('gp-state').innerText, self: document.getElementById('gp-self').innerText,
-        setup: __rect('gp-setup').shown, skip: __rect('gp-skip').shown, end: __rect('gp-end').shown, rows: document.querySelectorAll('#gp-standings .gp-row').length })`);
-      check('real gp: start button -> quali, menu panel shows the session', s.phase === 'quali' && s.calls === '[["start",{"q":1,"r":2,"wear":1},true]]' && /排位賽/.test(s.state) && /0 \/ 1/.test(s.self) && !s.setup && s.skip && s.end && s.rows === 1, s);
+        setup: __rect('setup').shown, skip: __rect('gp-skip').shown, end: __rect('gp-end').shown, rows: document.querySelectorAll('#gp-standings .gp-row').length })`);
+      check('real gp: 開始 -> quali, menu panel shows the session', s.phase === 'quali' && s.calls === '[["start",{"mode":"gp","q":1,"r":2,"wear":1,"force":false},true]]' && /排位賽/.test(s.state) && /0 \/ 1/.test(s.self) && !s.setup && s.skip && s.end && s.rows === 1, s);
       await shot('real-menu-quali');
       await js(`F1.ui.hideMenu()`);
       await js(`__step(100); F1.gp.lapDone(90); __push()`);
@@ -592,9 +630,9 @@ app.whenReady().then(async () => {
       s = await js(`({ phase: F1.gp.phase, calls: JSON.stringify(__calls), state: document.getElementById('gp-state').innerText })`);
       check('real gp: 跳過排位 -> grid', s.phase === 'grid' && s.calls === '[["action","skip",true]]' && /起跑/.test(s.state), s);
       await mouseClick('gp-end');
-      s = await js(`({ phase: F1.gp.phase, setup: __rect('gp-setup').shown, session: __rect('gp-session').shown, q: document.getElementById('gp-q').value, r: document.getElementById('gp-r').value,
-        start: !document.getElementById('gp-start').disabled, box: __rect('hud-gp').shown })`);
-      check('real gp: 結束大獎賽 -> free, setup back with the remembered laps', s.phase === 'free' && s.setup && !s.session && s.q === '1' && s.r === '2' && s.start, s);
+      s = await js(`({ phase: F1.gp.phase, open: __rect('gp-open').shown, session: __rect('gp-session').shown, q: document.getElementById('gp-q').value, r: document.getElementById('gp-r').value,
+        box: __rect('hud-gp').shown })`);
+      check('real gp: 結束大獎賽 -> free, 在目前賽道開大獎賽… offered again, the laps remembered', s.phase === 'free' && s.open && !s.session && s.q === '1' && s.r === '2', s);
       await shot('real-menu-free-again');
     }
     /* ================= init order: a callback fired from inside init() uses the whole API ================= */

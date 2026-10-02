@@ -12,6 +12,12 @@
    results, the room roster; their minimap dots ringed in the second livery colour; the car cards say who drives them;
    setLoading's optional title (電腦車手熟悉賽道中…). The search also takes the Taiwanese names of a round (日本站, 日本大獎賽),
    日本GP and full-width letters; searchTracks(list, query) is that search without the DOM (tests / harnesses).
+   v7.2: the left area of the menu shows one of three views (setSetup, a SetupView from main.js): the track cards, the
+   start panel (出發面板: a card click opens it, 開始 drives; single player) / the room lobby (房間大廳: players, 準備,
+   the room's settings host-editable and read-only for the guests, the host's 開始 / 不等了，直接開始), and the cards as
+   the host's track picker. The laps, the tyre wear and the 電腦車手 rows moved from the 大獎賽 tab into it (same ids);
+   the solo setup {mode, q, r, wear} is remembered ('f1drive.gp', getSetup). setRoomLoading draws a room's loading
+   screen; setupKey(k) lets main.js hand it Esc / the controller's A and B.
    Classic script; uses F1.telemetry when it is loaded, F1.cars.ersNote for the battery line of the car cards,
    F1.COCKPIT_FOV for the range of the FOV slider. */
 (function () {
@@ -22,9 +28,12 @@
   var callbacks = {
     onSelectTrack: null, onExitToMenu: null,
     onCreateRoom: null, onJoinRoom: null, onLeaveRoom: null, onProfile: null,
-    onGpStart: null, onGpAction: null,
+    onGpAction: null,
     onYear: null, onCar: null, onAudio: null, onMirrors: null,
-    onFov: null, onCompound: null, onBots: null
+    onFov: null, onCompound: null, onBots: null,
+    // v7.2: the start panel / the room lobby
+    onSetupStart: null, onSetupBack: null, onSetup: null, onReady: null,
+    onRoomTrackPicker: null, onRoomBack: null, onRoomGo: null, onGpOpen: null
   };
   var inited = false;
   var tele = null;          // F1.telemetry once init() found it and its canvas
@@ -111,7 +120,9 @@
   var GP_Q_MAX = 20, GP_R_MAX = 99;
   var PHASE_NAME = { quali: '排位賽', grid: '起跑', race: '正賽', results: '成績' };
   var WEAR_MAX = 5;
-  var gpCfg = { q: 3, r: 5, wear: 1 };   // laps typed into the panel and the tyre wear multiplier (remembered)
+  // the solo setup of the start panel (remembered; also the host's preferences for a fresh room): mode 'free' (自由練習)
+  // or 'gp' (大獎賽), the laps and the tyre wear multiplier
+  var gpCfg = { q: 3, r: 5, wear: 1, mode: 'free' };
   var gpView = {};              // last object given to setGp
   var gpOn = false;             // a session is on: the session box replaces the room roster box in the HUD
   var gpPhase = 'free';         // phase of the last setGp (a session starting opens the 大獎賽 tab, locks the cars)
@@ -121,6 +132,22 @@
   var gpEndsAt = 0;             // performance.now() time at which the race closes, 0 = no countdown
   var lightsN = -1, lightsGo = false, lightsWatch = false;
   var padOn = false, padId = '';
+  var gpConfirm = false;        // the 大獎賽 tab asks before 結束大獎賽 sends a room back to its lobby
+
+  // v7.2: the start panel / the room lobby (setSetup), the room's loading screen (setRoomLoading)
+  var MODE_NOTE = { free: '自由練習：不計成績，隨時可以按 Esc 回選單。', gp: '大獎賽：先跑排位賽決定起跑順序，再跑正賽。' };
+  var setupV = null;            // the last SetupView
+  var setupSig = '';            // what renderSetup last drew (only a change touches the DOM)
+  var shownView = 'tracks';     // the view on screen: 'tracks' | 'setup' | 'picker'
+  var focusKey = '';            // the view the focus was last moved for (moved only when the view changes)
+  var focusWait = null;         // the button that view wanted focused but could not be yet (disabled)
+  var roomRows = null;          // where the track / season rows sit: true = in the room settings, false = solo layout
+  var confirmKind = '';         // the action block's confirm row: '' | 'force' (仍要開始) | 'back' (回到大廳)
+  var gridScroll = 0;           // the card grid's scroll position while the panel shows
+  var rlView = null;            // the last RoomLoadingView, null = hidden
+  var rlSig = '';
+  var resumeFn = null;          // main.js's resume handler (繼續駕駛)
+  var copyTimer = 0;
 
   // HUD text cache (only touch the DOM when the string changed)
   var cache = {};
@@ -354,7 +381,17 @@
       var tr = tracks[j];
       cards.push({ node: nodes[j], key: searchKey(tr, zhOf(tr)) });
     }
+    markCurrentCard();
     applyFilter();
+  }
+
+  // v7.2: the card of the loaded track says 目前賽道 (Esc while driving opens the cards: 繼續駕駛 or another track)
+  var loadedId = '';
+  function markCurrentCard() {
+    for (var i = 0; i < cards.length; i++) {
+      var on = !!loadedId && !!builtFor && !!builtFor[i] && builtFor[i].id === loadedId;
+      if (cards[i].node.classList.contains('current') !== on) cards[i].node.classList.toggle('current', on);
+    }
   }
 
   // A term of the query. 1..3 Latin letters / digits must start a word ('us', 'uk', 'gb', 'it', 'spa': else 'us' would
@@ -527,14 +564,10 @@
       if (cache.prows !== rows) { cache.prows = rows; el.mpPlayers.innerHTML = rows; }
     }
 
-    // track grid: only the host picks
+    // track grid: in a room only the host picks (v7.2: the cards show there only as his picker; its banner, #track-lock,
+    // is the setup view's: renderSetup)
     gridLocked = connected && !v.isHost;
     el.grid.classList.toggle('locked', gridLocked);
-    var lock = connected ? (v.isHost ? '你是房主：點選賽道，房間裡所有人會一起載入並回到起跑格。' :
-      (v.roomTrack ? '賽道由房主選擇；房主換賽道時，所有人會一起載入。' : '等待房主選擇賽道…')) : '';
-    if (connected && v.lockText) lock = v.lockText;
-    el.lock.textContent = lock;
-    el.lock.classList.toggle('hidden', !lock);
 
     // HUD player list
     var hudRows = connected ? playerRows(roster, true) : '';
@@ -624,22 +657,29 @@
         gpCfg.q = cleanLaps(o.q, GP_Q_MAX, gpCfg.q);
         gpCfg.r = cleanLaps(o.r, GP_R_MAX, gpCfg.r);
         gpCfg.wear = cleanWear(o.wear, gpCfg.wear);
+        if (o.mode === 'gp' || o.mode === 'free') gpCfg.mode = o.mode;
       }
     } catch (err) { /* storage unavailable or corrupt: defaults */ }
   }
 
   function saveGpStore() {
-    try { window.localStorage.setItem(GP_STORE_KEY, JSON.stringify(gpCfg)); } catch (err) { /* ignore */ }
+    try { window.localStorage.setItem(GP_STORE_KEY, JSON.stringify({ q: gpCfg.q, r: gpCfg.r, wear: gpCfg.wear, mode: gpCfg.mode })); } catch (err) { /* ignore */ }
   }
 
-  // Fields -> gpCfg (clamped), and the cleaned values back into the fields.
+  // Fields -> gpCfg (clamped), and the cleaned values back into the fields. Only while the fields may be edited (alone;
+  // the host in the lobby): a guest's fields show the room's values. -> the partial that changed ({q}, {r}), or null.
   function commitLaps() {
-    gpCfg.q = cleanLaps(el.gpQ.value, GP_Q_MAX, gpCfg.q);
-    gpCfg.r = cleanLaps(el.gpR.value, GP_R_MAX, gpCfg.r);
-    el.gpQ.value = String(gpCfg.q);
-    el.gpR.value = String(gpCfg.r);
+    if (!setupEditable()) return null;
+    var q = cleanLaps(el.gpQ.value, GP_Q_MAX, gpCfg.q), r = cleanLaps(el.gpR.value, GP_R_MAX, gpCfg.r), ch = null;
+    if (q !== gpCfg.q || (setupV && setupV.room && q !== setupV.q)) (ch = ch || {}).q = q;
+    if (r !== gpCfg.r || (setupV && setupV.room && r !== setupV.r)) (ch = ch || {}).r = r;
+    gpCfg.q = q; gpCfg.r = r;
+    el.gpQ.value = String(q);
+    el.gpR.value = String(r);
     saveGpStore();
+    return ch;
   }
+  function setupEditable() { return !setupV || setupV.canEdit !== false; }
 
   function count(n) { n = Math.floor(Number(n)); return n > 0 ? n : 0; }
 
@@ -765,20 +805,21 @@
     renderTyre();
     renderBots();
 
-    /* menu panel */
-    setShown('gpsetup', el.gpSetup, !on && ctl);
-    var noStart = on || !ctl || !v.canStart;
-    if (el.gpStart.disabled !== noStart) el.gpStart.disabled = noStart;
+    /* menu panel (v7.2: a Grand Prix is started from the start panel / the room lobby, not from here) */
+    var room = !!v.room || online;
     var hint = '';
-    if (!on) {
-      if (!ctl) hint = '由房主開始大獎賽，開始後房間裡所有人會一起進入排位賽。';
-      else if (!v.canStart) hint = v.startHint || '先選一條賽道';
-      else if (online) hint = '房間裡所有人會一起進入排位賽。';
-    } else if (!ctl) {
-      hint = phase === 'results' ? '等待房主開始下一場或結束大獎賽。' : '只有房主可以跳過排位或結束大獎賽。';
+    if (!on) hint = room ? '大獎賽的圈數、輪胎損耗和電腦車手在房間大廳設定。' : '點一條賽道，在出發面板選「大獎賽」再按開始。';
+    else if (!ctl) {
+      hint = phase === 'results' ? (room ? '等待房主選擇再來一場或回到大廳。' : '等待房主開始下一場或結束大獎賽。')
+        : '只有房主可以跳過排位或結束大獎賽。';
     }
     setText('gphint', el.gpHint, hint);
     setShown('gphinton', el.gpHint, hint);
+    // alone, with a track loaded: the start panel of that track, 大獎賽 selected
+    setShown('gpopen', el.gpOpen, !on && !room && !!v.canStart);
+    // in a room 結束大獎賽 in qualifying / on the grid sends everybody back to the lobby: asked first
+    if (gpConfirm && !(room && ctl && (phase === 'quali' || phase === 'grid'))) gpConfirm = false;
+    setShown('gpconfirm', el.gpConfirm, gpConfirm);
 
     setShown('gpsession', el.gpSession, on);
     gpOn = on;
@@ -806,9 +847,12 @@
     else self = posTxt ? '你的名次：' + posTxt : '';
     setText('gpself', el.gpSelf, self);
     setShown('gpselfon', el.gpSelf, self);
-    setShown('gpactions', el.gpActions, ctl);
+    setShown('gpactions', el.gpActions, ctl && !gpConfirm);
     setShown('gpskip', el.gpSkip, ctl && phase === 'quali');
     setShown('gpagain', el.gpAgain, ctl && phase === 'results');
+    // a room's results: 回到大廳 (the room's 結束 there), alone 結束大獎賽 as before
+    setShown('gplobby', el.gpLobby, ctl && room && phase === 'results');
+    setShown('gpend', el.gpEnd, ctl && !(room && phase === 'results'));
     setHtml('gpmenurows', el.gpStandings, gpRowsHtml(v, phase, phase === 'results', true));
     setText('gpmenuspec', el.gpSpec, specTxt);
     setShown('gpmenuspecon', el.gpSpec, specTxt);
@@ -843,9 +887,10 @@
       '排位 ' + q + ' 圈 ‧ 正賽 ' + r + ' 圈' + (wear > 1 ? ' ‧ 輪胎損耗 ×' + wear : ''));
     setText('gpresspec', el.gpResSpec, specTxt);
     setShown('gpresspecon', el.gpResSpec, specTxt);
-    setText('gpresnote', el.gpResNote, ctl ? '' : '等待房主開始下一場或結束大獎賽');
+    setText('gpresnote', el.gpResNote, ctl ? '' : (room ? '等待房主選擇再來一場或回到大廳' : '等待房主開始下一場或結束大獎賽'));
     setShown('gpresagain', el.gpResAgain, ctl);
-    setShown('gpresend', el.gpResEnd, ctl);
+    setShown('gpresend', el.gpResEnd, ctl && !room);      // alone: 結束 = back to free practice on this track
+    setShown('gpreslobby', el.gpResLobby, ctl && room);   // a room's host: everybody back to the lobby
   }
 
   // The results overlay. #hud.res-open: in a narrow window the overlay takes the session box's place (index.html).
@@ -863,14 +908,17 @@
     if (cache.padid !== padId) { cache.padid = padId; el.padStatus.title = padId; }
   }
 
-  function markWear() {
-    var b = el.gpWear.children;
+  // a segmented control: the button whose attribute `attr` is `val` marked; disabled when `off`
+  function markSeg(box, attr, val, off) {
+    var b = box ? box.children : [];
     for (var i = 0; i < b.length; i++) {
-      var on = Number(b[i].getAttribute('data-w')) === gpCfg.wear;
-      b[i].classList.toggle('on', on);
+      var on = b[i].getAttribute(attr) === String(val);
+      if (b[i].classList.contains('on') !== on) b[i].classList.toggle('on', on);
       if (b[i].getAttribute('aria-checked') !== String(on)) b[i].setAttribute('aria-checked', String(on));
+      if (off !== undefined && b[i].disabled !== !!off) b[i].disabled = !!off;
     }
   }
+  function markWear(w) { markSeg(el.gpWear, 'data-w', w === undefined ? gpCfg.wear : w); }
 
   // The 大獎賽 tab's car line: the season that will be raced (or is being raced) and our car; 換車 opens 車輛.
   function renderGpCar() {
@@ -885,6 +933,10 @@
     setText('gpyearbadge', el.gpYear, year ? String(year) : '');
     setHtml('gpcarname', el.gpCarName, html);
     setShown('gpcarchange', el.gpCarChange, gpPhase === 'free' && canPick.car);
+    // the start panel / lobby: 你的車 (換車 opens the 車輛 tab)
+    var sc = c ? '<span class="mp-dot" style="background:' + livery(c) + '"></span>' + esc(teamName(c)) + (c.car ? ' ' + esc(c.car) : '') : '尚未選車';
+    setHtml('setupcar', el.setupCar, sc);
+    setShown('setupcarchange', el.setupCarChange, gpPhase === 'free' && canPick.car);
   }
 
   // The 大獎賽 tab's tyre row: before a Grand Prix the starting compound (fitted at the start of qualifying and on the
@@ -892,12 +944,9 @@
   // one T / X cycle while driving.
   function renderTyre() {
     if (!inited || !el.gpTyre) return;
-    var on = gpPhase !== 'free', b = el.gpTyre.children;
-    for (var i = 0; i < b.length; i++) {
-      var sel = b[i].getAttribute('data-c') === nextCmp;
-      b[i].classList.toggle('on', sel);
-      if (b[i].getAttribute('aria-checked') !== String(sel)) b[i].setAttribute('aria-checked', String(sel));
-    }
+    var on = gpPhase !== 'free';
+    markSeg(el.gpTyre, 'data-c', nextCmp);
+    markSeg(el.setupTyre, 'data-c', nextCmp);    // (the start panel's / lobby's 起跑輪胎: the same next set)
     setText('gptyrelabel', el.gpTyreLabel, on ? '下一組輪胎' : '起跑輪胎');
     setHtml('gptyrenote', el.gpTyreNote, on
       ? (gpPhase === 'quali' ? '正賽起跑和下次進站換胎時裝上。' : '下次進站停在維修格時裝上。') + '開車時按 <kbd>T</kbd>（手把 <kbd>X</kbd>）也能換。'
@@ -936,9 +985,9 @@
     setShown('gpbotsbox', el.gpBotsBox, avail);
     if (!avail) return;
     var edit = b.canEdit === true, on = gpPhase !== 'free', online = !!gpView.online;
-    var max = Math.min(16, count(b.max));
-    var n = edit ? Math.min(botCfg.count, max) : Math.min(16, count(b.count));
-    var lvl = edit ? botCfg.skill : cleanBotSkill(b.skill, 'pro');
+    var max = Math.min(16, count(b.max)), want = botWant();
+    var n = edit ? Math.min(want.count, max) : Math.min(16, count(b.count));
+    var lvl = edit ? want.skill : cleanBotSkill(b.skill, 'pro');
     var top = Math.max(max, n), opts = '';
     for (var i = 0; i <= top; i++) opts += '<option value="' + i + '">' + (i ? i + ' 位' : '無') + '</option>';
     setHtml('gpbotsopts', el.gpBots, opts);
@@ -953,8 +1002,8 @@
     }
     var note;
     if (on) note = '賽事進行中不能更改電腦車手。';
-    else if (!edit) note = online ? '電腦車手由房主設定。' : '';
-    else if (botCfg.count > max) note = '房間最多 16 輛車：現在最多 ' + max + ' 位電腦車手。';
+    else if (!edit) note = online ? (gpView.canControl ? '電腦車手只能在房間大廳更改。' : '電腦車手由房主設定。') : '';
+    else if (want.count > max) note = '房間最多 16 輛車：現在最多 ' + max + ' 位電腦車手。';
     else note = '電腦車手用這個賽季真實車手的名字，開' + (online ? '房間裡沒人選' : '你沒選') + '的車隊的車（每隊兩個席位，你選的車隊另一位車手也會上場）。';
     setText('gpbotsnote', el.gpBotsNote, note);
     setShown('gpbotsnoteon', el.gpBotsNote, note);
@@ -967,31 +1016,38 @@
     }
     setHtml('gpbotslist', el.gpBotsList, html);
     setShown('gpbotsliston', el.gpBotsList, html);
+    markScrolls();                            // (the rows sit in the start panel / lobby: its height changed)
+  }
+
+  // What the 電腦車手 rows show while they may be changed: the player's own setting, or (v7.2, a room's host) the room's
+  // wish main.js hands as bots.want / wantSkill (a new host takes over the room's field, not his stored one).
+  function botWant() {
+    var b = gpView.bots && typeof gpView.bots === 'object' ? gpView.bots : {};
+    return { count: typeof b.want === 'number' && b.want >= 0 ? Math.min(BOTS_MAX, Math.floor(b.want)) : botCfg.count,
+             skill: cleanBotSkill(b.wantSkill, botCfg.skill) };
   }
 
   function initBots() {
     loadBotsStore();
     if (!el.gpBots || !el.gpSkill) return;
-    var changed = function () {
+    var changed = function (w) {
+      botCfg.count = w.count; botCfg.skill = w.skill;   // (the host's lobby edits are his preferences too)
       saveBotsStore();
       renderBots();
-      if (callbacks.onBots) callbacks.onBots({ count: botCfg.count, skill: botCfg.skill });
+      if (callbacks.onBots) callbacks.onBots({ count: w.count, skill: w.skill });
     };
     el.gpBots.addEventListener('change', function () {
-      var b = gpView.bots;
+      var b = gpView.bots, w = botWant();
       if (!b || b.canEdit !== true) { renderBots(); return; }
-      var n = cleanBotCount(Number(el.gpBots.value), botCfg.count);
-      if (n === botCfg.count) return;
-      botCfg.count = n;
-      changed();
+      var n = cleanBotCount(Number(el.gpBots.value), w.count);
+      if (n === w.count && n === botCfg.count) return;
+      changed({ count: n, skill: w.skill });
     });
     el.gpSkill.addEventListener('click', function (e) {
-      var s = e.target && e.target.getAttribute ? e.target.getAttribute('data-s') : null, b = gpView.bots;
+      var s = e.target && e.target.getAttribute ? e.target.getAttribute('data-s') : null, b = gpView.bots, w = botWant();
       if (!s || !Object.prototype.hasOwnProperty.call(BOT_LEVEL_NAME, s) || !b || b.canEdit !== true) return;
-      if (e.target.blur) e.target.blur();
-      if (s === botCfg.skill) return;
-      botCfg.skill = s;
-      changed();
+      if (s === w.skill && s === botCfg.skill) return;
+      changed({ count: w.count, skill: s });
     });
   }
 
@@ -1001,37 +1057,44 @@
     el.gpQ.value = String(gpCfg.q);
     el.gpR.value = String(gpCfg.r);
 
-    // while typing: remember a valid value without rewriting the field; leaving the field / Enter cleans it up
+    // (v7.2: the laps and the tyre wear sit in the start panel / the room lobby; alone they are the remembered solo
+    // setup, the host's edits in the lobby go to the room through onSetup, a guest's fields are read-only)
+    // while typing: remember a valid value without rewriting the field (alone: the 開始 button's line follows);
+    // leaving the field / Enter cleans it up (a room's host: only then is it sent)
     var typed = function () {
-      var q = Number(el.gpQ.value), r = Number(el.gpR.value);
-      if (el.gpQ.value !== '' && q === Math.floor(q) && q >= 1 && q <= GP_Q_MAX) gpCfg.q = q;
-      if (el.gpR.value !== '' && r === Math.floor(r) && r >= 1 && r <= GP_R_MAX) gpCfg.r = r;
+      if (!setupEditable()) return;
+      var q = Number(el.gpQ.value), r = Number(el.gpR.value), ch = null;
+      if (el.gpQ.value !== '' && q === Math.floor(q) && q >= 1 && q <= GP_Q_MAX && q !== gpCfg.q) { gpCfg.q = q; (ch = ch || {}).q = q; }
+      if (el.gpR.value !== '' && r === Math.floor(r) && r >= 1 && r <= GP_R_MAX && r !== gpCfg.r) { gpCfg.r = r; (ch = ch || {}).r = r; }
       saveGpStore();
+      if (ch && !(setupV && setupV.room) && callbacks.onSetup) callbacks.onSetup(ch);
     };
-    var start = function () {
-      if (el.gpStart.disabled) return;
-      commitLaps();
-      if (callbacks.onGpStart) callbacks.onGpStart({ q: gpCfg.q, r: gpCfg.r, wear: gpCfg.wear });
+    var committed = function () {
+      var ch = commitLaps();
+      if (ch && callbacks.onSetup) callbacks.onSetup(ch);
     };
     // 輪胎損耗 ×1..×5
     markWear();
     el.gpWear.addEventListener('click', function (e) {
       var w = e.target && e.target.getAttribute && Number(e.target.getAttribute('data-w'));
-      if (!(w >= 1 && w <= WEAR_MAX)) return;
+      if (!(w >= 1 && w <= WEAR_MAX) || !setupEditable()) return;
       gpCfg.wear = w;
-      markWear();
+      markWear(w);
       saveGpStore();
+      if (callbacks.onSetup) callbacks.onSetup({ wear: w });
     });
     el.gpCarChange.addEventListener('click', function () { el.gpCarChange.blur(); setTab('car', true); });
-    // 起跑輪胎 / 下一組輪胎: main.js decides (setCompound comes back), the button is marked at once
-    if (el.gpTyre) el.gpTyre.addEventListener('click', function (e) {
+    // 起跑輪胎 / 下一組輪胎 (the 大獎賽 tab and the start panel / lobby): main.js decides (setCompound comes back), the
+    // button is marked at once
+    var tyreClick = function (e) {
       var c = e.target && e.target.getAttribute ? e.target.getAttribute('data-c') : null;
       if (!c || !Object.prototype.hasOwnProperty.call(COMPOUNDS, c)) return;
-      if (e.target.blur) e.target.blur();
       nextCmp = c;
       renderTyre();
       if (callbacks.onCompound) callbacks.onCompound(c);
-    });
+    };
+    if (el.gpTyre) el.gpTyre.addEventListener('click', tyreClick);
+    if (el.setupTyre) el.setupTyre.addEventListener('click', tyreClick);
     var action = function (btn, a) {
       btn.addEventListener('click', function () {
         btn.blur();                          // a focused button would take Space / Enter while driving
@@ -1040,13 +1103,40 @@
     };
     el.gpQ.addEventListener('input', typed);
     el.gpR.addEventListener('input', typed);
-    el.gpQ.addEventListener('change', commitLaps);
-    el.gpR.addEventListener('change', commitLaps);
-    el.gpQ.addEventListener('keydown', function (e) { if (e.key === 'Enter') start(); });
-    el.gpR.addEventListener('keydown', function (e) { if (e.key === 'Enter') start(); });
-    el.gpStart.addEventListener('click', start);
-    action(el.gpSkip, 'skip'); action(el.gpEnd, 'end'); action(el.gpAgain, 'again');
-    action(el.gpResAgain, 'again'); action(el.gpResEnd, 'end');
+    el.gpQ.addEventListener('change', committed);
+    el.gpR.addEventListener('change', committed);
+    // Enter in a lap field: alone it starts (as 開始); in a room it only takes the value
+    var enter = function (e) {
+      if (e.key !== 'Enter') return;
+      committed();
+      if (setupV && !setupV.room && setupV.show === 'setup') goClick();
+    };
+    el.gpQ.addEventListener('keydown', enter);
+    el.gpR.addEventListener('keydown', enter);
+    action(el.gpSkip, 'skip'); action(el.gpAgain, 'again'); action(el.gpResAgain, 'again'); action(el.gpResEnd, 'end');
+    // 結束大獎賽: alone (and in a room's race) at once; a room in qualifying / on the grid goes back to its lobby: asked
+    el.gpEnd.addEventListener('click', function () {
+      el.gpEnd.blur();
+      var room = !!gpView.room || !!gpView.online;
+      if (room && (gpPhase === 'quali' || gpPhase === 'grid')) { gpConfirm = true; renderGp(); if (el.gpConfirmYes) el.gpConfirmYes.focus(); return; }
+      if (callbacks.onGpAction) callbacks.onGpAction('end');
+    });
+    if (el.gpConfirmYes) el.gpConfirmYes.addEventListener('click', function () {
+      gpConfirm = false; renderGp();
+      if (callbacks.onGpAction) callbacks.onGpAction('end');
+    });
+    if (el.gpConfirmNo) el.gpConfirmNo.addEventListener('click', function () { gpConfirm = false; renderGp(); });
+    // a room's results: 回到大廳 (the tab, the overlay)
+    var back = function (btn) {
+      if (btn) btn.addEventListener('click', function () { btn.blur(); if (callbacks.onRoomBack) callbacks.onRoomBack(); });
+    };
+    back(el.gpLobby); back(el.gpResLobby);
+    // 在目前賽道開大獎賽…: the start panel of the loaded track with 大獎賽 selected
+    if (el.gpOpen) el.gpOpen.addEventListener('click', function () {
+      el.gpOpen.blur();
+      if (gpCfg.mode !== 'gp') { gpCfg.mode = 'gp'; saveGpStore(); }
+      if (callbacks.onGpOpen) callbacks.onGpOpen();
+    });
     el.gpClose.addEventListener('click', function () {
       el.gpClose.blur();
       gpClosed = true;
@@ -1055,6 +1145,365 @@
 
     renderGp();
     renderPad();
+  }
+
+  /* ---------- v7.2: the start panel / the room lobby (#setup), the host's track picker, a room's loading screen ---------- */
+
+  // A field that takes the keys (as main.js's isTyping): the focus is never moved away from one.
+  function typingIn(t) {
+    if (!t || !t.tagName) return false;
+    if (t.tagName === 'INPUT') return !/^(range|checkbox|radio|button|submit)$/i.test(String(t.type));
+    return t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable === true;
+  }
+  function shownEl(n) { return !!n && !n.classList.contains('hidden') && !n.disabled; }
+  function focusEl(n) {
+    if (!n) return;
+    try { n.focus({ preventScroll: true }); } catch (err) { n.focus(); }
+  }
+  // the scroll position of the left area (≤ 720 px the whole menu scrolls: .menu-main)
+  function scrollPos() { return { b: el.body ? el.body.scrollTop : 0, m: el.main ? el.main.scrollTop : 0 }; }
+  function setScroll(p) {
+    if (el.body) el.body.scrollTop = p ? p.b : 0;
+    if (el.main) el.main.scrollTop = p ? p.m : 0;
+  }
+
+  // The track / season rows: in the room they belong to the room's settings (right), alone to the panel (left).
+  function placeRows(room) {
+    if (roomRows === room || !el.setupRoomRows) return;
+    roomRows = room;
+    if (room) {
+      el.setupRoomRows.appendChild(el.setupTrack);
+      el.setupRoomRows.appendChild(el.setupYearRow);
+    } else {
+      el.setupColA.insertBefore(el.setupTrack, el.setupColA.firstChild);
+      el.setupOwn.insertBefore(el.setupYearRow, el.setupTyreRow);
+    }
+  }
+
+  var LOBBY_ST = { host: '房主', ready: '準備好了 ✓', wait: '還沒準備', 'load-wait': '載入中…', 'load-done': '已載入', 'load-fail': '載入失敗' };
+
+  // The room's players (humans, slot order): name, 你, the car, and per room state 房主 / 準備好了 / 還沒準備 (lobby),
+  // 載入中… / 已載入 / 載入失敗 (loading); in a session no state column (a player whose load failed: 載入失敗).
+  function lobbyRowsHtml(v) {
+    var list = Array.isArray(v.players) ? v.players : [], st = str(v.st), html = '';
+    for (var i = 0; i < list.length && i < 32; i++) {
+      var p = list[i] && typeof list[i] === 'object' ? list[i] : {}, s = '';
+      if (st === 'loading') s = p.load === 'done' ? 'load-done' : p.load === 'fail' ? 'load-fail' : 'load-wait';
+      else if (st === 'lobby') s = p.isHost ? 'host' : (p.ready ? 'ready' : 'wait');
+      else if (p.load === 'fail') s = 'load-fail';
+      var id = typeof p.id === 'number' && isFinite(p.id) ? String(p.id) : '';
+      var car = str(p.carName);
+      html += '<li class="lobby-row' + (p.isSelf ? ' self' : '') + '" data-id="' + esc(id) + '">' +
+        '<span class="mp-dot" style="background:' + cleanColour(p.colour) + '"></span>' +
+        '<span class="mp-pname">' + esc(p.name) + '</span>' +
+        (p.isSelf ? '<span class="mp-tag">你</span>' : '') + (p.isHost && st !== 'lobby' ? '<span class="mp-tag">房主</span>' : '') +
+        '<span class="lobby-car">' + (car ? '<i style="background:' + cleanColour(p.colour2) + '"></i><span>' + esc(car) + '</span>' : '') + '</span>' +
+        (s ? '<span class="lobby-st" data-state="' + s + '">' + LOBBY_ST[s] + '</span>' : '') + '</li>';
+    }
+    return html;
+  }
+
+  // The room's computer drivers: one line (電腦車手 ×m（level）) and their names as chips, not a row each.
+  function botsLineHtml(v) {
+    var list = Array.isArray(v.botList) ? v.botList : [], chips = '';
+    if (!list.length) return '';
+    for (var i = 0; i < list.length && i < 16; i++) {
+      var e = list[i] && typeof list[i] === 'object' ? list[i] : {}, lv = levelName(e.skill);
+      chips += '<span class="gp-bot" title="' + esc((e.team ? e.team + ' ‧ ' : '') + lv) + '"><i style="background:' +
+        livery({ colour: e.colour, colour2: e.colour2 }) + '"></i>' + esc(e.name) + '</span>';
+    }
+    var lvl = typeof v.botSkill === 'string' && Object.prototype.hasOwnProperty.call(BOT_LEVEL_NAME, v.botSkill) ? BOT_LEVEL_NAME[v.botSkill] : '';
+    return '電腦車手 ×' + list.length + (lvl ? '（' + lvl + '）' : '') + '<div class="gp-bots-names">' + chips + '</div>';
+  }
+
+  // The confirm row's question for 不等了，直接開始 (four names at most).
+  function unreadyText(v) {
+    var n = Array.isArray(v.unready) ? v.unready.map(str) : [];
+    var who = n.length > 4 ? n.slice(0, 4).join('、') + ' 等 ' + n.length + ' 人' : n.join('、');
+    return (who || '有玩家') + ' 還沒按準備。仍要開始嗎？他們也會一起載入賽道。';
+  }
+
+  function renderSetup() {
+    if (!inited || !el.setup) return;
+    var v = setupV || { show: 'tracks' };
+    var show = v.show === 'setup' || v.show === 'picker' ? v.show : 'tracks', room = !!v.room;
+    var menuOn = !el.menu.classList.contains('hidden');
+    if (show === 'setup' && shownView !== 'setup') gridScroll = scrollPos();   // (the cards' place, for coming back)
+    if (cache.setupshow !== show) {
+      cache.setupshow = show;
+      el.menu.classList.toggle('setup-open', show === 'setup');
+      el.menu.classList.toggle('picker', show === 'picker');
+    }
+    if (cache.setupisroom !== room) {
+      cache.setupisroom = room;
+      el.menu.classList.toggle('room-view', room);
+      el.setup.classList.toggle('room', room);
+      confirmKind = '';
+    }
+    setShown('setup', el.setup, show === 'setup');
+    placeRows(room);
+
+    /* the tools row: ← back (the panel, the picker), the lobby's title and address */
+    setShown('setupback', el.setupBack, (show === 'setup' && !room) || show === 'picker');
+    setText('setupbacktxt', el.setupBack, show === 'picker' ? '← 返回大廳' : '← 選擇其他賽道');
+    var head = room && show === 'setup', addr = str(v.address);
+    setShown('setuptitle', el.setupTitle, head);
+    setShown('setuproom', el.setupRoom, head);
+    setHtml('setupaddr', el.setupAddr, addr ? esc(v.isHost && !v.ded ? '位址 ' : '已連線到 ') + '<b>' + esc(addr) + '</b>' : '');
+    setShown('setupcopy', el.setupCopy, addr);
+    setShown('setuppw', el.setupPw, !!v.hasPassword);
+    // the picker's banner (over the cards)
+    var banner = show === 'picker' ? str(v.banner) : '';
+    setText('lock', el.lock, banner);
+    setShown('lockon', el.lock, banner);
+
+    if (show !== 'setup') {
+      if (shownView === 'setup') {            // back to the cards: where they were, the panel's card focused
+        setScroll(gridScroll);
+        var tid0 = setupV && typeof setupV.trackId === 'string' ? setupV.trackId : '';
+        for (var c = 0; c < cards.length && tid0 && menuOn; c++) {
+          if (builtFor[c] && builtFor[c].id === tid0) { if (!typingIn(document.activeElement)) focusEl(cards[c].node); break; }
+        }
+      }
+      if (menuOn) { shownView = show; focusKey = show; }
+      return;
+    }
+    if (shownView !== 'setup' && menuOn) setScroll(null);   // the panel from its top
+
+    /* the track */
+    var td = v.track && typeof v.track === 'object' ? v.track : null, tid = td ? str(td.id) : str(v.trackId), z = td ? zhOf(td) : null;
+    setText('stname', el.setupTrackName, td ? (z ? z.name : str(td.name)) : (tid || '還沒選賽道'));
+    setText('sten', el.setupTrackEn, td && z ? str(td.name) : '');
+    if (cache.stmap !== tid) { cache.stmap = tid; el.setupTrackMap.innerHTML = td ? thumbSvg(td.points) : ''; }
+    setText('stmeta', el.setupTrackMeta, td ? [z && z.location ? z.location : str(td.location), fmtKm(td.lengthKm)].filter(Boolean).join(' ‧ ') : '');
+    setShown('stcur', el.setupCurrent, !room && !!v.current);
+    setShown('stbtn', el.setupTrackBtn, room && !!v.canPick);
+    setText('stbtntxt', el.setupTrackBtn, tid ? '換賽道' : '選賽道');
+    var miss = room && v.trackMissing ? '你的版本沒有這條賽道（' + tid + '），請更新遊戲。' : '';
+    setText('stmiss', el.setupTrackMissing, miss);
+    setShown('stmisson', el.setupTrackMissing, miss);
+
+    /* the room's players, the titles of its cards */
+    setShown('setuppeople', el.setupPeople, room);
+    setShown('setupowntitle', el.setupOwnTitle, room);
+    setShown('setupoptstitle', el.setupOptsTitle, room);
+    setShown('setupoptsnote', el.setupOptsNote, room && !v.isHost);
+    if (room) {
+      var cn = v.counts && typeof v.counts === 'object' ? v.counts : {}, nh = count(cn.humans);
+      var nb = Array.isArray(v.botList) ? Math.min(16, v.botList.length) : 0;
+      setText('lobbytitle', el.setupPlayersTitle, nb ? '玩家（' + nh + ' 人 + 電腦 ' + nb + '，' + (nh + nb) + ' / 16）' : '玩家（' + nh + ' / 16）');
+      setHtml('lobbyrows', el.setupPlayers, lobbyRowsHtml(v));
+      var bl = botsLineHtml(v);
+      setHtml('botsline', el.setupBotsLine, bl);
+      setShown('botslineon', el.setupBotsLine, bl);
+    }
+
+    /* mode, laps, tyre wear (the 電腦車手 rows: renderBots, from setGp) */
+    var mode = v.mode === 'gp' ? 'gp' : 'free', edit = v.canEdit !== false;
+    markSeg(el.setupMode, 'data-m', mode, !edit);
+    setText('modenote', el.setupModeNote, MODE_NOTE[mode]);
+    setShown('setupgp', el.setupGp, mode === 'gp');
+    var q = cleanLaps(v.q, GP_Q_MAX, gpCfg.q), r = cleanLaps(v.r, GP_R_MAX, gpCfg.r), w = cleanWear(v.wear, gpCfg.wear);
+    if (document.activeElement !== el.gpQ && el.gpQ.value !== String(q)) el.gpQ.value = String(q);
+    if (document.activeElement !== el.gpR && el.gpR.value !== String(r)) el.gpR.value = String(r);
+    if (el.gpQ.disabled !== !edit) el.gpQ.disabled = !edit;
+    if (el.gpR.disabled !== !edit) el.gpR.disabled = !edit;
+    markSeg(el.gpWear, 'data-w', w, !edit);
+    var note = str(v.note);
+    setText('setupnote', el.setupNote, note);
+    setShown('setupnoteon', el.setupNote, note);
+    var state = str(v.banner);
+    setText('setupstate', el.setupState, state);
+    setShown('setupstateon', el.setupState, state);
+
+    /* the action block */
+    var go = v.go && typeof v.go === 'object' ? v.go : {}, rd = v.ready && typeof v.ready === 'object' ? v.ready : {};
+    if (confirmKind === 'force' && !(v.force && go.show)) confirmKind = '';   // (its reason went away)
+    if (confirmKind === 'back' && !v.lobbyBtn) confirmKind = '';
+    setShown('setupacts', el.setupActs, !confirmKind);
+    setShown('setupconfirm', el.setupConfirm, confirmKind);
+    if (confirmKind) {
+      setText('confirmtxt', el.setupConfirmText, confirmKind === 'force' ? unreadyText(v) : '要結束這場大獎賽並回到房間大廳嗎？');
+      setText('confirmyes', el.setupForceYes, confirmKind === 'force' ? '仍要開始' : '回到大廳');
+      setText('confirmno', el.setupForceNo, confirmKind === 'force' ? '再等等' : '取消');
+    }
+    setShown('setupgo', el.setupGo, !!go.show);
+    setText('golabel', el.setupGoLabel, str(go.label) || '開始');
+    setText('gosub', el.setupGoSub, str(go.sub));
+    setShown('gosubon', el.setupGoSub, str(go.sub));
+    if (el.setupGo.disabled !== !go.enabled) el.setupGo.disabled = !go.enabled;
+    var on = !!rd.on;
+    setShown('setupready', el.setupReady, !!rd.show);
+    setText('readytxt', el.setupReady, on ? '已準備 ✓（再按一下取消）' : '準備');
+    if (el.setupReady.getAttribute('aria-pressed') !== String(on)) el.setupReady.setAttribute('aria-pressed', String(on));
+    if (el.setupReady.disabled !== !rd.enabled) el.setupReady.disabled = !rd.enabled;
+    var status = rd.show ? str(rd.status)
+      : (room && v.isHost && go.show && Array.isArray(v.unready) && v.unready.length ? v.unready.map(str).join('、') + ' 還沒按準備' : '');
+    setText('setupstatus', el.setupStatus, status);
+    setShown('setupstatuson', el.setupStatus, status);
+    setShown('setupforce', el.setupForce, !!v.force);
+    setShown('setupresume', el.setupResume, !!v.resume);
+    setShown('setuplobby', el.setupLobby, !!v.lobbyBtn);
+    var hint = str(v.hint);
+    setText('setuphint', el.setupHint, hint);
+    setShown('setuphinton', el.setupHint, hint);
+    markScrolls();
+
+    // the focus moves only when the view changes (never out of a field being typed in): Enter / Space then press 開始
+    // (alone, the host), 準備 (a guest), 繼續駕駛 (a room's session)
+    if (menuOn) {
+      var fk = 'setup|' + (room ? 'r|' + (v.isHost ? 'h' : 'g') + '|' + str(v.st) : 's|' + tid);
+      var t = room ? (v.st === 'session' ? el.setupResume : (v.isHost ? el.setupGo : el.setupReady)) : el.setupGo;
+      if (fk !== focusKey) {
+        focusKey = fk;
+        focusWait = null;
+        if (shownEl(t) && !typingIn(document.activeElement)) focusEl(t);
+        else focusWait = t;                   // (e.g. the host's 開始 while a guest is not ready: once it can be used)
+      } else if (focusWait === t && shownEl(t) && (!document.activeElement || document.activeElement === document.body)) {
+        focusWait = null;                     // usable now, and nothing else has the focus: Enter presses it
+        focusEl(t);
+      }
+      shownView = 'setup';
+    }
+  }
+
+  // #setup.scrolls: the panel / lobby is taller than the left area (≤ 720 px: the whole menu scrolls), so the action
+  // block, sticky at the bottom, gets an opaque backing (without it the text would show through)
+  function markScrolls() {
+    if (!el.setup || el.setup.classList.contains('hidden')) return;
+    var s = window.innerWidth <= 720 ? el.main : el.body, on = !!s && s.scrollHeight > s.clientHeight + 1;
+    if (cache.setupscrolls !== on) { cache.setupscrolls = on; el.setup.classList.toggle('scrolls', on); }
+  }
+
+  // 開始 (the button, Enter in a lap field alone, the controller's A through setupKey)
+  function goClick() {
+    var v = setupV;
+    if (!v || !v.go || !v.go.show || !v.go.enabled || el.setupGo.disabled) return;
+    var ch = commitLaps();
+    if (ch && v.room && callbacks.onSetup) callbacks.onSetup(ch);   // (the host's typed laps go before the start)
+    var c = v.room ? { mode: v.mode, q: v.q, r: v.r, wear: v.wear } : { mode: gpCfg.mode, q: gpCfg.q, r: gpCfg.r, wear: gpCfg.wear };
+    if (ch && v.room) { if (ch.q) c.q = ch.q; if (ch.r) c.r = ch.r; }
+    c.force = false;
+    if (callbacks.onSetupStart) callbacks.onSetupStart(c);
+  }
+  function readyClick() {
+    var v = setupV;
+    if (!v || !v.ready || !v.ready.show || !v.ready.enabled) return;
+    if (callbacks.onReady) callbacks.onReady(!v.ready.on);
+  }
+  function openConfirm(kind) {
+    confirmKind = kind;
+    renderSetup();
+    if (confirmKind) focusEl(el.setupForceYes);
+  }
+  function closeConfirm() {
+    var k = confirmKind;
+    confirmKind = '';
+    renderSetup();
+    focusEl(k === 'back' ? el.setupLobby : el.setupForce);
+  }
+  function confirmYes() {
+    var k = confirmKind, v = setupV;
+    confirmKind = '';
+    renderSetup();
+    if (k === 'force' && v) {
+      var ch = commitLaps();
+      if (ch && callbacks.onSetup) callbacks.onSetup(ch);
+      var c = { mode: v.mode, q: ch && ch.q ? ch.q : v.q, r: ch && ch.r ? ch.r : v.r, wear: v.wear, force: true };
+      if (callbacks.onSetupStart) callbacks.onSetupStart(c);
+    } else if (k === 'back' && callbacks.onRoomBack) callbacks.onRoomBack();
+  }
+
+  // 複製: the room's address to the clipboard (a fallback where the Clipboard API is not allowed)
+  function copyAddress() {
+    var a = setupV ? str(setupV.address) : '';
+    if (!a) return;
+    var done = function () { ui.toast('已複製位址', 2000); };
+    var fallback = function () {
+      try {
+        var t = document.createElement('textarea');
+        t.value = a; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;left:-9999px;top:0';
+        document.body.appendChild(t); t.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(t);
+        if (ok) done();
+      } catch (err) { /* nothing to copy with */ }
+    };
+    try {
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') navigator.clipboard.writeText(a).then(done, fallback);
+      else fallback();
+    } catch (err) { fallback(); }
+  }
+
+  var RL_ST = { wait: '載入中…', done: '已載入', fail: '載入失敗' };
+
+  // A room's loading screen: the track and mode, every player's state, the time left, 不等了，開始 / 取消，回到大廳 (host).
+  function renderRoomLoading() {
+    if (!inited || !el.rl) return;
+    var v = rlView, on = !!v;
+    if (on && el.rl.classList.contains('hidden')) {   // appearing: nothing under it keeps the keyboard
+      var a = document.activeElement;
+      if (a && a !== document.body && a.blur) a.blur();
+    }
+    setShown('rl', el.rl, on);
+    if (!on) return;
+    setText('rltitle', el.rlTitle, str(v.title) || '載入賽道中…');
+    setText('rlsub', el.rlSub, str(v.sub));
+    var rows = Array.isArray(v.rows) ? v.rows : [], html = '';
+    for (var i = 0; i < rows.length && i < 32; i++) {
+      var r = rows[i] && typeof rows[i] === 'object' ? rows[i] : {}, s = RL_ST[r.state] ? r.state : 'wait';
+      var id = typeof r.id === 'number' && isFinite(r.id) ? String(r.id) : '';
+      html += '<li class="rl-row' + (r.isSelf ? ' self' : '') + '" data-id="' + esc(id) + '" data-state="' + s + '">' +
+        '<span class="mp-dot" style="background:' + cleanColour(r.colour) + '"></span><span class="mp-pname">' + esc(r.name) + '</span>' +
+        (r.isHost ? '<span class="mp-tag">房主</span>' : '') + (r.isSelf ? '<span class="mp-tag">你</span>' : '') +
+        '<span class="rl-st">' + RL_ST[s] + '</span></li>';
+    }
+    setHtml('rllist', el.rlList, html);
+    var left = typeof v.leftS === 'number' && v.leftS >= 0 && isFinite(v.leftS) ? '最多再等 ' + Math.ceil(v.leftS) + ' 秒' : '';
+    setText('rlleft', el.rlLeft, left);
+    setShown('rllefton', el.rlLeft, left);
+    setShown('rlgo', el.rlGo, !!v.canGo);
+    setShown('rlcancel', el.rlCancel, !!v.canCancel);
+  }
+
+  function initSetup() {
+    if (!el.setup) return;
+    el.setupBack.addEventListener('click', function () { if (callbacks.onSetupBack) callbacks.onSetupBack(); });
+    el.setupGo.addEventListener('click', goClick);
+    el.setupReady.addEventListener('click', readyClick);
+    el.setupForce.addEventListener('click', function () { openConfirm('force'); });
+    el.setupForceYes.addEventListener('click', confirmYes);
+    el.setupForceNo.addEventListener('click', closeConfirm);
+    el.setupResume.addEventListener('click', function () { if (resumeFn) resumeFn(); });
+    // 回到大廳 (the room's session menu, host): asked while a Grand Prix is on and not in its results
+    el.setupLobby.addEventListener('click', function () {
+      var p = setupV ? setupV.phase : '';
+      if (p === 'quali' || p === 'grid' || p === 'race') openConfirm('back');
+      else if (callbacks.onRoomBack) callbacks.onRoomBack();
+    });
+    el.setupTrackBtn.addEventListener('click', function () { if (callbacks.onRoomTrackPicker) callbacks.onRoomTrackPicker(); });
+    el.setupCarChange.addEventListener('click', function () {
+      setTab('car', true);
+      // (a narrow window: the side panel is under the panel)
+      if (el.main && el.main.scrollHeight > el.main.clientHeight + 4 && el.mpPanel.scrollIntoView) el.mpPanel.scrollIntoView({ block: 'start' });
+    });
+    el.setupMode.addEventListener('click', function (e) {
+      var m = e.target && e.target.getAttribute ? e.target.getAttribute('data-m') : null;
+      if ((m !== 'free' && m !== 'gp') || !setupEditable()) return;
+      var cur = setupV && setupV.room ? setupV.mode : gpCfg.mode;
+      if (m !== gpCfg.mode) { gpCfg.mode = m; saveGpStore(); }   // (alone the setup; the host's preference too)
+      if (m === cur) return;
+      markSeg(el.setupMode, 'data-m', m);
+      setShown('setupgp', el.setupGp, m === 'gp');
+      if (callbacks.onSetup) callbacks.onSetup({ mode: m });
+    });
+    el.setupLeave.addEventListener('click', function () { if (callbacks.onLeaveRoom) callbacks.onLeaveRoom(); });
+    el.setupCopy.addEventListener('click', copyAddress);
+    el.rlGo.addEventListener('click', function () { if (callbacks.onRoomGo) callbacks.onRoomGo(); });
+    el.rlCancel.addEventListener('click', function () { if (callbacks.onRoomBack) callbacks.onRoomBack(); });
+    el.rlLeave.addEventListener('click', function () { if (callbacks.onLeaveRoom) callbacks.onLeaveRoom(); });
+    window.addEventListener('resize', markScrolls);
+    renderSetup();
   }
 
   /* ---------- side panel tabs: 車輛 / 大獎賽 / 多人連線 / 設定 ---------- */
@@ -1224,6 +1673,12 @@
     setHtml('caryears', el.carYear, opts);
     if (year && el.carYear.value !== String(year)) el.carYear.value = String(year);
     if (el.carYear.disabled !== !(canYear && years.length > 1)) el.carYear.disabled = !(canYear && years.length > 1);
+    // the start panel's / lobby's 賽季 (the same seasons; a room's season for its guests, read-only)
+    if (el.setupYear) {
+      setHtml('setupyears', el.setupYear, opts);
+      if (year && el.setupYear.value !== String(year)) el.setupYear.value = String(year);
+      if (el.setupYear.disabled !== !(canYear && years.length > 1)) el.setupYear.disabled = !(canYear && years.length > 1);
+    }
     carsYear = year;
     canPick.year = !!carsView && canYear; canPick.car = !!carsView && canCar;
     el.carList.classList.toggle('locked', !canCar);
@@ -1267,10 +1722,10 @@
 
   function initCarPanel() {
     loadCarStore();
-    el.carYear.addEventListener('change', function () {
-      var y = cleanYear(el.carYear.value);
+    var yearPicked = function (sel) {
+      var y = cleanYear(sel.value);
       if (!y || !canPick.year) {
-        if (carsYear) el.carYear.value = String(carsYear);
+        if (carsYear) sel.value = String(carsYear);
         return;
       }
       pick.year = y;
@@ -1278,7 +1733,9 @@
       // until setCars brings that year's cars, the list on screen is last year's: dim it
       el.carList.classList.toggle('pending', y !== carsYear);
       if (callbacks.onYear) callbacks.onYear(y);
-    });
+    };
+    el.carYear.addEventListener('change', function () { yearPicked(el.carYear); });
+    if (el.setupYear) el.setupYear.addEventListener('change', function () { yearPicked(el.setupYear); });
     el.carList.addEventListener('click', function (e) {
       var n = e.target;
       while (n && n !== el.carList && !(n.classList && n.classList.contains('car-card'))) n = n.parentNode;
@@ -1600,10 +2057,13 @@
     el.mpPub = $('mp-pubip'); el.mpPubOut = $('mp-pubip-out'); el.mpPortNote = $('mp-port-note');
     el.mpPlayers = $('mp-players'); el.mpPlayersTitle = $('mp-players-title'); el.mpLeave = $('mp-leave');
     el.lock = $('track-lock'); el.hudPlayers = $('hud-players');
-    // Grand Prix panel, HUD session box, start lights, results overlay, controller hints
-    el.gpSetup = $('gp-setup'); el.gpQ = $('gp-q'); el.gpR = $('gp-r'); el.gpStart = $('gp-start');
+    // Grand Prix panel, HUD session box, start lights, results overlay, controller hints (v7.2: #gp-q / #gp-r / #gp-wear
+    // and the 電腦車手 rows live in the start panel / lobby now)
+    el.gpQ = $('gp-q'); el.gpR = $('gp-r');
     el.gpHint = $('gp-hint'); el.gpSession = $('gp-session'); el.gpState = $('gp-state'); el.gpSelf = $('gp-self');
     el.gpActions = $('gp-actions'); el.gpSkip = $('gp-skip'); el.gpEnd = $('gp-end'); el.gpAgain = $('gp-again');
+    el.gpLobby = $('gp-lobby'); el.gpOpen = $('gp-open');
+    el.gpConfirm = $('gp-confirm'); el.gpConfirmYes = $('gp-confirm-yes'); el.gpConfirmNo = $('gp-confirm-no');
     el.gpStandings = $('gp-standings'); el.gpSpec = $('gp-spec');
     el.gpWear = $('gp-wear'); el.gpCar = $('gp-car'); el.gpYear = $('gp-year'); el.gpCarName = $('gp-car-name');
     el.gpCarChange = $('gp-car-change');
@@ -1618,7 +2078,32 @@
     el.gpRes = $('gp-results'); el.gpResSub = $('gp-results-sub'); el.gpResBody = $('gp-results-body');
     el.gpResSpec = $('gp-results-spec'); el.gpResNote = $('gp-results-note');
     el.gpResAgain = $('gp-res-again'); el.gpResEnd = $('gp-res-end'); el.gpClose = $('gp-close');
+    el.gpResLobby = $('gp-res-lobby');
     el.hintKeys = $('hud-hint-keys'); el.hintPad = $('hud-hint-pad'); el.padStatus = $('pad-status');
+    // v7.2: the start panel / the room lobby, the tools row's parts of it, a room's loading screen
+    el.main = document.querySelector('#menu .menu-main'); el.body = document.querySelector('#menu .menu-body');
+    el.setup = $('setup'); el.setupState = $('setup-state'); el.setupColA = $('setup-col-a');
+    el.setupBack = $('setup-back'); el.setupTitle = $('setup-title'); el.setupRoom = $('setup-room');
+    el.setupAddr = $('setup-addr'); el.setupCopy = $('setup-copy'); el.setupPw = $('setup-pw'); el.setupLeave = $('setup-leave');
+    el.setupTrack = $('setup-track'); el.setupTrackMap = $('setup-track-map'); el.setupTrackName = $('setup-track-name');
+    el.setupTrackEn = $('setup-track-en'); el.setupTrackMeta = $('setup-track-meta'); el.setupCurrent = $('setup-current');
+    el.setupTrackBtn = $('setup-track-btn'); el.setupTrackMissing = $('setup-track-missing');
+    el.setupPeople = $('setup-people'); el.setupPlayersTitle = $('setup-players-title'); el.setupPlayers = $('setup-players');
+    el.setupBotsLine = $('setup-bots-line');
+    el.setupOwn = $('setup-own'); el.setupOwnTitle = $('setup-own-title'); el.setupCar = $('setup-car');
+    el.setupCarChange = $('setup-car-change'); el.setupYearRow = $('setup-year-row'); el.setupYear = $('setup-year');
+    el.setupTyreRow = $('setup-tyre-row'); el.setupTyre = $('setup-tyre');
+    el.setupOpts = $('setup-opts'); el.setupOptsTitle = $('setup-opts-title'); el.setupOptsNote = $('setup-opts-note');
+    el.setupRoomRows = $('setup-room-rows'); el.setupMode = $('setup-mode'); el.setupModeNote = $('setup-mode-note');
+    el.setupGp = $('setup-gp'); el.setupNote = $('setup-note');
+    el.setupActs = $('setup-acts'); el.setupGo = $('setup-go'); el.setupGoLabel = $('setup-go-label'); el.setupGoSub = $('setup-go-sub');
+    el.setupReady = $('setup-ready'); el.setupStatus = $('setup-status'); el.setupForce = $('setup-force');
+    el.setupConfirm = $('setup-confirm'); el.setupConfirmText = $('setup-confirm-text');
+    el.setupForceYes = $('setup-force-yes'); el.setupForceNo = $('setup-force-no');
+    el.setupResume = $('setup-resume'); el.setupLobby = $('setup-lobby'); el.setupHint = $('setup-hint');
+    el.rl = $('room-loading'); el.rlTitle = $('room-loading-title'); el.rlSub = $('room-loading-sub');
+    el.rlList = $('room-loading-list'); el.rlLeft = $('room-loading-left');
+    el.rlGo = $('room-loading-go'); el.rlCancel = $('room-loading-cancel'); el.rlLeave = $('room-loading-leave');
   }
 
   /* ---------- public API ---------- */
@@ -1632,8 +2117,16 @@
       callbacks.onJoinRoom = opts.onJoinRoom || null;
       callbacks.onLeaveRoom = opts.onLeaveRoom || null;
       callbacks.onProfile = opts.onProfile || null;
-      callbacks.onGpStart = opts.onGpStart || null;      // ({q, r, wear}): 開始大獎賽
       callbacks.onGpAction = opts.onGpAction || null;    // ('skip' | 'end' | 'again')
+      // v7.2 (onSelectTrack now means "a card was clicked": the panel opens, or the host's pick for the room)
+      callbacks.onSetupStart = opts.onSetupStart || null;            // ({mode, q, r, wear, force}): 開始
+      callbacks.onSetupBack = opts.onSetupBack || null;              // (): ← 選擇其他賽道 / ← 返回大廳
+      callbacks.onSetup = opts.onSetup || null;                      // ({mode} | {q} | {r} | {wear}): changed in the panel
+      callbacks.onReady = opts.onReady || null;                      // (on): a guest's 準備
+      callbacks.onRoomTrackPicker = opts.onRoomTrackPicker || null;  // (): the host's 選賽道 / 換賽道
+      callbacks.onRoomBack = opts.onRoomBack || null;                // (): the host's 回到大廳 / 取消，回到大廳
+      callbacks.onRoomGo = opts.onRoomGo || null;                    // (): the host's 不等了，開始
+      callbacks.onGpOpen = opts.onGpOpen || null;                    // (): 在目前賽道開大獎賽…
       callbacks.onYear = opts.onYear || null;            // (year): the player picked a season
       callbacks.onCar = opts.onCar || null;              // (id): the player picked a car of the list
       callbacks.onAudio = opts.onAudio || null;          // ({volume, muted}): slider / mute switch moved
@@ -1666,6 +2159,7 @@
       initCarPanel();
       initNetPanel();
       initGpPanel();
+      initSetup();
       initSettings();
       // the broadcast graphic: sized by its own ResizeObserver once the HUD is shown
       var T = F1.telemetry;
@@ -1678,8 +2172,8 @@
 
     /**
      * Multiplayer panel / HUD player list. v = { canCreate, connected, busy, isHost, status, statusKind ('ok' | 'err' | ''),
-     *   hostInfo: {port, addresses} | null, roster: [{name, colour, best, isHost, isSelf}], roomTrack (the room has a
-     *   track: a guest is no longer told to wait for one), lockText (overrides the banner over the track grid) }
+     *   hostInfo: {port, addresses} | null, roster: [{name, colour, best, isHost, isSelf}] } (v7.2: the room's track and
+     *   its banner are the setup view's, setSetup; roomTrack / lockText are no longer read) 
      */
     setNet: function (v) {
       netView = v || {};
@@ -1689,7 +2183,9 @@
     /**
      * Grand Prix: menu panel (Q / R, 開始 / 跳過排位 / 結束 / 再來一場, state, standings), HUD session box (replaces
      * the roster box while a session is on) and the results overlay. v = GpView (js/README-interfaces.md) plus
-     * canStart / startHint; an optional v.sid re-opens a closed results overlay when the session changes.
+     * canStart (v7.2: alone, a track is loaded: 在目前賽道開大獎賽… is offered) and room (v7.2: in a room - the results and
+     * the tab offer the host 回到大廳 instead of 結束; in qualifying / on the grid 結束大獎賽 asks first); an optional v.sid
+     * re-opens a closed results overlay when the session changes.
      * v7: v.bots = {count, skill, max, canEdit, available} (the 電腦車手 rows; available false hides them), v.botList =
      * [{name, colour, colour2, team, skill}] (the field, listed in free practice), rows[i].bot / skill (the AI tag).
      * Cheap to call a few times a second: the DOM is only touched where the generated text changed.
@@ -1873,9 +2369,51 @@
 
     /** Optional (not in the interface doc): main.js may register a "resume" handler to show a 繼續駕駛 button. */
     setResumeHandler: function (fn) {
+      resumeFn = typeof fn === 'function' ? fn : null;   // (also the room menu's 繼續駕駛, #setup-resume)
       if (!el.resume) return;
       el.resume.onclick = fn || null;
       el.resume.classList.toggle('hidden', !fn);
+    },
+
+    /**
+     * v7.2: the left area of the menu, from a SetupView (js/README-interfaces.md "v7.2 room lobby"): show 'tracks' (the
+     * cards), 'setup' (the start panel alone / the room lobby), 'picker' (the cards as the host's track picker, banner
+     * v.banner). Cheap to call often: the DOM is only touched where something changed; the focus moves only when the
+     * view changes (開始 alone and for the host, 準備 for a guest, 繼續駕駛 in a room's session).
+     */
+    setSetup: function (v) {
+      setupV = v && typeof v === 'object' ? v : null;
+      renderSetup();
+    },
+
+    /** v7.2: a room's loading screen from a RoomLoadingView {title, sub, rows: [{id, name, colour, isSelf, isHost, state:
+     *  'wait' | 'done' | 'fail'}], leftS, canGo, canCancel}; null hides it. */
+    setRoomLoading: function (v) {
+      rlView = v && typeof v === 'object' ? v : null;
+      renderRoomLoading();
+    },
+
+    /** v7.2: the remembered solo setup of the start panel {mode: 'free' | 'gp', q, r, wear} ('f1drive.gp'). */
+    getSetup: function () { return { mode: gpCfg.mode, q: gpCfg.q, r: gpCfg.r, wear: gpCfg.wear }; },
+
+    /**
+     * v7.2: a key main.js does not handle itself, in the menu: 'a' (the controller's A: 開始 alone and for the host - the
+     * first A asks while somebody is not ready, the second confirms -, a guest's 準備), 'b' / 'esc' (the controller's B,
+     * Esc: close the confirm row). -> true when it was used here.
+     */
+    setupKey: function (k) {
+      if (!inited || rlView || el.menu.classList.contains('hidden')) return false;
+      if (gpConfirm && (k === 'b' || k === 'esc')) { gpConfirm = false; renderGp(); return true; }
+      if (confirmKind) {
+        if (k === 'a') { confirmYes(); return true; }
+        if (k === 'b' || k === 'esc') { closeConfirm(); return true; }
+      }
+      var v = setupV;
+      if (k !== 'a' || !v || v.show !== 'setup') return false;
+      if (v.go && v.go.show && v.go.enabled) { goClick(); return true; }
+      if (v.force) { openConfirm('force'); return true; }
+      if (v.ready && v.ready.show && v.ready.enabled) { readyClick(); return true; }
+      return false;
     },
 
     showMenu: function (tracks) {
@@ -1893,6 +2431,8 @@
 
     setTrack: function (trackData) {
       trackData = trackData || {};
+      loadedId = typeof trackData.id === 'string' ? trackData.id : '';
+      markCurrentCard();                      // (v7.2: the cards mark the loaded track 目前賽道)
       setText('track', el.track, trackLabel(trackData));   // (v6.2: the Chinese name; the results subtitle uses it too)
       prepareMap(trackData.points);
       if (trackData.points && trackData.points.length) {

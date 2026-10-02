@@ -1,6 +1,8 @@
-// node test/tyres.test.js — tyre model (js/tyres.js): pure logic, fed with synthetic loads and with a real racing lap.
+// node test/tyres.test.js — tyre model (js/tyres.js): pure logic, fed with synthetic loads and with a real racing lap;
+// last, the real car (js/car.js + track + racing line) driven at Spa: the user's puncture report of 2026-10-02.
 'use strict';
 const assert = require('assert');
+const path = require('path');
 const Tyres = require('../js/tyres.js');
 const { createTyres, wearLoss, nextCompound } = Tyres;
 
@@ -147,18 +149,18 @@ test('reference condition: a new clean medium set in its window gives exactly 1 
   assert(exact, 'grip exactly 1 at rate 0');
   assert.deepStrictEqual(copy(z.state), before, 'state frozen at rate 0');
   // wear rate 1, hard racing: the first 20 % of wear costs nothing, the temperatures stay in the window ->
-  // exactly 1 / 1 / 1 at every step of the first two laps (the reference car drives exactly as before)
+  // exactly 1 / 1 / 1 at every step of the first ten laps (the reference car drives exactly as before)
   const r = fresh('M', 1);
   let steps = 0;
-  drive(r, 2, t => { chk(t); steps++; });
-  assert(exact, 'grip exactly 1 during two hard laps at rate 1');
+  drive(r, 10, t => { chk(t); steps++; });
+  assert(exact, 'grip exactly 1 during ten hard laps at rate 1');
   assert(maxWear(r) > 0.1 && maxWear(r) < 0.2, 'the tyres do wear meanwhile: ' + maxWear(r));
   assert(Math.max(...r.state.temp) > 90 && Math.max(...r.state.temp) < 100, 'working temperature ' + Math.max(...r.state.temp));
   assert.strictEqual(r.state.vib, 0);
-  info('2 hard laps at rate 1: wear ' + r.state.wear.map(w => (w * 100).toFixed(1) + '%').join(' ') + ', grip exactly 1 in all ' + steps + ' steps');
+  info('10 hard laps at rate 1: wear ' + r.state.wear.map(w => (w * 100).toFixed(1) + '%').join(' ') + ', grip exactly 1 in all ' + steps + ' steps');
 });
 
-test('compounds: soft +1.5 % grip / twice the wear, hard -1.5 % / half the wear; names, cycle', () => {
+test('compounds: soft +1.5 % grip / 1.65 x the wear, hard -1.5 % / 0.7 x the wear; names, cycle', () => {
   const s = fresh('S'), h = fresh('H');
   assert.deepStrictEqual(copy(s.state.grip), { lat: 1.015, brake: 1.015, traction: 1.015 });
   assert.deepStrictEqual(copy(h.state.grip), { lat: 0.985, brake: 0.985, traction: 0.985 });
@@ -166,8 +168,8 @@ test('compounds: soft +1.5 % grip / twice the wear, hard -1.5 % / half the wear;
   const m = fresh('M');
   for (const t of [s, m, h]) drive(t, 1);
   for (let i = 0; i < 4; i++) {
-    assert(Math.abs(s.state.wear[i] / m.state.wear[i] - 2) < 1e-9, 'soft wears twice as fast: ' + W[i]);
-    assert(Math.abs(h.state.wear[i] / m.state.wear[i] - 0.5) < 1e-9, 'hard half as fast: ' + W[i]);
+    assert(Math.abs(s.state.wear[i] / m.state.wear[i] - 1.65) < 1e-9, 'soft wears 1.65 x as fast: ' + W[i]);
+    assert(Math.abs(h.state.wear[i] / m.state.wear[i] - 0.7) < 1e-9, 'hard 0.7 x as fast: ' + W[i]);
   }
   const t = createTyres();
   for (const [arg, want] of [['soft', 'S'], ['s', 'S'], ['Hard', 'H'], ['h', 'H'], ['M', 'M'], ['medium', 'M'], ['x', 'M'], [null, 'M'],
@@ -228,7 +230,7 @@ test('grip versus wear: nothing below 20 %, < 1 % at 50 %, ~4 % at 75 %, then a 
   assert(jump < 1e-3, 'continuous, largest step per 0.01 % of wear: ' + jump);
   // the car along a real stint (medium, rate 1): multipliers when the most worn tyre passes 50 / 75 / 90 / 100 %
   const ty = fresh('M'), at = {};
-  drive(ty, 40, t => {
+  drive(ty, 100, t => {
     const m = maxWear(t);
     for (const p of [0.5, 0.75, 0.9, 1]) if (!at[p] && m >= p) at[p] = copy(t.state.grip);
     return m >= 1;
@@ -248,17 +250,20 @@ test('stint length on a real lap: S / M / H at wear rate 1, 2 and 5', () => {
     for (const rate of [1, 2, 5]) {
       const ty = fresh(c, rate);
       let l75 = 0;
-      const l100 = drive(ty, 100, (t, x) => { const m = maxWear(t); if (!l75 && m >= 0.75) l75 = x; return m >= 1; });
-      assert(l100 < 100, c + ' x' + rate + ' never wore out');
+      const l100 = drive(ty, 150, (t, x) => { const m = maxWear(t); if (!l75 && m >= 0.75) l75 = x; return m >= 1; });
+      assert(l100 < 150, c + ' x' + rate + ' never wore out');
       assert.strictEqual(ty.state.puncture, -1, 'no puncture before 100 %');
       res[c + rate] = { l100, l75, km: l100 * LAP.len / 1000 };
     }
   }
+  // (this lap is the gentle analog autopilot, ~4 % off the line's pace: the keyboard racing line at full pace wears a
+  // set ~1.3 x faster - devtests/tyre-test/README.md has the 40-circuit table for both and the real stint lengths)
   const M1 = res.M1.l100;
-  assert(M1 > 13.5 && M1 < 16.5, 'medium at rate 1 lasts ~15 laps of a ~5 km track: ' + M1);
+  assert(M1 > 50 && M1 < 66, 'medium at rate 1 lasts ~58 laps (~300 km) of this gentle lap: ' + M1);
+  assert(res.M1.l75 > 40 && res.M1.l75 < 52, 'medium: the cliff (75 %) after ~46 laps: ' + res.M1.l75);
   const near = (a, b, what) => assert(Math.abs(a / b - 1) < 0.01, what + ': ' + a + ' vs ' + b);
-  near(res.S1.l100, M1 / 2, 'soft: half');
-  near(res.H1.l100, M1 * 2, 'hard: twice');
+  near(res.S1.l100, M1 / 1.65, 'soft: 1 / 1.65');
+  near(res.H1.l100, M1 / 0.7, 'hard: 1 / 0.7');
   for (const c of ['S', 'M', 'H']) { near(res[c + 2].l100, res[c + 1].l100 / 2, c + ' rate 2'); near(res[c + 5].l100, res[c + 1].l100 / 5, c + ' rate 5'); }
   for (const c of ['S', 'M', 'H']) {
     info(Tyres.NAMES[c] + ' ' + c + ': ' + [1, 2, 5].map(r => 'x' + r + ' ' + res[c + r].l100.toFixed(1) + ' laps (' + res[c + r].km.toFixed(0) +
@@ -270,12 +275,12 @@ test('puncture from a worn-out tyre: after 100 %, on that tyre; big grip loss, s
   for (const seed of [1, 2, 3, 4, 5]) {
     const ty = fresh('M', 1, seeded(seed));
     let at100 = null, pAt = null;
-    drive(ty, 25, (t, x) => {
+    drive(ty, 100, (t, x) => {
       if (at100 === null && maxWear(t) >= 1) at100 = x;
       if (t.state.puncture >= 0) { pAt = x; return true; }
     });
     assert(at100 !== null && pAt !== null, 'seed ' + seed + ': punctured');
-    assert(pAt > at100 && pAt - at100 < 2.5, 'seed ' + seed + ': within 2.5 laps of 100 %: ' + at100 + ' -> ' + pAt);
+    assert(pAt > at100 && pAt - at100 < 8, 'seed ' + seed + ': within 8 laps (~40 km, 3..12 % of the life) of 100 %: ' + at100 + ' -> ' + pAt);
     assert.strictEqual(ty.state.wear[ty.state.puncture], 1, 'the punctured tyre is worn through');
     run(ty, 1, load({ speed: 60 }));
     const g = ty.state.grip, p = ty.state.puncture;
@@ -306,15 +311,20 @@ test('flat spots: lock-ups and hard impacts; vibration grows with speed, a littl
   const keep = copy(ty.state.flat);
   run(ty, 120, load({ speed: 60, lat: 0.4 }));
   assert.deepStrictEqual(copy(ty.state.flat), keep, 'no healing');
-  // light sliding does not flat-spot; understeer alone only a little
+  // light sliding does not flat-spot; a slide without the brakes (understeer, the rears on the throttle) neither:
+  // only a lock-up does (2026-10-02: a keyboard driver's throttle-on slides had flat-spotted all four tyres)
   const light = fresh('M');
-  run(light, 10, load({ speed: 50, lat: 1, slip: 0.3 }));
+  run(light, 10, load({ speed: 50, lat: 1, slip: 0.3, brake: 1 }));
   assert.deepStrictEqual(light.state.flat, [0, 0, 0, 0], 'slip 0.3: none');
-  const under = fresh('M'), lock = fresh('M');
+  const under = fresh('M'), spin = fresh('M'), lock = fresh('M'), trail = fresh('M');
   run(under, 2, load({ speed: 40, lat: 1, slip: 0.6 }));
+  run(spin, 2, load({ speed: 40, lat: -1, slip: 1, drive: 1 }));
   run(lock, 2, load({ speed: 40, lat: 1, slip: 0.6, brake: 1 }));
-  assert(Math.max(...under.state.flat) > 0 && Math.max(...under.state.flat) < Math.max(...lock.state.flat) / 4,
-    'understeer without the brakes: a little (' + Math.max(...under.state.flat) + '), locked: ' + Math.max(...lock.state.flat));
+  run(trail, 2, load({ speed: 40, lat: 1, slip: 0.6, brake: 0.3 }));
+  assert.deepStrictEqual(under.state.flat, [0, 0, 0, 0], 'understeer without the brakes: none');
+  assert.deepStrictEqual(spin.state.flat, [0, 0, 0, 0], 'a power slide: none');
+  assert(Math.max(...lock.state.flat) > 0.1 && Math.abs(Math.max(...trail.state.flat) / Math.max(...lock.state.flat) - 0.3) < 1e-9,
+    'locked: ' + Math.max(...lock.state.flat) + ', with 30 % of the brake: 30 % of that');
   // impacts: a light touch nothing, a hard hit a flat spot on one tyre, phased in without a step
   const touch = fresh('M', 1, () => 0.5);
   touch.update(DT, load({ speed: 40, hit: 0.15 })); run(touch, 1, load({ speed: 40 }));
@@ -469,7 +479,7 @@ test('garbage input never poisons the state', () => {
   }
   ty.update(DT, load({ speed: -70, lat: 7, brake: 3, drive: -2, slip: 9, hit: 5 }));   // reverse, out of range
   checkSane(ty, 'out of range');
-  ty.setWearRate(5); drive(ty, 10); checkSane(ty, 'worn out at x5');
+  ty.setWearRate(5); drive(ty, 20); checkSane(ty, 'worn out at x5');
   ty.fit({}); checkSane(ty, 'fit garbage');
   assert.strictEqual(ty.state.compound, 'M');
   // a year of racing at x5 on softs with every kind of abuse still gives sane numbers
@@ -494,7 +504,7 @@ test('the multipliers are continuous in time (only a puncture may move them quic
     prev = { lat: g.lat, brake: g.brake, traction: g.traction, l: lapLoad.lat };
   };
   let events = 0, overCliff = false;
-  drive(ty, 2.2, (t, x) => {
+  drive(ty, 8, (t, x) => {
     watch('lap')(t);
     if (t.state.puncture < 0 && maxWear(t) >= 0.99) overCliff = true;
     const i = Math.round(x * LN) % LN;
@@ -508,10 +518,87 @@ test('the multipliers are continuous in time (only a puncture may move them quic
       Object.assign(lapLoad, keep);
     }
   });
-  assert.strictEqual(events, 4);
+  assert.strictEqual(events, 16);
   assert(maxWear(ty) === 1 && overCliff, 'went over the cliff before any puncture: ' + ty.state.wear);
   assert(maxStep < 0.003, 'largest step of a multiplier in one 1/120 s step: ' + maxStep + ' (' + where + ')');
   info('largest step of a multiplier per 1/120 s (no puncture, ' + events + ' events, soft x5 over the cliff): ' + maxStep.toFixed(5) + ' (' + where + ')');
+});
+
+// ---- the real car on a real track (2026-10-02 report: "the RB19 at Spa, wear x1, a puncture halfway through lap 2,
+// and I hit nothing"). The cause: js/tyres.js was calibrated to a medium set lasting 15 laps of 5 km and a soft twice
+// as fast, so a soft at Spa reached 100 % (then punctured: worn through) after ~4 laps on the racing line and ~2.4
+// for a keyboard driver who slides and brakes late. Recalibrated to the real stint lengths (devtests/tyre-test).
+// Driven here with the REAL js/car.js (its own js/tyres.js) at 1/120 s by the seasons calibration's keyboard driver
+// (devtests/seasons-calib/driver.mjs: pursuit on the car's own racing line, keys from the line's advice, battery on
+// full throttle) and by a human-like variant of it (brakes late, rides the kerbs, 25 % more steering: slides).
+function realStint(o) {
+  const ROOT = path.join(__dirname, '..');
+  if (!globalThis.F1.buildRaceLine) {
+    globalThis.window = globalThis;
+    globalThis.THREE = globalThis.THREE || require(path.join(ROOT, 'lib/three.min.js'));
+    for (const f of ['tracks-data.js', 'js/seasons-data.js', 'js/cars.js', 'js/track.js', 'js/car.js', 'js/raceline.js']) require(path.join(ROOT, f));
+  }
+  const F1 = globalThis.F1;
+  const key = o.track + '|' + o.car;
+  realStint.cache = realStint.cache || {};
+  if (!realStint.cache[key]) {
+    const t = F1.buildTrack(globalThis.F1_TRACKS.find(x => x.id === o.track));
+    const c0 = F1.createCar(F1.cars.get(o.car), { tyres: false });
+    realStint.cache[key] = { t, line: F1.buildRaceLine(t, c0.perf) };
+  }
+  const { t, line } = realStint.cache[key];
+  const car = F1.createCar(F1.cars.get(o.car), { random: seeded(o.seed || 1) }), st = car.state, ty = car.tyres;
+  const S = t.samples, N = S.length, ds = t.length / N, P = line.points;
+  car.reset(t, 0); car.setBattery(1); ty.fit(o.compound); ty.setWearRate(o.rate || 1);
+  const human = o.driver === 'human';
+  const BRAKE_ON = human ? 0.78 : 0.6, THR_ON = human ? 0.5 : 0.45, GAIN = human ? 1.25 : 1, WIDE = human ? 1.1 : 0;
+  const input = { up: false, down: false, left: false, right: false, boost: false };
+  let dist = 0, hitMax = 0, punct = null, l75 = null, l100 = null, steps = 0;
+  while (dist < o.maxLaps * t.length && steps < o.maxLaps * 400 * 120) {
+    line.update(st);
+    const v = Math.max(0, st.speed), lv = line.levels[2];
+    input.up = lv < THR_ON || v < 5; input.down = lv >= BRAKE_ON && v >= 5;
+    if (input.up && input.down) input.up = false;
+    input.boost = input.up && !input.down && v > 100 / 3.6;
+    const k = (st.sampleIndex + Math.round(Math.min(35, Math.max(7, 5 + 0.3 * v)) / ds)) % N, tp = P[k];
+    let tx = tp.x, tz = tp.z;
+    const sk = S[k], hw = sk.halfW || t.halfWidth, d = tp.d || 0;
+    if (WIDE && Math.abs(d) > hw - 2.5) { const nd = Math.sign(d) * Math.min(Math.abs(d) + WIDE, hw + 1); tx = sk.x + sk.nx * nd; tz = sk.z + sk.nz * nd; }
+    const dx = tx - st.x, dz = tz - st.z, ch = Math.cos(st.heading), sh = Math.sin(st.heading);
+    const kap = 2 * (dx * ch - dz * sh) / (dx * dx + dz * dz);
+    const want = Math.max(-1, Math.min(1, GAIN * Math.atan(kap * 3.6) / car.perf.steerLockAt(v, S[st.sampleIndex].bank || 0, kap >= 0 ? 1 : -1)));
+    input.left = want > st.steer + 0.03; input.right = want < st.steer - 0.03;
+    const x0 = st.x, z0 = st.z;
+    car.update(DT, input, t);
+    steps++;
+    const dd = Math.hypot(st.x - x0, st.z - z0);
+    if (dd < 5) dist += dd;
+    if (st.hit > hitMax) hitMax = st.hit;
+    const m = maxWear(ty), laps = dist / t.length;
+    if (l75 === null && m >= 0.75) { l75 = laps; if (o.until === 0.75) break; }
+    if (l100 === null && m >= 1) l100 = laps;
+    if (ty.state.puncture >= 0) { punct = { laps, wear: ty.state.wear[ty.state.puncture], worst: m, hitMax }; break; }
+  }
+  return { l75, l100, punct, hitMax, laps: dist / t.length };
+}
+
+test('the user\'s case: RB19 at Spa, wear x1 - a soft set lasts a real stint, no puncture before it is worn through', () => {
+  const SPA = 'be-1925', RB19 = '2023-red-bull';
+  const line = realStint({ track: SPA, car: RB19, driver: 'line', compound: 'S', maxLaps: 30 });
+  assert(line.l75 > 12 && line.l75 < 18, 'soft, racing line: the cliff (75 %) after 12..18 laps (real Spa: 12..18): ' + line.l75);
+  assert(line.l100 !== null && line.punct && line.punct.laps > line.l100 && line.punct.wear === 1,
+    'soft, racing line: worn through first, punctured only after that: ' + JSON.stringify(line.punct) + ' 100 % at ' + line.l100);
+  const med = realStint({ track: SPA, car: RB19, driver: 'line', compound: 'M', maxLaps: 40, until: 0.75 });
+  assert(med.l75 > 20 && med.l75 < 30 && !med.punct, 'medium, racing line: the cliff after 20..30 laps (real Spa: 20..30): ' + med.l75);
+  const hum = realStint({ track: SPA, car: RB19, driver: 'human', compound: 'S', maxLaps: 30 });
+  assert(hum.l75 > 11 && hum.l75 < line.l75, 'soft, a human-like keyboard driver: the cliff after > 11 laps, before the clean line\'s: ' + hum.l75);
+  assert(hum.punct && hum.punct.laps > 15 && (hum.punct.wear === 1 || hum.punct.hitMax >= 0.4),
+    'soft, human-like: no puncture in 15 laps, then only a worn-through tyre or a real impact: ' + JSON.stringify(hum.punct));
+  const x3 = realStint({ track: SPA, car: RB19, driver: 'line', compound: 'S', rate: 3, maxLaps: 10, until: 0.75 });
+  assert(Math.abs(x3.l75 * 3 / line.l75 - 1) < 0.08, 'wear x3: a third of the stint: ' + x3.l75 + ' vs ' + line.l75);
+  info('RB19 at Spa, x1, soft: racing line 75 % after ' + line.l75.toFixed(1) + ' laps, 100 % after ' + line.l100.toFixed(1) + ' (worn-through puncture at ' +
+    line.punct.laps.toFixed(1) + '); human-like ' + hum.l75.toFixed(1) + ' / ' + (hum.l100 || 0).toFixed(1) + '; medium 75 % after ' + med.l75.toFixed(1) +
+    '; soft at x3 ' + x3.l75.toFixed(1));
 });
 
 console.log(failed ? '\n' + failed + ' test(s) FAILED' : '\nall tyres tests passed');

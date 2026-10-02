@@ -83,7 +83,7 @@ app.whenReady().then(async () => {
       ref: !!F1.REF_SPEC && typeof F1.carPerf === 'function' && typeof F1.sanitizeSpec === 'function', id: F1.REF_SPEC && F1.REF_SPEC.id, gears: F1.CAR_PERF.gears })`);
     check('boot: no error overlay, v6 car API present', !boot.overlay && boot.ref && boot.gears === 8, boot);
     const name = await js(`(function () { var c = [].slice.call(document.querySelectorAll('.card')).filter(function (n) { return n.textContent.toLowerCase().indexOf(${JSON.stringify(TRACK)}) >= 0; })[0];
-      if (!c) return null; c.click(); return c.querySelector('.card-name').textContent; })()`);
+      if (!c) return null; c.click(); var __g=document.getElementById('setup-go'); if(__g) __g.click(); return c.querySelector('.card-name').textContent; })()`);
     await sleep(1500);
     const car0 = await js(`(function () { var c = F1.game.car; return { running: F1.game.running, spec: c.spec.id, same: JSON.stringify(c.spec) === JSON.stringify(F1.REF_SPEC), tyres: !!c.tyres && c.tyres.state.compound,
       rate: c.tyres && c.tyres.wearRate, bat: c.state.battery, gear: c.state.gear, rpm: c.state.rpm, pit: !!F1.game.track.pit }; })()`);

@@ -8,7 +8,7 @@ const { app, ipcMain } = require('electron');
 const fs = require('fs'), path = require('path');
 require('../electron-userdata')(app, 'v6-critic');
 const L = require('./lib');
-const { OUT, host, sleep, J, results, state, check, note, makeWin } = L;
+const { OUT, host, sleep, J, results, state, check, note, makeWin, roomTrack, roomSettings, roomStart, roomBack } = L;
 const ONLY = (process.env.ONLY || '').split(',').filter(Boolean);
 const PORT = Number(process.env.PORT || 24870);
 
@@ -21,7 +21,7 @@ async function partNewbie() {
   await w.shot('newbie-01-menu');
   const m = await w.js(`({ tab: document.querySelector('.menu-tabs button.on').getAttribute('data-tab'), grid: __t.rect('track-grid'), panel: __t.rect('mp-panel'),
     cards: document.querySelectorAll('#track-grid .card').length, firstCard: __t.rect('#track-grid .card'), body: __t.rect('.menu-body'),
-    head: __t.rect('.menu-head'), keymap: __t.text('.keymap'), gpCar: __t.text('gp-car'), start: document.getElementById('gp-start').disabled,
+    head: __t.rect('.menu-head'), keymap: __t.text('.keymap'), gpCar: __t.text('gp-car'), gpOpen: __t.shown('gp-open'),
     hint: __t.shown('gp-hint') ? __t.text('gp-hint') : '' })`);
   note('menu: ' + J(m));
   check('the track grid is visible next to the side panel (cards at least 150 px wide, not covered)', m.firstCard && m.firstCard.w >= 150 && m.grid.w > 300 && m.panel.x >= m.grid.x + m.grid.w - 2, m);
@@ -307,17 +307,21 @@ async function tyresPuncture() {
   const tag = 'tyre-wear', w = makeWin(tag);
   await w.open({ warp: true });
   await w.pickTrackWarp('it-1922');
+  // (2026-10-02: the wear is real F1 stints at x1; at x5 a medium set wears through in ~12 laps, a soft in ~7..8:
+  // the race starts on softs (the start panel's 起跑輪胎) and runs up to 11 laps)
   await w.tap('Escape');
-  await w.click('#tab-gp');
-  await w.field('gp-q', '1'); await w.field('gp-r', '8');
+  await w.card('it-1922');
+  await w.mode('gp');
+  await w.field('gp-q', '1'); await w.field('gp-r', '12');
   await w.click('#gp-wear button[data-w="5"]');
-  check(tag + ': a Grand Prix with wear x5 starts', await w.click('gp-start') && await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000));
+  await w.click('#setup-tyre [data-c="S"]');
+  check(tag + ': a Grand Prix with wear x5 on softs starts from the start panel', await w.go() && await w.until(`F1.game.gp.phase === 'quali' && F1.game.running && F1.game.nextCompound === 'S'`, 3000));
   // the wear option is for the race only (qualifying wears at x1): straight to the race
   await w.js(`F1.game.gp.action('skip'); __e.ap.on = true; __e.ap.mode = 'line'; window.__lapLog = []; true`);
   check(tag + ': qualifying skipped: the race, wear x5 from the grid on', await w.pump(`g.gp.phase === 'race' && !g.gp.inputLocked`, 30, 'race') && (await w.js(`F1.game.tyres.wearRate`)) === 5);
   const laps = [];
   let punct = false;
-  for (let k = 1; k <= 7 && !punct; k++) {
+  for (let k = 1; k <= 11 && !punct; k++) {
     const ok = await w.pump(`g.gp.lap >= ${k} || g.tyres.state.puncture >= 0`, 220, 'race lap ' + k);
     const s = await w.js(`({ lapN: F1.game.gp.lap, last: F1.game.lap.last, tyres: __v.tyres(), hudPunct: __v.hud.tyres && __v.hud.tyres.puncture })`);
     laps.push({ lapN: s.lapN, last: s.last, wear: s.tyres.wear.map(x => +x.toFixed(2)), grip: s.tyres.grip, punct: s.tyres.puncture });
@@ -325,7 +329,7 @@ async function tyresPuncture() {
     if (!ok) break;
   }
   note(tag + ': ' + J(laps));
-  check(tag + ': the tyres wear out to a puncture within a few laps at x5', punct, laps[laps.length - 1]);
+  check(tag + ': the softs wear out to a puncture within 11 laps at x5', punct && laps[0].wear.every(x => x < 0.3), laps[laps.length - 1]);
   if (!punct) { await w.noErrors(); w.destroy(); return; }
   await w.frames(30);
   await w.shot(tag + '-1-puncture', true);
@@ -337,7 +341,8 @@ async function tyresPuncture() {
   const v = await pitVisit(w, tag + '-limp', { limiter: true });
   note(tag + ' limp: ' + J(v && { after: v.after, info: v.info && v.info.rec && { hits: v.info.rec.hits, grass: v.info.rec.grass } }));
   const t2 = await w.js(`__v.tyres()`);
-  check(tag + ': limped to the box on the puncture, a new set cures it', v && v.svcStarted && t2.puncture === -1 && Math.max.apply(null, t2.wear) < 0.01 && t2.grip.lat === 1, { v: v && v.after, t2 });
+  // (a new set: no wear, the full grip of its compound: js/tyres.js S 1.015 / M 1 / H 0.985)
+  check(tag + ': limped to the box on the puncture, a new set cures it', v && v.svcStarted && t2.puncture === -1 && Math.max.apply(null, t2.wear) < 0.01 && t2.grip.lat === { S: 1.015, M: 1, H: 0.985 }[t2.compound], { v: v && v.after, t2 });
   await w.noErrors();
   w.destroy();
 }
@@ -412,18 +417,20 @@ async function partRoom() {
   await A.pickCar('2014-mercedes'); await B.pickCar('2014-red-bull'); await C.pickCar('2014-ferrari');
   const ids = { a: await A.js(`F1.net.id`), b: await B.js(`F1.net.id`), c: await C.js(`F1.net.id`) };
   check('everybody sees the others\' cars', await A.until(`F1.net.players.length === 2 && F1.net.players.every(function (p) { return /^2014-(red-bull|ferrari)$/.test(p.car); })`, 4000));
-  await A.pickTrack('it-1922');
-  const onTrack = `F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id`;
-  check('all three on the room track', await A.until(onTrack, 15000) && await B.until(onTrack, 15000) && await C.until(onTrack, 15000));
+  // v7.2: the host picks the room's track in the lobby; the guests press 準備; 開始; everybody loads (the barrier)
+  check('the host sets Monza in the lobby', await roomTrack(A, 'it-1922'));
+  check('nobody is on a track in the lobby', (await Promise.all([A, B, C].map(w => w.js(`!F1.game.running && !F1.game.track`)))).every(Boolean));
+  const onTrack = `F1.game.running && F1.game.trackData && F1.net.trackId === F1.game.trackData.id && F1.net.room.st === 'session'`;
+  check('all three on the room track (free practice after the barrier)', await roomStart(A, [B, C]) && await A.until(onTrack, 15000) && await B.until(onTrack, 15000) && await C.until(onTrack, 15000));
   await sleep(1500);
-  // the host changes the year in free practice (from the menu)
-  await A.tap('Escape');
+  // the host changes the year (v7.2: in the lobby: 回到大廳, the season, 開始 again)
+  check('the host takes the room back to the lobby', await roomBack(A, [A, B, C]));
   const y16 = await A.pickYear(2016);
   const fol = await B.until(`F1.net.year === 2016 && F1.game.spec.id === '2016-red-bull'`, 5000, 'B 2016') && await C.until(`F1.net.year === 2016 && F1.game.spec.id === '2016-ferrari'`, 5000, 'C 2016');
   const toastsB = await B.js(`__v.toasts.map(function (t) { return t.text; }).filter(function (t) { return /2016/.test(t); })`);
   const aSpec = await A.js(`F1.game.spec.id`);
-  check('the host picks 2016 in free practice: guests follow to the same team\'s 2016 car, told by a toast', y16 === '2016' && fol && toastsB.length === 1 && aSpec === '2016-mercedes', { y16, toastsB, aSpec });
-  await A.tap('Escape');
+  check('the host picks 2016 in the lobby: guests follow to the same team\'s 2016 car, told by a toast', y16 === '2016' && fol && toastsB.length === 1 && aSpec === '2016-mercedes', { y16, toastsB, aSpec });
+  check('the season change cleared 準備; free practice again after 開始', (await A.js(`F1.net.room.ready.length`)) === 0 && await roomStart(A, [B, C]) && await B.until(onTrack, 15000) && await C.until(onTrack, 15000));
   await sleep(1500);
   const rc = await A.js(`(function () { var r = F1.game.remoteCars, o = {}; for (var k in r) o[k] = r[k].spec ? r[k].spec.id : null; return o; })()`);
   check('the host resolves the guests\' 2016 cars (liveries)', rc[ids.b] === '2016-red-bull' && rc[ids.c] === '2016-ferrari', rc);
@@ -442,13 +449,10 @@ async function partRoom() {
   const errsA = await A.js(`window.__errs.length`);
   check('garbage car ids from a guest: the host keeps going (no page error), shows a real car', errsA === 0 && /^2016-/.test((await A.js(`(function () { var r = F1.game.remoteCars[${ids.c}]; return r && r.spec ? r.spec.id : ''; })()`))));
   await C.tap('Escape'); await C.pickCar('2016-ferrari'); await C.tap('Escape');
-  // a Grand Prix: wear x2, skip qualifying, race of 2 laps
-  await A.tap('Escape');
-  await A.click('#tab-gp');
-  await A.field('gp-q', '1'); await A.field('gp-r', '2');
-  await A.click('#gp-wear button[data-w="2"]');
-  await A.click('gp-start');
-  check('the Grand Prix starts for everybody (qualifying)', await A.until(`F1.game.gp.phase === 'quali'`, 4000) && await B.until(`F1.game.gp.phase === 'quali'`, 4000) && await C.until(`F1.game.gp.phase === 'quali'`, 4000));
+  // a Grand Prix: wear x2, skip qualifying, race of 2 laps (v7.2: set in the lobby, started with 開始)
+  await roomBack(A, [A, B, C]);
+  await roomSettings(A, { mode: 'gp', q: 1, r: 2, wear: 2 });
+  check('the Grand Prix starts for everybody (qualifying)', await roomStart(A, [B, C], { gp: true }));
   // year / car switching attempts during the session
   await A.tap('Escape');
   const ya = await A.pickYear(2020);
@@ -510,8 +514,12 @@ async function partRoom() {
   check('C reconnects mid-race: back in the room as a spectator, a 2016 car', back && cv.spec === true && /^2016-/.test(cv.car), cv);
   await C.shot('room-05-C-spectating');
   await B.js(`__d.stop()`);
-  await A.js(`F1.game.gp.action('end'); F1.game.gp.action('end'); true`);
-  check('the host ends the Grand Prix: free practice everywhere', await A.until(`F1.game.gp.phase === 'free'`, 4000) && await B.until(`F1.game.gp.phase === 'free'`, 4000) && await C.until(`F1.game.gp.phase === 'free'`, 4000));
+  await A.js(`F1.game.gp.action('end'); true`);
+  await A.until(`F1.game.gp.phase === 'results'`, 4000, 'results');
+  await A.js(`F1.game.gp.action('end'); true`);
+  // (v7.2: a room does not fall back to free practice: the second end takes it back to the lobby)
+  check('the host ends the Grand Prix: the results, then everybody in the lobby (no session)', await A.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby'`, 4000) &&
+    await B.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby'`, 4000) && await C.until(`F1.game.gp.phase === 'free' && F1.net.room.st === 'lobby'`, 4000));
   for (const w of [A, B, C]) await w.noErrors();
   for (const w of [C, B, A]) { await w.js(`document.getElementById('mp-leave') && document.getElementById('mp-leave').click(); true`); }
   await sleep(400);
@@ -557,9 +565,10 @@ async function partMash() {
   await w.noErrors('mash');
   // the same on the grid of an offline Grand Prix (lights: input locked)
   await w.tap('Escape');
-  await w.click('#tab-gp');
+  await w.card('it-1922');
+  await w.mode('gp');
   await w.field('gp-q', '1'); await w.field('gp-r', '1');
-  await w.click('gp-start');
+  await w.go();
   await w.until(`F1.game.gp.phase === 'quali' && F1.game.running`, 3000, 'quali');
   await w.js(`F1.game.gp.action('skip'); true`);
   await w.until(`F1.game.gp.phase === 'grid'`, 3000, 'grid');

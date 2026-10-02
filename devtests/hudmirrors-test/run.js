@@ -133,7 +133,7 @@ async function boot(w) {
 
 async function pickTrack(w, id) {
   const ok = await w.js(`(function () { var i = F1_TRACKS.findIndex(function (t) { return t.id === ${J(id)}; });
-    var c = document.querySelector('#track-grid .card[data-i="' + i + '"]'); if (!c) return false; c.click(); return true; })()`);
+    var c = document.querySelector('#track-grid .card[data-i="' + i + '"]'); if (!c) return false; c.click(); var __g=document.getElementById('setup-go'); if(__g) __g.click(); return true; })()`);
   if (!ok) return false;
   return w.until(`F1.game.running && F1.game.trackData && F1.game.trackData.id === ${J(id)}`, 30000, 'track ' + id);
 }
