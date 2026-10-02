@@ -39,27 +39,21 @@ computer drivers (offline and in rooms). The user writes Traditional Chinese; UI
 - The user leaves work running unattended (overnight / while out): keep going, take sensible defaults, record them
   in docs/v6-plan.md; `node tools/watchdog.mjs` + `tools/keepawake.ps1` exist for that.
 
-## State (2026-10-02, after Fable review round 3)
+## State (2026-10-02 13:30, run finished)
 
-Released on GitHub (prereleases, private repo Heart-0001/f1drive; tags v6.1 = c50dc5a, v6.2 = dd08276, v7.0 = 766a0e1:
-computer drivers). HEAD = origin/main = 17170a2 (v7.0 + its exe-smoke checks).
+Released on GitHub (private repo Heart-0001/f1drive): v6.1 = c50dc5a, v6.2 = dd08276, v7.0 = 766a0e1 (prereleases) and
+**v7.1 = a955137 (latest, F1Drive-v7.1.exe)**: computer drivers + Fable review round 3 (30 confirmed findings fixed) +
+the AI pressing follow-up (no pressing into a braking car; passes 4328 vs 3961, contacts 48 vs 58 in 672 races).
+HEAD = origin/main = a955137 + this docs commit. Everything green: 12 node suites, build-cars --check, every node
+devtest, every Electron harness (gp-e2e/bots.js 193/193), exe smoke 22/22 on the clean-worktree build.
+Nothing is running; the user plays the release on their laptop and will say what to change next.
 
-The working tree holds review round 3 (30 confirmed findings fixed or documented: bots' pit limit, id memories,
-overtaking, wrong-way cars; js/net.js `__proto__` rows; the bots' owner leaving no longer ends a dedicated server's race;
-Silverstone's grid; elevation credits; gantry lamps; tunnel reverb; search forms; docs) plus the recalibrated seasons
-data. It is fully re-run and green (12 node suites, build-cars --check, every node devtest, every Electron harness
-including gp-e2e/bots.js 193/193) and is the commit about to be made: the last verified state. Details:
-`docs/v6-plan.md` "Fable review round 3 — outcome".
-
-Next, in order (docs/v6-plan.md "Remaining steps"): commit; `npm run dist` from a clean worktree of that commit;
-`node devtests/exe-smoke/smoke-exe.js <worktree>/dist/win-unpacked/F1Drive.exe` (22/22) and read its screenshots; push
-main; GitHub release (suggested tag v7.1); then record the commit / release here and refresh docs/claude-memory/.
-
-Known leftovers / not verified: AI pressing into Monza's first chicane on lap 1 gives 0.16-0.20 bumps in ~1 race in 5
-(needs a passing-behaviour decision); passing between cars 1-2 % apart is rare (no slipstream in js/car.js); the
-calibration driver's 2026 bias (-0.47 %, documented); `review/escape.js` counts pit lanes as escapes (203, v1 script);
-while the host is in the menu his bots stand still; no bot ownership transfer on host migration. Never verified: real
-two-machine internet play, a physical controller (stubbed only), the sound by ear (measured only), Electron 44 on
-another machine / a weaker GPU; COTA total elevation 30 m vs the published 41 m (lidar says the surface cannot reach 41 m).
+Known leftovers / not verified: Monaco wear x2 soft stints of bots can pass 93 % (1 run in 8); a hairpin alongside
+misjudgement (Bahrain T10, 1 heavy contact in 168 races); passing between cars 1-2 % apart is rare (no slipstream in
+js/car.js); Raidillon taken at 222-250 km/h (real ~300, flat out); the calibration driver's 2026 bias (-0.47 %,
+documented); `review/escape.js` counts pit lanes as escapes (203, v1 script); while the host is in the menu his bots
+stand still; no bot ownership transfer on host migration. Never verified: real two-machine internet play, a physical
+controller (stubbed only), the sound by ear (measured only), Electron 44 on another machine / a weaker GPU; COTA total
+elevation 30 m vs the published 41 m (lidar says the surface cannot reach 41 m).
 
 `docs/claude-memory/` is a copy of the Claude Code project memory (for other machines).
