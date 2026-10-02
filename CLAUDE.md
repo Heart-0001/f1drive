@@ -39,41 +39,20 @@ computer drivers (offline and in rooms). The user writes Traditional Chinese; UI
 - The user leaves work running unattended (overnight / while out): keep going, take sensible defaults, record them
   in docs/v6-plan.md; `node tools/watchdog.mjs` + `tools/keepawake.ps1` exist for that.
 
-## State (2026-10-03 ~06:00): v7.2 built in the working tree, NOT committed, NOT released
+## State (2026-10-03 05:45, v7.2 released)
 
-Working tree on top of HEAD 0f4e3af (= v7.1 + docs), uncommitted: **v7.2** = the room lobby (房間大廳: everybody gathers,
-guests press 準備, the host's 開始 loads the track on every window behind a loading barrier; protocol 2) and the
-single-player start panel (出發面板: a track card no longer drives; 開始 / Enter / pad A) — the user's 10-02 ~23:20 / 23:35
-requests — plus the tyre wear recalibrated to real F1 stints (the user's "RB19 at Spa x1, puncture on lap 2": js/tyres.js
-WEAR_K 3.9e-6 -> 1.0e-6, soft 1.65, hard 0.7, no flat spots from an unbraked slide; RB19 Spa x1 medium, human-like
-driving: ~42 % after 12 laps, no puncture; devtests/tyre-test) and the lobby review's 2 confirmed findings fixed in
-js/main.js (LOBBY-1 a host click on 取消 / 不等了 / 回到大廳 within 1 s of a room transition was dropped silently: now held
-for the rest of that second; LOBBY-2 a double click on 開始 over a slow link: one start until its answer). Design
-docs/lobby-design.md, contract js/README-interfaces.md "v7.2 room lobby", decisions docs/v6-plan.md "v7.2 room lobby".
-Final re-run (2026-10-03 ~04:45..06:00, muted, working tree): 12 node suites (main 160 checks), build-cars --check,
-every node devtest, every Electron harness: lobby-test 181/181, gp-e2e/bots 197/197, online 144/144, online-v6 66/66,
-gp-smoke 203/203, v6-smoke 153/153, v6-critic 89/89, ui-gp 121/121, ui-v6 154/154; exe smoke 23/23 on an unpacked copy
-of the working tree (no `npm run dist`). Known non-zero verdicts, all pre-existing: ai-test/critic-mixed (`erratic` at
-Baku, 0.74), audio-test/minimise-test 5/7 (needs an audible window), tunnel-test/make-data --check (only the "checked"
-notes), telemetry-test's DPR 2 pass, review/escape.js (pit lanes), start-clock against its mutant (it must fail).
-Next (when the user / orchestrator says so): commit, `npm run dist` from a clean worktree, exe smoke on it, push, release
-v7.2 (Traditional Chinese notes: the lobby, the start panel, the tyre wear).
+GitHub (PUBLIC repo Heart-0001/f1drive; history rewritten 2026-10-02 to drop two personal e-mail addresses — never write
+anyone's address into files, commits or requests): releases v6.1, v6.2, v7.0 (prereleases), v7.1 and **v7.2 = 5ded440
+(latest, F1Drive-v7.2.exe; also in dist/)**: room lobby (protocol 2, docs/lobby-design.md, contract 'v7.2 room lobby'),
+single-player start panel, tyre wear fixed (was ~4x too fast). Everything green: 12 node suites (main 160), build-cars
+--check, every node devtest, every Electron harness incl. devtests/lobby-test, exe smoke on the clean-worktree build.
+Nothing is running.
 
-## State before v7.2 (2026-10-02 13:30)
-
-Released on GitHub (PUBLIC repo Heart-0001/f1drive since 2026-10-02 23:30; history rewritten that night to drop two personal e-mail addresses — every commit id before then changed, the docs were updated to the new ids; pre-rewrite backup bundle in the session scratchpad only): v6.1 = c2bd064, v6.2 = 6eb2c29, v7.0 = 9890cad (prereleases) and
-**v7.1 = 79335dd (latest, F1Drive-v7.1.exe)**: computer drivers + Fable review round 3 (30 confirmed findings fixed) +
-the AI pressing follow-up (no pressing into a braking car; passes 4328 vs 3961, contacts 48 vs 58 in 672 races).
-HEAD = origin/main = 79335dd + docs commits (0f4e3af). Everything green: 12 node suites, build-cars --check, every node
-devtest, every Electron harness (gp-e2e/bots.js 193/193), exe smoke 22/22 on the clean-worktree build.
-(Then the user played v7.1 and asked for the lobby / start panel and reported the Spa puncture: v7.2 above.)
-
-Known leftovers / not verified: Monaco wear x2 soft stints of bots can pass 93 % (1 run in 8); a hairpin alongside
-misjudgement (Bahrain T10, 1 heavy contact in 168 races); passing between cars 1-2 % apart is rare (no slipstream in
-js/car.js); Raidillon taken at 222-250 km/h (real ~300, flat out); the calibration driver's 2026 bias (-0.47 %,
-documented); `review/escape.js` counts pit lanes as escapes (203, v1 script); while the host is in the menu his bots
-stand still; no bot ownership transfer on host migration. Never verified: real two-machine internet play, a physical
-controller (stubbed only), the sound by ear (measured only), Electron 44 on another machine / a weaker GPU; COTA total
-elevation 30 m vs the published 41 m (lidar says the surface cannot reach 41 m).
+Known leftovers: kerbs outside the white line count as grass in js/car.js (a little extra tyre wear / dirt);
+ai-test/critic-mixed 'erratic' at Baku (a legend rear-ends a blind brake-testing human); Monaco x2 soft stints of bots
+can pass 93 %; passing between cars 1-2 % apart is rare (no slipstream); Raidillon taken at 222-250 km/h (real ~300);
+review/escape.js counts pit lanes as escapes; while the host is in the menu his bots stand still. Never verified: real
+two-machine internet play (only a delaying proxy), a physical controller, the sound by ear, another machine / GPU.
+Lesson: SendMessage to a running workflow agent's id resumes a parallel COPY of it — never message workflow agents.
 
 `docs/claude-memory/` is a copy of the Claude Code project memory (for other machines).

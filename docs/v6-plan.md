@@ -420,3 +420,4 @@ texts, edge cases). In short:
   verdict, diagnostics only): audio alloc-profile, telemetry probe-cost / probe-alloc, cockpit-test compare.js,
   car-v6/smoke-wrap.js (historical), the review-final / review-r3 / handling-test probes. Next: commit, clean-worktree
   `npm run dist`, exe smoke on it, push, release v7.2 (when the orchestrator / user says so).
+- 05:45: v7.2 DONE: committed 5ded440, clean-worktree build, exe smoke all PASS (incl. the start-panel check), pushed, release v7.2 (latest) https://github.com/Heart-0001/f1drive/releases/tag/v7.2, exe copied to dist/F1Drive-v7.2.exe. Nothing running.
