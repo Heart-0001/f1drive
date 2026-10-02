@@ -15,8 +15,24 @@
 //   cars in the grid boxes behind ours, driving, a Grand Prix's placements (qualifying from the room slots, the grid by
 //   the session's order, held until the lights, the lap clocks armed at lights out), back to free practice, none again.
 //   With none (the default) everything above runs exactly as before.
+// Review round 3 (2026-10-02):
+//   FLOW-1 a season change while the car is in the pit lane: the whole change (track limit, signs, the car's limiter AND
+//          js/pit.js) waits until the car has left the pit stretch - the limiter held 80 while js/pit.js judged by 60 ->
+//          a 5 s speeding hold for nothing (alone, and a room's guest when the host changes the year).
+//   FLOW-2 the host's computer drivers in the roster were announced as players joining / leaving the room.
+//   FLOW-3 the track search: 日本站 / 鈴鹿站 / 日本大獎賽 / 日本GP / ＪＡＰＡＮ found nothing (the real js/ui.js's search).
+//   FLOW-4 V with no mirrors (js/hudmirrors.js failed) said nothing.
+//   AI-4   the bots' blue flags in free practice (every lap counter started elsewhere): prog only in the race.
+//   MP-3   two remote cars hit in one 50 ms tick: the second report was refused (one per reporting car per 40 ms) and
+//          thrown away: now one report per tick, the others in the next.
+//   MP-6   a bot lap the session refused ('botLapRejected') was not handled: now a toast for the one simulating it.
+//   PKG-2  the 電腦車手 setting ran F1.AI.warmUp (~0.2 s) inside its change handler: now behind the loading note.
+//   PRES-1 the start gantry's lamps (js/scenery.js setStartLights) follow the HUD's lights: dark in practice and after
+//          lights out, n columns on the grid.
+//   PRES-2 the tunnel reverb's impulse response is asked for at track load (setTunnel(0, w, h) of the longest stretch),
+//          not first at the tunnel entry at speed.
 //
-//   node test/main.test.js        -> exit code 1 on any failed check (about 1 s)
+//   node test/main.test.js        -> exit code 1 on any failed check (about 2 s)
 //   MAIN=<another main.js> runs the checks against it (e.g. the one from before the fixes: they must fail)
 'use strict';
 const path = require('path');
@@ -43,22 +59,41 @@ global.THREE = Object.assign({}, THREE_REAL, { WebGLRenderer: function () { this
 for (const f of ['tracks-data.js', 'js/seasons-data.js', 'js/cars.js', 'js/track.js', 'js/tyres.js', 'js/car.js', 'js/raceline.js',
   'js/tunnels.js', 'js/collide.js', 'js/laps.js', 'js/pit.js', 'js/ai.js', 'net/session.js', 'js/gp.js']) require(path.join(ROOT, f));
 const F1 = global.F1;
+// F1.AI.warmUp counted (PKG-2: when it runs)
+let warms = 0;
+const warmUp = F1.AI.warmUp;
+F1.AI.warmUp = function () { warms++; return warmUp.apply(this, arguments); };
+// a js/net.js stand-in: as in the game F1.net is there from boot, disconnected (alone) until the room section at the end
+const NET = {
+  connected: false, isHost: false, canCreate: true, hostInfo: null, id: 0, slot: 0, year: null, trackId: null,
+  roster: [], players: [], bots: [], session: null, hits: [], h: {},
+  on(n, fn) { (this.h[n] = this.h[n] || []).push(fn); },
+  emit(n, a, b) { (this.h[n] || []).slice().forEach(fn => fn(a, b)); },
+  setProfile() {}, update() {}, park() {}, sendState() {}, sendLap() { return true; }, sendBotStates() {}, setProgress() {},
+  setBotProgress() {}, sendGpLap() { return true; }, setBots() { return false; }, gp() { return false; }, serverNow: () => Date.now(),
+  leave() {}, selectTrack() { return false; }, setYear() { return false; },
+  create() { return Promise.resolve({ ok: false }); }, join() { return Promise.resolve({ ok: false }); },
+  sendHit(to, ix, iz, from) { this.hits.push({ to, ix, iz, from, t: performance.now() }); return this.connected; }
+};
+F1.net = NET;
 let builds = 0;
 const buildTrack = F1.buildTrack;
 F1.buildTrack = d => { builds++; return buildTrack(d); };
 F1.createCockpit = () => ({ group: new THREE.Group(), update() {}, setCar() {}, setSources() {}, centreLook() {}, setLook() {} });
-const U = { opts: null, toasts: [], loading: [], year: 2025, compound: null, pit: null, hud: null, tunnel: [], gp: null };
+const U = { opts: null, toasts: [], loading: [], loadTitle: [], year: 2025, compound: null, pit: null, hud: null, tunnel: [], primes: [], lamps: [], gp: null };
 F1.ui = {
   init(o) { U.opts = o; }, setTrack() {}, showMenu() {}, hideMenu() {}, updateHUD(h) { U.hud = h; }, setPit(p) { U.pit = p; }, setGp(v) { U.gp = v; }, setCars() {},
-  setLights() {}, setResumeHandler() {}, toast(t) { U.toasts.push(t); }, setLoading(n) { U.loading.push(n); },
+  setLights() {}, setResumeHandler() {}, toast(t) { U.toasts.push(t); }, setLoading(n, title) { U.loading.push(n); U.loadTitle.push(title); },
   setCompound(c) { U.compound = c; },
   getProfile: () => ({ name: 'T', colour: '#ff0000' }), getCar: () => null, getYear: () => U.year, getAudio: () => ({ volume: 0, muted: true })
 };
 // a silent F1.audio: what main.js asks of it for the tunnel (setTunnel once per frame)
 F1.audio = {
   supported: true, muted: true, init() {}, setVolume() {}, setMuted() {}, setEngine() {}, setActive() {}, beep() {}, play() {},
-  update() {}, setTunnel(k, w, h) { U.tunnel.push([k, w, h]); if (U.tunnel.length > 50) U.tunnel.shift(); }
+  update() {}, setTunnel(k, w, h) { U.tunnel.push([k, w, h]); if (U.tunnel.length > 50) U.tunnel.shift(); if (k === 0 && w !== undefined) U.primes.push([w, h]); }
 };
+// the scenery stand-in: only the start gantry's lamps (setStartLights, review r3 PRES-1), the last call kept
+F1.buildScenery = () => ({ group: new THREE.Group(), dispose() {}, stats: {}, setStartLights(n, go) { U.lamps.length = 0; U.lamps.push([n, go]); } });
 require(process.env.MAIN ? path.resolve(process.env.MAIN) : path.join(ROOT, 'js/main.js'));   // boots (readyState 'complete')
 const g = F1.game;
 
@@ -209,7 +244,11 @@ function stopInBox(slot) {
   g.gp.action('skip');
   frames(2);
   check('D5: the grid: x5', g.gp.phase === 'grid' && g.tyres.wearRate === 5, { phase: g.gp.phase, rate: g.tyres.wearRate });
+  check('PRES-1: the gantry dark on the grid before the lights', U.lamps.length === 1 && !(U.lamps[0][0] > 0) && !U.lamps[0][1], U.lamps);
+  check('PRES-1: three lights: the gantry lights three columns', pumpUntil(() => g.gp.phase === 'grid' && g.gp.lights === 3, 60 * 12) && (frames(1), U.lamps.length === 1 && U.lamps[0][0] === 3 && !U.lamps[0][1]),
+    { phase: g.gp.phase, lights: g.gp.lights, lamps: U.lamps });
   check('D5: the race: x5', pumpUntil(() => g.gp.phase === 'race', 60 * 12) && g.tyres.wearRate === 5, { phase: g.gp.phase, rate: g.tyres.wearRate });
+  check('PRES-1: lights out: the gantry dark (go, or no lamps)', (frames(1), U.lamps.length === 1 && (U.lamps[0][1] === true || !(U.lamps[0][0] > 0))), U.lamps);
   g.gp.action('end');                        // (the race ended early: its results first, then free practice)
   frames(2);
   check('D5: the results: x5', g.gp.phase === 'results' && g.tyres.wearRate === 5, { phase: g.gp.phase, rate: g.tyres.wearRate });
@@ -309,15 +348,55 @@ function stopInBox(slot) {
     U.year = 2024;
     U.opts.onYear(2024);
     frames(2);
-    check('v6.2: changed during a pit visit: the track says 60 at once, the visit is judged by 80 to its end',
-      g.pit.state.visit && g.track.pit.limitKmh === 60 && g.pit.state.limitKmh === 80, { visit: g.pit.state.visit, lim: g.track.pit.limitKmh, pit: g.pit.state.limitKmh });
+    // FLOW-1: the whole change waits for the end of the visit (it was: the track 60 at once, js/pit.js 80)
+    check('FLOW-1: changed during a pit visit: the whole change waits - track, signs (year), the limiter of the car and js/pit.js all 80 to its end',
+      g.pit.state.visit && g.track.pit.limitKmh === 80 && g.track.pit.year === 2025 && g.pit.state.limitKmh === 80 && g.car.state.limitKmh === 80,
+      { visit: g.pit.state.visit, lim: g.track.pit.limitKmh, year: g.track.pit.year, pit: g.pit.state.limitKmh, car: g.car.state.limitKmh });
     g.car.reset(g.track, (P.exit + Math.floor(N / 2)) % N);
     pumpUntil(() => !g.pit.state.visit, 120);
     frames(2);
-    check('v6.2: ... then js/pit.js is rebound to 60', !g.pit.state.visit && g.pit.state.limitKmh === 60, { visit: g.pit.state.visit, pit: g.pit.state.limitKmh });
+    check('v6.2: ... then the 60 of that season: the track (2024), js/pit.js and the limiter', !g.pit.state.visit && g.track.pit.limitKmh === 60 && g.track.pit.year === 2024 &&
+      g.pit.state.limitKmh === 60 && g.car.state.limitKmh === 60, { visit: g.pit.state.visit, lim: g.track.pit.limitKmh, pit: g.pit.state.limitKmh, car: g.car.state.limitKmh });
   }
-  U.year = 2025;
-  U.opts.onYear(2025);
+  // FLOW-1, the review's case: 2024 -> 2025 while driving down the lane on the limiter (60): it held 80 at once while
+  // js/pit.js judged by 60 -> 'speeding', a 5 s hold, the toast '維修區超速（限速 60 km/h）'
+  {
+    const P = g.track.pit, N = g.track.samples.length;
+    putInLane(((P.entry + 4) % N + N) % N, 14);
+    tap('KeyQ');                                // limiter on
+    key('KeyW', true);
+    frames(20);
+    const before = { car: g.car.state.limitKmh, pit: g.pit.state.limitKmh, v: g.car.state.speed * 3.6 };
+    const from = U.toasts.length;
+    U.year = 2025;
+    U.opts.onYear(2025);                        // (picked in the 車輛 tab: the menu, then back to driving)
+    let worst = null, maxV = 0, steps = 0;
+    while (steps++ < 60 * 20 && g.pit.state.visit) {
+      frames(1);
+      const st = g.car.state;
+      if (g.pit.state.inLane) {
+        maxV = Math.max(maxV, st.speed * 3.6);
+        if (!worst && (st.limitKmh !== g.pit.state.limitKmh || g.track.pit.limitKmh !== g.pit.state.limitKmh || g.pit.state.speeding))
+          worst = { car: st.limitKmh, pit: g.pit.state.limitKmh, track: g.track.pit.limitKmh, v: +(st.speed * 3.6).toFixed(1) };
+      }
+    }
+    key('KeyW', false);
+    check('FLOW-1: 2024 -> 2025 in the lane on the limiter: car limit = js/pit.js limit = track limit (60) to the end of the visit, never speeding',
+      before.car === 60 && before.pit === 60 && worst === null && maxV > 40 && maxV <= 63, { before, worst, maxV: +maxV.toFixed(1) });
+    check('FLOW-1: ... no hold, no speeding toast', g.pit.state.pending === 0 && !U.toasts.slice(from).some(t => /超速/.test(t)), { pending: g.pit.state.pending, toasts: U.toasts.slice(from) });
+    frames(2);
+    check('FLOW-1: ... and out of the pit stretch: the 80 of 2025 everywhere', !g.pit.state.visit && g.track.pit.limitKmh === 80 && g.track.pit.year === 2025 &&
+      g.pit.state.limitKmh === 80 && g.car.state.limitKmh === 80, { lim: g.track.pit.limitKmh, pit: g.pit.state.limitKmh, car: g.car.state.limitKmh });
+    tap('KeyQ');
+  }
+
+  /* ================= FLOW-4: V when the mirrors cannot be drawn ================= */
+  {
+    const from = U.toasts.length;
+    tap('KeyV');
+    check('FLOW-4: no mirrors (js/hudmirrors.js missing / failed): V says so instead of nothing', g.running && !g.hudMirrors &&
+      U.toasts.slice(from).indexOf('後照鏡無法顯示（顯示卡不支援）') >= 0, U.toasts.slice(from));
+  }
 
   /* ================= v6.2: Monaco's tunnel ================= */
   await load('mc-1929');
@@ -326,6 +405,8 @@ function stopInBox(slot) {
     const T0 = tn && tn.tunnels.find(t => t.kind === 'tunnel');
     check('v6.2: Monaco: the covered stretches built with the track and in the scene (the tunnel ' + (T0 && T0.length) + ' m)',
       !!(tn && tn.group.parent && T0 && T0.length > 300 && tn.tunnels.length >= 2), tn && tn.tunnels.map(t => t.name + ' ' + t.length));
+    const big = tn.tunnels.reduce((a, b) => (b.length > a.length ? b : a)), pr = U.primes[U.primes.length - 1];
+    check('PRES-2: the reverb primed at track load with the longest stretch (' + big.width + ' x ' + big.height + ' m)', !!pr && pr[0] === big.width && pr[1] === big.height, { pr, big: [big.width, big.height] });
     const mid = (T0.from + Math.round((((T0.to - T0.from) % N) + N) % N / 2)) % N;
     g.car.reset(g.track, mid);
     frames(3);
@@ -357,8 +438,14 @@ function stopInBox(slot) {
     const G = g.track.grid;
     const inBox = (st, k) => Math.hypot(st.x - (G[k].x - Math.sin(G[k].heading) * 2.8), st.z - (G[k].z - Math.cos(G[k].heading) * 2.8)) < 0.6;
     toMenu();
+    const w0 = warms, l0 = U.loading.length;
     U.opts.onBots({ count: 5, skill: 'pro' });
     const B = g.bots, desc = g.gp.bots();
+    check('PKG-2: 5 set in the menu on a loaded track: the cars made at once, F1.AI.warmUp not in the change handler; the note up first',
+      B.length === 5 && warms === w0 && U.loading.length === l0 + 1 && last(U.loading) === g.trackData.name && last(U.loadTitle) === '電腦車手熟悉賽道中…',
+      { bots: B.length, warms: warms - w0, loading: U.loading.slice(l0), title: last(U.loadTitle) });
+    frames(1); await tick(5);
+    check('PKG-2: ... the warm-up right after the next frame (once), the note gone', warms === w0 + 1 && last(U.loading) === null, { warms: warms - w0, loading: U.loading.slice(l0) });
     check('v7: 5 set in the menu (free practice): F1.gp holds them (ids 2..6, slots 1..5, real names, the season\'s cars)',
       desc.length === 5 && desc.every((d, i) => d.id === i + 2 && d.slot === i + 1 && /^2025-/.test(d.car) && !/standard/.test(d.car) && !/^AI /.test(d.name)),
       desc.map(d => d.name + ' ' + d.car));
@@ -375,6 +462,10 @@ function stopInBox(slot) {
       B.filter(b => Math.abs(b.car.state.speed) > 10).length >= 2 && B.every(b => [b.car.state.x, b.car.state.z, b.car.state.speed].every(Number.isFinite)),
       B.map(b => +b.car.state.speed.toFixed(1)));
     check('v7: think() sees ours + the 5 (views)', g.botViews.length === 6 && g.botViews[0].id === 1);
+    // AI-4: our lap counter ran from the track load (laps driven above), theirs from their placing: no race distances (no
+    // blue flags) in free practice
+    check('AI-4: free practice: no race distance in any view (no blue flags)', g.botViews.every(v => v.prog !== v.prog) && B.every(b => b.ctx.prog !== b.ctx.prog),
+      g.botViews.map(v => v.prog));
     // a Grand Prix with them
     toMenu();
     U.opts.onGpStart({ q: 1, r: 1, wear: 1 });
@@ -393,6 +484,16 @@ function stopInBox(slot) {
     check('v7: their lap clocks armed at lights out (as ours)', B.every(b => b.lap.started && b.lap.n === 1) && g.lap.started);
     frames(60 * 6);
     check('v7: the race: they start (6 s)', B.filter(b => Math.abs(b.car.state.speed) > 15).length >= 3, B.map(b => +b.car.state.speed.toFixed(1)));
+    check('AI-4: the race: every view has its race distance (blue flags on)', g.botViews.every(v => Number.isFinite(v.prog) && v.prog > -1 && v.prog < 2),
+      g.botViews.map(v => v.prog));
+    // MP-6: a bot lap the session refuses is said (here the local session: 'too-fast'), once per 8 s
+    {
+      const from = U.toasts.length, b0 = B[0];
+      const why = g.gp.botLap(b0.id, 0.5), why2 = g.gp.botLap(B[1].id, 0.5);
+      const said = U.toasts.slice(from);
+      check('MP-6: a bot lap refused by the session (botLapRejected): a toast with its name and why, a second within 8 s not',
+        why === 'too-fast' && why2 === 'too-fast' && said.length === 1 && said[0] === '電腦車手 ' + b0.name + ' 的一圈沒有被採計：圈速快得不合理', { why, why2, said });
+    }
     g.gp.action('end');
     frames(2);
     g.gp.action('end');
@@ -402,6 +503,134 @@ function stopInBox(slot) {
     toMenu();
     U.opts.onBots({ count: 0, skill: 'pro' });
     check('v7: none again: no bots left', g.bots.length === 0 && g.gp.bots().length === 0);
+    {
+      const w1 = warms, l1 = U.loading.length;
+      U.opts.onBots({ count: 3, skill: 'pro' });
+      frames(1); await tick(5);
+      check('PKG-2: the warm-up is once per track: 3 more on the same track, no note, no warm-up', g.bots.length === 3 && warms === w1 && U.loading.length === l1,
+        { warms: warms - w1, loading: U.loading.slice(l1) });
+      await load('mc-1929');
+      check('PKG-2: another track with bots: warmed up with its build (behind its own note)', g.bots.length === 3 && warms === w1 + 1 && last(U.loading) === null &&
+        U.loadTitle[U.loadTitle.length - 2] === undefined, { warms: warms - w1, titles: U.loadTitle.slice(-3) });
+      toMenu();
+      U.opts.onBots({ count: 0, skill: 'pro' });
+    }
+  }
+
+  /* ================= a room (the js/net.js stand-in): we are a guest ================= */
+  {
+    // remote cars need a model (js/carmodel.js is not loaded here)
+    F1.createCarModel = () => ({ group: new THREE.Group(), setName() {}, setGhost() {}, update() {}, setColour() {}, setLivery() {}, setHalo() {}, dispose() {} });
+    toMenu();
+    const me = { id: 5, name: 'T', isSelf: true }, host = { id: 3, name: 'Host' };
+    const botRow = (id, name) => ({ id, name, bot: true, owner: 3, skill: 0.7, bi: id - 6, car: '2024-mclaren' });
+    Object.assign(NET, { connected: true, isHost: false, id: 5, slot: 1, year: 2024, roster: [host, me] });
+    NET.emit('connected'); NET.emit('year', 2024); NET.emit('players', NET.roster);
+    /* ---- FLOW-2: the host's computer drivers are no players joining / leaving ---- */
+    let from = U.toasts.length;
+    NET.roster = [host, me, botRow(6, 'Lando Norris'), botRow(7, 'Oscar Piastri'), botRow(8, 'Max Verstappen')];
+    NET.emit('players', NET.roster);
+    let said = U.toasts.slice(from);
+    check('FLOW-2: the host adds 3 computer drivers: no "加入了房間" for them, one toast with their number',
+      !said.some(t => /加入了房間|離開了房間/.test(t)) && said.length === 1 && said[0] === '房間的電腦車手：3 位', said);
+    from = U.toasts.length;
+    NET.roster = [host, me, { id: 9, name: 'Guest2' }, botRow(6, 'Lando Norris'), botRow(7, 'Oscar Piastri')];   // (a human took a seat)
+    NET.emit('players', NET.roster);
+    said = U.toasts.slice(from);
+    check('FLOW-2: a player joins (and a bot gives him its seat): his join is the news', said.length === 1 && said[0] === 'Guest2 加入了房間', said);
+    from = U.toasts.length;
+    NET.roster = [host, me, { id: 9, name: 'Guest2' }];
+    NET.emit('players', NET.roster);
+    said = U.toasts.slice(from);
+    check('FLOW-2: the host removes his computer drivers: no "離開了房間", one toast', said.length === 1 && said[0] === '房間的電腦車手：無', said);
+    from = U.toasts.length;
+    NET.roster = [host, me];
+    NET.emit('players', NET.roster);
+    check('FLOW-2: a player leaves: still said', U.toasts.slice(from).join() === 'Guest2 離開了房間', U.toasts.slice(from));
+
+    /* ---- FLOW-1 in a room: the host changes the season while we are in the pit lane ---- */
+    NET.trackId = 'nl-1948';
+    NET.emit('track', 'nl-1948');
+    frames(1); await tick(5);
+    check('room: Zandvoort loaded for the room, 2024 (limit 60), driving', g.running && g.trackData.id === 'nl-1948' && g.track.pit.limitKmh === 60 && g.track.pit.year === 2024,
+      { running: g.running, id: g.trackData && g.trackData.id, lim: g.track.pit.limitKmh });
+    {
+      const P = g.track.pit, N = g.track.samples.length;
+      putInLane(((P.entry + 4) % N + N) % N, 14);
+      tap('KeyQ');
+      key('KeyW', true);
+      frames(20);
+      from = U.toasts.length;
+      NET.year = 2025; NET.emit('year', 2025);  // the host picked 2025 in the 車輛 tab
+      let worst = null, steps = 0;
+      while (steps++ < 60 * 20 && g.pit.state.visit) {
+        frames(1);
+        const st = g.car.state;
+        if (g.pit.state.inLane && !worst && (st.limitKmh !== g.pit.state.limitKmh || g.pit.state.speeding)) worst = { car: st.limitKmh, pit: g.pit.state.limitKmh, v: st.speed * 3.6 };
+      }
+      key('KeyW', false);
+      frames(2);
+      check('FLOW-1 (guest): the room goes 2024 -> 2025 while we drive down the lane on the limiter: no penalty, then 80 everywhere',
+        worst === null && g.pit.state.pending === 0 && !U.toasts.slice(from).some(t => /超速/.test(t)) && g.track.pit.limitKmh === 80 && g.pit.state.limitKmh === 80 && g.car.state.limitKmh === 80,
+        { worst, pending: g.pit.state.pending, toasts: U.toasts.slice(from), lim: g.track.pit.limitKmh, pit: g.pit.state.limitKmh });
+      tap('KeyQ');
+    }
+
+    /* ---- MP-3: two remote cars hit in the same 50 ms tick: one report per tick, the other one in the next ---- */
+    {
+      const st = g.car.state, N = g.track.samples.length;
+      g.car.reset(g.track, Math.floor(N / 3)); st.speed = 0;
+      frames(2);
+      const h = st.heading, fx = Math.sin(h), fz = Math.cos(h);
+      // one closing from behind, one coming the other way, both overlapping our car by 0.3 m
+      const behind = { x: st.x - fx * 5.1, z: st.z - fz * 5.1, y: st.y, heading: h, speed: 15 };
+      const ahead = { x: st.x + fx * 5.1, z: st.z + fz * 5.1, y: st.y, heading: h + Math.PI, speed: 15 };
+      NET.players = [{ id: 11, name: 'A', colour: '#00ff00', car: null, active: true, state: behind }, { id: 12, name: 'B', colour: '#0000ff', car: null, active: true, state: ahead }];
+      await tick(60);                          // (no report for 50 ms before)
+      NET.hits.length = 0;
+      frames(1);
+      const first = NET.hits.slice();
+      NET.players[0].state = { x: st.x - fx * 60, z: st.z - fz * 60, y: st.y, heading: h, speed: 0 };   // gone again: no new contact
+      NET.players[1].state = { x: st.x + fx * 60, z: st.z + fz * 60, y: st.y, heading: h, speed: 0 };
+      frames(1);
+      const sameTick = NET.hits.length;
+      await tick(60);
+      frames(1);
+      const all = NET.hits.slice(), ids = all.map(x => x.to).sort();
+      check('MP-3: both remote cars hit in one frame: ONE report in that tick (the server takes one per car per 40 ms)', first.length === 1 && sameTick === 1, { first, sameTick });
+      check('MP-3: ... the other one goes out in the next tick (>= 40 ms later), with its impulse', all.length === 2 && ids.join() === '11,12' &&
+        all[1].t - all[0].t >= 40 && Math.hypot(all[1].ix, all[1].iz) > 0.2, all);
+      NET.players = [];
+    }
+
+    // back alone
+    NET.connected = false; NET.trackId = null; NET.roster = [];
+    NET.emit('disconnected', '已離開房間');
+    frames(1);
+    check('room: left: alone again, our own season (2025)', !g.gp.online && g.spec && g.spec.year === 2025, g.spec && g.spec.year);
+  }
+
+  /* ================= FLOW-3: the track search (the real js/ui.js, without the DOM) ================= */
+  {
+    const stub = F1.ui;
+    require(path.join(ROOT, 'js/track-names-zh.js'));
+    require(path.join(ROOT, 'js/ui.js'));
+    const real = F1.ui;
+    F1.ui = stub;                               // (main.js keeps the stand-in it booted with)
+    const T = global.F1_TRACKS, sameSet = (a, b) => a.length === b.length && a.slice().sort().join() === b.slice().sort().join();
+    const IT = ['it-1922', 'it-1953', 'it-1914'], US = ['us-1909', 'us-1956', 'us-2012', 'us-2022', 'us-2023'];
+    const Q = [
+      // the review's finds that failed: the Taiwanese 'X站' / 'X大獎賽' forms, CJK + Latin in one word, full-width letters
+      ['日本站', ['jp-1962']], ['鈴鹿站', ['jp-1962']], ['義大利站', IT], ['沙烏地阿拉伯站', ['sa-2021']], ['卡達站', ['qa-2004']], ['新加坡站', ['sg-2008']],
+      ['日本大獎賽', ['jp-1962']], ['日本大奖赛', ['jp-1962']], ['日本分站', ['jp-1962']], ['日本GP', ['jp-1962']], ['ＪＡＰＡＮ', ['jp-1962']], ['F1日本大獎賽', ['jp-1962']],
+      ['F1 日本站', ['jp-1962']], ['美國站', US], ['japan站', ['jp-1962']],
+      // what worked before still does
+      ['japan', ['jp-1962']], ['日本', ['jp-1962']], ['鈴鹿', ['jp-1962']], ['铃鹿', ['jp-1962']], ['japanese gp', ['jp-1962']], ['日本 鈴鹿', ['jp-1962']],
+      ['鈴鹿賽道', ['jp-1962']], ['us', US], ['uk', ['gb-1948']], ['italy', IT], ['nürburgring', ['de-1927']], ['sao paulo', ['br-1940']],
+      ['蒙札', ['it-1922']], ['xyz', []], ['japan monza', []], ['大獎賽', T.map(t => t.id)], ['站', T.map(t => t.id)]
+    ];
+    const bad = Q.filter(([q, e]) => !real.searchTracks || !sameSet(real.searchTracks(T, q), e)).map(([q, e]) => ({ q, got: real.searchTracks ? real.searchTracks(T, q) : null, e }));
+    check('FLOW-3: the search finds the Taiwanese round names (日本站, 日本大獎賽), 日本GP and ＪＡＰＡＮ; ' + Q.length + ' queries', bad.length === 0, bad);
   }
 
   console.log('\n' + passed + ' / ' + (passed + failed) + ' checks passed' + (failed ? '' : ': all main tests passed'));

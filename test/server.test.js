@@ -1599,6 +1599,15 @@ function freshNet() {
       // --- snap ---
       await raw({ t: 'snap', p: [[8, 1000, 1e300, 0, 0, 0, 0, 0, 0, 0], [8, 1001, 0, 0, 0, 0, 0, 0, 1e9, 0], [8, 'x', 0, 0, 0, 0, 0, 0, 0, 0], [8], 5, null, 'x'] });
       await raw('{"t":"snap","p":[[8,1002,1e999,0,0,0,0,0,0,0]]}'); await raw({ t: 'snap', p: 'x' }); await raw({ t: 'snap', p: { length: 3 } });
+      // ids that are not numbers: '__proto__' would reach Object.prototype through remotes[...] (every for..in in the
+      // game would then list '_off'); a string '8' is not player 8
+      await raw({ t: 'snap', p: [['__proto__', 1000, 1, 2, 3, 0, 0, 0, 0, 0], ['constructor', 1000, 1, 2, 3, 0, 0, 0, 0, 0],
+        ['toString', 1000, 1, 2, 3, 0, 0, 0, 0, 0], ['hasOwnProperty', 1000, 1, 2, 3, 0, 0, 0, 0, 0], ['8', 1000, 1, 2, 3, 0, 0, 0, 0, 0],
+        [null, 1000, 1, 2, 3, 0, 0, 0, 0, 0], [[8], 1000, 1, 2, 3, 0, 0, 0, 0, 0]] });
+      const forIn = []; for (const k in {}) forIn.push(k);
+      assert.deepStrictEqual([forIn, Object.prototype.hasOwnProperty.call(Object, '_off')], [[], false], 'Object.prototype / Object untouched');
+      await raw({ t: 'players', host: 8, players: [{ id: 7, name: 'me', colour: '#112233', slot: 0 }, { id: 8, name: 'other', colour: '#445566', slot: 1 }] });
+      assert.deepStrictEqual(N.players.map(p => p.id), [8], 'the roster after the bad rows');
       N.update();
       assert.strictEqual(N.players[0].active, false, 'no pose came through');
       await raw({ t: 'snap', p: [[8, 2000, 10, 1, -20, 0.5, 0, 0, 30, 0]] });
@@ -1650,6 +1659,7 @@ function freshNet() {
       N.leave();
       assert.strictEqual(uncaught.length, 0, 'nothing thrown out of a message handler');
     } finally {
+      delete Object.prototype._off; delete Object._off;   // (a failure above must not poison the tests after it)
       wss.clients.forEach(ws => ws.terminate());
       await new Promise(r => wss.close(r));
     }
@@ -1958,36 +1968,57 @@ function freshNet() {
     [a, b].forEach(x => x.ws.close());
   });
 
-  T('bots: the host leaving takes his bots; a running session ends cleanly (race -> results with the bots DNF, qualifying -> free); the same in a token room', async t => {
-    // dedicated server, during the race
-    let R = await room(t, 2);
-    let [a, b] = R.cs;
-    let ids = await addBots(a, [a, b], 2);
+  T('bots: the host leaving takes his bots out of the session (race: DNF, qualifying: gone); the others race on; the same in a token room', async t => {
+    // dedicated server, during the race: the bots are DNF, the humans still racing finish it (review r3: the race
+    // used to be cut short to the results, the one left classified with 0 laps)
+    let R = await room(t, 3);
+    let [a, b, c] = R.cs;
+    let ids = await addBots(a, [a, b, c], 2);
     await R.start(1, 2);
     R.clk.add(3000);
-    botLap(a, ids[0], 2.6); botLap(a, ids[1], 2.7); a.lap(2.5); b.lap(2.8);
+    botLap(a, ids[0], 2.6); botLap(a, ids[1], 2.7); a.lap(2.5); b.lap(2.8); c.lap(2.9);
     const g = await R.settle(s => s.phase === 'grid');
     R.clk.to(g.goAt);
     await R.settle(s => s.phase === 'race');
+    R.clk.add(3000);
+    b.lap(2.8); c.lap(2.9);
+    await R.settle(s => s.players.filter(p => p.rLaps === 1).length === 2);
     a.ws.close();
-    await b.wait(() => b.gp().phase === 'results' && b.roster().length === 1, 2000, 'results');
+    await b.wait(() => b.roster().length === 2 && b.gp().players.filter(p => p.dnf).length === 3, 2000, 'bots DNF');
     let s = b.gp();
-    assert.deepStrictEqual(s.players.map(p => [p.id, p.bot === true, p.left, p.dnf]),
-      [[a.id, false, true, true], [b.id, false, false, false], [ids[0], true, true, true], [ids[1], true, true, true]]);
-    assert.strictEqual(s.order[0], b.id, 'the one still racing ahead of the DNFs');
+    assert.strictEqual(s.phase, 'race', 'the race goes on');
+    assert.deepStrictEqual(s.players.map(p => [p.id, p.bot === true, p.left, p.dnf, p.rLaps]),
+      [[a.id, false, true, true, 0], [b.id, false, false, false, 1], [c.id, false, false, false, 1],
+       [ids[0], true, true, true, 0], [ids[1], true, true, true, 0]]);
+    assert.deepStrictEqual(s.order.slice(0, 2), [b.id, c.id], 'the ones still racing ahead of the DNFs');
     assert.deepStrictEqual([b.host(), b.rosterMsg().bots], [b.id, { n: 0, skill: 'pro' }]);
     assert.deepStrictEqual(b.all('gone').map(m => m.id), [a.id], 'gone for the player only');
-    assert.strictEqual(R.srv.info().players.length, 1);
-    b.ws.close();
-    // dedicated server, during qualifying -> free practice; the next host can have his own
+    assert.strictEqual(R.srv.info().players.length, 2);
+    // ...and B and C take the flag
+    R.clk.add(3000);
+    b.lap(2.8); c.lap(2.9);
+    s = await R.settle(x => x.phase === 'results');
+    assert.deepStrictEqual(s.players.map(p => [p.id, p.rLaps, p.fin, p.dnf]),
+      [[a.id, 0, false, true], [b.id, 2, true, false], [c.id, 2, true, false], [ids[0], 0, false, true], [ids[1], 0, false, true]]);
+    assert.deepStrictEqual(s.order.slice(0, 2), [b.id, c.id]);
+    b.ws.close(); c.ws.close();
+    // dedicated server, during qualifying: the bots leave it, B (the next host) qualifies on; then free practice
+    // (his end) and he can have his own
     R = await room(t, 2);
     [a, b] = R.cs;
     ids = await addBots(a, [a, b], 3, null, 'amateur');
     await R.start(2, 2);
     a.ws.close();
-    await b.wait(() => b.gp().phase === 'free' && b.roster().length === 1 && b.host() === b.id, 2000, 'free');
-    assert.deepStrictEqual(b.gp().players.map(p => p.id), [b.id]);
+    await b.wait(() => b.roster().length === 1 && b.host() === b.id && b.gp().players.length === 1, 2000, 'bots gone');
+    assert.deepStrictEqual([b.gp().phase, b.gp().players.map(p => p.id)], ['quali', [b.id]]);
     assert.deepStrictEqual(b.rosterMsg().bots, { n: 0, skill: 'amateur' }, 'the level stays with the room');
+    R.clk.add(3000); b.lap(2.6);
+    await b.wait(() => b.gp().players[0].qLaps === 1, 2000, 'lap 1');
+    R.clk.add(3000); b.lap(2.6);
+    await b.wait(() => b.gp().phase === 'grid', 2000, 'grid');
+    assert.deepStrictEqual(b.gp().grid, [b.id]);
+    b.send({ t: 'gp', a: 'end' });
+    await b.wait(() => b.gp().phase === 'free', 2000, 'free');
     const ids2 = await addBots(b, [b], 1);
     assert(ids2[0] > ids[2] && b.roster().find(p => p.id === ids2[0]).owner === b.id);
     b.ws.close();
@@ -1999,7 +2030,8 @@ function freshNet() {
     await b.wait(() => b.roster().length === 1, 2000, 'bots gone');
     assert.deepStrictEqual([b.gp().phase, b.gp().players.length, b.gp().sid], ['free', 1, 0]);
     b.ws.close();
-    // token room: the host's bots go with him (the room closes anyway: the game stops the server)
+    // token room: the host's bots go with him, out of the session as on a dedicated server (the room closes anyway:
+    // the game stops the server)
     R = await room(t, 2, { hostToken: 'tok' });
     [a, b] = R.cs;
     assert.strictEqual(a.host(), a.id);
@@ -2009,8 +2041,8 @@ function freshNet() {
     assert.strictEqual(R.srv.info().players.length, 4, 'a guest cannot change them');
     await R.start(1, 1);
     a.ws.close();
-    await b.wait(() => b.roster().length === 1 && b.gp().phase === 'free', 2000, 'token room: bots gone, session ended');
-    assert.strictEqual(b.host(), 0);
+    await b.wait(() => b.roster().length === 1 && b.gp().players.length === 1, 2000, 'token room: bots gone');
+    assert.deepStrictEqual([b.gp().phase, b.gp().players.map(p => p.id), b.host()], ['quali', [b.id], 0]);
     b.ws.close();
   });
 
@@ -2201,11 +2233,11 @@ function freshNet() {
     assert.deepStrictEqual([A.sendLap(80.1, 80.1, B.id), A.sendLap(80.1, 80.1, ids[0])], [false, true]);
     await until(() => B.players.find(p => p.id === ids[0]).best === 80.1, 2000, 'bot lap time');
     assert.deepStrictEqual([take('A'), take('B')], [[], []]);
-    // the host leaves: his bots go; the session (qualifying) ends
+    // the host leaves: his bots go, out of qualifying too; B (the next host) qualifies on
     A.leave();
     assert.deepStrictEqual([A.bots, A.botSettings, take('A')], [[], { n: 0, skill: 'pro' }, [['bots', []]]]);
-    await until(() => B.roster.length === 1 && B.session.phase === 'free', 2000, 'bots gone');
-    assert.deepStrictEqual([B.players, B.isHost], [[], true]);
+    await until(() => B.roster.length === 1 && B.session.players.length === 1, 2000, 'bots gone');
+    assert.deepStrictEqual([B.players, B.isHost, B.session.phase, B.session.players[0].id], [[], true, 'quali', B.id]);
     B.leave();
     assert.strictEqual(uncaught.length, 0);
   });

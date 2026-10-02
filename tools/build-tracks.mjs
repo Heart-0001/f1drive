@@ -79,10 +79,12 @@ const START_AT = {
   'mc-1929': [43.7350269, 7.4212652],
   // Silverstone: the dataset starts on the pre-2011 National straight (between Woodcote and Copse). Since 2011 the pits
   // and the line are at the Wing, between Club and Abbey (en.wikipedia "2011 British Grand Prix": "the pits and the
-  // start/finish line moved to the straight between Club Corner and the new Abbey"). The timing (finish) line: OSM node
-  // 13036050131 (raceway=finish); the grid's start line (node 13036050130) is 151 m further on. One line for all seasons
-  // (16 of the 17 seasons 2010..2026 used the Wing).
-  'gb-1948': [52.0682609, -1.0234867],
+  // start/finish line moved to the straight between Club Corner and the new Abbey"). Two lines there: the timing
+  // (finish) line, OSM node 13036050131 (raceway=finish), and 151 m further on the start line, node 13036050130
+  // (raceway=start/finish), with the whole grid on the straight between them (grids must be straight). js/track.js lays
+  // the grid BEHIND points[0], so the loop starts at the START line: from the timing line it would reach back round
+  // Club (review r3 W1: slots 12-16 turned 22-53 deg). One line for all seasons (16 of the 17 seasons 2010..2026 used the Wing).
+  'gb-1948': [52.0693366, -1.0221521],
   // Hungaroring: the dataset's first vertex is ~240 m towards T1; the line (audit, OSM + imagery).
   'hu-1986': [47.5789212, 19.2483897],
   // Sepang: 302 m towards T1 in the dataset; the line from the OSM raceway node, the grid visible on imagery.
@@ -111,8 +113,9 @@ const PIT_FACTS = {
   'nl-1948': { limits: [{ to: 2024, kmh: 60 }] },
   // Sochi: 60 km/h (audit; 80 in the game before).
   'ru-2014': { limitKmh: 60 },
-  // Silverstone: the Wing's F1 pit lane (OSM way 227902927 "International pit lane") is on the driver's right; the
-  // scenery data still tags the old (National) pit building as 'pit', so the side is given here.
+  // Silverstone: the Wing's F1 pit lane (OSM way 227902927 "International pit lane", 755 m before to 555 m after the start
+  // line) is on the driver's right. scenery-data.js tags the Wing 'pit' now (109 m from the line, the same side), and the
+  // old National pits 1 km away too: the side stays given here so it never depends on which one js/track.js weighs.
   'gb-1948': { side: -1 },
 };
 
@@ -185,7 +188,7 @@ const STREET_BANK_MAX_DEG = 1.5;
 // 2026-10-01 audit (every one re-measured independently in devtests/track-audit/verify/): Spa from the Wallonia lidar
 // (GLO-90 + tree canopy: Raidillon 3-5 % instead of ~15 %, Paul Frere -> Bus Stop 25-30 m too high), Barcelona and Madring
 // from IGN's MDT05 (an invented crest at T3 / dip at T4; Madring's profile the wrong shape), Imola from the Emilia-Romagna
-// lidar (Acque Minerali too shallow, Rivazza -10.7 % instead of -6.9 %), Mugello from the Tuscany 1 m lidar (San Donato
+// lidar (Acque Minerali too shallow, Rivazza -10.7 % instead of -6.9 %), Mugello from the Tuscany 1 m DSM (San Donato
 // downhill in the game, +12.9 m uphill in reality), Monza from TINITALY 10 m (invented hills: 22.4 m instead of ~12 m),
 // Miami from the USGS lidar (off the flat list), Interlagos / Sepang / Portimao from Copernicus GLO-30 (no open lidar
 // there; GLO-30 cross-checked with SRTM by the audit).
@@ -255,7 +258,14 @@ const PUBLISHED = {
   'be-1925': [102.2, 'en.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps: highest point "102.2 m (335 ft) above the lowest part"'],
   'at-1969': [65, 'en.wikipedia.org/wiki/Red_Bull_Ring: "65 m (213 ft) from lowest to highest point"; de: max +12 % / -9.3 %'],
   'de-1927': [55, 'de.wikipedia.org/wiki/Nürburgring: GP-Strecke "Höhenunterschied: 55 m"'],
+  'az-2016': [26.8, 'formula1.com "Highs and lows - which F1 track has the most elevation changes?" (2016): Baku "Elevation change: 26.8m" (cached: devtests/track-audit/cache/wikipedia/f1com-highs-and-lows-2016.html)'],
 };
+// Circuits whose smoothed profile is scaled (shape kept) to the PUBLISHED range: no open terrain model covers them and
+// every model there reads buildings. Baku (review r3 W4; audit 2026-10-01 'scaleToRange'): Copernicus GLO-30 is not
+// released for Azerbaijan, and GLO-90 (34.4 m), SRTM (36.9 m) and ASTER (42.1 m) are all surface models in the city,
+// the excess sitting on the old-town climb T12-T13; the shape is right (high at T13, low on the sea front), the
+// range 28 % too big. Scaled 26.8 / 34.4: the -10.5 % fall after T15 becomes ~-8 %.
+const RANGE_TO_PUBLISHED = new Set(['az-2016']);
 
 const SOURCES = {
   glo90: {
@@ -349,7 +359,10 @@ const SOURCES = {
     fetch: (keys, track) => rasterSample(keys, tinitalyRaster(track, keys)),
   },
   toscana: {
-    label: 'Regione Toscana DSM 1 m 2021 (lidar SURFACE model; CC BY) via the GEOscopio WMS, https://www502.regione.toscana.it/wmsraster',
+    // The 2021 DSM is photogrammetric, not lidar (its metadata, GeoNetwork r_toscan:c5c907bf-50cc-4a76-8787-abc547509c8d:
+    // image autocorrelation of the 2021 aerial survey by Italian Remote Sensing S.r.l., GSD 15 cm): trees and the footbridge
+    // are in it, hence Mugello's 25 m median and its COVERED footbridge (review r3 W6).
+    label: 'Regione Toscana DSM 1 m 2021 (photogrammetric surface model, image autocorrelation of the 2021 aerial survey; CC BY 4.0) via the GEOscopio WMS, https://www502.regione.toscana.it/wmsraster',
     cache: 'elevation-cache-toscana.json', step: DTM_STEP, dtm: true, batch: Infinity, delay: 0,
     fetch: (keys) => toscanaSample(keys),
   },
@@ -1132,7 +1145,8 @@ function buildElevation(track, sampling, raw, src) {
   }
   let min = Math.min(...h);
   const range = Math.max(...h) - min;
-  const scale = flat && range > FLAT_MAX_RANGE ? FLAT_MAX_RANGE / range : 1;
+  const target = RANGE_TO_PUBLISHED.has(track.id) ? PUBLISHED[track.id][0] : null;
+  const scale = flat && range > FLAT_MAX_RANGE ? FLAT_MAX_RANGE / range : (target ? target / range : 1);
   h = h.map((v) => (v - min) * scale);
   // linear interpolation at each vertex's arc length (periodic), then re-zero after rounding
   let elev = track.points.map((_, i) => {
@@ -1237,7 +1251,8 @@ async function main() {
   for (const id of Object.keys(ELEV_SOURCE)) if (!ids.has(id) || !SOURCES[ELEV_SOURCE[id]]) warn(`ELEV_SOURCE ${id}: unknown track or source`);
   for (const id of [...Object.keys(START_AT), ...Object.keys(PIT_FACTS), ...Object.keys(LAYOUT_PATCHES), ...Object.keys(LENGTH_OVERRIDE),
     ...Object.keys(WIDTH_OVERRIDES), ...Object.keys(BANKED), ...Object.keys(COVERED), ...Object.keys(ELEV_SETTINGS),
-    ...Object.keys(MANUAL_DIPS), ...STREET_CIRCUITS, ...FLAT_TRACKS]) if (!ids.has(id)) warn(`${id}: unknown track id in a table`);
+    ...Object.keys(MANUAL_DIPS), ...STREET_CIRCUITS, ...FLAT_TRACKS, ...RANGE_TO_PUBLISHED]) if (!ids.has(id)) warn(`${id}: unknown track id in a table`);
+  for (const id of RANGE_TO_PUBLISHED) if (!PUBLISHED[id] || FLAT_TRACKS.has(id)) warn(`RANGE_TO_PUBLISHED ${id}: no PUBLISHED range, or a flat track`);
 
   // elevation: every source's samples fetched (cached), then each track built from its own source
   const srcOf = (t) => SOURCES[ELEV_SOURCE[t.id] || 'glo90'];
@@ -1298,7 +1313,8 @@ async function main() {
 // Converted to local metres (x = east, z = -north), centred on each circuit,
 // scaled to the official lap length (Madring: 5.414 km; Estoril: the line's own length, the post-2000 layout).
 // points[0] = start/finish, racing direction (loops turned to start at the real line: Monaco on Boulevard Albert 1er,
-// OpenStreetMap node 4937755860, ODbL; Silverstone at the Wing (2011+), Hungaroring, Sepang, Shanghai).
+// OpenStreetMap node 4937755860, ODbL; Silverstone at the Wing's start line (2011+; the grid lies behind it, the timing
+// line 151 m before it), Hungaroring, Sepang, Shanghai).
 // Albert Park: two stretches (Lakeside Drive after T8, T11) replaced by OpenStreetMap vertices (ODbL).
 // Segments longer than ${MAX_POINT_SPACING} m carry extra collinear vertices.
 // geo = projection used: x = (lon - geo.lon0) * geo.kx, z = (lat - geo.lat0) * geo.kz.
@@ -1307,6 +1323,8 @@ ${Object.entries(bySource).map(([s, l]) => `//   ${SOURCES[s].label}:\n//     ${
 //   Tunnels and bridges (Monaco's tunnel, Suzuka's crossover bridge, Madring's two tunnels, Mugello's main-straight
 //   footbridge): straight between their ends (from OpenStreetMap, ODbL), where the models see the ground above / below
 //   the road (or the footbridge). Monza: the dip under the old banking added by hand (5 m over 600 m).
+//   Baku: every model there is a surface model (the old town's buildings), the profile is scaled to the published
+//   26.8 m (formula1.com, 2016).
 // bankOverrides (optional) = real banked corners [{name, from, to, deg}]: full bank angle deg (inside of the corner
 // lower) from fraction \`from\` to fraction \`to\` of the lap (arc length of points); published angles and lidar-measured
 // cambers, sources in tools/build-tracks.mjs. bankMaxDeg (optional) = cap of js/track.js's curvature-derived banking
@@ -1346,7 +1364,7 @@ ${Object.entries(bySource).map(([s, l]) => `//   ${SOURCES[s].label}:\n//     ${
     console.log(`${t.id.padEnd(8)} ${t.name.padEnd(42)} ${(s.srcPoints + '->' + t.points.length).padStart(10)}  ${t.elevSource.padEnd(9)}` +
       `${s.rawRange.toFixed(0).padStart(7)} m  ${s.range.toFixed(1).padStart(7)} m  ${(s.maxGrad * 100).toFixed(1).padStart(6)} %  ` +
       `${pub ? (pub[0] + ' m').padStart(7) : '      -'}  ` +
-      (s.flat ? `flat (x${s.scale.toFixed(2)})` : (SOURCES[t.elevSource].dtm ? 'terrain model' : 'normal')) + `  base ${+(+s.rawMin).toFixed(2)} m` +
+      (s.flat ? `flat (x${s.scale.toFixed(2)})` : (SOURCES[t.elevSource].dtm ? 'terrain model' : 'normal') + (s.scale !== 1 ? ` (x${s.scale.toFixed(3)} to the published range)` : '')) + `  base ${+(+s.rawMin).toFixed(2)} m` +
       `  100 m: +${(s.rise100 * 100).toFixed(1)} / ${(s.fall100 * 100).toFixed(1)} %` +
       (ELEV_SETTINGS[t.id] ? `  [median +-${s.medHalf}, sigma ${s.sigma} m${ELEV_SETTINGS[t.id].envelope ? ', low envelope' : ''}]` : '') +
       (s.holes ? `  ${s.holes} no-data samples filled` : '') + (s.covered.length ? '  covered: ' + s.covered.join('; ') : '') +

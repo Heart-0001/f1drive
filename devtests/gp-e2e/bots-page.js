@@ -164,13 +164,16 @@
     // (pure pursuit of its position) until we touch it - what a careless human does to a computer car
     var rm = B.ram;
     if (rm && !rm.done && !c.locked && !rm.id) {
-      // (id 0: the first bot that is 15..45 m ahead of us, moving, with a straight before both of us - no corner in the
-      // next 300 m - until then we drive on)
+      // (id 0: the first bot that is 15..45 m ahead of us, moving but not faster than us (a bot that has just passed us
+      // pulls away on a free road: review r3, the bots press slower cars and are held up less), with a straight before
+      // both of us - no corner in the next 300 m - until then we drive on)
       var Nr = g.track.samples.length, dsr = g.track.length / Nr, blr = g.bots || [], Pr = g.raceLine.points, straight = true;
       for (var mr = 0; mr * dsr < 300 && straight; mr += 2) { var cr = Pr[(st.sampleIndex + mr) % Nr].curvature || 0; if (cr > 0.004 || cr < -0.004) straight = false; }
       for (var qr = 0; straight && qr < blr.length && !rm.id; qr++) {
         var kr = ((blr[qr].car.state.sampleIndex - st.sampleIndex) % Nr + Nr) % Nr;
-        if (kr * dsr > 15 && kr * dsr < 45 && blr[qr].car.state.speed > 10 && !blr[qr].pit.state.inLane) { rm.id = blr[qr].id; rm.name = blr[qr].name; rm.ahead = kr * dsr; rm.t0 = gameS(); }
+        if (kr * dsr > 15 && kr * dsr < 45 && blr[qr].car.state.speed > 10 && blr[qr].car.state.speed <= st.speed + 1 && !blr[qr].pit.state.inLane) {
+          rm.id = blr[qr].id; rm.name = blr[qr].name; rm.ahead = kr * dsr; rm.t0 = gameS(); rm.vUs0 = st.speed; rm.vIt0 = blr[qr].car.state.speed; rm.min = 0;
+        }
       }
     }
     if (rm && !rm.done && !c.locked && rm.id) {
@@ -185,7 +188,9 @@
         var want = Math.max(0, ts.speed) + (rm.closing || 6);
         thr = st.speed < want ? 1 : 0; brk = st.speed > want + 2 ? 0.5 : 0;
         if (!rm.min || d2 < rm.min) rm.min = d2;
-        for (var cq = B.contacts.length - 1; cq >= 0 && cq >= B.contacts.length - 4; cq--) {
+        // (it got away from us after all (beyond 60 m): drop it, pick another; rm.picks counts the picks)
+        if (d2 > 3600) { rm.picks = (rm.picks || 1) + 1; rm.id = 0; rm.t0 = 0; }
+        else for (var cq = B.contacts.length - 1; cq >= 0 && cq >= B.contacts.length - 4; cq--) {
           var ce = B.contacts[cq];
           if (ce.t >= rm.t0 && ((ce.self && ce.other && ce.other[0] === rm.id) || (ce.id === rm.id && ce.other && ce.other[0] === gp.selfId))) {
             rm.done = 'hit'; rm.at = gameS(); rm.vUs = st.speed; rm.vIt = ts.speed; break;

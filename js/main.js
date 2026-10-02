@@ -47,7 +47,7 @@
   var tunnels = null;                        // F1.buildTunnels(): this track's covered stretches (js/tunnels.js), optional
   var hemiLight = null, sunLight = null;     // the scene lights (dimmed inside a tunnel: tunnels.sceneLight)
   var HEMI0 = 0.85, SUN0 = 0.9;              // their intensities in daylight
-  var pitRebind = false;                     // the season's pit limit changed during a pit visit: js/pit.js rebinds after it
+  var pitRebind = false;                     // the season changed during a pit visit: its pit limit waits until after it
   var mirrorsOn = true;                      // their setting (設定 / V; remembered by ui.js)
   var raceLine = null, lineOn = true;
   var scenery = null, sky = null;
@@ -105,7 +105,8 @@
   var mapOthers = [];                        // [{x, z, colour}] for the minimap
   var eye = { x: 0, y: 0, z: 0 };
   var sharedLast = null, sharedBest = null;
-  var knownPlayers = null;                   // id -> name, to announce joins / leaves
+  var knownPlayers = null;                   // id -> name, to announce joins / leaves (the players: no computer drivers)
+  var knownBots = 0;                         // computer drivers in the last roster
 
   // computer drivers (v7, js/ai.js): alone every car of the field but ours, in a room the ones we host (the host's game
   // simulates its bots and publishes them; the guests see them as remote cars). See "computer drivers" below.
@@ -118,6 +119,7 @@
   var botSeeds = [];                         // per list index: the lineup's seed of that seat (the driver's randomness)
   var botLine = null;                        // the racing line the bots drive on this track (the first one built for it)
   var botWarm = null;                        // the track F1.AI.warmUp ran on
+  var warmRaf = 0, warmTimer = 0;            // its run waiting for the loading note to be painted (warmBotsSoon)
   var botResolve = null;                     // F1.AI.createContacts(): our car and the bots against each other
   var botEntries = [];                       // its entries: [0] our car, then the bots ({state, car, solid})
   var selfEntry = { state: null, car: null, solid: true };
@@ -416,7 +418,7 @@
     }
     limiterOn = false;
     if (pit) pit.reset();
-    pitRebind = false;                        // (bound afresh, with the season's limit)
+    syncPitYear();                            // (a season change that waited for the pit visit: bound afresh with it)
   }
 
   // Bounding box of the pit complex (+ PIT_REACH): only a remote car inside it is looked up in the pit lane.
@@ -482,6 +484,13 @@
         try {
           tunnels = F1.buildTunnels(track, data);
           scene.add(tunnels.group);
+          // the reverb's impulse response for the longest stretch, made now while quiet, not at the first entry at
+          // speed (review r3 PRES-2; js/audio.js reuses it for a size within 15 % / 1 m)
+          if (audio && audio.setTunnel && tunnels.tunnels && tunnels.tunnels.length) {
+            var big = tunnels.tunnels[0];
+            for (var ti = 1; ti < tunnels.tunnels.length; ti++) if (tunnels.tunnels[ti].length > big.length) big = tunnels.tunnels[ti];
+            audio.setTunnel(0, big.width, big.height);
+          }
         } catch (err) {
           disposeTunnels();                   // (decoration too)
           if (window.console) console.error(err);
@@ -504,7 +513,7 @@
       freshStart();
       sharedLast = null; sharedBest = null;
       clearInput();
-      syncBots();                             // the computer drivers' cars on this track, in their room slots
+      syncBots(true);                         // the computer drivers' cars on this track, in their room slots
 
       ui.setTrack(data);
       cockpit.update(car.state, 0);
@@ -723,19 +732,33 @@
     for (i = 0; i < contacts.length; i++) {
       c = contacts[i]; id = otherIds[c.i];
       if (id == null) continue;
-      r = impacts[id] || (impacts[id] = { sx: 0, sz: 0, lx: 0, lz: 0, t: 0 });
+      r = impacts[id] || (impacts[id] = { sx: 0, sz: 0, lx: 0, lz: 0, t: 0, s: 0 });
       if (now - r.t > HIT_MEMORY_MS) { r.lx = 0; r.lz = 0; }
       r.lx += c.ix; r.lz += c.iz; r.t = now;
+      if (r.sx === 0 && r.sz === 0) r.s = now;
       r.sx -= c.ix; r.sz -= c.iz;             // the other car is owed the opposite velocity change
     }
     contacts.length = 0;
     if (now - lastHitSend < HIT_SEND_MS) return;
-    for (id in impacts) {
-      r = impacts[id];
-      // (nothing is reported against a car that has become a ghost since the contact: Grand Prix or pit lane)
-      if (r.sx * r.sx + r.sz * r.sz > 0.04 && !gp.isGhost(Number(id)) && !ghostNow[id]) { net.sendHit(Number(id), r.sx, r.sz); lastHitSend = now; }
-      r.sx = 0; r.sz = 0;
+    if (sendOwed(impacts, now, null)) lastHitSend = now;
+  }
+
+  // What one car (ours: bot null; else that bot of ours) owes the remote cars it hit (records: id -> {sx, sz, t, s}):
+  // ONE report per call (per HIT_SEND_MS), the longest owed first. The server takes one report per reporting car per
+  // 40 ms (js/net.js refuses a bot's second one itself), so a second report in the same tick was lost: the others wait
+  // for the next tick, until their contact is HIT_MEMORY_MS old. Nothing is reported against a car that has become a
+  // ghost since the contact (Grand Prix or pit lane). -> true when a report went out.
+  function sendOwed(list, now, bot) {
+    var pick = null, pid = 0, id, r, n, ok;
+    for (id in list) {
+      r = list[id]; n = Number(id);
+      ok = bot === null ? !gp.isGhost(n) && !ghostNow[id] : solidId(n) && solidId(bot);
+      if (!(r.sx * r.sx + r.sz * r.sz > 0.04) || !ok || now - r.t > HIT_MEMORY_MS) { r.sx = 0; r.sz = 0; }
+      else if (!pick || r.s < pick.s) { pick = r; pid = n; }
     }
+    if (!pick || !(bot === null ? net.sendHit(pid, pick.sx, pick.sz) : net.sendHit(pid, pick.sx, pick.sz, bot))) return false;
+    pick.sx = 0; pick.sz = 0;
+    return true;
   }
 
   function onRemoteHit(from, imp) {
@@ -749,7 +772,7 @@
     var mag = Math.sqrt(imp[0] * imp[0] + imp[1] * imp[1]);
     if (!(mag > 0.2)) return;
     var ux = imp[0] / mag, uz = imp[1] / mag, now = performance.now();
-    var r = impacts[from] || (impacts[from] = { sx: 0, sz: 0, lx: 0, lz: 0, t: 0 });
+    var r = impacts[from] || (impacts[from] = { sx: 0, sz: 0, lx: 0, lz: 0, t: 0, s: 0 });
     if (now - r.t > HIT_MEMORY_MS) { r.lx = 0; r.lz = 0; }
     var already = Math.max(0, r.lx * ux + r.lz * uz);   // what our own resolver did for the same impact
     var rest = mag - already;
@@ -765,16 +788,24 @@
     net.sendLap(lap.last, lap.best);
   }
 
+  // The players who joined / left since the last roster. The host's computer drivers ride in the roster too (bot rows):
+  // they are not players joining or leaving the room - a guest is told their number once when it changed instead.
   function announce(roster) {
-    var now = {}, i, id;
-    for (i = 0; i < roster.length; i++) now[roster[i].id] = roster[i].name;
+    var now = {}, i, id, nb = 0, said = false;
+    for (i = 0; i < roster.length; i++) {
+      if (roster[i].bot) nb++;
+      else now[roster[i].id] = roster[i].name;
+    }
     if (knownPlayers && ui.toast) {
       for (i = 0; i < roster.length; i++) {
-        if (!(roster[i].id in knownPlayers) && !roster[i].isSelf) ui.toast(roster[i].name + ' 加入了房間');
+        if (!roster[i].bot && !(roster[i].id in knownPlayers) && !roster[i].isSelf) { ui.toast(roster[i].name + ' 加入了房間'); said = true; }
       }
-      for (id in knownPlayers) if (!(id in now)) ui.toast(knownPlayers[id] + ' 離開了房間');
+      for (id in knownPlayers) if (!(id in now)) { ui.toast(knownPlayers[id] + ' 離開了房間'); said = true; }
+      // (the toasts replace each other: a player's coming or going is the news then)
+      if (nb !== knownBots && !said && !net.isHost) ui.toast('房間的電腦車手：' + (nb ? nb + ' 位' : '無'));
     }
     knownPlayers = now;
+    knownBots = nb;
   }
 
   // What the room sees of us: name, colour and car.
@@ -1015,12 +1046,27 @@
     toast('這一圈沒有被採計' + (LAP_REJECTED[why] ? '：' + LAP_REJECTED[why] : ''), 5000);
   }
 
+  // A lap of one of OUR computer drivers that the session did not count (in a room: the server, e.g. 'no-data' when our
+  // upload stalled; alone: the local session). The bot drives one more lap, as a human whose lap was refused: its lap
+  // and finish come from the session (gp.entry). Said to us, the one simulating it (once per BOT_REJECT_MS: a lag spike
+  // refuses several), and logged.
+  var BOT_REJECT_MS = 8000, botRejectAt = -1e9;
+  function onBotLapRejected(id, why) {
+    var b = botById[id], name = b ? b.name : '#' + id, text = why === 'not-driven' ? '伺服器沒有看到它跑完這一圈' : LAP_REJECTED[why];
+    if (window.console) console.warn('bot lap rejected: ' + name + ' (' + id + '): ' + why);
+    var now = performance.now();
+    if (now - botRejectAt < BOT_REJECT_MS) return;
+    botRejectAt = now;
+    toast('電腦車手 ' + name + ' 的一圈沒有被採計' + (text ? '：' + text : ''), 5000);
+  }
+
   function initGp() {
     gp = F1.gp;
     gp.init({ net: F1.net || null, getProfile: ui.getProfile });
     gp.on('phase', onGpPhase);
     gp.on('go', onGpGo);
     gp.on('lapRejected', onLapRejected);
+    gp.on('botLapRejected', onBotLapRejected);
     gp.on('change', pushGp);
     // computer drivers: ours changed, the session placed / released them, their lights went out
     gp.on('bots', onBotsList);
@@ -1123,12 +1169,12 @@
   function botSkill(d) { return typeof d.skill === 'number' && d.skill === d.skill ? d.skill : AI.skillOf(botCfg.skill === 'mixed' ? 'pro' : botCfg.skill); }
 
   // The bot cars follow botDesc: a bot that went is removed, a new one is made (and placed), one whose car / strength /
-  // name / slot changed is updated where it stands.
-  function syncBots() {
+  // name / slot changed is updated where it stands. loading: called by the track build (behind its note).
+  function syncBots(loading) {
     if (!track || !botLine || !aiOn() || !botDesc.length) { clearBots(); return; }
-    if (botWarm !== track) {                   // once per track, while it loads: the drivers' code optimised before a race
-      botWarm = track;
-      try { AI.warmUp(track, botLine); } catch (err) { if (window.console) console.error(err); }
+    if (botWarm !== track) {                   // once per track: the drivers' code optimised before a race
+      if (loading) warmBots();
+      else warmBotsSoon();                     // (~0.2 s: not inside the 電腦車手 setting's change handler)
     }
     var out = [], keep = {}, i, b;
     for (i = 0; i < botDesc.length; i++) {
@@ -1149,6 +1195,31 @@
     botById = {};
     for (i = 0; i < bots.length; i++) botById[bots[i].id] = bots[i];
     viewsDirty = true;
+  }
+
+  // F1.AI.warmUp: ~0.2 s of CPU once per track (V8 optimises the drivers' code before they race). With the track build
+  // when there are bots then; for bots made on a track already loaded (the 電腦車手 setting, the room's roster), like a
+  // track build: behind the loading note, once it has been painted (the setting's control froze for 0.2..0.75 s).
+  function warmBots() {
+    if (botWarm === track || !track || !botLine || (!bots.length && !botDesc.length)) return;
+    botWarm = track;
+    try { AI.warmUp(track, botLine); } catch (err) { if (window.console) console.error(err); }
+  }
+  function warmBotsSoon() {
+    if (warmRaf || warmTimer || loadNext) return;   // (a track waiting to be built warms them up with its build)
+    if (ui.setLoading) ui.setLoading(trackData ? trackData.name || trackData.id || '' : '', '電腦車手熟悉賽道中…');
+    warmRaf = requestAnimationFrame(function () {
+      warmRaf = 0;
+      clearTimeout(warmTimer);
+      warmTimer = setTimeout(warmBotsNow, 0);
+    });
+    warmTimer = setTimeout(warmBotsNow, LOAD_WAIT_MS);
+  }
+  function warmBotsNow() {
+    if (warmRaf) { cancelAnimationFrame(warmRaf); warmRaf = 0; }
+    clearTimeout(warmTimer); warmTimer = 0;
+    warmBots();
+    if (ui.setLoading && !loadNext) ui.setLoading(null);   // (a track waiting to be built keeps its note)
   }
 
   function botLivery(b) {
@@ -1273,23 +1344,26 @@
     for (var id in remoteViews) views.push(remoteViews[id]);
   }
 
-  // Our car's view and the bots' from their states (every step: their places changed).
+  // Our car's view and the bots' from their states (every step: their places changed). The race distances (prog: the
+  // bots' blue flags) only in the race and its results, as remoteProg: in free practice / qualifying every lap counter
+  // started somewhere else (ours at the track load, a bot's when it was placed), so a car laps up on nobody there.
   function refreshViews() {
     if (viewsDirty) rebuildViews();
     if (!selfView) return;
     var s = car.state, v = selfView, P = track ? track.pit : null, paved = P && typeof P.paved === 'function', i, b, st;
+    var race = gp.phase === 'race' || gp.phase === 'results';
     v.id = gp.selfId;
     v.x = s.x; v.z = s.z; v.y = typeof s.y === 'number' ? s.y : NaN; v.heading = s.heading; v.speed = s.speed;
     v.sampleIndex = s.sampleIndex; v.d = s.d;
     v.ghost = !selfSolid || ownInPit() || !!(pit && pit.state.service);
-    v.prog = lap ? lap.progress(s.sampleIndex) : NaN;
+    v.prog = race && lap ? lap.progress(s.sampleIndex) : NaN;
     for (i = 0; i < bots.length; i++) {
       b = bots[i]; st = b.car.state; v = b.view;
       b.paved = paved ? !!P.paved(st.sampleIndex, st.d) : false;
       v.x = st.x; v.z = st.z; v.y = typeof st.y === 'number' ? st.y : NaN; v.heading = st.heading; v.speed = st.speed;
       v.sampleIndex = st.sampleIndex; v.d = st.d;
       v.ghost = !b.solid || b.paved || !!b.pit.state.service;
-      v.prog = b.lap ? b.lap.progress(st.sampleIndex) : NaN;
+      v.prog = race && b.lap ? b.lap.progress(st.sampleIndex) : NaN;
       v.pace = b.ai.pace;
     }
   }
@@ -1442,24 +1516,19 @@
     for (var k = 0; k < botRecs.length; k++) {
       var c = botRecs[k], id = botOtherIds[c.i];
       if (id == null) continue;
-      var r = b.impacts[id] || (b.impacts[id] = { sx: 0, sz: 0, lx: 0, lz: 0, t: 0 });
+      var r = b.impacts[id] || (b.impacts[id] = { sx: 0, sz: 0, lx: 0, lz: 0, t: 0, s: 0 });
       if (now - r.t > HIT_MEMORY_MS) { r.lx = 0; r.lz = 0; }
       r.lx += c.ix; r.lz += c.iz; r.t = now;
+      if (r.sx === 0 && r.sz === 0) r.s = now;
       r.sx -= c.ix; r.sz -= c.iz;
     }
     botRecs.length = 0;
   }
+  // (one report per bot per tick: a second one, a bot squeezed between two cars, goes out in the next - sendOwed)
   function sendBotHits(now) {
     if (now - lastBotHitSend < HIT_SEND_MS) return;
     lastBotHitSend = now;
-    for (var i = 0; i < bots.length; i++) {
-      var b = bots[i];
-      for (var id in b.impacts) {
-        var r = b.impacts[id];
-        if (r.sx * r.sx + r.sz * r.sz > 0.04 && solidId(Number(id)) && solidId(b.id)) net.sendHit(Number(id), r.sx, r.sz, b.id);
-        r.sx = 0; r.sz = 0;
-      }
-    }
+    for (var i = 0; i < bots.length; i++) sendOwed(bots[i].impacts, now, bots[i].id);
   }
 
   // Another game's car hit one of our bots (the server relays it to us, the bots' owner): what our own resolve of that
@@ -1475,7 +1544,7 @@
     var mag = Math.sqrt(imp[0] * imp[0] + imp[1] * imp[1]);
     if (!(mag > 0.2)) return;
     var ux = imp[0] / mag, uz = imp[1] / mag, now = performance.now();
-    var r = b.impacts[from] || (b.impacts[from] = { sx: 0, sz: 0, lx: 0, lz: 0, t: 0 });
+    var r = b.impacts[from] || (b.impacts[from] = { sx: 0, sz: 0, lx: 0, lz: 0, t: 0, s: 0 });
     if (now - r.t > HIT_MEMORY_MS) { r.lx = 0; r.lz = 0; }
     var rest = mag - Math.max(0, r.lx * ux + r.lz * uz);
     if (rest < 0.2) return;
@@ -1630,16 +1699,23 @@
 
   // The pit lane speed limit of the active season (track.pit.setYear; Zandvoort and Singapore 60 km/h up to 2024, 80
   // from 2025) and its painted signs. js/pit.js takes the limit when it binds the lane, so it is rebound (pit.reset)
-  // when the limit changed - at once, or, during a pit visit or service, once the car has left the pit stretch (a hold
-  // still pending from an earlier visit is dropped with it: the year only changes in free practice).
+  // with it (a hold still pending from an earlier visit is dropped: the year only changes in free practice). During a
+  // pit visit or service the whole change waits until the car has left the pit stretch (frame()): the limiter (js/car.js
+  // reads track.pit.limitKmh every step), the signs, the strip and js/pit.js all keep the limit the visit began with.
+  // (Only the track's limit changed at once, so a limiter holding the new 80 km/h was judged by the old 60: 'speeding'.)
   function syncPitYear() {
     var P = track && track.pit;
+    pitRebind = false;
     if (!P || typeof P.setYear !== 'function') return;
     var y = activeYear();
-    if (P.year !== y) P.setYear(y);
-    if (pit && pit.state && pit.state.limitKmh !== P.limitKmh) {
-      if (pitBusy()) pitRebind = true;
-      else { pit.reset(); pitRebind = false; }
+    if (P.year === y) return;
+    if (pitBusy()) { pitRebind = true; return; }
+    P.setYear(y);
+    if (pit && pit.state && pit.state.limitKmh !== P.limitKmh) pit.reset();
+    // the bots' js/pit.js too (one in the middle of a visit keeps its limit: their drivers keep theirs)
+    for (var i = 0; i < bots.length; i++) {
+      var bs = bots[i].pit.state;
+      if (bs.limitKmh !== P.limitKmh && !(bs.inLane || bs.visit || bs.service)) bots[i].pit.reset();
     }
   }
   function pitBusy() {
@@ -1741,7 +1817,8 @@
     if (hudMirrors) hudMirrors.setVisible(mirrorsOn);
   }
   function toggleMirrors() {
-    if (!hudMirrors) return;                  // (js/hudmirrors.js missing: nothing to switch)
+    // (js/hudmirrors.js missing or failed: nothing to switch - said, not silent; 設定's switch says 無法顯示 too)
+    if (!hudMirrors) { toast('後照鏡無法顯示（顯示卡不支援）', 2500); return; }
     setMirrors(!mirrorsOn);
     if (ui.setMirrors) ui.setMirrors({ on: mirrorsOn });
     toast(mirrorsOn ? '後照鏡：開（V）' : '後照鏡：關（V）', 1500);
@@ -2021,7 +2098,7 @@
         } else netHit = hit;
       }
       if (mp) collectContacts(performance.now());
-      if (pitRebind && !pitBusy()) { pit.reset(); pitRebind = false; }   // (the season's limit, see syncPitYear)
+      if (pitRebind && !pitBusy()) syncPitYear();   // (the season's limit, waiting for the car to leave the pit stretch)
       checkTyres();
       cockpit.update(car.state, dt);
       gp.setProgress(lap.progress(car.state.sampleIndex));   // race distance, rides along with the state
@@ -2039,6 +2116,7 @@
       var showLights = (gp.phase === 'grid' || gp.goFlash) && (mp || !gp.online);
       var lamps = showLights ? gp.lights : -1, lightsGo = showLights && gp.goFlash;
       if (ui.setLights) ui.setLights(lamps, gp.goFlash, !gp.taking);
+      if (scenery && scenery.setStartLights) scenery.setStartLights(lamps, gp.goFlash);   // the gantry's lamps (review r3 PRES-1)
       if (audio) {
         if (lamps > beepLights && lamps > 0) audio.beep('light');
         if (lightsGo && !beepGo) audio.beep('go');

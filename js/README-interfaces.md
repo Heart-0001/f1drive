@@ -3,7 +3,11 @@
 Plain classic scripts, no modules, no bundler. Everything hangs off `window.F1` (`window.F1 = window.F1 || {}`).
 `THREE` is the global from `lib/three.min.js` (r149 UMD). Must work from `file://` and inside Electron.
 
-Script order in `index.html`: `lib/three.min.js`, `tracks-data.js`, `js/track.js`, `js/car.js`, `js/cockpit.js`, `js/ui.js`, `js/main.js`.
+The sections below are cumulative: v1 first, then what each version added (v2 .. v6, v6.1, v6.2, v7) and what review
+round 3 (2026-10-02) changed. Where a later section changes an earlier rule, the earlier text says so. The CURRENT
+script order is in the v7 section.
+
+Script order in `index.html` (v1): `lib/three.min.js`, `tracks-data.js`, `js/track.js`, `js/car.js`, `js/cockpit.js`, `js/ui.js`, `js/main.js`.
 
 ## Conventions
 
@@ -20,7 +24,9 @@ window.F1_TRACKS = [{ id, name, location, lengthKm, points: [[x, z], ...] }, ...
 `points`: closed centreline in metres, centred near the origin, first point NOT repeated at the end,
 ordered in the racing direction, points[0] = start/finish line. Sorted by name.
 Optional: `pitSide` (-1 = driver's right at the line, +1 = left: the real pit lane side where scenery-data.js has no pit
-buildings; Monaco) and `pitLimitKmh` (the real pit lane speed limit where below 80: Monaco, Singapore = 60).
+buildings or picks the wrong ones; Monaco, Silverstone) and `pitLimitKmh` (the current layout's pit lane speed limit
+where below 80: Monaco, Sochi = 60). v6.2 adds `pitLimits`, `widthOverrides`, `bankMaxDeg`, `layout` (and documents
+`bankOverrides`): see "v6.2 additions".
 
 ## js/track.js
 
@@ -131,10 +137,14 @@ A track id may be missing or sparse; scenery.js must fall back to procedural sce
 ### js/scenery.js
 
 ```js
-F1.buildScenery(track, trackData, sceneryData /* may be undefined */) -> { group, dispose() }
+F1.buildScenery(track, trackData, sceneryData /* may be undefined */) -> { group, dispose(), stats, setStartLights(n, go) }
 F1.createSky() -> THREE.Object3D   // sky dome / sun / distant horizon, added once to the scene by main.js
 ```
 Nothing from scenery may stand inside the track corridor (within the walls of any part of the track).
+`stats` = `{triangles, drawCalls, buildMs, phases, counts: {buildings, stands, dropped, fitted, trees, boards,
+procBuildings, decks, decksSkipped}}`. `setStartLights(n, go)` (review r3): the start gantry's lamps follow the HUD's start
+lights; main.js passes what it gives `ui.setLights` every frame (n = -1 or go = true: all dark; 1..5: that many columns lit
+from the driver's left). The lamps are painted dark: in practice and after lights out the gantry is never lit.
 
 ## js/main.js
 
@@ -198,7 +208,8 @@ Tests: `node test/collide.test.js`, `test/server.test.js`, `test/session.test.js
 ### Grand Prix: what the player gets (requirement)
 
 Q laps of individual qualifying decide the grid, then an R-lap race. Q and R are configurable (1..20 / 1..99).
-In a room the host starts it; it also works alone (single player, local session, same rules). No AI cars.
+In a room the host starts it; it also works alone (single player, local session, same rules). No AI cars in v5 (the
+computer drivers came in v7: see "v7 additions"; with them, alone, the player starts from grid box 1 as in a room).
 
 - `free`: free practice exactly as before (no session).
 - `quali`: everybody drives at the same time but alone: the other cars are ghosts (translucent, no collisions, no impact
@@ -363,15 +374,17 @@ Final script order in `index.html`:
 `js/cockpit.js`, `js/gamepad.js`, `js/audio.js`, `js/raceline.js`, `scenery-data.js`, `js/scenery.js`, `js/collide.js`,
 `js/carmodel.js`, `js/laps.js`, `js/pit.js`, `net/session.js`, `js/net.js`, `js/gp.js`, `js/telemetry.js`, `js/ui.js`,
 `js/main.js`. `index.html` has a Content-Security-Policy (no inline script, no inline handlers, no remote scripts):
-`js/boot.js` holds what used to be the inline error / missing-script overlay.
+`js/boot.js` holds what used to be the inline error / missing-script overlay. (v6.1, v6.2 and v7 add `js/hudmirrors.js`,
+`js/track-names-zh.js`, `js/tunnels.js`, `js/ai.js`: the current order is in the v7 section.)
 
 Golden rule for every module below: **the reference car on fresh medium tyres, with no boost, no limiter and no pit
 stop, drives exactly as the v5 car did** (same accelerations, grip, braking, top speed). All existing tests, racing-line
 checks and autopilots were tuned on it and must keep passing unchanged.
 
-Controls (keyboard / controller): W S A D or arrows / RT LT left stick; R / A or Y reset; L / X racing line;
+Controls (keyboard / controller) as of v6: W S A D or arrows / RT LT left stick; R / A or Y reset; L / X racing line;
 Esc / Start menu; **Q / LB pit limiter (toggle)**; **E / RB or B battery (hold)**; **T / Back (View) next tyre compound**;
-**M mute**; right stick look, RS click recentre.
+**M mute**; right stick look, RS click recentre. (v6.1 moved the controller functions onto A / B / X / Y and added V:
+see "v6.1 additions".)
 
 ### CarSpec — what a car is (js/cars.js resolves it, js/car.js / audio / cockpit / HUD consume it)
 
@@ -417,14 +430,18 @@ Drivetrain formula (shared by car.js for the own car and by audio.js for remote 
 window.F1_SEASONS = [{ year, label, engine, era: { ...the CarSpec physics / drivetrain / ers / cockpit fields of that
                        season's STANDARD car }, cars: [{ id, team, teamZh, car, engine, cylinders?, aspiration?,
                        colour, colour2, ratings, perf: { power, drag, downforce, grip, brake, traction, ersPower,
-                       ersHarvest } /* multipliers 0.95..1.05 on the era */, note }] }, ...]   // 2010..2026
+                       ersHarvest, ersStore } /* multipliers on the era: 0.95..1.05; v6.1: ersPower / ersHarvest
+                       0.75..1.15, ersStore 0.9..1.1 */, hasErs, ersNote, drivers, est, note }] }, ...]   // 2010..2026
 F1.cars = {
   seasons,                       // [{year, label, engine, count}] ascending
   list(year) -> [CarSpec],       // that season's cars; first is '<year>-standard' (era car, every multiplier 1)
   get(id) -> CarSpec | null,
   resolve(id, year?) -> CarSpec, // never null: unknown id -> the same constructor in `year` if it raced then, else that
                                  //   year's standard car; no year -> DEFAULT_YEAR's standard car
-  DEFAULT_YEAR                   // the newest season
+  ersNote(id) -> string,         // (v6.1) one line about that car's battery for the car cards ('' none / unknown id)
+  drivers(id) -> [{name, abbr, number}],   // (v7) its two real drivers (see "v7 additions"); [] for unknown ids
+  DEFAULT_YEAR,                  // the newest season
+  attribution                    // { f1db, f1dbShort, sources2026, disclaimer } strings for the menu
 }
 ```
 - Generated by `tools/build-seasons.mjs` from the open F1DB database (CC BY 4.0, credited in the menu next to
@@ -495,7 +512,8 @@ really has no room.
 ```js
 track.pit = {
   side,               // +1 on the +n side (driver's left), -1 on the other
-  limitKmh,           // 80; trackData.pitLimitKmh where lower (60 at Monaco and Singapore)
+  limitKmh,           // 80; trackData.pitLimitKmh where lower (60 at Monaco, Sochi); v6.2: the season's
+                      //   (trackData.pitLimits: Zandvoort / Singapore 60 up to 2024) - limitFor / setYear below
   from, to,           // sample indices: first / last sample of the lane incl. its tapers (cyclic, `from` before the line)
   entry, exit,        // sample indices of the entry line and exit line (the light curtains, speed limit between them)
   laneD(index),       // signed lateral offset of the lane's centre at that sample, NaN outside from..to
@@ -604,7 +622,9 @@ PIT LIMITER state, the team colour and car name. One canvas, no DOM work per fra
   the visit has had its stop, so that hold waits for the exit line), next-compound indicator through the telemetry
   graphic; hints updated for Q / E / T / M and the controller mapping; volume slider + mute in the menu; F1DB attribution
   next to OpenStreetMap (the credits line opens 設定 → 資料來源與授權: every data source with its licence and address).
-- `ui.setLoading(name | null)`: the 載入賽道中… note while a track is built (main.js builds it after the next frame).
+- `ui.setLoading(name | null, title?)`: the 載入賽道中… note while a track is built (main.js builds it after the next
+  frame). v6.2: `name` is the English name, the note shows the card's Chinese one. v7 / review r3: `title` replaces the
+  heading (`#loading-title`); main.js passes 電腦車手熟悉賽道中… while `F1.AI.warmUp` runs for bots made on a loaded track.
 - `#hud.res-open` while the results overlay is open: in windows under 1260 px the overlay sits below the top row of boxes
   and the session box makes way for it.
 
@@ -627,3 +647,512 @@ PIT LIMITER state, the team colour and car name. One canvas, no DOM work per fra
   ignored while the car is held for a service or a hold.
 - `F1.buildRaceLine(track, perf?)` (js/raceline.js) takes the car's perf (default `F1.CAR_PERF`).
 - `electron-main.js`: autoplay policy `no-user-gesture-required`.
+
+### v6 review additions (early review J0 and the final review, 2026-10-01; documented here in 2026-10-02)
+
+- `car.bump(strength 0..1)`: a car-to-car impact; main.js calls it with the return value of `F1.resolveCarCollisions`
+  (local contacts only, never for reported impacts); the next `update` feeds it to the tyres and to `state.hit` (`hit` =
+  the strongest wall or car impact of the frame). `track.pit.paved(index, d)`: on the pit asphalt (car.js: not grass).
+- `cockpit.setMirrors(on)` (live rear-view glass, default on; objects with `userData.mirror === false` stay out of it),
+  `cockpit.info().mirrors`, `F1.COCKPIT_HALO` (the halo's centre line; js/carmodel.js draws the other cars' halo along
+  it), `carModel.setHalo(on)` (main.js: `!spec || spec.cockpit !== 'modern'`).
+- Rooms: an optional password: `F1.net.create(port, {password})`, `F1.net.join(address, {password})`; server errors
+  `'password'`, `'wait'` (too many wrong ones from one address in a minute), `'idle'` (a player silent for 180 s). Lap
+  reports carry `at` (`gl {k, sid, time, at?}`: the server's clock when the car crossed the line); new rejection reasons
+  `'not-driven'` (the server did not see the car cover the lap) and `'no-data'` (too few car states during it).
+- `spec.traction` also caps top speed (`sqrt((traction - 0.5) / dragK)`): 48 of the 197 cars are capped, by up to 6.3 km/h
+  (2026-10-02 data); `perf.topSpeed` includes it and the seasons are calibrated with it (devtests/car-v6/traction-cap.js).
+
+## v6.1 additions: HUD mirrors, the controller on A / B / X / Y, default season 2026, a battery per car
+
+What the user asked (2026-10-01 ~11:30, translated): the game opens on 2026; every car its own battery data; the
+controller functions on A B X Y; two small rear-view mirrors at the top left / top right of the screen, with a setting
+and a key to hide them.
+
+### Controls (current)
+
+Keyboard: W S A D or arrows drive; R reset; L racing line; Esc menu; Q pit limiter (toggle); E battery (hold); T next tyre
+compound; M mute; **V HUD mirrors (toggle)**; F11 full screen. Controller (`js/gamepad.js`, standard-mapping index in
+brackets; the API is unchanged, only the indices moved):
+
+| Button | Function | `F1.gamepad.state` |
+| --- | --- | --- |
+| A [0] or RB [5], held | battery deploy (E) | `boost` |
+| B [1] or LB [4] | pit limiter toggle (Q) | `pressed.limiter` (main.js keeps the toggle) |
+| X [2] | next tyre compound (T) | `pressed.compound` |
+| Y [3] | reset to the track (R) | `pressed.reset` |
+| View / Back [8] | racing line (L) | `pressed.line` |
+| Menu / Start [9] | menu (Esc) | `pressed.menu` |
+| RS click [11] | recentre the view | `pressed.recentre` |
+| RT [7] / LT [6] / left stick / right stick / D-pad [12-15] | throttle / brake / steer / look / digital keys | as v5 |
+
+Two buttons for one function (A / RB, B / LB) are OR-ed: the second going down while the first is held is not a new
+press. Unmapped pads with 6+ axes (raw XInput order A0 B1 X2 Y3 LB4 RB5 Back6 Start7 Guide8 LS9 RS10) are mapped by name
+the same way (Back 6 line, Start 7 menu, RS 10 recentre). The mirrors have no pad button. With a pad connected the
+pit-lane prompts name B (請開啟限速器（B）, 按 B 關閉限速器).
+
+### Default season
+
+`js/main.js` `START_YEAR = 2026`: a fresh install (no stored 車輛 pick) drives `'2026-standard'`. The reference car
+`F1.REF_SPEC` is `'2025-standard'` (the v5 car), now a pick in the 車輛 tab. Harnesses written for the reference car pick
+it before the game boots with `devtests/ref-car.js`: `await require('../ref-car').seed(win[, {year, car}])` BEFORE
+`win.loadFile(index.html)` writes the menu's stored choice (localStorage `'f1drive.car'`) through a blank page of the same
+`file://` origin (`devtests/ref-car.html`). `gp-e2e/lib.js` `makeWin`, `v6-critic/lib.js` `w.open` and `v6-smoke` seed it
+unless `opts.fresh` is set.
+
+### js/hudmirrors.js — `F1.createHudMirrors` (after `js/cockpit.js` in the script order)
+
+```js
+var hm = F1.createHudMirrors(renderer, scene, {
+  exclude: [cockpit.group],          // never drawn in the mirrors (our own car)
+  elements: [frameLeft, frameRight]  // optional: each mirror fills the padding box of its element (CSS owns the layout);
+                                     //   without them F1.hudMirrorsLayout(w, h) places them
+  // optional too: hfov, yaw, pitch, rate, trees, msaa (as setOptions below)
+});
+hm.render(car.state, dt)   // = hm.update(pose, dt); hm.render(): every frame, right AFTER renderer.render(scene, camera)
+hm.update(pose, dt)        // pose {x, y, z, heading, pitch, roll}; dt smooths the attitude
+hm.setVisible(on) -> on, hm.visible   // hidden: no work at all, render targets released; also sets the frames' display
+hm.setRects(fn | null)     // custom placement fn(cssW, cssH) -> [[x, y, w, h] left, [..] right]
+hm.relayout(), hm.setExclude(list), hm.dispose()
+hm.setOptions({hfov, yaw, pitch, rate: 1 | 2 | 'auto', trees, msaa})   // defaults 40 deg, 12, -1.5, 'auto', true, 4
+hm.info() -> {visible, lost, rate, rateMode, passes, blits, ms, msMax, pixelRatio, rects, target, hfov, yaw, pitch, source}
+F1.hudMirrorsLayout(w, h) -> [[x, y, w, h], [x, y, w, h]]   // the layout index.html's frames use (glass 176..400 px wide)
+```
+Each mirror is its own small render target drawn by a camera beside the driver's head looking back, copied into the canvas
+flipped left-right. Left out of the pass: `exclude` and every scene child or grandchild with `userData.mirror === false`
+(the cars' name tags; since v6.1 also the track's `pitCurtains` mesh, which main.js marks, so the light curtains just
+driven through never fill the HUD or the cockpit glass mirrors). rate `'auto'`: both mirrors every frame, alternately
+while they average over 1 ms of CPU.
+
+- `index.html`: the frames `#hud-mirror-l` / `#hud-mirror-r` (`.hud-mirror`) are the first children of `#hud`; layout A
+  from the `--mir-*` variables (`--mir-gw` = clamp(176px, 18.75vw, 400px)); `#hud.no-mirrors` hides them and puts every
+  box back where it was without mirrors; `#hud.mirrors-na` (review r3 FLOW-4) hides the V hints (`.hk-mirrors`).
+- `F1.ui`: `init({..., onMirrors(on)})` (the 設定 → 畫面 → 後照鏡 switch); `getMirrors()` -> bool (default true, stored in
+  localStorage `'f1drive.hud'` as `{mirrors}`); `setMirrors({on?, available?})` shows and stores a change made elsewhere
+  without calling `onMirrors`; `available: false` = the game cannot draw them: the switch says 無法顯示, the HUD is laid
+  out without them, `#hud.mirrors-na`.
+- `js/main.js`: creates them once with the cockpit (`exclude: [cockpit.group]`, the two frames); draws them after the main
+  render (`renderMirrors`); a missing module, a throwing `createHudMirrors` or a throwing `render()` switches them off for
+  the session (`hudMirrors = null`, `ui.setMirrors({available: false})`), never the game. V toggles them while driving
+  (toast 後照鏡：開／關（V）; ignored while typing or in the menu); after a failure V says 後照鏡無法顯示（顯示卡不支援）
+  (review r3 FLOW-4). `F1.game.hudMirrors` (null until the first track or after a failure), `F1.game.mirrors` (the setting).
+
+### A battery per car (tools/ers-data.json -> tools/build-cars.mjs -> js/seasons-data.js -> js/cars.js)
+
+- Every car of 2011..2026 has its own battery: `perf.ersPower` / `perf.ersHarvest` (0.75..1.15) and `perf.ersStore`
+  (0.9..1.1) REPLACE the era's battery multipliers; every other multiplier stays 0.95..1.05.
+- `hasErs: false` -> `CarSpec.ers === null`: all of 2010 and five cars that raced without KERS (2011 Lotus Racing, HRT,
+  Virgin; 2012 HRT, Marussia); their `ratings.ers` is 0. The `'<year>-standard'` car always has the era's battery.
+- `ersNote`: one line (Traditional Chinese) per car, read through `F1.cars.ersNote(id)` ('' for unknown / hostile ids;
+  the CarSpec does not carry it). `est.ersPct`: the battery's share of `est.lapPct` (the lap with the battery deployed).
+- Lap-time targets hold with the battery: `devtests/seasons-calib/ers-effect.mjs` drives each distinct battery of a season
+  on the 40 circuits and `tools/build-cars.mjs` solves the chassis level so that profile delta + battery effect = target
+  (a strong battery gets a weaker chassis). Re-run it after `calibrate.mjs` and whenever `tools/ers-data.json` changes.
+- The car cards (`F1.ui.setCars`): a line 電池 + the note; a car without a battery gets a dashed 無 KERS chip where the
+  電池 bar would be.
+
+## v6.2 additions: steering law, road-shape cues, the 40-circuit data audit, bridges, tunnels, FOV, Chinese names
+
+What the user asked (2026-10-01 ~14:30-17:30, translated): Monaco's hairpin cannot be taken even at 20 km/h; the banked
+corners (Zandvoort, Madring) and Spa's climb are not felt; a Monaco tunnel; re-check the data of ALL circuits; the
+controller's compound choice is not discoverable; Suzuka must be found by 鈴鹿 and by its country ('japan', 日本).
+
+### js/car.js — the steering law (the one deliberate change to the golden rule) and the road-shape load
+
+- `F1.CAR_PERF` / `F1.carPerf(spec)` gain `steerLockAt(v, bank, turnSign) -> rad` (the lock at the road wheels for
+  `state.steer = +-1` at speed v m/s, on a road banked `bank` rad (left higher > 0), turning towards `turnSign` (+1
+  left)), `steerLockMax` (0.40 rad = 23 deg: an 8.5 m radius on the 3.6 m wheelbase) and `steerLowGrip` (1.25). The law:
+  the v5 lock `0.35 / (1 + (v/22)^2)`, never less than the lock that asks `steerLowGrip` x the mechanical grip, more on a
+  real banked corner turned into (from 6 deg, in full from 9 deg), at most `steerLockMax`: full lock up to ~52 km/h,
+  exactly the v5 law above ~85 km/h on flat roads. `js/raceline.js`, `tools/build-cars.mjs`, the calibration driver
+  (`devtests/seasons-calib/driver.mjs`), `js/ai.js` and the sound's remote-car scrub use it. The golden-rule oracle
+  `devtests/car-v6/car-v5.js` has the identical function (test/car.test.js: bit-identical).
+- `js/raceline.js`: `cornerSpeed` limits by `perf.steerLockAt`; a path tighter than full lock targets the top of the
+  full-lock range (~45..50 km/h: Monaco's hairpin ~49) instead of the 25 km/h floor.
+- `car.state` gains `load` (g: the tyres' normal load in the last sub-step; 1 standing on the flat; + downforce, banking,
+  dips) and `compress` (g: the road shape's share alone, load - 1 - downforce: > 0 in a banked corner or a dip, < 0 over
+  a crest; Zandvoort T3 ~ +1.8, Eau Rouge ~ +1.6). Read-only cues: no effect on the path.
+- Every `track.locate` of js/car.js passes the car's height (`state.y`; on `reset` the sample's), so at a grade-separated
+  crossing (Suzuka) the car stays on the road it is on.
+
+### tracks-data.js (tools/build-tracks.mjs) — new optional fields
+
+```js
+{ ...,
+  bankOverrides: [{name, from, to, deg}],     // (since v6, J0) real banked / cambered corners: lap fractions of the
+                                              //   input polyline; deg > 0 = inside of the corner lower; the full angle
+                                              //   between from and to, eased over 35 m outside them, capped at 30 deg
+  bankMaxDeg,                                 // cap of the curvature-derived banking (default 2.5; 1.5 on the 10 street
+                                              //   circuits; it was 6 before v6.2)
+  widthOverrides: [{name, from, to, halfW}],  // narrow stretches (Baku's castle: 3.8): the road's half width capped,
+                                              //   eased back over 40 m; walls 1 m outside the road edge (eased over 50 m)
+  pitLimits: [{from?, to?, kmh}],             // pit speed limit by season (years inclusive): Zandvoort and Singapore
+                                              //   [{to: 2024, kmh: 60}]; otherwise pitLimitKmh, else 80
+  layout                                      // a note when the built layout is not what the name suggests (Estoril:
+}                                             //   'post-2000 layout ...'); the card's tooltip is its Chinese version
+```
+The data comes from the track audit (`docs/track-audit.md`, `tools/track-audit.json` `apply`): new elevation sources
+(Wallonia lidar for Spa, IGN MDT05 for Barcelona / Madring, Emilia-Romagna DTM for Imola, Regione Toscana DSM for Mugello,
+TINITALY + a 5 m dip for Monza, USGS for Miami, Copernicus GLO-30 for Interlagos / Sepang / Portimão), START_AT moved
+(Silverstone, Hungaroring, Sepang, Shanghai), layout fixes (Albert Park, Estoril, Madring), Baku's width, measured cambers
+and the season pit limits. `node tools/build-tracks.mjs --check` rebuilds in memory (dataset from the pinned commit,
+heights from `tools/elevation-cache*.json`) and compares with tracks-data.js; `--out <file>` writes elsewhere. Review r3
+moved Silverstone's points[0] to the Wing's START line (OSM node 13036050130, 151 m after the timing line: the 16 grid
+boxes then lie on the straight) and scaled Baku's heights to the published 26.8 m range (x0.777).
+
+### js/track.js additions
+
+```js
+F1.buildTrack(trackData, opts?)       // opts.year: the session's season (the pit limit and its painted signs)
+track.locate(x, z, hintIndex, y?)     // y (optional): at a grade-separated crossing the road whose surface at (x, z) is
+track.nearest(x, z, y?)               //   closest to y (the other road only where (x, z) is inside its corridor);
+track.groundY(x, z, y?)               //   without y exactly as before
+track.inCorridor(x, z, margin)        // true inside either level's corridor
+track.terrainY(x, z)                  // the terrain height field alone (valid away from the corridor)
+track.bridges = [{up, lo, separation, deckFrom, deckTo, deckLength, clearance, abutmentSegments, wingSegments}]
+                                      // a crossing whose roads are >= 3 m apart in height (Suzuka: 6.2 m) is a bridge:
+                                      //   up / lo = the sample of the upper / lower road at the crossing; deckFrom..deckTo
+                                      //   = the upper-road samples the deck spans; clearance = deck underside above the
+                                      //   lower road (~5.2 m). track.crossings is unchanged ([[1160, 2345]] at Suzuka).
+track.pit.limitFor(year) -> km/h      // that season's limit, never above pit.layoutLimitKmh (what the lane allows)
+track.pit.setYear(year) -> km/h       // makes it pit.limitKmh, sets pit.year, shows the matching painted signs
+track.pit.layoutLimitKmh, track.pit.year   // year: the season limitKmh is for (null = the current layout's rule)
+track.pit.paved(index, d) -> bool     // (since v6) on the pit asphalt (lane, boxes, tapers; never the road itself)
+F1.pitLimitFor(trackData, year)       // the data's limit, before the lane geometry's cap
+```
+- The upper road of a bridge gets a 0.9 m deck slab, its walls as parapets, abutment walls behind the lower road's walls;
+  through the deck range its verge stays at the deck's underside over the opening and ends on concrete wing walls
+  (review r3 W5). Both roads keep their walls, kerbs and lines; the terrain stays under both.
+- On tracks with `pitLimits` the 'paint' mesh has material groups `'paint'`, `'pitSign60'`, `'pitSign80'` (the inactive
+  sign's material `visible = false`); the child mesh count is unchanged.
+- A pit lane that is a little short retries shorter tapers (Silverstone's lane fits at 80 km/h).
+- Glue (main.js): `F1.buildTrack(data, {year: activeYear()})`; `syncPitYear()` at the start of every `applyCar()` calls
+  `track.pit.setYear(activeYear())` and `pit.reset()` when js/pit.js's bound limit differs (the bots' pits too, unless
+  mid-visit). Review r3 FLOW-1: during a pit visit or service the whole change waits until the car has left the pit
+  stretch (`pitRebind`): the limiter, the signs, the strip and js/pit.js keep the limit the visit began with. js/car.js
+  reads `track.pit.limitKmh` every step; js/ai.js reads it live (review r3 AI-1).
+
+### js/tunnels.js — covered stretches (after `js/scenery.js` in the script order)
+
+```js
+var tun = F1.buildTunnels(track, trackData, tunnelData?)  // default F1.TUNNEL_DATA[trackData.id]; none -> empty group
+tun.group                       // THREE.Group (4 draw calls for the whole track)
+tun.inTunnel(i) -> 0..1         // 0 outside, 1 deep inside, smooth over the first / last 30 m (sound)
+tun.lightAt(i) -> 0..1          // daylight reaching sample i (0.3 deep inside, 0.5 beside openings to the sea)
+tun.sceneLight(i, 'hemi' | 'sun')   // factor for the scene lights while the CAMERA is at sample i (eye adaptation)
+tun.covered(i) -> bool          // between the portals of a covered stretch
+tun.update(t, viewIndex, sceneScaled?)   // once per frame before rendering (allocation-free); viewIndex = the camera's
+                                //   sample (null: outside every tunnel); sceneScaled default true
+tun.tunnels                     // [{name, kind, from, to, length, sFrom, sTo, width, height, open: [{side, from, to}]}]
+tun.stats, tun.dispose()
+F1.tunnelImpulse(sampleRate, {width, height, rt60, seconds}) -> {sampleRate, left, right}   // reverb impulse response
+F1.TUNNEL_DATA                  // copy of tools/tunnels.json "tracks" (devtests/tunnel-test/make-data.js --check)
+```
+Stretches: Monza (Sopraelevata underpass), Monaco (Portier; the 368 m tunnel under the Fairmont with the sea-side
+colonnade), Madring (two tunnels under the motorway), Singapore (two Raffles Boulevard passages), Yas Marina (the W hotel
+bridge). Glue (main.js): built after the scenery inside a try (decoration), disposed with the track (the lights go back to
+daylight); `tunnelView(t)` before every render of the cockpit view (the frame and the still behind the menu): hemisphere
+light = 0.85 x `sceneLight(i, 'hemi')`, sun = 0.9 x `sceneLight(i, 'sun')`, then `tunnels.update(t, i)`; every frame
+`F1.audio.setTunnel(inTunnel(i), width, height)` of the stretch at i; at track load `F1.audio.setTunnel(0, w, h)` of the
+longest stretch (review r3 PRES-2: the impulse response is made then, silently). `F1.game.tunnels`, `F1.game.lights`
+(`{hemi, sun, hemi0, sun0}`). `js/scenery.js` builds no mapped deck within 12 m of a covered stretch or of the upper road
+of `track.bridges`.
+
+### js/audio.js — `F1.audio.setTunnel(k, width?, height?)`
+
+k 0..1 = how deep the listener is in a tunnel (`tun.inTunnel(car.state.sampleIndex)`, 0 where there is none; or
+`own.tunnel` handed to `update`). Inside: the whole mix through a convolution reverb of `F1.tunnelImpulse` at
+`T.tunWet` (0.6) x k beside the dry mix, a mid band (+`T.tunMidDb` 3 dB x k around 450 Hz), the wind / road roar
++`T.tunRoarDb` (2 dB) x k, all ramped (`T.tunTau` 0.05 s); reverb and mid band disconnected 2 s after k fell to 0 (at k = 0
+the sound is exactly the one without a tunnel). width / height (m, default 25 x 6.8) size the impulse response; a size
+within `T.tunSizeTol` (15 %) of the width and `T.tunHeightTol` (1 m) of the height of the one already made reuses it
+(review r3 PRES-2: Monaco's Portier 23.5 m and tunnel 25 m share one; making one costs 10-20 ms on the main thread);
+`setTunnel(0, w, h)` makes it silently at the next `update()`; a throwing `F1.tunnelImpulse` is tried once per size.
+Without js/tunnels.js: no reverb (the rest works). Debug: `F1.audio.debug.tunnel / reverb / reverbBuilds / tunnelWet /
+tunnelMid`; the control vector gained `C_TUN = 17` (read `debug.ctl` by the paramTable names).
+
+### js/cockpit.js — FOV setting and road-shape cues
+
+- `cockpit.setFov(deg) -> deg in use`: the vertical FOV at a standstill, clamped to `F1.COCKPIT_FOV.min..max`; numeric
+  strings are taken, anything else gives the default; applied at once. `F1.COCKPIT_FOV = {def: 60, min: 50, max: 75,
+  widen: 12/70}`: the speed widening stays proportional (60 -> 70.3 deg at top speed; 70 -> 82 as v5).
+- A framing lens shift (only `camera.projectionMatrix.elements[9]`, re-applied by `update` while the setting is not 70)
+  keeps the wheel display where v5 drew it, above the telemetry graphic; an outside `camera.updateProjectionMatrix()`
+  gives a plain centred projection until the next `update`.
+- Head cues, `F1.COCKPIT_HEAD = {rollKeep 0.45, rollTau 0.25 s, pitchKeep 0.5, pitchTau 0.6 s, compressEye 0.012 m/g,
+  compressNod 0.004 rad/g, compressMin -1, compressMax 2.5, compressTau 0.08 s}`: the head takes out 45 % of the car's
+  roll (banking reads as the road and the cockpit tilting) and slowly 50 % of its pitch (a steady climb shows the road
+  rising against the horizon); the eye sinks and nods under `state.compress` (else `state.seatG - 1`, the seat load
+  WITHOUT downforce: never pass `state.load`). Both turn about the car's axes: `camera.rotation.y` stays exactly
+  `PI + head yaw`. On a level road with no compression at `setFov(70)` the camera is v5's, bit for bit.
+- `cockpit.info()` gains `fov: {setting, now, shift}` and `head: {roll, pitch, compress}`.
+- Glue: `cockpit.setFov(ui.getFov())` when the cockpit is created and on `onFov` (guarded: the test stubs have none).
+
+### Chinese names and the track search (js/track-names-zh.js, right after tracks-data.js)
+
+```js
+window.F1_TRACK_NAMES_ZH = { '<track id>': { name, short, location, aliases: [...], layout? }, ... }   // all 40 ids
+```
+`name` as Taiwanese F1 coverage writes it (鈴鹿賽道, 蒙札賽道, 銀石賽道 ...), `short` (鈴鹿), `location` ('日本 鈴鹿'),
+`aliases` (search only: zh-tw Wikipedia forms, mainland / Hong Kong forms, ASCII spellings), `layout` (optional Chinese
+tooltip, preferred over trackData.layout). Sources are in the file's header.
+- Cards: the Chinese name, the English one under it (`.card-en`), the Chinese location; card i is still `F1_TRACKS[i]`
+  (English order). The HUD timing box, the results subtitle and the loading note use the Chinese name.
+- Search (`js/ui.js`): the English name, location and id; the Chinese name, short, location and aliases; the country in
+  English with short forms and adjectives and in Chinese (`COUNTRY` / `EXTRA` tables in ui.js); 'F1 GP Grand Prix 大獎賽'
+  in every key. Lower-cased; review r3 FLOW-3: NFKD folding (accents, full-width letters), Chinese and Latin runs split
+  ('日本GP'), a trailing round suffix (分站 / 站 / 大獎賽 / 大奖赛 / 獎賽 / 奖赛 / 賽 / 赛) dropped from a Chinese term
+  ('日本站', '日本大獎賽'); the various middle dots / dashes are one. Latin terms of 1..3 letters must start a word ('us'
+  finds the 5 US circuits, not Austria). `F1.ui.searchTracks(list, query) -> [ids]`: the same search without the DOM.
+
+### js/ui.js + index.html + js/telemetry.js (v6.2)
+
+- `init({..., onFov(deg), onCompound(c)})`; `getFov()` -> the stored FOV (whole degrees, localStorage `'f1drive.fov'` =
+  `{fov}`, stored only once the 設定 → 畫面 → 視野 slider moved; junk ignored, clamped 50..75), else `F1.COCKPIT_FOV.def`.
+- `setCompound('S' | 'M' | 'H')`: the 大獎賽 tab's 起跑輪胎 row (下一組輪胎 during a session) shows main.js's next set; does
+  not call `onCompound`. The next set is not stored (a new game starts on mediums); `onGpStart` stays `{q, r, wear}`.
+- `setPit(p)`: `p.next` ('S' | 'M' | 'H') -> the line 下一組：中性胎（T / X 切換）(X / T first while a pad is connected).
+- `F1.telemetry.draw(t)`: `t.nextKeys` (string, at most 12 characters, default 'T / X'), drawn under the 下一組 badge as
+  '<keys> 切換'; main.js hands 'X / T' while a pad is connected.
+- main.js: pit event 'enter' -> toast 按 X（鍵盤 T）選擇輪胎：軟 / 中 / 硬（下一組：…）(按 T（手把 X）… without a pad).
+
+### scenery-data.js / tools/build-scenery.mjs / js/scenery.js (v6.2)
+
+- A 'bridge' entry may carry `o` (OSM way id, debug), `c` (underside above the road, m, at least 6.5) and `t` (deck
+  thickness, default 1.4); without them js/scenery.js builds what it built before. Decks thicker than 2.5 m (buildings
+  spanning the road) get no parapet. A deck over the road stamps its footprint (no tree or object under it).
+- The builder leaves out the lap's own deck over an underpass (the six phantom bridges of Spa, Zandvoort, Hockenheim x3,
+  Nürburgring) and adds linear bridges / buildings spanning the lap (Montréal, Marina Bay, Silverstone's Wing footbridge,
+  Las Vegas, Miami, Mexico, COTA ...). Options `--only <ids> --merge` (replace only those tracks), `--offline`, `--out`.
+  Buildings named as pits count only within 450 m of the line (Silverstone's Wing is 'pit').
+
+## v7 additions: computer drivers (offline and in rooms)
+
+What the user asked (2026-10-01 ~16:35, translated): add computer players; in the room you choose how many and how strong.
+(This overrides v5's "no AI cars".)
+
+Current script order in `index.html`: `js/boot.js`, `lib/three.min.js`, `tracks-data.js`, `js/track-names-zh.js`,
+`js/seasons-data.js`, `js/cars.js`, `js/track.js`, `js/tyres.js`, `js/car.js`, `js/cockpit.js`, `js/hudmirrors.js`,
+`js/gamepad.js`, `js/audio.js`, `js/raceline.js`, `scenery-data.js`, `js/scenery.js`, `js/tunnels.js`, `js/collide.js`,
+`js/carmodel.js`, `js/laps.js`, `js/pit.js`, `js/ai.js`, `net/session.js`, `js/net.js`, `js/gp.js`, `js/telemetry.js`,
+`js/ui.js`, `js/main.js` (checked by devtests/ui-v6 and ui-gp). Node test suites: 12 (`test/ai.test.js` added).
+
+### js/ai.js — `F1.createAIDriver` and `F1.AI` (pure logic: no DOM, no THREE, no timers, no Math.random; node: `module.exports = F1.AI`)
+
+```js
+var ai = F1.createAIDriver({ track, raceLine, car, skill, seed, id, slot, name, mistakeRate? })
+//   track     F1.buildTrack(...); raceLine: any F1.buildRaceLine of this track (only its geometry is used; the AI caches
+//             it per raceLine.points object: give every bot of a track the SAME line); car: the F1.createCar(spec) it
+//             drives (car.perf / state / tyres read, never written); skill 0..1 or a level id / name; seed: every random
+//             decision comes from it; id: its id in `others` (skipped there; any size); slot: its pit box
+//             (track.pit.boxes[slot] = its room slot); mistakeRate (tests): the chance of a mistake per braking zone
+ai.think(dt, others, ctx) -> input   // once per PHYSICS STEP (1/120 s), right before car.update(dt, input, track); the same
+                                     //   object every call {up, down, left, right, throttle, brake, steerAxis, boost,
+                                     //   limiter, reset}; reset true = please do its R (F1.AI.resetCar + lap.sync)
+ai.onPit(event) -> compound | null   // every event of ITS js/pit.js update (also from the update made while held for the
+                                     //   service: 'serviceDone' happens there) -> the compound to fit (car.tyres.fit)
+ai.startCompound(raceLaps, wear) -> 'S' | 'M' | 'H'   // the set for the grid
+ai.reset()                           // after EVERY placement (grid, qualifying start, a new track)
+ai.setSkill(s), ai.setSlot(slot), ai.planStop(compound, park)   // a stop (or parking in the box) at the next chance
+ai.pace                              // its profile's lap time (s): put it in its view (others[i].pace). Comparable between
+                                     //   bots, NOT a lap-time prediction (it runs 9..15 % under their real laps)
+ai.skill, ai.level, ai.id, ai.name, ai.slot, ai.seed, ai.plan
+ai.state                             // live: mode ('race' | 'follow' | 'overtake' | 'defend' | 'yield' | 'pit' | 'parked' |
+                                     //   'start' | 'grid' | 'reverse' | 'recover'), targetSpeed, cap, capBy, tgt, obs,
+                                     //   offset, idx, plan, mistake, compound ...
+ai.stats                             // mistakes, offs, wallHits, resets, reverses, stuck, passes, passTries, defends, yields,
+                                     //   concedes, pitStops; ai.log: the last 24 rare events [t, what, sample]
+
+F1.AI = {
+  LEVELS,            // [{id: 'rookie', name: '新手', skill: 0, lapPct: 8}, {'amateur', '業餘', 0.35, 5}, {'pro', '職業', 0.7,
+                     //   2.5}, {'legend', '傳奇', 1, 1}]: lapPct = median lap gap to the reference (the racing line's own
+                     //   margins driven perfectly, battery included)
+  skillOf(x) -> 0..1 (a number, a level id or name; anything else 'pro'), levelOf(s) -> the nearest LEVELS entry,
+  PACE, paceOf(s), params(s, ref?), prepare(track, raceLine), profile(...), makeRandom(seed) -> () => [0, 1),
+  createView(id) -> {id, x, z, heading, speed, sampleIndex, d, ghost, prog, pace, y}   // make EVERY view with this
+  createContext() -> {phase, locked, lap, laps, done, prog, pit, wear}                // one per bot
+  updateView(view, state, track)       // fill a view from a car state; locates it (with its y at a bridge) when the
+                                       //   state has no sampleIndex (remote cars; the hint is kept in the view)
+  placeOnGrid(car, track, slot) -> sample index   // main.js's placeOnGrid: nose at the box's front bar
+  resetCar(car, track, idx?, others?, selfId?) -> sample index   // main.js's R; with others (a bot's R): moved up to
+                                       //   ~80 m on to the first spot with no solid car within 7 m and no car standing
+                                       //   in the 30 m ahead (a car on the other level of a bridge does not count)
+  createContacts() -> resolveAll(entries, dt, onContact?)   // car against car among locally simulated cars; entries
+                                       //   [{state, car?, solid}], car.bump on hits, onContact(i, j, dv, hit) per impact;
+                                       //   -> the strongest hit; allocation-free; needs F1.resolveCarCollisions and its
+                                       //   own properties (.overlap: a wrapper must copy them)
+  warmUp(track, raceLine, opts?) -> {steps, calls, pitStops, resets, passTries, offs, yields, mistakes} | null
+                                       // optional, at track load: six cars through a scripted session (~29 000 think()
+                                       //   calls, 0.1..0.5 s once per track; later calls return {steps: 0, calls: 0})
+                                       //   so V8 optimises the drivers' code before the race (first race ~24 MB of
+                                       //   garbage instead of ~160 MB); changes no real driver's driving. opts: spec, force
+  lineup(opts) -> [{name, car, skill, seed, abbr}]   // the field; see below
+  shortName(name) -> <= 16 characters, INVENTED (fallback names),
+  startCompound(laps, wear, trackLength) -> 'S' | 'M' | 'H', CAR_LEN, CAR_WID, SEP, createAIDriver
+}
+```
+- Views: `x, z, heading, speed` (signed), `sampleIndex, d` as `car.state` has them, `y` (height, NaN unknown), `ghost`
+  (not solid for anybody: Grand Prix ghost rules, the pit asphalt, a car held in its box), `prog` (race distance in laps,
+  `lap.progress(idx)`: blue flags; NaN outside the race and results, review r3 AI-4), `pace` (`ai.pace` of a bot, NaN for a
+  human). Fill every field in place and add none: one object shape keeps think() optimised and allocation-free.
+- Context: `phase` (gp.phase), `locked` (the grid before lights out: think() returns a pad at rest, and seeing it arms the
+  start reaction), `lap` / `laps` (timed laps done / the phase's Q or R; 0 = open-ended), `done` (a boolean), `prog` (a
+  number, NaN unknown), `pit` (its js/pit.js state), `wear` (the wear multiplier).
+- Levels (median over the circuits, `devtests/ai-test/calibrate.js`): +8 / +5 / +2.5 / +1 % against the reference;
+  `PACE = [[0, 0.841], [0.35, 0.89], [0.7, 0.942], [1, 0.977]]` (2026-10-01, kept after review r3's track data: within the
+  solver's step). Re-solve after ANY change to js/car.js physics, js/raceline.js or the track data and paste the table.
+- Behaviour the player sees: every car on the path gives a speed cap (also a stopped one hidden behind another); a car
+  known to be slower (its pace) is pressed on the straights (radius > 80 m at both; 0.3 of the time gap, its normal
+  braking not anticipated; not while a stop is planned) and attacked on the side with room; a car alongside always gets
+  room; mild defence; a slower bot under sustained pressure from a quicker car (within 0.5 s, let go beyond 1 s) gives it
+  room on a straight after a while (rookies ~2 s, legends never: the stand-in for the slipstream js/car.js lacks); a
+  human of unknown pace counts only after closing by more than 1.5 m/s while the bot is flat out (review r3 AI-5); blue
+  flags (a car a lap up): the side chosen once, the edge held. A car standing > 1.5 s or coming the wrong way: a yellow flag
+  (single file, no racing past, no defending), driven round (the wrong-way car beside where it will be when they meet,
+  review r3 AI-6); blocked across a narrow street: R after 8 s, put down past the obstacle. Through a corner tighter than
+  full lock (Monaco's hairpin, ~45 km/h) nobody attacks or defends and the queue keeps 5 m more gap. Pit stops: a stint
+  optimiser once a lap (the softest compound that lasts; stints to 88 %, in before 93 %; punctures at once), the lane at
+  `track.pit.limitKmh` read live (review r3 AI-1), its own box. What a bot remembers of another car is keyed by its full
+  id (review r3 AI-2: a room's ids grow past 63). Every `track.locate` passes the car's height (Suzuka's bridge).
+- Cost: think() ~2 us per call, ~0 allocation once optimised (< 2 B per call in test/ai.test.js); 15 bots in the game
+  ~ +0.6 ms of main thread per frame; Monaco loads in ~850 ms with bots (warm-up) instead of ~330.
+
+### The field: `F1.AI.lineup` and `F1.cars.drivers`
+
+```js
+F1.AI.lineup({ cars: F1.cars.list(year), taken: [car ids the humans drive], count, skill: 0..1 | level | 'mixed', seed,
+               drivers: F1.cars.drivers, names: [names already used] }) -> [{name, car, skill, seed, abbr}]
+F1.cars.drivers(carId) -> [{name, abbr, number}, {name, abbr, number}]
+```
+- `lineup`: every team fields two seats; a human takes seat 0 of his team (his teammate still races); one seat of every
+  team before the second seats; standard cars never used; at most 15; names <= 16 characters (`shortName`), unique
+  (`INVENTED` where there is no data); skill = the level +-0.04 ('mixed': a random level per seat). Each seat's level, jitter
+  and seed come from (seed, car, seat): a human taking another seat leaves every other driver as he was.
+- `F1.cars.drivers(id)`: the car's two real drivers of that season from F1DB (`js/seasons-data.js` `cars[].drivers`, built
+  by `tools/build-cars.mjs`), the one with the most starts in that car first; `name` in F1DB's Latin spelling with accents
+  (up to 19 characters: use `F1.AI.shortName` for the rooms' 16), `abbr` three capitals, `number` 0..99 (null if unknown).
+  The standard car's two are invented (Alex Rowan #90, Sam Ellery #91). A new array of new objects every call; [] for an
+  unknown / hostile id (Map lookups only). Not part of the CarSpec.
+
+### net/session.js, js/gp.js — bots are players of the session
+
+- `session.addPlayer(id, name, now, {bot: true, owner})` adds a bot (anything else a human); `session.isBot(id)`; snapshot
+  rows of bots carry `bot: true`. Bots are classified exactly like humans.
+- `F1.gp` (offline: ids 2..16, room slots 1..15; the player is id 1, slot 0):
+  - `setBots(list | n, level) -> bool`: free practice only; `list = [{name, car, colour, skill}]`, entry i = bot i
+    (cleaned: name <= 16, 'AI n' by default); offline applied at once (at most 15), online forwarded to `net.setBots`.
+  - `bots()` -> a fresh copy `[{id, name, colour, car, skill, slot, bi}]` (online: `net.bots`).
+  - `botLap(id, time) -> ''` when accepted (offline) / sent (online), else 'not-ours' | 'not-racing' | 'done' |
+    'no-session' | 'not-sent' | a session reason (offline also fired as 'botLapRejected').
+  - `botProgress(id, v)` every frame (online it rides with the bot's next state).
+  - `entry(id, out?) -> {id, bot, taking, lap, lapTotal, done, fin, dnf, gridSlot, locked}` for any car (fills `out`: no
+    allocation per step); `solid(a, b)`: the session's rule for any two cars (always in free practice, never in
+    qualifying or on the grid before the lights, else both classified and in the session; the pit lane is main.js's).
+  - events `'bots'(list)`, `'botsGo'` (once per session at lights out when any of our bots takes part: arm their lap
+    counters), `'botLapRejected'(id, why)`.
+  - `view()` rows gain `bot`, `skill` (0..1 | null), `car`; `view().bots = {count, skill: level, max (16 - humans; 15
+    offline), canEdit (offline or host, free practice only)}`. The offline race republishes live standings every 500 ms
+    of game clock when they changed (as a room does).
+
+### Wire format (protocol stays 1; additive: an older client sees bots as ordinary players)
+
+The HOST's game simulates its bots; the server knows them as players his connection owns (ids from the players' counter,
+room slots from the same pool, humans + bots <= 16) and treats what he sends for them exactly like a player's own
+(validation, proof-of-driving, impact checks, rate limits).
+- client -> server: `bots {n, skill?, list?: [{name?, car?, colour?, skill?}]}` (host, free practice only; n clamped to
+  the free seats; bots 0..n-1 that exist keep id and slot; skill = the room level 'rookie' | 'amateur' | 'pro' | 'legend' |
+  'mixed', default 'pro'); `bs {k, c, b: [[id, x, y, z, heading, pitch, roll, speed, steer, g?], ...]}` (his bots' states,
+  at most 16 rows, the first per bot; js/net.js splits frames over 1900 bytes); `gl {..., id}`, `lap {..., id}`,
+  `hit {..., from: botId}` (a lap / lap times / an impact of one of HIS bots; any other id is dropped silently).
+- server -> client: roster rows of bots `{id, name, colour, car, slot, last, best, bot: true, skill, owner, bi}` (human rows
+  unchanged); `welcome` and every `players` carry `bots: {n, skill}`; snap rows and session rows as a player's (session
+  rows `bot: true`); `glno {why, id}` to the owner; `hit {from, i, bot: botId}` to the owner when a guest hit his bot,
+  `hit {from: botId, i}` to a player a bot hit. No `gone` message for a bot (the roster carries the change).
+- Server rules: a connection's message budget grows by `BOT_RATE` (4) per second and its burst by 8 per bot it owns; a
+  human joining a full room in free practice takes the newest bot's seat (during a session: 'full'); hits among one
+  owner's own cars are never relayed. When the owner leaves, his bots leave too, each as a player leaving: out of
+  qualifying / the grid, DNF in the race, a row kept in final results; the others' session goes on (review r3 MP-2; a
+  dedicated server's next host can end it; before: the race closed for everybody). `srv.info()` gains `bots: {n, skill}`.
+
+### js/net.js additions
+
+- `setBots(list | n, skill) -> bool` (host, free practice); `sendBotStates([{id, state, g?}], force?)` every frame (it
+  sends at most every 45 ms, only OUR bots; while the loop stands still keepalive repeats the last rows parked);
+  `setBotProgress(id, v | null)`; `sendGpLap(sid, time, at, botId?)`, `sendLap(last, best, botId?)`,
+  `sendHit(toId, ix, iz, fromBotId?)` (one report per bot per 40 ms; never against our own cars) -> bool.
+- `net.bots` (OUR bots in list order: `[{id, name, colour, car, slot, skill, bi, last, best}]`), `net.botSettings` (`{n,
+  skill}`); `net.roster` rows gain `bot, skill, owner, mine`; `net.players` rows gain `bot, skill, owner` (OUR bots are not
+  in `net.players`: they are local cars). Events `'bots'(net.bots)` (also [] when we leave), `'botHit'(botId, fromId,
+  [ix, iz])`, `'botLapRejected'(botId, why)`.
+- Review r3 MP-1: a `snap` row whose id is not a number or not one of our own remotes is dropped (a hostile server's
+  `"__proto__"` row can no longer reach `Object.prototype`).
+
+### js/ui.js + index.html + js/carmodel.js (v7)
+
+- 大獎賽 tab: 電腦車手 (無 / 1..max) and 強度 (新手 / 業餘 / 職業 / 傳奇 / 混合) rows; `init({..., onBots({count, skill})})`;
+  `getBots()` -> `{count 0..15, skill}` (localStorage `'f1drive.bots'`, default `{0, 'pro'}`); read-only for a room's guests
+  (電腦車手由房主設定。) and during a session (賽事進行中不能更改電腦車手。). DOM: `#gp-bots-box`, `#gp-bots` (select),
+  `#gp-skill` (buttons `data-s`), `#gp-bots-note`, `#gp-bots-list`; classes `.gp-bot`, `.car-drv`, `.gp-ai`.
+- `setGp(v)`: `v.bots = {count, skill, max, canEdit, available}` (available false hides the rows), `v.botList = [{name,
+  colour, colour2, team, skill}]` (the field, listed in free practice), `rows[i].bot / skill` -> an AI tag (tooltip
+  電腦車手（level）) in the standings, the HUD session box and the results; room roster rows with `bot` get the tag and the
+  title 玩家（n 人 + 電腦 m，k / 16）.
+- `setCars(v)`: optional `v.drivers = {carId: [{name, bot, self}]}` -> the card line 車手 … (only while there are bots).
+- `updateHUD(h)`: `h.others[i].ring` (optional) rings a minimap dot (a bot's second livery colour).
+- `carModel.setName(name, badge?)`: badge (e.g. 'AI') drawn as a light pill before the name.
+
+### js/main.js (v7 glue)
+
+- The setting -> `F1.AI.lineup({cars: F1.cars.list(activeYear), taken: the humans' cars (ours alone; in a room every
+  non-bot roster row's car resolved to the room year), count: min(count, 15 alone / 16 - humans), skill, seed: the year,
+  drivers: F1.cars.drivers, names: the humans' names})` -> `gp.setBots(list, level)`: alone, or as the host in free
+  practice, only when the field changed; re-sent once on every return to free practice.
+- `gp.on('bots')` -> each bot: `F1.createCar(spec, {random})`, `F1.createPit`, `F1.createLapCounter`,
+  `F1.createAIDriver({track, raceLine: botLine, car, skill, seed, id, slot, name})`, a `F1.createCarModel` with its
+  livery, halo (not before 2018) and the AI badge; updated in place on a car / skill / name / slot change. `botLine` is the
+  track's first racing line (kept when ours is rebuilt for another car). `F1.AI.warmUp(track, botLine)` runs with the track
+  build when there are bots, or behind the loading note (`ui.setLoading(name, '電腦車手熟悉賽道中…')`) for bots made on a
+  loaded track (review r3 PKG-2).
+- Placement: alone with bots we start in grid box 1 (also qualifying), bots in boxes slot + 1 (2..16); the grid: the box of
+  each one's qualifying place with `ai.startCompound(r, wear)`; back to free practice: their boxes again (ours stays). A
+  box with a car on it is skipped (`F1.AI.resetCar` moves the bot on).
+- Every physics step, right after our `car.update` (also while our car is held in its box): `stepBots` = the views
+  (ours first) and contexts (from `gp.entry`), `think` for each, then locked -> stand; in service -> held, its pit
+  updated, its lap clock running; `input.reset` -> `F1.AI.resetCar(car, track, idx, views, id)` + `lap.sync`; else
+  `car.update`. Contacts: `F1.AI.createContacts()` over [our car, bots] (solid = `gp.solid(id, id)`, not on the pit
+  asphalt, not in service, not locked); the host also resolves each bot against the remote solid cars and reports those
+  hits. Then each bot's pit (events -> `ai.onPit`) and lap counter (2 -> `gp.botLap(id, lap.last)`). On the frozen grid
+  `botsHeld` lets them think once per frame. 'botsGo' -> `lap.arm(idx)`, `lap.time = gp.sinceGo` (online minus the frame's
+  delay), as ours.
+- Per frame: their models (ghost rules as for remote cars), the minimap (dots in livery colours, ringed), the sound list;
+  the host publishes (`net.sendBotStates`, `net.sendLap(last, best, id)` on change, bot hits). Guests see bots as remote
+  cars with the AI badge (`net.players[i].bot`); 'botHit' applies the impulse to the bot's car with the same "already
+  applied" bookkeeping as our own hits.
+- Review r3: impact reports go out one per reporting car per `HIT_SEND_MS` (50 ms) tick, the longest owed first, kept for
+  `HIT_MEMORY_MS` (400 ms) (MP-3: a second one in the same tick used to be lost); a rejected bot lap -> toast
+  電腦車手 <name> 的一圈沒有被採計… at most once per 8 s (MP-6); bot roster rows are not announced as players joining /
+  leaving: a guest gets one count toast 房間的電腦車手：N 位 / 無 when their number changes (FLOW-2).
+- `F1.game` gains `bots` (`{id, name, spec, car, ai, pit, lap, model, ctx, ...}`), `botCfg`, `botViews` (the views think()
+  sees, ours first; empty without bots) and `botCost(reset) -> {frames, mean, max}` (main-thread ms per frame on the bots).
+- Known limits: while the host has the menu open his bots stand still for everybody (keepalive parks them); bot ownership
+  is not transferred on host migration; js/car.js has no slipstream, so passing between cars 1..2 % apart stays rarer than
+  in real racing.
+
+## Review round 3 (2026-10-02): what changed in the contract
+
+Findings by area (30 confirmed of 39; the rest refuted by a second agent). The ones that touch an interface are folded into
+the sections above; this list says where:
+- AI-1 live pit limit, AI-2 full-id memories, AI-3 pressing / passing, AI-4 `view.prog` NaN outside the race, AI-5 concede
+  only to a human seen to be quicker, AI-6 wrong-way swerve: js/ai.js (v7 section).
+- FLOW-1 season change during a pit visit waits (`syncPitYear` / `pitRebind`), FLOW-2 bot count toast, FLOW-3 search
+  forms (`ui.searchTracks`), FLOW-4 V after a mirror failure (`#hud.mirrors-na`).
+- MP-1 snap row ids (js/net.js), MP-2 the bots' owner leaving no longer ends the session (net/server.js), MP-3 deferred hit
+  reports, MP-6 bot lap rejection toast.
+- PRES-1 gantry lamps (`scenery.setStartLights`), PRES-2 tunnel impulse response reuse / priming (`audio.setTunnel`).
+- PKG-2 the warm-up behind the loading note (`ui.setLoading(name, title)`), PKG-3 the credits' links open in the user's
+  browser in the exe (`electron-main.js`: https links to github.com, creativecommons.org and www.openstreetmap.org only;
+  every other navigation / window is still denied), PKG-5 exe-smoke cleanup.
+- W1 Silverstone's line at the Wing's start line, W2 the six new elevation sources credited in 設定 → 資料來源與授權, W4
+  Baku's range 26.8 m, W5 Suzuka's bridge verge, W6 Toscana labelled a photogrammetric DSM, W7 test/track.test.js.
+- DRV-1 / W3 / MP-5 / AI-9: this document (v6.1 / v6.2 / v7 sections). DRV-2 (the calibration driver under-drives 2026 in
+  slow corners by ~0.47 %) is documented in docs/seasons-data.md, not changed.

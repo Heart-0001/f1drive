@@ -89,6 +89,7 @@
   var BRIDGE_DECK_T = 0.9;   // deck thickness under the road surface (clearance = separation - this)
   var BRIDGE_GAP = 0.6;      // the deck is drawn where the terrain is more than this below the road
   var ABUT_GAP = 0.6, ABUT_T = 1.0;   // abutment walls: this far behind the lower road's walls, this thick
+  var WING_SLOPE = 1.5;      // through the deck range the upper road's verge falls at most 1 in this (an embankment)
 
   // ---- narrow stretches (trackData.widthOverrides: Baku's castle section): road half width capped, walls moved in
   var WIDTH_RAMP = 40;       // m over which the road widens back to normal past each end (< 0.35 m per 2 m sample)
@@ -1422,6 +1423,42 @@
           prev = cur;
         }
       }
+      // The upper road's verge (skirt) through the deck range: the lower road's corridor squeezes it to nothing there, so
+      // it hung from the deck edge straight down to the cutting floor, a green curtain across the lower road and beside
+      // it (review r3 W5). Over the lower road, out to the back of its abutments, it now stays at the deck's underside
+      // (the opening is clear); elsewhere it falls at most 1:WING_SLOPE from there, and where that leaves its outer edge
+      // above its old foot a concrete wing wall closes the gap down to it.
+      function overLower(x, z) {         // 0: clear of the lower road, 1: over its abutments (and the gap), 2: over its corridor
+        var best = -1, bd = Infinity;
+        for (var qq = -CROSS_ZONE; qq <= CROSS_ZONE; qq++) {
+          var s = (B.lo + qq + N) % N, ex = px[s] - x, ez = pz[s] - z, dd = ex * ex + ez * ez;
+          if (dd < bd) { bd = dd; best = s; }
+        }
+        var dl = (x - px[best]) * nx[best] + (z - pz[best]) * nz[best], al = (x - px[best]) * tx[best] + (z - pz[best]) * tz[best];
+        var wo = wallOuter[dl > 0 ? 1 : 0][best];
+        if (Math.abs(al) > ds || Math.abs(dl) >= wo + ABUT_GAP + ABUT_T) return 0;
+        return Math.abs(dl) < wo ? 2 : 1;
+      }
+      var wing = 0;
+      for (sd = 0; sd < 2; sd++) {
+        var last = null;
+        for (q = R[0]; q <= R[1]; q++) {
+          u = (B.up + q + N) % N;
+          var hD = skH[sd][u * SK_ROWS] - T, cell = null;
+          for (var kr = 1; kr < SK_ROWS; kr++) {
+            var gv = (gridVerts + sd * N * SK_ROWS + u * SK_ROWS + kr) * 3, old = gPos[gv + 1];
+            var zone = overLower(gPos[gv], gPos[gv + 2]), want = zone ? hD : hD - skU[sd][u] * SK_F[kr] / WING_SLOPE;
+            if (want > old) gPos[gv + 1] = skH[sd][u * SK_ROWS + kr] = want;
+            if (kr === SK_ROWS - 1) cell = want > old + 0.05 ? { x: gPos[gv], z: gPos[gv + 2], top: want, foot: old, zone: zone } : null;
+          }
+          // a wall runs up to an abutment, never over the opening or the lower road's corridor
+          if (cell && last && !(cell.zone && last.zone) && cell.zone < 2 && last.zone < 2) {
+            quad(wallBuf, [last.x, last.foot, last.z], [cell.x, cell.foot, cell.z], [last.x, last.top, last.z], [cell.x, cell.top, cell.z], C_ABUT);
+            wing++;
+          }
+          last = cell;
+        }
+      }
       var minClear = Infinity;              // lowest deck underside above the lower road's surface (car's path)
       for (q = -CROSS_ZONE; q <= CROSS_ZONE; q++) {
         u = (B.lo + q + N) % N;
@@ -1431,7 +1468,8 @@
         }
       }
       bridgeOut.push({ up: B.up, lo: B.lo, separation: py[B.up] - py[B.lo], deckFrom: (B.up + R[0] + N) % N,
-        deckTo: (B.up + R[1] + N) % N, deckLength: (R[1] - R[0]) * ds, clearance: minClear, abutmentSegments: abut });
+        deckTo: (B.up + R[1] + N) % N, deckLength: (R[1] - R[0]) * ds, clearance: minClear, abutmentSegments: abut,
+        wingSegments: wing });
     })(bridges[bI]);
 
     // --- meshes

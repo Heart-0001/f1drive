@@ -64,10 +64,11 @@
 - Mugello：改用托斯卡尼 1 m 地表模型，取 25 m 中位數。
 - Monza：改用 TINITALY 10 m，再手動加入舊傾斜彎下方約 5 m 的低窪。
 - Miami：移出平坦賽道清單，改用 USGS 光達。
+- Baku：沒有開放 DTM（GLO-30 未對亞塞拜然發布，GLO-90／SRTM／ASTER 都是含建築的地表模型），高程依 formula1.com 公布的 26.8 m 縮放（×0.777，形狀不變；review r3 W4）。
 - Interlagos、Sepang、Portimão：改用 Copernicus GLO-30。這些地方沒有開放光達，GLO-30 已和 SRTM 交叉比對。Sepang 要取貼近路面的低值包絡；Portimão 套用後要確認上坡不超過約 7 %。
 
 **起跑線（START_AT）**：
-- Silverstone：移到 Wing 的計時線，pitSide 設為 -1。
+- Silverstone：移到 Wing 的起跑線（OSM 13036050130；計時線在它前面 151 m，發車格在兩線之間的直道上，review r3 W1），pitSide 設為 -1。
 - Hungaroring：往後移 240 m。
 - Sepang：往後移 302 m（OSM 有標示節點，影像上也看得到發車格）。
 - Shanghai：往後移約 210 m（依影像判斷）。

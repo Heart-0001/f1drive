@@ -1,5 +1,6 @@
 // devtests/audio-test/control-test.js - the control layer of js/audio.js in plain node (no Web Audio: the module runs
-// its per-frame logic and reports through .debug). Deterministic, fast.   node devtests/audio-test/control-test.js
+// its per-frame logic and reports through .debug; part 6 gives it a fake offline context to watch the tunnel reverb's
+// graph). Deterministic, fast.   node devtests/audio-test/control-test.js
 'use strict';
 const path = require('path');
 let fails = 0, n = 0;
@@ -97,5 +98,99 @@ let threw = false;
 try { a.update(0, { speed: NaN, rpm: 'x', gear: {}, throttle: Infinity }, null, [{ x: NaN }, null, 5]); a.update(1e9, me, L, many); a.update(-1, undefined, undefined, undefined); } catch (e) { threw = true; }
 check('dt 0 / 1e9 / -1, NaN and junk fields: nothing thrown, nothing caught (' + a.debug.errors + ')', !threw && a.debug.errors === 0);
 
-console.log('\n' + (n - fails) + ' / ' + n + ' checks passed');
-process.exit(fails ? 1 : 0);
+// 6. tunnel reverb (review r3 PRES-2): the impulse response is made once per size class, not at every stretch of a
+//    slightly other size (Monaco: Portier 23.5 m, the tunnel 25 m; each new one costs 10-20 ms on the main thread).
+//    A fake offline context (plain nodes back end) records the graph; F1.tunnelImpulse is a stub that counts calls.
+function fakeContext() {
+  const made = { convolvers: [], bufferSets: 0 };
+  const param = v => ({ value: v, setTargetAtTime() {}, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {},
+    cancelScheduledValues() {}, cancelAndHoldAtTime() {} });
+  function node(kind, params) {
+    const o = { kind, ins: new Set(), outs: new Set(), start() {}, stop() {}, setPeriodicWave() {} };
+    o.connect = d => { o.outs.add(d); if (d && d.ins) d.ins.add(o); return d; };
+    o.disconnect = d => {
+      if (d === undefined) { for (const x of o.outs) if (x && x.ins) x.ins.delete(o); o.outs.clear(); return; }
+      if (!o.outs.has(d)) throw new Error('InvalidAccessError: not connected');
+      o.outs.delete(d); if (d.ins) d.ins.delete(o);
+    };
+    for (const p of params || []) o[p] = param(0);
+    return o;
+  }
+  const ctx = {
+    sampleRate: 48000, currentTime: 0, state: 'running', destination: node('destination'),
+    startRendering() {}, resume() { return Promise.resolve(); }, suspend() { return Promise.resolve(); },
+    createGain: () => node('gain', ['gain']),
+    createBiquadFilter: () => node('biquad', ['frequency', 'Q', 'gain', 'detune']),
+    createDynamicsCompressor: () => node('compressor', ['threshold', 'knee', 'ratio', 'attack', 'release']),
+    createWaveShaper: () => node('shaper'),
+    createOscillator: () => node('oscillator', ['frequency', 'detune']),
+    createBufferSource: () => node('source', ['playbackRate', 'detune']),
+    createStereoPanner: () => node('panner', ['pan']),
+    createPeriodicWave: () => ({}),
+    createBuffer: (ch, len, sr) => { const d = []; for (let c = 0; c < ch; c++) d.push(new Float32Array(len)); return { numberOfChannels: ch, length: len, sampleRate: sr, getChannelData: c => d[c] }; },
+    createConvolver: () => {
+      const o = node('convolver'); let buf = null;
+      Object.defineProperty(o, 'buffer', { get: () => buf, set: b => { buf = b; made.bufferSets++; } });
+      made.convolvers.push(o); return o;
+    }
+  };
+  return { ctx, made };
+}
+function irStub(log, fail) {
+  return function (sr, o) { log.push([o.width, o.height]); if (fail) throw new Error('no impulse'); const n = 64, l = new Float32Array(n), r = new Float32Array(n); l[0] = r[0] = 1; return { sampleRate: sr, left: l, right: r }; };
+}
+async function tunnelRig(fail) {
+  const log = [], F = load({ tunnelImpulse: irStub(log, fail) }), fk = fakeContext();
+  const au = F.createAudio({ context: fk.ctx, worklet: false });
+  const ok = await au.init();
+  au.setActive(true);
+  const conv = fk.made.convolvers[0], st = { speed: 50, x: 0, y: 0, z: 0, heading: 0 }, LL = { x: 0, y: 0.7, z: 0, heading: 0 };
+  // as js/main.js does: k every frame, the stretch's size only while k > 0
+  const frames = (sec, k, w, h) => { for (let i = 0; i < Math.round(sec * 60); i++) { if (k > 0 && w) au.setTunnel(k, w, h); else au.setTunnel(k); au.update(1 / 60, st, LL, []); } };
+  return { au, ok, conv, log, fk, frames, fed: () => conv.ins.size > 0 };
+}
+// one lap of Monaco as the critic log shows it: Portier (k up to ~0.2), 2.5 s on (more than T.tunOff), the tunnel (k 1)
+function monacoLap(r) { r.frames(10, 0); r.frames(0.4, 0.2, 23.5, 6.8); r.frames(2.5, 0); r.frames(1, 0.5, 25, 6.8); r.frames(5, 1, 25, 6.8); r.frames(30, 0); }
+(async () => {
+  let r = await tunnelRig();
+  check('fake context: graph built on the plain nodes back end, one convolver', r.ok === true && r.au.debug.backend === 'nodes' && !!r.conv);
+  r.frames(5, 0);
+  check('no tunnel asked: no impulse response made, the reverb not fed', r.au.debug.reverbBuilds === 0 && r.log.length === 0 && !r.fed());
+  r.frames(0.4, 0.2, 23.5, 6.8);
+  check('Portier (23.5 m): the impulse made for its size, the reverb fed', r.au.debug.reverbBuilds === 1 && r.log[0][0] === 23.5 && r.fed() && r.au.debug.reverb === true);
+  r.frames(2.5, 0);
+  check('2.5 s after it: the reverb disconnected again', !r.fed() && r.au.debug.reverb === false);
+  r.frames(6, 1, 25, 6.8);
+  check('the tunnel (25 m, 1.5 m wider): the same impulse kept (builds ' + r.au.debug.reverbBuilds + ', buffer sets ' + r.fk.made.bufferSets + '), fed', r.au.debug.reverbBuilds === 1 && r.fk.made.bufferSets === 1 && r.fed());
+  r.frames(30, 0);
+  for (let lap = 0; lap < 3; lap++) monacoLap(r);
+  check('three more Monaco laps: still one impulse response in all (builds ' + r.au.debug.reverbBuilds + ', sizes ' + JSON.stringify(r.log) + ')', r.au.debug.reverbBuilds === 1 && r.log.length === 1 && r.fk.made.bufferSets === 1);
+  // Singapore: soffits 4.5 m / 5 m
+  r = await tunnelRig();
+  for (let lap = 0; lap < 3; lap++) { r.frames(10, 0); r.frames(0.5, 0.3, 25, 4.5); r.frames(5, 0); r.frames(1, 0.6, 25, 5); r.frames(20, 0); }
+  check('Singapore (soffits 4.5 / 5 m), three laps: one impulse response (builds ' + r.au.debug.reverbBuilds + ')', r.au.debug.reverbBuilds === 1);
+  // a clearly other size (another track: Abu Dhabi's 9 m soffit): made anew at its portal
+  r.frames(1, 0.5, 25, 9);
+  check('a clearly other size (25 x 9 after 25 x 5): made anew (builds ' + r.au.debug.reverbBuilds + ', last ' + JSON.stringify(r.log[r.log.length - 1]) + ')', r.au.debug.reverbBuilds === 2 && r.log[1][1] === 9 && r.fed());
+  r.frames(1, 0.5, 45, 9);
+  check('a much wider stretch (45 m) asked for while the reverb sounds: not made yet (no swap mid-tunnel)', r.au.debug.reverbBuilds === 2);
+  r.frames(1, 0);
+  check('... 1 s after it (k 0, the wet gain long at 0): made for 45 m while still connected', r.au.debug.reverbBuilds === 3 && r.log[2][0] === 45 && r.fed());
+  r.frames(2, 0);
+  check('... and disconnected after T.tunOff', !r.fed());
+  // primed at track load: setTunnel(0, w, h) -> made at the next update(), silently; the laps then make none
+  r = await tunnelRig();
+  r.au.setTunnel(0, 25, 6.8); r.au.update(1 / 60, { speed: 0 }, { x: 0, y: 0, z: 0 }, []);
+  check('setTunnel(0, 25, 6.8) at track load: made at the next update(), the reverb not fed (k 0)', r.au.debug.reverbBuilds === 1 && !r.fed() && r.au.debug.reverb === false && r.au.debug.tunnel === 0);
+  for (let lap = 0; lap < 3; lap++) monacoLap(r);
+  check('primed, three Monaco laps: no impulse response made while driving (builds ' + r.au.debug.reverbBuilds + ')', r.au.debug.reverbBuilds === 1 && r.log.length === 1);
+  // F1.tunnelImpulse throwing: one attempt per size, not one per frame
+  r = await tunnelRig(true);
+  const warn = console.warn; console.warn = () => {};          // (the module warns once: expected here)
+  r.au.setTunnel(0, 25, 6.8); r.frames(5, 0);
+  console.warn = warn;
+  check('F1.tunnelImpulse throws: one attempt (' + r.log.length + '), one error (' + r.au.debug.errors + '), no reverb', r.log.length === 1 && r.au.debug.errors === 1 && !r.fed());
+
+  console.log('\n' + (n - fails) + ' / ' + n + ' checks passed');
+  process.exit(fails ? 1 : 0);
+})().catch(e => { console.error(e); process.exit(1); });

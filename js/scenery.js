@@ -380,13 +380,15 @@
       g.fillStyle = '#f4f4f2'; g.font = 'bold 56px Arial, Helvetica, sans-serif';
       g.fillText(nums[i], i * 112 + 56, 460, 92);
     }
+    // the start lights panel: every lamp unlit (dark red glass); the lit ones are the gantry's own lamp mesh, switched by
+    // setStartLights (review r3 PRES-1: painted lit, all ten glowed in practice and after lights out)
     g.fillStyle = '#0c0d0f'; g.fillRect(336, 400, 176, 112);
     for (i = 0; i < 5; i++) {
       for (var r = 0; r < 2; r++) {
-        var gx = 336 + 22 + i * 33, gy = 432 + r * 46;
-        var rg = g.createRadialGradient(gx, gy, 2, gx, gy, 15);
-        rg.addColorStop(0, '#ff6a5a'); rg.addColorStop(0.55, '#e01010'); rg.addColorStop(1, 'rgba(90,0,0,0)');
-        g.fillStyle = rg; g.beginPath(); g.arc(gx, gy, 15, 0, Math.PI * 2); g.fill();
+        var gx = LAMP_X0 + i * LAMP_DX, gy = LAMP_Y0 + r * LAMP_DY;
+        var rg = g.createRadialGradient(gx, gy, 2, gx, gy, LAMP_R);
+        rg.addColorStop(0, '#4a1a16'); rg.addColorStop(0.55, '#2a0c0a'); rg.addColorStop(0.8, '#3a3c40'); rg.addColorStop(1, 'rgba(12,13,15,0)');
+        g.fillStyle = rg; g.beginPath(); g.arc(gx, gy, LAMP_R, 0, Math.PI * 2); g.fill();
       }
     }
     return makeTexture(THREE, c, false, false);
@@ -395,6 +397,8 @@
   function bannerUV(i) { return [0.004, 1 - (i * 80 + 78) / 512, 0.996, 1 - (i * 80 + 2) / 512]; }
   function numberUV(i) { return [(i * 112 + 2) / 512, 1 - 510 / 512, (i * 112 + 110) / 512, 1 - 402 / 512]; }
   var LIGHTS_UV = [338 / 512, 1 - 510 / 512, 510 / 512, 1 - 402 / 512];
+  // its lamps (atlas px): 5 columns (the driver's left first) of 2, centres LAMP_X0 + c * LAMP_DX, LAMP_Y0 + r * LAMP_DY
+  var LAMP_X0 = 358, LAMP_DX = 33, LAMP_Y0 = 432, LAMP_DY = 46, LAMP_R = 15, LAMP_LIT_R = 10, LAMP_SEGS = 12;
 
   // debris fence: 4 m wide panel with a post, clamped vertically
   function texFence(THREE) {
@@ -940,6 +944,7 @@
     var solid = new Buf(false), patch = new Buf(false);
     var masonry = new Buf(true), glass = new Buf(true), pitB = new Buf(true), crowd = new Buf(true);
     var signs = new Buf(true), fence = new Buf(true);
+    var lamps = new Buf(false);       // the start gantry's lit lamps, column by column (setStartLights: a draw range)
     var phases = {}, tPhase = now();
     function mark(name) { var t = now(); phases[name] = Math.round((t - tPhase) * 10) / 10; tPhase = t; }
     mark('setup');
@@ -1472,6 +1477,23 @@
       var mid = (dP - dN) / 2 - (dP - dN) / 2;   // beam centre is already the mid point of the legs
       var cen = (dN - dP) / 2;                   // lateral position of the road centre relative to the beam centre
       face(cen + 1.3 + mid, cen - 1.3 + mid, LIGHTS_UV);
+      // the lit lamps over the panel's unlit ones (just in front of it, facing the cars), column by column from the
+      // driver's left: a lamp = an ellipse (the atlas is stretched on the face) bright in the middle, red at the rim
+      var l0 = cen + 1.3 + mid, l1 = cen - 1.3 + mid, lx = mx - tx * 0.5, lz = mz - tz * 0.5;
+      var sx = (l1 - l0) / (LIGHTS_UV[2] - LIGHTS_UV[0]) / 512, sy = (yt - yb - 0.16) / (LIGHTS_UV[3] - LIGHTS_UV[1]) / 512;
+      var LIT_IN = [1, 0.62, 0.52], LIT_RIM = [0.95, 0.08, 0.05];
+      for (var lc = 0; lc < 5; lc++) {
+        for (var lr = 0; lr < 2; lr++) {
+          var ll = l0 + (LAMP_X0 + lc * LAMP_DX - LIGHTS_UV[0] * 512) * sx;
+          var ly = yb + 0.08 + ((1 - LIGHTS_UV[1]) * 512 - (LAMP_Y0 + lr * LAMP_DY)) * sy;
+          var cx = lx + NX[g] * ll, cz = lz + NZ[g] * ll, rim = [];
+          for (var k = 0; k <= LAMP_SEGS; k++) {     // the ellipse, anticlockwise as the drivers see it (from its right)
+            var an = 2 * Math.PI * k / LAMP_SEGS, dl = Math.cos(an) * LAMP_LIT_R * sx;
+            rim.push([cx + NX[g] * dl, ly + Math.sin(an) * LAMP_LIT_R * sy, cz + NZ[g] * dl]);
+          }
+          for (k = 0; k < LAMP_SEGS; k++) tri(lamps, [cx, ly, cz], rim[k], rim[k + 1], LIT_IN, LIT_RIM, LIT_RIM);
+        }
+      }
       var bi = Math.floor(rnd() * BANNERS.length);
       if (halfSpan - 0.4 - (cen + 1.5) > 3) face(halfSpan - 0.4, cen + 1.5, bannerUV(bi));
       if ((cen - 1.5) - (-halfSpan + 0.4) > 3) face(cen - 1.5, -halfSpan + 0.4, bannerUV((bi + 2) % BANNERS.length));
@@ -2081,6 +2103,10 @@
       var st = texSigns(THREE);
       makeMesh('scenery-signs', signs, st ? lam({ map: st }) : lam({ color: 0x9a3030 }));
     }
+    // the start gantry's lit lamps: hidden until setStartLights lights a column (a draw range over columns 1..n)
+    var lampMesh = lamps.tris ? makeMesh('scenery-start-lights', lamps, new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false })) : null;
+    var lampCol = lamps.tris / 5, litCols = 0;   // triangles per column
+    if (lampMesh) { lampMesh.visible = false; lampMesh.geometry.setDrawRange(0, 0); }
     if (fence.tris) {
       var ft = texFence(THREE);
       makeMesh('scenery-fence', fence, ft ?
@@ -2134,10 +2160,20 @@
       if (group.parent) group.parent.remove(group);
     }
 
+    // The start gantry's lamps, with the values the HUD's lights get (ui.setLights): n = -1 (no start) or go (lights
+    // out) -> all dark; 0..5 -> that many columns lit, from the driver's left. Cheap to call every frame.
+    function setStartLights(n, go) {
+      n = go || !(n > 0) ? 0 : Math.min(5, Math.floor(n));
+      if (n === litCols || !lampMesh) return;
+      litCols = n;
+      lampMesh.visible = n > 0;
+      lampMesh.geometry.setDrawRange(0, n * lampCol * 3);
+    }
+
     mark('meshes');
     stats.phases = phases;
     stats.buildMs = now() - tStart;
-    var result = { group: group, dispose: dispose, stats: stats };
+    var result = { group: group, dispose: dispose, stats: stats, setStartLights: setStartLights };
     if (DEBUG) result.debug = { footprints: foot, clear: CLEAR };
     return result;
   };

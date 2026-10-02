@@ -31,10 +31,10 @@ needed are granted. Do not wait for the user; decide sensible defaults and recor
 | F | seasons builder: `js/seasons-data.js` + `js/cars.js` from C + D, era physics calibrated against the pace index with the real car model; `raceline.js` takes perf (after E's car.js, C, D) | workflow / agent | DONE ~04:40: js/seasons-data.js (17 seasons, 180 cars + standard per season), js/cars.js (Map lookups, sanitised to car.js ranges), tools/build-cars.mjs (deterministic, --check), raceline perf; calibrated on all 40 circuits, champions fastest or 2nd, rank correlation 0.95..1.00; 9 node suites green. Limits: circuit-to-circuit scatter ~1 %, 2026 ERS speed taper not modelled. Report: scratchpad seasons-report.txt |
 | G | main.js + electron-main.js glue, Electron smoke of every feature | workflow f1drive-v6-glue (wf_7f774cc7-65a): glue agent, then an integration critic | DONE ~06:20: glue (v6-smoke 129/129, app-check 7/7) + critic (v6-critic 83/83; 9 defects fixed incl. the J0 leftovers setHalo / syncMute / bump, puncture + pit-exit toasts, rev in neutral while held, readable hint chips); all suites green. Open: box 1 inside the exit curtain at Las Vegas / Monaco (added to stage H fix) |
 | H | end-to-end: update `devtests/gp-e2e` (solo + online) for v6, new pit / tyre / year scenarios, fix loop | workflow f1drive-v6-e2e (wf_f1d4d7c9-b43) | DONE ~10:40: solo 588/588, solo-v6 295/295 (2012 KERS + 2026 ERS, wear x5, one-stop races, speeding penalty), online 141/141, online-v6 65/65 (password room, 2014, three cars in the lane at once), v6-smoke 129/129, gp-smoke 197/197, ui 117 + 124, mp-e2e 30/30, all node + devtests suites; fixed: box vs curtain clearance (PIT_BOX_MARGIN 12 m; Monaco entry 14 m after the line), Monaco gantry vs curtain, refused lap shown as best lap, car card name wrap; harness windows proven silent (Windows mixer, 49 min) |
-| I | `npm run dist`, launch the exe, smoke it (remote-debugging port), screenshots | orchestrator | not started |
+| I | `npm run dist`, launch the exe, smoke it (remote-debugging port), screenshots | orchestrator | done per release from clean worktrees (v6.1 18/18, v6.2 18/18, v7.0 22/22, see "GitHub release"); the round 3 build is still to do (see "Remaining steps" at the end) |
 | J0 | EARLY Fable review pass 1 of the stable modules (multiplayer / driving model / world + visual spot-check of 12 unvisited tracks / sound + graphics), each finding verified by an independent Opus agent; NO fixes in the run | workflow `f1drive-fable-review-1` (wf_83c1d2a6-190), launched ~03:30 in parallel with F | multiplayer / driving / media verified (15 real, mostly minor; scratchpad j0-confirmed.json); their fixes run in workflow f1drive-j0-fixes (wf_2d87efd2-7fc) since ~04:45 in parallel with G (disjoint files); world verified ~05:00: 5 real (banking synthetic — no real banked corners; COTA / Monaco / Las Vegas elevation; pit-building texture stacked; kerb paint on the pit taper; groundY beside the pit) -> workflow f1drive-world-fixes (wf_24e3e0cc-046): track data + track.js, scenery.js, then RE-CALIBRATION of the seasons data (track change invalidates it) |
 | J | Fable review (independent: code + requirements, not conclusions; scope = everything since v1 incl. v6; visual spot-check of scenery on tracks nobody looked at; multiplayer protocol hardening) -> adversarial verification -> fixes by file owners -> all suites -> final `npm run dist` | workflow (reviewers `model: 'fable'`) | DONE ~13:50: workflow f1drive-fable-final (wf_64daa6f3-2d9): 34 confirmed findings fixed (pit-lane R / speeding exit-line hold, ERS traction-limited + 2026 fade, recalibration WITH the battery, Monaco start / grid / pit on the harbour straight via OSM start-finish node, Zandvoort pit 80, Singapore 60, CSP, crash handling, icon, Electron 44.5.1); re-run all green on Electron 44 (11 node suites, v6-smoke 133, critic 85, gp-smoke 197, ui 117 + 124, solo 588, solo-v6 295, online 141, online-v6 65, mp-e2e 30, track / pit / scenery / audio). Committed locally e02cf43 |
-| K | docs: `CLAUDE.md` state section, `docs/claude-memory/`, README contract notes, `devtests/README.md` | orchestrator | not started |
+| K | docs: `CLAUDE.md` state section, `docs/claude-memory/`, README contract notes, `devtests/README.md` | orchestrator | DONE 2026-10-02 (docs stage of review round 3): contract v6.1 / v6.2 / v7 / r3 sections, every harness in devtests/README.md, this file, CLAUDE.md |
 
 Stage E's workflow script is already written: `%TEMP%\claude\C--Users-Heart-Desktop-f1Drive\c2c193e6-e2b5-4b48-8955-beed8746e07e\scratchpad\wf-v6-modules.js`
 (launch with `Workflow({scriptPath, args: {audioReady: <true once stage B has finished>}})`; when `audioReady` is false the
@@ -182,9 +182,9 @@ The user asked: keep working on your own until it is finished. Keep-awake restar
 3. Track audit DONE ~18:50 (docs/track-audit.md, tools/track-audit.json: 33 major findings, 32 fully + 1 partly confirmed — e.g. Spa Raidillon only 3-5 % in the game vs 15 % real (GLO-90 + tree canopy), 6 phantom scenery bridges over the road, Silverstone start / pits on the pre-2011 straight, start lines off at Hungaroring / Sepang / Shanghai, Albert Park / Estoril / Madring geometry, Baku castle width, Suzuka crossover levelled flat, derived banking up to 6 deg everywhere). v6.2 integration DONE ~23:00 (run wf_6d7b5834-24a; all reports docs/agent-runs/2026-10-01/reports/v62-reports.txt): critic found no defect in the v6.2 features (Monaco hairpin 14/14 runs keys + pad at 20-50 km/h, tunnel light + reverb, Raidillon reads as a climb, banking +34 / +39 km/h vs flat, Suzuka bridge both roads, Silverstone Wing, 26 searches, pad compound prompt, FOV, pit limits by season); all 12 node suites, build-cars --check, every node devtest and all 25 Electron harnesses green. Open: Raidillon taken at 222-250 km/h (real ~300, physics unchanged); docs rows for the new harnesses (docs stage).1 critic has finished. v6.2 integration workflow: steering law (Monaco hairpin drivable, Zandvoort / Madring banking felt), slope / banking presentation (perception findings), Monaco tunnel (js/tunnels.js + lighting + reverb), visible pad compound choice (pit-lane prompt, telemetry / pit strip, GP starting compound), Chinese names + country search on the cards, the verified track-data corrections (tools/track-audit.json via tools/build-tracks.mjs), recalibration (~22 min), harness updates; then a player-eyes critic.
 - v6.2 stage 1 DONE ~21:20: steering law + cues + Suzuka height-aware locate + tunnel reverb (physics); Spa Wallonia lidar CC-BY 4.0 (Raidillon +14.2 % / 50 m, range 102.1 m), IGN MDT05 Barcelona / Madring, Emilia-Romagna Imola, Tuscany Mugello, TINITALY Monza (+5 m dip), USGS Miami, GLO-30 Interlagos / Sepang / Portimao, START_AT Silverstone Wing / Hungaroring / Sepang / Shanghai, per-season pit limits (track); cockpit: head keeps 45 % roll / 50 % pitch, compression cue, FOV 60 (setFov 50..75), lens shift keeps the wheel display above the telemetry. Notes for AI integration: js/ai.js must pass the car height to locate (Suzuka bridge); Monaco hairpin grip with the 1.5 deg street bank cap to be checked by the critic.
 3b. AI computer drivers (user request ~16:35: "add computer players; in the room choose how many and how strong"; overrides v5's "no AI"): brain js/ai.js DONE ~21:40 (wf_ccc80dcc-32f author + critic; report docs/agent-runs/2026-10-01/reports/ai-report.txt: 4 levels +8 / +5 / +2.5 / +1 %, 42-race matrix 10 contacts, 40/40 circuits clean, think() ~2 us, alloc-free; critic fixed rear-ends, hidden stopped cars, stuck queues, pit-lane rubbing, tyre planner) -> integration script READY docs/agent-runs/2026-10-01/scripts/wf-ai-integrate.js, launched right AFTER the v6.2 run finishes (it shares main.js / ui.js / build-cars with v6.2) -> integration workflow after / with v6.2: offline (AI players in the local session, local car instances, carmodel liveries of that season, collisions), online (the HOST simulates the bots: server-side bot players owned by the host, batched bot states, bot laps through the proof-of-driving checks, host-leave behaviour), room / GP panel controls (count 0..16-humans, skill level), names from the season's drivers, end-to-end races with AI (solo + online).
-4. Fable review round 3 of everything changed since e02cf43 (independent; verify each finding; fixes by file group; full re-run).
-5. npm run dist; node devtests/exe-smoke/smoke-exe.js dist/win-unpacked/F1Drive.exe; read a few screenshots.
-6. Docs: CLAUDE.md state, README contract, devtests/README, docs/claude-memory; local commit (NO push).
+4. Fable review round 3 of everything changed since e02cf43 (independent; verify each finding; fixes by file group; full re-run). DONE 2026-10-02: see "Fable review round 3 — outcome" at the end.
+5. npm run dist; node devtests/exe-smoke/smoke-exe.js dist/win-unpacked/F1Drive.exe; read a few screenshots. (v6.1, v6.2, v7.0 done; the round 3 build: TODO)
+6. Docs: CLAUDE.md state, README contract, devtests/README, docs/claude-memory; local commit (NO push). Docs DONE 2026-10-02; since 10-01 ~22:00 the user wants verified rounds pushed and released (see "GitHub release"): commit, push, release TODO.
 If the usage limit stops the agents: stop everything cleanly, record the exact state here and in CLAUDE.md, commit WIP locally, and wait.
 
 ## Watchdog (asked for by the user)
@@ -217,6 +217,130 @@ If the usage limit stops the agents: stop everything cleanly, record the exact s
 - User 10-01 ~22:15 played v6.1 Suzuka: the crossover is a flat crossroads (known: audit finding, fixed in v6.2 as a real bridge, 6.22 m apart, 5.18 m clearance). Decision: as soon as the v6.2 critic + full re-run is green -> commit, build from a clean worktree, exe smoke, push, release v6.2 (prerelease) BEFORE starting the AI integration, so the user can play the fixes now.
 - DONE ~22:40: v6.2 committed dd08276, pushed, release v6.2 (prerelease) with F1Drive-v6.2.exe (clean worktree build, exe smoke 18/18, Chinese names in the packaged menu). https://github.com/Heart-0001/f1drive/releases/tag/v6.2
 - AI integration decisions (owners + glue, ~01:00): bots set by the host (bots {n, skill, list}), owned by the host connection, laps via gl with id, no gone message on removal, +4 msg/s per owned bot; offline gp assigns ids 2..16 and republishes standings every 500 ms; drivers = the 2 with most starts in that car (Latin names), standard car Alex Rowan / Sam Ellery (never used by bots); defaults 0 bots, level 職業; with bots offline the player starts in grid box 1 (also qualifying); bots return to their boxes after a session; lineup seed = season year; bots keep the first racing line; AI warm-up at load only with bots (Monaco load 846 ms vs 328); 15 bots = +0.6 ms per frame, 60 fps at Monaco / Spa. Known: a bot behind a player parked on pole in free practice waits up to ~16 s at Monaco before going round.
+- DONE ~04:20: v7.0 committed 766a0e1, clean worktree build, exe smoke 22/22 (new v7 checks: 5 bots from the 大獎賽 tab, grid, race start, standings), pushed, release v7.0 (prerelease) https://github.com/Heart-0001/f1drive/releases/tag/v7.0. Fable round 3 RUNNING since ~04:25 (run wf_07a7593a-444, script wf-fable-r3.js; the usage limit hit ~05:30 and reset ~06:10: the world reviewer was restarted by the workflow, the scratch of its first attempt is in devtests/review-r3/world/; 6 areas reviewed + verified before that: 32 findings, 23 confirmed, none critical); all 7 areas done ~06:45: 30 confirmed (7 major: bots keep a stale pit limit after a season change, AI per-car memory keyed by id & 63 collides in rooms, faster bots cannot pass slower ones (trains), js/net.js __proto__ snap row from a hostile server, Silverstone grid wraps round Club, missing attribution of the 6 new elevation sources, + minors / cosmetics incl. the static red gantry lamps, external links dead in the exe, README contract gaps) -> fixers DONE ~07:30 (media: tunnel IR cached per size; world: Silverstone loop from the Wing line node 13036050130 (16 boxes on the straight, pit right side 80), Baku range scaled to 26.8 m, Toscana labelled photogrammetric DSM, Suzuka verge under the deck, gantry lamps dark + a lamp mesh API; ui: 9 fixes incl. pit limit on a season change in the lane, bot join toasts, X站 / X大獎賽 search, credits for the new elevation sources, bot impulses deferred, bot lap rejection; net: __proto__ snap rows dropped, dedicated server: the bots leave as DNF and the race goes on, credit links open in the browser (https allow-list); ai: live pit limit, full-id memories, passing reworked, concede only to faster humans, wrong-way handling). Re-run DONE ~09:00: recalibrated (17 seasons within 0.03 %, team order unchanged), AI PACE kept (7.95 / 4.98 / 2.50 / 0.97 %), gantry lamps + tunnel IR priming hooked into main.js, bots.js ram / host parts updated, every suite and harness green (review/escape.js 203 = pre-existing v1 script counting pit lanes); bots do not press while a stop is planned. OPEN trade-off: pressing a slower car into Monza T1 braking zone on lap 1 bumps in ~1 run in 5 (0.16-0.20) -> follow-up workflow docs/agent-runs/2026-10-01/scripts/wf-ai-press.js after the docs stage, then dist / smoke / commit / push / release. (Earlier note) Cross-file leftovers to check after the re-run: main.js hookup of the gantry lamps (scenery setStartLights) and of the tunnel IR priming (audio.setTunnel(0, w, h)), devtests/gp-e2e/bots.js host part (new dedicated-server rule) and ram part (times out with the new AI); afterwards: dist from a clean worktree, exe smoke, commit, push, release (final v7.x).
 - Plan after the AI critic: commit, clean build + exe smoke, push, release v7.0 preview (AI drivers) so the user can play it; then Fable round 3 (docs/agent-runs/2026-10-01/scripts/wf-fable-r3.js: 7 Fable reviewers flow / ai / multiplayer / driving / world / media / product, verifiers, fixers by file group, re-run, docs) -> dist + exe smoke -> commit, push, release.
-- AI integration DONE ~03:30 (run wf_76c677c2-d76; reports docs/agent-runs/2026-10-01/reports/ai-integrate-reports.txt): new harness gp-e2e/bots.js 193/193 (Monza + Monaco 15 mixed bots, online host + guest + 6 bots, Suzuka bridge, pit lane with 16 cars, blue flags, host leaving), all 82 suite / harness runs green. Net decisions: host leaving removes his bots (quali / grid -> free, race -> results with bots DNF); a human joining a full room in free practice takes the newest bot seat; room level default pro; bot names max 16 chars; protocol stays v1. Critic fixes: creep past stopped cars (field by in 9 s at Monaco), per-seat skill kept when a human joins, botViews cleared. Open: gap column after pit stops can look out of order (pre-existing), ai.pace is not a lap-time prediction. -> Fable round 3 over everything since e02cf43 -> docs -> dist + exe smoke -> commit, push, release.
+- AI integration DONE ~03:30 (run wf_76c677c2-d76; reports docs/agent-runs/2026-10-01/reports/ai-integrate-reports.txt): new harness gp-e2e/bots.js 193/193 (Monza + Monaco 15 mixed bots, online host + guest + 6 bots, Suzuka bridge, pit lane with 16 cars, blue flags, host leaving), all 82 suite / harness runs green. Net decisions: host leaving removes his bots (review r3 MP-2, 2026-10-02: they leave a running session as any leaver: quali / grid out, race DNF; the humans race on; was: the session ended); a human joining a full room in free practice takes the newest bot seat; room level default pro; bot names max 16 chars; protocol stays v1. Critic fixes: creep past stopped cars (field by in 9 s at Monaco), per-seat skill kept when a human joins, botViews cleared. Open: gap column after pit stops can look out of order (pre-existing), ai.pace is not a lap-time prediction. -> Fable round 3 over everything since e02cf43 -> docs -> dist + exe smoke -> commit, push, release.
 - At the end of this run: after v6.2 + AI + Fable round 3 + full re-run + dist + exe smoke: commit, push main, tag v6.2 (or v7), publish a release with the exe and Traditional Chinese notes.
+
+## Fable review round 3 — outcome (2026-10-02)
+
+Run wf_07a7593a-444 (script `docs/agent-runs/2026-10-01/scripts/wf-fable-r3.js`): 7 Fable reviewers (flow, ai,
+multiplayer, driving, world, media, product) over everything since e02cf43 (v6.1, v6.2, v7.0), each finding checked by a
+second agent, fixes by file group (ui, net, ai, world, media), a full re-run, then the docs. Probes and evidence:
+`devtests/review-r3/`. 39 findings, **30 confirmed** (verifier severity: 6 major, 17 minor, 7 cosmetic), 9 refuted
+(DRV-3 remote scrub, PRES-3 hemisphere overshoot, PRES-4 lens shift after a resize behind the menu, PRES-5 compression cue
+too small, PKG-1 "無 does not remove the bots", PKG-4 standings DOM churn, AI-7 R completing a lap, AI-8 strategy at high
+wear, MP-4 rate budget). Nothing critical.
+
+| Id | Sev. | Finding | Fix (file) |
+| --- | --- | --- | --- |
+| AI-1 | major | bots kept a stale pit-lane limit after a season change (Zandvoort / Singapore): a penalty at every stop | the limit read live from `track.pit.limitKmh`, the stop's time cost recomputed (js/ai.js); main.js rebinds the bots' js/pit.js |
+| AI-2 | major | per-car memories keyed by `id & 63`: colliding ids in rooms hid a stopped car (queue, then R after 30 s) | keyed by the full id (128-slot table) (js/ai.js) |
+| AI-3 | major | faster bots could not pass slower ones: trains, the order from a reversed grid ~ the grid | pressing a known-slower car on straights + four attack fixes (js/ai.js): matrix Spearman 0.70 -> 0.78, passes 139 -> 174, contacts 5 -> 3 |
+| MP-1 | major | a hostile server's snap row `"__proto__"` polluted `Object.prototype` and killed the guest's game | snap rows need a numeric id of an own remote (js/net.js) |
+| W1 | major | Silverstone's grid wrapped round Club (line at the OSM finish node) | the loop starts at the Wing's start line, node 13036050130; pit lane right side, 80 km/h (tools/build-tracks.mjs, tracks-data.js) |
+| W2 | major | the six new elevation sources (CC BY 4.0 / Copernicus) were not credited | 設定 → 資料來源與授權 lists every source with its licence and address (index.html) |
+| FLOW-1 | minor | a season change while in the pit lane: the limiter took the new limit, js/pit.js the old -> speeding on the limiter | the whole change waits until the car has left the pit stretch (js/main.js `syncPitYear` / `pitRebind`) |
+| FLOW-2 | minor | every bot announced as a player joining / leaving | bot rows not announced; a guest gets one count toast (js/main.js) |
+| FLOW-3 | minor | 'X站' / 'X大獎賽' / '日本GP' found nothing | NFKD, Chinese / Latin runs split, round suffixes dropped, 'F1' in every key; `ui.searchTracks` (js/ui.js) |
+| AI-4 | minor | free practice: bots gave blue-flag way to a player on the same lap | `view.prog` NaN outside race / results (js/main.js) |
+| AI-5 | minor | a bot conceded to any human who followed long enough, faster or not | only to a human seen closing > 1.5 m/s while the bot is flat out (js/ai.js) |
+| AI-6 | minor | a car coming the wrong way at speed: head-ons at full strength, pile-ups | the swerve aims beside the meeting point (js/ai.js): 40 m/s head-ons 57 -> 12, pile-ups 14 -> 2 |
+| MP-2 | minor | dedicated server: the bots' owner leaving aborted the race for everybody | his bots leave as any leaver (DNF), the humans race on (net/server.js) |
+| MP-3 | minor | a bot's second impact in the same 50 ms tick was discarded | one report per car per tick, longest owed first, kept 400 ms (js/main.js `sendOwed`) |
+| PRES-1 | minor | the 3D start gantry's lamps were painted lit red (all 10, also in practice / after lights out) | lamps painted dark + `scenery.setStartLights(n, go)` driven by main.js (js/scenery.js, js/main.js) |
+| PRES-2 | minor | the tunnel reverb's impulse response was rebuilt twice per lap at Monaco (23.5 vs 25 m) | reused within 15 % / 1 m; primed at track load with the longest stretch (js/audio.js, js/main.js) |
+| PKG-3 | minor | the credits' links did nothing in the exe | https links to github.com / creativecommons.org / www.openstreetmap.org open in the user's browser (electron-main.js) |
+| W4 | minor | Baku's range 34.4 m vs the published 26.8 m | heights scaled x0.777 (tools/build-tracks.mjs) |
+| DRV-1, W3, MP-5, AI-9 | minor | the contract had no v6.1 / v6.2 / v7 sections; CLAUDE.md said 11 suites; the concede device not recorded | this docs stage (js/README-interfaces.md, devtests/README.md, CLAUDE.md, this file) |
+| DRV-2 | minor | the calibration's keyboard driver under-drives 2026 in grip-limited slow corners (-0.47 % over 40 circuits) | NOT changed: documented in docs/seasons-data.md (a fix = a new driver + ~30 min of recalibration) |
+| PKG-2 | cosmetic | 15 bots set on a loaded track froze the UI 0.2..0.75 s | the warm-up runs behind the loading note 電腦車手熟悉賽道中… (js/main.js, js/ui.js) |
+| FLOW-4 | cosmetic | V after a mirror failure gave no feedback | a toast; the V hints hidden (`#hud.mirrors-na`) |
+| MP-6 | cosmetic | the host ignored a rejected bot lap | a toast at most once per 8 s; the session stays authoritative |
+| W5 | cosmetic | Suzuka bridge: green terrain sheets under the deck | the verge stays at the deck's underside over the opening, concrete wing walls (js/track.js) |
+| W6 | cosmetic | the Toscana DSM was labelled lidar | labelled a photogrammetric surface model |
+| W7 | cosmetic | test/track.test.js still exempted Silverstone from "line beside the pit buildings" | exemption removed |
+| PKG-5 | cosmetic | exe-smoke left its temporary profile in %TEMP% | removal retried for 5 s (devtests/exe-smoke/smoke-exe.js) |
+
+### Decisions taken for the user (round 3)
+
+- FLOW-1: a season change during a pit visit waits entirely until the car leaves the pit stretch (not a live limit in
+  js/pit.js: an 80 -> 60 change at 79.8 km/h would flag speeding at once). A hold still pending is dropped on a year change
+  (free practice only).
+- FLOW-2: guests get one toast 房間的電腦車手：N 位 / 無, never the host, and none when a human joined / left in the same roster.
+- FLOW-3: trailing round suffixes dropped, Chinese and Latin runs split, NFKD, 'F1' in every key. FLOW-4: a toast on every
+  V press, the V hints hidden while the mirrors cannot be drawn.
+- AI-4: no race distances (blue flags) outside race and results. MP-3: one report per reporting car per 50 ms tick, longest
+  owed first, kept up to 400 ms. MP-6: a toast at most once per 8 s, the session stays authoritative. PKG-2: the warm-up
+  runs behind the loading note titled 電腦車手熟悉賽道中….
+- MP-2: when the bots' owner leaves, his bots leave the running session as any player does (quali / grid: out; race: DNF;
+  results: row kept) and the humans race on; on a dedicated server the next host can end it; in a token room the session
+  goes on without a host, as when a host without bots leaves (a room hosted in the game closes with its host anyway).
+- PKG-3: only https links to github.com, creativecommons.org and www.openstreetmap.org open (in the user's browser); every
+  other navigation and window stays denied (the other source addresses in the credits are text).
+- AI: (1) the pit limit is read live by the bots; (2) memories by full id; (3) a bot presses a car known to be slower
+  (bots' pace) on straights only (radius > 80 m at both): 0.3 x the time gap, its normal braking not anticipated; not in
+  corners (four times the heavy contacts there); not while it has a stop planned, from the decision to 90 m past the lane
+  (re-run stage: the merge after a full-field stop); the longer attack reach was tested and dropped; (4) the concede device
+  (the stand-in for the missing slipstream) is unchanged in what it does - the edge, max(follower speed - 8 m/s, 78 % of
+  own pace) for up to 8 s, rookies after ~2 s, legends never - but pressure is a time gap (within 0.5 s, released beyond
+  1 s) and a human of unknown pace counts only after closing faster than 1.5 m/s while the bot is flat out; (5) a
+  wrong-way car is swerved round beside the meeting point (braking for it and longer yellow gaps were tested: worse).
+- World: (1) Silverstone timing at the Wing's start line, 151 m after the real timing line, so that the grid behind the
+  line lies on the straight (a per-track "grid ahead of the line" offset was rejected: laps are counted at the start
+  line); (2) Baku scaled to the published 26.8 m rather than the surface model's 34.4 m (no open DTM for Azerbaijan); (3)
+  the Toscana DSM labelled photogrammetric, Mugello's settings unchanged; (4) Suzuka bridge: the verge at the deck's
+  underside over the opening, a 1:1.5 embankment elsewhere, concrete wing walls; (5) the gantry lamps dark unless
+  `setStartLights` lights them: they follow the HUD lights (dark in practice and after lights out, n columns from the
+  driver's left on the grid).
+- Media: an impulse response is reused for sizes within 15 % of its width and 1 m of its height (23.5 vs 25 m = echo
+  spacing 68.5 vs 72.9 ms, inaudible; a new one costs 10-20 ms of main thread); it is built at track load for the longest
+  covered stretch (`setTunnel(0, w, h)`), silently.
+- AI PACE kept after the re-check on the new track data: 7.95 / 4.98 / 2.50 / 0.97 %, within the solver's 0.001 step of
+  the targets.
+
+### Re-run on the final tree (2026-10-02)
+
+All green, muted (devtests/electron-userdata.js; SOUND never set): the 12 node suites (main.test 91 checks, ai.test 34
+tests), `build-cars --check` after a recalibration (calibrate.mjs 26 min, then ers-effect.mjs and build-cars: all 17
+seasons within 0.03 % of their index, team order unchanged in every season, reference laps Baku 101.833 -> 101.850 s and
+Silverstone 95.017 -> 94.908 s, check-drive within 0.3 %, drive-check "all seasons ok"), every node devtest, every Electron
+harness (gp-e2e/bots.js 193/193, bots-test/game.js 72/72, v62-critic 134, v61-critic 98, v6-smoke 150, v6-critic 85,
+gp-smoke 197, ui-gp 117, ui-v6 154, hudmirrors-test 41, gp-e2e solo 584 / solo-v6 295 / online 141 / online-v6 65,
+mp-e2e 30 ...). Only `review/escape.js` prints 203 escapes (a v1 script that counts the pit lanes; 204 at HEAD 17170a2).
+Fixed during the re-run: gp-e2e/bots.js parts `ram` (it now picks a bot not faster than us, re-picks beyond 60 m) and
+`host` (the new MP-2 rule); hudmirrors-test's V check (FLOW-4); review/e-main / e-fps / e-blur hung on `#hud-speed`
+(gone since v6; broken at HEAD too); check-v62's Silverstone line; the two main.js hookups (gantry lamps, reverb priming);
+exe-smoke's cleanup; the bots' "no pressing with a stop planned" guard (part `pits` once failed with a 0.31 bump).
+Reports (every reviewer's findings, the verdicts, the fixers' and the re-run's summaries): docs/agent-runs/2026-10-01/reports/r3-reports.txt.
+
+### Still open after round 3 (known, not fixed)
+
+- Pressing into the braking zone of Monza's first chicane on lap 1 gives bumps of 0.16..0.20 in about 1 race in 5 (HEAD
+  never did; heavy is 0.25). Needs a decision on the passing behaviour in js/ai.js (e.g. no pressing within N m of a
+  braking zone, or on lap 1).
+- Passing between cars 1..2 % apart stays rarer than real racing (js/car.js has no slipstream); a pro-paced human behind
+  an amateur bot at Monza is never let by (he never shows closing speed while the bot is flat out).
+- At 8 m/s in a Monaco street too narrow to pass, bots meeting a wrong-way car stop and back off slower than it comes on
+  (5 hits, max 0.42); a human would stop too.
+- DRV-2: the calibration driver's 2026 bias (-0.47 %): a line-following player finds 2026 ~0.4 % quicker than its index.
+- Credits: a docs/CREDITS (or README) section mirroring the in-game list, and generating it from tools/build-tracks.mjs
+  SOURCES, were suggested (W2 follow-ups). tools/track-audit.json still records Silverstone's finish node and 'lidar' for
+  Toscana / Mugello (the builder is the reference; docs/track-audit.md is updated).
+- By design: while the host has the menu open his bots stand still for everybody; no bot ownership transfer on host
+  migration; the standings' gap column can look out of order after a pit stop (gap taken at the last line crossing);
+  `ai.pace` is not a lap-time prediction.
+- Not verified by anyone: a physical controller (stubbed only), the sound by ear (measured only), real two-machine
+  internet play, a weaker GPU / a visible window with 15 bots, Electron 44 on another machine.
+
+### Remaining steps (in order)
+
+1. Commit the round 3 tree locally (code + harness fixes + recalibrated seasons data + docs) on main.
+2. `npm run dist` from a CLEAN worktree of that commit (not the working tree: untracked scratch must not ship).
+3. `node devtests/exe-smoke/smoke-exe.js <worktree>/dist/win-unpacked/F1Drive.exe` (expect 22 / 22, no page errors) and
+   read its screenshots (devtests/exe-smoke/out/), incl. the gantry lamps and the bots at the start.
+4. Push main (the user wants verified rounds pushed: "最後好了幫我丟github吧").
+5. GitHub release: push the tag first (`gh release create` with a bare sha as --target fails with 422), prerelease, the
+   portable exe as the asset, Traditional Chinese notes (round 3 changes: smarter overtaking, the bots' pit limit, the
+   Silverstone grid, the start gantry lights, the credits, search by 日本站 ...). Suggested tag: v7.1.
+6. Then update CLAUDE.md's state (commit id, release) and refresh docs/claude-memory/.

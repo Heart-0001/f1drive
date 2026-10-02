@@ -1,5 +1,6 @@
 // node test/track.test.js — js/track.js on the real data (tracks-data.js + scenery-data.js): where the start / finish
-// line and the pit lane are, the pit speed limit, and the terrain beside banked corners (final review W1 / W2 / W3).
+// line and the pit lane are, the pit speed limit, and the terrain beside banked corners (final review W1 / W2 / W3);
+// the start gantry's lamps of js/scenery.js (review r3 PRES-1).
 'use strict';
 const assert = require('assert');
 const path = require('path');
@@ -9,6 +10,7 @@ global.THREE = require(path.join(ROOT, 'lib/three.min.js'));
 require(path.join(ROOT, 'tracks-data.js'));
 require(path.join(ROOT, 'scenery-data.js'));
 require(path.join(ROOT, 'js/track.js'));
+require(path.join(ROOT, 'js/scenery.js'));
 const TRACKS = global.F1_TRACKS, SCENERY = global.F1_SCENERY;
 
 let failed = 0;
@@ -34,11 +36,29 @@ test('Monaco starts at the real line on Boulevard Albert 1er (OpenStreetMap node
   return 'line ' + d.toFixed(1) + ' m from the OSM node, y ' + S[0].y.toFixed(1) + ' m, grid max grade ' + (g * 100).toFixed(1) + ' %, lap ' + (N * ds).toFixed(0) + ' m';
 });
 
+// Grids must be straight (FIA, 1998): js/track.js lays the 16 boxes behind points[0], so the line must have 128 m of
+// straight behind it (review r3 W1: Silverstone's boxes 12-16 stood round Club, 22-53 deg off). Monaco's grid follows
+// the gentle bend of Boulevard Albert 1er, as the real one does.
+test('the starting grid is straight: every box within 3 deg of the pole heading (Monaco 12)', () => {
+  let worst = '', wd = -1;
+  for (const td of TRACKS) {
+    const tr = track(td.id), h0 = tr.grid[0].heading, lim = td.id === 'mc-1929' ? 12 : 3;
+    assert.strictEqual(tr.grid.length, 16, td.id + ' boxes');
+    for (const b of tr.grid) {
+      let d = (b.heading - h0) * 180 / Math.PI;
+      d -= Math.round(d / 360) * 360;
+      assert(Math.abs(d) <= lim, td.id + ': box ' + (tr.grid.indexOf(b) + 1) + ' ' + d.toFixed(1) + ' deg off the pole heading');
+      if (td.id !== 'mc-1929' && Math.abs(d) > wd) { wd = Math.abs(d); worst = td.id; }
+    }
+  }
+  return 'worst outside Monaco ' + wd.toFixed(1) + ' deg (' + worst + ')';
+});
+
 // Mugello: its only 'pit' footprint in scenery-data.js stands 135 m off the circuit 2.4 km into the lap (not the pit
 // building); points[0] is on the main straight at the circuit's published coordinates (43.9975 N, 11.3714 E).
-// Silverstone: since 2026-10-01 the line is at the Wing (2011+); scenery-data.js still tags the old National pits as
-// 'pit' (the Wing is a 'building' 63 m from the line) until tools/build-scenery.mjs retags it (pitSide -1 is given).
-const NO_PIT_AT_LINE = new Set(['it-1914', 'gb-1948']);
+// Silverstone (line at the Wing's start line since review r3 W1) is checked like the others: scenery-data.js tags the
+// Wing 'pit' (109 m from the line; the old National pits 1 km away are 'pit' too, pitSide -1 is given).
+const NO_PIT_AT_LINE = new Set(['it-1914']);
 test('every track with OSM pit buildings has its start / finish line beside them (points[0] within 300 m of one)', () => {
   let n = 0;
   for (const td of TRACKS) {
@@ -195,7 +215,22 @@ test('Suzuka crossover: a bridge (both roads keep their heights), clearance, wal
   // with the hint on its own road and no y, locate stays on that road (as before)
   assert.strictEqual(tr.locate(lo.x, lo.z, B.lo).index, B.lo);
   assert.strictEqual(tr.locate(up.x, up.z, B.up).index, B.up);
-  return 'separation ' + B.separation.toFixed(2) + ' m, clearance ' + B.clearance.toFixed(2) + ' m, deck ' + B.deckLength.toFixed(0) + ' m';
+  // the opening under the deck is clear (review r3 W5: the upper road's verge hung from the deck edges down to the cutting
+  // floor, a green curtain across the lower road): no ground vertex inside the lower road's walls between its surface
+  // and the deck; beside it the verge ends on concrete wing walls
+  const gp = tr.group.getObjectByName('ground').geometry.attributes.position.array;
+  let inside = 0, hanging = 0;
+  for (let v = 0; v < gp.length; v += 3) {
+    const x = gp[v], y = gp[v + 1], z = gp[v + 2], L = tr.locate(x, z, B.lo), s = S[L.index];
+    if (Math.min(Math.abs(L.index - B.lo), N - Math.abs(L.index - B.lo)) > 30) continue;
+    if (Math.abs((x - s.x) * s.tx + (z - s.z) * s.tz) > 2 || L.d < -s.wallNegDist || L.d > s.wallPosDist) continue;
+    inside++;
+    const above = y - tr.surfaceY(L.index, L.d);
+    if (above > 0.3 && above < B.clearance - 0.3) hanging++;
+  }
+  assert(inside > 50 && hanging === 0, hanging + ' ground vertices hang into the opening (of ' + inside + ' inside the lower road\'s walls)');
+  assert(B.wingSegments > 4, 'wing walls ' + B.wingSegments);
+  return 'separation ' + B.separation.toFixed(2) + ' m, clearance ' + B.clearance.toFixed(2) + ' m, deck ' + B.deckLength.toFixed(0) + ' m, ' + inside + ' ground vertices in the opening, none hanging, ' + B.wingSegments + ' wing wall segments';
 });
 
 test('Baku castle section: 7.6 m of road (widthOverrides), walls 1 m outside it as everywhere, no wall gaps, no steps', () => {
@@ -249,16 +284,36 @@ test('elevation: Spa Raidillon ~14-15 % over 50 m from the Eau Rouge dip (Wallon
   assert(range > 95 && range < 108, 'Spa range ' + range.toFixed(1));
   const mu = TRACKS.find(t => t.id === 'it-1914'), mt = track('it-1914'), mds = mt.length / mt.samples.length;
   const sd = mt.samples[Math.round(900 / mds)].y - mt.samples[Math.round(450 / mds)].y;
-  assert(sd > 8, 'Mugello s 450 -> 900 climbs ' + sd.toFixed(1) + ' m (lidar +12.9)');
+  assert(sd > 8, 'Mugello s 450 -> 900 climbs ' + sd.toFixed(1) + ' m (Tuscany DSM +12.9)');
   const mz = TRACKS.find(t => t.id === 'it-1922'), mzr = Math.max(...mz.elev) - Math.min(...mz.elev);
   assert(mzr < 17, 'Monza range ' + mzr.toFixed(1) + ' m (TINITALY 12 m + the 5 m dip)');
   return 'Raidillon ' + (g[0] * 100).toFixed(1) + ' %, Spa ' + range.toFixed(1) + ' m, Mugello +' + sd.toFixed(1) + ' m, Monza ' + mzr.toFixed(1) + ' m (' + mu.elev.length + ' pts)';
 });
 
+// Baku: no open terrain model covers Azerbaijan and every model reads the old town's buildings; the profile is scaled to
+// the published 26.8 m (formula1.com 2016; review r3 W4), the shape kept: high at T13 in the old town, low on the sea front.
+test('elevation: Baku scaled to the published 26.8 m, high point in the old town (T13), low on the sea front near the line', () => {
+  const td = TRACKS.find(t => t.id === 'az-2016'), tr = track('az-2016'), S = tr.samples, N = S.length, ds = tr.length / N;
+  const lo = Math.min(...td.elev), hi = Math.max(...td.elev), range = hi - lo;
+  assert(Math.abs(range - 26.8) < 0.4, 'Baku range ' + range.toFixed(1) + ' m');
+  let iy = 0, il = 0;
+  for (let i = 0; i < N; i++) { if (S[i].y > S[iy].y) iy = i; if (S[i].y < S[il].y) il = i; }
+  assert(iy * ds > 2900 && iy * ds < 3500, 'highest point at s ' + (iy * ds).toFixed(0) + ' m');
+  assert(il * ds < 400 || il * ds > tr.length - 400, 'lowest point at s ' + (il * ds).toFixed(0) + ' m');
+  const g = grades(tr, 0, N - 1, 100);
+  assert(g[0] < 0.07 && g[1] > -0.09, 'steepest 100 m +' + (g[0] * 100).toFixed(1) + ' / ' + (g[1] * 100).toFixed(1) + ' %');
+  return range.toFixed(1) + ' m, high at s ' + (iy * ds).toFixed(0) + ' m, 100 m +' + (g[0] * 100).toFixed(1) + ' / ' + (g[1] * 100).toFixed(1) + ' %';
+});
+
 test('layout: Silverstone line at the Wing, Albert Park T11 no 10 m radius, Madring 5.414 km, Estoril the post-2000 length', () => {
-  const gb = TRACKS.find(t => t.id === 'gb-1948'), p = toXZ(gb, 52.0682609, -1.0234867);
+  // points[0] = the Wing's START line (OSM node 13036050130); the timing line (node 13036050131) is 151 m before it, and
+  // the grid between them (review r3 W1: from the timing line the grid reached back round Club)
+  const gb = TRACKS.find(t => t.id === 'gb-1948'), p = toXZ(gb, 52.0693366, -1.0221521), q = toXZ(gb, 52.0682609, -1.0234867);
   const d = Math.hypot(gb.points[0][0] - p[0], gb.points[0][1] - p[1]);
-  assert(d < 3, 'Silverstone points[0] ' + d.toFixed(1) + ' m from the Wing timing line');
+  assert(d < 3, 'Silverstone points[0] ' + d.toFixed(1) + ' m from the Wing start line');
+  const gt = track('gb-1948'), fin = gt.nearest(q[0], q[1]), back = (gt.samples.length - fin.index) * gt.length / gt.samples.length;
+  assert(back > 140 && back < 160, 'Silverstone timing line ' + back.toFixed(0) + ' m before points[0]');
+  assert(gt.grid.every(b => (gt.samples.length - b.index) * gt.length / gt.samples.length < back), 'Silverstone grid between the timing and the start line');
   const au = TRACKS.find(t => t.id === 'au-1953'), at = track('au-1953'), S = at.samples, N = S.length;
   const c = sIndexAt(at, au, -37.8533681, 144.9786557);
   let minR = Infinity;
@@ -272,6 +327,36 @@ test('layout: Silverstone line at the Wing, Albert Park T11 no 10 m radius, Madr
   assert(Math.abs(md.lengthKm - 5.414) < 0.003, 'Madring ' + md.lengthKm);
   assert(es.lengthKm > 4.14 && es.lengthKm < 4.19 && /2000/.test(es.layout || ''), 'Estoril ' + es.lengthKm + ' ' + es.layout);
   return 'Silverstone ' + d.toFixed(1) + ' m, Albert Park T11 r ' + minR.toFixed(1) + ' m, Madring ' + md.lengthKm + ', Estoril ' + es.lengthKm;
+});
+
+// review r3 PRES-1: the gantry's lamps were painted lit (all ten red in practice and after lights out). Now the panel's
+// lamps are unlit and a lamp mesh lights columns 1..n from the driver's left: scenery.setStartLights(n, go) takes the
+// values of ui.setLights (n = -1: no start; go: lights out -> dark).
+test('start gantry lamps (js/scenery.js): dark when built, setStartLights(n) lights columns 1..n from the driver\'s left, dark at lights out', () => {
+  const notes = [];
+  for (const id of ['gb-1948', 'mc-1929', 'it-1922']) {
+    const td = TRACKS.find(t => t.id === id), tr = track(id), S = tr.samples, sc = F1.buildScenery(tr, td, SCENERY[id]);
+    const m = sc.group.getObjectByName('scenery-start-lights');
+    assert(m && typeof sc.setStartLights === 'function', id + ': lamp mesh and setStartLights');
+    const P = m.geometry.attributes.position.array, nv = P.length / 3, col = nv / 5, s0 = S[Math.round(6 / (tr.length / S.length))];
+    assert(!m.visible && m.geometry.drawRange.count === 0, id + ': dark when built (free practice)');
+    const lat = c => { let a = 0; for (let v = c * col; v < (c + 1) * col; v++) a += (P[v * 3] - s0.x) * s0.nx + (P[v * 3 + 2] - s0.z) * s0.nz; return a / col; };
+    for (let c = 1; c < 5; c++) assert(lat(c) < lat(c - 1) - 0.3, id + ': column ' + (c + 1) + ' right of column ' + c);
+    for (let v = 0; v < nv; v++) assert(P[v * 3 + 1] > s0.y + 6, id + ': lamps above the road');
+    const nr = m.geometry.attributes.normal.array;
+    assert(nr[0] * s0.tx + nr[2] * s0.tz < -0.9, id + ': lamps face the cars arriving');
+    sc.setStartLights(3, false);
+    assert(m.visible && m.geometry.drawRange.count === 3 * col, id + ': 3 columns lit');
+    sc.setStartLights(5, false);
+    assert(m.visible && m.geometry.drawRange.count === nv, id + ': 5 columns lit');
+    sc.setStartLights(0, true);
+    assert(!m.visible, id + ': lights out (go) -> dark');
+    sc.setStartLights(5, false); sc.setStartLights(-1, false);
+    assert(!m.visible, id + ': no start (-1) -> dark');
+    notes.push(id + ' ' + (nv / 30) + ' tris per lamp');
+    sc.dispose();
+  }
+  return notes.join(', ');
 });
 
 console.log(failed ? '\n' + failed + ' test(s) FAILED' : '\nall track tests passed');

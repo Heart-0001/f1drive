@@ -1,10 +1,16 @@
-const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const host = require('./net/host');   // multiplayer: the relay server runs in this process while a room is open
 
 const INDEX = path.join(__dirname, 'index.html');
 const RELOAD_MIN_MS = 10000;          // a page that dies again this soon after being reloaded is not reloaded blindly
+// the only pages the game links to (設定 → 資料來源: the data licences); they open in the user's browser
+const EXTERNAL_OK = /^https:\/\/(github\.com|creativecommons\.org|www\.openstreetmap\.org)\//;
 let mainWin = null;
+
+function openLink(url) {
+  if (typeof url === 'string' && EXTERNAL_OK.test(url)) shell.openExternal(url).catch(() => {});
+}
 
 function createWindow() {
   const win = mainWin = new BrowserWindow({
@@ -34,9 +40,9 @@ function createWindow() {
       event.preventDefault();
     }
   });
-  // the page never navigates anywhere else and never opens windows
-  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-  win.webContents.on('will-navigate', (event) => event.preventDefault());
+  // the page never navigates anywhere else and never opens windows: a credits link goes to the browser instead
+  win.webContents.setWindowOpenHandler(({ url }) => { openLink(url); return { action: 'deny' }; });
+  win.webContents.on('will-navigate', (event) => { event.preventDefault(); openLink(event.url); });
   watchRenderer(win);
   host.attach(win);
   win.loadFile(INDEX);

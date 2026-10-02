@@ -83,8 +83,8 @@ const COLOURS = ['#ff7a14', '#e10600', '#1e6bff', '#19c8e6', '#35d07f', '#ffd21e
 //   server -> client  roster rows of bots: {..., bot: true, skill, owner, bi}; welcome / players: bots {n, skill}
 //                     snap rows and session rows as a player's (session rows: bot: true); glno {why, id};
 //                     hit {from, i, bot} to the owner when one of his bots was hit
-// The owner leaving takes his bots (a running session they race in ends); a human joining a full room in free
-// practice takes the newest bot's seat.
+// The owner leaving takes his bots (they leave a running session as players do: DNF in the race; the others race
+// on); a human joining a full room in free practice takes the newest bot's seat.
 const BOT_LEVELS = { rookie: 0, amateur: 0.35, pro: 0.7, legend: 1, mixed: null };
 const BOT_LEVEL_DEFAULT = 'pro';
 const BOT_RATE = 4;                // messages / s more for a connection per bot it owns (their laps, lap times, impacts)
@@ -444,17 +444,14 @@ function createServer(opts) {
       const now = clock();
       gpSync(now);
       session.removePlayer(p.id, now);
-      // His bots go with him (nobody simulates them any more). If they were in a running session it ends cleanly:
-      // qualifying / grid -> free practice, the race -> the results as they stand (the bots DNF); a classification
-      // that is already final stays. (Ownership could pass to the next host one day: his game would rebuild them.)
+      // His bots go with him (nobody simulates them any more), each as a player leaving: they drop out of qualifying
+      // / the grid, are DNF in the race, keep their row in final results. The others' session goes on as when a
+      // host without bots leaves (a dedicated server's next host can end it). (Ownership could pass to the next
+      // host one day: his game would rebuild them.)
       const mine = botsOf(p.id);
       if (mine.length) {
         mine.forEach(function (b) { removeBot(b, now); });
-        if (session.phase === 'quali' || session.phase === 'grid' || session.phase === 'race') {
-          session.end();
-          log('gp    the bots\' owner left -> ' + session.phase);
-        }
-        log('bots  ' + mine.length + ' of #' + p.id + ' removed');
+        log('bots  ' + mine.length + ' of #' + p.id + ' removed (gp: ' + session.phase + ')');
       }
       broadcast({ t: 'gone', id: p.id });
       sendRoster();

@@ -131,7 +131,8 @@ function getJson(url) {
     await sleep(1500);
     // the portable exe is a stub that unpacks and starts the real app as a child: /T ends the whole tree
     try { require('child_process').execFileSync('taskkill', ['/T', '/F', '/PID', String(app.pid)], { stdio: 'ignore' }); } catch (e) { /* already gone */ }
-    try { fs.rmSync(userData, { recursive: true, force: true }); } catch (e) { /* locked */ }
+    // (the killed tree lets go of its files a moment later on Windows: retried for up to 5 s, review r3 PKG-5)
+    try { fs.rmSync(userData, { recursive: true, force: true, maxRetries: 10, retryDelay: 500 }); } catch (e) { /* still locked */ }
   }
   const failed = results.filter(r => !r).length;
   console.log((results.length - failed) + ' / ' + results.length + ' checks passed');

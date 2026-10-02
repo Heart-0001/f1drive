@@ -352,6 +352,7 @@
   /* 資料來源與授權: the addresses as text that can be selected (a click opens one only where the shell allows it) */
   .set-credits { margin: 0; padding-left: 16px; font-size: 12.5px; line-height: 1.55; color: var(--muted); }
   .set-credits li + li { margin-top: 5px; }
+  .set-credits ul { margin: 3px 0 4px; padding-left: 14px; }
   .set-credits a { color: #c9d1db; text-decoration: none; cursor: text; word-break: break-all; -webkit-user-select: text; user-select: text; }
 
   #track-grid {
@@ -420,6 +421,7 @@
   #hud-mirror-l { left: var(--mir-side); }
   #hud-mirror-r { right: var(--mir-side); }
   #hud.no-mirrors .hud-mirror { display: none; }
+  #hud.mirrors-na .hk-mirrors { display: none; }   /* (the game cannot draw them: V only says so, review r3 FLOW-4) */
   .hud-box {
     position: absolute; background: rgba(10,12,15,.62); border: 1px solid rgba(255,255,255,.10);
     border-radius: 8px; backdrop-filter: blur(3px);
@@ -734,8 +736,8 @@
   <div id="hud-map" class="hud-box"><canvas id="minimap"></canvas></div>
   <canvas id="hud-telemetry"></canvas>
   <div id="hud-hint">
-    <span id="hud-hint-keys"><span class="hk"><kbd>W</kbd>油門</span> <span class="hk"><kbd>S</kbd>煞車‧倒車</span> <span class="hk"><kbd>A</kbd><kbd>D</kbd>轉向</span> <span class="hk"><kbd>R</kbd>重置</span> <span class="hk"><kbd>L</kbd>行車線</span> <span class="hk"><kbd>Q</kbd>限速器</span> <span class="hk"><kbd>E</kbd>電池（按住）</span> <span class="hk"><kbd>T</kbd>換胎配方（軟／中／硬）</span> <span class="hk"><kbd>M</kbd>靜音</span> <span class="hk"><kbd>V</kbd>後照鏡</span> <span class="hk"><kbd>Esc</kbd>選單</span></span>
-    <span id="hud-hint-pad" class="hidden"><span class="hk"><kbd>RT</kbd>油門</span> <span class="hk"><kbd>LT</kbd>煞車</span> <span class="hk"><kbd>左搖桿</kbd>轉向</span> <span class="hk"><kbd>右搖桿</kbd>視角</span> <span class="hk"><kbd>A</kbd>/<kbd>RB</kbd>電池（按住）</span> <span class="hk"><kbd>B</kbd>/<kbd>LB</kbd>限速器</span> <span class="hk"><kbd>X</kbd>換胎配方（軟／中／硬）</span> <span class="hk"><kbd>Y</kbd>重置</span> <span class="hk"><kbd>View</kbd>行車線</span> <span class="hk"><kbd>Start</kbd>選單</span> <span class="hk"><kbd>V</kbd>後照鏡</span></span>
+    <span id="hud-hint-keys"><span class="hk"><kbd>W</kbd>油門</span> <span class="hk"><kbd>S</kbd>煞車‧倒車</span> <span class="hk"><kbd>A</kbd><kbd>D</kbd>轉向</span> <span class="hk"><kbd>R</kbd>重置</span> <span class="hk"><kbd>L</kbd>行車線</span> <span class="hk"><kbd>Q</kbd>限速器</span> <span class="hk"><kbd>E</kbd>電池（按住）</span> <span class="hk"><kbd>T</kbd>換胎配方（軟／中／硬）</span> <span class="hk"><kbd>M</kbd>靜音</span> <span class="hk hk-mirrors"><kbd>V</kbd>後照鏡</span> <span class="hk"><kbd>Esc</kbd>選單</span></span>
+    <span id="hud-hint-pad" class="hidden"><span class="hk"><kbd>RT</kbd>油門</span> <span class="hk"><kbd>LT</kbd>煞車</span> <span class="hk"><kbd>左搖桿</kbd>轉向</span> <span class="hk"><kbd>右搖桿</kbd>視角</span> <span class="hk"><kbd>A</kbd>/<kbd>RB</kbd>電池（按住）</span> <span class="hk"><kbd>B</kbd>/<kbd>LB</kbd>限速器</span> <span class="hk"><kbd>X</kbd>換胎配方（軟／中／硬）</span> <span class="hk"><kbd>Y</kbd>重置</span> <span class="hk"><kbd>View</kbd>行車線</span> <span class="hk"><kbd>Start</kbd>選單</span> <span class="hk hk-mirrors"><kbd>V</kbd>後照鏡</span></span>
     <span class="hk"><kbd>F11</kbd>全螢幕</span><button id="hud-menu-btn" type="button" tabindex="-1">選單</button>
   </div>
 </div>
@@ -932,7 +934,17 @@
           <li>賽季、車隊與車輛資料：F1DB（<a href="https://github.com/f1db/f1db" target="_blank" rel="noopener noreferrer">github.com/f1db/f1db</a>），依 CC BY 4.0 授權（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">creativecommons.org/licenses/by/4.0</a>）。本遊戲篩選、彙整並修正了部分資料。</li>
           <li>場景地圖：© OpenStreetMap contributors，依 ODbL 授權（<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">openstreetmap.org/copyright</a>）。</li>
           <li>賽道中心線：f1-circuits，© Tomislav Bacinger，MIT 授權（<a href="https://github.com/bacinger/f1-circuits" target="_blank" rel="noopener noreferrer">github.com/bacinger/f1-circuits</a>）。</li>
-          <li>賽道高度：Copernicus DEM GLO-90（© DLR e.V. 2010-2014、© Airbus Defence and Space GmbH 2014-2018，provided under COPERNICUS by the European Union and ESA，經 Open-Meteo 取得），以及 USGS 3DEP、IGN RGE ALTI（Etalab 2.0）、日本國土地理院、AHN4 的地形資料。</li>
+          <li>賽道高度（取樣、平滑並依公開數字縮放，經修改）：
+            <ul>
+              <li>Copernicus DEM GLO-90（經 Open-Meteo 取得，<a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">open-meteo.com</a>）與 GLO-30（<a href="https://copernicus-dem-30m.s3.amazonaws.com" target="_blank" rel="noopener noreferrer">copernicus-dem-30m.s3.amazonaws.com</a>）：produced using Copernicus WorldDEM-30 / WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.</li>
+              <li>Service public de Wallonie (SPW) – Relief de la Wallonie – Modèle Numérique de Terrain (MNT) 2021-2022，CC BY 4.0（<a href="https://geodata.wallonie.be/id/a004e570-99d6-4fe5-b83d-49b774409278" target="_blank" rel="noopener noreferrer">geodata.wallonie.be/id/a004e570-99d6-4fe5-b83d-49b774409278</a>）：斯帕。</li>
+              <li>MDT05 CC-BY 4.0 scne.es，© Instituto Geográfico Nacional de España / CNIG（PNOA-LiDAR，<a href="https://www.scne.es" target="_blank" rel="noopener noreferrer">scne.es</a>）：巴塞隆納、馬德里。</li>
+              <li>Regione Emilia-Romagna，DTM RER2022，CC BY 4.0（<a href="https://servizigis.regione.emilia-romagna.it" target="_blank" rel="noopener noreferrer">servizigis.regione.emilia-romagna.it</a>）：伊莫拉。</li>
+              <li>Regione Toscana，DSM 1 m 2021，CC BY 4.0（GEOscopio，<a href="https://www502.regione.toscana.it/wmsraster" target="_blank" rel="noopener noreferrer">www502.regione.toscana.it</a>）：穆傑羅。</li>
+              <li>TINITALY 1.1，INGV（Tarquini S. et al. 2023，doi:10.13127/tinitaly/1.1），CC BY 4.0（<a href="https://tinitaly.pi.ingv.it" target="_blank" rel="noopener noreferrer">tinitaly.pi.ingv.it</a>）：蒙札。</li>
+              <li>USGS 3DEP（公有領域，<a href="https://www.usgs.gov/3d-elevation-program" target="_blank" rel="noopener noreferrer">usgs.gov/3d-elevation-program</a>）、IGN RGE ALTI（source: IGN，Licence Ouverte Etalab 2.0，<a href="https://data.geopf.fr/altimetrie" target="_blank" rel="noopener noreferrer">data.geopf.fr/altimetrie</a>）、日本國土地理院（<a href="https://maps.gsi.go.jp" target="_blank" rel="noopener noreferrer">maps.gsi.go.jp</a>）、AHN4（CC0，<a href="https://www.ahn.nl" target="_blank" rel="noopener noreferrer">ahn.nl</a>）。</li>
+            </ul>
+            CC BY 4.0 授權條款：<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">creativecommons.org/licenses/by/4.0</a>。</li>
           <li>各車的性能數字是依公開資料推估的遊戲數值，不是官方規格。</li>
         </ul>
       </section>
@@ -942,7 +954,7 @@
 
 <!-- after #menu: the CSS moves it to the bottom while the menu is open -->
 <div id="hud-toast" class="hud-box hidden" role="status" aria-live="polite"></div>
-<div id="loading" class="hidden" role="status" aria-live="polite"><b>載入賽道中…</b><span id="loading-name"></span></div>
+<div id="loading" class="hidden" role="status" aria-live="polite"><b id="loading-title">載入賽道中…</b><span id="loading-name"></span></div>
 
 <div id="error" class="hidden">
   <div class="inner">

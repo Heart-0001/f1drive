@@ -654,5 +654,135 @@ test('F1.AI.warmUp: every track, the real drivers drive exactly as without it (G
   assert.strictEqual(AI.prepare(tB, lB).pitLoss, AI.prepare(tA, lA).pitLoss, 'pit loss');
 });
 
+// ---- review r3 (devtests/review-r3/ai, verify-ai): each of these failed on the file before the fix -----------------
+test('the pit lane limit is read live: the season changed after the drivers were made (Zandvoort 80 -> 60 -> 80 km/h)', () => {
+  // main.js keeps the bots on the track's first racing line for the whole session and track.pit.setYear changes the
+  // limit in place: the limit copied once into the shared geometry drove the lane at 78 km/h under a 60 limit
+  const id = 'nl-1948', t = track(id), N = t.samples.length;
+  assert(typeof t.pit.setYear === 'function' && t.pit.limitFor(2020) === 60 && t.pit.limitFor(2026) === 80, 'Zandvoort pit limits');
+  const year0 = t.pit.year;
+  try {
+    t.pit.setYear(2026);
+    const d = driver(id, { tyres: true, ai: { skill: 0.7, seed: 3, slot: 4 } });   // the geometry is prepared at 80
+    const G = AI.prepare(t, line(id)), loss80 = G.pitLoss;
+    function stop(year) {
+      t.pit.setYear(year);
+      const pit = F1.createPit({ random: AI.makeRandom(4) });                       // (js/pit.js binds the limit; main.js rebinds)
+      d.car.reset(t, (t.pit.from - 600 + N) % N); d.car.tyres.fit('M'); d.ai.reset(); d.ai.planStop('H');
+      const ctx = context({ phase: 'race', lap: 2, laps: 10, pit: pit.state }), ev = [];
+      let maxLane = 0, after = 0;
+      for (let k = 0; k < 120 * 90 && after < 120 * 5; k++) {
+        if (ev.includes('exit')) after++;
+        const inp = d.ai.think(STEP, null, ctx);
+        if (pit.state.service) d.st.speed = 0; else d.car.update(STEP, inp, t);
+        const e = pit.update(STEP, d.st, t, { slot: 4, limiter: inp.limiter });
+        if (e) { ev.push(e); const c = d.ai.onPit(e); if (c) d.car.tyres.fit(c); }
+        if (pit.state.inLane) maxLane = Math.max(maxLane, Math.abs(d.st.speed) * 3.6);
+      }
+      assert(ev.includes('serviceDone') && ev.includes('exit'), year + ': events ' + ev.join(','));
+      assert(!ev.includes('speeding') && !ev.includes('penaltyStart'), year + ': speeding at ' + maxLane.toFixed(1) + ' km/h under ' + t.pit.limitKmh);
+      return maxLane;
+    }
+    const v60 = stop(2020);
+    assert(v60 <= 63, 'lane at ' + v60.toFixed(1) + ' km/h under a 60 limit');
+    AI.profile(G, d.car.perf, 0.8, 0.7);                                            // (any profile request brings pitLoss up to date)
+    assert(G.pitLoss > loss80 + 2, 'pit loss not recomputed for 60 km/h: ' + loss80.toFixed(1) + ' -> ' + G.pitLoss.toFixed(1));
+    const v80 = stop(2026);
+    assert(v80 > 72 && v80 <= 83, 'lane at ' + v80.toFixed(1) + ' km/h under an 80 limit (crawling at the old 60?)');
+  } finally { t.pit.setYear(year0); }
+});
+
+test('per-car memories keyed by the full id: cars 64 apart (a room) do not wipe each other (a car stopped on the line is seen)', () => {
+  // devtests/review-r3/ai/idcoll.js: a car parked on the line (id P) while another car (id Q) drives 2 km away; with
+  // slots by id & 63, ids 66 and 2 reset each other's standing time every step: the bot queued 30 s, then asked for R
+  const t = track('it-1922'), S = t.samples, P = line('it-1922').points;
+  for (const [pid, qid] of [[66, 2], [2, 66], [130, 2], [3, 2]]) {
+    const d = driver('it-1922', { id: 1, ai: { skill: 0.7, seed: 5 } });
+    d.car.reset(t, 100); d.st.speed = 30; d.ai.reset();
+    const park = AI.createView(pid), oth = AI.createView(qid), me = AI.createView(1), at = 400, far = 2500;
+    park.x = S[at].x + S[at].nx * P[at].d; park.z = S[at].z + S[at].nz * P[at].d; park.heading = Math.atan2(S[at].tx, S[at].tz); park.speed = 0; park.sampleIndex = at; park.d = P[at].d;
+    oth.x = S[far].x; oth.z = S[far].z; oth.heading = Math.atan2(S[far].tx, S[far].tz); oth.speed = 40; oth.sampleIndex = far; oth.d = 0;
+    const others = [me, park, oth], ctx = context({ phase: 'race', laps: 5, lap: 1 });
+    let passedAt = -1, resets = 0;
+    for (let k = 0; k < 120 * 40 && passedAt < 0; k++) {
+      refresh(me, d.st); ctx.prog = d.st.sampleIndex / S.length;
+      const inp = d.ai.think(STEP, others, ctx);
+      if (inp.reset) { resets++; AI.resetCar(d.car, t, d.st.sampleIndex, others, 1); } else d.car.update(STEP, inp, t);
+      if (d.st.sampleIndex > at + 10 && d.st.sampleIndex < at + 400) passedAt = k * STEP;
+    }
+    assert(passedAt > 0 && passedAt < 25, 'ids ' + pid + ' / ' + qid + ': past the parked car at ' + passedAt.toFixed(1) + ' s');
+    assert.strictEqual(resets, 0, 'ids ' + pid + ' / ' + qid + ': R');
+  }
+});
+
+// two computer cars of the same car, the slower one ahead (rolling): -> when the quicker one got by (s, -1 never), contacts
+function duel(id, fast, slow, seconds, opts) {
+  opts = opts || {};
+  const t = track(id), N = t.samples.length, ds = t.length / N, S = t.samples, P = line(id).points;
+  const mk = (vid, skill, at) => {
+    const d = driver(id, { id: vid, ai: { skill, seed: 10 + vid, slot: vid } });
+    d.car.reset(t, at); d.st.x = S[at].x + S[at].nx * P[at].d; d.st.z = S[at].z + S[at].nz * P[at].d; d.car.update(1e-4, null, t); d.st.speed = 30; d.ai.reset();
+    return Object.assign(d, { view: AI.createView(vid), ctx: context({ phase: 'race', laps: 30, lap: 1 }) });
+  };
+  const lead = mk(1, slow, 200 + Math.round(30 / ds)), fol = mk(2, fast, 200), cs = [lead, fol], views = cs.map(c => c.view);
+  const hit = AI.createContacts(), ent = cs.map(c => ({ state: c.st, car: c.car, solid: true }));
+  let passedAt = -1, touches = 0;
+  for (let k = 0; k < 120 * seconds && passedAt < 0; k++) {
+    for (const c of cs) { refresh(c.view, c.st); c.view.pace = opts.human && c === fol ? NaN : c.ai.pace; }
+    for (const c of cs) { const inp = c.ai.think(STEP, views, c.ctx); c.car.update(STEP, inp, t); }
+    hit(ent, STEP, () => { touches++; });
+    let g = lead.st.sampleIndex - fol.st.sampleIndex; if (g > N / 2) g -= N; if (g < -N / 2) g += N;
+    if (g < -8) passedAt = k * STEP;
+  }
+  return { passedAt, touches, concedes: lead.ai.stats.concedes };
+}
+
+test('a quicker computer car gets by a slower one (closing up on the straights; the slower one gives room): no train', () => {
+  // devtests/ai-test/race.js reversed grids: the quicker cars braked with the car in front from 100 m back in every
+  // braking zone (its braking anticipated, the full time gap kept) and sat behind it for whole races
+  const r1 = duel('bh-2002', 1, 0.35, 150), r2 = duel('bh-2002', 0.7, 0, 150);
+  assert(r1.passedAt > 0, 'legend behind an amateur (Bahrain): never got by in 150 s (' + r1.concedes + ' concedes)');
+  assert(r2.passedAt > 0, 'pro behind a rookie (Bahrain): never got by in 150 s (' + r2.concedes + ' concedes)');
+  assert.strictEqual(r1.touches + r2.touches, 0, 'contact');
+});
+
+test('a car of unknown pace (a human) is given room only when seen to be quicker, never for sitting behind at the same pace', () => {
+  // devtests/review-r3/verify-ai/concede.js: a view with no pace 15 m behind at the bot's own speed was let by every
+  // 15..25 s (the bot moving over and lifting ~30 km/h on Monza's straights)
+  const t = track('it-1922'), S = t.samples, N = S.length, ds = t.length / N;
+  for (const skill of [0, 0.35, 0.7]) {
+    const d = driver('it-1922', { id: 1, ai: { skill, seed: 5 } });
+    d.car.reset(t, 50); d.st.speed = 40; d.ai.reset();
+    const me = AI.createView(1), hum = AI.createView(2), others = [me, hum], ctx = context({ phase: 'race', laps: 10, lap: 1 });
+    for (let k = 0; k < 120 * 150; k++) {
+      refresh(me, d.st);
+      const hi = ((d.st.sampleIndex - Math.round(15 / ds)) % N + N) % N, sh = S[hi];
+      hum.x = sh.x + sh.nx * d.st.d; hum.z = sh.z + sh.nz * d.st.d; hum.heading = Math.atan2(sh.tx, sh.tz); hum.speed = d.st.speed; hum.sampleIndex = hi; hum.d = d.st.d;
+      const inp = d.ai.think(STEP, others, ctx);
+      if (inp.reset) AI.resetCar(d.car, t, d.st.sampleIndex, others, 1); else d.car.update(STEP, inp, t);
+    }
+    assert.strictEqual(d.ai.stats.concedes, 0, 'skill ' + skill + ': gave room to a car of the same pace');
+  }
+  // a quicker driver whose pace the bots do not know (a legend's view with pace NaN) behind a rookie: let by
+  const r = duel('it-1922', 1, 0, 150, { human: true });
+  assert(r.concedes > 0 && r.passedAt > 0, 'a quicker car of unknown pace was never let by (' + r.concedes + ' concedes, by at ' + r.passedAt + ')');
+});
+
+test('a car coming the wrong way at 40 m/s on the racing line: a stream of 5 cars goes round it where the line takes it', () => {
+  // devtests/review-r3/verify-ai/wrong.js: the swerve aimed beside where the car was going sideways now, not where the
+  // racing line it follows takes it, and the side was chosen where it was, not where the two meet: head-on hits at
+  // full strength and pile-ups behind. Six placements that all ended in a heavy hit before the fix; at most one may.
+  const cases = [['mc-1929', 0.75], ['mc-1929', 0.85], ['be-1925', 0.75], ['nl-1948', 0.25], ['nl-1948', 0.85], ['az-2016', 0.05]];
+  const bad = [];
+  for (const [id, frac] of cases) {
+    const t = track(id), N = t.samples.length, ds = t.length / N, w = Math.floor(N * frac);
+    const specs = [{ kind: 'wrong', at: w, v: 40 }];
+    for (let i = 0; i < 5; i++) specs.push({ kind: 'ai', skill: i / 4, at: w - Math.round((250 + 55 * i) / ds), v: 30 });
+    const r = pack(id, specs, 120 * 16);
+    if (r.maxActor > 0.25 || r.maxAI > 0.25) bad.push(id + '@' + frac + ' ' + r.maxActor.toFixed(2) + '/' + r.maxAI.toFixed(2));
+  }
+  assert(bad.length <= 1, 'heavy hits: ' + bad.join(', '));
+});
+
 console.log(failed ? '\n' + failed + ' test(s) FAILED' : '\nall ai tests passed');
 process.exit(failed ? 1 : 0);

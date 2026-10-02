@@ -19,8 +19,13 @@
 //   F1.audio.setTunnel(k, width?, height?) (v6.2) how far the listener is inside a tunnel, 0..1: js/tunnels.js
 //                                          tun.inTunnel(car.state.sampleIndex), once per frame (0 where there is none).
 //                                          width / height (m, optional): that tunnel's size for its reverb (default
-//                                          25 x 6.8, Monaco); a new size is taken at the next quiet moment. own.tunnel
-//                                          (a number) given to update() does the same. Allocates nothing itself.
+//                                          25 x 6.8, Monaco); a new size is taken at the next quiet moment, and only
+//                                          when it is clearly another (T.tunSizeTol 15 % of the width, T.tunHeightTol
+//                                          1 m: making an impulse response costs 10-20 ms on the main thread).
+//                                          setTunnel(0, width, height) at track load (the track's main tunnel) has it
+//                                          made at the next update(), silently, instead of at the first portal at
+//                                          speed. own.tunnel (a number) given to update() sets k the same way.
+//                                          Allocates nothing itself.
 //   F1.audio.dispose()
 //
 // What sounds:
@@ -159,7 +164,12 @@
     // engine's reflections, so there is no dry engine boost, and a stronger wet (0.6) costs no level. These: 2.6 dB at
     // 290 km/h (0.3 dB outside), the 355..560 Hz band +4.7 dB, a reverb tail -26 dB 0.2 s after a sound stops.
     tunWet: 0.6, tunMidHz: 450, tunMidQ: 0.8, tunMidDb: 3, tunEngDb: 0, tunRoarDb: 2, tunTau: 0.05, tunOff: 2,
-    tunWidth: 25, tunHeight: 6.8, tunRt60: 1.4
+    tunWidth: 25, tunHeight: 6.8, tunRt60: 1.4,
+    // an impulse response already made is kept for a size within this share of its width and this many metres of its
+    // height: a new one costs 10-20 ms on the main thread (F1.tunnelImpulse + the convolver partitioning it; review r3
+    // PRES-2), and Monaco's Portier 23.5 m / tunnel 25 m (echo spacing 68.5 / 72.9 ms) or Singapore's 4.5 / 5 m soffits
+    // sound alike
+    tunSizeTol: 0.15, tunHeightTol: 1
   };
   var LN10_20 = Math.LN10 / 20;     // dB -> gain: Math.exp(dB * LN10_20)
   // timbre sets as arrays (worklet and fallback read them by index)
@@ -830,7 +840,8 @@
         S_NX = 18, S_NY = 19, S_NZ = 20,                                               // the listener's new position
         S_PITT = 21, S_BLIP = 22,                                                      // s since the throttle was open with the pit limiter on; blip on (the fallback's)
         S_0 = 24, S_1 = 25, S_2 = 26, S_3 = 27, S_4 = 28, S_5 = 29, S_6 = 30, S_7 = 31, // scratch
-        S_TUN = 32, S_TUNQ = 33, S_TUNZ = 34, S_TUNW = 35, S_TUNH = 36;                 // tunnel: k asked for, k sent to the graph, s at k = 0, size asked for
+        S_TUN = 32, S_TUNQ = 33, S_TUNZ = 34, S_TUNW = 35, S_TUNH = 36,                 // tunnel: k asked for, k sent to the graph, s at k = 0, size asked for,
+        S_TUNA = 37;                                                                   //   1 once a size was given (setTunnel)
     var first = true, gearD = 0, prevGear = 0, shiftDir = 0, inContact = false, haveL = false, upN = 0, dnN = 0;
     function initS() { S.fill(0); S[S_SHIFT] = 9; S[S_GAP] = 9; S[S_PITT] = 9; S[S_TUNQ] = -1; S[S_TUNZ] = 9; S[S_TUNW] = T.tunWidth; S[S_TUNH] = T.tunHeight; }
     initS();
@@ -899,27 +910,32 @@
     // update() applies them), so it can be called every frame without allocating.
     function setTunnel(k, width, height) {
       S[S_TUN] = typeof k === 'number' && k > 0 ? (k < 1 ? k : 1) : 0;
-      if (typeof width === 'number' && width >= 2 && width <= 200) S[S_TUNW] = width;
-      if (typeof height === 'number' && height >= 2 && height <= 60) S[S_TUNH] = height;
+      if (typeof width === 'number' && width >= 2 && width <= 200) { S[S_TUNW] = width; S[S_TUNA] = 1; }
+      if (typeof height === 'number' && height >= 2 && height <= 60) { S[S_TUNH] = height; S[S_TUNA] = 1; }
     }
-    // The impulse response for the size asked for (rare: the first tunnel, or one of another size; allocates).
+    // The impulse response for the size asked for (rare: the first tunnel, or one of a clearly other size; allocates
+    // and takes 10-20 ms). The size is taken as made even when making it fails (no retry every frame).
     function tunImpulse() {
       var mk = F1.tunnelImpulse, ir, buf, sr;
       if (typeof mk !== 'function' || !tunConv) return;
+      tunIrW = S[S_TUNW]; tunIrH = S[S_TUNH];
       try {
         sr = ctx.sampleRate;
         ir = mk(sr, { width: S[S_TUNW], height: S[S_TUNH], rt60: T.tunRt60 });
         buf = ctx.createBuffer(2, ir.left.length, sr);
         buf.getChannelData(0).set(ir.left); buf.getChannelData(1).set(ir.right);
         tunConv.buffer = buf;
-        tunIrW = S[S_TUNW]; tunIrH = S[S_TUNH];
         dbg.reverbBuilds++;
       } catch (e) { fail(e); }
     }
     // Once per update(), after ctl[C_TUN] and S[S_TUNZ]: connects the reverb and the mid band while in use (and
-    // disconnects them T.tunOff s after k fell to 0: no CPU outside tunnels), ramps their gains to k.
+    // disconnects them T.tunOff s after k fell to 0: no CPU outside tunnels), ramps their gains to k. The impulse
+    // response made is kept while the size asked for is within T.tunSizeTol / T.tunHeightTol of it (Monaco's two
+    // stretches share one); a size given while quiet (setTunnel(0, w, h), e.g. at track load) is made then, silently,
+    // so that entering the tunnel at speed does not wait for it.
     function tunnelGraph() {
-      var k = ctl[C_TUN], sized = tunIrW === S[S_TUNW] && tunIrH === S[S_TUNH];
+      var k = ctl[C_TUN], sized = tunIrW > 0 && Math.abs(S[S_TUNW] - tunIrW) <= T.tunSizeTol * tunIrW &&
+        Math.abs(S[S_TUNH] - tunIrH) <= T.tunHeightTol;
       if (k > 0 && !tunOn) {
         if (!tunConv.buffer || !sized) tunImpulse();
         try { tunIn.connect(tunBand); if (tunConv.buffer) tunIn.connect(tunConv); } catch (e) { fail(e); }
@@ -928,11 +944,12 @@
         try { tunIn.disconnect(tunBand); } catch (e) {}
         try { tunIn.disconnect(tunConv); } catch (e) {}
         tunOn = false;
-      } else if (tunOn && !sized && k === 0 && S[S_TUNZ] > 0.4 && typeof F1.tunnelImpulse === 'function') {
-        // another size asked for while the reverb is still connected but silent (its wet gain long at 0)
-        try { tunIn.disconnect(tunConv); } catch (e) {}
+      } else if (!sized && k === 0 && S[S_TUNZ] > 0.4 && S[S_TUNA] > 0 && typeof F1.tunnelImpulse === 'function') {
+        // another size given while quiet: the reverb disconnected, or still connected but silent (its wet gain long at
+        // 0). (S_TUNA: never for the default size on a track without tunnels.)
+        if (tunOn) { try { tunIn.disconnect(tunConv); } catch (e) {} }
         tunImpulse();
-        try { if (tunConv.buffer) tunIn.connect(tunConv); } catch (e) { fail(e); }
+        if (tunOn) { try { if (tunConv.buffer) tunIn.connect(tunConv); } catch (e) { fail(e); } }
       }
       if (k !== S[S_TUNQ]) {
         S[S_TUNQ] = k;

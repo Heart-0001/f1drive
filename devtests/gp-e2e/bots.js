@@ -468,7 +468,10 @@ async function partRam() {
   const tgt = found ? await w.js(`(function () { window.__tg = F1.game.bots.filter(function (b) { return b.id === __bots.ram.id; })[0]; return { id: __bots.ram.id, name: __bots.ram.name, ahead: Math.round(__bots.ram.ahead) }; })()`) : null;
   check('a bot ahead to run into: ' + (tgt ? tgt.name + ', ' + tgt.ahead + ' m ahead' : 'none'), !!tgt);
   if (tgt) {
-    const hit = await w.pump(`__bots.ram.done`, 45, 'the ram');
+    const hit = await w.pump(`__bots.ram.done`, 90, 'the ram');
+    // (the target may have been re-picked: the one that got away beyond 60 m is dropped, bots-page.js)
+    const tg2 = await w.js(`(function () { window.__tg = F1.game.bots.filter(function (b) { return b.id === __bots.ram.id; })[0] || window.__tg; return { id: __tg.id, name: __tg.name, picks: __bots.ram.picks || 1 }; })()`);
+    if (tg2.id !== tgt.id) { info('re-picked (' + tg2.picks + ' picks): ' + tg2.name); tgt.id = tg2.id; tgt.name = tg2.name; }
     await w.advance(4);
     const r = await w.js(`({ ram: __bots.ram, c: __bots.contacts.filter(function (c) { return c.t >= __bots.ram.t0; }).map(function (c) { return [c.id, +c.max.toFixed(3), c.other, +(c.v * 3.6).toFixed(0)]; }),
       rumbles: __e.rumbles - __r1, bot: { v: __tg.car.state.speed, mode: __tg.ai.state.mode, resets: __tg.ai.stats.resets, puncture: __tg.car.tyres.state.puncture, x: __tg.car.state.x },
@@ -742,12 +745,15 @@ async function partHost() {
     check('A (the host, owner of the bots) leaves in the middle of the race', await A.click('mp-leave') && await A.until(`!F1.net.connected`, 5000));
     check('B: A\'s bots are gone (no bot car, no bot model), B is the host now', await B.until(`F1.net.players.filter(function (p) { return p.bot; }).length === 0 && Object.keys(F1.game.remoteModels).length === 0 && F1.net.isHost`, 8000),
       await B.js(`({ p: F1.net.players.map(function (p) { return [p.id, p.bot, p.active]; }), host: F1.net.isHost, m: Object.keys(F1.game.remoteModels).length })`));
-    check('the race closes with the bots (and A) out: the results as they stood, B classified', await B.until(`F1.gp.phase === 'results'`, 5000), await B.js(`F1.gp.phase`));
+    // review r3 MP-2: his bots leave the race as any leaver does (DNF); B, the one still racing, races on
+    check('the race goes on for B: A and his bots DNF (left)', await B.until(`F1.gp.phase === 'race' && F1.gp.view().rows.filter(function (r) { return r.dnf; }).length === 4`, 5000) &&
+      (await sleep(3000), await B.js(`F1.gp.phase`)) === 'race', await B.js(`F1.gp.phase`));
     const after = await B.js(rowsJs);
     info('before: ' + before.map(x => x.pos + '. ' + x.name + (x.bot ? ' (AI)' : '')).join(' | ') + '  after: ' + after.map(x => x.pos + '. ' + x.name + (x.bot ? ' (AI)' : '') + (x.dnf ? ' DNF' : '')).join(' | '));
-    check('B\'s results: the bots and A DNF (left), B classified', after.some(x => x.self && !x.dnf) && after.filter(x => !x.self).every(x => x.dnf || x.left), after);
+    check('B\'s standings: B first and racing, the bots and A DNF (left)', after.length === 5 && after[0].self && !after[0].dnf && after.filter(x => !x.self).every(x => x.dnf && x.left), after);
     await B.shotTo('host-01-B-after');
-    check('B (now host) ends it: free practice', await B.toMenu() && await B.click('tab-gp') && await B.click('gp-end') && await B.until(`F1.gp.phase === 'free'`, 4000));
+    check('B (now host) ends it: 結束大獎賽 -> the results as they stand, again -> free practice', await B.toMenu() && await B.click('tab-gp') && await B.click('gp-end') &&
+      await B.until(`F1.gp.phase === 'results'`, 4000) && await B.click('gp-end') && await B.until(`F1.gp.phase === 'free'`, 4000));
     await A.noBotErr(); await B.noBotErr();
     await A.noErrors(); await B.noErrors();
   } finally { await closeAll(); try { await srv.close(); } catch (e) {} }

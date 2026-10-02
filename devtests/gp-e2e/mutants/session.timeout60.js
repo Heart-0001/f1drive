@@ -192,15 +192,24 @@
       get sid() { return S.sid; },
 
       /** A player connected. During qualifying they take part; during grid / race / results they are
-       *  spectators (free-roaming ghosts, not classified) until the next session. */
-      addPlayer: function (id, name, now) {
+       *  spectators (free-roaming ghosts, not classified) until the next session.
+       *  opts (optional): { bot: true, owner: id } = a computer driver simulated by player `owner`'s game. A bot
+       *  is a player like any other (qualifies, takes its grid slot, races, is DNF when removed during the race);
+       *  its snapshot row carries `bot: true`. The rooms only add bots in free practice. */
+      addPlayer: function (id, name, now, opts) {
         if (!isNum(id) || find(id)) return false;                  // ids are numbers (the wire and gp.js rely on it)
         var p = { id: id, name: String(name == null ? '' : name), join: joinSeq++, left: false,
-                  spec: S.phase === 'grid' || S.phase === 'race' || S.phase === 'results' };
+                  spec: S.phase === 'grid' || S.phase === 'race' || S.phase === 'results',
+                  bot: !!(opts && typeof opts === 'object' && opts.bot === true),
+                  owner: 0 };
+        if (p.bot && isNum(opts.owner)) p.owner = opts.owner;
         resetQuali(p); resetRace(p); rebase(p, now);
         players.push(p);
         return true;
       },
+
+      /** -> true when id is a bot present in the session */
+      isBot: function (id) { var p = find(id); return !!p && p.bot; },
 
       rename: function (id, name) {
         var p = find(id);
@@ -363,6 +372,7 @@
                     qLaps: p.qLaps, qBest: p.qBest, qDone: p.qDone,
                     rLaps: p.rLaps, rTime: ms3(p.rTime), rBest: p.rBest, fin: p.fin, dnf: p.dnf,
                     gap: null, down: 0 };
+          if (p.bot) o.bot = true;                    // (human rows stay as they were: the field is only on bots)
           if (leader && !p.spec && p !== leader && !p.dnf) {
             var down = Math.floor(eff(leader) - eff(p) + 1e-9);
             if (leader.fin && p.fin) down = leader.rLaps - p.rLaps;

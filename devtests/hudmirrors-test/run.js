@@ -474,11 +474,12 @@ async function restart() {
   await w.js(`F1.ui.toast(''), true`);
   await w.key('V');
   await sleep(300);
-  const afterV = await w.js(`({ hm: F1.game.hudMirrors === null ? null : 'back', cls: document.getElementById('hud').classList.contains('no-mirrors'), toast: document.getElementById('hud-toast').textContent })`);
+  const afterV = await w.js(`({ hm: F1.game.hudMirrors === null ? null : 'back', cls: document.getElementById('hud').classList.contains('no-mirrors'), toast: document.getElementById('hud-toast').textContent,
+    na: document.getElementById('hud').classList.contains('mirrors-na'), hints: [].slice.call(document.querySelectorAll('.hk-mirrors')).filter(function (e) { return e.getBoundingClientRect().width > 0; }).length })`);
   const expected = w.errors.filter(e => /a broken mirror pass/.test(e));
-  check('a mirror pass that throws: mirrors switched off for good (game instance gone, 設定 switch disabled 無法顯示, HUD laid out without them, the setting kept), the game drives on (no error overlay, W accelerates); V then does nothing',
+  check('a mirror pass that throws: mirrors switched off for good (game instance gone, 設定 switch disabled 無法顯示, HUD laid out without them, the setting kept), the game drives on (no error overlay, W accelerates); V then brings nothing back and says so (review r3 FLOW-4: toast 後照鏡無法顯示, the V hints hidden)',
     broken.running && broken.hm === null && !broken.overlay && broken.kmh > 20 && broken.dis && broken.txt === '無法顯示' && broken.cls && broken.timingTop === 18 &&
-    broken.frames.every(f => !f) && broken.setting === true && afterV.hm === null && afterV.cls && !/後照鏡/.test(afterV.toast) && expected.length === 1 && w.errors.length === 1,
+    broken.frames.every(f => !f) && broken.setting === true && afterV.hm === null && afterV.cls && afterV.toast === '後照鏡無法顯示（顯示卡不支援）' && afterV.na && afterV.hints === 0 && expected.length === 1 && w.errors.length === 1,
     { broken, afterV, errors: w.errors.slice(0, 3) });
   try { w.destroy(); } catch (e) {}
 }

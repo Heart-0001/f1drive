@@ -405,9 +405,9 @@
         var now = nowMs();
         for (var i = 0; i < m.p.length && i < 64; i++) {
           var e = m.p[i];
-          if (!Array.isArray(e) || e.length < 10 || e[0] === net.id) continue;
-          var r = remotes[e[0]];
-          if (r) pushSnap(r, e, now);
+          // ids are numbers: '__proto__' / 'constructor' must never reach remotes[...] (Object.prototype)
+          if (!Array.isArray(e) || e.length < 10 || !isNum(e[0]) || e[0] === net.id || !remotes.hasOwnProperty(e[0])) continue;
+          pushSnap(remotes[e[0]], e, now);
         }
         break;
       }
@@ -740,7 +740,8 @@
      *  'pro' | 'legend' | 'mixed' (shown to everybody; anything else keeps the room's). The server gives at most
      *  16 - humans; bots 0..n-1 that exist keep their ids and slots. -> true when the request was sent; the answer is
      *  the roster ('players', 'bots' events; net.bots). A human joining a full room in free practice takes the seat
-     *  of the newest bot. When we leave the room our bots go (a running session they race in ends). */
+     *  of the newest bot. When we leave the room our bots go (out of a running session: DNF in the race; the others
+     *  race on). */
     setBots: function (list, skill) {
       if (!net.connected || !net.isHost) return false;
       if (net.session && net.session.phase !== 'free') return false;

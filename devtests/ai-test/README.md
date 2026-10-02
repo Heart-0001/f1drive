@@ -2,7 +2,7 @@
 
 Everything here runs the REAL game modules in node (js/car.js at 1/120 s, js/tyres.js, js/collide.js, js/pit.js,
 js/laps.js, net/session.js; THREE only for the racing line's mesh). No Electron, no sound.
-The unit tests are `node test/ai.test.js` (29 tests, a few seconds). `AI_JS=<path>` makes `lib.js` load another copy
+The unit tests are `node test/ai.test.js` (34 tests, a few seconds; the last five are review r3's regressions). `AI_JS=<path>` makes `lib.js` load another copy
 of js/ai.js (A/B experiments; `fingerprint.js` shows whether two copies drive identically).
 
 | script | what it does | time |
@@ -20,12 +20,59 @@ of js/ai.js (A/B experiments; `fingerprint.js` shows whether two copies drive id
 | `node devtests/ai-test/critic-start.js` | the critic's start stress: 15 cars, standing start on the painted grid (random order, mixed levels) into the tight first corners of 12 circuits, 3 seeds, 2 laps: contacts (lap 1 / later; who ran into whom), pile-ups, R, stuck | ~45 s |
 | `node devtests/ai-test/critic-obstacle.js [mode=parked\|wrong] [tracks=..] [v=1]` | a stream of 10 cars meets a car standing on the racing line (blind walled apex, hairpin exit, mid-straight, braking zone, across the road) and a car coming the wrong way (15 / 45 m/s; a kinematic ghost that never gives way: reported, not judged) | ~1 min |
 | `node devtests/ai-test/critic-mixed.js [only=lapping,erratic,pit,wear,seasons,hairpin,determinism]` | lapping a backmarker, two erratic "humans" (brake tests, weaving, one blind), 10 cars stopping on the same lap, tyre wear x5, 2010 V8 vs 2026 cars, the Monaco hairpin (alone and 15 cars), the same race twice | ~50 s |
+| `node devtests/ai-test/passing.js [seeds=1,2,3] [sc=B,C] [tracks=..] [list=1]` | matrix.js's races B (reversed grid) and C (15 cars, random grid, wear x4) on its 14 circuits with other seeds: passes, contacts (heavy, max; `list=1` every heavy one with the modes), offs, R, stuck, finishing order vs skill. Over several seeds a version comparison is not decided by one chaotic race | ~4 min per seed |
+| `node devtests/ai-test/wrongway.js [v=8,15,40] [tracks=..] [pos=..]` | a kinematic car coming the wrong way along the racing line (never gives way) meets a stream of 8 computer cars on 5 circuits from 3 places: head-ons (heavy, summed severity), AI-AI contacts, pile-ups, R, wall hits per speed | ~1 min per speed |
 
 `sim.js` is the reference implementation of the per-step loop the game needs (placements, views, contexts, think,
 R, the frozen pit service and its events, car-to-car contacts, pit events, lap counter, session laps);
 `critic-sim.js` is a second, independent harness with "actor" cars (parked, wrong-way, erratic, human) and contacts
 attributed to the striker (`trace: {ids, from, to}` records both cars' decisions step by step); `lib.js` loads the
 modules.
+
+## Review r3 fixes (2026-10-02)
+
+Fable review round 3 found five problems in js/ai.js (evidence: `devtests/review-r3/ai`, `verify-ai`). Each one now has
+a regression test in test/ai.test.js that fails on the old file. Decisions taken for the user (also for docs/v6-plan.md):
+- AI-1, the pit lane limit: read live from `track.pit.limitKmh` every step and at every stop decision (G.pit.limitV is
+  refreshed, `G.pitLoss` recomputed when the limit changed). Before, the limit was copied into the shared geometry
+  once: after a season change at Zandvoort / Singapore the bots drove the lane at 78 km/h under a 60 limit (a 5 s
+  penalty at every stop) or crawled at 55 under an 80 limit. Probe `review-r3/ai/yearscen.js` (real main.js): now
+  57..58 km/h under 60, no speeding.
+- AI-2, per-car memories (standing time, measured deceleration, in-path hold): an open-addressed table of 128 slots
+  keyed by the full id (slots not seen for 5 s go to a new id; `reset()` empties it), not `id & 63`. Ids 66 and 2 used
+  to wipe each other every step: a car parked on the line was never seen as stopped (queue, then R after 30 s). Probe
+  `review-r3/ai/idcoll.js`: past it at 14.8 s, no R, for every id pair. Driving is bit-identical where ids are below 64
+  (fingerprint.js).
+- AI-3, passing: a car known to be slower (pace) is PRESSED on the straights (radius > 80 m at both cars): followed at
+  0.3 of the time gap, its braking not anticipated as long as it brakes no harder than this car's own braking plan
+  (harder - a brake test, a crash - is anticipated as before). The concede device counts pressure by TIME gap (within
+  0.5 s / 28 m, let go beyond 1 s / 45 m - in metres the gap doubles down a straight). Attack fixes found while
+  measuring: the side's room is measured at the other car's place (not this car's), the shut inside is given up for
+  the open side, the car being passed is still checked on the path (where the two meet, where both are heading)
+  until this car is alongside, and "beside it" leaves more room the faster it is gone by. Tried and NOT kept: the
+  review's longer attack reach on the straights (40 + 0.3 v m: the attacker took the slow inside line from too far
+  back, Spearman down to 0.2 at Bahrain) and pressing in corners too (Spearman 0.8 but four times the heavy contacts:
+  the car in front turns in across the nose of one pressing close behind). Measured, old file -> fixed: matrix.js
+  Spearman median 0.70 -> 0.78 (B 0.50 -> 0.64), passes 139 -> 174, contacts 5 -> 3, offs 36 -> 14; passing.js seeds
+  1..3 (84 races) passes 342 -> 437, contacts 22 (2 heavy) -> 3 (1 heavy), offs 98 -> 48; race.js Bahrain 8 cars
+  2025-standard reversed 6 laps seeds 1..3: Spearman -0.76 / -0.64 / -0.83 -> 0.57 / 0.57 / 0.40. Passing stays rarer
+  than in real racing between cars 1..2 % apart (no slipstream in js/car.js).
+- AI-5, giving room to a human: a car of unknown pace presses only while it has been seen to be quicker (closing the
+  gap by 1.5 m/s over ~1 s while the bot is flat out, in the last 2 s), at half rate as before. A human sitting behind at
+  the same pace is never let by (verify-ai/concede.js: 0 concedes at every level, was every 15..25 s); a quicker one
+  still is (review-r3/ai/dbg1.js-like duels: 8 of 9 let by). The room given is unchanged: the edge, and
+  max(its speed - 8 m/s, 78 % of the bot's pace) for up to 8 s - the stand-in for the slipstream js/car.js lacks.
+- AI-6, a car coming the wrong way: the swerve aims beside where it WILL be when the two meet (on the racing line it
+  follows the line - which swings across the road on the way), the side is chosen there, and it is taken on from
+  50 m + 1.5 s of the closing at both speeds. wrongway.js, old -> fixed: 40 m/s head-ons 57 (52 heavy) -> 12 (10),
+  pile-ups 14 -> 2; 15 m/s 23 (19) -> 3 (0), pile-ups 7 -> 0; 8 m/s 16 (13) -> 6 (5). verify-ai/wrong.js at 40 m/s:
+  Monaco 19 contacts -> 6, Baku 7 -> 1, Spa 12 -> 3, Monza 2 -> 0. Tried and NOT kept (both made it worse against this
+  ghost, which never stops): braking for it as for a car standing at the meeting point (40 m/s head-ons 57 -> 68) and
+  twice the following gap under the yellow flag. Left: at 8 m/s in a Monaco street too narrow to pass, the bots stop
+  and back off slower than the ghost comes on (5 light-to-medium hits, max 0.42); a human would stop too.
+- critic-start (36 races of 15 cars) old -> fixed: contacts 12 -> 5, heavy 3 -> 1, offs 35 -> 13, one light pile-up
+  (0.15 + 0.12 at Austria, lap 1) where there was none. critic-obstacle: hits on the obstacle 248 -> 57, AI-AI 51 (37
+  heavy) -> 13 (1 heavy), R 35 -> 10 (the parked-car runs alone: 2 -> 4 light-to-medium hits, max 0.40 -> 0.32).
 
 ## The JIT (allocation) work of 2026-10-02
 
@@ -54,6 +101,18 @@ into each changes its shape and de-optimises every function that reads it (car.j
 
 - pace alone (calibrate.js, 10 circuits): rookie / amateur / pro / legend +8.02 / +5.03 / +2.50 / +1.00 % (PACE
   [[0,0.841],[0.35,0.89],[0.7,0.942],[1,0.977]]); pace.js (its 7 circuits, best lap) 7.05 / 4.63 / 2.27 / 0.86 %.
+  Re-checked after review r3's track data (Silverstone's loop starting 151 m later, at the Wing's start line; Baku's
+  heights x0.777): calibrate.js with this PACE 7.95 / 4.98 / 2.50 / 0.97 %; its re-solve [[0,0.84],[0.35,0.89],[0.7,0.941],
+  [1,0.976]] gives 7.98 / 4.98 / 2.53 / 1.01 % - the same within the solver's 0.001 step, so PACE is kept; pace.js
+  (no Silverstone / Baku) unchanged, 7.05 / 4.63 / 2.27 / 0.86 %.
+- No pressing with a stop planned (the re-run stage after review r3, 2026-10-02): in gp-e2e/bots.js part pits (the whole
+  field told into Monza's lane on lap 2) the cars leaving the lane in a queue pressed each other at the merge: bumps up to
+  0.12 there in 2 of 14 runs, once a contact on the pit asphalt (a failed check); the old file 0.06 in 5 of 14. With
+  `!plan` in the press condition: 0.065..0.097 in 5 of 14, none on the asphalt. fingerprint.js prints the same lines
+  (monza8 with its 8 stops included), matrix.js the same numbers, critic-mixed pit 0 contacts either way. Still open:
+  pressing into the braking zone of Monza's first chicane on lap 1 gives 0.16..0.20 bumps in about 1 run in 5 (none with
+  pressing off, none with the old file); one full bots.js run (before this guard) failed part pits with a 0.31 bump
+  (over its 0.25 line; where was not recorded).
 - Monaco hairpin: the profile's slowest point 49 km/h (was 25: js/ai.js now aims at the top of the full-lock range as
   js/raceline.js does); taken at 40.1 km/h (rookie) / 45.4 km/h (legend), steering 0.93..1.00, no wall, no grass;
   15 cars x 10 seeds: 0 contacts (the old file: 4) - no attack or defence through a corner tighter than full lock,

@@ -149,7 +149,7 @@ const f1 = (v) => (v >= 0 ? '+' : '') + v.toFixed(1);
   check(d < 250, 'my-1999', 'highest point near T10 / T11 (old s 3192)', d.toFixed(0) + ' m away, range ' + (Math.max(...ys) - Math.min(...ys)).toFixed(1) + ' m');
 }
 // ---- start lines
-for (const [id, ll, lim] of [['gb-1948', [52.0682609, -1.0234867], 3], ['hu-1986', [47.5789212, 19.2483897], 3],
+for (const [id, ll, lim] of [['gb-1948', [52.0693366, -1.0221521], 3], ['hu-1986', [47.5789212, 19.2483897], 3],
   ['my-1999', [2.7607601, 101.7383513], 3], ['cn-2004', [31.3372693, 121.2205226], 3], ['mc-1929', [43.7350269, 7.4212652], 3]]) {
   const t = td(id), x = (ll[1] - t.geo.lon0) * t.geo.kx, z = (ll[0] - t.geo.lat0) * t.geo.kz;
   const d = Math.hypot(t.points[0][0] - x, t.points[0][1] - z);

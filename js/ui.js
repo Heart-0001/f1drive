@@ -9,7 +9,9 @@
    v7: the computer drivers (電腦車手) - in the 大獎賽 tab how many (0..16 - humans) and how strong (新手 / 業餘 / 職業 /
    傳奇 / 混合), remembered ('f1drive.bots', getBots / onBots; read-only for a room's guests and during a session: the
    view's bots.canEdit) with the field listed in free practice; an AI tag on bots in the standings, the session box, the
-   results, the room roster; their minimap dots ringed in the second livery colour; the car cards say who drives them.
+   results, the room roster; their minimap dots ringed in the second livery colour; the car cards say who drives them;
+   setLoading's optional title (電腦車手熟悉賽道中…). The search also takes the Taiwanese names of a round (日本站, 日本大獎賽),
+   日本GP and full-width letters; searchTracks(list, query) is that search without the DOM (tests / harnesses).
    Classic script; uses F1.telemetry when it is loaded, F1.cars.ersNote for the battery line of the car cards,
    F1.COCKPIT_FOV for the range of the FOV slider. */
 (function () {
@@ -277,21 +279,38 @@
     'us-1956': 'New York|紐約'
   };
 
-  // The search key / query in one form: lower case, accents off (Nürburgring = nurburgring, São Paulo = sao paulo), every
-  // middle dot as '·' and every dash as '-' (js/track-names-zh.js: the dots Taiwanese IMEs and media use), runs of
+  // The search key / query in one form: lower case, accents off (Nürburgring = nurburgring, São Paulo = sao paulo),
+  // full-width letters and digits as ASCII (ＪＡＰＡＮ = japan: NFKD), every middle dot as '·' and every dash as '-'
+  // (js/track-names-zh.js: the dots Taiwanese IMEs and media use; the dots first: NFKD makes '．' a '.'), runs of
   // spaces and separators as one space.
   function searchForm(s) {
-    s = String(s == null ? '' : s).toLowerCase();
-    if (s.normalize) s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    return s.replace(/[\u2027\uff0e\u30fb\uff65\u2022]/g, '\u00b7').replace(/[\u2013\u2014\uff0d]/g, '-')
+    s = String(s == null ? '' : s).replace(/[\u2027\uff0e\u30fb\uff65\u2022]/g, '\u00b7');
+    if (s.normalize) s = s.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+    return s.toLowerCase().replace(/[\u2013\u2014\uff0d]/g, '-')
       .replace(/[\s,;:()\uff08\uff09\u3001\uff0c|\/]+/g, ' ').trim();
+  }
+
+  // The terms of a query: searchForm, split at the spaces and between Chinese and Latin runs ('日本GP' = 日本 gp), and a
+  // Chinese term without the way a round is named after it: 日本站 / 日本分站 / 日本大獎賽 (大奖赛) / 日本賽 = 日本 (the
+  // Taiwanese media's '沙烏地阿拉伯站'; the keys hold the country and 大獎賽 as words of their own). A term that is
+  // nothing but that (大獎賽, 站) asks for nothing.
+  var CJK_LATIN = /([\u3400-\u9fff\uf900-\ufaff])(?=[a-z0-9])|([a-z0-9])(?=[\u3400-\u9fff\uf900-\ufaff])/g;
+  var HAS_CJK = /[\u3400-\u9fff\uf900-\ufaff]/;
+  var ROUND_SUFFIX = /(?:分站|站|大獎賽|大奖赛|獎賽|奖赛|賽|赛)$/;
+  function queryTerms(q) {
+    var s = searchForm(q).replace(CJK_LATIN, '$1$2 '), parts = s ? s.split(' ') : [], out = [];
+    for (var i = 0; i < parts.length; i++) {
+      var t = HAS_CJK.test(parts[i]) ? parts[i].replace(ROUND_SUFFIX, '') : parts[i];
+      if (t) out.push(t);
+    }
+    return out;
   }
 
   // Everything a card is found by: the English name, location and id, the Chinese name / short / location / aliases,
   // the country (English + short forms, Chinese), the Grand Prix names ('japanese gp' finds Suzuka). Kept as
   // ' ' + words + ' ', once more with '-' as a word break (for the whole-word test of short terms: 'us' in 'us-2012').
   function searchKey(t, zh) {
-    var parts = [t.name, t.location, t.id, 'GP Grand Prix 大獎賽'], cc = String(t.id || '').split('-')[0];
+    var parts = [t.name, t.location, t.id, 'F1 GP Grand Prix 大獎賽'], cc = String(t.id || '').split('-')[0];
     if (zh) {
       parts.push(zh.name, zh.short, zh.location);
       if (Array.isArray(zh.aliases)) parts = parts.concat(zh.aliases);
@@ -346,8 +365,7 @@
   }
 
   function applyFilter() {
-    var q = searchForm(el.search.value || '');
-    var terms = q ? q.split(' ') : [];
+    var terms = queryTerms(el.search.value || '');
     var shown = 0;
     for (var i = 0; i < cards.length; i++) {
       var ok = true;
@@ -1405,6 +1423,8 @@
       setText('mirrorstxt', el.setMirrorsText, view.available ? (on ? '開' : '關') : '無法顯示');
     }
     if (cache.nomirrors !== !on) { cache.nomirrors = !on; el.hud.classList.toggle('no-mirrors', !on); }
+    // (they cannot be drawn: the HUD hint leaves out V too - main.js says so when V is pressed anyway)
+    if (cache.mirrorsna !== !view.available) { cache.mirrorsna = !view.available; el.hud.classList.toggle('mirrors-na', !view.available); }
   }
 
   function initMirrorSetting() {
@@ -1550,7 +1570,7 @@
     el.telemetry = $('hud-telemetry');
     el.menuBtn = $('hud-menu-btn');
     el.toast = $('hud-toast');               // (not inside #hud: shown over the menu too)
-    el.loading = $('loading'); el.loadingName = $('loading-name');   // (likewise)
+    el.loading = $('loading'); el.loadingName = $('loading-name'); el.loadingTitle = $('loading-title');   // (likewise)
     // side panel tabs
     el.mpPanel = $('mp-panel'); el.tabs = $('menu-tabs');
     el.tabBtn = { car: $('tab-car'), gp: $('tab-gp'), mp: $('tab-mp'), set: $('tab-set') };
@@ -1839,13 +1859,15 @@
 
     /**
      * A track is being built (the page stops for a moment): name = its name, shown in a note in the middle of the
-     * screen, over the menu and the HUD; null hides the note.
+     * screen, over the menu and the HUD; null hides the note. title (optional, v7): the note's heading instead of
+     * 載入賽道中… (main.js: 電腦車手熟悉賽道中… while the computer drivers' warm-up runs).
      */
-    setLoading: function (name) {
+    setLoading: function (name, title) {
       if (!inited || !el.loading) return;
       var on = typeof name === 'string';
       // (main.js hands the English name: the note shows the card's Chinese one)
       setText('loadname', el.loadingName, on ? (Object.prototype.hasOwnProperty.call(zhByName, name) ? zhByName[name] : name) : '');
+      if (on && el.loadingTitle) setText('loadtitle', el.loadingTitle, typeof title === 'string' && title ? title : '載入賽道中…');
       setShown('loading', el.loading, on);
     },
 
@@ -1896,7 +1918,19 @@
       if (tele) tele.draw(h);                   // never throws; a no-op while the HUD is hidden
     },
 
-    formatTime: fmtTime
+    formatTime: fmtTime,
+
+    /** The track search of the menu, without the DOM (tests / harnesses): -> the ids of the tracks of `list` (trackData
+     *  objects) the query finds, in list order. */
+    searchTracks: function (list, query) {
+      var terms = queryTerms(query), out = [];
+      for (var i = 0; list && i < list.length; i++) {
+        var key = searchKey(list[i], zhOf(list[i])), ok = true;
+        for (var k = 0; k < terms.length && ok; k++) ok = termMatch(key, terms[k]);
+        if (ok) out.push(list[i].id);
+      }
+      return out;
+    }
   };
 
   F1.ui = ui;
